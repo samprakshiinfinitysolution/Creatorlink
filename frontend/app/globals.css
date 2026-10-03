@@ -1,29 +1,155 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* =========================
+   LIGHT THEME
+========================= */
+
 :root {
-    --background: #fff7f8;
-    --foreground: #111111;
+  --background: #fff7f8;
+  --foreground: #111111;
+
+  --theme-primary: #111111;
+  --theme-secondary: #ff4f87;
+  --theme-secondary-dark: #d51662;
+  --theme-tertiary: #8b5cf6;
+  --theme-surface: #ffffff;
+  --theme-text-secondary: #555555;
+  --theme-border: #00000012;
+
+  --theme-hover: #252525;
+  --theme-dark-surface: #1b1b1b;
+  --theme-dark-hover: #eeeeee;
+  --theme-surface-muted: #f7f5f6;
 }
+
+/* =========================
+   DARK THEME
+========================= */
 
 .dark {
-    --background: #111111;
-    --foreground: #ededed;
+  --background: #111111;
+  --foreground: #ffffff;
+
+  --theme-primary: #ffffff;
+  --theme-secondary: #ff6b9d;
+  --theme-secondary-dark: #ff4f87;
+  --theme-tertiary: #a78bfa;
+  --theme-surface: #1b1b1b;
+  --theme-text-secondary: #b8b8b8;
+  --theme-border: #ffffff18;
+
+  --theme-hover: #eeeeee;
+  --theme-dark-surface: #1b1b1b;
+  --theme-dark-hover: #252525;
+  --theme-surface-muted: #252324;
 }
 
-html,
+/* =========================
+   TAILWIND THEME
+========================= */
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-primary: var(--theme-primary);
+  --color-secondary: var(--theme-secondary);
+  --color-secondary-dark: var(--theme-secondary-dark);
+  --color-tertiary: var(--theme-tertiary);
+  --color-surface: var(--theme-surface);
+  --color-surface-muted: var(--theme-surface-muted);
+  --color-text-secondary: var(--theme-text-secondary);
+  --color-border-theme: var(--theme-border);
+
+  --color-theme-hover: var(--theme-hover);
+  --color-theme-dark-surface: var(--theme-dark-surface);
+  --color-theme-dark-hover: var(--theme-dark-hover);
+
+  --font-sans: var(--font-jakarta);
+  --font-heading: var(--font-playfair);
+}
+
+/* =========================
+   BODY
+========================= */
+
 body {
-    min-height: 100%;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-jakarta), sans-serif;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
-html {
-    scroll-behavior: smooth;
+/* =========================
+   DARK MODE - EXISTING
+   COMPONENTS SUPPORT
+========================= */
+
+.dark body {
+  background: #111111;
+  color: #ffffff;
 }
 
-body {
-    margin: 0;
-    background: var(--background);
-    color: var(--foreground);
-    transition:
-        background-color 300ms ease,
-        color 300ms ease;
+/* Main sections with old hard-coded colors */
+.dark main {
+  background: #111111 !important;
+}
+
+/* Text */
+.dark h1,
+.dark h2,
+.dark h3 {
+  color: #ffffff;
+}
+
+.dark p {
+  color: #e5e5e5;
+}
+
+/* =========================
+   CREATOR CARD ANIMATION
+   ========================= */
+
+@keyframes creatorFloat {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.creator-float {
+  animation: creatorFloat 5s ease-in-out infinite;
+}
+
+/* =========================
+   DARK MODE SECTIONS
+========================= */
+
+.dark section {
+  background: #111111 !important;
+}
+
+/* =========================
+   DARK MODE FIXES
+========================= */
+
+/* Hero white button */
+.dark button.border {
+  background: #1b1b1b !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+}
+
+/* Hero feature text */
+.dark section p {
+  color: #d0d0d0;
 }

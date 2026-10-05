@@ -15,7 +15,7 @@ const loginUser = async (credentials) => {
 // Get currently logged in user's details.
 const getCurrentUser = async () => {
 
-    const response = await api.get(
+    const response = await axiosInstance.get(
         "/auth/me"
     );
 
@@ -62,5 +62,5 @@ export {
     registerUser,
     refreshAccessToken,
     logoutUser,
-     getCurrentUser
+    getCurrentUser
 };

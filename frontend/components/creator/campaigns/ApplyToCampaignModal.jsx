@@ -84,11 +84,19 @@ export default function ApplyToCampaignModal({
 
   const handleSelectService = (service) => {
     const serviceId = service._id || service.id;
-    setSelectedServiceId(serviceId);
-    if (typeof service.price === "number") {
-      setProposedPrice(service.price);
-    } else {
+    const normalizedServiceId = String(serviceId);
+    const isSameService = String(selectedServiceId) === normalizedServiceId;
+
+    if (isSameService) {
+      setSelectedServiceId("");
       setProposedPrice("");
+    } else {
+      setSelectedServiceId(serviceId);
+      if (typeof service.price === "number") {
+        setProposedPrice(service.price);
+      } else {
+        setProposedPrice("");
+      }
     }
     setValidationError(null);
     setIsStepValidated(false);
@@ -248,7 +256,7 @@ export default function ApplyToCampaignModal({
                 <div className="grid grid-cols-1 gap-3">
                   {activeServices.map((service) => {
                     const serviceId = service._id || service.id;
-                    const isSelected = selectedServiceId === serviceId;
+                    const isSelected = Boolean(selectedServiceId) && String(selectedServiceId) === String(serviceId);
 
                     return (
                       <div

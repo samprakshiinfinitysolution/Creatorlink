@@ -63,7 +63,21 @@ const updateBrandBookingStatus = createAsyncThunk(
 
         try {
 
-            return await updateBrandBookingStatusApi(bookingId, status);
+            const updateRes = await updateBrandBookingStatusApi(bookingId, status);
+
+            try {
+                const freshRes = await getBrandBookingByIdApi(bookingId);
+                if (freshRes && freshRes.data) {
+                    return {
+                        ...updateRes,
+                        data: freshRes.data
+                    };
+                }
+            } catch {
+                // If fetching fresh populated booking fails, fallback to update status response
+            }
+
+            return updateRes;
 
         } catch (error) {
 

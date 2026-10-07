@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import Booking from "./booking.model.js";
 import Campaign from "../brand/campaigns/campaign.model.js";
 import CreatorService from "../creator/services/services.model.js";
+import { createWorkspaceForAcceptedBooking } from "../workspace/workspace.service.js";
 import createApiError from "../../utils/ApiError.js";
 
 import {
@@ -349,6 +350,10 @@ const updateBrandBookingStatusService = async (brandId, bookingId, newStatus) =>
 
     booking.status = newStatus;
     await booking.save();
+
+    if (newStatus === "accepted") {
+        await createWorkspaceForAcceptedBooking(booking);
+    }
 
     return booking;
 };

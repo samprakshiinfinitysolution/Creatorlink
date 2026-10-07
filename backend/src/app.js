@@ -7,10 +7,21 @@ import routes from "./routes/index.js";
 
 const app = express();
 
+const allowedOrigins = [
+    process.env.FRONTEND_URL,
+    "http://10.255.135.1750:3005",
+    "http://localhost:3005"
+].filter(Boolean);
+
 // Allows the frontend to communicate with the backend.
 app.use(
     cors({
-        origin: "http://localhost:3005",
+        origin: (origin, callback) => {
+            if (!origin || allowedOrigins.includes(origin)) {
+                return callback(null, true);
+            }
+            return callback(null, true);
+        },
         credentials: true
     })
 );

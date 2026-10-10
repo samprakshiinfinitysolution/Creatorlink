@@ -7,9 +7,11 @@ import {
     getCreatorWorkspaces,
     getCreatorWorkspaceById,
     submitCreatorWorkspaceWork,
+    submitCreatorWorkspaceDeliverable,
     getBrandWorkspaces,
     getBrandWorkspaceById,
-    reviewBrandWorkspace
+    reviewBrandWorkspace,
+    reviewBrandWorkspaceDeliverable
 } from "./workspace.controller.js";
 
 import {
@@ -41,11 +43,18 @@ creatorWorkspaceRouter.get(
     getCreatorWorkspaceById
 );
 
-// Creator submits work / deliverables.
+// Creator submits work / deliverables (legacy / wrapper).
 creatorWorkspaceRouter.post(
     "/:id/submit",
     validateCreatorSubmission,
     submitCreatorWorkspaceWork
+);
+
+// Creator submits work for a specific deliverable.
+creatorWorkspaceRouter.post(
+    "/:id/deliverables/:deliverableId/submit",
+    validateCreatorSubmission,
+    submitCreatorWorkspaceDeliverable
 );
 
 // =========================================================
@@ -71,14 +80,22 @@ brandWorkspaceRouter.get(
     getBrandWorkspaceById
 );
 
-// Brand reviews workspace submission (approve / request revision).
+// Brand reviews workspace submission (approve / request revision) (legacy / wrapper).
 brandWorkspaceRouter.post(
     "/:id/review",
     validateBrandReview,
     reviewBrandWorkspace
 );
 
+// Brand reviews a specific deliverable in a workspace.
+brandWorkspaceRouter.post(
+    "/:id/deliverables/:deliverableId/review",
+    validateBrandReview,
+    reviewBrandWorkspaceDeliverable
+);
+
 export {
     creatorWorkspaceRouter,
     brandWorkspaceRouter
 };
+

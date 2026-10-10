@@ -26,7 +26,7 @@ const getCreatorWorkspaceById = async (workspaceId) => {
 };
 
 
-// Submits work / deliverables for a creator workspace.
+// Submits work / deliverables for a creator workspace (legacy / wrapper).
 const submitCreatorWorkspaceWork = async (workspaceId, submissionData) => {
 
     const response = await axiosInstance.post(
@@ -38,8 +38,22 @@ const submitCreatorWorkspaceWork = async (workspaceId, submissionData) => {
 };
 
 
+// Submits work for a specific deliverable in a creator workspace.
+const submitCreatorDeliverableWork = async (workspaceId, deliverableId, submissionData) => {
+
+    const response = await axiosInstance.post(
+        `/creator/workspace/${workspaceId}/deliverables/${deliverableId}/submit`,
+        submissionData
+    );
+
+    return response.data;
+};
+
+
 export {
     getCreatorWorkspaces,
     getCreatorWorkspaceById,
-    submitCreatorWorkspaceWork
+    submitCreatorWorkspaceWork,
+    submitCreatorDeliverableWork
 };
+

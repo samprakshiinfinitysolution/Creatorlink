@@ -78,6 +78,14 @@ function CheckCircleIcon({ className = "w-5 h-5" }) {
   );
 }
 
+function ChatBubbleIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h.008v.008H8.625V12zm4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h.008v.008h-.008V12zm4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h.008v.008h-.008V12zM21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+    </svg>
+  );
+}
+
 // =========================================================
 // HELPER UTILITIES & STATUS BADGES
 // =========================================================
@@ -150,6 +158,46 @@ const getStatusBadge = (status) => {
   }
 };
 
+const getDeliverableStatusBadge = (status) => {
+  switch (status) {
+    case "pending":
+      return {
+        label: "Pending",
+        color: "bg-slate-500/10 text-slate-400 border-slate-500/20",
+      };
+    case "in_progress":
+      return {
+        label: "In Progress",
+        color: "bg-amber-500/10 text-amber-500 border-amber-500/20",
+      };
+    case "submitted":
+      return {
+        label: "Submitted",
+        color: "bg-purple-500/10 text-purple-500 border-purple-500/20",
+      };
+    case "revision_requested":
+      return {
+        label: "Revision Requested",
+        color: "bg-amber-500/10 text-amber-500 border-amber-500/20",
+      };
+    case "approved":
+      return {
+        label: "Approved",
+        color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+      };
+    case "completed":
+      return {
+        label: "Completed",
+        color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+      };
+    default:
+      return {
+        label: status ? status.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()) : "Pending",
+        color: "bg-surface-muted text-text-secondary border-border-theme",
+      };
+  }
+};
+
 export default function BrandWorkspaceDetail({ workspaceId }) {
   const dispatch = useDispatch();
   const { selectedWorkspace, loading, error, successMessage } = useSelector(
@@ -159,6 +207,7 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [reviewMode, setReviewMode] = useState("approve"); // 'approve' | 'revision'
+  const [selectedDeliverable, setSelectedDeliverable] = useState(null);
 
   useEffect(() => {
     if (workspaceId) {
@@ -172,9 +221,15 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
     }
   };
 
-  const handleOpenReviewModal = (mode) => {
+  const handleOpenReviewModal = (mode, deliverable = null) => {
+    setSelectedDeliverable(deliverable);
     setReviewMode(mode);
     setIsReviewModalOpen(true);
+  };
+
+  const handleCloseReviewModal = () => {
+    setIsReviewModalOpen(false);
+    setSelectedDeliverable(null);
   };
 
   const workspace = selectedWorkspace;
@@ -182,12 +237,147 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
   const campaign = workspace?.campaign;
   const creator = workspace?.creator;
   const service = workspace?.service;
+  const bookingId =
+    typeof workspace?.booking === "object" && workspace?.booking !== null
+      ? workspace.booking._id
+      : workspace?.booking;
   const deliverables = Array.isArray(workspace?.deliverables) ? workspace.deliverables : [];
   const submissions = Array.isArray(workspace?.submissions) ? workspace.submissions : [];
   const revisions = Array.isArray(workspace?.revisions) ? workspace.revisions : [];
 
-  // Review actions are ONLY visible when status === "submitted"
-  const isSubmittedStatus = workspace?.status === "submitted";
+
+  const activeDeliverables = deliverables.filter(
+    (item) =>
+      typeof item === "object" &&
+      item !== null &&
+      (item.status === "submitted" ||
+        item.status === "revision_requested" ||
+        item.status === "approved" ||
+        item.status === "completed")
+  );
+
+  const pendingDeliverables = deliverables.filter(
+    (item) =>
+      typeof item === "string" ||
+      item === null ||
+      !item.status ||
+      item.status === "pending" ||
+      item.status === "in_progress"
+  );
+
+  const renderDeliverableCard = (item, idx) => {
+    const isObject = typeof item === "object" && item !== null;
+    const deliverableId = isObject ? item._id : idx;
+    const title = isObject ? item.title || "Deliverable" : item;
+    const description = isObject ? item.description : null;
+    const dueDate = isObject ? item.dueDate : null;
+    const status = isObject ? item.status || "pending" : "pending";
+    const delBadge = getDeliverableStatusBadge(status);
+    const submission = isObject ? item.submission : null;
+    const isReviewable = status === "submitted" || status === "revision_requested";
+
+    return (
+      <div
+        key={deliverableId || idx}
+        className="bg-surface-muted/60 border border-border-theme/60 rounded-xl p-4 space-y-3 flex flex-col justify-between"
+      >
+        <div className="space-y-2">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-semibold text-sm text-foreground line-clamp-1">
+                {title}
+              </span>
+              <span
+                className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wider ${delBadge.color}`}
+              >
+                {delBadge.label}
+              </span>
+            </div>
+            {dueDate && (
+              <span className="text-[10px] text-text-secondary flex items-center gap-1 shrink-0">
+                <CalendarIcon className="w-3 h-3" />
+                Due: {formatDate(dueDate)}
+              </span>
+            )}
+          </div>
+
+          {description && (
+            <p className="text-xs text-text-secondary line-clamp-2 leading-relaxed">
+              {description}
+            </p>
+          )}
+
+          {/* Submission Details if available */}
+          {submission && (
+            <div className="bg-surface p-3 rounded-lg border border-border-theme/50 space-y-1.5 text-xs mt-2">
+              <div className="flex items-center justify-between text-[10px] text-text-secondary font-semibold">
+                <span>Submitted Work</span>
+                {submission.submittedAt && (
+                  <span>{formatDateTime(submission.submittedAt)}</span>
+                )}
+              </div>
+
+              {submission.title && (
+                <p className="font-semibold text-foreground">{submission.title}</p>
+              )}
+
+              {submission.notes && (
+                <p className="text-text-secondary leading-relaxed text-[11px] line-clamp-2">
+                  {submission.notes}
+                </p>
+              )}
+
+              <div className="flex flex-wrap gap-2 pt-1">
+                {submission.link && (
+                  <a
+                    href={submission.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-[11px] text-secondary hover:underline font-medium"
+                  >
+                    <LinkIcon className="w-3 h-3" />
+                    <span>View Content Link</span>
+                  </a>
+                )}
+                {submission.fileUrl && (
+                  <a
+                    href={submission.fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-[11px] text-secondary hover:underline font-medium"
+                  >
+                    <DocumentIcon className="w-3 h-3" />
+                    <span>View Asset File</span>
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Review Actions */}
+        {isReviewable && (
+          <div className="pt-3 border-t border-border-theme/50 flex items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => handleOpenReviewModal("revision", isObject ? item : null)}
+              className="px-3 py-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 text-xs font-semibold transition-colors cursor-pointer"
+            >
+              Request Revision
+            </button>
+            <button
+              type="button"
+              onClick={() => handleOpenReviewModal("approve", isObject ? item : null)}
+              className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition-colors shadow-xs cursor-pointer"
+            >
+              <CheckIcon className="w-3.5 h-3.5" />
+              <span>Approve</span>
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
@@ -314,24 +504,15 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
                     </div>
                   </div>
 
-                  {/* Review Actions (Visible ONLY when workspace.status === "submitted") */}
-                  {isSubmittedStatus && (
-                    <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => handleOpenReviewModal("revision")}
-                        className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 text-xs font-semibold transition-all cursor-pointer"
+                  {bookingId && (
+                    <div className="flex items-center gap-3 shrink-0 sm:self-start">
+                      <Link
+                        href={`/brand/messages?bookingId=${bookingId}`}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-secondary hover:bg-secondary-dark text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
                       >
-                        <span>Request Revision</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleOpenReviewModal("approve")}
-                        className="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition-all shadow-xs cursor-pointer"
-                      >
-                        <CheckIcon className="w-4 h-4" />
-                        <span>Approve & Complete</span>
-                      </button>
+                        <ChatBubbleIcon className="w-4 h-4" />
+                        <span>Message Creator</span>
+                      </Link>
                     </div>
                   )}
                 </div>
@@ -381,24 +562,44 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Left Column: Deliverables & Details */}
                 <div className="lg:col-span-2 space-y-6">
-                  {/* Required Deliverables Checklist */}
-                  <div className="bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 space-y-4 shadow-xs">
-                    <h2 className="font-serif font-semibold text-lg text-foreground">
-                      Required Campaign Deliverables
-                    </h2>
+                  {/* Campaign Deliverables Section */}
+                  <div className="bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 space-y-6 shadow-xs">
+                    <div className="flex items-center justify-between">
+                      <h2 className="font-serif font-semibold text-lg text-foreground">
+                        Campaign Deliverables
+                      </h2>
+                      <span className="text-xs text-text-secondary font-medium">
+                        {deliverables.length} Total
+                      </span>
+                    </div>
+
                     {deliverables.length > 0 ? (
-                      <div className="space-y-2.5">
-                        {deliverables.map((item, idx) => (
-                          <div
-                            key={idx}
-                            className="flex items-center gap-3 p-3 rounded-xl bg-surface-muted/60 border border-border-theme/60 text-xs font-medium text-foreground"
-                          >
-                            <div className="w-5 h-5 rounded-full bg-secondary/15 text-secondary border border-secondary/20 flex items-center justify-center shrink-0">
-                              <CheckIcon className="w-3.5 h-3.5" />
+                      <div className="space-y-6">
+                        {/* Active / Reviewable Group */}
+                        {activeDeliverables.length > 0 && (
+                          <div className="space-y-3">
+                            <h3 className="text-xs font-bold text-text-secondary uppercase tracking-wider">
+                              Reviewable & Active Deliverables ({activeDeliverables.length})
+                            </h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+                              {activeDeliverables.map((item, idx) => renderDeliverableCard(item, idx))}
                             </div>
-                            <span>{typeof item === "string" ? item : item.title || JSON.stringify(item)}</span>
                           </div>
-                        ))}
+                        )}
+
+                        {/* Pending Group */}
+                        {pendingDeliverables.length > 0 && (
+                          <div className="space-y-3">
+                            {activeDeliverables.length > 0 && (
+                              <h3 className="text-xs font-bold text-text-secondary uppercase tracking-wider pt-2 border-t border-border-theme">
+                                Pending Deliverables ({pendingDeliverables.length})
+                              </h3>
+                            )}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+                              {pendingDeliverables.map((item, idx) => renderDeliverableCard(item, idx))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ) : (
                       <p className="text-xs text-text-secondary">No specific deliverables listed.</p>
@@ -538,8 +739,9 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
       {/* Review Modal */}
       <BrandReviewModal
         isOpen={isReviewModalOpen}
-        onClose={() => setIsReviewModalOpen(false)}
+        onClose={handleCloseReviewModal}
         workspaceId={workspaceId}
+        targetDeliverable={selectedDeliverable}
         initialMode={reviewMode}
       />
     </div>

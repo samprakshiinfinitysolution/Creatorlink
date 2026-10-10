@@ -6,7 +6,8 @@ import {
 import {
     getBrandWorkspaces as getBrandWorkspacesApi,
     getBrandWorkspaceById as getBrandWorkspaceByIdApi,
-    reviewBrandWorkspace as reviewBrandWorkspaceApi
+    reviewBrandWorkspace as reviewBrandWorkspaceApi,
+    reviewBrandDeliverableWork as reviewBrandDeliverableWorkApi
 } from "./workspace_api";
 
 import {
@@ -56,7 +57,7 @@ const fetchBrandWorkspaceById = createAsyncThunk(
 );
 
 
-// Handles reviewing workspace submission (approve / request revision) by brand.
+// Handles reviewing workspace submission (approve / request revision) by brand (legacy wrapper).
 const reviewBrandWorkspace = createAsyncThunk(
     "brandWorkspace/reviewBrandWorkspace",
     async ({ workspaceId, reviewData }, { rejectWithValue }) => {
@@ -70,6 +71,26 @@ const reviewBrandWorkspace = createAsyncThunk(
             return rejectWithValue(
                 error.response?.data?.message ||
                 "Unable to review workspace"
+            );
+        }
+    }
+);
+
+
+// Handles reviewing a specific deliverable submission (approve / request revision) by brand.
+const reviewBrandDeliverableWork = createAsyncThunk(
+    "brandWorkspace/reviewBrandDeliverableWork",
+    async ({ workspaceId, deliverableId, reviewData }, { rejectWithValue }) => {
+
+        try {
+
+            return await reviewBrandDeliverableWorkApi(workspaceId, deliverableId, reviewData);
+
+        } catch (error) {
+
+            return rejectWithValue(
+                error.response?.data?.message ||
+                "Unable to review deliverable"
             );
         }
     }
@@ -206,6 +227,47 @@ const brandWorkspaceSlice = createSlice({
             })
 
 
+            // Review Brand Deliverable Work started.
+            .addCase(reviewBrandDeliverableWork.pending, (state) => {
+
+                state.submitting = true;
+                state.error = null;
+                state.successMessage = null;
+            })
+
+            // Review Brand Deliverable Work successful.
+            .addCase(reviewBrandDeliverableWork.fulfilled, (state, action) => {
+
+                state.submitting = false;
+                state.successMessage = action.payload?.message || "Deliverable review updated successfully";
+
+                const updatedWorkspace = action.payload?.data;
+
+                if (updatedWorkspace) {
+                    const index = state.workspaces.findIndex(
+                        (item) => item._id === updatedWorkspace._id
+                    );
+
+                    if (index !== -1) {
+                        state.workspaces[index] = updatedWorkspace;
+                    }
+
+                    if (state.selectedWorkspace && state.selectedWorkspace._id === updatedWorkspace._id) {
+                        state.selectedWorkspace = updatedWorkspace;
+                    }
+                }
+
+                state.error = null;
+            })
+
+            // Review Brand Deliverable Work failed.
+            .addCase(reviewBrandDeliverableWork.rejected, (state, action) => {
+
+                state.submitting = false;
+                state.error = action.payload;
+            })
+
+
             // Clear state on auth events.
             .addCase(login.fulfilled, (state) => {
 
@@ -253,8 +315,10 @@ export const {
 export {
     fetchBrandWorkspaces,
     fetchBrandWorkspaceById,
-    reviewBrandWorkspace
+    reviewBrandWorkspace,
+    reviewBrandDeliverableWork
 };
 
 
 export default brandWorkspaceSlice.reducer;
+

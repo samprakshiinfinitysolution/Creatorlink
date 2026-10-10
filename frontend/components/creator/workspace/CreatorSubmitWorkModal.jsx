@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  submitCreatorWorkspaceWork,
+  submitCreatorDeliverableWork,
   clearSuccessMessage,
 } from "@/redux/creator/workspace/workspace_slice";
 
@@ -31,6 +31,7 @@ export default function CreatorSubmitWorkModal({
   onClose,
   workspaceId,
   isResubmission = false,
+  targetDeliverable = null,
 }) {
   const dispatch = useDispatch();
   const { submitting, error } = useSelector(
@@ -42,6 +43,18 @@ export default function CreatorSubmitWorkModal({
   const [fileUrl, setFileUrl] = useState("");
   const [notes, setNotes] = useState("");
   const [validationError, setValidationError] = useState(null);
+
+  useEffect(() => {
+    if (isOpen && targetDeliverable) {
+      setTitle(targetDeliverable.title || "");
+    } else if (!isOpen) {
+      setTitle("");
+      setLink("");
+      setFileUrl("");
+      setNotes("");
+      setValidationError(null);
+    }
+  }, [isOpen, targetDeliverable]);
 
   if (!isOpen) return null;
 
@@ -69,9 +82,12 @@ export default function CreatorSubmitWorkModal({
       return;
     }
 
+    const deliverableId = targetDeliverable?._id;
+
     const action = await dispatch(
-      submitCreatorWorkspaceWork({
+      submitCreatorDeliverableWork({
         workspaceId,
+        deliverableId,
         submissionData: {
           title: trimmedTitle,
           link: trimmedLink,
@@ -81,7 +97,7 @@ export default function CreatorSubmitWorkModal({
       })
     );
 
-    if (submitCreatorWorkspaceWork.fulfilled.match(action)) {
+    if (submitCreatorDeliverableWork.fulfilled.match(action)) {
       setTitle("");
       setLink("");
       setFileUrl("");
@@ -107,10 +123,12 @@ export default function CreatorSubmitWorkModal({
             </span>
             <div>
               <h2 className="font-serif font-semibold text-lg text-foreground">
-                {isResubmission ? "Resubmit Campaign Work" : "Submit Deliverables"}
+                {isResubmission ? "Resubmit Deliverable Work" : "Submit Deliverable Work"}
               </h2>
               <p className="text-xs text-text-secondary mt-0.5">
-                Provide your completed content links or file references for brand review.
+                {targetDeliverable?.title
+                  ? `Deliverable: ${targetDeliverable.title}`
+                  : "Provide your completed content links or file references for brand review."}
               </p>
             </div>
           </div>
@@ -249,3 +267,4 @@ export default function CreatorSubmitWorkModal({
     </div>
   );
 }
+

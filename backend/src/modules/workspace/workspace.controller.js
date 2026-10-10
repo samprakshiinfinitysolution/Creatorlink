@@ -5,9 +5,11 @@ import {
     getCreatorWorkspacesService,
     getCreatorWorkspaceByIdService,
     submitCreatorWorkspaceWorkService,
+    submitCreatorWorkspaceDeliverableService,
     getBrandWorkspacesService,
     getBrandWorkspaceByIdService,
-    reviewBrandWorkspaceService
+    reviewBrandWorkspaceService,
+    reviewBrandWorkspaceDeliverableService
 } from "./workspace.service.js";
 
 // =========================================================
@@ -44,7 +46,7 @@ const getCreatorWorkspaceById = asyncHandler(async (req, res) => {
     );
 });
 
-// Creator submits work / deliverables for workspace.
+// Creator submits work / deliverables for workspace (legacy / wrapper).
 const submitCreatorWorkspaceWork = asyncHandler(async (req, res) => {
     const workspace = await submitCreatorWorkspaceWorkService(
         req.user.userId,
@@ -56,6 +58,26 @@ const submitCreatorWorkspaceWork = asyncHandler(async (req, res) => {
         res,
         200,
         "Work submitted successfully",
+        workspace
+    );
+});
+
+// Creator submits work for a specific deliverable.
+const submitCreatorWorkspaceDeliverable = asyncHandler(async (req, res) => {
+    const workspaceId = req.params.id;
+    const deliverableId = req.params.deliverableId || req.body.deliverableId;
+
+    const workspace = await submitCreatorWorkspaceDeliverableService(
+        req.user.userId,
+        workspaceId,
+        deliverableId,
+        req.body
+    );
+
+    return sendResponse(
+        res,
+        200,
+        "Deliverable work submitted successfully",
         workspace
     );
 });
@@ -94,7 +116,7 @@ const getBrandWorkspaceById = asyncHandler(async (req, res) => {
     );
 });
 
-// Brand reviews workspace submission (approve or request revision).
+// Brand reviews workspace submission (approve or request revision) (legacy / wrapper).
 const reviewBrandWorkspace = asyncHandler(async (req, res) => {
     const workspace = await reviewBrandWorkspaceService(
         req.user.userId,
@@ -110,11 +132,34 @@ const reviewBrandWorkspace = asyncHandler(async (req, res) => {
     );
 });
 
+// Brand reviews a specific deliverable in a workspace.
+const reviewBrandWorkspaceDeliverable = asyncHandler(async (req, res) => {
+    const workspaceId = req.params.id;
+    const deliverableId = req.params.deliverableId || req.body.deliverableId;
+
+    const workspace = await reviewBrandWorkspaceDeliverableService(
+        req.user.userId,
+        workspaceId,
+        deliverableId,
+        req.body
+    );
+
+    return sendResponse(
+        res,
+        200,
+        "Deliverable review updated successfully",
+        workspace
+    );
+});
+
 export {
     getCreatorWorkspaces,
     getCreatorWorkspaceById,
     submitCreatorWorkspaceWork,
+    submitCreatorWorkspaceDeliverable,
     getBrandWorkspaces,
     getBrandWorkspaceById,
-    reviewBrandWorkspace
+    reviewBrandWorkspace,
+    reviewBrandWorkspaceDeliverable
 };
+

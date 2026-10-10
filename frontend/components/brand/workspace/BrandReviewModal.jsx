@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { reviewBrandWorkspace, clearSuccessMessage } from "@/redux/brand/workspace/workspace_slice";
+import { reviewBrandDeliverableWork, clearSuccessMessage } from "@/redux/brand/workspace/workspace_slice";
 
 // =========================================================
 // SVG ICONS
@@ -38,6 +38,7 @@ export default function BrandReviewModal({
   isOpen,
   onClose,
   workspaceId,
+  targetDeliverable = null,
   initialMode = "approve", // 'approve' | 'revision'
 }) {
   const dispatch = useDispatch();
@@ -74,6 +75,12 @@ export default function BrandReviewModal({
 
     setLocalError("");
 
+    const deliverableId = targetDeliverable?._id;
+    if (!deliverableId) {
+      setLocalError("Deliverable target is missing or invalid.");
+      return;
+    }
+
     let reviewData = {};
 
     if (mode === "revision") {
@@ -88,18 +95,19 @@ export default function BrandReviewModal({
       };
     } else {
       reviewData = {
-        status: "completed",
+        status: "approve",
       };
     }
 
     const result = await dispatch(
-      reviewBrandWorkspace({
+      reviewBrandDeliverableWork({
         workspaceId,
+        deliverableId,
         reviewData,
       })
     );
 
-    if (reviewBrandWorkspace.fulfilled.match(result)) {
+    if (reviewBrandDeliverableWork.fulfilled.match(result)) {
       setFeedback("");
       setLocalError("");
       onClose();
@@ -119,10 +127,10 @@ export default function BrandReviewModal({
         <div className="p-5 border-b border-border-theme flex items-center justify-between bg-surface">
           <div>
             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-secondary/15 text-secondary border border-secondary/20 uppercase tracking-wide">
-              Workspace Review
+              {targetDeliverable?.title ? `Deliverable: ${targetDeliverable.title}` : "Workspace Review"}
             </span>
             <h2 className="font-serif font-semibold text-xl text-foreground mt-1">
-              {mode === "approve" ? "Approve Work & Complete" : "Request Revision"}
+              {mode === "approve" ? "Approve Deliverable Work" : "Request Revision"}
             </h2>
           </div>
           <button
@@ -150,7 +158,7 @@ export default function BrandReviewModal({
                 : "bg-surface text-text-secondary hover:text-foreground border border-border-theme"
             }`}
           >
-            Approve & Complete
+            Approve Deliverable
           </button>
           <button
             type="button"
@@ -193,10 +201,10 @@ export default function BrandReviewModal({
               <div className="bg-emerald-500/5 border border-emerald-500/20 p-4 rounded-xl space-y-2">
                 <div className="flex items-center gap-2 text-emerald-500 font-semibold text-xs">
                   <CheckCircleIcon className="w-4 h-4" />
-                  <span>Ready to finalize this campaign?</span>
+                  <span>Ready to approve this deliverable?</span>
                 </div>
                 <p className="text-xs text-text-secondary leading-relaxed">
-                  Approving this workspace will mark the campaign as <strong className="text-foreground">Completed</strong>. The creator will be notified that their submitted work has been accepted.
+                  Approving this deliverable will mark <strong className="text-foreground">{targetDeliverable?.title || "this work"}</strong> as Approved. Once all deliverables are approved, the collaboration will automatically complete.
                 </p>
               </div>
             ) : (
@@ -208,7 +216,7 @@ export default function BrandReviewModal({
                     <span>Provide Specific Revision Feedback</span>
                   </div>
                   <p className="text-xs text-text-secondary leading-relaxed">
-                    Explain clearly what changes, updates, or adjustments the creator needs to make before resubmitting.
+                    Explain clearly what changes, updates, or adjustments the creator needs to make for <strong className="text-foreground">{targetDeliverable?.title || "this deliverable"}</strong>.
                   </p>
                 </div>
 
@@ -259,7 +267,7 @@ export default function BrandReviewModal({
                   <span>Submitting...</span>
                 </span>
               ) : mode === "approve" ? (
-                <span>Approve & Complete</span>
+                <span>Approve Deliverable</span>
               ) : (
                 <span>Send Revision Request</span>
               )}
@@ -270,3 +278,4 @@ export default function BrandReviewModal({
     </div>
   );
 }
+

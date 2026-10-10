@@ -6,7 +6,8 @@ import {
 import {
     getCreatorWorkspaces as getCreatorWorkspacesApi,
     getCreatorWorkspaceById as getCreatorWorkspaceByIdApi,
-    submitCreatorWorkspaceWork as submitCreatorWorkspaceWorkApi
+    submitCreatorWorkspaceWork as submitCreatorWorkspaceWorkApi,
+    submitCreatorDeliverableWork as submitCreatorDeliverableWorkApi
 } from "./workspace_api";
 
 import {
@@ -56,7 +57,7 @@ const fetchCreatorWorkspaceById = createAsyncThunk(
 );
 
 
-// Handles submitting work for a workspace by creator.
+// Handles submitting work for a workspace by creator (legacy wrapper).
 const submitCreatorWorkspaceWork = createAsyncThunk(
     "creatorWorkspace/submitCreatorWorkspaceWork",
     async ({ workspaceId, submissionData }, { rejectWithValue }) => {
@@ -70,6 +71,26 @@ const submitCreatorWorkspaceWork = createAsyncThunk(
             return rejectWithValue(
                 error.response?.data?.message ||
                 "Unable to submit work"
+            );
+        }
+    }
+);
+
+
+// Handles submitting work for a specific deliverable in a workspace by creator.
+const submitCreatorDeliverableWork = createAsyncThunk(
+    "creatorWorkspace/submitCreatorDeliverableWork",
+    async ({ workspaceId, deliverableId, submissionData }, { rejectWithValue }) => {
+
+        try {
+
+            return await submitCreatorDeliverableWorkApi(workspaceId, deliverableId, submissionData);
+
+        } catch (error) {
+
+            return rejectWithValue(
+                error.response?.data?.message ||
+                "Unable to submit deliverable work"
             );
         }
     }
@@ -206,6 +227,47 @@ const creatorWorkspaceSlice = createSlice({
             })
 
 
+            // Submit Creator Deliverable Work started.
+            .addCase(submitCreatorDeliverableWork.pending, (state) => {
+
+                state.submitting = true;
+                state.error = null;
+                state.successMessage = null;
+            })
+
+            // Submit Creator Deliverable Work successful.
+            .addCase(submitCreatorDeliverableWork.fulfilled, (state, action) => {
+
+                state.submitting = false;
+                state.successMessage = action.payload?.message || "Deliverable work submitted successfully";
+
+                const updatedWorkspace = action.payload?.data;
+
+                if (updatedWorkspace) {
+                    const index = state.workspaces.findIndex(
+                        (item) => item._id === updatedWorkspace._id
+                    );
+
+                    if (index !== -1) {
+                        state.workspaces[index] = updatedWorkspace;
+                    }
+
+                    if (state.selectedWorkspace && state.selectedWorkspace._id === updatedWorkspace._id) {
+                        state.selectedWorkspace = updatedWorkspace;
+                    }
+                }
+
+                state.error = null;
+            })
+
+            // Submit Creator Deliverable Work failed.
+            .addCase(submitCreatorDeliverableWork.rejected, (state, action) => {
+
+                state.submitting = false;
+                state.error = action.payload;
+            })
+
+
             // Clear state on auth events.
             .addCase(login.fulfilled, (state) => {
 
@@ -253,8 +315,10 @@ export const {
 export {
     fetchCreatorWorkspaces,
     fetchCreatorWorkspaceById,
-    submitCreatorWorkspaceWork
+    submitCreatorWorkspaceWork,
+    submitCreatorDeliverableWork
 };
 
 
 export default creatorWorkspaceSlice.reducer;
+

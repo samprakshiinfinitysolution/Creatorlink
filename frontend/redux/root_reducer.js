@@ -12,6 +12,8 @@ import brandCampaignsReducer from "./brand/campaigns/campaigns_slice";
 import brandBookingsReducer from "./brand/bookings/bookings_slice";
 import creatorWorkspaceReducer from "./creator/workspace/workspace_slice";
 import brandWorkspaceReducer from "./brand/workspace/workspace_slice";
+import creatorMessagesReducer from "./creator/messages/messages_slice";
+import brandMessagesReducer from "./brand/messages/messages_slice";
 
 
 const rootReducer = combineReducers({
@@ -25,7 +27,9 @@ const rootReducer = combineReducers({
     brandCampaigns: brandCampaignsReducer,
     brandBookings: brandBookingsReducer,
     creatorWorkspace: creatorWorkspaceReducer,
-    brandWorkspace: brandWorkspaceReducer
+    brandWorkspace: brandWorkspaceReducer,
+    creatorMessages: creatorMessagesReducer,
+    brandMessages: brandMessagesReducer
 
 });
 

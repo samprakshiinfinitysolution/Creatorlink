@@ -75,6 +75,14 @@ function ExclamationIcon({ className = "w-5 h-5" }) {
   );
 }
 
+function ChatBubbleIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a.596.596 0 01-.643-.655 4.5 4.5 0 011.02-2.316A7.478 7.478 0 013 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
+    </svg>
+  );
+}
+
 // =========================================================
 // HELPER UTILITIES & STATUS BADGES
 // =========================================================
@@ -147,6 +155,46 @@ const getStatusBadge = (status) => {
   }
 };
 
+const getDeliverableStatusBadge = (status) => {
+  switch (status) {
+    case "pending":
+      return {
+        label: "Pending",
+        color: "bg-slate-500/10 text-slate-400 border-slate-500/20",
+      };
+    case "in_progress":
+      return {
+        label: "In Progress",
+        color: "bg-amber-500/10 text-amber-500 border-amber-500/20",
+      };
+    case "submitted":
+      return {
+        label: "Submitted",
+        color: "bg-purple-500/10 text-purple-500 border-purple-500/20",
+      };
+    case "revision_requested":
+      return {
+        label: "Revision Requested",
+        color: "bg-amber-500/10 text-amber-500 border-amber-500/20",
+      };
+    case "approved":
+      return {
+        label: "Approved",
+        color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+      };
+    case "completed":
+      return {
+        label: "Completed",
+        color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+      };
+    default:
+      return {
+        label: status ? status.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()) : "Pending",
+        color: "bg-surface-muted text-text-secondary border-border-theme",
+      };
+  }
+};
+
 export default function CreatorWorkspaceDetail({ workspaceId }) {
   const dispatch = useDispatch();
   const { selectedWorkspace, loading, error } = useSelector(
@@ -155,6 +203,7 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
+  const [selectedDeliverable, setSelectedDeliverable] = useState(null);
 
   useEffect(() => {
     if (workspaceId) {
@@ -168,6 +217,16 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
     }
   };
 
+  const handleOpenSubmitModal = (deliverable = null) => {
+    setSelectedDeliverable(deliverable);
+    setIsSubmitModalOpen(true);
+  };
+
+  const handleCloseSubmitModal = () => {
+    setIsSubmitModalOpen(false);
+    setSelectedDeliverable(null);
+  };
+
   const workspace = selectedWorkspace;
   const badge = getStatusBadge(workspace?.status);
   const campaign = workspace?.campaign;
@@ -178,8 +237,149 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
   const revisions = Array.isArray(workspace?.revisions) ? workspace.revisions : [];
   const latestRevision = revisions.length > 0 ? revisions[revisions.length - 1] : null;
 
+  const submittableDeliverable = deliverables.find(
+    (d) => typeof d === "object" && (d.status === "pending" || d.status === "in_progress" || d.status === "revision_requested")
+  );
+
   const canSubmitWork = workspace?.status === "in_progress" || workspace?.status === "revision_requested";
   const isRevisionMode = workspace?.status === "revision_requested";
+
+  const activeDeliverables = deliverables.filter(
+    (item) =>
+      typeof item === "object" &&
+      (item?.status === "submitted" ||
+        item?.status === "revision_requested" ||
+        item?.status === "approved" ||
+        item?.status === "completed")
+  );
+
+  const pendingDeliverables = deliverables.filter(
+    (item) =>
+      typeof item === "string" ||
+      item?.status === "pending" ||
+      item?.status === "in_progress" ||
+      (!item?.status ||
+        (item.status !== "submitted" &&
+          item.status !== "revision_requested" &&
+          item.status !== "approved" &&
+          item.status !== "completed"))
+  );
+
+  const renderDeliverableCard = (item, idx) => {
+    const isStringItem = typeof item === "string";
+    const title = isStringItem ? item : item.title || `Deliverable #${idx + 1}`;
+    const status = isStringItem ? "pending" : item.status || "pending";
+    const delivBadge = getDeliverableStatusBadge(status);
+
+    return (
+      <div
+        key={!isStringItem && item._id ? item._id : idx}
+        className="bg-surface border border-border-theme rounded-xl p-4 space-y-3 shadow-xs"
+      >
+        <div className="space-y-2.5">
+          {/* Top Metadata Row: Status Badge & Due Date */}
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span
+                className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wider ${delivBadge.color}`}
+              >
+                {delivBadge.label}
+              </span>
+              {!isStringItem && item.dueDate && (
+                <span className="text-[11px] text-text-secondary flex items-center gap-1 font-medium">
+                  <CalendarIcon className="w-3.5 h-3.5" />
+                  Due: {formatDate(item.dueDate)}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Main Content Row: Title (+ optional description) on left, Action Button on right */}
+          <div className="flex items-start justify-between gap-3 flex-wrap sm:flex-nowrap">
+            <div className="min-w-0 flex-1">
+              <h3 className="font-serif font-semibold text-base text-foreground">
+                {title}
+              </h3>
+              {!isStringItem && item.description && (
+                <p className="text-xs text-text-secondary leading-normal mt-0.5 line-clamp-2">
+                  {item.description}
+                </p>
+              )}
+            </div>
+
+            {/* Per-Deliverable Action Buttons */}
+            {!isStringItem && (status === "pending" || status === "in_progress") && (
+              <button
+                type="button"
+                onClick={() => handleOpenSubmitModal(item)}
+                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-secondary hover:bg-secondary-dark text-white text-xs font-semibold transition-all shadow-xs cursor-pointer shrink-0"
+              >
+                <UploadIcon className="w-3.5 h-3.5" />
+                <span>Submit Work</span>
+              </button>
+            )}
+            {!isStringItem && status === "revision_requested" && (
+              <button
+                type="button"
+                onClick={() => handleOpenSubmitModal(item)}
+                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold transition-all shadow-xs cursor-pointer shrink-0"
+              >
+                <RefreshIcon className="w-3.5 h-3.5" />
+                <span>Resubmit Work</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Deliverable Submission Info inside Card */}
+        {!isStringItem && item.submission && (
+          <div className="bg-surface-muted/60 border border-border-theme/70 p-3 rounded-lg space-y-1.5 text-xs mt-2">
+            <div className="flex items-center justify-between gap-2">
+              <span className="font-semibold text-foreground">
+                Submission: {item.submission.title || title}
+              </span>
+              {item.submittedAt && (
+                <span className="text-[10px] text-text-secondary shrink-0">
+                  {formatDateTime(item.submittedAt)}
+                </span>
+              )}
+            </div>
+
+            {item.submission.notes && (
+              <p className="text-text-secondary bg-surface p-2 rounded-md border border-border-theme/50 leading-relaxed text-[11px]">
+                {item.submission.notes}
+              </p>
+            )}
+
+            <div className="flex flex-wrap gap-2 pt-0.5">
+              {item.submission.link && (
+                <a
+                  href={item.submission.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-[11px] text-secondary hover:underline font-medium"
+                >
+                  <LinkIcon className="w-3.5 h-3.5" />
+                  <span>Live Content Link</span>
+                </a>
+              )}
+              {item.submission.fileUrl && (
+                <a
+                  href={item.submission.fileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-[11px] text-secondary hover:underline font-medium"
+                >
+                  <DocumentIcon className="w-3.5 h-3.5" />
+                  <span>Asset File Reference</span>
+                </a>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
@@ -303,17 +503,27 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                     </p>
                   </div>
 
-                  {/* Primary Submit / Resubmit Action */}
-                  {canSubmitWork && (
-                    <button
-                      type="button"
-                      onClick={() => setIsSubmitModalOpen(true)}
-                      className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-secondary hover:bg-secondary-dark text-white text-xs font-semibold transition-all shadow-xs cursor-pointer shrink-0"
+                  {/* Action Buttons: Message Brand & Submit Work */}
+                  <div className="flex items-center gap-2.5 flex-wrap shrink-0">
+                    <Link
+                      href={`/creator/messages?bookingId=${workspace.booking?._id || workspace.booking}`}
+                      className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-border-theme bg-surface hover:bg-surface-muted text-foreground text-xs font-semibold transition-all shadow-xs cursor-pointer shrink-0"
                     >
-                      <UploadIcon className="w-4 h-4" />
-                      <span>{isRevisionMode ? "Resubmit Work" : "Submit Work"}</span>
-                    </button>
-                  )}
+                      <ChatBubbleIcon className="w-4 h-4 text-secondary" />
+                      <span>Message Brand</span>
+                    </Link>
+
+                    {canSubmitWork && (
+                      <button
+                        type="button"
+                        onClick={() => handleOpenSubmitModal(submittableDeliverable || deliverables[0] || null)}
+                        className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-secondary hover:bg-secondary-dark text-white text-xs font-semibold transition-all shadow-xs cursor-pointer shrink-0"
+                      >
+                        <UploadIcon className="w-4 h-4" />
+                        <span>{isRevisionMode ? "Resubmit Work" : "Submit Work"}</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {/* Key Summary Stats Grid */}
@@ -361,27 +571,31 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Left Column: Required Deliverables & Overview */}
                 <div className="lg:col-span-2 space-y-6">
-                  {/* Required Deliverables Checklist */}
-                  <div className="bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 space-y-4 shadow-xs">
-                    <h2 className="font-serif font-semibold text-lg text-foreground">
-                      Required Campaign Deliverables
+                  {/* Required Deliverables Checklist Cards */}
+                  <div className="space-y-4">
+                    <h2 className="font-serif font-semibold text-lg text-foreground px-1">
+                      Required Campaign Deliverables ({deliverables.length})
                     </h2>
                     {deliverables.length > 0 ? (
-                      <div className="space-y-2.5">
-                        {deliverables.map((item, idx) => (
-                          <div
-                            key={idx}
-                            className="flex items-center gap-3 p-3 rounded-xl bg-surface-muted/60 border border-border-theme/60 text-xs font-medium text-foreground"
-                          >
-                            <div className="w-5 h-5 rounded-full bg-secondary/15 text-secondary border border-secondary/20 flex items-center justify-center shrink-0">
-                              <CheckIcon className="w-3.5 h-3.5" />
-                            </div>
-                            <span>{item}</span>
+                      <div className="space-y-6">
+                        {/* Group 1: Active / Submitted / Reviewed Deliverables */}
+                        {activeDeliverables.length > 0 && (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+                            {activeDeliverables.map((item, idx) => renderDeliverableCard(item, idx))}
                           </div>
-                        ))}
+                        )}
+
+                        {/* Group 2: Pending / In Progress Deliverables */}
+                        {pendingDeliverables.length > 0 && (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+                            {pendingDeliverables.map((item, idx) => renderDeliverableCard(item, idx))}
+                          </div>
+                        )}
                       </div>
                     ) : (
-                      <p className="text-xs text-text-secondary">No specific deliverables listed.</p>
+                      <div className="bg-surface border border-border-theme rounded-2xl p-5 text-center">
+                        <p className="text-xs text-text-secondary">No specific deliverables listed.</p>
+                      </div>
                     )}
                   </div>
 
@@ -424,7 +638,7 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                       {canSubmitWork && (
                         <button
                           type="button"
-                          onClick={() => setIsSubmitModalOpen(true)}
+                          onClick={() => handleOpenSubmitModal(submittableDeliverable || deliverables[0] || null)}
                           className="text-xs font-semibold text-secondary hover:underline cursor-pointer"
                         >
                           + Submit Work
@@ -441,7 +655,7 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                         {canSubmitWork && (
                           <button
                             type="button"
-                            onClick={() => setIsSubmitModalOpen(true)}
+                            onClick={() => handleOpenSubmitModal(submittableDeliverable || deliverables[0] || null)}
                             className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-secondary text-white text-xs font-semibold transition-all cursor-pointer mt-1"
                           >
                             <span>Submit Now</span>
@@ -534,9 +748,10 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
       {/* Submit Work Modal */}
       <CreatorSubmitWorkModal
         isOpen={isSubmitModalOpen}
-        onClose={() => setIsSubmitModalOpen(false)}
+        onClose={handleCloseSubmitModal}
         workspaceId={workspaceId}
-        isResubmission={isRevisionMode}
+        targetDeliverable={selectedDeliverable}
+        isResubmission={selectedDeliverable?.status === "revision_requested"}
       />
     </div>
   );

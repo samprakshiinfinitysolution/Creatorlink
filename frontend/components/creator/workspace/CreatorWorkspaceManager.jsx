@@ -74,6 +74,14 @@ function BriefcaseIcon({ className = "w-8 h-8" }) {
   );
 }
 
+function ChatBubbleIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h.008v.008H8.625V12zm4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h.008v.008h-.008V12zm4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h.008v.008h-.008V12zM21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+    </svg>
+  );
+}
+
 // =========================================================
 // HELPER UTILITIES & STATUS CONFIG
 // =========================================================
@@ -295,6 +303,11 @@ export default function CreatorWorkspaceManager() {
                 const deadlineFormatted = formatDate(ws.deadline);
                 const deliverables = Array.isArray(ws.deliverables) ? ws.deliverables : [];
 
+                const bookingId =
+                  typeof ws.booking === "object" && ws.booking !== null
+                    ? ws.booking._id
+                    : ws.booking;
+
                 return (
                   <div
                     key={ws._id}
@@ -344,17 +357,20 @@ export default function CreatorWorkspaceManager() {
                             Required Deliverables:
                           </span>
                           <div className="space-y-1">
-                            {deliverables.slice(0, 3).map((item, idx) => (
-                              <div
-                                key={idx}
-                                className="flex items-center gap-2 text-xs text-text-secondary"
-                              >
-                                <div className="w-4 h-4 rounded-full bg-secondary/10 text-secondary flex items-center justify-center shrink-0">
-                                  <CheckIcon className="w-3 h-3" />
+                            {deliverables.slice(0, 3).map((item, idx) => {
+                              const title = typeof item === "string" ? item : item?.title || "Deliverable";
+                              return (
+                                <div
+                                  key={item?._id || idx}
+                                  className="flex items-center gap-2 text-xs text-text-secondary"
+                                >
+                                  <div className="w-4 h-4 rounded-full bg-secondary/10 text-secondary flex items-center justify-center shrink-0">
+                                    <CheckIcon className="w-3 h-3" />
+                                  </div>
+                                  <span className="line-clamp-1">{title}</span>
                                 </div>
-                                <span className="line-clamp-1">{item}</span>
-                              </div>
-                            ))}
+                              );
+                            })}
                             {deliverables.length > 3 && (
                               <span className="text-[10px] text-text-secondary pl-6 block">
                                 + {deliverables.length - 3} more deliverables
@@ -366,14 +382,23 @@ export default function CreatorWorkspaceManager() {
                     </div>
 
                     {/* Card Footer Action */}
-                    <div className="pt-2 border-t border-border-theme">
+                    <div className="pt-2 border-t border-border-theme flex items-center gap-2">
                       <Link
                         href={`/creator/workspace/${ws._id}`}
-                        className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-secondary hover:bg-secondary-dark text-white text-xs font-semibold transition-all cursor-pointer shadow-xs"
+                        className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-secondary hover:bg-secondary-dark text-white text-xs font-semibold transition-all cursor-pointer shadow-xs"
                       >
                         <span>Open Workspace</span>
                         <ArrowRightIcon className="w-3.5 h-3.5" />
                       </Link>
+                      {bookingId && (
+                        <Link
+                          href={`/creator/messages?bookingId=${bookingId}`}
+                          title="Message Brand"
+                          className="p-2.5 rounded-xl bg-surface-muted hover:bg-secondary/15 text-text-secondary hover:text-secondary border border-border-theme transition-all cursor-pointer shrink-0"
+                        >
+                          <ChatBubbleIcon className="w-4 h-4" />
+                        </Link>
+                      )}
                     </div>
                   </div>
                 );

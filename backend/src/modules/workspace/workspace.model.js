@@ -45,6 +45,44 @@ const revisionSchema = new mongoose.Schema(
     { _id: true }
 );
 
+const deliverableSchema = new mongoose.Schema(
+    {
+        title: {
+            type: String,
+            trim: true,
+            required: true
+        },
+        description: {
+            type: String,
+            trim: true,
+            default: ""
+        },
+        dueDate: {
+            type: Date
+        },
+        status: {
+            type: String,
+            enum: [
+                "pending",
+                "in_progress",
+                "submitted",
+                "revision_requested",
+                "approved",
+                "completed"
+            ],
+            default: "pending"
+        },
+        submission: submissionSchema,
+        submittedAt: {
+            type: Date
+        },
+        approvedAt: {
+            type: Date
+        }
+    },
+    { _id: true }
+);
+
 const workspaceSchema = new mongoose.Schema(
     {
         booking: {
@@ -92,15 +130,32 @@ const workspaceSchema = new mongoose.Schema(
             maxlength: 3
         },
 
-        deliverables: {
-            type: [
-                {
-                    type: String,
-                    trim: true
-                }
-            ],
-            default: []
+        brief: {
+            type: String,
+            trim: true,
+            default: ""
         },
+
+        deliverables: [deliverableSchema],
+
+        files: [
+            {
+                name: {
+                    type: String,
+                    trim: true,
+                    default: ""
+                },
+                url: {
+                    type: String,
+                    trim: true,
+                    default: ""
+                },
+                uploadedAt: {
+                    type: Date,
+                    default: Date.now
+                }
+            }
+        ],
 
         deadline: {
             type: Date,
@@ -134,3 +189,4 @@ workspaceSchema.index({ brand: 1, status: 1, createdAt: -1 });
 const Workspace = mongoose.model("Workspace", workspaceSchema);
 
 export default Workspace;
+

@@ -15,6 +15,10 @@ import {
     creatorWorkspaceRouter,
     brandWorkspaceRouter
 } from "../modules/workspace/workspace.route.js";
+import {
+    creatorMessagesRouter,
+    brandMessagesRouter
+} from "../modules/messages/messages.route.js";
 
 const router = Router();
 
@@ -28,11 +32,13 @@ router.use("/creator/services", creatorServiceRoutes);
 router.use("/creator/campaigns", creatorCampaignRoutes);
 router.use("/creator/bookings", creatorBookingRouter);
 router.use("/creator/workspace", creatorWorkspaceRouter);
+router.use("/creator/messages", creatorMessagesRouter);
 
 // Brand routes.
 router.use("/brand/profile", brandProfileRoutes);
 router.use("/brand/campaigns", campaignRoutes);
 router.use("/brand/bookings", brandBookingRouter);
 router.use("/brand/workspace", brandWorkspaceRouter);
+router.use("/brand/messages", brandMessagesRouter);
 
 export default router;

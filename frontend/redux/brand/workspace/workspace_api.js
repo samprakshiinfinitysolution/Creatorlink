@@ -26,7 +26,7 @@ const getBrandWorkspaceById = async (workspaceId) => {
 };
 
 
-// Reviews workspace submission (approve or request revision) by brand.
+// Reviews workspace submission (approve or request revision) by brand (legacy / wrapper).
 const reviewBrandWorkspace = async (workspaceId, reviewData) => {
 
     const response = await axiosInstance.post(
@@ -38,8 +38,22 @@ const reviewBrandWorkspace = async (workspaceId, reviewData) => {
 };
 
 
+// Reviews a specific deliverable submission (approve or request revision) by brand.
+const reviewBrandDeliverableWork = async (workspaceId, deliverableId, reviewData) => {
+
+    const response = await axiosInstance.post(
+        `/brand/workspace/${workspaceId}/deliverables/${deliverableId}/review`,
+        reviewData
+    );
+
+    return response.data;
+};
+
+
 export {
     getBrandWorkspaces,
     getBrandWorkspaceById,
-    reviewBrandWorkspace
+    reviewBrandWorkspace,
+    reviewBrandDeliverableWork
 };
+

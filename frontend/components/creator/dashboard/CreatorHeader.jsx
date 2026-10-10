@@ -143,31 +143,31 @@ export default function CreatorHeader({ setMobileOpen = () => { } }) {
   }, []);
 
   return (
-    <header className="sticky top-0 z-20 w-full bg-surface text-foreground border-b border-border-theme px-4 sm:px-6 py-3.5 flex items-center justify-between transition-colors duration-200">
+    <header className="sticky top-0 z-20 w-full bg-surface text-foreground border-b border-border-theme px-3 sm:px-6 py-2.5 sm:py-3.5 flex items-center justify-between transition-colors duration-200 min-w-0 max-w-full">
       {/* Left: Mobile Toggle & Page Title */}
-      <div className="flex items-center gap-3 sm:gap-4">
+      <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
         {/* Mobile Hamburger Button */}
         <button
           type="button"
           onClick={() => setMobileOpen(true)}
-          className="lg:hidden p-2 rounded-xl text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors"
+          className="lg:hidden p-1.5 sm:p-2 rounded-xl text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors shrink-0"
           aria-label="Open sidebar"
         >
           <MenuIcon />
         </button>
 
-        <div>
-          <h1 className="font-serif font-semibold text-lg sm:text-xl text-foreground tracking-tight leading-none">
+        <div className="min-w-0 flex-1">
+          <h1 className="font-serif font-semibold text-base sm:text-xl text-foreground tracking-tight leading-none truncate">
             Creator Dashboard
           </h1>
-          <p className="text-[11px] sm:text-xs text-text-secondary font-sans mt-1 hidden sm:block">
+          <p className="text-[11px] sm:text-xs text-text-secondary font-sans mt-1 hidden sm:block truncate">
             Overview of your active campaigns, earnings, and services
           </p>
         </div>
       </div>
 
       {/* Right: Actions & Profile Dropdown */}
-      <div className="flex items-center gap-2.5 sm:gap-4">
+      <div className="flex items-center gap-2 sm:gap-4 shrink-0">
         {/* Notification Icon Button */}
         <button
           type="button"

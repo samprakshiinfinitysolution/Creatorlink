@@ -40,8 +40,21 @@ const updateBrandBookingStatus = async (bookingId, status) => {
 };
 
 
+// Sends a brand booking proposal.
+const createBrandBooking = async (bookingData) => {
+
+    const response = await axiosInstance.post(
+        "/brand/bookings",
+        bookingData
+    );
+
+    return response.data;
+};
+
+
 export {
     getBrandBookings,
     getBrandBookingById,
-    updateBrandBookingStatus
+    updateBrandBookingStatus,
+    createBrandBooking
 };

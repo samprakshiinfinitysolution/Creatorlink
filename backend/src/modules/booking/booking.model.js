@@ -89,6 +89,16 @@ const bookingSchema = new mongoose.Schema(
                 "completed"
             ],
             default: "pending"
+        },
+
+        // Indicates whether the booking was initiated by the creator (campaign application) or the brand (direct service hire proposal).
+        initiatedBy: {
+            type: String,
+            enum: [
+                "creator",
+                "brand"
+            ],
+            default: "creator"
         }
     },
     {

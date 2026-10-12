@@ -79,6 +79,7 @@ function ChevronDownIcon({ className = "w-3.5 h-3.5" }) {
 
 export default function CreatorHeader({ setMobileOpen = () => { } }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [imgError, setImgError] = useState(false);
   const dropdownRef = useRef(null);
 
   const dispatch = useDispatch();
@@ -94,6 +95,11 @@ export default function CreatorHeader({ setMobileOpen = () => { } }) {
       dispatch(getCreatorProfile());
     }
   }, [dispatch, profile, profileLoading, profileError]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setImgError(false);
+  }, [profile?.profileImage]);
 
   const userObj = profile?.user || (authUser?.user ? authUser.user : authUser);
 
@@ -190,8 +196,17 @@ export default function CreatorHeader({ setMobileOpen = () => { } }) {
             aria-haspopup="true"
             className="flex items-center gap-2.5 p-1 rounded-xl hover:bg-surface-muted transition-colors cursor-pointer text-left focus:outline-none"
           >
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-secondary/15 text-secondary font-semibold font-sans text-xs sm:text-sm flex items-center justify-center border border-secondary/30 shrink-0 uppercase">
-              {initials}
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-secondary/15 text-secondary font-semibold font-sans text-xs sm:text-sm flex items-center justify-center border border-secondary/30 shrink-0 uppercase overflow-hidden">
+              {profile?.profileImage && !imgError ? (
+                <img
+                  src={profile.profileImage}
+                  alt={displayName || "Creator avatar"}
+                  className="w-full h-full object-cover"
+                  onError={() => setImgError(true)}
+                />
+              ) : (
+                initials
+              )}
             </div>
           </button>
 

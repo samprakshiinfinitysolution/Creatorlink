@@ -105,7 +105,7 @@ export default function CreatorDiscovery() {
             <div className="group bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 hover:border-secondary/60 rounded-[36px] p-3 shadow-sm hover:shadow-[0_12px_32px_-8px_rgba(255,79,135,0.2)] hover:-translate-y-1 transition-all duration-300 relative overflow-hidden w-full max-w-[340px] mb-5">
               <div className="relative w-full h-[350px] sm:h-[380px] rounded-[28px] overflow-hidden bg-slate-100 dark:bg-surface-muted">
                 <Image
-                  src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=700&q=80"
+                  src="https://res.cloudinary.com/atr5osne/image/upload/v1791822113/creatorlink/public/avatars/avatar_female_natural_aura.jpg"
                   alt="Aarohi Mehta Aesthetic Portrait"
                   fill
                   sizes="(max-width: 640px) 100vw, 360px"

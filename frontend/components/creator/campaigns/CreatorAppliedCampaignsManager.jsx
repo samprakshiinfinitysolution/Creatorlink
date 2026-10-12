@@ -3,7 +3,10 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchAppliedCampaigns } from "@/redux/creator/campaigns/campaigns_slice";
+import {
+  fetchAppliedCampaigns,
+  updateCreatorBookingStatus,
+} from "@/redux/creator/campaigns/campaigns_slice";
 import CreatorSidebar from "@/components/creator/dashboard/CreatorSidebar";
 import CreatorHeader from "@/components/creator/dashboard/CreatorHeader";
 
@@ -196,6 +199,8 @@ export default function CreatorAppliedCampaignsManager() {
   const [selectedStatus, setSelectedStatus] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [processingBookingId, setProcessingBookingId] = useState(null);
+  const [actionFeedback, setActionFeedback] = useState(null);
 
   // Fetch applied campaigns on mount and when filters/page change
   useEffect(() => {
@@ -237,6 +242,54 @@ export default function CreatorAppliedCampaignsManager() {
     }
 
     dispatch(fetchAppliedCampaigns(params));
+  };
+
+  const handleUpdateStatus = async (bookingId, status) => {
+    if (!bookingId || processingBookingId) return;
+    setProcessingBookingId(bookingId);
+    setActionFeedback(null);
+
+    try {
+      const actionResult = await dispatch(
+        updateCreatorBookingStatus({ bookingId, status })
+      );
+
+      if (updateCreatorBookingStatus.fulfilled.match(actionResult)) {
+        const message =
+          actionResult.payload?.message ||
+          `Booking proposal ${status} successfully`;
+        setActionFeedback({ type: "success", message });
+
+        const params = {
+          page: currentPage,
+          limit: 9,
+        };
+
+        if (selectedStatus && selectedStatus !== "All") {
+          params.status = selectedStatus;
+        }
+
+        if (searchQuery.trim()) {
+          params.search = searchQuery.trim();
+        }
+
+        dispatch(fetchAppliedCampaigns(params));
+      } else if (updateCreatorBookingStatus.rejected.match(actionResult)) {
+        setActionFeedback({
+          type: "error",
+          message:
+            actionResult.payload ||
+            `Failed to ${status} booking proposal.`,
+        });
+      }
+    } catch (err) {
+      setActionFeedback({
+        type: "error",
+        message: err.message || `Failed to ${status} booking proposal.`,
+      });
+    } finally {
+      setProcessingBookingId(null);
+    }
   };
 
   return (
@@ -339,6 +392,33 @@ export default function CreatorAppliedCampaignsManager() {
             </div>
           )}
 
+          {/* ACTION FEEDBACK BANNER */}
+          {actionFeedback && (
+            <div
+              className={`px-5 py-4 rounded-2xl text-xs font-medium flex items-center justify-between gap-4 shadow-xs ${
+                actionFeedback.type === "success"
+                  ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
+                  : "bg-red-500/10 border border-red-500/30 text-red-500"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                {actionFeedback.type === "success" ? (
+                  <CheckIcon className="w-4 h-4 text-emerald-500 shrink-0" />
+                ) : (
+                  <RefreshIcon className="w-4 h-4 text-red-500 shrink-0" />
+                )}
+                <span>{actionFeedback.message}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActionFeedback(null)}
+                className="text-text-secondary hover:text-foreground text-xs font-semibold cursor-pointer"
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
+
           {/* 4. LOADING SKELETON STATE */}
           {loading && campaignsList.length === 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -373,11 +453,22 @@ export default function CreatorAppliedCampaignsManager() {
                     className="bg-surface border border-border-theme rounded-2xl overflow-hidden shadow-xs hover:border-secondary/40 transition-all duration-200 flex flex-col justify-between p-6 group"
                   >
                     <div className="space-y-4">
-                      {/* Top Row: Category & Status Badge */}
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-secondary/10 text-secondary border border-secondary/20 uppercase tracking-wide truncate max-w-[140px]">
-                          {campaignObj.category || "General"}
-                        </span>
+                      {/* Top Row: Category, Origin & Status Badge */}
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-secondary/10 text-secondary border border-secondary/20 uppercase tracking-wide truncate max-w-[140px]">
+                            {campaignObj.category || "General"}
+                          </span>
+                          {item.initiatedBy === "brand" ? (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 uppercase tracking-wide">
+                              Brand Proposal
+                            </span>
+                          ) : (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-surface-muted text-text-secondary border border-border-theme uppercase tracking-wide">
+                              My Application
+                            </span>
+                          )}
+                        </div>
                         <span
                           className={`px-2.5 py-1 rounded-full text-[10px] font-bold border uppercase tracking-wide ${badge.color}`}
                         >
@@ -452,7 +543,55 @@ export default function CreatorAppliedCampaignsManager() {
                           </div>
                         );
                       })()}
+                      {/* Optional Service Package Badge */}
+                      {item.service?.title && (
+                        <div className="text-[11px] text-text-secondary flex items-center gap-1 pt-1">
+                          <span className="font-semibold text-foreground">Service Package:</span>
+                          <span className="truncate">{item.service.title}</span>
+                        </div>
+                      )}
                     </div>
+
+                    {/* Accept / Reject Buttons for Pending Brand Proposals */}
+                    {item.initiatedBy === "brand" && item.status === "pending" && (
+                      <div className="pt-3.5 mt-3 border-t border-border-theme flex items-center gap-2">
+                        <button
+                          type="button"
+                          disabled={processingBookingId === bookingId}
+                          onClick={() => handleUpdateStatus(bookingId, "accepted")}
+                          className="flex-1 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {processingBookingId === bookingId ? (
+                            <RefreshIcon className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <CheckIcon className="w-3.5 h-3.5" />
+                          )}
+                          <span>Accept</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          disabled={processingBookingId === bookingId}
+                          onClick={() => handleUpdateStatus(bookingId, "rejected")}
+                          className="flex-1 py-2 px-3 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-500 font-semibold text-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <span>Reject</span>
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Go to Workspace Button for Accepted or In-Progress Bookings */}
+                    {(item.status === "accepted" || item.status === "in_progress") && (
+                      <div className="pt-3.5 mt-3 border-t border-border-theme">
+                        <Link
+                          href={`/creator/workspace/${item.bookingId || item._id}`}
+                          className="w-full py-2 px-3 rounded-xl bg-secondary hover:bg-secondary-dark text-white font-semibold text-xs transition-colors flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                        >
+                          <span>Go to Workspace</span>
+                          <ArrowRightIcon className="w-3.5 h-3.5" />
+                        </Link>
+                      </div>
+                    )}
 
                     {/* Card Footer: Platform Label */}
                     <div className="pt-4 mt-4 border-t border-border-theme flex items-center justify-between text-xs text-text-secondary">

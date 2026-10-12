@@ -89,7 +89,7 @@ export default function AboutNexus() {
                 style={{ animation: 'nexusFloat1 5.2s ease-in-out 0s infinite' }}
               >
                 <Image
-                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80"
+                  src="https://res.cloudinary.com/atr5osne/image/upload/v1791821908/creatorlink/public/avatars/avatar_female_editorial_aarohi.jpg"
                   alt="Creators"
                   width={32}
                   height={32}
@@ -179,7 +179,7 @@ export default function AboutNexus() {
                 style={{ animation: 'nexusFloat2 6.0s ease-in-out 1.1s infinite' }}
               >
                 <Image
-                  src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=150&q=80"
+                  src="https://res.cloudinary.com/atr5osne/image/upload/v1791821998/creatorlink/public/editorial/editorial_creator_filming_beauty.jpg"
                   alt="Curated Assets"
                   width={32}
                   height={32}

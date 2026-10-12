@@ -7,7 +7,7 @@ export default function CreatorProduction() {
   // Conceptual structure for future backend video switching
   const [mediaData] = useState({
     mediaType: "image", // "image" | "video"
-    imageUrl: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=800&q=80",
+    imageUrl: "https://res.cloudinary.com/atr5osne/image/upload/v1791822132/creatorlink/public/editorial/editorial_cinema_camera_rig.jpg",
     videoUrl: "",
     title: "GLOW RITUAL",
     subtitle: "Lumina Skin",

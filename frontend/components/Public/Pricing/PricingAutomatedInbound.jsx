@@ -12,7 +12,7 @@ export default function PricingAutomatedInbound() {
       locationStats: "London • 54K",
       pitch: '"I love your tonal palette! Would love to shoot this in the Cotswolds next week."',
       matchScore: "MATCH SCORE: 96%",
-      image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80",
+      image: "https://res.cloudinary.com/atr5osne/image/upload/v1791821908/creatorlink/public/avatars/avatar_female_editorial_aarohi.jpg",
     },
     {
       id: "marcus",
@@ -20,7 +20,7 @@ export default function PricingAutomatedInbound() {
       locationStats: "Berlin • 92K",
       pitch: '"Pitching a cinematic 4K reel highlighting stitching and garment flow."',
       matchScore: "MATCH SCORE: 92%",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80",
+      image: "https://res.cloudinary.com/atr5osne/image/upload/v1791821988/creatorlink/public/avatars/avatar_male_portrait_marcus.jpg",
     },
   ];
 

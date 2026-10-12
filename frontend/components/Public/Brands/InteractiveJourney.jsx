@@ -54,35 +54,35 @@ const DISCOVERY_CREATORS = [
     niche: "Beauty • 98% Match",
     fee: "₹30,000",
     image:
-      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200",
+      "https://res.cloudinary.com/atr5osne/image/upload/v1791821908/creatorlink/public/avatars/avatar_female_editorial_aarohi.jpg",
   },
   {
     name: "Riya Sharma",
     niche: "Wellness • 92% Match",
     fee: "₹25,000",
     image:
-      "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=200",
+      "https://res.cloudinary.com/atr5osne/image/upload/v1791821980/creatorlink/public/avatars/avatar_female_portrait_camille.jpg",
   },
   {
     name: "Maya Kapoor",
     niche: "Lifestyle • 89% Match",
     fee: "₹32,000",
     image:
-      "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=200",
+      "https://res.cloudinary.com/atr5osne/image/upload/v1791821993/creatorlink/public/avatars/avatar_female_fashion_sora.jpg",
   },
   {
     name: "Anaya Shah",
     niche: "Design • 87% Match",
     fee: "₹18,000",
     image:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200",
+      "https://res.cloudinary.com/atr5osne/image/upload/v1791821988/creatorlink/public/avatars/avatar_male_portrait_marcus.jpg",
   },
   {
     name: "Kiara Jain",
     niche: "Skincare • 94% Match",
     fee: "₹28,000",
     image:
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200",
+      "https://res.cloudinary.com/atr5osne/image/upload/v1791822016/creatorlink/public/avatars/avatar_male_professional_david.jpg",
   },
 ];
 
@@ -270,7 +270,7 @@ export default function InteractiveJourney() {
 
                     <div className="md:col-span-6">
                       <div className="relative rounded-2xl overflow-hidden border border-border-theme bg-surface-muted aspect-[4/3] group shadow-xs">
-                        <Image src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&q=80&w=800" alt="Moodboard" fill className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" sizes="(max-width: 768px) 100vw, 50vw" />
+                        <Image src="https://res.cloudinary.com/atr5osne/image/upload/v1791821998/creatorlink/public/editorial/editorial_creator_filming_beauty.jpg" alt="Moodboard" fill className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" sizes="(max-width: 768px) 100vw, 50vw" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
                         <div className="absolute bottom-4 left-4 right-4 text-left">
                           <p className="text-xs font-semibold text-white font-sans tracking-wide">
@@ -360,7 +360,7 @@ export default function InteractiveJourney() {
                             82% Audience Relevance
                           </span>
                         </div>
-                        <Image src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200" alt="Aarohi Mehta" width={40} height={40} className="w-10 h-10 rounded-full object-cover border border-border-theme" />
+                        <Image src="https://res.cloudinary.com/atr5osne/image/upload/v1791821908/creatorlink/public/avatars/avatar_female_editorial_aarohi.jpg" alt="Aarohi Mehta" width={40} height={40} className="w-10 h-10 rounded-full object-cover border border-border-theme" />
                       </div>
                     </div>
 
@@ -423,7 +423,7 @@ export default function InteractiveJourney() {
                     {/* Left Creator Video Preview Card */}
                     <div className="md:col-span-5">
                       <div className="relative rounded-2xl overflow-hidden border border-border-theme aspect-[3/4] bg-surface-muted group shadow-xs">
-                        <Image src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=600" alt="Content Preview" fill className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" sizes="(max-width: 768px) 100vw, 50vw" />
+                        <Image src="https://res.cloudinary.com/atr5osne/image/upload/v1791821908/creatorlink/public/avatars/avatar_female_editorial_aarohi.jpg" alt="Content Preview" fill className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" sizes="(max-width: 768px) 100vw, 50vw" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                         <div className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-white text-[10px] font-bold font-sans">
                           Reel 01 (Draft 4K)

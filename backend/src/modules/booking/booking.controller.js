@@ -3,9 +3,11 @@ import sendResponse from "../../utils/response.js";
 
 import {
     createBookingService,
+    createBrandBookingService,
     getCreatorBookingsService,
     getCreatorBookingByIdService,
     cancelCreatorBookingService,
+    updateCreatorBookingStatusService,
     getBrandBookingsService,
     getBrandBookingByIdService,
     updateBrandBookingStatusService
@@ -84,6 +86,24 @@ const cancelCreatorBooking = asyncHandler(async (req, res) => {
 });
 
 
+// Creator accepts or rejects a brand-initiated booking proposal.
+const updateCreatorBookingStatus = asyncHandler(async (req, res) => {
+
+    const booking = await updateCreatorBookingStatusService(
+        req.user.userId,
+        req.params.id,
+        req.body.status
+    );
+
+    return sendResponse(
+        res,
+        200,
+        `Booking proposal ${req.body.status} successfully`,
+        booking
+    );
+});
+
+
 // =========================================================
 // BRAND CONTROLLERS
 // =========================================================
@@ -140,12 +160,32 @@ const updateBrandBookingStatus = asyncHandler(async (req, res) => {
 });
 
 
+// Brand submits a direct booking / hire proposal for a creator service.
+const createBrandBooking = asyncHandler(async (req, res) => {
+
+    const booking = await createBrandBookingService(
+        req.user.userId,
+        req.body
+    );
+
+    return sendResponse(
+        res,
+        201,
+        "Booking proposal submitted successfully",
+        booking
+    );
+});
+
+
 export {
     createBooking,
+    createBrandBooking,
     getCreatorBookings,
     getCreatorBookingById,
     cancelCreatorBooking,
+    updateCreatorBookingStatus,
     getBrandBookings,
     getBrandBookingById,
     updateBrandBookingStatus
 };
+

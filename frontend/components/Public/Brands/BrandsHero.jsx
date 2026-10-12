@@ -142,7 +142,7 @@ export default function BrandsHero() {
                   {/* Image Container with Verified Badge */}
                   <div className="relative aspect-[4/5] rounded-xl overflow-hidden mb-3 bg-surface-muted">
                     <Image
-                      src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400"
+                      src="https://res.cloudinary.com/atr5osne/image/upload/v1791821908/creatorlink/public/avatars/avatar_female_editorial_aarohi.jpg"
                       alt="Camille Dupont"
                       fill
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -190,7 +190,7 @@ export default function BrandsHero() {
                   {/* Image Container with Available Next Week Badge */}
                   <div className="relative aspect-[4/5] rounded-xl overflow-hidden mb-3 bg-surface-muted">
                     <Image
-                      src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=400"
+                      src="https://res.cloudinary.com/atr5osne/image/upload/v1791821980/creatorlink/public/avatars/avatar_female_portrait_camille.jpg"
                       alt="Sora Lin"
                       fill
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -227,7 +227,7 @@ export default function BrandsHero() {
                   {/* Image Container */}
                   <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-3 bg-surface-muted">
                     <Image
-                      src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400"
+                      src="https://res.cloudinary.com/atr5osne/image/upload/v1791821988/creatorlink/public/avatars/avatar_male_portrait_marcus.jpg"
                       alt="Marcus Vance"
                       fill
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -253,7 +253,7 @@ export default function BrandsHero() {
                   {/* Image Container with Engagement Pill */}
                   <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-3 bg-surface-muted">
                     <Image
-                      src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=400"
+                      src="https://res.cloudinary.com/atr5osne/image/upload/v1791821993/creatorlink/public/avatars/avatar_female_fashion_sora.jpg"
                       alt="Elena Rostova"
                       fill
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"

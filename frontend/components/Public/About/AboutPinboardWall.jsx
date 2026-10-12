@@ -11,7 +11,7 @@ const CARDS_DATA = [
     label: 'CREATOR PIN',
     title: '@elena.sound',
     rightMeta: '15m audio',
-    image: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=800&q=80',
+    image: 'https://res.cloudinary.com/atr5osne/image/upload/v1791822065/creatorlink/public/editorial/editorial_soundwave_audio.jpg',
     isBw: true,
   },
   {
@@ -21,7 +21,7 @@ const CARDS_DATA = [
     label: 'BRAND STILL',
     title: 'Aura Botanicals',
     rightBadge: 'VERIFIED',
-    image: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=600&q=80',
+    image: 'https://res.cloudinary.com/atr5osne/image/upload/v1791822025/creatorlink/public/campaigns/campaign_water_radiance_cosmetics.jpg',
   },
   {
     id: 3,
@@ -30,7 +30,7 @@ const CARDS_DATA = [
     label: 'COLLABORATION',
     title: 'Maison × Clara',
     rightMeta: 'season release',
-    image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=600&q=80',
+    image: 'https://res.cloudinary.com/atr5osne/image/upload/v1791822069/creatorlink/public/editorial/editorial_luxury_shopping_fashion.jpg',
   },
   {
     id: 4,
@@ -39,7 +39,7 @@ const CARDS_DATA = [
     label: 'CONTENT',
     title: 'Spatial Forms',
     rightMeta: 'ARCHIVE',
-    image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80',
+    image: 'https://res.cloudinary.com/atr5osne/image/upload/v1791822023/creatorlink/public/editorial/editorial_luxury_villa_interior.jpg',
   },
   {
     id: 5,
@@ -48,7 +48,7 @@ const CARDS_DATA = [
     label: 'CONTENT BOARD',
     title: 'Tableau Studio',
     rightMeta: '4.8k saves',
-    image: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&q=80',
+    image: 'https://res.cloudinary.com/atr5osne/image/upload/v1791821998/creatorlink/public/editorial/editorial_creator_filming_beauty.jpg',
   },
   {
     id: 6,
@@ -57,7 +57,7 @@ const CARDS_DATA = [
     label: 'CREATOR BOARD',
     title: 'Nordic Journal',
     rightMeta: '6.2k saves',
-    image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80',
+    image: 'https://res.cloudinary.com/atr5osne/image/upload/v1791822076/creatorlink/public/editorial/editorial_travel_mountain_valley.jpg',
   },
   {
     id: 7,
@@ -66,7 +66,7 @@ const CARDS_DATA = [
     label: 'GUILD REVIEW',
     title: 'Contact Sheet N° 09',
     rightStatusDot: true,
-    image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=600&q=80',
+    image: 'https://res.cloudinary.com/atr5osne/image/upload/v1791822326/creatorlink/public/editorial/editorial_collaboration_team_studio.jpg',
   },
   {
     id: 8,
@@ -75,7 +75,7 @@ const CARDS_DATA = [
     label: 'STUDIO ARCHIVE',
     title: 'Set 04 / Paris',
     rightStatusDot: true,
-    image: 'https://images.unsplash.com/photo-1579632652768-6cb9dcf85912?auto=format&fit=crop&w=600&q=80',
+    image: 'https://res.cloudinary.com/atr5osne/image/upload/v1791822005/creatorlink/public/editorial/editorial_abstract_sand_texture.jpg',
   },
 ];
 

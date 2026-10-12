@@ -118,7 +118,7 @@ export default function CreatorShowcase() {
                 border-secondary/20
               "
             >
-              <Image src="https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=300&q=85" alt="Maya creator" fill className="h-full w-full object-cover" sizes="33vw" />
+              <Image src="https://res.cloudinary.com/atr5osne/image/upload/v1791822058/creatorlink/public/creators/creator_streetwear_maya_thorne.jpg" alt="Maya creator" fill className="h-full w-full object-cover" sizes="33vw" />
             </div>
 
             {/* NAME + STATS */}
@@ -250,7 +250,7 @@ export default function CreatorShowcase() {
                 border-secondary/20
               "
             >
-              <Image src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=300&q=85" alt="Lucian creator" fill className="h-full w-full object-cover" sizes="33vw" />
+              <Image src="https://res.cloudinary.com/atr5osne/image/upload/v1791822008/creatorlink/public/creators/creator_fashion_lucian_moreau.jpg" alt="Lucian creator" fill className="h-full w-full object-cover" sizes="33vw" />
             </div>
 
             {/* NAME + STATS */}
@@ -427,7 +427,7 @@ export default function CreatorShowcase() {
             "
           >
             <div className="relative h-[235px] overflow-hidden rounded-[19px]">
-              <Image src="https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=700&q=85" alt="Maya creator" fill className="h-full w-full object-cover transition-transform duration-700 hover:scale-105" sizes="50vw" />
+              <Image src="https://res.cloudinary.com/atr5osne/image/upload/v1791822058/creatorlink/public/creators/creator_streetwear_maya_thorne.jpg" alt="Maya creator" fill className="h-full w-full object-cover transition-transform duration-700 hover:scale-105" sizes="50vw" />
 
               <div className="absolute right-3 top-3 rounded-full bg-white/95 px-3 py-1 text-[11px] font-semibold text-[#333]">
                 <span className="mr-1 text-secondary">●</span>
@@ -478,7 +478,7 @@ export default function CreatorShowcase() {
             "
           >
             <div className="relative h-[235px] overflow-hidden rounded-[19px]">
-              <Image src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=700&q=85" alt="Lucian creator" fill className="h-full w-full object-cover transition-transform duration-700 hover:scale-105" sizes="50vw" />
+              <Image src="https://res.cloudinary.com/atr5osne/image/upload/v1791822008/creatorlink/public/creators/creator_fashion_lucian_moreau.jpg" alt="Lucian creator" fill className="h-full w-full object-cover transition-transform duration-700 hover:scale-105" sizes="50vw" />
 
               <div className="absolute right-3 top-3 rounded-full bg-white/95 px-3 py-1 text-[11px] font-semibold text-[#333]">
                 <span className="mr-1 text-secondary">●</span>
@@ -567,7 +567,7 @@ export default function CreatorShowcase() {
             "
           >
             <div className="relative h-[190px] overflow-hidden rounded-[18px]">
-              <Image src="https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&w=700&q=85" alt="Clara creator" fill className="h-full w-full object-cover transition-transform duration-700 hover:scale-105" sizes="50vw" />
+              <Image src="https://res.cloudinary.com/atr5osne/image/upload/v1791822177/creatorlink/public/creators/creator_workspace_clara_vane.jpg" alt="Clara creator" fill className="h-full w-full object-cover transition-transform duration-700 hover:scale-105" sizes="50vw" />
 
               <div className="absolute bottom-3 left-3 rounded-full bg-[#222]/80 px-3 py-1 text-[10px] font-medium text-white">
                 ▶ TikTok Motion
@@ -613,7 +613,7 @@ export default function CreatorShowcase() {
             "
           >
             <div className="relative h-[190px] overflow-hidden rounded-[18px]">
-              <Image src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=700&q=85" alt="Sora creator" fill className="h-full w-full object-cover transition-transform duration-700 hover:scale-105" sizes="50vw" />
+              <Image src="https://res.cloudinary.com/atr5osne/image/upload/v1791822180/creatorlink/public/editorial/editorial_architectural_interior_sora.jpg" alt="Sora creator" fill className="h-full w-full object-cover transition-transform duration-700 hover:scale-105" sizes="50vw" />
 
               <div className="absolute bottom-3 left-3 rounded-full bg-secondary px-3 py-1 text-[10px] font-medium text-white">
                 Architectural Travel

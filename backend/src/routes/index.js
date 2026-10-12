@@ -27,6 +27,8 @@ import {
     creatorReviewRouter,
     brandReviewRouter
 } from "../modules/reviews/reviews.route.js";
+import brandCreatorsRouter from "../modules/brand/creators/creators.route.js";
+import uploadRoutes from "../modules/upload/upload.route.js";
 
 const router = Router();
 
@@ -47,10 +49,14 @@ router.use("/creator/reviews", creatorReviewRouter);
 // Brand routes.
 router.use("/brand/profile", brandProfileRoutes);
 router.use("/brand/campaigns", campaignRoutes);
+router.use("/brand/creators", brandCreatorsRouter);
 router.use("/brand/bookings", brandBookingRouter);
 router.use("/brand/workspace", brandWorkspaceRouter);
 router.use("/brand/messages", brandMessagesRouter);
 router.use("/brand/payments", brandPaymentRouter);
 router.use("/brand/reviews", brandReviewRouter);
+
+// Upload routes.
+router.use("/upload", uploadRoutes);
 
 export default router;

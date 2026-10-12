@@ -5,9 +5,11 @@ import authorizeRoles from "../../middleware/role.middleware.js";
 
 import {
     createBooking,
+    createBrandBooking,
     getCreatorBookings,
     getCreatorBookingById,
     cancelCreatorBooking,
+    updateCreatorBookingStatus,
     getBrandBookings,
     getBrandBookingById,
     updateBrandBookingStatus
@@ -15,7 +17,9 @@ import {
 
 import {
     validateCreateBooking,
+    validateCreateBrandBooking,
     validateUpdateBookingStatus,
+    validateCreatorUpdateBookingStatus,
     validateGetBookingsQuery
 } from "./booking.validation.js";
 
@@ -56,6 +60,13 @@ creatorBookingRouter.patch(
     cancelCreatorBooking
 );
 
+// Creator accepts or rejects a brand-initiated booking proposal.
+creatorBookingRouter.patch(
+    "/:id/status",
+    validateCreatorUpdateBookingStatus,
+    updateCreatorBookingStatus
+);
+
 
 // =========================================================
 // BRAND BOOKING ROUTER
@@ -65,6 +76,13 @@ const brandBookingRouter = express.Router();
 brandBookingRouter.use(
     authenticateUser,
     authorizeRoles("brand")
+);
+
+// Brand submits a direct booking / hire proposal for a creator service.
+brandBookingRouter.post(
+    "/",
+    validateCreateBrandBooking,
+    createBrandBooking
 );
 
 // Brand fetches list of received bookings/applications.
@@ -92,3 +110,4 @@ export {
     creatorBookingRouter,
     brandBookingRouter
 };
+

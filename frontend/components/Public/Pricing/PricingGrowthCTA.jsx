@@ -9,22 +9,22 @@ export default function PricingGrowthCTA() {
     {
       id: 1,
       name: "Aarohi Mehta",
-      src: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80",
+      src: "https://res.cloudinary.com/atr5osne/image/upload/v1791821908/creatorlink/public/avatars/avatar_female_editorial_aarohi.jpg",
     },
     {
       id: 2,
       name: "Marcus Chen",
-      src: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80",
+      src: "https://res.cloudinary.com/atr5osne/image/upload/v1791821988/creatorlink/public/avatars/avatar_male_portrait_marcus.jpg",
     },
     {
       id: 3,
       name: "Camille Dupont",
-      src: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=120&q=80",
+      src: "https://res.cloudinary.com/atr5osne/image/upload/v1791821980/creatorlink/public/avatars/avatar_female_portrait_camille.jpg",
     },
     {
       id: 4,
       name: "Sora Lin",
-      src: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=120&q=80",
+      src: "https://res.cloudinary.com/atr5osne/image/upload/v1791821993/creatorlink/public/avatars/avatar_female_fashion_sora.jpg",
     },
   ];
 

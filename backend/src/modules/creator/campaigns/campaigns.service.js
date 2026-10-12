@@ -26,6 +26,7 @@ const formatAppliedCampaignItem = (b) => {
         startDate: b.startDate,
         deadline: b.deadline,
         createdAt: b.createdAt,
+        initiatedBy: b.initiatedBy || "creator",
         campaign: b.campaign ? {
             _id: b.campaign._id,
             title: b.campaign.title,

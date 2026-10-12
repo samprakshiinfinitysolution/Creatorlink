@@ -9,7 +9,8 @@ import {
     getAppliedCampaigns,
     getAppliedCampaignById,
     applyToCampaign as applyToCampaignApi,
-    cancelBooking as cancelBookingApi
+    cancelBooking as cancelBookingApi,
+    updateCreatorBookingStatus as updateCreatorBookingStatusApi
 } from "./campaigns_api";
 
 import {
@@ -133,6 +134,26 @@ const cancelCampaignBooking = createAsyncThunk(
             return rejectWithValue(
                 error.response?.data?.message ||
                 "Booking cancellation failed"
+            );
+        }
+    }
+);
+
+
+// Handles updating creator booking status ("accepted" or "rejected").
+const updateCreatorBookingStatus = createAsyncThunk(
+    "creatorCampaigns/updateCreatorBookingStatus",
+    async ({ bookingId, status }, { rejectWithValue }) => {
+
+        try {
+
+            return await updateCreatorBookingStatusApi(bookingId, status);
+
+        } catch (error) {
+
+            return rejectWithValue(
+                error.response?.data?.message ||
+                "Unable to update booking status"
             );
         }
     }
@@ -355,6 +376,50 @@ const creatorCampaignsSlice = createSlice({
             })
 
 
+            // Update Creator Booking Status started.
+            .addCase(updateCreatorBookingStatus.pending, (state) => {
+
+                state.submitting = true;
+                state.error = null;
+                state.successMessage = null;
+            })
+
+            // Update Creator Booking Status successful.
+            .addCase(updateCreatorBookingStatus.fulfilled, (state, action) => {
+
+                state.submitting = false;
+                state.successMessage = action.payload?.message || "Booking status updated successfully";
+
+                const updatedBooking = action.payload?.data;
+
+                if (updatedBooking) {
+                    const index = state.appliedCampaigns.findIndex(
+                        (item) => item._id === updatedBooking._id || item.bookingId === updatedBooking._id
+                    );
+
+                    if (index !== -1) {
+                        state.appliedCampaigns[index].status = updatedBooking.status;
+                    }
+
+                    if (
+                        state.selectedAppliedCampaign?._id === updatedBooking._id ||
+                        state.selectedAppliedCampaign?.bookingId === updatedBooking._id
+                    ) {
+                        state.selectedAppliedCampaign.status = updatedBooking.status;
+                    }
+                }
+
+                state.error = null;
+            })
+
+            // Update Creator Booking Status failed.
+            .addCase(updateCreatorBookingStatus.rejected, (state, action) => {
+
+                state.submitting = false;
+                state.error = action.payload;
+            })
+
+
             // Clear state on auth events.
             .addCase(login.fulfilled, (state) => {
 
@@ -415,7 +480,8 @@ export {
     fetchAppliedCampaigns,
     fetchAppliedCampaignById,
     applyToCampaign,
-    cancelCampaignBooking
+    cancelCampaignBooking,
+    updateCreatorBookingStatus
 };
 
 

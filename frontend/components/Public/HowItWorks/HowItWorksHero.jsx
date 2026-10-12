@@ -121,7 +121,7 @@ export default function HowItWorksHero() {
 
               {/* Main Image Container */}
               <div className="relative w-full h-[400px] sm:h-[460px] lg:h-[480px] rounded-[32px] sm:rounded-[36px] overflow-hidden bg-slate-100 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 shadow-xl group ml-auto">
-                <Image src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1000&q=80" alt="Glow Botanical Mist Campaign" fill className="w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-500 ease-out" sizes="(max-width: 768px) 100vw, 50vw" />
+                <Image src="https://res.cloudinary.com/atr5osne/image/upload/v1791821908/creatorlink/public/avatars/avatar_female_editorial_aarohi.jpg" alt="Glow Botanical Mist Campaign" fill className="w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-500 ease-out" sizes="(max-width: 768px) 100vw, 50vw" />
 
                 {/* Subtle bottom gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-transparent pointer-events-none" />

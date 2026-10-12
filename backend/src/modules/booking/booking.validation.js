@@ -171,8 +171,118 @@ const validateGetBookingsQuery = (req, res, next) => {
 };
 
 
+// Validates booking / proposal creation data from brand.
+const validateCreateBrandBooking = (req, res, next) => {
+
+    const {
+        creatorId,
+        serviceId,
+        campaignId,
+        proposedPrice,
+        message
+    } = req.body;
+
+
+    // Check required IDs
+    if (!creatorId || !serviceId || !campaignId) {
+        throw createApiError(
+            400,
+            "creatorId, serviceId, and campaignId are required"
+        );
+    }
+
+
+    // Validate creatorId
+    if (!mongoose.Types.ObjectId.isValid(creatorId)) {
+        throw createApiError(
+            400,
+            "Invalid creatorId"
+        );
+    }
+
+
+    // Validate serviceId
+    if (!mongoose.Types.ObjectId.isValid(serviceId)) {
+        throw createApiError(
+            400,
+            "Invalid serviceId"
+        );
+    }
+
+
+    // Validate campaignId
+    if (!mongoose.Types.ObjectId.isValid(campaignId)) {
+        throw createApiError(
+            400,
+            "Invalid campaignId"
+        );
+    }
+
+
+    // Validate proposedPrice if provided
+    if (proposedPrice !== undefined && proposedPrice !== null && proposedPrice !== "") {
+        const parsedPrice = Number(proposedPrice);
+        if (!Number.isFinite(parsedPrice) || parsedPrice < 0) {
+            throw createApiError(
+                400,
+                "Proposed price must be a non-negative number"
+            );
+        }
+    }
+
+
+    // Validate message if provided
+    if (
+        message !== undefined &&
+        (typeof message !== "string" || message.length > 2000)
+    ) {
+        throw createApiError(
+            400,
+            "Message must be a string with maximum 2000 characters"
+        );
+    }
+
+
+    next();
+};
+
+
+// Validates creator status update data for brand-initiated booking proposals.
+const creatorAllowedStatuses = [
+    "accepted",
+    "rejected"
+];
+
+const validateCreatorUpdateBookingStatus = (req, res, next) => {
+
+    const { status } = req.body;
+
+
+    if (!status) {
+        throw createApiError(
+            400,
+            "Status is required"
+        );
+    }
+
+
+    if (!creatorAllowedStatuses.includes(status)) {
+        throw createApiError(
+            400,
+            `Invalid status update. Allowed values: ${creatorAllowedStatuses.join(", ")}`
+        );
+    }
+
+
+    next();
+};
+
+
 export {
     validateCreateBooking,
+    validateCreateBrandBooking,
     validateUpdateBookingStatus,
+    validateCreatorUpdateBookingStatus,
     validateGetBookingsQuery
 };
+

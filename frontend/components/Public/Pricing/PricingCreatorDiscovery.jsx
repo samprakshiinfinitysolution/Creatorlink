@@ -18,7 +18,7 @@ export default function PricingCreatorDiscovery() {
       engagement: "6.8%",
       avgViews: "42K",
       buttonLabel: "View Media Kit",
-      image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80",
+      image: "https://res.cloudinary.com/atr5osne/image/upload/v1791821908/creatorlink/public/avatars/avatar_female_editorial_aarohi.jpg",
     },
     {
       id: "camille",
@@ -30,7 +30,7 @@ export default function PricingCreatorDiscovery() {
       engagement: "8.2%",
       avgViews: "61K",
       buttonLabel: "Send Invitation",
-      image: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=600&q=80",
+      image: "https://res.cloudinary.com/atr5osne/image/upload/v1791822045/creatorlink/public/creators/creator_fashion_chloe_bennett.jpg",
     },
     {
       id: "sora",
@@ -42,7 +42,7 @@ export default function PricingCreatorDiscovery() {
       engagement: "5.4%",
       avgViews: "94K",
       buttonLabel: "View Media Kit",
-      image: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=600&q=80",
+      image: "https://res.cloudinary.com/atr5osne/image/upload/v1791821993/creatorlink/public/avatars/avatar_female_fashion_sora.jpg",
     },
   ];
 

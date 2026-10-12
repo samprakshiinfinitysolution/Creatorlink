@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getCreatorProfile,
@@ -9,6 +9,7 @@ import {
 } from "@/redux/creator/profile/profile_slice";
 import CreatorSidebar from "@/components/creator/dashboard/CreatorSidebar";
 import CreatorHeader from "@/components/creator/dashboard/CreatorHeader";
+import { uploadSingleImageApi } from "@/lib/upload";
 
 // =========================================================
 // SVG ICONS (Lean & Clean)
@@ -136,6 +137,10 @@ export default function CreatorProfile() {
   const [formData, setFormData] = useState(defaultFormValues);
   const [successToast, setSuccessToast] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+
+  const fileInputRef = useRef(null);
 
   // Fetch profile on initial component mount
   useEffect(() => {
@@ -145,6 +150,7 @@ export default function CreatorProfile() {
   // Sync local form state whenever profile loaded from Redux
   useEffect(() => {
     if (profile) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({
         bio: profile.bio || "",
         category: profile.category || "Fashion & Luxury",
@@ -189,6 +195,72 @@ export default function CreatorProfile() {
 
   const handleToggleVisibility = () => {
     setFormData((prev) => ({ ...prev, isPublic: !prev.isPublic }));
+  };
+
+  // Handle image file selection & Cloudinary upload
+  const handleFileSelect = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Reset input so re-selecting the same file triggers change
+    e.target.value = "";
+
+    const allowedMimeTypes = ["image/jpeg", "image/png", "image/webp"];
+    const maxSizeBytes = 5 * 1024 * 1024; // 5 MB
+
+    if (!allowedMimeTypes.includes(file.type)) {
+      setUploadError("Please select a valid image file (JPEG, PNG, or WEBP).");
+      return;
+    }
+
+    if (file.size > maxSizeBytes) {
+      setUploadError("Image size exceeds the 5 MB limit. Please select a smaller file.");
+      return;
+    }
+
+    try {
+      setUploadingImage(true);
+      setUploadError("");
+
+      const response = await uploadSingleImageApi(file, "creatorlink/profiles");
+      const imageUrl = response?.data?.url || response?.url;
+
+      if (!imageUrl) {
+        throw new Error("Upload succeeded, but no image URL was returned.");
+      }
+
+      setFormData((prev) => ({
+        ...prev,
+        profileImage: imageUrl,
+      }));
+
+      // Persist only profileImage if an existing profile is already loaded
+      if (profile) {
+        const persistAction = await dispatch(
+          updateCreatorProfile({ profileImage: imageUrl })
+        );
+
+        if (persistAction?.error) {
+          throw new Error(
+            persistAction.payload || "Image uploaded, but failed to save to profile."
+          );
+        }
+
+        setSuccessToast(true);
+        setTimeout(() => setSuccessToast(false), 3000);
+      } else {
+        // For new profiles, keep in form state until the full profile is submitted
+        setIsEditing(true);
+      }
+    } catch (err) {
+      const message =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Failed to upload profile image. Please try again.";
+      setUploadError(message);
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   // Save changes via Redux (Update if profile exists, Create if not)
@@ -247,6 +319,7 @@ export default function CreatorProfile() {
     } else {
       setFormData(defaultFormValues);
     }
+    setUploadError("");
     setIsEditing(false);
   };
 
@@ -300,6 +373,21 @@ export default function CreatorProfile() {
             </div>
           )}
 
+          {/* Upload Error Banner */}
+          {uploadError && (
+            <div className="bg-red-500/10 border border-red-500/30 text-red-500 px-4 py-3 rounded-xl flex items-center justify-between text-xs font-medium animate-in fade-in slide-in-from-top-2 duration-200">
+              <span>{uploadError}</span>
+              <button
+                type="button"
+                onClick={() => setUploadError("")}
+                className="text-red-500/70 hover:text-red-500 text-xs font-bold cursor-pointer ml-2"
+                aria-label="Dismiss error"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
           {/* 1. PAGE HEADER */}
           <div className="bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
@@ -350,9 +438,17 @@ export default function CreatorProfile() {
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-5 w-full md:w-auto">
                 {/* LEFT: Profile Avatar Image */}
                 <div className="relative shrink-0">
-                  <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-surface border-4 border-surface shadow-sm flex items-center justify-center overflow-hidden">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                  />
+                  <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-surface border-4 border-surface shadow-sm flex items-center justify-center overflow-hidden relative">
                     {profile?.profileImage || formData.profileImage ? (
                       <img
+                        key={formData.profileImage || profile?.profileImage || "avatar"}
                         src={formData.profileImage || profile.profileImage}
                         alt={displayName}
                         className="w-full h-full object-cover"
@@ -366,12 +462,43 @@ export default function CreatorProfile() {
                         {initials}
                       </div>
                     )}
+                    {uploadingImage && (
+                      <div className="absolute inset-0 bg-background/80 backdrop-blur-xs flex flex-col items-center justify-center z-10 text-foreground">
+                        <svg
+                          className="animate-spin h-6 w-6 text-secondary mb-1"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                          />
+                        </svg>
+                        <span className="text-[10px] font-semibold">Uploading...</span>
+                      </div>
+                    )}
                   </div>
                   <button
                     type="button"
                     title="Change Profile Picture"
-                    onClick={() => setIsEditing(true)}
-                    className="absolute bottom-0 right-0 p-1.5 rounded-lg bg-surface border border-border-theme text-text-secondary hover:text-foreground hover:bg-surface-muted shadow-xs transition-colors cursor-pointer"
+                    disabled={uploadingImage}
+                    onClick={() => {
+                      setIsEditing(true);
+                      fileInputRef.current?.click();
+                    }}
+                    className={`absolute bottom-0 right-0 p-1.5 rounded-lg bg-surface border border-border-theme text-text-secondary hover:text-foreground hover:bg-surface-muted shadow-xs transition-colors cursor-pointer ${
+                      uploadingImage ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                   >
                     <CameraIcon className="w-3.5 h-3.5" />
                   </button>
@@ -531,9 +658,19 @@ export default function CreatorProfile() {
 
                     {/* Profile Image URL */}
                     <div>
-                      <label className="block font-semibold text-foreground mb-1.5">
-                        Profile Image URL
-                      </label>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="block font-semibold text-foreground">
+                          Profile Image URL
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={uploadingImage}
+                          className="text-[11px] text-secondary font-semibold hover:underline cursor-pointer disabled:opacity-50"
+                        >
+                          {uploadingImage ? "Uploading..." : "Upload from computer"}
+                        </button>
+                      </div>
                       <input
                         type="url"
                         name="profileImage"
@@ -785,11 +922,19 @@ export default function CreatorProfile() {
                 <div className="flex flex-col gap-2 pt-2">
                   <button
                     type="submit"
-                    disabled={submitting}
+                    disabled={submitting || uploadingImage}
                     className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-secondary hover:bg-secondary-dark text-white text-xs font-semibold tracking-wide transition-all shadow-xs cursor-pointer disabled:opacity-50"
                   >
                     <CheckIcon className="w-4 h-4" />
-                    <span>{submitting ? "Saving..." : profile ? "Save Changes" : "Create Profile"}</span>
+                    <span>
+                      {submitting
+                        ? "Saving..."
+                        : uploadingImage
+                        ? "Uploading Image..."
+                        : profile
+                        ? "Save Changes"
+                        : "Create Profile"}
+                    </span>
                   </button>
 
                   <button

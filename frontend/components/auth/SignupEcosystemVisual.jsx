@@ -14,7 +14,7 @@ const ECOSYSTEM_NODES = [
     type: "Luxury House",
     badge: "Paris",
     image:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200",
+      "https://res.cloudinary.com/atr5osne/image/upload/v1791821988/creatorlink/public/avatars/avatar_male_portrait_marcus.jpg",
     initials: "JQ",
     position: "top-[10%] left-[15%]",
     floatDelay: "0s",
@@ -25,7 +25,7 @@ const ECOSYSTEM_NODES = [
     type: "Couture Stylist",
     badge: "Milan • 480K",
     image:
-      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200",
+      "https://res.cloudinary.com/atr5osne/image/upload/v1791821908/creatorlink/public/avatars/avatar_female_editorial_aarohi.jpg",
     initials: "SL",
     position: "top-[16%] right-[12%]",
     floatDelay: "1.2s",
@@ -36,7 +36,7 @@ const ECOSYSTEM_NODES = [
     type: "Fragrance House",
     badge: "Stockholm",
     image:
-      "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=200",
+      "https://res.cloudinary.com/atr5osne/image/upload/v1791822028/creatorlink/public/avatars/avatar_male_lifestyle_ethan.jpg",
     initials: "BH",
     position: "top-[44%] left-[6%]",
     floatDelay: "2.1s",
@@ -47,7 +47,7 @@ const ECOSYSTEM_NODES = [
     type: "Beauty Brand",
     badge: "New York",
     image:
-      "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=200",
+      "https://res.cloudinary.com/atr5osne/image/upload/v1791821993/creatorlink/public/avatars/avatar_female_fashion_sora.jpg",
     initials: "GA",
     position: "top-[48%] right-[8%]",
     floatDelay: "0.8s",
@@ -58,7 +58,7 @@ const ECOSYSTEM_NODES = [
     type: "Growth Lead",
     badge: "Aura Parfums",
     image:
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200",
+      "https://res.cloudinary.com/atr5osne/image/upload/v1791822016/creatorlink/public/avatars/avatar_male_professional_david.jpg",
     initials: "DK",
     position: "bottom-[22%] left-[20%]",
     floatDelay: "1.7s",
@@ -69,7 +69,7 @@ const ECOSYSTEM_NODES = [
     type: "Fashion House",
     badge: "Paris",
     image:
-      "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=200",
+      "https://res.cloudinary.com/atr5osne/image/upload/v1791821980/creatorlink/public/avatars/avatar_female_portrait_camille.jpg",
     initials: "BM",
     position: "bottom-[26%] right-[18%]",
     floatDelay: "2.8s",

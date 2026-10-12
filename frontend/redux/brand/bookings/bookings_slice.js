@@ -6,7 +6,8 @@ import {
 import {
     getBrandBookings as getBrandBookingsApi,
     getBrandBookingById as getBrandBookingByIdApi,
-    updateBrandBookingStatus as updateBrandBookingStatusApi
+    updateBrandBookingStatus as updateBrandBookingStatusApi,
+    createBrandBooking as createBrandBookingApi
 } from "./bookings_api";
 
 import {
@@ -84,6 +85,26 @@ const updateBrandBookingStatus = createAsyncThunk(
             return rejectWithValue(
                 error.response?.data?.message ||
                 "Unable to update booking status"
+            );
+        }
+    }
+);
+
+
+// Handles creating a brand booking proposal.
+const createBrandBooking = createAsyncThunk(
+    "brandBookings/createBrandBooking",
+    async (bookingData, { rejectWithValue }) => {
+
+        try {
+
+            return await createBrandBookingApi(bookingData);
+
+        } catch (error) {
+
+            return rejectWithValue(
+                error.response?.data?.message ||
+                "Unable to submit booking proposal"
             );
         }
     }
@@ -220,6 +241,30 @@ const bookingsSlice = createSlice({
             })
 
 
+            // Create Brand Booking started.
+            .addCase(createBrandBooking.pending, (state) => {
+
+                state.submitting = true;
+                state.error = null;
+                state.successMessage = null;
+            })
+
+            // Create Brand Booking successful.
+            .addCase(createBrandBooking.fulfilled, (state, action) => {
+
+                state.submitting = false;
+                state.successMessage = action.payload?.message || "Booking proposal submitted successfully";
+                state.error = null;
+            })
+
+            // Create Brand Booking failed.
+            .addCase(createBrandBooking.rejected, (state, action) => {
+
+                state.submitting = false;
+                state.error = action.payload;
+            })
+
+
             // Clear state on auth events.
             .addCase(login.fulfilled, (state) => {
 
@@ -267,7 +312,8 @@ export const {
 export {
     fetchBrandBookings,
     fetchBrandBookingById,
-    updateBrandBookingStatus
+    updateBrandBookingStatus,
+    createBrandBooking
 };
 
 

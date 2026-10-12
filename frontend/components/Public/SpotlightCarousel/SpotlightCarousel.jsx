@@ -12,9 +12,9 @@ const SPOTLIGHT_CASES = [
     creatorName: "Seraphina Raw",
     handle: "@seraphinaraw",
     image:
-      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=85",
+      "https://res.cloudinary.com/atr5osne/image/upload/v1791821908/creatorlink/public/avatars/avatar_female_editorial_aarohi.jpg",
     desktopImage:
-      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=85",
+      "https://res.cloudinary.com/atr5osne/image/upload/v1791822008/creatorlink/public/creators/creator_fashion_lucian_moreau.jpg",
     collaboratedWith: "Collaborated with Jacquemus",
     collabShort: "Collab with Jacquemus",
     title: "Summer Solstice Campaign",
@@ -28,9 +28,9 @@ const SPOTLIGHT_CASES = [
     creatorName: "Julian Sound",
     handle: "@juliansound",
     image:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=85",
+      "https://res.cloudinary.com/atr5osne/image/upload/v1791821988/creatorlink/public/avatars/avatar_male_portrait_marcus.jpg",
     desktopImage:
-      "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=85",
+      "https://res.cloudinary.com/atr5osne/image/upload/v1791822200/creatorlink/public/campaigns/campaign_premium_headphones_tech.jpg",
     collaboratedWith: "Collaborated with B&O Audio",
     collabShort: "Collab with B&O Audio",
     title: "Acoustic Minimalist Series",
@@ -44,9 +44,9 @@ const SPOTLIGHT_CASES = [
     creatorName: "Mara Hideaways",
     handle: "@marahideaways",
     image:
-      "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=85",
+      "https://res.cloudinary.com/atr5osne/image/upload/v1791821980/creatorlink/public/avatars/avatar_female_portrait_camille.jpg",
     desktopImage:
-      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=85",
+      "https://res.cloudinary.com/atr5osne/image/upload/v1791822053/creatorlink/public/editorial/editorial_travel_tropical_coast.jpg",
     collaboratedWith: "Collaborated with Aman Resorts",
     collabShort: "Collab with Aman Resorts",
     title: "Sanctuary Visual Essay",

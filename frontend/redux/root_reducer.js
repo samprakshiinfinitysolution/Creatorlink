@@ -18,6 +18,7 @@ import brandPaymentsReducer from "./brand/payments/payments_slice";
 import creatorPaymentsReducer from "./creator/payments/payments_slice";
 import creatorReviewsReducer from "./creator/reviews/reviews_slice";
 import brandReviewsReducer from "./brand/reviews/reviews_slice";
+import brandCreatorsReducer from "./brand/creators/creators_slice";
 
 
 const rootReducer = combineReducers({
@@ -37,7 +38,8 @@ const rootReducer = combineReducers({
     brandPayments: brandPaymentsReducer,
     creatorPayments: creatorPaymentsReducer,
     creatorReviews: creatorReviewsReducer,
-    brandReviews: brandReviewsReducer
+    brandReviews: brandReviewsReducer,
+    brandCreators: brandCreatorsReducer
 
 });
 

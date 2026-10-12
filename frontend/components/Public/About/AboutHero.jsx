@@ -117,7 +117,7 @@ export default function AboutHero() {
               {/* Creator Image */}
               <div className="relative rounded-xl overflow-hidden aspect-[4/5] bg-surface-muted">
                 <Image
-                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80"
+                  src="https://res.cloudinary.com/atr5osne/image/upload/v1791821908/creatorlink/public/avatars/avatar_female_editorial_aarohi.jpg"
                   alt="Aarohi M. Tokyo Studio"
                   fill
                   className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
@@ -184,7 +184,7 @@ export default function AboutHero() {
                 {/* Left Tile (Luxury Skincare / Beauty Campaign) */}
                 <div className="relative rounded-2xl overflow-hidden aspect-[4/3] bg-surface-muted group/tile">
                   <Image
-                    src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&q=80"
+                    src="https://res.cloudinary.com/atr5osne/image/upload/v1791821998/creatorlink/public/editorial/editorial_creator_filming_beauty.jpg"
                     alt="Brand Campaign Still"
                     fill
                     className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover/tile:scale-105"
@@ -198,7 +198,7 @@ export default function AboutHero() {
                 {/* Right Tile (Luxury Architectural Interior View) */}
                 <div className="relative rounded-2xl overflow-hidden aspect-[4/3] bg-surface-muted group/tile">
                   <Image
-                    src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80"
+                    src="https://res.cloudinary.com/atr5osne/image/upload/v1791822023/creatorlink/public/editorial/editorial_luxury_villa_interior.jpg"
                     alt="Set Visual"
                     fill
                     className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover/tile:scale-105"
@@ -248,7 +248,7 @@ export default function AboutHero() {
               {/* Image Container */}
               <div className="relative rounded-xl overflow-hidden aspect-[4/3] bg-surface-muted mt-1">
                 <Image
-                  src="https://images.unsplash.com/photo-1579632652768-6cb9dcf85912?auto=format&fit=crop&w=600&q=80"
+                  src="https://res.cloudinary.com/atr5osne/image/upload/v1791822005/creatorlink/public/editorial/editorial_abstract_sand_texture.jpg"
                   alt="Paris Set 16mm"
                   fill
                   className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"

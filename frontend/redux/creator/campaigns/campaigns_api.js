@@ -74,11 +74,27 @@ const cancelBooking = async (bookingId) => {
 };
 
 
+// Updates creator booking status ("accepted" or "rejected") for a brand-initiated proposal.
+const updateCreatorBookingStatus = async (bookingId, status) => {
+
+    const response = await axiosInstance.patch(
+        `/creator/bookings/${bookingId}/status`,
+        {
+            status
+        }
+    );
+
+    return response.data;
+};
+
+
 export {
     getDiscoverCampaigns,
     getDiscoverCampaignById,
     getAppliedCampaigns,
     getAppliedCampaignById,
     applyToCampaign,
-    cancelBooking
+    cancelBooking,
+    updateCreatorBookingStatus
 };
+

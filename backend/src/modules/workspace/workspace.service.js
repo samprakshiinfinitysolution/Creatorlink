@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 import Workspace from "./workspace.model.js";
+import Review from "../reviews/reviews.model.js";
 import Conversation from "../messages/conversation.model.js";
 import createApiError from "../../utils/ApiError.js";
 import {
@@ -420,8 +421,39 @@ const getBrandWorkspacesService = async (
         Workspace.countDocuments(filter)
     ]);
 
+    // Lookup reviews submitted by this brand for any returned completed workspaces
+    const completedWorkspaceIds = workspaces
+        .filter((w) => w.status === "completed")
+        .map((w) => w._id);
+
+    const reviewMap = new Map();
+    if (completedWorkspaceIds.length > 0) {
+        const reviews = await Review.find({
+            workspace: { $in: completedWorkspaceIds },
+            reviewer: brandId
+        }).select("_id workspace rating comment createdAt");
+
+        reviews.forEach((r) => {
+            const wsKey = r.workspace ? r.workspace.toString() : null;
+            if (wsKey) {
+                reviewMap.set(wsKey, {
+                    _id: r._id,
+                    rating: r.rating,
+                    comment: r.comment,
+                    createdAt: r.createdAt
+                });
+            }
+        });
+    }
+
+    const workspacesWithReviews = workspaces.map((w) => {
+        const wsObj = w.toObject ? w.toObject() : { ...w };
+        wsObj.review = reviewMap.get(w._id.toString()) || null;
+        return wsObj;
+    });
+
     return {
-        workspaces,
+        workspaces: workspacesWithReviews,
         pagination: getPaginationData(
             currentPage,
             itemsPerPage,
@@ -461,7 +493,26 @@ const getBrandWorkspaceByIdService = async (
         );
     }
 
-    return workspace;
+    const wsObj = workspace.toObject ? workspace.toObject() : { ...workspace };
+    if (wsObj.status === "completed") {
+        const review = await Review.findOne({
+            workspace: wsObj._id,
+            reviewer: brandId
+        }).select("_id workspace rating comment createdAt");
+
+        wsObj.review = review
+            ? {
+                _id: review._id,
+                rating: review.rating,
+                comment: review.comment,
+                createdAt: review.createdAt
+            }
+            : null;
+    } else {
+        wsObj.review = null;
+    }
+
+    return wsObj;
 };
 
 // Reviews a specific deliverable in workspace by brand.

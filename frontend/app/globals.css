@@ -153,3 +153,17 @@ body {
 .dark section p {
   color: #d0d0d0;
 }
+
+/* =========================
+   SCROLLBAR UTILITIES
+========================= */
+
+/* Hide scrollbar while maintaining scrollability */
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}

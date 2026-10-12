@@ -10,17 +10,19 @@ function BrandMessagesContent() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex">
+    <div className="h-screen bg-background text-foreground flex overflow-hidden">
       {/* Brand Sidebar */}
       <BrandSidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 lg:pl-64">
+      <div className="flex-1 flex flex-col min-w-0 lg:pl-64 h-full min-h-0 overflow-hidden">
         {/* Brand Top Header */}
-        <BrandHeader setMobileOpen={setMobileOpen} />
+        <div className="shrink-0">
+          <BrandHeader setMobileOpen={setMobileOpen} />
+        </div>
 
         {/* Page Content Container */}
-        <main className="flex-1 p-4 lg:p-6 overflow-hidden flex flex-col">
+        <main className="flex-1 p-3 sm:p-4 lg:p-6 overflow-hidden flex flex-col min-h-0">
           <Suspense fallback={<div className="p-8 text-center text-xs text-text-secondary">Loading messages...</div>}>
             <BrandMessages />
           </Suspense>

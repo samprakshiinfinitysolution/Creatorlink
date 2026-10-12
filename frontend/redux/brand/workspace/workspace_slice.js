@@ -15,6 +15,10 @@ import {
     logout,
     clearAuth
 } from "../../auth/auth_slice";
+import {
+    submitBrandReviewThunk,
+    fetchBrandWorkspaceReview
+} from "../reviews/reviews_slice";
 
 
 // Handles fetching brand workspaces list.
@@ -267,6 +271,51 @@ const brandWorkspaceSlice = createSlice({
                 state.error = action.payload;
             })
 
+            // Synchronize creator review updates when brand submits a review
+            .addCase(submitBrandReviewThunk.fulfilled, (state, action) => {
+                const submittedWsId = action.meta.arg?.workspaceId
+                    ? String(action.meta.arg.workspaceId)
+                    : null;
+                const reviewData = action.payload?.data;
+
+                if (submittedWsId && reviewData) {
+                    const workspaceItem = state.workspaces.find(
+                        (w) => String(w._id) === submittedWsId
+                    );
+                    if (workspaceItem) {
+                        workspaceItem.review = reviewData;
+                    }
+                    if (
+                        state.selectedWorkspace &&
+                        String(state.selectedWorkspace._id) === submittedWsId
+                    ) {
+                        state.selectedWorkspace.review = reviewData;
+                    }
+                }
+            })
+
+            // Synchronize creator review updates when brand workspace review is fetched
+            .addCase(fetchBrandWorkspaceReview.fulfilled, (state, action) => {
+                const requestedWorkspaceId = action.meta.arg
+                    ? String(action.meta.arg)
+                    : null;
+                const reviewData = action.payload?.data;
+
+                if (requestedWorkspaceId && reviewData) {
+                    const workspaceItem = state.workspaces.find(
+                        (w) => String(w._id) === requestedWorkspaceId
+                    );
+                    if (workspaceItem) {
+                        workspaceItem.review = reviewData;
+                    }
+                    if (
+                        state.selectedWorkspace &&
+                        String(state.selectedWorkspace._id) === requestedWorkspaceId
+                    ) {
+                        state.selectedWorkspace.review = reviewData;
+                    }
+                }
+            })
 
             // Clear state on auth events.
             .addCase(login.fulfilled, (state) => {

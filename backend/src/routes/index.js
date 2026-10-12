@@ -19,6 +19,14 @@ import {
     creatorMessagesRouter,
     brandMessagesRouter
 } from "../modules/messages/messages.route.js";
+import {
+    creatorPaymentRouter,
+    brandPaymentRouter
+} from "../modules/payments/payment.route.js";
+import {
+    creatorReviewRouter,
+    brandReviewRouter
+} from "../modules/reviews/reviews.route.js";
 
 const router = Router();
 
@@ -33,6 +41,8 @@ router.use("/creator/campaigns", creatorCampaignRoutes);
 router.use("/creator/bookings", creatorBookingRouter);
 router.use("/creator/workspace", creatorWorkspaceRouter);
 router.use("/creator/messages", creatorMessagesRouter);
+router.use("/creator/payments", creatorPaymentRouter);
+router.use("/creator/reviews", creatorReviewRouter);
 
 // Brand routes.
 router.use("/brand/profile", brandProfileRoutes);
@@ -40,5 +50,7 @@ router.use("/brand/campaigns", campaignRoutes);
 router.use("/brand/bookings", brandBookingRouter);
 router.use("/brand/workspace", brandWorkspaceRouter);
 router.use("/brand/messages", brandMessagesRouter);
+router.use("/brand/payments", brandPaymentRouter);
+router.use("/brand/reviews", brandReviewRouter);
 
 export default router;

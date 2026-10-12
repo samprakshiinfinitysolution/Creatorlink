@@ -195,13 +195,9 @@ export default function BrandMessages() {
   
   // Connect Socket.IO when the Brand Messages component mounts.
   useEffect(() => {
-      if (!socket.connected) {
-          socket.connect();
-      }
-
-      return () => {
-          socket.disconnect();
-      };
+    if (!socket.connected) {
+      socket.connect();
+    }
   }, []);
 
 
@@ -246,6 +242,7 @@ useEffect(() => {
 }, [selectedConversation?._id]);
 
   const isRefreshingSocketRef = useRef(false);
+  const authRetryCountRef = useRef(0);
 
   const selectedConversationRef = useRef(selectedConversation);
   useEffect(() => {
@@ -259,6 +256,10 @@ useEffect(() => {
 
   // Listen for incoming real-time socket messages, read receipts, and handle socket auth errors.
   useEffect(() => {
+    const handleConnectSuccess = () => {
+      authRetryCountRef.current = 0;
+    };
+
     const handleNewMessage = (payload) => {
       if (payload && payload.conversationId && payload.message) {
         dispatch(addNewBrandMessage(payload));
@@ -288,33 +289,45 @@ useEffect(() => {
 
     const handleConnectError = async (err) => {
       const errorMessage = err?.message || "";
-      console.error("Socket connection error:", errorMessage);
 
       const isAuthError =
         errorMessage === "Invalid or expired access token" ||
-        errorMessage === "Authentication required";
+        errorMessage === "Authentication required" ||
+        errorMessage === "Invalid or expired session";
 
-      if (isAuthError && !isRefreshingSocketRef.current) {
-        isRefreshingSocketRef.current = true;
-        try {
-          await dispatch(refreshToken()).unwrap();
-          if (!socket.connected) {
-            socket.connect();
-          }
-        } catch (refreshErr) {
-          console.error("Token refresh failed for Socket.IO:", refreshErr);
+      if (isAuthError) {
+        if (authRetryCountRef.current >= 3) {
+          console.error("Max socket authentication retry attempts reached. Disconnecting socket.");
           socket.disconnect();
-        } finally {
-          isRefreshingSocketRef.current = false;
+          return;
         }
+
+        if (!isRefreshingSocketRef.current) {
+          isRefreshingSocketRef.current = true;
+          authRetryCountRef.current += 1;
+          try {
+            await dispatch(refreshToken()).unwrap();
+            socket.disconnect();
+            socket.connect();
+          } catch (refreshErr) {
+            console.error("Token refresh failed for Socket.IO:", refreshErr);
+            socket.disconnect();
+          } finally {
+            isRefreshingSocketRef.current = false;
+          }
+        }
+      } else {
+        console.error("Socket connection error:", errorMessage);
       }
     };
 
+    socket.on("connect", handleConnectSuccess);
     socket.on("message:new", handleNewMessage);
     socket.on("conversation:read", handleConversationRead);
     socket.on("connect_error", handleConnectError);
 
     return () => {
+      socket.off("connect", handleConnectSuccess);
       socket.off("message:new", handleNewMessage);
       socket.off("conversation:read", handleConversationRead);
       socket.off("connect_error", handleConnectError);
@@ -431,7 +444,7 @@ useEffect(() => {
   const activeBookingPrice = formatCurrency(selectedConversation?.booking?.agreedPrice);
 
   return (
-    <div className="w-full max-w-full min-w-0 flex-1 flex flex-col h-[calc(100vh-6.5rem)] sm:h-[calc(100vh-7rem)] bg-background overflow-hidden rounded-2xl border border-border-theme shadow-xs">
+    <div className="w-full max-w-full min-w-0 flex-1 flex flex-col h-full min-h-0 bg-background overflow-hidden rounded-2xl border border-border-theme shadow-xs">
       {/* Banner / Toast Feedback */}
       {error && (
         <div className="bg-red-500/10 border-b border-red-500/20 text-red-500 px-4 py-2 text-xs font-medium flex items-center justify-between shrink-0">
@@ -447,17 +460,17 @@ useEffect(() => {
       )}
 
       {/* Main Two-Column Layout */}
-      <div className="w-full max-w-full flex-1 flex min-h-0 relative min-w-0">
+      <div className="w-full max-w-full flex-1 flex min-h-0 relative min-w-0 overflow-hidden">
         {/* ========================================================= */}
         {/* LEFT COLUMN: CONVERSATION LIST */}
         {/* ========================================================= */}
         <div
-          className={`w-full md:w-80 lg:w-96 border-r border-border-theme bg-surface flex flex-col shrink-0 min-w-0 max-w-full ${
+          className={`w-full md:w-80 lg:w-96 border-r border-border-theme bg-surface flex flex-col shrink-0 min-w-0 max-w-full h-full min-h-0 overflow-hidden ${
             selectedConversation ? "hidden md:flex" : "flex"
           }`}
         >
           {/* Header & Search Bar */}
-          <div className="p-3.5 sm:p-4 border-b border-border-theme space-y-3">
+          <div className="p-3.5 sm:p-4 border-b border-border-theme space-y-3 shrink-0">
             <div className="flex items-center justify-between">
               <h2 className="font-serif font-semibold text-base sm:text-lg text-foreground tracking-tight">
                 Messages
@@ -487,7 +500,7 @@ useEffect(() => {
           </div>
 
           {/* Conversations Scrollable List */}
-          <div className="flex-1 overflow-y-auto custom-scrollbar divide-y divide-border-theme/50">
+          <div className="flex-1 overflow-y-auto no-scrollbar divide-y divide-border-theme/50 min-h-0 overscroll-contain">
             {conversationsLoading && conversations.length === 0 ? (
               // Loading Skeleton List
               <div className="p-4 space-y-4">
@@ -577,7 +590,7 @@ useEffect(() => {
         {/* RIGHT COLUMN: CHAT WINDOW */}
         {/* ========================================================= */}
         <div
-          className={`flex-1 flex flex-col min-w-0 max-w-full bg-background ${
+          className={`flex-1 flex flex-col min-w-0 max-w-full h-full min-h-0 overflow-hidden bg-background ${
             selectedConversation ? "flex" : "hidden md:flex"
           }`}
         >
@@ -620,7 +633,7 @@ useEffect(() => {
               </div>
 
               {/* Messages Thread Container */}
-              <div className="flex-1 p-3 sm:p-6 overflow-y-auto custom-scrollbar space-y-3 sm:space-y-3.5 bg-background min-w-0 max-w-full">
+              <div className="flex-1 p-3 sm:p-6 overflow-y-auto no-scrollbar space-y-3 sm:space-y-3.5 bg-background min-w-0 max-w-full min-h-0 overscroll-contain">
                 {conversationLoading && messages.length === 0 ? (
                   // Loading Thread Skeleton
                   <div className="space-y-4">

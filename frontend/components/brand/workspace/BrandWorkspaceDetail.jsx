@@ -1,19 +1,57 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchBrandWorkspaceById,
   clearSuccessMessage,
 } from "@/redux/brand/workspace/workspace_slice";
+import {
+  createPaymentOrder,
+  verifyPayment,
+  reportFailedPayment,
+  fetchBrandPayments,
+  clearPaymentError,
+  clearPaymentSuccessMessage,
+} from "@/redux/brand/payments/payments_slice";
 import BrandSidebar from "@/components/brand/dashboard/BrandSidebar";
 import BrandHeader from "@/components/brand/dashboard/BrandHeader";
 import BrandReviewModal from "./BrandReviewModal";
+import {
+  fetchBrandWorkspaceReview,
+  clearWorkspaceReview,
+} from "@/redux/brand/reviews/reviews_slice";
+import BrandSubmitReviewModal from "@/components/brand/reviews/BrandSubmitReviewModal";
 
 // =========================================================
 // SVG ICONS
 // =========================================================
+function StarIcon({ className = "w-4 h-4", filled = true }) {
+  return (
+    <svg
+      className={className}
+      fill={filled ? "currentColor" : "none"}
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+      />
+    </svg>
+  );
+}
+
+function CreditCardIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+    </svg>
+  );
+}
 function ChevronLeftIcon({ className = "w-4 h-4" }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -203,21 +241,198 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
   const { selectedWorkspace, loading, error, successMessage } = useSelector(
     (state) => state.brandWorkspace
   );
+  const {
+    payments: brandPaymentsList,
+    creatingOrder: isCreatingOrder,
+    verifyingPayment: isVerifyingPayment,
+    error: reduxPaymentError,
+    successMessage: reduxPaymentSuccess,
+  } = useSelector((state) => state.brandPayments);
+  const {
+    workspaceReview,
+    workspaceReviewWorkspaceId,
+    workspaceReviewLoading,
+    workspaceReviewError,
+  } = useSelector((state) => state.brandReviews || {});
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [isCreatorReviewModalOpen, setIsCreatorReviewModalOpen] = useState(false);
   const [reviewMode, setReviewMode] = useState("approve"); // 'approve' | 'revision'
   const [selectedDeliverable, setSelectedDeliverable] = useState(null);
+  const [paymentActionError, setPaymentActionError] = useState("");
+  const [paymentActionSuccess, setPaymentActionSuccess] = useState("");
+  const [isInitiatingPayment, setIsInitiatingPayment] = useState(false);
 
   useEffect(() => {
     if (workspaceId) {
       dispatch(fetchBrandWorkspaceById(workspaceId));
+      dispatch(fetchBrandPayments({ workspace: workspaceId, limit: 10 }));
+      dispatch(fetchBrandWorkspaceReview(workspaceId));
     }
+    return () => {
+      dispatch(clearWorkspaceReview());
+    };
   }, [dispatch, workspaceId]);
+
+  const isCurrentWorkspaceReview = useMemo(() => {
+    if (!workspaceReview || !workspaceId) return false;
+
+    // Check if review has a workspace property (either populated object with _id, or raw ID string)
+    const revWs = workspaceReview.workspace;
+    if (revWs !== undefined && revWs !== null) {
+      const revWsId =
+        typeof revWs === "object"
+          ? (revWs._id ? String(revWs._id) : String(revWs))
+          : String(revWs);
+      return revWsId === String(workspaceId);
+    }
+
+    // Fallback: If workspace reference property is not directly exposed on the review object,
+    // verify against the tracked workspaceReviewWorkspaceId in Redux state
+    if (workspaceReviewWorkspaceId && String(workspaceReviewWorkspaceId) === String(workspaceId)) {
+      return true;
+    }
+
+    return false;
+  }, [workspaceReview, workspaceId, workspaceReviewWorkspaceId]);
 
   const handleRetry = () => {
     if (workspaceId) {
       dispatch(fetchBrandWorkspaceById(workspaceId));
+      dispatch(fetchBrandPayments({ workspace: workspaceId, limit: 10 }));
+      dispatch(fetchBrandWorkspaceReview(workspaceId));
+    }
+  };
+
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      try {
+        if (typeof window !== "undefined" && window.Razorpay) {
+          resolve(true);
+          return;
+        }
+        const script = document.createElement("script");
+        script.src = "https://checkout.razorpay.com/v1/checkout.js";
+        script.async = true;
+        script.onload = () => resolve(true);
+        script.onerror = () => resolve(false);
+        document.body.appendChild(script);
+      } catch (err) {
+        resolve(false);
+      }
+    });
+  };
+
+  const handleInitiatePayment = async () => {
+    if (!selectedWorkspace || selectedWorkspace.status !== "completed") return;
+    if (isInitiatingPayment || isCreatingOrder || isVerifyingPayment) return;
+
+    setIsInitiatingPayment(true);
+    setPaymentActionError("");
+    setPaymentActionSuccess("");
+    dispatch(clearPaymentError());
+    dispatch(clearPaymentSuccessMessage());
+
+    let scriptLoaded = false;
+    try {
+      scriptLoaded = await loadRazorpayScript();
+    } catch (sdkErr) {
+      scriptLoaded = false;
+    }
+
+    if (!scriptLoaded) {
+      setPaymentActionError("Failed to load Razorpay Checkout SDK. Please check your internet connection.");
+      setIsInitiatingPayment(false);
+      return;
+    }
+
+    try {
+      const orderResult = await dispatch(createPaymentOrder(selectedWorkspace._id)).unwrap();
+      const orderData = orderResult?.data || orderResult;
+      const { razorpayOrder, keyId } = orderData || {};
+
+      if (!razorpayOrder?.id || !keyId) {
+        setPaymentActionError("Invalid payment order payload returned from server.");
+        setIsInitiatingPayment(false);
+        return;
+      }
+
+      const options = {
+        key: keyId,
+        amount: razorpayOrder.amount,
+        currency: razorpayOrder.currency || "INR",
+        name: "CreatorLink",
+        description: `Payment for workspace: ${selectedWorkspace.campaign?.title || "Campaign Collaboration"}`,
+        order_id: razorpayOrder.id,
+        handler: async function (response) {
+          try {
+            const verifyResult = await dispatch(
+              verifyPayment({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              })
+            ).unwrap();
+
+            setPaymentActionSuccess(verifyResult?.message || "Payment verified and completed successfully!");
+            dispatch(fetchBrandWorkspaceById(selectedWorkspace._id));
+            dispatch(fetchBrandPayments({ workspace: selectedWorkspace._id, limit: 10 }));
+          } catch (verifyErr) {
+            setPaymentActionError(typeof verifyErr === "string" ? verifyErr : "Payment verification failed.");
+          } finally {
+            setIsInitiatingPayment(false);
+          }
+        },
+        modal: {
+          ondismiss: function () {
+            setIsInitiatingPayment(false);
+            setPaymentActionError("Payment checkout was closed. You can resume payment at any time.");
+          },
+        },
+        prefill: {
+          name: selectedWorkspace.brand?.name || "",
+          email: selectedWorkspace.brand?.email || "",
+        },
+        theme: {
+          color: "#4F46E5",
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+
+      rzp.on("payment.failed", async function (response) {
+        try {
+          const failureMetadata = response?.error?.metadata || {};
+          const razorpay_payment_id = response?.error?.payment_id || failureMetadata.payment_id;
+          const razorpay_order_id = failureMetadata.order_id || razorpayOrder.id;
+
+          if (razorpay_payment_id && razorpay_order_id) {
+            await dispatch(
+              reportFailedPayment({
+                razorpay_payment_id,
+                razorpay_order_id,
+              })
+            ).unwrap();
+          }
+          setPaymentActionError(
+            response?.error?.description || "Payment attempt failed. You can retry payment at any time."
+          );
+          dispatch(fetchBrandWorkspaceById(selectedWorkspace._id));
+          dispatch(fetchBrandPayments({ workspace: selectedWorkspace._id, limit: 10 }));
+        } catch (reportErr) {
+          setPaymentActionError(
+            typeof reportErr === "string" ? reportErr : "Payment failed and could not be reported."
+          );
+        } finally {
+          setIsInitiatingPayment(false);
+        }
+      });
+
+      rzp.open();
+    } catch (err) {
+      setPaymentActionError(typeof err === "string" ? err : "Failed to initiate payment order.");
+      setIsInitiatingPayment(false);
     }
   };
 
@@ -237,6 +452,15 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
   const campaign = workspace?.campaign;
   const creator = workspace?.creator;
   const service = workspace?.service;
+
+  // Identify whether an active/completed paid payment already exists for this workspace
+  const existingPaidPayment = (brandPaymentsList || []).find(
+    (p) =>
+      (p.workspace === workspace?._id || p.workspace?._id === workspace?._id) &&
+      p.status === "paid"
+  );
+  const isPaid = Boolean(existingPaidPayment);
+  const isPaymentProcessing = isInitiatingPayment || isCreatingOrder || isVerifyingPayment;
   const bookingId =
     typeof workspace?.booking === "object" && workspace?.booking !== null
       ? workspace.booking._id
@@ -504,8 +728,8 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
                     </div>
                   </div>
 
-                  {bookingId && (
-                    <div className="flex items-center gap-3 shrink-0 sm:self-start">
+                  <div className="flex flex-wrap items-center gap-3 shrink-0 sm:self-start">
+                    {bookingId && (
                       <Link
                         href={`/brand/messages?bookingId=${bookingId}`}
                         className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-secondary hover:bg-secondary-dark text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
@@ -513,9 +737,131 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
                         <ChatBubbleIcon className="w-4 h-4" />
                         <span>Message Creator</span>
                       </Link>
-                    </div>
-                  )}
+                    )}
+
+                    {/* Payment Action / Paid Badge */}
+                    {isPaid ? (
+                      <div className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-xs font-semibold">
+                        <CheckCircleIcon className="w-4 h-4" />
+                        <span>Payment Completed ({formatPrice(existingPaidPayment.amount, existingPaidPayment.currency)})</span>
+                      </div>
+                    ) : workspace.status === "completed" ? (
+                      <button
+                        type="button"
+                        onClick={handleInitiatePayment}
+                        disabled={isPaymentProcessing}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isPaymentProcessing ? (
+                          <>
+                            <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            <span>Processing Payment...</span>
+                          </>
+                        ) : (
+                          <>
+                            <CreditCardIcon className="w-4 h-4" />
+                            <span>Pay Now (Razorpay Test)</span>
+                          </>
+                        )}
+                      </button>
+                    ) : null}
+
+                    {/* Review Creator Action / Reviewed Status - Only when workspace is completed */}
+                    {workspace.status === "completed" && (
+                      workspaceReviewLoading || (workspaceReviewWorkspaceId && workspaceReviewWorkspaceId !== workspaceId?.toString()) ? (
+                        <div className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-muted text-text-secondary border border-border-theme text-xs font-medium">
+                          <RefreshIcon className="w-3.5 h-3.5 animate-spin" />
+                          <span>Checking Review...</span>
+                        </div>
+                      ) : workspaceReviewError && !isCurrentWorkspaceReview ? (
+                        <div
+                          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-red-500/10 text-red-500 border border-red-500/20 text-xs font-semibold"
+                          title={typeof workspaceReviewError === "string" ? workspaceReviewError : "Review status unavailable"}
+                        >
+                          <ExclamationIcon className="w-4 h-4 text-red-500 shrink-0" />
+                          <span>Review Unavailable</span>
+                        </div>
+                      ) : isCurrentWorkspaceReview ? (
+                        <div
+                          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-xs font-semibold"
+                          title={workspaceReview.comment ? `Feedback: "${workspaceReview.comment}"` : "Rated by you"}
+                        >
+                          <StarIcon className="w-4 h-4 text-amber-500" filled={true} />
+                          <span>Reviewed ({workspaceReview.rating}★)</span>
+                        </div>
+                      ) : workspaceReviewWorkspaceId === workspaceId?.toString() ? (
+                        <button
+                          type="button"
+                          onClick={() => setIsCreatorReviewModalOpen(true)}
+                          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+                        >
+                          <StarIcon className="w-4 h-4 text-white" filled={true} />
+                          <span>Review Creator</span>
+                        </button>
+                      ) : (
+                        <div className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-muted text-text-secondary border border-border-theme text-xs font-medium">
+                          <RefreshIcon className="w-3.5 h-3.5 animate-spin" />
+                          <span>Checking Review...</span>
+                        </div>
+                      )
+                    )}
+                  </div>
                 </div>
+
+                {/* Review Specific Lookup Error Banner */}
+                {workspaceReviewError && workspace.status === "completed" && !isCurrentWorkspaceReview && (
+                  <div className="bg-red-500/10 border border-red-500/30 text-red-500 p-4 rounded-xl text-xs font-medium flex items-center justify-between gap-4">
+                    <span>
+                      {typeof workspaceReviewError === "string"
+                        ? workspaceReviewError
+                        : "Failed to verify review status for this workspace."}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => dispatch(fetchBrandWorkspaceReview(workspaceId))}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500 text-white text-xs font-semibold hover:bg-red-600 transition-colors cursor-pointer shrink-0"
+                    >
+                      <RefreshIcon className="w-3.5 h-3.5" />
+                      <span>Retry</span>
+                    </button>
+                  </div>
+                )}
+
+                {/* Payment Specific Action Error / Success Banners */}
+                {(paymentActionError || reduxPaymentError) && (
+                  <div className="bg-red-500/10 border border-red-500/30 text-red-500 p-4 rounded-xl text-xs font-medium flex items-center justify-between gap-4">
+                    <span>{paymentActionError || (typeof reduxPaymentError === "string" ? reduxPaymentError : "Payment failed.")}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPaymentActionError("");
+                        dispatch(clearPaymentError());
+                      }}
+                      className="text-xs font-semibold underline cursor-pointer"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
+                )}
+
+                {(paymentActionSuccess || reduxPaymentSuccess) && (
+                  <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 p-4 rounded-xl text-xs font-medium flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-2">
+                      <CheckCircleIcon className="w-4 h-4 shrink-0" />
+                      <span>{paymentActionSuccess || reduxPaymentSuccess}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPaymentActionSuccess("");
+                        dispatch(clearPaymentSuccessMessage());
+                      }}
+                      className="text-xs font-semibold underline cursor-pointer"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
+                )}
 
                 {/* Key Summary Stats */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-border-theme">
@@ -736,13 +1082,27 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
         </main>
       </div>
 
-      {/* Review Modal */}
+      {/* Deliverable Review Modal */}
       <BrandReviewModal
         isOpen={isReviewModalOpen}
         onClose={handleCloseReviewModal}
         workspaceId={workspaceId}
         targetDeliverable={selectedDeliverable}
         initialMode={reviewMode}
+      />
+
+      {/* Creator Rating & Review Modal */}
+      <BrandSubmitReviewModal
+        isOpen={isCreatorReviewModalOpen}
+        onClose={() => setIsCreatorReviewModalOpen(false)}
+        workspaceId={workspace?._id}
+        creatorName={creator?.name}
+        campaignTitle={campaign?.title}
+        onSuccess={() => {
+          if (workspace?._id) {
+            dispatch(fetchBrandWorkspaceReview(workspace._id));
+          }
+        }}
       />
     </div>
   );

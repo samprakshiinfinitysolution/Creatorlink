@@ -14,6 +14,10 @@ import creatorWorkspaceReducer from "./creator/workspace/workspace_slice";
 import brandWorkspaceReducer from "./brand/workspace/workspace_slice";
 import creatorMessagesReducer from "./creator/messages/messages_slice";
 import brandMessagesReducer from "./brand/messages/messages_slice";
+import brandPaymentsReducer from "./brand/payments/payments_slice";
+import creatorPaymentsReducer from "./creator/payments/payments_slice";
+import creatorReviewsReducer from "./creator/reviews/reviews_slice";
+import brandReviewsReducer from "./brand/reviews/reviews_slice";
 
 
 const rootReducer = combineReducers({
@@ -29,7 +33,11 @@ const rootReducer = combineReducers({
     creatorWorkspace: creatorWorkspaceReducer,
     brandWorkspace: brandWorkspaceReducer,
     creatorMessages: creatorMessagesReducer,
-    brandMessages: brandMessagesReducer
+    brandMessages: brandMessagesReducer,
+    brandPayments: brandPaymentsReducer,
+    creatorPayments: creatorPaymentsReducer,
+    creatorReviews: creatorReviewsReducer,
+    brandReviews: brandReviewsReducer
 
 });
 

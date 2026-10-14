@@ -5,7 +5,11 @@ import Campaign from "../brand/campaigns/campaign.model.js";
 import CreatorService from "../creator/services/services.model.js";
 import Auth from "../auth/auth.model.js";
 import CreatorProfile from "../creator/profile/profile.model.js";
-import { createWorkspaceForAcceptedBooking } from "../workspace/workspace.service.js";
+import {
+    createWorkspaceForAcceptedBooking,
+    cleanupWorkspaceForBooking
+} from "../workspace/workspace.service.js";
+import { createNotificationSafe } from "../notifications/notification.service.js";
 import createApiError from "../../utils/ApiError.js";
 
 import {
@@ -100,6 +104,23 @@ const createBookingService = async (creatorId, bookingData) => {
         status: "pending"
     });
 
+    await createNotificationSafe({
+        recipient: brandId,
+        sender: creatorId,
+        type: "booking:application_received",
+        title: "New Campaign Application",
+        message: `A creator submitted an application for "${campaign.title || 'Campaign'}".`,
+        entityType: "booking",
+        entityId: booking._id,
+        destination: "/brand/bookings",
+        metadata: {
+            campaignId: campaign._id,
+            campaignTitle: campaign.title,
+            serviceId: serviceId,
+            agreedPrice: finalPrice
+        },
+        idempotencyKey: `booking:application_received:${booking._id}`
+    });
 
     return booking;
 };
@@ -221,10 +242,60 @@ const cancelCreatorBookingService = async (creatorId, bookingId) => {
     }
 
 
-    booking.status = "cancelled";
-    await booking.save();
+    const updatedBooking = await Booking.findOneAndUpdate(
+        {
+            _id: booking._id,
+            creator: creatorId,
+            status: "pending"
+        },
+        {
+            $set: { status: "cancelled" }
+        },
+        { new: true }
+    );
 
-    return booking;
+    if (!updatedBooking) {
+        const recheck = await Booking.findOne({
+            _id: bookingId,
+            creator: creatorId
+        });
+
+        if (!recheck) {
+            throw createApiError(
+                404,
+                "Booking not found"
+            );
+        }
+
+        if (recheck.status === "cancelled") {
+            return recheck;
+        }
+
+        throw createApiError(
+            400,
+            `Cannot cancel booking with status '${recheck.status}'. Only pending bookings can be cancelled.`
+        );
+    }
+
+    await cleanupWorkspaceForBooking(updatedBooking._id);
+
+    await createNotificationSafe({
+        recipient: updatedBooking.brand,
+        sender: creatorId,
+        type: "booking:cancelled",
+        title: "Application Withdrawn",
+        message: "A creator has withdrawn their application for your campaign.",
+        entityType: "booking",
+        entityId: updatedBooking._id,
+        destination: "/brand/bookings",
+        metadata: {
+            bookingId: updatedBooking._id,
+            campaignId: updatedBooking.campaign
+        },
+        idempotencyKey: `booking:cancelled:${updatedBooking._id}`
+    });
+
+    return updatedBooking;
 };
 
 
@@ -358,14 +429,83 @@ const updateBrandBookingStatusService = async (brandId, bookingId, newStatus) =>
     }
 
 
-    booking.status = newStatus;
-    await booking.save();
-
     if (newStatus === "accepted") {
-        await createWorkspaceForAcceptedBooking(booking);
+        try {
+            await createWorkspaceForAcceptedBooking(booking);
+        } catch (wsErr) {
+            if (wsErr?.statusCode) {
+                throw wsErr;
+            }
+            throw createApiError(
+                500,
+                `Failed to initialize collaboration workspace: ${wsErr?.message || "Workspace creation failed"}`
+            );
+        }
     }
 
-    return booking;
+    const updatedBooking = await Booking.findOneAndUpdate(
+        {
+            _id: booking._id,
+            brand: brandId,
+            status: "pending"
+        },
+        {
+            $set: { status: newStatus }
+        },
+        { new: true }
+    );
+
+    if (!updatedBooking) {
+        const recheck = await Booking.findOne({
+            _id: bookingId,
+            brand: brandId
+        });
+
+        if (!recheck) {
+            throw createApiError(
+                404,
+                "Booking not found"
+            );
+        }
+
+        if (recheck.status === newStatus) {
+            return recheck;
+        }
+
+        if (newStatus === "accepted" && recheck.status !== "accepted") {
+            await cleanupWorkspaceForBooking(booking._id);
+        }
+
+        throw createApiError(
+            400,
+            `Cannot update status for booking that is already '${recheck.status}'`
+        );
+    }
+
+    if (newStatus === "rejected") {
+        await cleanupWorkspaceForBooking(updatedBooking._id);
+    }
+
+    await createNotificationSafe({
+        recipient: updatedBooking.creator,
+        sender: brandId,
+        type: newStatus === "accepted" ? "booking:accepted" : "booking:rejected",
+        title: newStatus === "accepted" ? "Application Accepted!" : "Application Declined",
+        message: newStatus === "accepted"
+            ? "Your campaign application was accepted! Collaboration workspace has been created."
+            : "Your campaign application was declined.",
+        entityType: "booking",
+        entityId: updatedBooking._id,
+        destination: newStatus === "accepted" ? "/creator/workspace" : "/creator/campaigns",
+        metadata: {
+            bookingId: updatedBooking._id,
+            campaignId: updatedBooking.campaign,
+            status: newStatus
+        },
+        idempotencyKey: `booking:${newStatus}:${updatedBooking._id}`
+    });
+
+    return updatedBooking;
 };
 
 
@@ -489,6 +629,23 @@ const createBrandBookingService = async (brandId, bookingData) => {
         initiatedBy: "brand"
     });
 
+    await createNotificationSafe({
+        recipient: creatorId,
+        sender: brandId,
+        type: "booking:proposal_received",
+        title: "New Collaboration Proposal",
+        message: `You received a new collaboration proposal for "${campaign.title || 'Campaign'}".`,
+        entityType: "booking",
+        entityId: booking._id,
+        destination: "/creator/campaigns",
+        metadata: {
+            campaignId: campaign._id,
+            campaignTitle: campaign.title,
+            serviceId: serviceId,
+            agreedPrice: finalPrice
+        },
+        idempotencyKey: `booking:proposal_received:${booking._id}`
+    });
 
     return booking;
 };
@@ -535,16 +692,83 @@ const updateCreatorBookingStatusService = async (creatorId, bookingId, newStatus
     }
 
 
-    booking.status = newStatus;
-    await booking.save();
-
-
     if (newStatus === "accepted") {
-        await createWorkspaceForAcceptedBooking(booking);
+        try {
+            await createWorkspaceForAcceptedBooking(booking);
+        } catch (wsErr) {
+            if (wsErr?.statusCode) {
+                throw wsErr;
+            }
+            throw createApiError(
+                500,
+                `Failed to initialize collaboration workspace: ${wsErr?.message || "Workspace creation failed"}`
+            );
+        }
     }
 
+    const updatedBooking = await Booking.findOneAndUpdate(
+        {
+            _id: booking._id,
+            creator: creatorId,
+            status: "pending"
+        },
+        {
+            $set: { status: newStatus }
+        },
+        { new: true }
+    );
 
-    return booking;
+    if (!updatedBooking) {
+        const recheck = await Booking.findOne({
+            _id: bookingId,
+            creator: creatorId
+        });
+
+        if (!recheck) {
+            throw createApiError(
+                404,
+                "Booking not found"
+            );
+        }
+
+        if (recheck.status === newStatus) {
+            return recheck;
+        }
+
+        if (newStatus === "accepted" && recheck.status !== "accepted") {
+            await cleanupWorkspaceForBooking(booking._id);
+        }
+
+        throw createApiError(
+            400,
+            `Cannot update status for booking that is already '${recheck.status}'`
+        );
+    }
+
+    if (newStatus === "rejected") {
+        await cleanupWorkspaceForBooking(updatedBooking._id);
+    }
+
+    await createNotificationSafe({
+        recipient: updatedBooking.brand,
+        sender: creatorId,
+        type: newStatus === "accepted" ? "booking:accepted" : "booking:rejected",
+        title: newStatus === "accepted" ? "Proposal Accepted!" : "Proposal Declined",
+        message: newStatus === "accepted"
+            ? "Creator accepted your collaboration proposal! Workspace is ready."
+            : "Creator declined your collaboration proposal.",
+        entityType: "booking",
+        entityId: updatedBooking._id,
+        destination: newStatus === "accepted" ? "/brand/workspace" : "/brand/bookings",
+        metadata: {
+            bookingId: updatedBooking._id,
+            campaignId: updatedBooking.campaign,
+            status: newStatus
+        },
+        idempotencyKey: `booking:${newStatus}:${updatedBooking._id}`
+    });
+
+    return updatedBooking;
 };
 
 

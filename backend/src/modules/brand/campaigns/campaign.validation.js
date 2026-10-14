@@ -31,6 +31,7 @@ const validateCreateCampaign = (req, res, next) => {
         category,
         platform,
         budget,
+        currency,
         deadline,
         requiredCreators,
         deliverables
@@ -112,6 +113,20 @@ const validateCreateCampaign = (req, res, next) => {
     }
 
 
+    // Validate currency if provided (must be "INR").
+    if (currency !== undefined) {
+        if (
+            typeof currency !== "string" ||
+            currency.trim().toUpperCase() !== "INR"
+        ) {
+            throw createApiError(
+                400,
+                "Only INR currency is currently supported"
+            );
+        }
+    }
+
+
     // Validate deadline.
     if (Number.isNaN(Date.parse(deadline))) {
         throw createApiError(
@@ -173,6 +188,7 @@ const validateUpdateCampaign = (req, res, next) => {
         "category",
         "platform",
         "budget",
+        "currency",
         "deadline",
         "requiredCreators",
         "deliverables",
@@ -212,6 +228,7 @@ const validateUpdateCampaign = (req, res, next) => {
         category,
         platform,
         budget,
+        currency,
         deadline,
         requiredCreators,
         deliverables,
@@ -288,6 +305,20 @@ const validateUpdateCampaign = (req, res, next) => {
             400,
             "Budget must be a valid positive number"
         );
+    }
+
+
+    // Validate currency if provided (must be "INR").
+    if (currency !== undefined) {
+        if (
+            typeof currency !== "string" ||
+            currency.trim().toUpperCase() !== "INR"
+        ) {
+            throw createApiError(
+                400,
+                "Only INR currency is currently supported"
+            );
+        }
     }
 
 

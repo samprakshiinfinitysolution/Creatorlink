@@ -16,6 +16,8 @@ const EXPECTED_AUTH_ERRORS = new Set([
     "Invalid or expired access token"
 ]);
 
+let ioInstance = null;
+
 const initializeSocket = (httpServer) => {
     const allowedOrigins = [
         ...new Set([
@@ -31,6 +33,8 @@ const initializeSocket = (httpServer) => {
             credentials: true
         }
     });
+
+    ioInstance = io;
 
     // Authenticate Socket.IO using HttpOnly cookies (with fallback to valid refresh token session).
     io.use(async (socket, next) => {
@@ -232,6 +236,28 @@ const initializeSocket = (httpServer) => {
     });
 
     return io;
+};
+
+const getIO = () => ioInstance;
+
+const emitNotificationToUser = (userId, notificationData) => {
+    if (!ioInstance || !userId) {
+        return false;
+    }
+
+    try {
+        ioInstance.to(`user:${userId.toString()}`).emit("notification:new", notificationData);
+        return true;
+    } catch (error) {
+        console.error("Socket notification emission failed:", error?.message || error);
+        return false;
+    }
+};
+
+export {
+    initializeSocket,
+    getIO,
+    emitNotificationToUser
 };
 
 export default initializeSocket;

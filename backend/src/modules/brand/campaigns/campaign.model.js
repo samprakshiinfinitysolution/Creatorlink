@@ -47,6 +47,14 @@ const campaignSchema = new mongoose.Schema(
             min: 0
         },
 
+        currency: {
+            type: String,
+            default: "INR",
+            uppercase: true,
+            trim: true,
+            maxlength: 3 
+        },
+
         deadline: {
             type: Date,
             required: true

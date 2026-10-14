@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@/redux/auth/auth_slice";
 import { getCreatorProfile, clearProfile } from "@/redux/creator/profile/profile_slice";
 import ThemeToggle from "@/components/common/ThemeToggle/ThemeToggle";
+import CreatorNotificationDropdown from "@/components/creator/notifications/CreatorNotificationDropdown";
 
 // Helper function to calculate initials dynamically from name or email
 function getInitials(name, email) {
@@ -36,13 +37,6 @@ function MenuIcon({ className = "w-6 h-6" }) {
   );
 }
 
-function BellIcon({ className = "w-5 h-5" }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
-    </svg>
-  );
-}
 
 function UserIcon({ className = "w-4 h-4" }) {
   return (
@@ -79,6 +73,7 @@ function ChevronDownIcon({ className = "w-3.5 h-3.5" }) {
 
 export default function CreatorHeader({ setMobileOpen = () => { } }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [notificationOpen, setNotificationOpen] = useState(false);
   const [imgError, setImgError] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -121,6 +116,7 @@ export default function CreatorHeader({ setMobileOpen = () => { } }) {
 
   const handleLogout = async () => {
     setDropdownOpen(false);
+    setNotificationOpen(false);
     dispatch(clearProfile());
     await dispatch(logout());
     router.push("/login");
@@ -137,6 +133,7 @@ export default function CreatorHeader({ setMobileOpen = () => { } }) {
     function handleKeyDown(event) {
       if (event.key === "Escape") {
         setDropdownOpen(false);
+        setNotificationOpen(false);
       }
     }
 
@@ -174,15 +171,17 @@ export default function CreatorHeader({ setMobileOpen = () => { } }) {
 
       {/* Right: Actions & Profile Dropdown */}
       <div className="flex items-center gap-2 sm:gap-4 shrink-0">
-        {/* Notification Icon Button */}
-        <button
-          type="button"
-          aria-label="Notifications"
-          className="relative p-2 rounded-xl text-text-secondary hover:text-foreground hover:bg-surface-muted border border-border-theme transition-colors cursor-pointer"
-        >
-          <BellIcon />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-secondary ring-2 ring-surface" />
-        </button>
+        {/* Notification Bell Dropdown */}
+        <CreatorNotificationDropdown
+          isOpen={notificationOpen}
+          onToggle={() => {
+            setNotificationOpen((prev) => {
+              if (!prev) setDropdownOpen(false);
+              return !prev;
+            });
+          }}
+          onClose={() => setNotificationOpen(false)}
+        />
 
         {/* Dark / Light Theme Toggle */}
         <ThemeToggle />
@@ -191,7 +190,12 @@ export default function CreatorHeader({ setMobileOpen = () => { } }) {
         <div className="relative pl-2 sm:pl-3 border-l border-border-theme" ref={dropdownRef}>
           <button
             type="button"
-            onClick={() => setDropdownOpen((prev) => !prev)}
+            onClick={() => {
+              setDropdownOpen((prev) => {
+                if (!prev) setNotificationOpen(false);
+                return !prev;
+              });
+            }}
             aria-expanded={dropdownOpen}
             aria-haspopup="true"
             className="flex items-center gap-2.5 p-1 rounded-xl hover:bg-surface-muted transition-colors cursor-pointer text-left focus:outline-none"

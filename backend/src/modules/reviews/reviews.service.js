@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import Review from "./reviews.model.js";
 import Workspace from "../workspace/workspace.model.js";
+import { createNotificationSafe } from "../notifications/notification.service.js";
 import createApiError from "../../utils/ApiError.js";
 import {
     getPagination,
@@ -88,6 +89,24 @@ const createBrandReviewService = async (brandId, payload) => {
             path: "workspace",
             select: "status agreedPrice currency"
         });
+
+    await createNotificationSafe({
+        recipient: newReview.reviewee,
+        sender: brandId,
+        type: "review:received",
+        title: "New Review Received",
+        message: `A brand reviewed your collaboration with a ${newReview.rating}-star rating!`,
+        entityType: "review",
+        entityId: newReview._id,
+        destination: "/creator/reviews",
+        metadata: {
+            reviewId: newReview._id,
+            rating: newReview.rating,
+            workspaceId: newReview.workspace,
+            comment: newReview.comment || ""
+        },
+        idempotencyKey: `review:received:${newReview._id}`
+    });
 
     return populatedReview;
 };
@@ -205,10 +224,10 @@ const getWorkspaceReviewService = async (workspaceId, userId) => {
         );
     }
 
-    // Find the review submitted for this workspace by the requesting user, or all reviews for this workspace
+    // Find the review submitted for this workspace where the requesting user is a participant
     const review = await Review.findOne({
         workspace: workspaceId,
-        reviewer: userId
+        $or: [{ reviewer: userId }, { reviewee: userId }]
     })
         .populate({
             path: "reviewer",

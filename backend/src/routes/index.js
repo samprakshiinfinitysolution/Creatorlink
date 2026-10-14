@@ -5,8 +5,10 @@ import creatorProfileRoutes from "../modules/creator/profile/profile.route.js";
 import creatorPortfolioRoutes from "../modules/creator/portfolio/portfolio.route.js";
 import creatorServiceRoutes from "../modules/creator/services/services.route.js";
 import creatorCampaignRoutes from "../modules/creator/campaigns/campaigns.route.js";
+import creatorDashboardRoutes from "../modules/creator/dashboard/dashboard.route.js";
 import brandProfileRoutes from "../modules/brand/profile/profile.route.js";
 import campaignRoutes from "../modules/brand/campaigns/campaign.route.js";
+import brandDashboardRoutes from "../modules/brand/dashboard/dashboard.route.js";
 import {
     creatorBookingRouter,
     brandBookingRouter
@@ -29,13 +31,20 @@ import {
 } from "../modules/reviews/reviews.route.js";
 import brandCreatorsRouter from "../modules/brand/creators/creators.route.js";
 import uploadRoutes from "../modules/upload/upload.route.js";
+import notificationRouter from "../modules/notifications/notification.route.js";
 
 const router = Router();
 
 // Authentication routes.
 router.use("/auth", authRoutes);
 
+// Notification routes (shared endpoints and role aliases).
+router.use("/notifications", notificationRouter);
+router.use("/creator/notifications", notificationRouter);
+router.use("/brand/notifications", notificationRouter);
+
 // Creator routes.
+router.use("/creator/dashboard", creatorDashboardRoutes);
 router.use("/creator/profile", creatorProfileRoutes);
 router.use("/creator/portfolio", creatorPortfolioRoutes);
 router.use("/creator/services", creatorServiceRoutes);
@@ -47,6 +56,7 @@ router.use("/creator/payments", creatorPaymentRouter);
 router.use("/creator/reviews", creatorReviewRouter);
 
 // Brand routes.
+router.use("/brand/dashboard", brandDashboardRoutes);
 router.use("/brand/profile", brandProfileRoutes);
 router.use("/brand/campaigns", campaignRoutes);
 router.use("/brand/creators", brandCreatorsRouter);

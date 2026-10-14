@@ -3,6 +3,8 @@ import mongoose from "mongoose";
 import Workspace from "./workspace.model.js";
 import Review from "../reviews/reviews.model.js";
 import Conversation from "../messages/conversation.model.js";
+import Campaign from "../brand/campaigns/campaign.model.js";
+import { createNotificationSafe } from "../notifications/notification.service.js";
 import createApiError from "../../utils/ApiError.js";
 import {
     getPagination,
@@ -72,6 +74,12 @@ const parseDeliverablesToObjects = (rawDeliverables = [], deadline = null) => {
 const createWorkspaceForAcceptedBooking = async (booking) => {
     if (!booking || !booking._id) return null;
 
+    // Guard: Do not initialize workspace if the booking was already rejected or cancelled
+    const currentBooking = await mongoose.model("Booking").findById(booking._id).select("status");
+    if (currentBooking && (currentBooking.status === "rejected" || currentBooking.status === "cancelled")) {
+        throw createApiError(400, `Cannot initialize workspace for booking with status '${currentBooking.status}'`);
+    }
+
     let workspace = await Workspace.findOne({
         booking: booking._id
     });
@@ -82,7 +90,7 @@ const createWorkspaceForAcceptedBooking = async (booking) => {
             if (typeof booking.campaign === "object" && booking.campaign.description) {
                 campaignBrief = booking.campaign.description;
             } else if (mongoose.Types.ObjectId.isValid(booking.campaign)) {
-                const campaignDoc = await mongoose.model("Campaign")
+                const campaignDoc = await Campaign
                     .findById(booking.campaign)
                     .select("description");
                 if (campaignDoc && campaignDoc.description) {
@@ -96,37 +104,77 @@ const createWorkspaceForAcceptedBooking = async (booking) => {
             booking.deadline
         );
 
-        workspace = await Workspace.create({
-            booking: booking._id,
-            campaign: booking.campaign,
-            brand: booking.brand,
-            creator: booking.creator,
-            service: booking.service,
-            agreedPrice: booking.agreedPrice,
-            currency: booking.currency || "INR",
-            brief: campaignBrief,
-            deliverables: structuredDeliverables,
-            deadline: booking.deadline,
-            status: "in_progress"
-        });
+        try {
+            workspace = await Workspace.create({
+                booking: booking._id,
+                campaign: booking.campaign,
+                brand: booking.brand,
+                creator: booking.creator,
+                service: booking.service,
+                agreedPrice: booking.agreedPrice,
+                currency: booking.currency || "INR",
+                brief: campaignBrief,
+                deliverables: structuredDeliverables,
+                deadline: booking.deadline,
+                status: "in_progress"
+            });
+        } catch (createErr) {
+            if (createErr?.code === 11000) {
+                workspace = await Workspace.findOne({
+                    booking: booking._id
+                });
+            }
+            if (!workspace) {
+                throw createErr;
+            }
+        }
     }
 
     // Ensure a conversation document is initialized for this accepted booking
-    await Conversation.findOneAndUpdate(
-        { booking: booking._id },
-        {
-            $setOnInsert: {
-                participants: [booking.brand, booking.creator],
-                booking: booking._id,
-                campaign: booking.campaign,
-                lastMessage: "",
-                lastMessageAt: new Date()
+    try {
+        await Conversation.findOneAndUpdate(
+            { booking: booking._id },
+            {
+                $setOnInsert: {
+                    participants: [booking.brand, booking.creator],
+                    booking: booking._id,
+                    campaign: booking.campaign,
+                    lastMessage: "",
+                    lastMessageAt: new Date()
+                }
+            },
+            { upsert: true, new: true }
+        );
+    } catch (convErr) {
+        if (convErr?.code === 11000) {
+            const existingConv = await Conversation.findOne({ booking: booking._id });
+            if (!existingConv) {
+                throw convErr;
             }
-        },
-        { upsert: true, new: true }
-    );
+        } else {
+            throw convErr;
+        }
+    }
 
     return workspace;
+};
+
+// Safely cleans up workspace and conversation records for a booking that is not accepted (e.g. rejected or cancelled).
+const cleanupWorkspaceForBooking = async (bookingId) => {
+    if (!bookingId) return;
+
+    // Strict guard: Only clean up collaboration records if the booking is currently in a terminal non-accepted state (rejected or cancelled)
+    const booking = await mongoose.model("Booking").findOne({
+        _id: bookingId,
+        status: { $in: ["rejected", "cancelled"] }
+    }).select("status");
+
+    if (!booking) {
+        return;
+    }
+
+    await Workspace.deleteMany({ booking: bookingId });
+    await Conversation.deleteMany({ booking: bookingId });
 };
 
 // Gets workspaces belonging to creator.
@@ -355,6 +403,27 @@ const submitCreatorWorkspaceDeliverableService = async (
 
     await workspace.save();
 
+    const currentSubmission = workspace.submissions[workspace.submissions.length - 1];
+    const submissionId = currentSubmission?._id || deliverable.submission?._id || submittedAtDate.getTime();
+
+    await createNotificationSafe({
+        recipient: workspace.brand,
+        sender: creatorId,
+        type: "workspace:deliverable_submitted",
+        title: "Deliverable Submitted",
+        message: `Creator submitted work for deliverable "${deliverable.title || 'Deliverable'}".`,
+        entityType: "workspace",
+        entityId: workspace._id,
+        destination: `/brand/workspace/${workspace._id}`,
+        metadata: {
+            workspaceId: workspace._id,
+            deliverableId: deliverable._id,
+            deliverableTitle: deliverable.title,
+            submissionLink: subObj.link || ""
+        },
+        idempotencyKey: `workspace:deliverable_submitted:${workspace._id}:${deliverable._id}:${submissionId}`
+    });
+
     return await Workspace.findById(workspace._id)
         .populate("brand", "name email")
         .populate("campaign")
@@ -569,11 +638,20 @@ const reviewBrandWorkspaceDeliverableService = async (
         );
     }
 
+    if (deliverable.status !== "submitted") {
+        throw createApiError(
+            400,
+            `Cannot review deliverable with status '${deliverable.status}'. Only submitted deliverables can be reviewed.`
+        );
+    }
+
     const {
         status,
         action,
         feedback
     } = reviewData;
+
+    const previousWorkspaceStatus = workspace.status;
 
     const targetAction = String(
         status || action
@@ -617,6 +695,78 @@ const reviewBrandWorkspaceDeliverableService = async (
 
     await workspace.save();
 
+    if (targetAction === "completed" || targetAction === "approve") {
+        await createNotificationSafe({
+            recipient: workspace.creator,
+            sender: brandId,
+            type: "workspace:deliverable_approved",
+            title: "Deliverable Approved",
+            message: `Your deliverable "${deliverable.title || 'Deliverable'}" has been approved!`,
+            entityType: "workspace",
+            entityId: workspace._id,
+            destination: `/creator/workspace/${workspace._id}`,
+            metadata: {
+                workspaceId: workspace._id,
+                deliverableId: deliverable._id,
+                deliverableTitle: deliverable.title
+            },
+            idempotencyKey: `workspace:deliverable_approved:${workspace._id}:${deliverable._id}`
+        });
+
+        if (previousWorkspaceStatus !== "completed" && workspace.status === "completed") {
+            await createNotificationSafe({
+                recipient: workspace.creator,
+                sender: brandId,
+                type: "workspace:completed",
+                title: "Workspace Completed!",
+                message: "All deliverables have been approved! The collaboration is complete.",
+                entityType: "workspace",
+                entityId: workspace._id,
+                destination: `/creator/workspace/${workspace._id}`,
+                metadata: {
+                    workspaceId: workspace._id
+                },
+                idempotencyKey: `workspace:completed:creator:${workspace._id}`
+            });
+
+            await createNotificationSafe({
+                recipient: workspace.brand,
+                sender: null,
+                type: "workspace:completed",
+                title: "Collaboration Completed",
+                message: "All deliverables are approved. Collaboration is complete; you can proceed to payment.",
+                entityType: "workspace",
+                entityId: workspace._id,
+                destination: `/brand/workspace/${workspace._id}`,
+                metadata: {
+                    workspaceId: workspace._id
+                },
+                idempotencyKey: `workspace:completed:brand:${workspace._id}`
+            });
+        }
+    } else if (targetAction === "revision_requested" || targetAction === "revision") {
+        const lastRevision = workspace.revisions[workspace.revisions.length - 1];
+        const revisionId = lastRevision?._id || Date.now();
+
+        await createNotificationSafe({
+            recipient: workspace.creator,
+            sender: brandId,
+            type: "workspace:revision_requested",
+            title: "Revision Requested",
+            message: `Brand requested revisions for "${deliverable.title || 'Deliverable'}": "${feedback ? feedback.trim().slice(0, 100) : ''}"`,
+            entityType: "workspace",
+            entityId: workspace._id,
+            destination: `/creator/workspace/${workspace._id}`,
+            metadata: {
+                workspaceId: workspace._id,
+                deliverableId: deliverable._id,
+                deliverableTitle: deliverable.title,
+                feedback: feedback ? feedback.trim() : ""
+            },
+            idempotencyKey: `workspace:revision_requested:${workspace._id}:${deliverable._id}:${revisionId}`
+        });
+    }
+
     return await Workspace.findById(workspace._id)
         .populate("creator", "name email")
         .populate("campaign")
@@ -642,6 +792,7 @@ const reviewBrandWorkspaceService = async (
 export {
     parseDeliverablesToObjects,
     createWorkspaceForAcceptedBooking,
+    cleanupWorkspaceForBooking,
     getCreatorWorkspacesService,
     getCreatorWorkspaceByIdService,
     submitCreatorWorkspaceWorkService,

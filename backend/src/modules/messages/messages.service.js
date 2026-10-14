@@ -4,6 +4,8 @@ import Conversation from "./conversation.model.js";
 import Message from "./message.model.js";
 import Booking from "../booking/booking.model.js";
 import Workspace from "../workspace/workspace.model.js";
+import Auth from "../auth/auth.model.js";
+import { createNotificationSafe } from "../notifications/notification.service.js";
 import createApiError from "../../utils/ApiError.js";
 import {
     getPagination,
@@ -140,6 +142,40 @@ const sendMessageService = async (senderId, payload) => {
         message: message.trim(),
         attachments: Array.isArray(attachments) ? attachments : [],
         isRead: false
+    });
+
+    // 4. Create notification for the recipient (non-blocking)
+    const isSenderBrand = senderId.toString() === booking.brand.toString();
+    const verifiedRecipientId = isSenderBrand ? booking.creator : booking.brand;
+    const destination = isSenderBrand
+        ? `/creator/messages?conversationId=${conversation._id}`
+        : `/brand/messages?conversationId=${conversation._id}`;
+
+    let senderDisplayName = isSenderBrand ? "Brand" : "Creator";
+    try {
+        const senderUser = await Auth.findById(senderId).select("name");
+        if (senderUser?.name && senderUser.name.trim()) {
+            senderDisplayName = senderUser.name.trim();
+        }
+    } catch (lookupError) {
+        console.error("Non-fatal sender name lookup error:", lookupError?.message || lookupError);
+    }
+
+    await createNotificationSafe({
+        recipient: verifiedRecipientId,
+        sender: senderId,
+        type: "message:received",
+        title: `New Message from ${senderDisplayName}`,
+        message: message.trim().slice(0, 150),
+        entityType: "message",
+        entityId: conversation._id,
+        destination,
+        metadata: {
+            conversationId: conversation._id,
+            messageId: newMessage._id,
+            bookingId: booking._id
+        },
+        idempotencyKey: `message:${newMessage._id}`
     });
 
     return {

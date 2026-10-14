@@ -4,6 +4,7 @@ import Razorpay from "razorpay";
 
 import Payment from "./payment.model.js";
 import Workspace from "../workspace/workspace.model.js";
+import { createNotificationSafe } from "../notifications/notification.service.js";
 import createApiError from "../../utils/ApiError.js";
 import {
     getPagination,
@@ -523,10 +524,44 @@ const verifyBrandPaymentService = async (brandId, payload = {}) => {
     // Accept ONLY 'captured' status as paid. Do NOT treat 'authorized' as paid!
     if (fetchedStatus !== "captured") {
         if (fetchedStatus === "failed") {
-            // Only release lock when gateway explicitly confirms payment failed
-            payment.status = "failed";
-            payment.isActive = false;
-            await payment.save().catch(() => {});
+            // Atomically mark failed and release lock only if payment is not already paid
+            const failedPayment = await Payment.findOneAndUpdate(
+                {
+                    _id: payment._id,
+                    status: { $ne: "paid" }
+                },
+                {
+                    $set: {
+                        status: "failed",
+                        isActive: false,
+                        razorpayPaymentId: paymentIdVal,
+                        transactionId: payment.transactionId || paymentIdVal
+                    }
+                },
+                { new: true }
+            );
+
+            if (!failedPayment) {
+                const recheck = await Payment.findById(payment._id);
+
+                if (recheck?.status === "paid") {
+                    throw createApiError(
+                        400,
+                        "Payment has already been successfully verified and completed. Cannot mark a completed payment as failed."
+                    );
+                }
+
+                if (recheck?.status === "failed") {
+                    throw createApiError(400, "Payment failed at Razorpay checkout");
+                }
+
+                if (!recheck) {
+                    throw createApiError(404, "Payment record not found");
+                }
+
+                throw createApiError(400, "Failed to update payment status");
+            }
+
             throw createApiError(400, "Payment failed at Razorpay checkout");
         } else {
             // Status is 'authorized', 'created', etc. Preserve reservation in non-paid state.
@@ -580,6 +615,24 @@ const verifyBrandPaymentService = async (brandId, payload = {}) => {
 
         throw createApiError(400, "Failed to update payment status");
     }
+
+    await createNotificationSafe({
+        recipient: updatedPayment.creator,
+        sender: brandId,
+        type: "payment:received",
+        title: "Payment Received!",
+        message: `You received a payment of ₹${updatedPayment.amount} for your collaboration!`,
+        entityType: "payment",
+        entityId: updatedPayment._id,
+        destination: "/creator/payments",
+        metadata: {
+            paymentId: updatedPayment._id,
+            amount: updatedPayment.amount,
+            currency: updatedPayment.currency,
+            workspaceId: updatedPayment.workspace
+        },
+        idempotencyKey: `payment:received:${updatedPayment._id}`
+    });
 
     return {
         message: "Payment successfully verified and completed",
@@ -687,19 +740,65 @@ const reportBrandPaymentFailureService = async (brandId, payload = {}) => {
         );
     }
 
-    // 3. Update MongoDB Payment document status to 'failed' and release active lock
-    payment.status = "failed";
-    payment.isActive = false; // Release active lock so brand can re-attempt payment
-    payment.razorpayPaymentId = paymentIdVal;
-    if (!payment.transactionId) {
-        payment.transactionId = paymentIdVal;
+    // 3. Atomic conditional update to 'failed' status to prevent overwriting concurrent 'paid' status
+    const updatedPayment = await Payment.findOneAndUpdate(
+        {
+            _id: payment._id,
+            status: { $ne: "paid" }
+        },
+        {
+            $set: {
+                status: "failed",
+                isActive: false, // Release active lock so brand can re-attempt payment
+                razorpayPaymentId: paymentIdVal,
+                transactionId: payment.transactionId || paymentIdVal
+            }
+        },
+        { new: true }
+    );
+
+    // If update returned null, the status was modified concurrently (e.g. marked 'paid' or 'failed')
+    if (!updatedPayment) {
+        const recheck = await Payment.findById(payment._id);
+
+        if (recheck?.status === "paid") {
+            throw createApiError(
+                400,
+                "Payment has already been successfully verified and completed. Cannot mark a completed payment as failed."
+            );
+        }
+
+        if (recheck?.status === "failed") {
+            return {
+                message: "Payment is already marked as failed",
+                payment: recheck
+            };
+        }
+
+        throw createApiError(400, "Failed to update payment status");
     }
 
-    await payment.save();
+    await createNotificationSafe({
+        recipient: brandId,
+        sender: null,
+        type: "payment:failed",
+        title: "Payment Attempt Failed",
+        message: `Your payment attempt of ₹${updatedPayment.amount} was not successful. Please re-attempt from your Payments dashboard.`,
+        entityType: "payment",
+        entityId: updatedPayment._id,
+        destination: "/brand/payments",
+        metadata: {
+            paymentId: updatedPayment._id,
+            amount: updatedPayment.amount,
+            currency: updatedPayment.currency,
+            workspaceId: updatedPayment.workspace
+        },
+        idempotencyKey: `payment:failed:${updatedPayment._id}:${paymentIdVal || updatedPayment.razorpayOrderId || updatedPayment._id}`
+    });
 
     return {
         message: "Payment status updated to failed based on gateway verification",
-        payment
+        payment: updatedPayment
     };
 };
 

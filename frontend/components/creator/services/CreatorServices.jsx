@@ -88,8 +88,11 @@ function RefreshIcon({ className = "w-4 h-4" }) {
 }
 
 function CheckIcon({ className = "w-3.5 h-3.5" }) {
+  const finalClass = className.includes("w-") && className.includes("h-")
+    ? className
+    : `w-3.5 h-3.5 ${className}`.trim();
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <svg className={finalClass} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
     </svg>
   );
@@ -144,6 +147,76 @@ const initialFormState = {
   isActive: true,
 };
 
+const formatDeliverableItem = (item) => {
+  if (!item) return "";
+  if (typeof item === "string") return item.trim();
+  if (typeof item === "object") {
+    const fields = [
+      item.title,
+      item.name,
+      item.type,
+      item.deliverable,
+      item.text,
+      item.label,
+    ];
+    let text = "";
+    for (const field of fields) {
+      if (field != null) {
+        const str = String(field).trim();
+        if (str && str !== "[object Object]") {
+          text = str;
+          break;
+        }
+      }
+    }
+    const rawCount = item.count ?? item.quantity ?? item.amount;
+    const count =
+      rawCount != null && rawCount !== ""
+        ? String(rawCount).trim()
+        : "";
+
+    if (text && count) return `${count} ${text}`;
+    if (text) return text;
+    return "";
+  }
+  return String(item).trim();
+};
+
+const getDeliverablesList = (deliverables) => {
+  if (!deliverables) return [];
+
+  let list = [];
+  if (Array.isArray(deliverables)) {
+    list = deliverables.flat();
+  } else if (typeof deliverables === "string") {
+    const trimmed = deliverables.trim();
+    if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (Array.isArray(parsed)) {
+          list = parsed.flat();
+        } else if (parsed && typeof parsed === "object") {
+          list = [parsed];
+        } else {
+          list = [trimmed];
+        }
+      } catch {
+        list = trimmed.includes(",") ? trimmed.split(",") : [trimmed];
+      }
+    } else if (trimmed.includes(",")) {
+      list = trimmed.split(",");
+    } else if (trimmed) {
+      list = [trimmed];
+    }
+  } else if (typeof deliverables === "object") {
+    list = [deliverables];
+  } else {
+    list = [deliverables];
+  }
+
+  return list.map(formatDeliverableItem).filter(Boolean);
+};
+
 export default function CreatorServices() {
   const dispatch = useDispatch();
   const { services, pagination, loading, error } = useSelector((state) => state.services);
@@ -156,7 +229,7 @@ export default function CreatorServices() {
   const [selectedPlatform, setSelectedPlatform] = useState("All");
   const [selectedStatus, setSelectedStatus] = useState("All");
   const [sortBy, setSortBy] = useState("createdAt");
-  const [sortOrder, setSortOrder] = useState("desc");
+  const [sortOrder] = useState("desc");
   const [currentPage, setCurrentPage] = useState(1);
 
   // Modal Form States
@@ -245,7 +318,7 @@ export default function CreatorServices() {
       currency: service.currency || "INR",
       deliveryTime: typeof service.deliveryTime === "number" ? service.deliveryTime : 7,
       revisions: typeof service.revisions === "number" ? service.revisions : 1,
-      deliverables: Array.isArray(service.deliverables) ? [...service.deliverables] : [],
+      deliverables: getDeliverablesList(service.deliverables),
       isActive: typeof service.isActive === "boolean" ? service.isActive : true,
     });
     setDeliverableInput("");
@@ -673,29 +746,29 @@ export default function CreatorServices() {
                       </div>
 
                       {/* Deliverables List */}
-                      {Array.isArray(service.deliverables) && service.deliverables.length > 0 && (
-                        <div className="pt-2 space-y-1.5">
-                          <span className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary block">
-                            Deliverables ({service.deliverables.length})
-                          </span>
-                          <div className="flex flex-wrap gap-1.5">
-                            {service.deliverables.slice(0, 3).map((item, idx) => (
-                              <span
-                                key={idx}
-                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] bg-surface-muted text-foreground border border-border-theme/80 truncate max-w-[180px]"
-                              >
-                                <CheckIcon className="text-emerald-500 shrink-0" />
-                                <span className="truncate">{item}</span>
-                              </span>
-                            ))}
-                            {service.deliverables.length > 3 && (
-                              <span className="px-2 py-0.5 rounded-md text-[10px] bg-surface-muted text-text-secondary border border-border-theme/80">
-                                +{service.deliverables.length - 3} more
-                              </span>
-                            )}
+                      {(() => {
+                        const validDeliverables = getDeliverablesList(service.deliverables);
+                        if (validDeliverables.length === 0) return null;
+
+                        return (
+                          <div className="space-y-1.5 pt-1">
+                            <span className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary block">
+                              Deliverables ({validDeliverables.length})
+                            </span>
+                            <div className="flex flex-wrap gap-1.5">
+                              {validDeliverables.map((itemText, idx) => (
+                                <span
+                                  key={idx}
+                                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-surface-muted text-foreground border border-border-theme/80"
+                                >
+                                  <CheckIcon className="text-emerald-500 shrink-0 w-3.5 h-3.5" />
+                                  <span className="truncate max-w-[200px]">{itemText}</span>
+                                </span>
+                              ))}
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        );
+                      })()}
                     </div>
 
                     {/* Card Footer Actions */}
@@ -1101,7 +1174,7 @@ export default function CreatorServices() {
             </div>
 
             <p className="text-text-secondary leading-relaxed">
-              Are you sure you want to delete <span className="font-semibold text-foreground">"{deleteConfirmService.title}"</span>?
+              Are you sure you want to delete <span className="font-semibold text-foreground">&quot;{deleteConfirmService.title}&quot;</span>?
             </p>
 
             {deleteError && (

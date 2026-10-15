@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --test",
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "seed:admin": "node src/seed/admin.seed.js"
@@ -25,6 +25,7 @@
     "mongoose": "^9.10.2",
     "multer": "^2.4.0",
     "razorpay": "^2.9.8",
+    "sharp": "^0.35.5",
     "socket.io": "^4.8.4"
   },
   "devDependencies": {

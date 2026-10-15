@@ -2,45 +2,46 @@ import { Readable } from "stream";
 
 import cloudinary from "../../config/cloudinary.js";
 import createApiError from "../ApiError.js";
+import { convertImageToWebp } from "./image.helper.js";
 
 // Default concurrency limit for multiple uploads.
 const DEFAULT_CONCURRENCY = 3;
 
 /**
- * Uploads a single image Buffer to Cloudinary using upload_stream.
+ * Converts an image Buffer to WebP and uploads it to Cloudinary using upload_stream.
  *
  * @param {Buffer} buffer - Image file buffer.
  * @param {string} folder - Target Cloudinary folder path.
  * @returns {Promise<{ url: string, publicId: string }>}
  */
-const uploadImageToCloudinary = (buffer, folder) => {
+const uploadImageToCloudinary = async (buffer, folder) => {
+    // Validate buffer.
+    if (!buffer || !Buffer.isBuffer(buffer) || buffer.length === 0) {
+        throw createApiError(
+            400,
+            "Invalid image buffer provided"
+        );
+    }
+
+    // Validate target folder.
+    if (!folder || typeof folder !== "string" || !folder.trim()) {
+        throw createApiError(
+            400,
+            "A valid upload folder must be specified"
+        );
+    }
+
+    // Convert raw image buffer to optimized WebP buffer (max 2 MiB, auto-rotated, alpha-preserved).
+    const webpBuffer = await convertImageToWebp(buffer);
+
     return new Promise((resolve, reject) => {
-        // Validate buffer.
-        if (!buffer || !Buffer.isBuffer(buffer) || buffer.length === 0) {
-            return reject(
-                createApiError(
-                    400,
-                    "Invalid image buffer provided"
-                )
-            );
-        }
-
-        // Validate target folder.
-        if (!folder || typeof folder !== "string" || !folder.trim()) {
-            return reject(
-                createApiError(
-                    400,
-                    "A valid upload folder must be specified"
-                )
-            );
-        }
-
         let isSettled = false;
 
         const uploadStream = cloudinary.uploader.upload_stream(
             {
                 folder: folder.trim(),
-                resource_type: "image"
+                resource_type: "image",
+                format: "webp"
             },
             (error, result) => {
                 if (isSettled) return;
@@ -83,8 +84,8 @@ const uploadImageToCloudinary = (buffer, folder) => {
             );
         });
 
-        // Stream the buffer to Cloudinary.
-        const readableStream = Readable.from(buffer);
+        // Stream the converted WebP buffer to Cloudinary.
+        const readableStream = Readable.from(webpBuffer);
 
         readableStream.on("error", (streamError) => {
             if (isSettled) return;

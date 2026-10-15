@@ -110,7 +110,7 @@ export default function AboutSharedVision({ ctaHref }) {
               {/* Image Aspect Container */}
               <div className="relative aspect-[4/5] sm:aspect-[3/4] lg:aspect-[4/5] w-full overflow-hidden">
                 <Image
-                  src="https://res.cloudinary.com/atr5osne/image/upload/v1791822005/creatorlink/public/editorial/editorial_abstract_sand_texture.jpg"
+                  src="https://res.cloudinary.com/atr5osne/image/upload/v1792054717/creatorlink/public/editorial/ir7hxl0x2guq9j4yoxto.webp"
                   alt="Cinematic dialogue behind the scenes"
                   fill
                   className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"

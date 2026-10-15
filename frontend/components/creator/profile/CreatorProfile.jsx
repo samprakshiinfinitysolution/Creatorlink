@@ -139,6 +139,8 @@ export default function CreatorProfile() {
   const [submitting, setSubmitting] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadError, setUploadError] = useState("");
+  const [loadedAvatarUrl, setLoadedAvatarUrl] = useState(null);
+  const [failedAvatarUrl, setFailedAvatarUrl] = useState(null);
 
   const fileInputRef = useRef(null);
 
@@ -178,6 +180,11 @@ export default function CreatorProfile() {
     .join("")
     .toUpperCase()
     .slice(0, 2) || "CR";
+
+  const currentAvatarUrl = formData.profileImage || profile?.profileImage;
+  const isAvatarLoaded = loadedAvatarUrl === currentAvatarUrl;
+  const isAvatarError = failedAvatarUrl === currentAvatarUrl;
+  const isAvatarLoading = Boolean(currentAvatarUrl) && !isAvatarLoaded && !isAvatarError;
 
   // Handle Input Changes
   const handleInputChange = (e) => {
@@ -335,17 +342,6 @@ export default function CreatorProfile() {
 
         {/* Profile Main Container */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-6xl w-full mx-auto">
-          {/* Initial Loading Skeleton */}
-          {loading && !profile && (
-            <div className="bg-surface border border-border-theme rounded-2xl p-8 space-y-6 animate-pulse">
-              <div className="h-6 bg-surface-muted rounded-lg w-1/4" />
-              <div className="h-24 bg-surface-muted rounded-xl" />
-              <div className="grid grid-cols-2 gap-4">
-                <div className="h-20 bg-surface-muted rounded-xl" />
-                <div className="h-20 bg-surface-muted rounded-xl" />
-              </div>
-            </div>
-          )}
 
           {/* Toast Notification */}
           {successToast && (
@@ -388,7 +384,51 @@ export default function CreatorProfile() {
             </div>
           )}
 
-          {/* 1. PAGE HEADER */}
+          {loading && !profile ? (
+            /* Comprehensive Profile Layout Skeleton */
+            <div className="space-y-6 animate-pulse">
+              {/* Page Header Skeleton */}
+              <div className="bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="space-y-2">
+                  <div className="h-7 w-40 bg-surface-muted rounded-xl" />
+                  <div className="h-4 w-72 bg-surface-muted rounded-lg" />
+                </div>
+                <div className="h-10 w-32 bg-surface-muted rounded-xl" />
+              </div>
+
+              {/* Profile Overview Hero Card Skeleton */}
+              <div className="bg-surface border border-border-theme rounded-2xl overflow-hidden shadow-xs">
+                <div className="h-20 sm:h-24 bg-surface-muted/60 border-b border-border-theme" />
+                <div className="p-5 sm:p-6 pt-0 relative flex flex-col md:flex-row items-start md:items-center justify-between gap-5 -mt-10 sm:-mt-12">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-5 w-full md:w-auto">
+                    <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-surface-muted border-4 border-surface shadow-sm shrink-0" />
+                    <div className="space-y-2">
+                      <div className="h-6 w-48 bg-surface-muted rounded-lg" />
+                      <div className="h-4 w-36 bg-surface-muted rounded-md" />
+                      <div className="h-5 w-24 bg-surface-muted rounded-full" />
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <div className="h-9 w-24 bg-surface-muted rounded-xl" />
+                    <div className="h-9 w-24 bg-surface-muted rounded-xl" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Form / Details Cards Skeleton */}
+              <div className="bg-surface border border-border-theme rounded-2xl p-6 space-y-4">
+                <div className="h-6 w-48 bg-surface-muted rounded-lg" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="h-12 bg-surface-muted rounded-xl" />
+                  <div className="h-12 bg-surface-muted rounded-xl" />
+                  <div className="h-12 bg-surface-muted rounded-xl" />
+                  <div className="h-12 bg-surface-muted rounded-xl" />
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* 1. PAGE HEADER */}
           <div className="bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="font-serif font-semibold text-2xl sm:text-3xl text-foreground tracking-tight">
@@ -409,11 +449,10 @@ export default function CreatorProfile() {
                     setIsEditing(true);
                   }
                 }}
-                className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all shadow-xs cursor-pointer ${
-                  isEditing
+                className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all shadow-xs cursor-pointer ${isEditing
                     ? "bg-surface-muted border border-border-theme text-foreground hover:bg-surface"
                     : "bg-secondary hover:bg-secondary-dark text-white"
-                }`}
+                  }`}
               >
                 {isEditing ? (
                   <span>Cancel Editing</span>
@@ -446,18 +485,25 @@ export default function CreatorProfile() {
                     className="hidden"
                   />
                   <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-surface border-4 border-surface shadow-sm flex items-center justify-center overflow-hidden relative">
-                    {profile?.profileImage || formData.profileImage ? (
-                      <img
-                        key={formData.profileImage || profile?.profileImage || "avatar"}
-                        src={formData.profileImage || profile.profileImage}
-                        alt={displayName}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.target.style.display = "none";
-                        }}
-                      />
-                    ) : null}
-                    {(!profile?.profileImage && !formData.profileImage) && (
+                    {currentAvatarUrl && !isAvatarError ? (
+                      <>
+                        {isAvatarLoading && (
+                          <div className="absolute inset-0 bg-surface-muted animate-pulse flex items-center justify-center text-text-secondary/40 font-serif font-bold text-2xl">
+                            {initials}
+                          </div>
+                        )}
+                        <img
+                          key={currentAvatarUrl}
+                          src={currentAvatarUrl}
+                          alt={displayName}
+                          onLoad={() => setLoadedAvatarUrl(currentAvatarUrl)}
+                          onError={() => setFailedAvatarUrl(currentAvatarUrl)}
+                          className={`w-full h-full object-cover transition-opacity duration-300 ${
+                            isAvatarLoaded ? "opacity-100" : "opacity-0"
+                          }`}
+                        />
+                      </>
+                    ) : (
                       <div className="w-full h-full bg-secondary/15 text-secondary font-serif font-bold text-2xl sm:text-3xl flex items-center justify-center border border-secondary/30">
                         {initials}
                       </div>
@@ -496,9 +542,8 @@ export default function CreatorProfile() {
                       setIsEditing(true);
                       fileInputRef.current?.click();
                     }}
-                    className={`absolute bottom-0 right-0 p-1.5 rounded-lg bg-surface border border-border-theme text-text-secondary hover:text-foreground hover:bg-surface-muted shadow-xs transition-colors cursor-pointer ${
-                      uploadingImage ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
+                    className={`absolute bottom-0 right-0 p-1.5 rounded-lg bg-surface border border-border-theme text-text-secondary hover:text-foreground hover:bg-surface-muted shadow-xs transition-colors cursor-pointer ${uploadingImage ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
                   >
                     <CameraIcon className="w-3.5 h-3.5" />
                   </button>
@@ -535,16 +580,14 @@ export default function CreatorProfile() {
               {/* RIGHT: Public / Private Status Badge */}
               <div className="flex items-center shrink-0 pt-2 sm:pt-0">
                 <span
-                  className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
-                    formData.isPublic
+                  className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${formData.isPublic
                       ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
                       : "bg-amber-500/10 text-amber-500 border-amber-500/20"
-                  }`}
+                    }`}
                 >
                   <span
-                    className={`w-2 h-2 rounded-full ${
-                      formData.isPublic ? "bg-emerald-500 animate-pulse" : "bg-amber-500"
-                    }`}
+                    className={`w-2 h-2 rounded-full ${formData.isPublic ? "bg-emerald-500 animate-pulse" : "bg-amber-500"
+                      }`}
                   />
                   <span>{formData.isPublic ? "Public Profile" : "Private Profile"}</span>
                 </span>
@@ -889,16 +932,14 @@ export default function CreatorProfile() {
                     <button
                       type="button"
                       onClick={handleToggleVisibility}
-                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                        formData.isPublic ? "bg-secondary" : "bg-surface-muted border-border-theme"
-                      }`}
+                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${formData.isPublic ? "bg-secondary" : "bg-surface-muted border-border-theme"
+                        }`}
                       role="switch"
                       aria-checked={formData.isPublic}
                     >
                       <span
-                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
-                          formData.isPublic ? "translate-x-5" : "translate-x-0"
-                        }`}
+                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${formData.isPublic ? "translate-x-5" : "translate-x-0"
+                          }`}
                       />
                     </button>
                   </div>
@@ -930,10 +971,10 @@ export default function CreatorProfile() {
                       {submitting
                         ? "Saving..."
                         : uploadingImage
-                        ? "Uploading Image..."
-                        : profile
-                        ? "Save Changes"
-                        : "Create Profile"}
+                          ? "Uploading Image..."
+                          : profile
+                            ? "Save Changes"
+                            : "Create Profile"}
                     </span>
                   </button>
 
@@ -949,6 +990,8 @@ export default function CreatorProfile() {
               </div>
             </div>
           </form>
+            </>
+          )}
         </main>
       </div>
     </div>

@@ -54,35 +54,35 @@ const DISCOVERY_CREATORS = [
     niche: "Beauty • 98% Match",
     fee: "₹30,000",
     image:
-      "https://res.cloudinary.com/atr5osne/image/upload/v1791821908/creatorlink/public/avatars/avatar_female_editorial_aarohi.jpg",
+      "https://res.cloudinary.com/atr5osne/image/upload/v1792054698/creatorlink/public/avatars/gye9m9prpdv81gc9ipkp.webp",
   },
   {
     name: "Riya Sharma",
     niche: "Wellness • 92% Match",
     fee: "₹25,000",
     image:
-      "https://res.cloudinary.com/atr5osne/image/upload/v1791821980/creatorlink/public/avatars/avatar_female_portrait_camille.jpg",
+      "https://res.cloudinary.com/atr5osne/image/upload/v1792054701/creatorlink/public/avatars/qooau1mzc4okikpsrqri.webp",
   },
   {
     name: "Maya Kapoor",
     niche: "Lifestyle • 89% Match",
     fee: "₹32,000",
     image:
-      "https://res.cloudinary.com/atr5osne/image/upload/v1791821993/creatorlink/public/avatars/avatar_female_fashion_sora.jpg",
+      "https://res.cloudinary.com/atr5osne/image/upload/v1792054710/creatorlink/public/avatars/ra9dirifievmiawd57yl.webp",
   },
   {
     name: "Anaya Shah",
     niche: "Design • 87% Match",
     fee: "₹18,000",
     image:
-      "https://res.cloudinary.com/atr5osne/image/upload/v1791821988/creatorlink/public/avatars/avatar_male_portrait_marcus.jpg",
+      "https://res.cloudinary.com/atr5osne/image/upload/v1792054706/creatorlink/public/avatars/qvmu4uqdqpexdchfnvys.webp",
   },
   {
     name: "Kiara Jain",
     niche: "Skincare • 94% Match",
     fee: "₹28,000",
     image:
-      "https://res.cloudinary.com/atr5osne/image/upload/v1791822016/creatorlink/public/avatars/avatar_male_professional_david.jpg",
+      "https://res.cloudinary.com/atr5osne/image/upload/v1792054726/creatorlink/public/avatars/ygxg39zcf4is7tn711ez.webp",
   },
 ];
 
@@ -270,7 +270,7 @@ export default function InteractiveJourney() {
 
                     <div className="md:col-span-6">
                       <div className="relative rounded-2xl overflow-hidden border border-border-theme bg-surface-muted aspect-[4/3] group shadow-xs">
-                        <Image src="https://res.cloudinary.com/atr5osne/image/upload/v1791821998/creatorlink/public/editorial/editorial_creator_filming_beauty.jpg" alt="Moodboard" fill className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" sizes="(max-width: 768px) 100vw, 50vw" />
+                        <Image src="https://res.cloudinary.com/atr5osne/image/upload/v1792054714/creatorlink/public/editorial/se3wpecdot8jphnowzci.webp" alt="Moodboard" fill className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" sizes="(max-width: 768px) 100vw, 50vw" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
                         <div className="absolute bottom-4 left-4 right-4 text-left">
                           <p className="text-xs font-semibold text-white font-sans tracking-wide">
@@ -360,7 +360,7 @@ export default function InteractiveJourney() {
                             82% Audience Relevance
                           </span>
                         </div>
-                        <Image src="https://res.cloudinary.com/atr5osne/image/upload/v1791821908/creatorlink/public/avatars/avatar_female_editorial_aarohi.jpg" alt="Aarohi Mehta" width={40} height={40} className="w-10 h-10 rounded-full object-cover border border-border-theme" />
+                        <Image src="https://res.cloudinary.com/atr5osne/image/upload/v1792054698/creatorlink/public/avatars/gye9m9prpdv81gc9ipkp.webp" alt="Aarohi Mehta" width={40} height={40} className="w-10 h-10 rounded-full object-cover border border-border-theme" />
                       </div>
                     </div>
 
@@ -423,7 +423,7 @@ export default function InteractiveJourney() {
                     {/* Left Creator Video Preview Card */}
                     <div className="md:col-span-5">
                       <div className="relative rounded-2xl overflow-hidden border border-border-theme aspect-[3/4] bg-surface-muted group shadow-xs">
-                        <Image src="https://res.cloudinary.com/atr5osne/image/upload/v1791821908/creatorlink/public/avatars/avatar_female_editorial_aarohi.jpg" alt="Content Preview" fill className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" sizes="(max-width: 768px) 100vw, 50vw" />
+                        <Image src="https://res.cloudinary.com/atr5osne/image/upload/v1792054698/creatorlink/public/avatars/gye9m9prpdv81gc9ipkp.webp" alt="Content Preview" fill className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" sizes="(max-width: 768px) 100vw, 50vw" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                         <div className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-white text-[10px] font-bold font-sans">
                           Reel 01 (Draft 4K)

@@ -67,7 +67,7 @@ export default function CreatorIdentity() {
             {/* CARD 1: BEAUTY REEL */}
             <div className="group relative w-full h-[320px] sm:h-[350px] rounded-3xl overflow-hidden bg-slate-100 dark:bg-surface border border-black/[0.06] dark:border-white/10 shadow-sm hover:shadow-xl transition-all duration-300">
               <Image
-                src="https://res.cloudinary.com/atr5osne/image/upload/v1791821998/creatorlink/public/editorial/editorial_creator_filming_beauty.jpg"
+                src="https://res.cloudinary.com/atr5osne/image/upload/v1792054714/creatorlink/public/editorial/se3wpecdot8jphnowzci.webp"
                 alt="Beauty Reel"
                 fill
                 sizes="(max-width: 640px) 100vw, 350px"
@@ -101,7 +101,7 @@ export default function CreatorIdentity() {
             {/* CARD 5: SPACES */}
             <div className="group relative w-full h-[220px] sm:h-[240px] rounded-3xl overflow-hidden bg-slate-100 dark:bg-surface border border-black/[0.06] dark:border-white/10 shadow-sm hover:shadow-xl transition-all duration-300">
               <Image
-                src="https://res.cloudinary.com/atr5osne/image/upload/v1791822036/creatorlink/public/editorial/editorial_minimalist_studio_interior.jpg"
+                src="https://res.cloudinary.com/atr5osne/image/upload/v1792054740/creatorlink/public/editorial/hwajtuk9gwkhujb9glj8.webp"
                 alt="Interior Spaces"
                 fill
                 sizes="(max-width: 640px) 100vw, 350px"
@@ -123,7 +123,7 @@ export default function CreatorIdentity() {
             {/* CARD 2: LOOKBOOK #04 */}
             <div className="group relative w-full h-[566px] sm:h-[617px] rounded-3xl overflow-hidden bg-slate-100 dark:bg-surface border border-black/[0.06] dark:border-white/10 shadow-sm hover:shadow-xl transition-all duration-300">
               <Image
-                src="https://res.cloudinary.com/atr5osne/image/upload/v1791822119/creatorlink/public/editorial/editorial_summer_fashion_pastel.jpg"
+                src="https://res.cloudinary.com/atr5osne/image/upload/v1792055946/creatorlink/public/editorial/pxw6resagifvayqppnqp.webp"
                 alt="Lookbook 04"
                 fill
                 sizes="(max-width: 640px) 100vw, 400px"
@@ -163,7 +163,7 @@ export default function CreatorIdentity() {
               {/* CARD 3: UGC EDITORIAL */}
               <div className="group relative w-full h-[220px] sm:h-[240px] rounded-3xl overflow-hidden bg-slate-100 dark:bg-surface border border-black/[0.06] dark:border-white/10 shadow-sm hover:shadow-xl transition-all duration-300">
                 <Image
-                  src="https://res.cloudinary.com/atr5osne/image/upload/v1791822025/creatorlink/public/campaigns/campaign_water_radiance_cosmetics.jpg"
+                  src="https://res.cloudinary.com/atr5osne/image/upload/v1792054733/creatorlink/public/campaigns/cru8rs8ckm8iszusol6z.webp"
                   alt="UGC Editorial Skincare"
                   fill
                   sizes="(max-width: 640px) 100vw, 350px"
@@ -179,7 +179,7 @@ export default function CreatorIdentity() {
               {/* CARD 4: GASTRONOMY */}
               <div className="group relative w-full h-[220px] sm:h-[240px] rounded-3xl overflow-hidden bg-slate-100 dark:bg-surface border border-black/[0.06] dark:border-white/10 shadow-sm hover:shadow-xl transition-all duration-300">
                 <Image
-                  src="https://res.cloudinary.com/atr5osne/image/upload/v1791822123/creatorlink/public/editorial/editorial_artisan_food_feast.jpg"
+                  src="https://res.cloudinary.com/atr5osne/image/upload/v1792055958/creatorlink/public/editorial/wknylb4namiugiypc1sn.webp"
                   alt="Gastronomy Table"
                   fill
                   sizes="(max-width: 640px) 100vw, 350px"
@@ -202,7 +202,7 @@ export default function CreatorIdentity() {
             {/* BOTTOM ROW (WIDE CAMPAIGN CARD: FEATURED TRIP) */}
             <div className="group relative w-full h-[320px] sm:h-[350px] rounded-3xl overflow-hidden bg-slate-100 dark:bg-surface border border-black/[0.06] dark:border-white/10 shadow-sm hover:shadow-xl transition-all duration-300">
               <Image
-                src="https://res.cloudinary.com/atr5osne/image/upload/v1791822129/creatorlink/public/editorial/editorial_mediterranean_coast_village.jpg"
+                src="https://res.cloudinary.com/atr5osne/image/upload/v1792055986/creatorlink/public/editorial/baenp9gwb0oiigc80uuz.webp"
                 alt="Amalfi Horizon Campaign"
                 fill
                 sizes="(max-width: 640px) 100vw, 700px"

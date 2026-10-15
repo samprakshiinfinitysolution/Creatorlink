@@ -39,7 +39,7 @@ const MONETIZATION_DATA = {
     name: "Juliette Moreau",
     handleLocation: "@juliette.moreau • Paris & New York",
     avatar:
-      "https://res.cloudinary.com/atr5osne/image/upload/v1791821908/creatorlink/public/avatars/avatar_female_editorial_aarohi.jpg",
+      "https://res.cloudinary.com/atr5osne/image/upload/v1792054698/creatorlink/public/avatars/gye9m9prpdv81gc9ipkp.webp",
     initials: "JM",
     pendingLabel: "PENDING ESCROW",
     pendingAmount: "$6,420.00 USD",

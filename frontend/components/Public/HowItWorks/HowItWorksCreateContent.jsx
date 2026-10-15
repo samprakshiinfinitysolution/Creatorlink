@@ -60,7 +60,7 @@ export default function HowItWorksCreateContent() {
             <div className="relative w-full max-w-[380px] sm:max-w-[420px] aspect-[9/14] sm:aspect-[9/13] rounded-[28px] sm:rounded-[36px] overflow-hidden bg-slate-900 shadow-xl hover:-translate-y-[6px] hover:scale-[1.01] hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.3)] transition-all duration-300 ease-out cursor-pointer group text-left">
               
               {/* Static Media Image */}
-              <Image src="https://res.cloudinary.com/atr5osne/image/upload/v1791821998/creatorlink/public/editorial/editorial_creator_filming_beauty.jpg" alt="Creator Filming Content" fill className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500 ease-out" sizes="(max-width: 768px) 100vw, 50vw" />
+              <Image src="https://res.cloudinary.com/atr5osne/image/upload/v1792054714/creatorlink/public/editorial/se3wpecdot8jphnowzci.webp" alt="Creator Filming Content" fill className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500 ease-out" sizes="(max-width: 768px) 100vw, 50vw" />
 
               {/* Gradient Vignette Overlay for Text Contrast */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/30 pointer-events-none" />

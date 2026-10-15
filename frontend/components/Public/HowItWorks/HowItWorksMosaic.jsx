@@ -45,7 +45,7 @@ export default function HowItWorksMosaic() {
             {/* Card 1: Campaign Still */}
             <div className="bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 rounded-2xl overflow-hidden shadow-2xs hover:-translate-y-1 hover:scale-[1.01] hover:border-pink-200 dark:hover:border-pink-500/30 hover:shadow-md transition-all duration-300 ease-out cursor-pointer group text-left">
               <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
-                <Image src="https://res.cloudinary.com/atr5osne/image/upload/v1791822189/creatorlink/public/campaigns/campaign_botanical_silk_serum.jpg" alt="Botanical Silk Serum Macro Campaign still" fill className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500 ease-out" sizes="(max-width: 768px) 100vw, 33vw" />
+                <Image src="https://res.cloudinary.com/atr5osne/image/upload/v1792056018/creatorlink/public/campaigns/kplj9loopnrtw679uypx.webp" alt="Botanical Silk Serum Macro Campaign still" fill className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500 ease-out" sizes="(max-width: 768px) 100vw, 33vw" />
               </div>
 
               <div className="p-4 sm:p-5 bg-white dark:bg-surface border-t border-slate-100 dark:border-white/10">
@@ -101,7 +101,7 @@ export default function HowItWorksMosaic() {
 
               {/* Taller Portrait Image */}
               <div className="relative aspect-[3/3.8] w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
-                <Image src="https://res.cloudinary.com/atr5osne/image/upload/v1791822195/creatorlink/public/creators/creator_editorial_devika_rao.jpg" alt="Devika Rao featured artist editorial" fill className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500 ease-out" sizes="(max-width: 768px) 100vw, 33vw" />
+                <Image src="https://res.cloudinary.com/atr5osne/image/upload/v1792056035/creatorlink/public/creators/ivls2e0jr20rlu4kncza.webp" alt="Devika Rao featured artist editorial" fill className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500 ease-out" sizes="(max-width: 768px) 100vw, 33vw" />
               </div>
 
               <div className="p-4 sm:p-5 bg-white dark:bg-surface border-t border-slate-100 dark:border-white/10">
@@ -136,7 +136,7 @@ export default function HowItWorksMosaic() {
             {/* Card 3: Verified Production */}
             <div className="bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 rounded-2xl overflow-hidden shadow-2xs hover:-translate-y-1 hover:scale-[1.01] hover:border-pink-200 dark:hover:border-pink-500/30 hover:shadow-md transition-all duration-300 ease-out cursor-pointer group text-left">
               <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
-                <Image src="https://res.cloudinary.com/atr5osne/image/upload/v1791822025/creatorlink/public/campaigns/campaign_water_radiance_cosmetics.jpg" alt="Water and Radiance production scene" fill className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500 ease-out" sizes="(max-width: 768px) 100vw, 33vw" />
+                <Image src="https://res.cloudinary.com/atr5osne/image/upload/v1792054733/creatorlink/public/campaigns/cru8rs8ckm8iszusol6z.webp" alt="Water and Radiance production scene" fill className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500 ease-out" sizes="(max-width: 768px) 100vw, 33vw" />
               </div>
 
               <div className="p-4 sm:p-5 bg-white dark:bg-surface border-t border-slate-100 dark:border-white/10">

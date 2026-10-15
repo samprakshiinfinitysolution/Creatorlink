@@ -187,6 +187,51 @@ function BriefcaseIcon({ className = "w-6 h-6" }) {
   );
 }
 
+function ModalPortfolioCover({ cover, title, category }) {
+  const [loadedUrl, setLoadedUrl] = useState(null);
+  const [failedUrl, setFailedUrl] = useState(null);
+
+  const isImgLoaded = loadedUrl === cover;
+  const isImgError = failedUrl === cover;
+  const isImgLoading = Boolean(cover) && !isImgLoaded && !isImgError;
+
+  return (
+    <div className="h-44 w-full bg-surface-muted overflow-hidden relative border-b border-border-theme">
+      {cover && !isImgError ? (
+        <>
+          {isImgLoading && (
+            <div className="absolute inset-0 bg-surface-muted animate-pulse flex items-center justify-center text-text-secondary/30">
+              <SparklesIcon className="w-8 h-8 opacity-30 text-secondary" />
+            </div>
+          )}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            key={cover}
+            src={cover}
+            alt={title || "Portfolio Work"}
+            loading="lazy"
+            decoding="async"
+            onLoad={() => setLoadedUrl(cover)}
+            onError={() => setFailedUrl(cover)}
+            className={`w-full h-full object-cover transition-opacity duration-300 ${
+              isImgLoaded ? "opacity-100" : "opacity-0"
+            }`}
+          />
+        </>
+      ) : (
+        <div className="w-full h-full flex items-center justify-center text-text-secondary">
+          <SparklesIcon className="w-6 h-6 opacity-40 text-secondary" />
+        </div>
+      )}
+      {category && (
+        <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-black/60 text-white backdrop-blur-xs z-10">
+          {category}
+        </span>
+      )}
+    </div>
+  );
+}
+
 // =========================================================
 // MAIN MODAL COMPONENT
 // =========================================================
@@ -202,7 +247,8 @@ export default function BrandCreatorDetailModal({
   );
 
   const [activeTab, setActiveTab] = useState("overview"); // "overview" | "portfolio" | "services"
-  const [profileImgError, setProfileImgError] = useState(false);
+  const [loadedAvatarUrl, setLoadedAvatarUrl] = useState(null);
+  const [failedAvatarUrl, setFailedAvatarUrl] = useState(null);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [selectedServiceForBooking, setSelectedServiceForBooking] = useState(null);
 
@@ -212,7 +258,6 @@ export default function BrandCreatorDetailModal({
       dispatch(fetchBrandCreatorById(creatorId));
       queueMicrotask(() => {
         setActiveTab("overview");
-        setProfileImgError(false);
       });
     }
   }, [dispatch, isOpen, creatorId]);
@@ -242,6 +287,11 @@ export default function BrandCreatorDetailModal({
   if (!isOpen) return null;
 
   const creator = selectedCreator;
+  const avatarUrl = creator?.profileImage;
+  const isProfileImgLoaded = loadedAvatarUrl === avatarUrl;
+  const isProfileImgError = failedAvatarUrl === avatarUrl;
+  const isProfileImgLoading = Boolean(avatarUrl) && !isProfileImgLoaded && !isProfileImgError;
+
   const name = creator?.user?.name || "Creator";
   const initials = getInitials(name);
   const isVerified = Boolean(creator?.user?.isVerified);
@@ -277,48 +327,72 @@ export default function BrandCreatorDetailModal({
       <div className="relative z-10 bg-surface border border-border-theme rounded-2xl max-w-4xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
         {/* Modal Header */}
         <div className="p-4 sm:p-6 border-b border-border-theme bg-surface flex items-start justify-between gap-4">
-          <div className="flex items-center gap-3.5 min-w-0">
-            <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-2xl shrink-0 overflow-hidden bg-surface-muted border border-border-theme flex items-center justify-center font-bold text-sm sm:text-base text-text-secondary">
-              {!profileImgError && creator?.profileImage ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={creator.profileImage}
-                  alt={name}
-                  className="w-full h-full object-cover"
-                  onError={() => setProfileImgError(true)}
-                />
-              ) : (
-                <span>{initials}</span>
-              )}
+          {detailsLoading && !creator ? (
+            <div className="flex items-center gap-3.5 min-w-0 animate-pulse">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-surface-muted shrink-0" />
+              <div className="space-y-2 min-w-0">
+                <div className="flex items-center gap-2">
+                  <div className="h-5 sm:h-6 w-36 bg-surface-muted rounded-md" />
+                  <div className="h-4 w-16 bg-surface-muted rounded-md" />
+                </div>
+                <div className="h-3.5 w-48 bg-surface-muted rounded-md" />
+              </div>
             </div>
-
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <h2 className="font-serif font-semibold text-lg sm:text-xl text-foreground truncate" title={name}>
-                  {name}
-                </h2>
-                {isVerified && (
-                  <span className="text-secondary shrink-0" title="Verified Creator">
-                    <CheckBadgeIcon className="w-5 h-5" />
-                  </span>
+          ) : (
+            <div className="flex items-center gap-3.5 min-w-0">
+              <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-2xl shrink-0 overflow-hidden bg-surface-muted border border-border-theme flex items-center justify-center font-bold text-sm sm:text-base text-text-secondary">
+                {avatarUrl && !isProfileImgError ? (
+                  <>
+                    {isProfileImgLoading && (
+                      <div className="absolute inset-0 bg-surface-muted animate-pulse flex items-center justify-center text-text-secondary/40 font-mono text-xs uppercase">
+                        {initials}
+                      </div>
+                    )}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      key={avatarUrl}
+                      src={avatarUrl}
+                      alt={name}
+                      onLoad={() => setLoadedAvatarUrl(avatarUrl)}
+                      onError={() => setFailedAvatarUrl(avatarUrl)}
+                      className={`w-full h-full object-cover transition-opacity duration-300 ${
+                        isProfileImgLoaded ? "opacity-100" : "opacity-0"
+                      }`}
+                    />
+                  </>
+                ) : (
+                  <span>{initials}</span>
                 )}
-                <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-secondary/10 text-secondary border border-secondary/20">
-                  {category}
-                </span>
               </div>
 
-              <div className="flex items-center gap-3 text-xs text-text-secondary mt-1 flex-wrap">
-                <span className="flex items-center gap-1">
-                  <MapPinIcon className="w-3.5 h-3.5 text-text-secondary" />
-                  <span>{location}</span>
-                </span>
-                <span>•</span>
-                <span>{portfolioItems.length} {portfolioItems.length === 1 ? "Portfolio Item" : "Portfolio Items"}</span>
-                <span>•</span>
-                <span>{servicesItems.length} {servicesItems.length === 1 ? "Active Service" : "Active Services"}</span>
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <h2 className="font-serif font-semibold text-lg sm:text-xl text-foreground truncate" title={name}>
+                    {name}
+                  </h2>
+                  {isVerified && (
+                    <span className="text-secondary shrink-0" title="Verified Creator">
+                      <CheckBadgeIcon className="w-5 h-5" />
+                    </span>
+                  )}
+                  <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-secondary/10 text-secondary border border-secondary/20">
+                    {category}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-3 text-xs text-text-secondary mt-1 flex-wrap">
+                  <span className="flex items-center gap-1">
+                    <MapPinIcon className="w-3.5 h-3.5 text-text-secondary" />
+                    <span>{location}</span>
+                  </span>
+                  <span>•</span>
+                  <span>{portfolioItems.length} {portfolioItems.length === 1 ? "Portfolio Item" : "Portfolio Items"}</span>
+                  <span>•</span>
+                  <span>{servicesItems.length} {servicesItems.length === 1 ? "Active Service" : "Active Services"}</span>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           <button
             type="button"
@@ -335,11 +409,10 @@ export default function BrandCreatorDetailModal({
           <button
             type="button"
             onClick={() => setActiveTab("overview")}
-            className={`py-3 px-3 sm:px-4 text-xs font-semibold border-b-2 transition-colors cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
-              activeTab === "overview"
+            className={`py-3 px-3 sm:px-4 text-xs font-semibold border-b-2 transition-colors cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${activeTab === "overview"
                 ? "border-secondary text-secondary"
                 : "border-transparent text-text-secondary hover:text-foreground"
-            }`}
+              }`}
           >
             <span>Profile & Overview</span>
           </button>
@@ -347,11 +420,10 @@ export default function BrandCreatorDetailModal({
           <button
             type="button"
             onClick={() => setActiveTab("portfolio")}
-            className={`py-3 px-3 sm:px-4 text-xs font-semibold border-b-2 transition-colors cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
-              activeTab === "portfolio"
+            className={`py-3 px-3 sm:px-4 text-xs font-semibold border-b-2 transition-colors cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${activeTab === "portfolio"
                 ? "border-secondary text-secondary"
                 : "border-transparent text-text-secondary hover:text-foreground"
-            }`}
+              }`}
           >
             <span>Portfolio</span>
             <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-surface-muted text-text-secondary border border-border-theme font-medium">
@@ -362,11 +434,10 @@ export default function BrandCreatorDetailModal({
           <button
             type="button"
             onClick={() => setActiveTab("services")}
-            className={`py-3 px-3 sm:px-4 text-xs font-semibold border-b-2 transition-colors cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
-              activeTab === "services"
+            className={`py-3 px-3 sm:px-4 text-xs font-semibold border-b-2 transition-colors cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${activeTab === "services"
                 ? "border-secondary text-secondary"
                 : "border-transparent text-text-secondary hover:text-foreground"
-            }`}
+              }`}
           >
             <span>Services</span>
             <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-surface-muted text-text-secondary border border-border-theme font-medium">
@@ -379,15 +450,18 @@ export default function BrandCreatorDetailModal({
         <div className="p-4 sm:p-6 overflow-y-auto space-y-6 flex-1 custom-scrollbar">
           {/* Loading Skeleton */}
           {detailsLoading && !creator && (
-            <div className="space-y-4 animate-pulse">
-              <div className="h-20 bg-surface-muted rounded-xl" />
+            <div className="space-y-6 animate-pulse">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="h-16 bg-surface-muted rounded-xl" />
-                <div className="h-16 bg-surface-muted rounded-xl" />
-                <div className="h-16 bg-surface-muted rounded-xl" />
-                <div className="h-16 bg-surface-muted rounded-xl" />
+                <div className="h-18 bg-surface-muted rounded-xl" />
+                <div className="h-18 bg-surface-muted rounded-xl" />
+                <div className="h-18 bg-surface-muted rounded-xl" />
+                <div className="h-18 bg-surface-muted rounded-xl" />
               </div>
-              <div className="h-32 bg-surface-muted rounded-xl" />
+              <div className="h-28 bg-surface-muted rounded-2xl" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="h-32 bg-surface-muted rounded-xl" />
+                <div className="h-32 bg-surface-muted rounded-xl" />
+              </div>
             </div>
           )}
 
@@ -549,19 +623,11 @@ export default function BrandCreatorDetailModal({
                             <div>
                               {/* Cover Image Preview */}
                               {cover ? (
-                                <div className="h-44 w-full bg-surface-muted overflow-hidden relative border-b border-border-theme">
-                                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                                  <img
-                                    src={cover}
-                                    alt={item.title || "Portfolio Work"}
-                                    className="w-full h-full object-cover"
-                                  />
-                                  {item.category && (
-                                    <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-black/60 text-white backdrop-blur-xs">
-                                      {item.category}
-                                    </span>
-                                  )}
-                                </div>
+                                <ModalPortfolioCover
+                                  cover={cover}
+                                  title={item.title}
+                                  category={item.category}
+                                />
                               ) : (
                                 <div className="h-28 w-full bg-surface-muted/70 flex items-center justify-center text-text-secondary border-b border-border-theme">
                                   <div className="text-center p-3">
@@ -673,8 +739,8 @@ export default function BrandCreatorDetailModal({
                           service.pricingType === "starting_from"
                             ? "Starting From"
                             : service.pricingType === "custom"
-                            ? "Custom Quote"
-                            : "Fixed Price";
+                              ? "Custom Quote"
+                              : "Fixed Price";
 
                         return (
                           <div

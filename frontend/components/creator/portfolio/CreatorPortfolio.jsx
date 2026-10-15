@@ -88,6 +88,75 @@ function LayersIcon({ className = "w-4 h-4" }) {
   );
 }
 
+function PortfolioCardCover({ coverImage, title, category, isPublic }) {
+  const [loadedUrl, setLoadedUrl] = useState(null);
+  const [failedUrl, setFailedUrl] = useState(null);
+
+  const isImgLoaded = loadedUrl === coverImage;
+  const isImgError = failedUrl === coverImage;
+  const isImgLoading = Boolean(coverImage) && !isImgLoaded && !isImgError;
+
+  return (
+    <div className="relative h-48 sm:h-52 bg-surface-muted overflow-hidden">
+      {coverImage && !isImgError ? (
+        <>
+          {isImgLoading && (
+            <div className="absolute inset-0 bg-surface-muted animate-pulse flex items-center justify-center text-text-secondary/30">
+              <PhotoIcon className="w-10 h-10 opacity-30" />
+            </div>
+          )}
+          <img
+            key={coverImage}
+            src={coverImage}
+            alt={title}
+            loading="lazy"
+            decoding="async"
+            onLoad={() => setLoadedUrl(coverImage)}
+            onError={() => setFailedUrl(coverImage)}
+            className={`w-full h-full object-cover group-hover:scale-105 transition-all duration-300 ${
+              isImgLoaded ? "opacity-100" : "opacity-0"
+            }`}
+          />
+        </>
+      ) : (
+        <div className="w-full h-full flex items-center justify-center text-text-secondary">
+          <PhotoIcon className="w-10 h-10 opacity-40" />
+        </div>
+      )}
+
+      {/* Category Tag Overlay */}
+      {category && (
+        <div className="absolute top-3 left-3 z-10">
+          <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-surface/90 backdrop-blur-xs text-foreground border border-border-theme">
+            {category}
+          </span>
+        </div>
+      )}
+
+      {/* Public / Private Status Overlay */}
+      <div className="absolute top-3 right-3 z-10">
+        <span
+          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold backdrop-blur-xs border ${
+            isPublic
+              ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/30"
+              : "bg-amber-500/10 text-amber-500 border-amber-500/30"
+          }`}
+        >
+          {isPublic ? (
+            <>
+              <EyeIcon className="w-3 h-3" /> Public
+            </>
+          ) : (
+            <>
+              <LockClosedIcon className="w-3 h-3" /> Private
+            </>
+          )}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 const initialFormState = {
   title: "",
   description: "",
@@ -167,12 +236,12 @@ export default function CreatorPortfolio() {
       isPublic: typeof project.isPublic === "boolean" ? project.isPublic : true,
       contents: Array.isArray(project.contents)
         ? project.contents.map((c) => ({
-            platform: c.platform || "instagram",
-            contentType: c.contentType || "post",
-            url: c.url || "",
-            previewImage: c.previewImage || "",
-            title: c.title || "",
-          }))
+          platform: c.platform || "instagram",
+          contentType: c.contentType || "post",
+          url: c.url || "",
+          previewImage: c.previewImage || "",
+          title: c.title || "",
+        }))
         : [],
     });
     setFormError(null);
@@ -306,9 +375,9 @@ export default function CreatorPortfolio() {
     } else {
       setFormError(
         resultAction.payload ||
-          (editingPortfolioId
-            ? "Failed to update portfolio project."
-            : "Failed to create portfolio project.")
+        (editingPortfolioId
+          ? "Failed to update portfolio project."
+          : "Failed to create portfolio project.")
       );
     }
   };
@@ -421,14 +490,33 @@ export default function CreatorPortfolio() {
           {/* 3. LOADING SKELETON STATE */}
           {loading && portfolioItems.length === 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[1, 2, 3].map((i) => (
+              {[1, 2, 3, 4, 5, 6].map((i) => (
                 <div
                   key={i}
-                  className="bg-surface border border-border-theme rounded-2xl overflow-hidden shadow-xs animate-pulse space-y-4 p-4"
+                  className="bg-surface border border-border-theme rounded-2xl overflow-hidden shadow-xs animate-pulse flex flex-col"
                 >
-                  <div className="h-48 bg-surface-muted rounded-xl" />
-                  <div className="h-5 bg-surface-muted rounded-md w-3/4" />
-                  <div className="h-4 bg-surface-muted rounded-md w-full" />
+                  {/* Cover Image Skeleton */}
+                  <div className="h-48 sm:h-52 bg-surface-muted w-full" />
+
+                  {/* Card Details Skeleton */}
+                  <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                    <div className="space-y-2.5">
+                      <div className="h-5 bg-surface-muted rounded-md w-3/4" />
+                      <div className="space-y-1.5">
+                        <div className="h-3.5 bg-surface-muted rounded w-full" />
+                        <div className="h-3.5 bg-surface-muted rounded w-4/5" />
+                      </div>
+                    </div>
+
+                    {/* Meta info & Action Buttons Skeleton */}
+                    <div className="pt-3 border-t border-border-theme flex items-center justify-between">
+                      <div className="h-4 bg-surface-muted rounded w-24" />
+                      <div className="flex items-center gap-1.5">
+                        <div className="h-8 w-8 bg-surface-muted rounded-lg" />
+                        <div className="h-8 w-8 bg-surface-muted rounded-lg" />
+                      </div>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
@@ -440,54 +528,13 @@ export default function CreatorPortfolio() {
                   key={project._id || project.id}
                   className="bg-surface border border-border-theme rounded-2xl overflow-hidden shadow-xs hover:border-secondary/40 transition-all duration-200 flex flex-col group"
                 >
-                  {/* Cover Image Container */}
-                  <div className="relative h-48 sm:h-52 bg-surface-muted overflow-hidden">
-                    {project.coverImage ? (
-                      <img
-                        src={project.coverImage}
-                        alt={project.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        onError={(e) => {
-                          e.target.style.display = "none";
-                        }}
-                      />
-                    ) : null}
-                    {!project.coverImage && (
-                      <div className="w-full h-full flex items-center justify-center text-text-secondary">
-                        <PhotoIcon className="w-10 h-10 opacity-40" />
-                      </div>
-                    )}
-
-                    {/* Category Tag Overlay */}
-                    {project.category && (
-                      <div className="absolute top-3 left-3">
-                        <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-surface/90 backdrop-blur-xs text-foreground border border-border-theme">
-                          {project.category}
-                        </span>
-                      </div>
-                    )}
-
-                    {/* Public / Private Status Overlay */}
-                    <div className="absolute top-3 right-3">
-                      <span
-                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold backdrop-blur-xs border ${
-                          project.isPublic
-                            ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/30"
-                            : "bg-amber-500/10 text-amber-500 border-amber-500/30"
-                        }`}
-                      >
-                        {project.isPublic ? (
-                          <>
-                            <EyeIcon className="w-3 h-3" /> Public
-                          </>
-                        ) : (
-                          <>
-                            <LockClosedIcon className="w-3 h-3" /> Private
-                          </>
-                        )}
-                      </span>
-                    </div>
-                  </div>
+                  {/* Cover Image Container with Per-Image Skeleton */}
+                  <PortfolioCardCover
+                    coverImage={project.coverImage}
+                    title={project.title}
+                    category={project.category}
+                    isPublic={project.isPublic}
+                  />
 
                   {/* Card Details */}
                   <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
@@ -690,14 +737,12 @@ export default function CreatorPortfolio() {
                     onClick={() =>
                       setFormData((prev) => ({ ...prev, isPublic: !prev.isPublic }))
                     }
-                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
-                      formData.isPublic ? "bg-secondary" : "bg-surface-muted border-border-theme"
-                    }`}
+                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${formData.isPublic ? "bg-secondary" : "bg-surface-muted border-border-theme"
+                      }`}
                   >
                     <span
-                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
-                        formData.isPublic ? "translate-x-5" : "translate-x-0"
-                      }`}
+                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${formData.isPublic ? "translate-x-5" : "translate-x-0"
+                        }`}
                     />
                   </button>
                 </div>
@@ -847,8 +892,8 @@ export default function CreatorPortfolio() {
                       ? "Updating..."
                       : "Creating..."
                     : editingPortfolioId
-                    ? "Update Portfolio"
-                    : "Create Portfolio"}
+                      ? "Update Portfolio"
+                      : "Create Portfolio"}
                 </button>
               </div>
             </form>

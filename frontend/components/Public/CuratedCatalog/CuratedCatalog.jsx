@@ -14,7 +14,7 @@ const CREATORS = [
     category: "Haute Fashion",
     location: "Paris, FR",
     image:
-      "https://res.cloudinary.com/atr5osne/image/upload/v1791821908/creatorlink/public/avatars/avatar_female_editorial_aarohi.jpg",
+      "https://res.cloudinary.com/atr5osne/image/upload/v1792054698/creatorlink/public/avatars/gye9m9prpdv81gc9ipkp.webp",
     badge: "TRENDING #1",
     badgeColor: "bg-secondary text-white",
     fit: "98% Fit",
@@ -30,7 +30,7 @@ const CREATORS = [
     category: "Beauty & Editorial",
     location: "Milan, IT",
     image:
-      "https://res.cloudinary.com/atr5osne/image/upload/v1791821980/creatorlink/public/avatars/avatar_female_portrait_camille.jpg",
+      "https://res.cloudinary.com/atr5osne/image/upload/v1792054701/creatorlink/public/avatars/qooau1mzc4okikpsrqri.webp",
     badge: "LIVE COLLAB",
     badgeColor: "bg-emerald-500 text-white dark:bg-emerald-600",
     fit: "96% Fit",
@@ -46,7 +46,7 @@ const CREATORS = [
     category: "Minimal Tech",
     location: "Tokyo, JP",
     image:
-      "https://res.cloudinary.com/atr5osne/image/upload/v1791821988/creatorlink/public/avatars/avatar_male_portrait_marcus.jpg",
+      "https://res.cloudinary.com/atr5osne/image/upload/v1792054706/creatorlink/public/avatars/qvmu4uqdqpexdchfnvys.webp",
     badge: "VERIFIED PRO",
     badgeColor: "bg-tertiary text-white dark:bg-purple-600",
     fit: "99% Fit",
@@ -62,7 +62,7 @@ const CREATORS = [
     category: "Fine Art & Travel",
     location: "Stockholm, SE",
     image:
-      "https://res.cloudinary.com/atr5osne/image/upload/v1791821993/creatorlink/public/avatars/avatar_female_fashion_sora.jpg",
+      "https://res.cloudinary.com/atr5osne/image/upload/v1792054710/creatorlink/public/avatars/ra9dirifievmiawd57yl.webp",
     badge: "FAST RESPONSE",
     badgeColor: "bg-amber-500 text-white dark:bg-amber-600",
     fit: "94% Fit",

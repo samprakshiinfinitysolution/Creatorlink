@@ -53,7 +53,7 @@ export default function AboutPerspectives() {
               {/* Image Frame */}
               <div className="relative w-full h-52 sm:h-64 rounded-2xl sm:rounded-3xl overflow-hidden mb-6 shadow-md border border-border-theme">
                 <Image
-                  src="https://res.cloudinary.com/atr5osne/image/upload/v1791822036/creatorlink/public/editorial/editorial_minimalist_studio_interior.jpg"
+                  src="https://res.cloudinary.com/atr5osne/image/upload/v1792054740/creatorlink/public/editorial/hwajtuk9gwkhujb9glj8.webp"
                   alt="Curated Lookbook for Brands"
                   fill
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
@@ -108,7 +108,7 @@ export default function AboutPerspectives() {
               {/* Image Frame */}
               <div className="relative w-full h-52 sm:h-64 rounded-2xl sm:rounded-3xl overflow-hidden mb-6 shadow-md border border-border-theme">
                 <Image
-                  src="https://res.cloudinary.com/atr5osne/image/upload/v1791822005/creatorlink/public/editorial/editorial_abstract_sand_texture.jpg"
+                  src="https://res.cloudinary.com/atr5osne/image/upload/v1792054717/creatorlink/public/editorial/ir7hxl0x2guq9j4yoxto.webp"
                   alt="Auteur Profile for Creators"
                   fill
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"

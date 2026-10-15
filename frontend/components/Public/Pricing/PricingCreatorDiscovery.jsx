@@ -18,7 +18,7 @@ export default function PricingCreatorDiscovery() {
       engagement: "6.8%",
       avgViews: "42K",
       buttonLabel: "View Media Kit",
-      image: "https://res.cloudinary.com/atr5osne/image/upload/v1791821908/creatorlink/public/avatars/avatar_female_editorial_aarohi.jpg",
+      image: "https://res.cloudinary.com/atr5osne/image/upload/v1792054698/creatorlink/public/avatars/gye9m9prpdv81gc9ipkp.webp",
     },
     {
       id: "camille",
@@ -30,7 +30,7 @@ export default function PricingCreatorDiscovery() {
       engagement: "8.2%",
       avgViews: "61K",
       buttonLabel: "Send Invitation",
-      image: "https://res.cloudinary.com/atr5osne/image/upload/v1791822045/creatorlink/public/creators/creator_fashion_chloe_bennett.jpg",
+      image: "https://res.cloudinary.com/atr5osne/image/upload/v1792054750/creatorlink/public/creators/wgh3norjnvhnlp2jlfhl.webp",
     },
     {
       id: "sora",
@@ -42,7 +42,7 @@ export default function PricingCreatorDiscovery() {
       engagement: "5.4%",
       avgViews: "94K",
       buttonLabel: "View Media Kit",
-      image: "https://res.cloudinary.com/atr5osne/image/upload/v1791821993/creatorlink/public/avatars/avatar_female_fashion_sora.jpg",
+      image: "https://res.cloudinary.com/atr5osne/image/upload/v1792054710/creatorlink/public/avatars/ra9dirifievmiawd57yl.webp",
     },
   ];
 

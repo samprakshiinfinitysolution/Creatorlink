@@ -134,7 +134,7 @@ export default function CreatorsHero() {
             <div className="bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 rounded-2xl p-3 inline-flex items-center gap-3.5 shadow-sm hover:shadow-md transition-shadow duration-200">
               <div className="relative w-11 h-11 rounded-full overflow-hidden flex-shrink-0 bg-slate-100">
                 <Image
-                  src="https://res.cloudinary.com/atr5osne/image/upload/v1791822049/creatorlink/public/creators/creator_editorial_maya_lin.jpg"
+                  src="https://res.cloudinary.com/atr5osne/image/upload/v1792054754/creatorlink/public/creators/asaeu3b0m8gtfekaphzu.webp"
                   alt="Aarohi Mehta"
                   fill
                   sizes="44px"
@@ -170,10 +170,10 @@ export default function CreatorsHero() {
               {/* Main Rounded Portrait Visual with Subtle Hover Zoom */}
               <div className="group/main relative w-full h-[350px] min-[380px]:h-[390px] sm:h-[590px] rounded-[28px] sm:rounded-[40px] overflow-hidden shadow-2xl hover:shadow-[0_25px_50px_-12px_rgba(255,79,135,0.18)] dark:hover:shadow-secondary/20 transition-all duration-500 ease-out bg-slate-200 dark:bg-surface border border-white/60 dark:border-white/10">
                 <Image
-                  src="https://res.cloudinary.com/atr5osne/image/upload/v1791822049/creatorlink/public/creators/creator_editorial_maya_lin.jpg"
+                  src="https://res.cloudinary.com/atr5osne/image/upload/v1792054754/creatorlink/public/creators/asaeu3b0m8gtfekaphzu.webp"
                   alt="Aarohi Mehta - Digital Creator"
                   fill
-                  priority
+                  preload
                   sizes="(max-width: 768px) 100vw, 520px"
                   className="object-cover object-[center_20%] sm:object-center group-hover/main:scale-[1.025] transition-transform duration-500 ease-out"
                 />
@@ -198,7 +198,7 @@ export default function CreatorsHero() {
               <div className="absolute -left-3 min-[380px]:-left-5 sm:-left-12 top-3 sm:top-10 w-22 min-[380px]:w-26 sm:w-40 h-16 min-[380px]:h-20 sm:h-30 rounded-xl sm:rounded-2xl border-2 sm:border-4 border-white dark:border-surface bg-white dark:bg-surface shadow-xl overflow-hidden creator-float-card-1 z-20">
                 <div className="relative w-full h-full">
                   <Image
-                    src="https://res.cloudinary.com/atr5osne/image/upload/v1791822053/creatorlink/public/editorial/editorial_travel_tropical_coast.jpg"
+                    src="https://res.cloudinary.com/atr5osne/image/upload/v1792054758/creatorlink/public/editorial/avjxgors8karuxcb8p43.webp"
                     alt="Coastal Terrace View"
                     fill
                     sizes="(max-width: 640px) 104px, 160px"
@@ -213,7 +213,7 @@ export default function CreatorsHero() {
                 <div className="w-8 h-2.5 bg-pink-200/90 dark:bg-secondary/40 rounded-sm absolute -top-1 left-1/2 -translate-x-1/2 z-30 shadow-xs" />
                 <div className="relative w-full h-full">
                   <Image
-                    src="https://res.cloudinary.com/atr5osne/image/upload/v1791822041/creatorlink/public/campaigns/campaign_french_perfume_glass.jpg"
+                    src="https://res.cloudinary.com/atr5osne/image/upload/v1792054745/creatorlink/public/campaigns/tt4slqpoo1tprmx7ndss.webp"
                     alt="Coffee and linen setup"
                     fill
                     sizes="(max-width: 640px) 96px, 144px"
@@ -226,7 +226,7 @@ export default function CreatorsHero() {
               <div className="absolute -right-3 min-[380px]:-right-5 sm:-right-8 bottom-3 sm:bottom-10 w-22 min-[380px]:w-26 sm:w-40 h-16 min-[380px]:h-20 sm:h-30 rounded-xl sm:rounded-2xl border-2 sm:border-4 border-white dark:border-surface bg-white dark:bg-surface shadow-xl overflow-hidden creator-float-card-3 z-20">
                 <div className="relative w-full h-full">
                   <Image
-                    src="https://res.cloudinary.com/atr5osne/image/upload/v1791822136/creatorlink/public/campaigns/campaign_modern_ceramic_vessels.jpg"
+                    src="https://res.cloudinary.com/atr5osne/image/upload/v1792054860/creatorlink/public/campaigns/tmkqzb5b64olyrrvyscm.webp"
                     alt="Texture Detail"
                     fill
                     sizes="(max-width: 640px) 104px, 160px"

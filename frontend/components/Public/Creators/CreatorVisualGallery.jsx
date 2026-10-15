@@ -9,7 +9,7 @@ export default function CreatorVisualGallery() {
     // TOP ROW (Items 1 - 5)
     {
       id: 1,
-      src: "https://res.cloudinary.com/atr5osne/image/upload/v1791822008/creatorlink/public/creators/creator_fashion_lucian_moreau.jpg",
+      src: "https://res.cloudinary.com/atr5osne/image/upload/v1792054721/creatorlink/public/creators/lyhqi3si95n8so90e1gl.webp",
       alt: "Fashion & Art Gallery Creator",
       handle: "@serena.gallery",
       category: "EDITORIAL",
@@ -17,7 +17,7 @@ export default function CreatorVisualGallery() {
     },
     {
       id: 2,
-      src: "https://res.cloudinary.com/atr5osne/image/upload/v1791822141/creatorlink/public/editorial/editorial_artisan_rustic_bread.jpg",
+      src: "https://res.cloudinary.com/atr5osne/image/upload/v1792056000/creatorlink/public/editorial/tmvytlc1dprhgkrn5del.webp",
       alt: "Slow Living & Artisanal Morning Breakfast",
       handle: "@slow.kitchen",
       category: "SLOW LIVING",
@@ -25,7 +25,7 @@ export default function CreatorVisualGallery() {
     },
     {
       id: 3,
-      src: "https://res.cloudinary.com/atr5osne/image/upload/v1791822147/creatorlink/public/editorial/editorial_tropical_palms_sunset.jpg",
+      src: "https://res.cloudinary.com/atr5osne/image/upload/v1792054885/creatorlink/public/editorial/o5nw5mti6eh115xsuxfj.webp",
       alt: "Coastal Lifestyle Overlooking Amalfi Coast",
       handle: "@journey.with.maya",
       category: "TRAVEL",
@@ -33,7 +33,7 @@ export default function CreatorVisualGallery() {
     },
     {
       id: 4,
-      src: "https://res.cloudinary.com/atr5osne/image/upload/v1791822149/creatorlink/public/campaigns/campaign_skincare_stone_pedestal.jpg",
+      src: "https://res.cloudinary.com/atr5osne/image/upload/v1792054891/creatorlink/public/campaigns/l3ga6hm8eeyh0b4glc2o.webp",
       alt: "Macro Skincare Dew Droplet Detail",
       handle: "@botanical.dew",
       category: "BEAUTY",
@@ -41,7 +41,7 @@ export default function CreatorVisualGallery() {
     },
     {
       id: 5,
-      src: "https://res.cloudinary.com/atr5osne/image/upload/v1791822153/creatorlink/public/editorial/editorial_concrete_pavilion_architecture.jpg",
+      src: "https://res.cloudinary.com/atr5osne/image/upload/v1792054897/creatorlink/public/editorial/mhkn5bujhgmqdurgheqz.webp",
       alt: "Minimalist Serene Living Lounge Interior",
       handle: "@minimal.sanctuary",
       category: "ARCHITECTURE",
@@ -51,7 +51,7 @@ export default function CreatorVisualGallery() {
     // BOTTOM ROW (Items 6 - 10)
     {
       id: 6,
-      src: "https://res.cloudinary.com/atr5osne/image/upload/v1791821908/creatorlink/public/avatars/avatar_female_editorial_aarohi.jpg",
+      src: "https://res.cloudinary.com/atr5osne/image/upload/v1792054698/creatorlink/public/avatars/gye9m9prpdv81gc9ipkp.webp",
       alt: "Coffee & Creative Lifestyle Creator at Workspace",
       handle: "@aarohi.mehta",
       category: "CREATOR",
@@ -59,7 +59,7 @@ export default function CreatorVisualGallery() {
     },
     {
       id: 7,
-      src: "https://res.cloudinary.com/atr5osne/image/upload/v1791822156/creatorlink/public/campaigns/campaign_minimalist_sneaker_footwear.jpg",
+      src: "https://res.cloudinary.com/atr5osne/image/upload/v1792054902/creatorlink/public/campaigns/vgtcgq8lejpxdavms5ku.webp",
       alt: "Handcrafted Leather Sandals on Sunset Beach Sand",
       handle: "@sol.atelier",
       category: "CRAFT",
@@ -67,7 +67,7 @@ export default function CreatorVisualGallery() {
     },
     {
       id: 8,
-      src: "https://res.cloudinary.com/atr5osne/image/upload/v1791822163/creatorlink/public/editorial/editorial_abstract_fine_art_canvas.jpg",
+      src: "https://res.cloudinary.com/atr5osne/image/upload/v1792054913/creatorlink/public/editorial/hr87whbaii0lozxsyzyd.webp",
       alt: "Female Artist Painting in Sunlit Studio",
       handle: "@canvas.notes",
       category: "STUDIO",
@@ -75,7 +75,7 @@ export default function CreatorVisualGallery() {
     },
     {
       id: 9,
-      src: "https://res.cloudinary.com/atr5osne/image/upload/v1791822170/creatorlink/public/campaigns/campaign_handmade_gold_jewelry.jpg",
+      src: "https://res.cloudinary.com/atr5osne/image/upload/v1792054919/creatorlink/public/campaigns/eocmumqyfn0jr0ryguxl.webp",
       alt: "Layered Gold Necklaces Fine Jewelry Detail",
       handle: "@luxe.details",
       category: "QUIET LUXURY",
@@ -83,7 +83,7 @@ export default function CreatorVisualGallery() {
     },
     {
       id: 10,
-      src: "https://res.cloudinary.com/atr5osne/image/upload/v1791822173/creatorlink/public/campaigns/campaign_luxury_sports_car_silhouette.jpg",
+      src: "https://res.cloudinary.com/atr5osne/image/upload/v1792054924/creatorlink/public/campaigns/dhmyvkdz6gcjmjbij8vz.webp",
       alt: "Vintage Convertible Drive Along Coastal Cliff",
       handle: "ESCAPE",
       category: "ESCAPE",

@@ -167,7 +167,13 @@ const SORT_OPTIONS = [
 // CREATOR CARD COMPONENT
 // =========================================================
 function CreatorCard({ creator, onViewProfile }) {
-  const [imgError, setImgError] = useState(false);
+  const avatarUrl = creator.profileImage;
+  const [loadedUrl, setLoadedUrl] = useState(null);
+  const [failedUrl, setFailedUrl] = useState(null);
+
+  const isImgLoaded = loadedUrl === avatarUrl;
+  const isImgError = failedUrl === avatarUrl;
+  const isImgLoading = Boolean(avatarUrl) && !isImgLoaded && !isImgError;
 
   const name = creator.user?.name || "Creator";
   const initials = getInitials(name);
@@ -190,14 +196,27 @@ function CreatorCard({ creator, onViewProfile }) {
         {/* Top Header: Avatar + Name + Category */}
         <div className="flex items-start gap-3.5 mb-3.5">
           <div className="relative w-12 h-12 rounded-xl shrink-0 overflow-hidden bg-surface-muted border border-border-theme flex items-center justify-center font-bold text-sm text-text-secondary">
-            {!imgError && creator.profileImage ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={creator.profileImage}
-                alt={name}
-                className="w-full h-full object-cover"
-                onError={() => setImgError(true)}
-              />
+            {avatarUrl && !isImgError ? (
+              <>
+                {isImgLoading && (
+                  <div className="absolute inset-0 bg-surface-muted animate-pulse flex items-center justify-center text-text-secondary/40 font-mono text-[10px] uppercase">
+                    {initials}
+                  </div>
+                )}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  key={avatarUrl}
+                  src={avatarUrl}
+                  alt={name}
+                  loading="lazy"
+                  decoding="async"
+                  onLoad={() => setLoadedUrl(avatarUrl)}
+                  onError={() => setFailedUrl(avatarUrl)}
+                  className={`w-full h-full object-cover transition-opacity duration-300 ${
+                    isImgLoaded ? "opacity-100" : "opacity-0"
+                  }`}
+                />
+              </>
             ) : (
               <span>{initials}</span>
             )}

@@ -11,7 +11,7 @@ export default function HowItWorksDiscovery() {
       info: "24.8K · Clean Beauty",
       match: "92% MATCH",
       badgeStyle: "bg-[#FCE7F3] dark:bg-secondary/30 text-secondary dark:text-pink-100 border border-pink-200/60 dark:border-pink-500/20",
-      image: "https://res.cloudinary.com/atr5osne/image/upload/v1791821908/creatorlink/public/avatars/avatar_female_editorial_aarohi.jpg",
+      image: "https://res.cloudinary.com/atr5osne/image/upload/v1792054698/creatorlink/public/avatars/gye9m9prpdv81gc9ipkp.webp",
       staggerClass: "lg:translate-y-4",
     },
     {
@@ -20,7 +20,7 @@ export default function HowItWorksDiscovery() {
       info: "52.0K · Lifestyle & Art",
       match: "96% MATCH",
       badgeStyle: "bg-white/95 dark:bg-slate-900/95 text-slate-900 dark:text-foreground border border-slate-200/80 dark:border-white/10",
-      image: "https://res.cloudinary.com/atr5osne/image/upload/v1791821980/creatorlink/public/avatars/avatar_female_portrait_camille.jpg",
+      image: "https://res.cloudinary.com/atr5osne/image/upload/v1792054701/creatorlink/public/avatars/qooau1mzc4okikpsrqri.webp",
       staggerClass: "lg:-translate-y-2",
     },
     {
@@ -29,7 +29,7 @@ export default function HowItWorksDiscovery() {
       info: "86.0K · Haute Fashion",
       match: "89% MATCH",
       badgeStyle: "bg-white/95 dark:bg-slate-900/95 text-slate-900 dark:text-foreground border border-slate-200/80 dark:border-white/10",
-      image: "https://res.cloudinary.com/atr5osne/image/upload/v1791822185/creatorlink/public/avatars/avatar_female_creative_elena.jpg",
+      image: "https://res.cloudinary.com/atr5osne/image/upload/v1792056014/creatorlink/public/avatars/bqycu9zbswhrpnc7aznv.webp",
       staggerClass: "lg:translate-y-2",
     },
   ];

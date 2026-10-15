@@ -110,6 +110,8 @@ export default function BrandProfileForm() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const [loadedLogoUrl, setLoadedLogoUrl] = useState(null);
+  const [failedLogoUrl, setFailedLogoUrl] = useState(null);
 
   const dispatch = useDispatch();
   const { profile, loading, error } = useSelector(
@@ -280,6 +282,11 @@ export default function BrandProfileForm() {
     formData.contactInformation?.email || profile?.contactInformation?.email
   );
 
+  const currentLogoUrl = formData.logo || profile?.logo;
+  const isLogoLoaded = loadedLogoUrl === currentLogoUrl;
+  const isLogoError = failedLogoUrl === currentLogoUrl;
+  const isLogoLoading = Boolean(currentLogoUrl) && !isLogoLoaded && !isLogoError;
+
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
       {/* Sidebar Component */}
@@ -292,7 +299,7 @@ export default function BrandProfileForm() {
 
         {/* Profile Main Container */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 max-w-4xl w-full mx-auto">
-          
+
           {/* Section Heading */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
@@ -337,12 +344,25 @@ export default function BrandProfileForm() {
 
           {/* Initial Loading Skeleton */}
           {loading && !profile && (
-            <div className="bg-surface border border-border-theme rounded-2xl p-6 space-y-6 animate-pulse">
-              <div className="h-6 bg-surface-muted rounded-md w-1/3" />
-              <div className="space-y-4">
-                <div className="h-10 bg-surface-muted rounded-xl w-full" />
-                <div className="h-24 bg-surface-muted rounded-xl w-full" />
-                <div className="h-10 bg-surface-muted rounded-xl w-full" />
+            <div className="space-y-6 animate-pulse">
+              {/* Profile Banner Skeleton */}
+              <div className="bg-surface border border-border-theme rounded-2xl p-6 sm:p-8 shadow-xs flex flex-col sm:flex-row items-start sm:items-center gap-6">
+                <div className="w-20 h-20 rounded-2xl bg-surface-muted shrink-0" />
+                <div className="space-y-2 flex-1 w-full">
+                  <div className="h-7 w-48 bg-surface-muted rounded-lg" />
+                  <div className="h-4 w-72 bg-surface-muted rounded-md" />
+                </div>
+              </div>
+
+              {/* Company Details Skeleton */}
+              <div className="bg-surface border border-border-theme rounded-2xl p-6 sm:p-8 space-y-4">
+                <div className="h-6 w-40 bg-surface-muted rounded-md" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="h-10 bg-surface-muted rounded-xl" />
+                  <div className="h-10 bg-surface-muted rounded-xl" />
+                  <div className="h-10 bg-surface-muted rounded-xl" />
+                  <div className="h-10 bg-surface-muted rounded-xl" />
+                </div>
               </div>
             </div>
           )}
@@ -352,16 +372,28 @@ export default function BrandProfileForm() {
           {/* ========================================================= */}
           {!loading && profile && !isEditing && (
             <div className="space-y-8">
-              
+
               {/* 1. Profile Banner Header Card */}
               <div className="bg-surface border border-border-theme rounded-2xl p-6 sm:p-8 shadow-xs flex flex-col sm:flex-row items-start sm:items-center gap-6">
                 {/* Logo Image / Initials Fallback */}
-                {formData.logo || profile.logo ? (
-                  <img
-                    src={formData.logo || profile.logo}
-                    alt={formData.companyName || profile.companyName || "Brand Logo"}
-                    className="w-20 h-20 rounded-2xl object-cover border border-border-theme shrink-0"
-                  />
+                {currentLogoUrl && !isLogoError ? (
+                  <div className="relative w-20 h-20 rounded-2xl overflow-hidden border border-border-theme shrink-0 bg-surface-muted flex items-center justify-center">
+                    {isLogoLoading && (
+                      <div className="absolute inset-0 bg-surface-muted animate-pulse flex items-center justify-center text-text-secondary/40 font-serif font-bold text-2xl uppercase">
+                        {initials}
+                      </div>
+                    )}
+                    <img
+                      key={currentLogoUrl}
+                      src={currentLogoUrl}
+                      alt={formData.companyName || profile?.companyName || "Brand Logo"}
+                      onLoad={() => setLoadedLogoUrl(currentLogoUrl)}
+                      onError={() => setFailedLogoUrl(currentLogoUrl)}
+                      className={`w-full h-full object-cover transition-opacity duration-300 ${
+                        isLogoLoaded ? "opacity-100" : "opacity-0"
+                      }`}
+                    />
+                  </div>
                 ) : (
                   <div className="w-20 h-20 rounded-2xl bg-secondary/15 text-secondary font-serif font-bold text-2xl flex items-center justify-center border border-secondary/30 shrink-0 uppercase">
                     {initials}
@@ -587,7 +619,7 @@ export default function BrandProfileForm() {
           {/* ========================================================= */}
           {(!loading || profile) && isEditing && (
             <form onSubmit={handleSubmit} className="space-y-8">
-              
+
               {/* 1. Company Details Card */}
               <div className="bg-surface border border-border-theme rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
                 <div className="flex items-center gap-3 border-b border-border-theme pb-4">

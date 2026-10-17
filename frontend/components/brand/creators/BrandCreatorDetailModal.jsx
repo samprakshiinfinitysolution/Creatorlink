@@ -242,9 +242,10 @@ export default function BrandCreatorDetailModal({
 }) {
   const dispatch = useDispatch();
 
-  const { selectedCreator, detailsLoading, error } = useSelector(
+  const { selectedCreator, detailsLoading, detailsError, error: listError } = useSelector(
     (state) => state.brandCreators || {}
   );
+  const error = detailsError ?? listError;
 
   const [activeTab, setActiveTab] = useState("overview"); // "overview" | "portfolio" | "services"
   const [loadedAvatarUrl, setLoadedAvatarUrl] = useState(null);
@@ -265,11 +266,15 @@ export default function BrandCreatorDetailModal({
   const handleClose = () => {
     if (isBookingModalOpen) return;
     dispatch(clearSelectedCreator());
+    setLoadedAvatarUrl(null);
+    setFailedAvatarUrl(null);
     onClose();
   };
 
   const handleRetry = () => {
     if (creatorId) {
+      setLoadedAvatarUrl(null);
+      setFailedAvatarUrl(null);
       dispatch(fetchBrandCreatorById(creatorId));
     }
   };
@@ -286,11 +291,12 @@ export default function BrandCreatorDetailModal({
 
   if (!isOpen) return null;
 
-  const creator = selectedCreator;
-  const avatarUrl = creator?.profileImage;
-  const isProfileImgLoaded = loadedAvatarUrl === avatarUrl;
-  const isProfileImgError = failedAvatarUrl === avatarUrl;
-  const isProfileImgLoading = Boolean(avatarUrl) && !isProfileImgLoaded && !isProfileImgError;
+  const isCorrectCreator = Boolean(creatorId) && (selectedCreator?._id === creatorId || selectedCreator?.id === creatorId);
+  const creator = isCorrectCreator ? selectedCreator : null;
+  const cleanAvatarUrl = typeof creator?.profileImage === "string" ? creator.profileImage.trim() : "";
+  const isProfileImgLoaded = Boolean(cleanAvatarUrl) && loadedAvatarUrl === cleanAvatarUrl;
+  const isProfileImgError = Boolean(cleanAvatarUrl) && failedAvatarUrl === cleanAvatarUrl;
+  const isProfileImgLoading = Boolean(cleanAvatarUrl) && !isProfileImgLoaded && !isProfileImgError;
 
   const name = creator?.user?.name || "Creator";
   const initials = getInitials(name);
@@ -341,7 +347,7 @@ export default function BrandCreatorDetailModal({
           ) : (
             <div className="flex items-center gap-3.5 min-w-0">
               <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-2xl shrink-0 overflow-hidden bg-surface-muted border border-border-theme flex items-center justify-center font-bold text-sm sm:text-base text-text-secondary">
-                {avatarUrl && !isProfileImgError ? (
+                {cleanAvatarUrl && !isProfileImgError ? (
                   <>
                     {isProfileImgLoading && (
                       <div className="absolute inset-0 bg-surface-muted animate-pulse flex items-center justify-center text-text-secondary/40 font-mono text-xs uppercase">
@@ -350,11 +356,11 @@ export default function BrandCreatorDetailModal({
                     )}
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      key={avatarUrl}
-                      src={avatarUrl}
+                      key={cleanAvatarUrl}
+                      src={cleanAvatarUrl}
                       alt={name}
-                      onLoad={() => setLoadedAvatarUrl(avatarUrl)}
-                      onError={() => setFailedAvatarUrl(avatarUrl)}
+                      onLoad={() => setLoadedAvatarUrl(cleanAvatarUrl)}
+                      onError={() => setFailedAvatarUrl(cleanAvatarUrl)}
                       className={`w-full h-full object-cover transition-opacity duration-300 ${
                         isProfileImgLoaded ? "opacity-100" : "opacity-0"
                       }`}

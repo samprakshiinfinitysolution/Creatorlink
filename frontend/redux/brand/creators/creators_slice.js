@@ -50,7 +50,8 @@ const initialState = {
     pagination: null,
     loading: false,
     detailsLoading: false,
-    error: null
+    error: null,
+    detailsError: null
 };
 
 const brandCreatorsSlice = createSlice({
@@ -59,9 +60,11 @@ const brandCreatorsSlice = createSlice({
     reducers: {
         clearSelectedCreator: (state) => {
             state.selectedCreator = null;
+            state.detailsError = null;
         },
         clearCreatorError: (state) => {
             state.error = null;
+            state.detailsError = null;
         },
         clearCreatorsState: (state) => {
             state.creators = [];
@@ -70,6 +73,7 @@ const brandCreatorsSlice = createSlice({
             state.loading = false;
             state.detailsLoading = false;
             state.error = null;
+            state.detailsError = null;
         }
     },
     extraReducers: (builder) => {
@@ -92,20 +96,17 @@ const brandCreatorsSlice = createSlice({
 
             // Fetch Brand Creator By ID
             .addCase(fetchBrandCreatorById.pending, (state) => {
-                state.loading = true;
                 state.detailsLoading = true;
-                state.error = null;
+                state.detailsError = null;
             })
             .addCase(fetchBrandCreatorById.fulfilled, (state, action) => {
-                state.loading = false;
                 state.detailsLoading = false;
                 state.selectedCreator = action.payload?.data || null;
-                state.error = null;
+                state.detailsError = null;
             })
             .addCase(fetchBrandCreatorById.rejected, (state, action) => {
-                state.loading = false;
                 state.detailsLoading = false;
-                state.error = action.payload || action.error?.message || "Unable to fetch creator details";
+                state.detailsError = action.payload || action.error?.message || "Unable to fetch creator details";
             })
 
             // Clear state on auth events
@@ -116,6 +117,7 @@ const brandCreatorsSlice = createSlice({
                 state.loading = false;
                 state.detailsLoading = false;
                 state.error = null;
+                state.detailsError = null;
             })
             .addCase(logout.fulfilled, (state) => {
                 state.creators = [];
@@ -124,6 +126,7 @@ const brandCreatorsSlice = createSlice({
                 state.loading = false;
                 state.detailsLoading = false;
                 state.error = null;
+                state.detailsError = null;
             })
             .addCase(clearAuth, (state) => {
                 state.creators = [];
@@ -132,6 +135,7 @@ const brandCreatorsSlice = createSlice({
                 state.loading = false;
                 state.detailsLoading = false;
                 state.error = null;
+                state.detailsError = null;
             });
     }
 });

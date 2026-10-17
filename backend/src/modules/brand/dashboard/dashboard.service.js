@@ -351,19 +351,32 @@ const getBrandDashboardOverviewService = async (brandId, query = {}) => {
         requiredCreators: c.requiredCreators
     }));
 
-    const workspaceDeadlines = upcomingWorkspaceDeadlines.map((ws) => ({
-        id: ws._id,
-        sourceType: "workspace",
-        title: ws.campaign?.title || "Collaboration Deliverable",
-        creatorName: ws.creator?.name || "Creator",
-        category: ws.campaign?.category || "General",
-        platform: ws.campaign?.platform || "multiple",
-        status: ws.status,
-        deadline: ws.deadline,
-        agreedPrice: ws.agreedPrice,
-        currency: ws.currency || "INR",
-        deliverablesCount: ws.deliverables?.length || 0
-    }));
+    const workspaceDeadlines = upcomingWorkspaceDeadlines.map((ws) => {
+        const deliverablesList = Array.isArray(ws.deliverables) ? ws.deliverables : [];
+        const deliverablesCount = deliverablesList.length;
+        const completedDeliverablesCount = deliverablesList.filter(
+            (d) => d && (d.status === "approved" || d.status === "completed")
+        ).length;
+        const deliverablesProgress = deliverablesCount > 0
+            ? Math.round((completedDeliverablesCount / deliverablesCount) * 100)
+            : 0;
+
+        return {
+            id: ws._id,
+            sourceType: "workspace",
+            title: ws.campaign?.title || "Collaboration Deliverable",
+            creatorName: ws.creator?.name || "Creator",
+            category: ws.campaign?.category || "General",
+            platform: ws.campaign?.platform || "multiple",
+            status: ws.status,
+            deadline: ws.deadline,
+            agreedPrice: ws.agreedPrice,
+            currency: ws.currency || "INR",
+            deliverablesCount,
+            completedDeliverablesCount,
+            deliverablesProgress
+        };
+    });
 
     const bookingDeadlines = upcomingBookingDeadlines.map((b) => ({
         id: b._id,

@@ -23,7 +23,7 @@ function getInitials(name, email) {
     return email.trim()[0].toUpperCase();
   }
 
-  return "CL";
+  return "BU";
 }
 
 // =========================================================
@@ -63,32 +63,39 @@ function LogoutIcon({ className = "w-4 h-4" }) {
   );
 }
 
-function ChevronDownIcon({ className = "w-3.5 h-3.5" }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-    </svg>
-  );
-}
 
 export default function BrandHeader({ setMobileOpen = () => { } }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
+  const [loadedLogoUrl, setLoadedLogoUrl] = useState(null);
+  const [failedLogoUrl, setFailedLogoUrl] = useState(null);
   const dropdownRef = useRef(null);
 
   const dispatch = useDispatch();
-  const { profile, loading: profileLoading, error: profileError } = useSelector(
+  const { profile, fetchLoading, loading: profileLoading, error: profileError } = useSelector(
     (state) => state.brandProfile || {}
   );
-  const { user: authUser, loading: authLoading } = useSelector(
+  const isFetching = Boolean(fetchLoading ?? profileLoading);
+  const { user: authUser } = useSelector(
     (state) => state.auth || {}
   );
 
+  const isNotFoundError =
+    Boolean(profileError) &&
+    (typeof profileError === "string"
+      ? profileError.toLowerCase().includes("not found")
+      : typeof profileError === "object" && typeof profileError?.message === "string"
+      ? profileError.message.toLowerCase().includes("not found")
+      : false);
+
+  const hasAttemptedFetch = useRef(false);
+
   useEffect(() => {
-    if (!profile && !profileLoading && !profileError) {
+    if (!profile && !isFetching && !isNotFoundError && !hasAttemptedFetch.current) {
+      hasAttemptedFetch.current = true;
       dispatch(getBrandProfile());
     }
-  }, [dispatch, profile, profileLoading, profileError]);
+  }, [dispatch, profile, isFetching, isNotFoundError]);
 
   const userObj = profile?.user || (authUser?.user ? authUser.user : authUser);
 
@@ -96,28 +103,64 @@ export default function BrandHeader({ setMobileOpen = () => { } }) {
     profile?.companyName ||
     profile?.brandName ||
     userObj?.name ||
+    authUser?.name ||
     profile?.name ||
     userObj?.email ||
+    authUser?.email ||
     profile?.email ||
     "";
 
   const displayEmail =
     userObj?.email ||
+    authUser?.email ||
     profile?.email ||
     "";
 
-  const isDataLoading = (profileLoading || authLoading || (!profile && !authUser)) && !profileError;
+  // Authenticated brand user's name for initials fallback
+  const brandUserName =
+    userObj?.name ||
+    authUser?.name ||
+    profile?.contactInformation?.name ||
+    profile?.companyName ||
+    displayName ||
+    "Brand User";
 
-  const initials = isDataLoading ? "" : getInitials(displayName, displayEmail);
+  const brandUserEmail =
+    userObj?.email ||
+    authUser?.email ||
+    profile?.contactInformation?.email ||
+    displayEmail ||
+    "";
+
+  const initials = getInitials(brandUserName, brandUserEmail);
+
+  // Logo URL and safe image states
+  const cleanLogoUrl = typeof profile?.logo === "string" ? profile.logo.trim() : "";
+  const isLoaded = Boolean(cleanLogoUrl) && loadedLogoUrl === cleanLogoUrl;
+  const isFailed = Boolean(cleanLogoUrl) && failedLogoUrl === cleanLogoUrl;
+  const hasValidLogo = Boolean(cleanLogoUrl) && !isFailed;
 
   const router = useRouter();
 
   const handleLogout = async () => {
     setDropdownOpen(false);
     setNotificationOpen(false);
+    hasAttemptedFetch.current = false;
     dispatch(clearBrandProfile());
     await dispatch(logout());
     router.push("/login");
+  };
+
+  const handleDropdownToggle = () => {
+    // If previous fetch failed due to a genuine network/server error, allow retry
+    if (!profile && !isFetching && profileError && !isNotFoundError) {
+      hasAttemptedFetch.current = true;
+      dispatch(getBrandProfile());
+    }
+    setDropdownOpen((prev) => {
+      if (!prev) setNotificationOpen(false);
+      return !prev;
+    });
   };
 
   // Close dropdown on click outside or Escape key
@@ -188,20 +231,33 @@ export default function BrandHeader({ setMobileOpen = () => { } }) {
         <div className="relative pl-2 sm:pl-3 border-l border-border-theme" ref={dropdownRef}>
           <button
             type="button"
-            onClick={() => {
-              setDropdownOpen((prev) => {
-                if (!prev) setNotificationOpen(false);
-                return !prev;
-              });
-            }}
+            onClick={handleDropdownToggle}
             aria-expanded={dropdownOpen}
             aria-haspopup="true"
             className="flex items-center gap-2 p-1 rounded-xl hover:bg-surface-muted transition-colors cursor-pointer text-left focus:outline-none"
           >
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-secondary/15 text-secondary font-semibold font-sans text-xs sm:text-sm flex items-center justify-center border border-secondary/30 shrink-0 uppercase">
-              {initials}
+            <div className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-secondary/15 text-secondary font-semibold font-sans text-xs sm:text-sm flex items-center justify-center border border-secondary/30 shrink-0 uppercase overflow-hidden">
+              {hasValidLogo ? (
+                <>
+                  {!isLoaded && (
+                    <span className="animate-pulse">{initials}</span>
+                  )}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    key={cleanLogoUrl}
+                    src={cleanLogoUrl}
+                    alt={profile?.companyName || displayName || "Brand logo"}
+                    onLoad={() => setLoadedLogoUrl(cleanLogoUrl)}
+                    onError={() => setFailedLogoUrl(cleanLogoUrl)}
+                    className={`w-full h-full object-cover transition-opacity duration-200 ${
+                      isLoaded ? "opacity-100" : "opacity-0 absolute inset-0"
+                    }`}
+                  />
+                </>
+              ) : (
+                <span>{initials}</span>
+              )}
             </div>
-            {/* <ChevronDownIcon className={`w-3.5 h-3.5 text-text-secondary transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`} /> */}
           </button>
 
           {/* Dropdown Menu */}

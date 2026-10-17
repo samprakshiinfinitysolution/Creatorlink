@@ -170,7 +170,7 @@ export default function Navbar() {
       <header className="fixed left-1/2 top-4 z-50 hidden w-[94%] -translate-x-1/2 lg:block xl:top-5 xl:w-[88%] 2xl:w-[84%]">
         <nav
           className="
-            flex h-[70px] items-center
+            grid grid-cols-[1fr_auto_1fr] h-[70px] items-center
             rounded-full
             border border-border-theme
             bg-surface/95
@@ -184,26 +184,28 @@ export default function Navbar() {
         >
           {/* LOGO */}
 
-          <Link
-            href="/"
-            className="
-              shrink-0
-              text-[19px]
-              tracking-[-0.04em]
-              text-primary
-              transition-colors
-              duration-300
-              xl:text-[25px]
-            "
-            style={{ fontFamily: "var(--font-playfair), serif" }}
-          >
-            CREATORLINK
-            <span className="ml-1 text-secondary">•</span>
-          </Link>
+          <div className="flex items-center justify-start">
+            <Link
+              href="/"
+              className="
+                shrink-0
+                text-[19px]
+                tracking-[-0.04em]
+                text-primary
+                transition-colors
+                duration-300
+                xl:text-[25px]
+              "
+              style={{ fontFamily: "var(--font-playfair), serif" }}
+            >
+              CREATORLINK
+              <span className="ml-1 text-secondary">•</span>
+            </Link>
+          </div>
 
-          {/* MENU */}
+          {/* NAVIGATION LINKS */}
 
-          <div className="ml-auto flex items-center gap-4 xl:gap-6 2xl:gap-7">
+          <div className="flex items-center justify-center gap-4 xl:gap-6 2xl:gap-7">
             {navItems.map((item) => {
               const isActive = pathname === item.href;
               return (
@@ -232,7 +234,11 @@ export default function Navbar() {
                 </Link>
               );
             })}
+          </div>
 
+          {/* RIGHT ACTIONS */}
+
+          <div className="flex items-center justify-end gap-4 xl:gap-6 2xl:gap-7">
             {/* SEARCH */}
 
             <button

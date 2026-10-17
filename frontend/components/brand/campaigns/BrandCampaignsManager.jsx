@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import BrandSidebar from "@/components/brand/dashboard/BrandSidebar";
-import BrandHeader from "@/components/brand/dashboard/BrandHeader";
+import BrandDashboardNavbar from "@/components/brand/dashboard/BrandDashboardNavbar";
+import BrandCampaignsHero from "@/components/brand/campaigns/BrandCampaignsHero";
 import {
   getBrandCampaigns,
   createCampaign,
@@ -15,13 +15,30 @@ import {
 // =========================================================
 // HELPER FORMATTERS & BADGES
 // =========================================================
-function formatCurrency(amount) {
-  if (amount === undefined || amount === null || isNaN(Number(amount))) return "₹0";
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
-  }).format(Number(amount));
+function formatCurrency(amount, currency = "INR") {
+  const numericAmount =
+    amount === undefined || amount === null || isNaN(Number(amount))
+      ? 0
+      : Number(amount);
+  const currCode =
+    (currency && typeof currency === "string" ? currency.trim().toUpperCase() : "INR") || "INR";
+
+  try {
+    if (currCode === "INR") {
+      return new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR",
+        maximumFractionDigits: 0,
+      }).format(numericAmount);
+    }
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: currCode,
+      maximumFractionDigits: 0,
+    }).format(numericAmount);
+  } catch {
+    return `${currCode} ${numericAmount.toLocaleString()}`;
+  }
 }
 
 function formatDate(dateStr) {
@@ -83,6 +100,94 @@ function getStatusBadge(status) {
   }
 }
 
+function getCampaignInitials(title) {
+  if (!title || typeof title !== "string") return "CP";
+  const clean = title.trim();
+  if (!clean) return "CP";
+  const words = clean.split(/\s+/).filter(Boolean);
+  if (words.length >= 2) {
+    const first = words[0][0] || "";
+    const second = words[1][0] || "";
+    return (first + second).toUpperCase();
+  }
+  return clean.slice(0, 2).toUpperCase();
+}
+
+function CampaignAvatar({ title, thumbnail }) {
+  const [failedUrl, setFailedUrl] = useState(null);
+  const initials = getCampaignInitials(title);
+  const hasFailed = Boolean(thumbnail && failedUrl === thumbnail);
+
+  if (thumbnail && !hasFailed) {
+    return (
+      <div className="w-10 h-10 rounded-xl bg-secondary/10 border border-secondary/20 overflow-hidden shrink-0 flex items-center justify-center">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={thumbnail}
+          alt={title || "Campaign"}
+          className="w-full h-full object-cover"
+          onError={() => setFailedUrl(thumbnail)}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="w-10 h-10 rounded-xl bg-secondary/10 border border-secondary/20 flex items-center justify-center shrink-0 font-bold text-xs text-secondary tracking-wider font-sans select-none"
+      aria-hidden="true"
+    >
+      {initials}
+    </div>
+  );
+}
+
+function getPlatformBadge(platform) {
+  const norm = typeof platform === "string" ? platform.trim().toLowerCase() : "";
+  switch (norm) {
+    case "instagram":
+      return {
+        label: "Instagram",
+        icon: InstagramIcon,
+        className: "bg-pink-500/10 text-pink-600 dark:text-pink-400 border-pink-500/20",
+      };
+    case "youtube":
+      return {
+        label: "YouTube",
+        icon: YoutubeIcon,
+        className: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20",
+      };
+    case "tiktok":
+      return {
+        label: "TikTok",
+        icon: TiktokIcon,
+        className: "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20",
+      };
+    case "facebook":
+      return {
+        label: "Facebook",
+        icon: FacebookIcon,
+        className: "bg-blue-600/10 text-blue-600 dark:text-blue-400 border-blue-600/20",
+      };
+    case "website":
+      return {
+        label: "Website",
+        icon: GlobeIcon,
+        className: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
+      };
+    default: {
+      const displayLabel = platform
+        ? String(platform).replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())
+        : "General";
+      return {
+        label: displayLabel,
+        icon: GlobeIcon,
+        className: "bg-surface-muted text-text-secondary border-border-theme",
+      };
+    }
+  }
+}
+
 // Backend-enforced status transition rules
 function getValidNextStatuses(currentStatus) {
   switch (currentStatus?.toLowerCase()) {
@@ -104,13 +209,6 @@ function getValidNextStatuses(currentStatus) {
 // =========================================================
 // SVG ICONS
 // =========================================================
-function PlusIcon({ className = "w-4 h-4" }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-    </svg>
-  );
-}
 
 function SearchIcon({ className = "w-4 h-4" }) {
   return (
@@ -145,9 +243,17 @@ function MegaPhoneIcon({ className = "w-6 h-6" }) {
   );
 }
 
-function ArrowPathIcon({ className = "w-4 h-4" }) {
+function CheckCircleIcon({ className = "w-4 h-4" }) {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  );
+}
+
+function ArrowPathIcon({ className = "w-3.5 h-3.5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
     </svg>
   );
@@ -169,7 +275,7 @@ function ChevronRightIcon({ className = "w-4 h-4" }) {
   );
 }
 
-function XMarkIcon({ className = "w-5 h-5" }) {
+function XMarkIcon({ className = "w-4 h-4" }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -177,26 +283,87 @@ function XMarkIcon({ className = "w-5 h-5" }) {
   );
 }
 
-function CheckCircleIcon({ className = "w-5 h-5" }) {
+function CalendarIcon({ className = "w-3.5 h-3.5" }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
     </svg>
   );
 }
+
+function UsersIcon({ className = "w-3.5 h-3.5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+    </svg>
+  );
+}
+
+function InstagramIcon({ className = "w-3.5 h-3.5" }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75}>
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+    </svg>
+  );
+}
+
+function YoutubeIcon({ className = "w-3.5 h-3.5" }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+    </svg>
+  );
+}
+
+function TiktokIcon({ className = "w-3.5 h-3.5" }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.298-.002.595.042.88.13V9.4a6.33 6.33 0 0 0-1-.08A6.34 6.34 0 0 0 3 15.66a6.34 6.34 0 0 0 10.82 4.47 6.27 6.27 0 0 0 1.88-4.47V8.84a8.27 8.27 0 0 0 4.89 1.57V6.96a4.83 4.83 0 0 1-1-.27z" />
+    </svg>
+  );
+}
+
+function FacebookIcon({ className = "w-3.5 h-3.5" }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+    </svg>
+  );
+}
+
+function GlobeIcon({ className = "w-3.5 h-3.5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-.778.099-1.533.284-2.253" />
+    </svg>
+  );
+}
+
+const STATUS_TABS = [
+  { label: "All Campaigns", value: "" },
+  { label: "In Progress", value: "in_progress" },
+  { label: "Published", value: "published" },
+  { label: "Completed", value: "completed" },
+  { label: "Draft", value: "draft" },
+  { label: "Paused", value: "paused" },
+  { label: "Closed", value: "closed" },
+];
 
 // =========================================================
 // MAIN COMPONENT
 // =========================================================
 export default function BrandCampaignsManager() {
-  const [mobileOpen, setMobileOpen] = useState(false);
-
   // Search & Filter State
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
   const [platform, setPlatform] = useState("");
   const [status, setStatus] = useState("");
   const [page, setPage] = useState(1);
+
+  // Frontend-only selection state
+  const [selectedIds, setSelectedIds] = useState([]);
 
   // Feedback Notification & Modal States
   const [successMsg, setSuccessMsg] = useState("");
@@ -337,6 +504,23 @@ export default function BrandCampaignsManager() {
     fetchCampaignsWithFilters({ page: newPage });
   };
 
+  // Frontend-only Selection Handlers
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      const pageIds = campaigns.map((c) => c._id || c.id).filter(Boolean);
+      setSelectedIds((prev) => Array.from(new Set([...prev, ...pageIds])));
+    } else {
+      const pageIds = new Set(campaigns.map((c) => c._id || c.id).filter(Boolean));
+      setSelectedIds((prev) => prev.filter((id) => !pageIds.has(id)));
+    }
+  };
+
+  const handleSelectRow = (id) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
   // Deliverables Handlers for Create Form
   const addCreateDeliverable = () => {
     if (createDeliverableInput.trim()) {
@@ -424,6 +608,7 @@ export default function BrandCampaignsManager() {
       setCreateDeliverables([]);
       setSuccessMsg("Campaign created successfully!");
       setTimeout(() => setSuccessMsg(""), 4000);
+      fetchCampaignsWithFilters({ page: 1 });
     } else {
       setFormError(
         typeof actionResult.payload === "string"
@@ -446,6 +631,21 @@ export default function BrandCampaignsManager() {
   // Handle Edit Action Click
   const handleEditClick = (campaign) => {
     setFormError("");
+    if (campaign) {
+      setEditForm({
+        title: campaign.title || "",
+        description: campaign.description || "",
+        category: campaign.category || "",
+        platform: campaign.platform || "instagram",
+        budget: campaign.budget !== undefined ? String(campaign.budget) : "",
+        deadline: formatDateForInput(campaign.deadline),
+        requiredCreators: campaign.requiredCreators !== undefined ? String(campaign.requiredCreators) : "1",
+        status: campaign.status || "draft",
+      });
+      setEditDeliverables(
+        Array.isArray(campaign.deliverables) ? [...campaign.deliverables] : []
+      );
+    }
     const campaignId = campaign._id || campaign.id;
     if (campaignId) {
       dispatch(getCampaignById(campaignId));
@@ -494,6 +694,7 @@ export default function BrandCampaignsManager() {
       dispatch(clearSelectedCampaign());
       setSuccessMsg("Campaign updated successfully!");
       setTimeout(() => setSuccessMsg(""), 4000);
+      fetchCampaignsWithFilters();
     } else {
       setFormError(
         typeof actionResult.payload === "string"
@@ -527,282 +728,373 @@ export default function BrandCampaignsManager() {
   const hasNextPage = pagination?.hasNextPage ?? (currentPage < totalPages);
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
-      {/* Sidebar Component */}
-      <BrandSidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
+    <div className="min-h-screen bg-background text-foreground flex flex-col font-sans transition-colors duration-200">
+      {/* Horizontal Navigation matching Brand Dashboard */}
+      <BrandDashboardNavbar />
 
-      {/* Main Content Area Offset by Desktop Sidebar */}
-      <div className="flex-1 lg:ml-64 flex flex-col min-w-0">
-        {/* Header Bar Component */}
-        <BrandHeader setMobileOpen={setMobileOpen} />
+      {/* Campaigns Main Container matching full-width Brand Dashboard */}
+      <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8">
+        {/* Success Notification Alert */}
+        {successMsg && (
+          <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-2xl p-4 text-xs font-sans flex items-center gap-2 animate-in fade-in duration-200">
+            <CheckCircleIcon className="w-5 h-5 shrink-0" />
+            <span>{successMsg}</span>
+          </div>
+        )}
 
-        {/* Campaigns Main Container */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl w-full mx-auto">
+        {/* Modern Reference Campaign Hero */}
+        <BrandCampaignsHero
+          onCreateClick={() => {
+            setFormError("");
+            setIsCreateOpen(true);
+          }}
+        />
+
+        {/* Status Tabs Navigation */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+          {STATUS_TABS.map((tab) => {
+            const isActive = status === tab.value;
+            return (
+              <button
+                key={tab.value || "all"}
+                type="button"
+                onClick={() => {
+                  setStatus(tab.value);
+                  setPage(1);
+                  fetchCampaignsWithFilters({ status: tab.value, page: 1 });
+                }}
+                className={`px-4 py-2 text-xs font-semibold rounded-xl transition-all whitespace-nowrap cursor-pointer border ${
+                  isActive
+                    ? "bg-secondary text-white border-secondary shadow-xs"
+                    : "bg-surface border-border-theme text-text-secondary hover:text-foreground hover:bg-surface-muted"
+                }`}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Search & Filter Toolbar */}
+        <div className="bg-surface border border-border-theme rounded-2xl p-4 shadow-xs space-y-4 sm:space-y-0 sm:flex sm:items-center sm:gap-3">
           
-          {/* Success Notification Alert */}
-          {successMsg && (
-            <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-2xl p-4 text-xs font-sans flex items-center gap-2 animate-in fade-in duration-200">
-              <CheckCircleIcon className="w-5 h-5 shrink-0" />
-              <span>{successMsg}</span>
-            </div>
-          )}
+          {/* Search Input Form */}
+          <form onSubmit={handleSearchSubmit} className="flex-1 relative">
+            <input
+              type="text"
+              placeholder="Search campaigns..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full bg-surface-muted/60 border border-border-theme text-foreground text-xs sm:text-sm rounded-xl pl-9 pr-4 py-2.5 focus:outline-none focus:border-secondary transition-colors"
+            />
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none">
+              <SearchIcon />
+            </span>
+          </form>
 
-          {/* Page Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <span className="inline-block px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase bg-secondary/15 text-secondary border border-secondary/20 mb-2">
-                Brand Workspace
-              </span>
-              <h1 className="font-serif font-medium text-2xl sm:text-3xl text-foreground tracking-tight">
-                Campaigns
-              </h1>
-              <p className="text-xs sm:text-sm text-text-secondary mt-1">
-                Create and manage your brand collaboration campaigns.
-              </p>
-            </div>
+          {/* Filter Dropdowns Grid */}
+          <div className="grid grid-cols-3 gap-2 sm:flex sm:items-center sm:gap-3 shrink-0">
+            
+            {/* Category Filter */}
+            <select
+              value={category}
+              onChange={handleCategoryChange}
+              className="bg-surface-muted/60 border border-border-theme text-foreground text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-secondary transition-colors cursor-pointer"
+            >
+              <option value="">All Categories</option>
+              <option value="Fashion">Fashion</option>
+              <option value="Beauty">Beauty</option>
+              <option value="Lifestyle">Lifestyle</option>
+              <option value="Tech">Tech</option>
+              <option value="Fitness">Fitness</option>
+              <option value="Food & Beverage">Food & Beverage</option>
+              <option value="Travel">Travel</option>
+              <option value="Gaming">Gaming</option>
+            </select>
 
-            {/* Create Campaign Trigger Button */}
+            {/* Platform Filter */}
+            <select
+              value={platform}
+              onChange={handlePlatformChange}
+              className="bg-surface-muted/60 border border-border-theme text-foreground text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-secondary transition-colors cursor-pointer"
+            >
+              <option value="">All Platforms</option>
+              <option value="instagram">Instagram</option>
+              <option value="facebook">Facebook</option>
+              <option value="youtube">YouTube</option>
+              <option value="tiktok">TikTok</option>
+              <option value="website">Website</option>
+            </select>
+
+            {/* Status Filter */}
+            <select
+              value={status}
+              onChange={handleStatusChange}
+              className="bg-surface-muted/60 border border-border-theme text-foreground text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-secondary transition-colors cursor-pointer"
+            >
+              <option value="">All Statuses</option>
+              <option value="draft">Draft</option>
+              <option value="published">Published</option>
+              <option value="in_progress">In Progress</option>
+              <option value="paused">Paused</option>
+              <option value="completed">Completed</option>
+              <option value="closed">Closed</option>
+            </select>
+
+          </div>
+        </div>
+
+        {/* Error Banner */}
+        {error && (
+          <div className="bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl p-4 text-xs font-sans flex items-center justify-between gap-4">
+            <span>{typeof error === "string" ? error : "Failed to load campaigns. Please try again."}</span>
             <button
               type="button"
-              onClick={() => {
-                setFormError("");
-                setIsCreateOpen(true);
-              }}
-              className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-secondary hover:bg-secondary-dark text-white text-xs font-semibold tracking-wide transition-all shadow-xs hover:shadow-md cursor-pointer shrink-0"
+              onClick={handleRetry}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500 text-white text-xs font-semibold hover:bg-red-600 transition-colors shrink-0 cursor-pointer"
             >
-              <PlusIcon />
-              <span>Create Campaign</span>
+              <ArrowPathIcon />
+              <span>Retry</span>
             </button>
           </div>
+        )}
 
-          {/* Search & Filter Toolbar */}
-          <div className="bg-surface border border-border-theme rounded-2xl p-4 shadow-xs space-y-4 sm:space-y-0 sm:flex sm:items-center sm:gap-3">
-            
-            {/* Search Input Form */}
-            <form onSubmit={handleSearchSubmit} className="flex-1 relative">
-              <input
-                type="text"
-                placeholder="Search campaigns..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full bg-surface-muted/60 border border-border-theme text-foreground text-xs sm:text-sm rounded-xl pl-9 pr-4 py-2.5 focus:outline-none focus:border-secondary transition-colors"
-              />
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none">
-                <SearchIcon />
-              </span>
-            </form>
-
-            {/* Filter Dropdowns Grid */}
-            <div className="grid grid-cols-3 gap-2 sm:flex sm:items-center sm:gap-3 shrink-0">
-              
-              {/* Category Filter */}
-              <select
-                value={category}
-                onChange={handleCategoryChange}
-                className="bg-surface-muted/60 border border-border-theme text-foreground text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-secondary transition-colors cursor-pointer"
-              >
-                <option value="">All Categories</option>
-                <option value="Fashion">Fashion</option>
-                <option value="Beauty">Beauty</option>
-                <option value="Lifestyle">Lifestyle</option>
-                <option value="Tech">Tech</option>
-                <option value="Fitness">Fitness</option>
-                <option value="Food & Beverage">Food & Beverage</option>
-                <option value="Travel">Travel</option>
-                <option value="Gaming">Gaming</option>
-              </select>
-
-              {/* Platform Filter */}
-              <select
-                value={platform}
-                onChange={handlePlatformChange}
-                className="bg-surface-muted/60 border border-border-theme text-foreground text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-secondary transition-colors cursor-pointer"
-              >
-                <option value="">All Platforms</option>
-                <option value="instagram">Instagram</option>
-                <option value="facebook">Facebook</option>
-                <option value="youtube">YouTube</option>
-                <option value="tiktok">TikTok</option>
-                <option value="website">Website</option>
-              </select>
-
-              {/* Status Filter */}
-              <select
-                value={status}
-                onChange={handleStatusChange}
-                className="bg-surface-muted/60 border border-border-theme text-foreground text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-secondary transition-colors cursor-pointer"
-              >
-                <option value="">All Statuses</option>
-                <option value="draft">Draft</option>
-                <option value="published">Published</option>
-                <option value="in_progress">In Progress</option>
-                <option value="paused">Paused</option>
-                <option value="completed">Completed</option>
-                <option value="closed">Closed</option>
-              </select>
-
-            </div>
-          </div>
-
-          {/* Error Banner */}
-          {error && (
-            <div className="bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl p-4 text-xs font-sans flex items-center justify-between gap-4">
-              <span>{typeof error === "string" ? error : "Failed to load campaigns. Please try again."}</span>
-              <button
-                type="button"
-                onClick={handleRetry}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500 text-white text-xs font-semibold hover:bg-red-600 transition-colors shrink-0 cursor-pointer"
-              >
-                <ArrowPathIcon />
-                <span>Retry</span>
-              </button>
+        {/* Main Campaign List Section */}
+        <div className="bg-surface border border-border-theme rounded-2xl shadow-xs overflow-hidden">
+          
+          {/* Loading State Skeleton */}
+          {loading && !isViewOpen && !isEditOpen && (
+            <div className="p-6 space-y-4">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="h-14 bg-surface-muted rounded-xl animate-pulse w-full" />
+              ))}
             </div>
           )}
 
-          {/* Main Campaign List Section */}
-          <div className="bg-surface border border-border-theme rounded-2xl shadow-xs overflow-hidden">
-            
-            {/* Loading State Skeleton */}
-            {loading && !isViewOpen && !isEditOpen && (
-              <div className="p-6 space-y-4">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <div key={i} className="h-12 bg-surface-muted rounded-xl animate-pulse w-full" />
-                ))}
+          {/* Empty State */}
+          {!loading && !error && campaigns.length === 0 && (
+            <div className="text-center py-16 px-4 border-dashed border-border-theme space-y-3">
+              <div className="w-12 h-12 mx-auto rounded-full bg-secondary/10 text-secondary flex items-center justify-center">
+                <MegaPhoneIcon />
               </div>
-            )}
+              <h3 className="font-serif font-medium text-lg text-foreground">
+                No campaigns found
+              </h3>
+              <p className="text-xs text-text-secondary max-w-sm mx-auto">
+                {search || category || platform || status
+                  ? "No campaigns match your selected search criteria or filters. Try adjusting your search parameters."
+                  : "You haven't created any campaigns yet. Click the 'Create Campaign' button above to get started."}
+              </p>
+            </div>
+          )}
 
-            {/* Empty State */}
-            {!loading && !error && campaigns.length === 0 && (
-              <div className="text-center py-16 px-4 border-dashed border-border-theme space-y-3">
-                <div className="w-12 h-12 mx-auto rounded-full bg-secondary/10 text-secondary flex items-center justify-center">
-                  <MegaPhoneIcon />
-                </div>
-                <h3 className="font-serif font-medium text-lg text-foreground">
-                  No campaigns found
-                </h3>
-                <p className="text-xs text-text-secondary max-w-sm mx-auto">
-                  {search || category || platform || status
-                    ? "No campaigns match your selected search criteria or filters. Try adjusting your search parameters."
-                    : "You haven't created any campaigns yet. Click the 'Create Campaign' button above to get started."}
-                </p>
-              </div>
-            )}
-
-            {/* Campaign Table (Responsive Desktop / Tablet) */}
-            {!loading && !error && campaigns.length > 0 && (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs border-collapse">
-                  <thead>
-                    <tr className="border-b border-border-theme bg-surface-muted/40 text-text-secondary uppercase tracking-wider text-[10px] font-semibold">
-                      <th className="py-3.5 px-5">Campaign Title</th>
-                      <th className="py-3.5 px-4">Platform</th>
-                      <th className="py-3.5 px-4">Category</th>
-                      <th className="py-3.5 px-4">Budget</th>
-                      <th className="py-3.5 px-4">Creators</th>
-                      <th className="py-3.5 px-4">Status</th>
-                      <th className="py-3.5 px-4">Deadline</th>
-                      <th className="py-3.5 px-5 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border-theme">
-                    {campaigns.map((c) => {
-                      const badge = getStatusBadge(c.status);
-                      const reqCreators = typeof c.requiredCreators === "number"
+          {/* Campaign Table (Responsive Modern Redesign) */}
+          {!loading && !error && campaigns.length > 0 && (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="border-b border-border-theme bg-surface-muted/40 text-text-secondary uppercase tracking-wider text-[10px] font-semibold">
+                    <th className="py-3.5 px-4 w-10 text-center">
+                      <input
+                        type="checkbox"
+                        aria-label="Select all campaigns on this page"
+                        checked={
+                          campaigns.length > 0 &&
+                          campaigns.every((c) => selectedIds.includes(c._id || c.id))
+                        }
+                        onChange={handleSelectAll}
+                        className="w-4 h-4 rounded border-border-theme text-secondary focus:ring-secondary/20 cursor-pointer accent-secondary"
+                      />
+                    </th>
+                    <th className="py-3.5 px-4 min-w-[220px]">Campaign</th>
+                    <th className="py-3.5 px-4 min-w-[120px]">Platform</th>
+                    <th className="py-3.5 px-4 min-w-[120px]">Category</th>
+                    <th className="py-3.5 px-4 min-w-[110px]">Budget</th>
+                    <th className="py-3.5 px-4 min-w-[100px]">Creators</th>
+                    <th className="py-3.5 px-4 min-w-[110px]">Status</th>
+                    <th className="py-3.5 px-4 min-w-[120px]">Deadline</th>
+                    <th className="py-3.5 px-5 text-right min-w-[90px]">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border-theme">
+                  {campaigns.map((c) => {
+                    const id = c._id || c.id;
+                    const isSelected = selectedIds.includes(id);
+                    const badge = getStatusBadge(c.status);
+                    const platformInfo = getPlatformBadge(c.platform);
+                    const PlatformIcon = platformInfo.icon;
+                    const reqCreators =
+                      typeof c.requiredCreators === "number"
                         ? c.requiredCreators
                         : Array.isArray(c.requiredCreators)
                         ? c.requiredCreators.length
-                        : c.requiredCreators || 1;
+                        : c.requiredCreators !== undefined && c.requiredCreators !== null
+                        ? c.requiredCreators
+                        : "—";
 
-                      return (
-                        <tr key={c._id || c.id || c.title} className="hover:bg-surface-muted/30 transition-colors">
-                          <td className="py-4 px-5 font-semibold text-foreground text-sm font-sans">
-                            {c.title}
-                          </td>
-                          <td className="py-4 px-4 text-text-secondary font-medium capitalize">
-                            {c.platform || "Multi-Platform"}
-                          </td>
-                          <td className="py-4 px-4 text-text-secondary font-medium">
-                            {c.category || "General"}
-                          </td>
-                          <td className="py-4 px-4 font-semibold text-foreground">
-                            {formatCurrency(c.budget)}
-                          </td>
-                          <td className="py-4 px-4 text-text-secondary font-medium">
-                            {reqCreators}
-                          </td>
-                          <td className="py-4 px-4">
-                            <span
-                              className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-bold border ${badge.color}`}
-                            >
-                              {badge.label}
-                            </span>
-                          </td>
-                          <td className="py-4 px-4 text-text-secondary font-medium">
-                            {formatDate(c.deadline)}
-                          </td>
-                          <td className="py-4 px-5 text-right">
-                            <div className="inline-flex items-center justify-end gap-1">
+                    return (
+                      <tr
+                        key={id || c.title}
+                        className={`transition-colors ${
+                          isSelected
+                            ? "bg-secondary/5 hover:bg-secondary/10"
+                            : "hover:bg-surface-muted/30"
+                        }`}
+                      >
+                        {/* Frontend Selection Checkbox */}
+                        <td className="py-4 px-4 text-center">
+                          <input
+                            type="checkbox"
+                            aria-label={`Select campaign ${c.title}`}
+                            checked={isSelected}
+                            onChange={() => handleSelectRow(id)}
+                            className="w-4 h-4 rounded border-border-theme text-secondary focus:ring-secondary/20 cursor-pointer accent-secondary"
+                          />
+                        </td>
+
+                        {/* Campaign Info (Avatar + Title + Category Subtitle) */}
+                        <td className="py-4 px-4">
+                          <div className="flex items-center gap-3">
+                            <CampaignAvatar title={c.title} thumbnail={c.thumbnail} />
+                            <div className="min-w-0">
                               <button
                                 type="button"
                                 onClick={() => handleViewClick(c)}
-                                className="p-1.5 rounded-lg text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors cursor-pointer"
-                                title="View Campaign Details"
+                                className="font-semibold text-foreground text-sm font-sans hover:text-secondary transition-colors text-left truncate block max-w-[240px] cursor-pointer"
+                                title={c.title}
                               >
-                                <EyeIcon />
+                                {c.title}
                               </button>
-                              <button
-                                type="button"
-                                onClick={() => handleEditClick(c)}
-                                className="p-1.5 rounded-lg text-text-secondary hover:text-secondary hover:bg-secondary/10 transition-colors cursor-pointer"
-                                title="Edit Campaign"
-                              >
-                                <PencilIcon />
-                              </button>
+                              <span className="text-[11px] text-text-secondary truncate block max-w-[240px]">
+                                {c.category || "General"}
+                              </span>
                             </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
+                          </div>
+                        </td>
 
-            {/* Pagination Controls */}
-            {!loading && !error && campaigns.length > 0 && (
-              <div className="border-t border-border-theme px-5 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <span className="text-xs text-text-secondary">
-                  Showing page <span className="font-semibold text-foreground">{currentPage}</span> of{" "}
-                  <span className="font-semibold text-foreground">{totalPages}</span> ({totalItems} total campaigns)
+                        {/* Platform Badge with Icon */}
+                        <td className="py-4 px-4">
+                          <span
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border ${platformInfo.className}`}
+                          >
+                            <PlatformIcon className="w-3.5 h-3.5 shrink-0" />
+                            <span>{platformInfo.label}</span>
+                          </span>
+                        </td>
+
+                        {/* Category Badge */}
+                        <td className="py-4 px-4">
+                          <span className="inline-block px-2.5 py-1 rounded-lg text-[11px] font-medium bg-surface-muted border border-border-theme text-foreground">
+                            {c.category || "General"}
+                          </span>
+                        </td>
+
+                        {/* Budget */}
+                        <td className="py-4 px-4 font-semibold text-foreground">
+                          {formatCurrency(c.budget, c.currency)}
+                        </td>
+
+                        {/* Required Creators */}
+                        <td className="py-4 px-4">
+                          <span className="inline-flex items-center gap-1.5 text-text-secondary font-medium">
+                            <UsersIcon className="w-3.5 h-3.5 text-text-secondary/70 shrink-0" />
+                            <span>{reqCreators}</span>
+                          </span>
+                        </td>
+
+                        {/* Status Pill */}
+                        <td className="py-4 px-4">
+                          <span
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border ${badge.color}`}
+                          >
+                            <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                            <span>{badge.label}</span>
+                          </span>
+                        </td>
+
+                        {/* Deadline */}
+                        <td className="py-4 px-4">
+                          <span className="inline-flex items-center gap-1.5 text-text-secondary font-medium">
+                            <CalendarIcon className="w-3.5 h-3.5 text-text-secondary/70 shrink-0" />
+                            <span>{formatDate(c.deadline)}</span>
+                          </span>
+                        </td>
+
+                        {/* Actions */}
+                        <td className="py-4 px-5 text-right">
+                          <div className="inline-flex items-center justify-end gap-1">
+                            <button
+                              type="button"
+                              onClick={() => handleViewClick(c)}
+                              className="p-1.5 rounded-lg text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors cursor-pointer"
+                              title="View Campaign Details"
+                            >
+                              <EyeIcon />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleEditClick(c)}
+                              className="p-1.5 rounded-lg text-text-secondary hover:text-secondary hover:bg-secondary/10 transition-colors cursor-pointer"
+                              title="Edit Campaign"
+                            >
+                              <PencilIcon />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Pagination Controls */}
+          {!loading && !error && campaigns.length > 0 && (
+            <div className="border-t border-border-theme px-5 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="text-xs text-text-secondary flex items-center gap-2">
+                <span>
+                  Showing{" "}
+                  <span className="font-semibold text-foreground">
+                    {totalItems === 0 ? 0 : (currentPage - 1) * (pagination?.limit || 10) + 1}
+                    –
+                    {Math.min(currentPage * (pagination?.limit || 10), totalItems)}
+                  </span>{" "}
+                  of <span className="font-semibold text-foreground">{totalItems}</span> campaigns
                 </span>
-
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={!hasPrevPage}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border border-border-theme bg-surface text-xs font-medium text-foreground hover:bg-surface-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-                  >
-                    <ChevronLeftIcon />
-                    <span>Previous</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={!hasNextPage}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border border-border-theme bg-surface text-xs font-medium text-foreground hover:bg-surface-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-                  >
-                    <span>Next</span>
-                    <ChevronRightIcon />
-                  </button>
-                </div>
+                {selectedIds.length > 0 && (
+                  <span className="px-2 py-0.5 rounded-md bg-secondary/10 text-secondary font-medium">
+                    {selectedIds.length} selected
+                  </span>
+                )}
               </div>
-            )}
 
-          </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={!hasPrevPage}
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border border-border-theme bg-surface text-xs font-medium text-foreground hover:bg-surface-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                >
+                  <ChevronLeftIcon />
+                  <span>Previous</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={!hasNextPage}
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border border-border-theme bg-surface text-xs font-medium text-foreground hover:bg-surface-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                >
+                  <span>Next</span>
+                  <ChevronRightIcon />
+                </button>
+              </div>
+            </div>
+          )}
 
-        </main>
-      </div>
+        </div>
+
+      </main>
 
       {/* ========================================================= */}
       {/* 1. CREATE CAMPAIGN MODAL */}

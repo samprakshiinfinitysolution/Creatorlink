@@ -52,6 +52,14 @@ const getBrandProfile = createAsyncThunk(
                 "Unable to fetch brand profile"
             );
         }
+    },
+    {
+        condition: (_, { getState }) => {
+            const { brandProfile } = getState();
+            if (brandProfile?.fetchLoading) {
+                return false;
+            }
+        }
     }
 );
 
@@ -79,6 +87,7 @@ const updateBrandProfile = createAsyncThunk(
 const initialState = {
     profile: null,
     loading: false,
+    fetchLoading: false,
     error: null
 };
 
@@ -93,6 +102,8 @@ const profileSlice = createSlice({
 
         clearBrandProfile: (state) => {
             state.profile = null;
+            state.loading = false;
+            state.fetchLoading = false;
             state.error = null;
         }
     },
@@ -128,6 +139,7 @@ const profileSlice = createSlice({
             .addCase(getBrandProfile.pending, (state) => {
 
                 state.loading = true;
+                state.fetchLoading = true;
                 state.error = null;
             })
 
@@ -135,6 +147,7 @@ const profileSlice = createSlice({
             .addCase(getBrandProfile.fulfilled, (state, action) => {
 
                 state.loading = false;
+                state.fetchLoading = false;
                 state.profile = action.payload.data;
                 state.error = null;
             })
@@ -143,6 +156,7 @@ const profileSlice = createSlice({
             .addCase(getBrandProfile.rejected, (state, action) => {
 
                 state.loading = false;
+                state.fetchLoading = false;
                 state.error = action.payload;
             })
 
@@ -174,6 +188,7 @@ const profileSlice = createSlice({
 
                 state.profile = null;
                 state.loading = false;
+                state.fetchLoading = false;
                 state.error = null;
             })
 
@@ -181,6 +196,7 @@ const profileSlice = createSlice({
 
                 state.profile = null;
                 state.loading = false;
+                state.fetchLoading = false;
                 state.error = null;
             })
 
@@ -188,6 +204,7 @@ const profileSlice = createSlice({
 
                 state.profile = null;
                 state.loading = false;
+                state.fetchLoading = false;
                 state.error = null;
             });
     }

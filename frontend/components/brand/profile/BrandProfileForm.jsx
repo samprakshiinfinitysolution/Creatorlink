@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import BrandSidebar from "@/components/brand/dashboard/BrandSidebar";
 import BrandHeader from "@/components/brand/dashboard/BrandHeader";
@@ -9,6 +9,7 @@ import {
   createBrandProfile,
   updateBrandProfile,
 } from "@/redux/brand/profile/profile_slice";
+import { uploadSingleImageApi } from "@/lib/upload";
 
 // =========================================================
 // HELPER FOR INITIALS
@@ -25,6 +26,32 @@ function getCompanyInitials(name, email) {
     return email.trim()[0].toUpperCase();
   }
   return "BR";
+}
+
+// =========================================================
+// ERROR FORMATTER HELPER
+// =========================================================
+function formatErrorMessage(err, fallback = "An unexpected error occurred.") {
+  if (!err) return fallback;
+  if (typeof err === "string") return err.trim() || fallback;
+  if (typeof err === "object") {
+    if (typeof err.message === "string" && err.message.trim()) {
+      return err.message.trim();
+    }
+    if (typeof err.error === "string" && err.error.trim()) {
+      return err.error.trim();
+    }
+    if (typeof err.msg === "string" && err.msg.trim()) {
+      return err.msg.trim();
+    }
+    try {
+      const json = JSON.stringify(err);
+      if (json && json !== "{}") return json;
+    } catch {
+      // ignore serialization error
+    }
+  }
+  return String(err) || fallback;
 }
 
 // =========================================================
@@ -103,6 +130,95 @@ function ExternalLinkIcon({ className = "w-3.5 h-3.5" }) {
   );
 }
 
+function CameraIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+    </svg>
+  );
+}
+
+// =========================================================
+// SHARED LOGO PREVIEW COMPONENT
+// =========================================================
+function BrandLogoPreview({
+  url,
+  alt = "Company Logo",
+  initials = "BR",
+  isUploading = false,
+  className = "w-20 h-20",
+}) {
+  const [loadedUrl, setLoadedUrl] = useState(null);
+  const [failedUrl, setFailedUrl] = useState(null);
+
+  const cleanUrl = typeof url === "string" ? url.trim() : "";
+  const isLoaded = Boolean(cleanUrl) && loadedUrl === cleanUrl;
+  const isFailed = Boolean(cleanUrl) && failedUrl === cleanUrl;
+  const isLoading = Boolean(cleanUrl) && !isLoaded && !isFailed;
+
+  return (
+    <div
+      className={`relative ${className} rounded-2xl overflow-hidden border border-border-theme shrink-0 bg-surface-muted flex items-center justify-center`}
+    >
+      {cleanUrl && !isFailed ? (
+        <>
+          {isLoading && (
+            <div className="absolute inset-0 bg-surface-muted animate-pulse flex items-center justify-center text-text-secondary/40 font-serif font-bold text-2xl uppercase select-none">
+              {initials}
+            </div>
+          )}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            key={cleanUrl}
+            src={cleanUrl}
+            alt={alt}
+            onLoad={() => {
+              setLoadedUrl(cleanUrl);
+            }}
+            onError={() => {
+              setFailedUrl(cleanUrl);
+            }}
+            className={`w-full h-full object-cover transition-opacity duration-300 ${
+              isLoaded ? "opacity-100" : "opacity-0"
+            }`}
+          />
+        </>
+      ) : (
+        <div className="w-full h-full bg-secondary/15 text-secondary font-serif font-bold text-2xl flex items-center justify-center border border-secondary/30 uppercase select-none">
+          {initials}
+        </div>
+      )}
+
+      {isUploading && (
+        <div className="absolute inset-0 bg-background/80 backdrop-blur-xs flex flex-col items-center justify-center z-10 text-foreground">
+          <svg
+            className="animate-spin h-6 w-6 text-secondary mb-1"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+            />
+          </svg>
+          <span className="text-[10px] font-semibold">Uploading...</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // =========================================================
 // BRAND PROFILE FORM COMPONENT
 // =========================================================
@@ -110,8 +226,15 @@ export default function BrandProfileForm() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
-  const [loadedLogoUrl, setLoadedLogoUrl] = useState(null);
-  const [failedLogoUrl, setFailedLogoUrl] = useState(null);
+  const [saveError, setSaveError] = useState("");
+  const [uploadError, setUploadError] = useState("");
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [initialFetchDone, setInitialFetchDone] = useState(false);
+  const [isRetrying, setIsRetrying] = useState(false);
+  const [lastFetchError, setLastFetchError] = useState("");
+
+  const fileInputRef = useRef(null);
 
   const dispatch = useDispatch();
   const { profile, loading, error } = useSelector(
@@ -140,44 +263,50 @@ export default function BrandProfileForm() {
 
   // Fetch brand profile on mount
   useEffect(() => {
-    dispatch(getBrandProfile());
+    let isMounted = true;
+    dispatch(getBrandProfile()).finally(() => {
+      if (isMounted) {
+        setInitialFetchDone(true);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
   }, [dispatch]);
 
-  // Sync form data whenever profile in Redux updates
+  // Sync form data whenever profile in Redux updates, unless the user is actively editing
   useEffect(() => {
-    if (profile) {
-      queueMicrotask(() => {
-        setFormData({
-          companyName: profile.companyName || "",
-          description: profile.description || "",
-          industry: profile.industry || "",
-          website: profile.website || "",
-          logo: profile.logo || "",
-          location: profile.location || "",
-          socialLinks: {
-            instagram: profile.socialLinks?.instagram || "",
-            facebook: profile.socialLinks?.facebook || "",
-            linkedin: profile.socialLinks?.linkedin || "",
-            youtube: profile.socialLinks?.youtube || "",
-          },
-          contactInformation: {
-            name: profile.contactInformation?.name || "",
-            email: profile.contactInformation?.email || "",
-            phone: profile.contactInformation?.phone || "",
-          },
-        });
+    if (profile && !isEditing) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setFormData({
+        companyName: profile.companyName || "",
+        description: profile.description || "",
+        industry: profile.industry || "",
+        website: profile.website || "",
+        logo: profile.logo || "",
+        location: profile.location || "",
+        socialLinks: {
+          instagram: profile.socialLinks?.instagram || "",
+          facebook: profile.socialLinks?.facebook || "",
+          linkedin: profile.socialLinks?.linkedin || "",
+          youtube: profile.socialLinks?.youtube || "",
+        },
+        contactInformation: {
+          name: profile.contactInformation?.name || "",
+          email: profile.contactInformation?.email || "",
+          phone: profile.contactInformation?.phone || "",
+        },
       });
     }
-  }, [profile]);
+  }, [profile, isEditing]);
 
-  // If loading is finished and no profile exists, open directly in edit/create mode
+  // If initial profile fetch is finished and no profile exists, open directly in edit/create mode
   useEffect(() => {
-    if (!loading && !profile) {
-      queueMicrotask(() => {
-        setIsEditing(true);
-      });
+    if (initialFetchDone && !profile) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setIsEditing(true);
     }
-  }, [loading, profile]);
+  }, [initialFetchDone, profile]);
 
   // Top-level input change handler
   const handleInputChange = (e) => {
@@ -212,9 +341,86 @@ export default function BrandProfileForm() {
     }));
   };
 
-  // Cancel functionality to discard changes and return to View Mode
+  // Handle local file selection and upload
+  const handleFileSelect = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Reset input value so re-selecting the same file triggers onChange
+    e.target.value = "";
+
+    const allowedMimeTypes = ["image/jpeg", "image/png", "image/webp"];
+    const maxSizeBytes = 5 * 1024 * 1024; // 5 MB
+
+    if (!allowedMimeTypes.includes(file.type)) {
+      setUploadError("Please select a valid image file (JPEG, PNG, or WebP).");
+      return;
+    }
+
+    if (file.size > maxSizeBytes) {
+      setUploadError("Image size exceeds the 5 MB limit. Please select a smaller file.");
+      return;
+    }
+
+    if (isUploadingLogo) return;
+
+    try {
+      setIsUploadingLogo(true);
+      setUploadError("");
+      setSaveError("");
+      setSuccessMessage("");
+
+      const response = await uploadSingleImageApi(file, "creatorlink/brands");
+      const imageUrl = response?.data?.url || response?.url;
+
+      if (!imageUrl) {
+        throw new Error("Upload succeeded, but no image URL was returned.");
+      }
+
+      setFormData((prev) => ({
+        ...prev,
+        logo: imageUrl,
+      }));
+
+      // If an existing profile is already loaded, follow the established pattern to persist immediately
+      const hasExistingProfile = Boolean(profile && (profile._id || profile.id));
+      if (hasExistingProfile) {
+        const prevSavedLogo = profile.logo || "";
+        const persistAction = await dispatch(
+          updateBrandProfile({ logo: imageUrl })
+        );
+
+        if (updateBrandProfile.rejected.match(persistAction)) {
+          // Restore previous saved logo in the form on update failure
+          setFormData((prev) => ({
+            ...prev,
+            logo: prevSavedLogo,
+          }));
+          const errMsg = formatErrorMessage(
+            persistAction.payload,
+            "Image uploaded, but failed to save to brand profile."
+          );
+          setUploadError(errMsg);
+        } else {
+          setSuccessMessage("Brand logo updated successfully!");
+        }
+      }
+    } catch (err) {
+      const message = formatErrorMessage(
+        err?.response?.data?.message || err?.message || err,
+        "Failed to upload logo image. Please try again."
+      );
+      setUploadError(message);
+    } finally {
+      setIsUploadingLogo(false);
+    }
+  };
+
+  // Cancel functionality to discard unsaved edits and return to View Mode
   const handleCancel = () => {
     setSuccessMessage("");
+    setSaveError("");
+    setUploadError("");
     if (profile) {
       setFormData({
         companyName: profile.companyName || "",
@@ -253,42 +459,101 @@ export default function BrandProfileForm() {
   // Form submission handler
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
     setSuccessMessage("");
+    setSaveError("");
+    setUploadError("");
 
     const hasExistingProfile = Boolean(profile && (profile._id || profile.id));
 
-    let actionResult;
-    if (hasExistingProfile) {
-      actionResult = await dispatch(updateBrandProfile(formData));
-    } else {
-      actionResult = await dispatch(createBrandProfile(formData));
-    }
+    try {
+      setIsSubmitting(true);
+      let actionResult;
+      if (hasExistingProfile) {
+        actionResult = await dispatch(updateBrandProfile(formData));
+      } else {
+        actionResult = await dispatch(createBrandProfile(formData));
+      }
 
-    if (
-      updateBrandProfile.fulfilled.match(actionResult) ||
-      createBrandProfile.fulfilled.match(actionResult)
-    ) {
-      setSuccessMessage(
-        hasExistingProfile
-          ? "Brand profile updated successfully!"
-          : "Brand profile created successfully!"
+      if (
+        updateBrandProfile.fulfilled.match(actionResult) ||
+        createBrandProfile.fulfilled.match(actionResult)
+      ) {
+        setSuccessMessage(
+          hasExistingProfile
+            ? "Brand profile updated successfully!"
+            : "Brand profile created successfully!"
+        );
+        setIsEditing(false);
+      } else {
+        const errMsg = formatErrorMessage(
+          actionResult?.payload || error,
+          hasExistingProfile
+            ? "Failed to update brand profile."
+            : "Failed to create brand profile."
+        );
+        setSaveError(errMsg);
+      }
+    } catch (err) {
+      const errMsg = formatErrorMessage(
+        err?.response?.data?.message || err?.message || err,
+        "An unexpected error occurred while saving."
       );
-      setIsEditing(false);
+      setSaveError(errMsg);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const initials = getCompanyInitials(
-    formData.companyName || profile?.companyName,
-    formData.contactInformation?.email || profile?.contactInformation?.email
-  );
+  const isNotFoundError =
+    Boolean(error) &&
+    (typeof error === "string"
+      ? error.toLowerCase().includes("not found")
+      : typeof error === "object" && typeof error?.message === "string"
+      ? error.message.toLowerCase().includes("not found")
+      : false);
 
-  const currentLogoUrl = formData.logo || profile?.logo;
-  const isLogoLoaded = loadedLogoUrl === currentLogoUrl;
-  const isLogoError = failedLogoUrl === currentLogoUrl;
-  const isLogoLoading = Boolean(currentLogoUrl) && !isLogoLoaded && !isLogoError;
+  const handleRetry = async () => {
+    if (isRetrying || loading) return;
+    try {
+      setIsRetrying(true);
+      setLastFetchError(
+        formatErrorMessage(error, "An error occurred while loading your profile.")
+      );
+      const actionResult = await dispatch(getBrandProfile());
+      if (getBrandProfile.fulfilled.match(actionResult)) {
+        setLastFetchError("");
+      } else if (getBrandProfile.rejected.match(actionResult)) {
+        setLastFetchError(
+          formatErrorMessage(
+            actionResult.payload,
+            "An error occurred while loading your profile."
+          )
+        );
+      }
+    } finally {
+      setIsRetrying(false);
+    }
+  };
+
+  const displayFetchError =
+    (error && formatErrorMessage(error)) ||
+    lastFetchError ||
+    "An error occurred while loading your profile.";
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
+      {/* Hidden File Input for Logo Uploads */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        onChange={handleFileSelect}
+        className="hidden"
+        aria-label="Upload brand logo file"
+      />
+
       {/* Sidebar Component */}
       <BrandSidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 
@@ -307,7 +572,7 @@ export default function BrandProfileForm() {
                 Account Management
               </span>
               <h1 className="font-serif font-medium text-2xl sm:text-3xl text-foreground tracking-tight">
-                Brand Profile
+                {profile ? "Brand Profile" : "Create Brand Profile"}
               </h1>
               <p className="text-xs sm:text-sm text-text-secondary mt-1">
                 Manage your company information, social presence, and primary point of contact.
@@ -318,7 +583,12 @@ export default function BrandProfileForm() {
             {!isEditing && profile && (
               <button
                 type="button"
-                onClick={() => setIsEditing(true)}
+                onClick={() => {
+                  setSuccessMessage("");
+                  setSaveError("");
+                  setUploadError("");
+                  setIsEditing(true);
+                }}
                 className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-secondary hover:bg-secondary-dark text-white text-xs font-semibold tracking-wide transition-all shadow-xs hover:shadow-md cursor-pointer shrink-0"
               >
                 <PencilIcon />
@@ -329,21 +599,76 @@ export default function BrandProfileForm() {
 
           {/* Success Message Alert */}
           {successMessage && (
-            <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-2xl p-4 text-xs font-sans flex items-center gap-2">
-              <CheckCircleIcon className="w-5 h-5 shrink-0" />
-              <span>{successMessage}</span>
+            <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-2xl p-4 text-xs font-sans flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <CheckCircleIcon className="w-5 h-5 shrink-0" />
+                <span>{successMessage}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSuccessMessage("")}
+                className="text-emerald-500/70 hover:text-emerald-500 text-xs font-bold cursor-pointer ml-2"
+                aria-label="Dismiss success message"
+              >
+                ✕
+              </button>
             </div>
           )}
 
-          {/* Error Message Alert */}
-          {error && (
-            <div className="bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl p-4 text-xs font-sans">
-              {typeof error === "string" ? error : "An error occurred while processing your request."}
+          {/* Upload Error Banner */}
+          {uploadError && (
+            <div className="bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl p-4 text-xs font-sans flex items-center justify-between">
+              <span>{formatErrorMessage(uploadError, "Failed to upload image.")}</span>
+              <button
+                type="button"
+                onClick={() => setUploadError("")}
+                className="text-red-500/70 hover:text-red-500 text-xs font-bold cursor-pointer ml-2"
+                aria-label="Dismiss upload error"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
+          {/* Save Error Banner */}
+          {saveError && (
+            <div className="bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl p-4 text-xs font-sans flex items-center justify-between">
+              <span>{formatErrorMessage(saveError, "Failed to save profile.")}</span>
+              <button
+                type="button"
+                onClick={() => setSaveError("")}
+                className="text-red-500/70 hover:text-red-500 text-xs font-bold cursor-pointer ml-2"
+                aria-label="Dismiss save error"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
+          {/* Profile Fetch Error Banner with Retry */}
+          {(error || isRetrying) && !isNotFoundError && !profile && (
+            <div className="bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl p-4 text-xs font-sans flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <span>{displayFetchError}</span>
+              <button
+                type="button"
+                onClick={handleRetry}
+                disabled={isRetrying || loading}
+                className="inline-flex items-center justify-center px-4 py-1.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-500 text-xs font-semibold transition-colors cursor-pointer self-start sm:self-auto disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isRetrying || loading ? (
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-3 h-3 border-2 border-red-500/40 border-t-red-500 rounded-full animate-spin" />
+                    <span>Retrying...</span>
+                  </span>
+                ) : (
+                  <span>Retry</span>
+                )}
+              </button>
             </div>
           )}
 
           {/* Initial Loading Skeleton */}
-          {loading && !profile && (
+          {loading && !profile && !initialFetchDone && !isRetrying && (
             <div className="space-y-6 animate-pulse">
               {/* Profile Banner Skeleton */}
               <div className="bg-surface border border-border-theme rounded-2xl p-6 sm:p-8 shadow-xs flex flex-col sm:flex-row items-start sm:items-center gap-6">
@@ -370,65 +695,65 @@ export default function BrandProfileForm() {
           {/* ========================================================= */}
           {/* VIEW MODE */}
           {/* ========================================================= */}
-          {!loading && profile && !isEditing && (
+          {profile && !isEditing && (
             <div className="space-y-8">
 
               {/* 1. Profile Banner Header Card */}
               <div className="bg-surface border border-border-theme rounded-2xl p-6 sm:p-8 shadow-xs flex flex-col sm:flex-row items-start sm:items-center gap-6">
-                {/* Logo Image / Initials Fallback */}
-                {currentLogoUrl && !isLogoError ? (
-                  <div className="relative w-20 h-20 rounded-2xl overflow-hidden border border-border-theme shrink-0 bg-surface-muted flex items-center justify-center">
-                    {isLogoLoading && (
-                      <div className="absolute inset-0 bg-surface-muted animate-pulse flex items-center justify-center text-text-secondary/40 font-serif font-bold text-2xl uppercase">
-                        {initials}
-                      </div>
+                {/* Logo Image with Quick Upload Button */}
+                <div className="relative shrink-0">
+                  <BrandLogoPreview
+                    url={profile.logo}
+                    alt={profile.companyName || "Brand Logo"}
+                    initials={getCompanyInitials(
+                      profile.companyName,
+                      profile.contactInformation?.email
                     )}
-                    <img
-                      key={currentLogoUrl}
-                      src={currentLogoUrl}
-                      alt={formData.companyName || profile?.companyName || "Brand Logo"}
-                      onLoad={() => setLoadedLogoUrl(currentLogoUrl)}
-                      onError={() => setFailedLogoUrl(currentLogoUrl)}
-                      className={`w-full h-full object-cover transition-opacity duration-300 ${
-                        isLogoLoaded ? "opacity-100" : "opacity-0"
-                      }`}
-                    />
-                  </div>
-                ) : (
-                  <div className="w-20 h-20 rounded-2xl bg-secondary/15 text-secondary font-serif font-bold text-2xl flex items-center justify-center border border-secondary/30 shrink-0 uppercase">
-                    {initials}
-                  </div>
-                )}
+                    isUploading={isUploadingLogo}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploadingLogo}
+                    aria-label="Change brand logo"
+                    title="Change brand logo"
+                    className={`absolute -bottom-1.5 -right-1.5 p-1.5 rounded-lg bg-surface border border-border-theme text-text-secondary hover:text-foreground hover:bg-surface-muted shadow-xs transition-colors cursor-pointer ${
+                      isUploadingLogo ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
+                  >
+                    <CameraIcon className="w-3.5 h-3.5" />
+                  </button>
+                </div>
 
                 <div className="space-y-2 min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-3">
                     <h2 className="font-serif font-semibold text-2xl text-foreground truncate">
-                      {formData.companyName || profile.companyName || "Brand Company"}
+                      {profile.companyName || "Brand Company"}
                     </h2>
-                    {formData.industry || profile.industry ? (
+                    {profile.industry ? (
                       <span className="px-3 py-1 rounded-full text-xs font-medium bg-surface-muted border border-border-theme text-text-secondary">
-                        {formData.industry || profile.industry}
+                        {profile.industry}
                       </span>
                     ) : null}
                   </div>
 
                   <div className="flex flex-wrap items-center gap-4 text-xs text-text-secondary">
-                    {formData.location || profile.location ? (
+                    {profile.location ? (
                       <span className="inline-flex items-center gap-1.5">
                         <MapPinIcon className="text-secondary" />
-                        <span>{formData.location || profile.location}</span>
+                        <span>{profile.location}</span>
                       </span>
                     ) : null}
 
-                    {formData.website || profile.website ? (
+                    {profile.website ? (
                       <a
-                        href={formData.website || profile.website}
+                        href={profile.website}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1 text-secondary hover:underline"
                       >
                         <GlobeIcon className="w-4 h-4" />
-                        <span>{formData.website || profile.website}</span>
+                        <span>{profile.website}</span>
                         <ExternalLinkIcon />
                       </a>
                     ) : null}
@@ -447,7 +772,7 @@ export default function BrandProfileForm() {
                   </h3>
                 </div>
                 <p className="text-xs sm:text-sm text-text-secondary leading-relaxed whitespace-pre-line">
-                  {formData.description || profile.description || "No company overview provided."}
+                  {profile.description || "No company overview provided."}
                 </p>
               </div>
 
@@ -463,9 +788,9 @@ export default function BrandProfileForm() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                  {formData.socialLinks?.instagram || profile.socialLinks?.instagram ? (
+                  {profile.socialLinks?.instagram ? (
                     <a
-                      href={formData.socialLinks?.instagram || profile.socialLinks?.instagram}
+                      href={profile.socialLinks.instagram}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="p-3.5 rounded-xl bg-surface-muted/60 border border-border-theme text-xs font-medium text-foreground hover:border-secondary transition-all flex items-center justify-between group"
@@ -475,16 +800,16 @@ export default function BrandProfileForm() {
                           Instagram
                         </span>
                         <span className="block text-[11px] text-text-secondary truncate mt-0.5 font-sans">
-                          {formData.socialLinks?.instagram || profile.socialLinks?.instagram}
+                          {profile.socialLinks.instagram}
                         </span>
                       </div>
                       <ExternalLinkIcon className="w-3.5 h-3.5 text-text-secondary group-hover:text-secondary shrink-0" />
                     </a>
                   ) : null}
 
-                  {formData.socialLinks?.facebook || profile.socialLinks?.facebook ? (
+                  {profile.socialLinks?.facebook ? (
                     <a
-                      href={formData.socialLinks?.facebook || profile.socialLinks?.facebook}
+                      href={profile.socialLinks.facebook}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="p-3.5 rounded-xl bg-surface-muted/60 border border-border-theme text-xs font-medium text-foreground hover:border-secondary transition-all flex items-center justify-between group"
@@ -494,16 +819,16 @@ export default function BrandProfileForm() {
                           Facebook
                         </span>
                         <span className="block text-[11px] text-text-secondary truncate mt-0.5 font-sans">
-                          {formData.socialLinks?.facebook || profile.socialLinks?.facebook}
+                          {profile.socialLinks.facebook}
                         </span>
                       </div>
                       <ExternalLinkIcon className="w-3.5 h-3.5 text-text-secondary group-hover:text-secondary shrink-0" />
                     </a>
                   ) : null}
 
-                  {formData.socialLinks?.linkedin || profile.socialLinks?.linkedin ? (
+                  {profile.socialLinks?.linkedin ? (
                     <a
-                      href={formData.socialLinks?.linkedin || profile.socialLinks?.linkedin}
+                      href={profile.socialLinks.linkedin}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="p-3.5 rounded-xl bg-surface-muted/60 border border-border-theme text-xs font-medium text-foreground hover:border-secondary transition-all flex items-center justify-between group"
@@ -513,16 +838,16 @@ export default function BrandProfileForm() {
                           LinkedIn
                         </span>
                         <span className="block text-[11px] text-text-secondary truncate mt-0.5 font-sans">
-                          {formData.socialLinks?.linkedin || profile.socialLinks?.linkedin}
+                          {profile.socialLinks.linkedin}
                         </span>
                       </div>
                       <ExternalLinkIcon className="w-3.5 h-3.5 text-text-secondary group-hover:text-secondary shrink-0" />
                     </a>
                   ) : null}
 
-                  {formData.socialLinks?.youtube || profile.socialLinks?.youtube ? (
+                  {profile.socialLinks?.youtube ? (
                     <a
-                      href={formData.socialLinks?.youtube || profile.socialLinks?.youtube}
+                      href={profile.socialLinks.youtube}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="p-3.5 rounded-xl bg-surface-muted/60 border border-border-theme text-xs font-medium text-foreground hover:border-secondary transition-all flex items-center justify-between group"
@@ -532,20 +857,16 @@ export default function BrandProfileForm() {
                           YouTube
                         </span>
                         <span className="block text-[11px] text-text-secondary truncate mt-0.5 font-sans">
-                          {formData.socialLinks?.youtube || profile.socialLinks?.youtube}
+                          {profile.socialLinks.youtube}
                         </span>
                       </div>
                       <ExternalLinkIcon className="w-3.5 h-3.5 text-text-secondary group-hover:text-secondary shrink-0" />
                     </a>
                   ) : null}
 
-                  {!formData.socialLinks?.instagram &&
-                    !profile.socialLinks?.instagram &&
-                    !formData.socialLinks?.facebook &&
+                  {!profile.socialLinks?.instagram &&
                     !profile.socialLinks?.facebook &&
-                    !formData.socialLinks?.linkedin &&
                     !profile.socialLinks?.linkedin &&
-                    !formData.socialLinks?.youtube &&
                     !profile.socialLinks?.youtube && (
                       <p className="text-xs text-text-secondary col-span-1 sm:col-span-2 py-1">
                         No social media links connected.
@@ -571,7 +892,7 @@ export default function BrandProfileForm() {
                       Contact Name
                     </span>
                     <span className="font-semibold text-foreground">
-                      {formData.contactInformation?.name || profile.contactInformation?.name || "Not specified"}
+                      {profile.contactInformation?.name || "Not specified"}
                     </span>
                   </div>
 
@@ -579,13 +900,13 @@ export default function BrandProfileForm() {
                     <span className="block text-text-secondary uppercase tracking-wider text-[10px] font-semibold mb-1">
                       Contact Email
                     </span>
-                    {formData.contactInformation?.email || profile.contactInformation?.email ? (
+                    {profile.contactInformation?.email ? (
                       <a
-                        href={`mailto:${formData.contactInformation?.email || profile.contactInformation?.email}`}
+                        href={`mailto:${profile.contactInformation.email}`}
                         className="inline-flex items-center gap-1 text-secondary hover:underline font-semibold"
                       >
                         <MailIcon />
-                        <span>{formData.contactInformation?.email || profile.contactInformation?.email}</span>
+                        <span>{profile.contactInformation.email}</span>
                       </a>
                     ) : (
                       <span className="text-text-secondary">Not specified</span>
@@ -596,13 +917,13 @@ export default function BrandProfileForm() {
                     <span className="block text-text-secondary uppercase tracking-wider text-[10px] font-semibold mb-1">
                       Contact Phone
                     </span>
-                    {formData.contactInformation?.phone || profile.contactInformation?.phone ? (
+                    {profile.contactInformation?.phone ? (
                       <a
-                        href={`tel:${formData.contactInformation?.phone || profile.contactInformation?.phone}`}
+                        href={`tel:${profile.contactInformation.phone}`}
                         className="inline-flex items-center gap-1 text-secondary hover:underline font-semibold"
                       >
                         <PhoneIcon />
-                        <span>{formData.contactInformation?.phone || profile.contactInformation?.phone}</span>
+                        <span>{profile.contactInformation.phone}</span>
                       </a>
                     ) : (
                       <span className="text-text-secondary">Not specified</span>
@@ -617,7 +938,7 @@ export default function BrandProfileForm() {
           {/* ========================================================= */}
           {/* EDIT MODE FORM */}
           {/* ========================================================= */}
-          {(!loading || profile) && isEditing && (
+          {isEditing && (
             <form onSubmit={handleSubmit} className="space-y-8">
 
               {/* 1. Company Details Card */}
@@ -698,19 +1019,87 @@ export default function BrandProfileForm() {
                     />
                   </div>
 
-                  {/* Logo URL */}
-                  <div className="space-y-1.5">
+                  {/* Company Logo and File Upload */}
+                  <div className="space-y-1.5 sm:col-span-2">
                     <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
-                      Logo Image URL
+                      Company Logo
                     </label>
-                    <input
-                      type="url"
-                      name="logo"
-                      value={formData.logo}
-                      onChange={handleInputChange}
-                      placeholder="https://example.com/logo.png"
-                      className="w-full bg-surface border border-border-theme text-foreground text-xs sm:text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-secondary transition-colors"
-                    />
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 rounded-xl bg-surface-muted/30 border border-border-theme">
+                      {/* Logo Preview with Upload Button */}
+                      <div className="relative shrink-0">
+                        <BrandLogoPreview
+                          url={formData.logo}
+                          alt={formData.companyName || "Brand Logo Preview"}
+                          initials={getCompanyInitials(
+                            formData.companyName,
+                            formData.contactInformation?.email
+                          )}
+                          isUploading={isUploadingLogo}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={isUploadingLogo}
+                          aria-label="Upload company logo image"
+                          title="Upload company logo image"
+                          className={`absolute -bottom-1.5 -right-1.5 p-1.5 rounded-lg bg-surface border border-border-theme text-text-secondary hover:text-foreground hover:bg-surface-muted shadow-xs transition-colors cursor-pointer ${
+                            isUploadingLogo ? "opacity-50 cursor-not-allowed" : ""
+                          }`}
+                        >
+                          <CameraIcon className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+
+                      <div className="flex-1 w-full space-y-2.5">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={isUploadingLogo}
+                            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface border border-border-theme hover:bg-surface-muted text-foreground text-xs font-semibold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <CameraIcon className="w-3.5 h-3.5 text-secondary" />
+                            <span>{isUploadingLogo ? "Uploading..." : "Upload Logo Image"}</span>
+                          </button>
+
+                          {formData.logo ? (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setFormData((prev) => ({ ...prev, logo: "" }))
+                              }
+                              disabled={isUploadingLogo}
+                              className="px-2.5 py-1.5 rounded-lg border border-border-theme hover:bg-red-500/10 text-red-500 text-xs font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              Remove Logo
+                            </button>
+                          ) : null}
+
+                          <span className="text-[11px] text-text-secondary">
+                            JPEG, PNG or WebP (max 5 MB)
+                          </span>
+                        </div>
+
+                        <div>
+                          <label
+                            htmlFor="logo-url-input"
+                            className="block text-[11px] font-medium text-text-secondary mb-1"
+                          >
+                            Or enter Logo Image URL:
+                          </label>
+                          <input
+                            id="logo-url-input"
+                            type="url"
+                            name="logo"
+                            value={formData.logo}
+                            onChange={handleInputChange}
+                            placeholder="https://example.com/logo.png"
+                            disabled={isUploadingLogo}
+                            className="w-full bg-surface border border-border-theme text-foreground text-xs sm:text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-secondary transition-colors disabled:opacity-60"
+                          />
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Description */}
@@ -879,17 +1268,18 @@ export default function BrandProfileForm() {
                   <button
                     type="button"
                     onClick={handleCancel}
-                    className="px-6 py-3.5 rounded-xl border border-border-theme text-foreground hover:bg-surface-muted text-xs sm:text-sm font-semibold transition-colors cursor-pointer"
+                    disabled={isSubmitting || isUploadingLogo}
+                    className="px-6 py-3.5 rounded-xl border border-border-theme text-foreground hover:bg-surface-muted text-xs sm:text-sm font-semibold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Cancel
                   </button>
                 )}
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={isSubmitting || isUploadingLogo}
                   className="inline-flex items-center justify-center px-8 py-3.5 rounded-xl bg-secondary hover:bg-secondary-dark text-white font-sans text-xs sm:text-sm font-semibold tracking-wide transition-all shadow-xs hover:shadow-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {loading ? (
+                  {isSubmitting ? (
                     <span className="flex items-center gap-2">
                       <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                       <span>Saving...</span>

@@ -67,7 +67,7 @@ export default function CreatorIdentity() {
             {/* CARD 1: BEAUTY REEL */}
             <div className="group relative w-full h-[320px] sm:h-[350px] rounded-3xl overflow-hidden bg-slate-100 dark:bg-surface border border-black/[0.06] dark:border-white/10 shadow-sm hover:shadow-xl transition-all duration-300">
               <Image
-                src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&q=80"
+                src="https://res.cloudinary.com/atr5osne/image/upload/v1792054714/creatorlink/public/editorial/se3wpecdot8jphnowzci.webp"
                 alt="Beauty Reel"
                 fill
                 sizes="(max-width: 640px) 100vw, 350px"
@@ -101,7 +101,7 @@ export default function CreatorIdentity() {
             {/* CARD 5: SPACES */}
             <div className="group relative w-full h-[220px] sm:h-[240px] rounded-3xl overflow-hidden bg-slate-100 dark:bg-surface border border-black/[0.06] dark:border-white/10 shadow-sm hover:shadow-xl transition-all duration-300">
               <Image
-                src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=600&q=80"
+                src="https://res.cloudinary.com/atr5osne/image/upload/v1792054740/creatorlink/public/editorial/hwajtuk9gwkhujb9glj8.webp"
                 alt="Interior Spaces"
                 fill
                 sizes="(max-width: 640px) 100vw, 350px"
@@ -123,7 +123,7 @@ export default function CreatorIdentity() {
             {/* CARD 2: LOOKBOOK #04 */}
             <div className="group relative w-full h-[566px] sm:h-[617px] rounded-3xl overflow-hidden bg-slate-100 dark:bg-surface border border-black/[0.06] dark:border-white/10 shadow-sm hover:shadow-xl transition-all duration-300">
               <Image
-                src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=800&q=80"
+                src="https://res.cloudinary.com/atr5osne/image/upload/v1792055946/creatorlink/public/editorial/pxw6resagifvayqppnqp.webp"
                 alt="Lookbook 04"
                 fill
                 sizes="(max-width: 640px) 100vw, 400px"
@@ -163,7 +163,7 @@ export default function CreatorIdentity() {
               {/* CARD 3: UGC EDITORIAL */}
               <div className="group relative w-full h-[220px] sm:h-[240px] rounded-3xl overflow-hidden bg-slate-100 dark:bg-surface border border-black/[0.06] dark:border-white/10 shadow-sm hover:shadow-xl transition-all duration-300">
                 <Image
-                  src="https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=600&q=80"
+                  src="https://res.cloudinary.com/atr5osne/image/upload/v1792054733/creatorlink/public/campaigns/cru8rs8ckm8iszusol6z.webp"
                   alt="UGC Editorial Skincare"
                   fill
                   sizes="(max-width: 640px) 100vw, 350px"
@@ -179,7 +179,7 @@ export default function CreatorIdentity() {
               {/* CARD 4: GASTRONOMY */}
               <div className="group relative w-full h-[220px] sm:h-[240px] rounded-3xl overflow-hidden bg-slate-100 dark:bg-surface border border-black/[0.06] dark:border-white/10 shadow-sm hover:shadow-xl transition-all duration-300">
                 <Image
-                  src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&q=80"
+                  src="https://res.cloudinary.com/atr5osne/image/upload/v1792055958/creatorlink/public/editorial/wknylb4namiugiypc1sn.webp"
                   alt="Gastronomy Table"
                   fill
                   sizes="(max-width: 640px) 100vw, 350px"
@@ -202,7 +202,7 @@ export default function CreatorIdentity() {
             {/* BOTTOM ROW (WIDE CAMPAIGN CARD: FEATURED TRIP) */}
             <div className="group relative w-full h-[320px] sm:h-[350px] rounded-3xl overflow-hidden bg-slate-100 dark:bg-surface border border-black/[0.06] dark:border-white/10 shadow-sm hover:shadow-xl transition-all duration-300">
               <Image
-                src="https://images.unsplash.com/photo-1533105079780-92b9be482077?auto=format&fit=crop&w=1000&q=80"
+                src="https://res.cloudinary.com/atr5osne/image/upload/v1792055986/creatorlink/public/editorial/baenp9gwb0oiigc80uuz.webp"
                 alt="Amalfi Horizon Campaign"
                 fill
                 sizes="(max-width: 640px) 100vw, 700px"

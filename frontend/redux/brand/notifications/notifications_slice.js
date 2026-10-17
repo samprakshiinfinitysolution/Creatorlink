@@ -1,0 +1,327 @@
+import {
+    createAsyncThunk,
+    createSlice
+} from "@reduxjs/toolkit";
+
+import {
+    getBrandNotifications as getBrandNotificationsApi,
+    getBrandUnreadNotificationCount as getBrandUnreadNotificationCountApi,
+    markBrandNotificationRead as markBrandNotificationReadApi,
+    markAllBrandNotificationsRead as markAllBrandNotificationsReadApi
+} from "./notifications_api";
+
+import {
+    login,
+    logout,
+    clearAuth
+} from "../../auth/auth_slice";
+
+// Handles fetching brand notifications list with optional params (page, limit, isRead).
+const fetchBrandNotifications = createAsyncThunk(
+    "brandNotifications/fetchBrandNotifications",
+    async (params = {}, { rejectWithValue }) => {
+        try {
+            return await getBrandNotificationsApi(params);
+        } catch (error) {
+            return rejectWithValue(
+                error.response?.data?.message ||
+                "Unable to fetch notifications"
+            );
+        }
+    }
+);
+
+// Handles fetching unread notifications count for brand.
+const fetchBrandUnreadNotificationCount = createAsyncThunk(
+    "brandNotifications/fetchBrandUnreadNotificationCount",
+    async (_, { rejectWithValue }) => {
+        try {
+            return await getBrandUnreadNotificationCountApi();
+        } catch (error) {
+            return rejectWithValue(
+                error.response?.data?.message ||
+                "Unable to fetch unread notification count"
+            );
+        }
+    }
+);
+
+// Handles fetching latest notifications for brand header dropdown.
+const fetchBrandDropdownNotifications = createAsyncThunk(
+    "brandNotifications/fetchBrandDropdownNotifications",
+    async (_, { rejectWithValue }) => {
+        try {
+            return await getBrandNotificationsApi({ page: 1, limit: 10 });
+        } catch (error) {
+            return rejectWithValue(
+                error.response?.data?.message ||
+                "Unable to fetch notifications"
+            );
+        }
+    }
+);
+
+// Handles marking single notification as read for brand.
+const markBrandNotificationRead = createAsyncThunk(
+    "brandNotifications/markBrandNotificationRead",
+    async (notificationId, { dispatch, getState, rejectWithValue }) => {
+        try {
+            const response = await markBrandNotificationReadApi(notificationId);
+
+            // Check if notification is present in either loaded list
+            const currentList = getState()?.brandNotifications?.notifications || [];
+            const dropdownList = getState()?.brandNotifications?.dropdownNotifications || [];
+            const targetId = response?.data?._id || notificationId;
+            const wasInList = currentList.some(
+                (item) => item._id && String(item._id) === String(targetId)
+            );
+            const wasInDropdown = dropdownList.some(
+                (item) => item._id && String(item._id) === String(targetId)
+            );
+
+            // If not found in either loaded list, fetch authoritative count from backend
+            if (!wasInList && !wasInDropdown) {
+                await dispatch(fetchBrandUnreadNotificationCount());
+            }
+
+            return response;
+        } catch (error) {
+            return rejectWithValue(
+                error.response?.data?.message ||
+                "Unable to mark notification as read"
+            );
+        }
+    }
+);
+
+// Handles marking all notifications as read for brand.
+const markAllBrandNotificationsRead = createAsyncThunk(
+    "brandNotifications/markAllBrandNotificationsRead",
+    async (_, { rejectWithValue }) => {
+        try {
+            return await markAllBrandNotificationsReadApi();
+        } catch (error) {
+            return rejectWithValue(
+                error.response?.data?.message ||
+                "Unable to mark all notifications as read"
+            );
+        }
+    }
+);
+
+const initialState = {
+    notifications: [],
+    dropdownNotifications: [],
+    unreadCount: 0,
+    pagination: null,
+    loading: false,
+    dropdownLoading: false,
+    unreadCountLoading: false,
+    markingRead: false,
+    markingAllRead: false,
+    currentRequestId: null,
+    error: null,
+    dropdownError: null
+};
+
+const brandNotificationsSlice = createSlice({
+    name: "brandNotifications",
+    initialState,
+
+    reducers: {
+        // Adds real-time incoming notification with deduplication.
+        addRealtimeBrandNotification: (state, action) => {
+            const notification = action.payload;
+            if (!notification || !notification._id) return;
+
+            const notifIdStr = String(notification._id);
+            const inNotifications = state.notifications.some(
+                (item) => item._id && String(item._id) === notifIdStr
+            );
+
+            if (!inNotifications) {
+                state.notifications.unshift(notification);
+                if (state.pagination && typeof state.pagination.totalItems === "number") {
+                    state.pagination.totalItems += 1;
+                }
+            }
+
+            const inDropdown = state.dropdownNotifications.some(
+                (item) => item._id && String(item._id) === notifIdStr
+            );
+            if (!inDropdown) {
+                state.dropdownNotifications.unshift(notification);
+                if (state.dropdownNotifications.length > 10) {
+                    state.dropdownNotifications = state.dropdownNotifications.slice(0, 10);
+                }
+            }
+
+            if (!notification.isRead && !inNotifications && !inDropdown) {
+                state.unreadCount += 1;
+            }
+        },
+
+        clearNotificationsState: () => initialState,
+
+        clearNotificationsError: (state) => {
+            state.error = null;
+            state.dropdownError = null;
+        }
+    },
+
+    extraReducers: (builder) => {
+        builder
+            // Fetch Notifications List (Full Manager) with request ID checking
+            .addCase(fetchBrandNotifications.pending, (state, action) => {
+                state.loading = true;
+                state.currentRequestId = action.meta.requestId;
+                state.error = null;
+            })
+            .addCase(fetchBrandNotifications.fulfilled, (state, action) => {
+                if (state.currentRequestId === action.meta.requestId) {
+                    state.loading = false;
+                    state.notifications = action.payload?.data?.notifications || [];
+                    state.pagination = action.payload?.data?.pagination || null;
+                    state.error = null;
+                    state.currentRequestId = null;
+                }
+            })
+            .addCase(fetchBrandNotifications.rejected, (state, action) => {
+                if (state.currentRequestId === action.meta.requestId) {
+                    state.loading = false;
+                    state.error = action.payload || "Unable to fetch notifications";
+                    state.currentRequestId = null;
+                }
+            })
+
+            // Fetch Latest Notifications (Dropdown)
+            .addCase(fetchBrandDropdownNotifications.pending, (state) => {
+                state.dropdownLoading = true;
+                state.dropdownError = null;
+            })
+            .addCase(fetchBrandDropdownNotifications.fulfilled, (state, action) => {
+                state.dropdownLoading = false;
+                state.dropdownNotifications = action.payload?.data?.notifications || [];
+                state.dropdownError = null;
+            })
+            .addCase(fetchBrandDropdownNotifications.rejected, (state, action) => {
+                state.dropdownLoading = false;
+                state.dropdownError = action.payload || "Unable to fetch notifications";
+            })
+
+            // Fetch Unread Count
+            .addCase(fetchBrandUnreadNotificationCount.pending, (state) => {
+                state.unreadCountLoading = true;
+            })
+            .addCase(fetchBrandUnreadNotificationCount.fulfilled, (state, action) => {
+                state.unreadCountLoading = false;
+                state.unreadCount =
+                    typeof action.payload?.data?.unreadCount === "number"
+                        ? action.payload.data.unreadCount
+                        : 0;
+            })
+            .addCase(fetchBrandUnreadNotificationCount.rejected, (state) => {
+                state.unreadCountLoading = false;
+            })
+
+            // Mark Single Read
+            .addCase(markBrandNotificationRead.pending, (state) => {
+                state.markingRead = true;
+                state.error = null;
+            })
+            .addCase(markBrandNotificationRead.fulfilled, (state, action) => {
+                state.markingRead = false;
+                const updatedNotification = action.payload?.data;
+                const updatedId = updatedNotification?._id;
+
+                if (updatedId && updatedNotification?.isRead === true) {
+                    const targetIdStr = String(updatedId);
+                    let wasUnread = false;
+
+                    const index = state.notifications.findIndex(
+                        (item) => item._id && String(item._id) === targetIdStr
+                    );
+                    if (index !== -1) {
+                        if (!state.notifications[index].isRead) {
+                            wasUnread = true;
+                        }
+                        state.notifications[index] = {
+                            ...state.notifications[index],
+                            ...updatedNotification,
+                            isRead: true
+                        };
+                    }
+
+                    const dropIndex = state.dropdownNotifications.findIndex(
+                        (item) => item._id && String(item._id) === targetIdStr
+                    );
+                    if (dropIndex !== -1) {
+                        if (!state.dropdownNotifications[dropIndex].isRead) {
+                            wasUnread = true;
+                        }
+                        state.dropdownNotifications[dropIndex] = {
+                            ...state.dropdownNotifications[dropIndex],
+                            ...updatedNotification,
+                            isRead: true
+                        };
+                    }
+
+                    if (wasUnread) {
+                        state.unreadCount = Math.max(0, (Number(state.unreadCount) || 0) - 1);
+                    }
+                }
+                state.error = null;
+            })
+            .addCase(markBrandNotificationRead.rejected, (state, action) => {
+                state.markingRead = false;
+                state.error = action.payload || "Unable to mark notification as read";
+            })
+
+            // Mark All Read
+            .addCase(markAllBrandNotificationsRead.pending, (state) => {
+                state.markingAllRead = true;
+                state.error = null;
+            })
+            .addCase(markAllBrandNotificationsRead.fulfilled, (state) => {
+                state.markingAllRead = false;
+                const nowIso = new Date().toISOString();
+                state.notifications = state.notifications.map((item) => ({
+                    ...item,
+                    isRead: true,
+                    readAt: item.readAt || nowIso
+                }));
+                state.dropdownNotifications = state.dropdownNotifications.map((item) => ({
+                    ...item,
+                    isRead: true,
+                    readAt: item.readAt || nowIso
+                }));
+                state.unreadCount = 0;
+                state.error = null;
+            })
+            .addCase(markAllBrandNotificationsRead.rejected, (state, action) => {
+                state.markingAllRead = false;
+                state.error = action.payload || "Unable to mark all notifications as read";
+            })
+
+            // Reset state on authentication changes
+            .addCase(login.fulfilled, () => initialState)
+            .addCase(logout.fulfilled, () => initialState)
+            .addCase(clearAuth, () => initialState);
+    }
+});
+
+export const {
+    addRealtimeBrandNotification,
+    clearNotificationsState,
+    clearNotificationsError
+} = brandNotificationsSlice.actions;
+
+export {
+    fetchBrandNotifications,
+    fetchBrandDropdownNotifications,
+    fetchBrandUnreadNotificationCount,
+    markBrandNotificationRead,
+    markAllBrandNotificationsRead
+};
+
+export default brandNotificationsSlice.reducer;

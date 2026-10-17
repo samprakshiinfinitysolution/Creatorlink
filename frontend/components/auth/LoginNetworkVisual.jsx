@@ -13,7 +13,7 @@ const NETWORK_NODES = [
     name: "Elena Vance",
     badge: "Milan",
     image:
-      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200",
+      "https://res.cloudinary.com/atr5osne/image/upload/v1792054698/creatorlink/public/avatars/gye9m9prpdv81gc9ipkp.webp",
     initials: "EV",
     position: "top-[12%] left-[18%]",
     floatDelay: "0s",
@@ -23,7 +23,7 @@ const NETWORK_NODES = [
     name: "Aura Luxury",
     badge: "Paris",
     image:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200",
+      "https://res.cloudinary.com/atr5osne/image/upload/v1792054706/creatorlink/public/avatars/qvmu4uqdqpexdchfnvys.webp",
     initials: "AL",
     position: "top-[18%] right-[14%]",
     floatDelay: "1s",
@@ -33,7 +33,7 @@ const NETWORK_NODES = [
     name: "Félix S.",
     badge: "640K",
     image:
-      "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=200",
+      "https://res.cloudinary.com/atr5osne/image/upload/v1792054701/creatorlink/public/avatars/qooau1mzc4okikpsrqri.webp",
     initials: "FS",
     position: "top-[42%] left-[8%]",
     floatDelay: "2s",
@@ -43,7 +43,7 @@ const NETWORK_NODES = [
     name: "Byredo House",
     badge: "Stockholm",
     image:
-      "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=200",
+      "https://res.cloudinary.com/atr5osne/image/upload/v1792054736/creatorlink/public/avatars/zlmon5cclvmmdh0wpwwz.webp",
     initials: "BH",
     position: "top-[48%] right-[10%]",
     floatDelay: "1.5s",
@@ -53,7 +53,7 @@ const NETWORK_NODES = [
     name: "Lucian Atelier",
     badge: "New York",
     image:
-      "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=200",
+      "https://res.cloudinary.com/atr5osne/image/upload/v1792054710/creatorlink/public/avatars/ra9dirifievmiawd57yl.webp",
     initials: "LA",
     position: "bottom-[24%] left-[22%]",
     floatDelay: "0.5s",
@@ -63,7 +63,7 @@ const NETWORK_NODES = [
     name: "Balmain Haute",
     badge: "Paris",
     image:
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200",
+      "https://res.cloudinary.com/atr5osne/image/upload/v1792054726/creatorlink/public/avatars/ygxg39zcf4is7tn711ez.webp",
     initials: "BM",
     position: "bottom-[28%] right-[20%]",
     floatDelay: "2.5s",

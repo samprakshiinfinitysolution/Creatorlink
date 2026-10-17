@@ -13,6 +13,18 @@ const axiosInstance = axios.create({
 });
 
 
+axiosInstance.interceptors.request.use((config) => {
+    if (typeof FormData !== "undefined" && config.data instanceof FormData) {
+        if (config.headers?.delete) {
+            config.headers.delete("Content-Type");
+        } else if (config.headers) {
+            delete config.headers["Content-Type"];
+        }
+    }
+    return config;
+});
+
+
 let isRefreshing = false;
 
 let pendingRequests = [];
@@ -56,9 +68,9 @@ axiosInstance.interceptors.response.use(
 
         // Do not try to refresh the refresh request itself.
         if (
-            originalRequest?.url?.includes(
-                "/auth/refresh"
-            )
+            originalRequest?.url?.includes("/auth/login") ||
+            originalRequest?.url?.includes("/auth/register") ||
+            originalRequest?.url?.includes("/auth/refresh")
         ) {
             return Promise.reject(error);
         }
@@ -112,3 +124,6 @@ axiosInstance.interceptors.response.use(
 
 
 export default axiosInstance;
+
+
+

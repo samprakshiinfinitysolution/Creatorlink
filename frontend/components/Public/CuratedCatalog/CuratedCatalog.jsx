@@ -14,7 +14,7 @@ const CREATORS = [
     category: "Haute Fashion",
     location: "Paris, FR",
     image:
-      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=85",
+      "https://res.cloudinary.com/atr5osne/image/upload/v1792054698/creatorlink/public/avatars/gye9m9prpdv81gc9ipkp.webp",
     badge: "TRENDING #1",
     badgeColor: "bg-secondary text-white",
     fit: "98% Fit",
@@ -30,7 +30,7 @@ const CREATORS = [
     category: "Beauty & Editorial",
     location: "Milan, IT",
     image:
-      "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=85",
+      "https://res.cloudinary.com/atr5osne/image/upload/v1792054701/creatorlink/public/avatars/qooau1mzc4okikpsrqri.webp",
     badge: "LIVE COLLAB",
     badgeColor: "bg-emerald-500 text-white dark:bg-emerald-600",
     fit: "96% Fit",
@@ -46,7 +46,7 @@ const CREATORS = [
     category: "Minimal Tech",
     location: "Tokyo, JP",
     image:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=85",
+      "https://res.cloudinary.com/atr5osne/image/upload/v1792054706/creatorlink/public/avatars/qvmu4uqdqpexdchfnvys.webp",
     badge: "VERIFIED PRO",
     badgeColor: "bg-tertiary text-white dark:bg-purple-600",
     fit: "99% Fit",
@@ -62,7 +62,7 @@ const CREATORS = [
     category: "Fine Art & Travel",
     location: "Stockholm, SE",
     image:
-      "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=85",
+      "https://res.cloudinary.com/atr5osne/image/upload/v1792054710/creatorlink/public/avatars/ra9dirifievmiawd57yl.webp",
     badge: "FAST RESPONSE",
     badgeColor: "bg-amber-500 text-white dark:bg-amber-600",
     fit: "94% Fit",

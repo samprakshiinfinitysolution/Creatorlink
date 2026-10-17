@@ -7,7 +7,7 @@ import {
     loginUser,
     refreshAccessToken,
     logoutUser,
-     getCurrentUser
+    getCurrentUser
 } from "./auth.service.js";
 
 
@@ -16,7 +16,9 @@ import {
 const cookieOptions = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "strict"
+    sameSite: process.env.NODE_ENV === "production"
+        ? "none"
+        : "strict"
 };
 
 
@@ -47,8 +49,8 @@ const login = asyncHandler(async (req, res) => {
         {
             ...cookieOptions,
             maxAge: getMilliseconds(
-    process.env.ACCESS_TOKEN_EXPIRES_IN
-)
+                process.env.ACCESS_TOKEN_EXPIRES_IN
+            )
         }
     );
 
@@ -57,9 +59,9 @@ const login = asyncHandler(async (req, res) => {
         loginData.refreshToken,
         {
             ...cookieOptions,
-           maxAge: getMilliseconds(
-    process.env.REFRESH_TOKEN_EXPIRES_IN
-           )
+            maxAge: getMilliseconds(
+                process.env.REFRESH_TOKEN_EXPIRES_IN
+            )
         }
     );
 

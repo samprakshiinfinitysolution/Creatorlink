@@ -1,7 +1,6 @@
-import {
-    createAsyncThunk,
-    createSlice
-} from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice} from "@reduxjs/toolkit";
+
+import { socket } from "@/lib/socket";
 
 import {
     loginUser,
@@ -61,10 +60,20 @@ const refreshToken = createAsyncThunk(
             return await refreshAccessToken();
 
         } catch (error) {
+            const isAuthFailure =
+                error.response?.status === 401 ||
+                error.response?.status === 403;
+
+            if (isAuthFailure) {
+                socket.disconnect();
+            }
 
             return rejectWithValue(
                 error.response?.data?.message ||
-                "Session expired"
+                (isAuthFailure
+                    ? "Session expired"
+                    : (error.message || "Failed to refresh token")),
+                { isAuthFailure }
             );
         }
     }
@@ -86,6 +95,8 @@ const logout = createAsyncThunk(
                 error.response?.data?.message ||
                 "Logout failed"
             );
+        } finally {
+            socket.disconnect();
         }
     }
 );
@@ -101,10 +112,18 @@ const getMe = createAsyncThunk(
             return await getCurrentUser();
 
         } catch (error) {
+            const isAuthFailure =
+                error.response?.status === 401 ||
+                error.response?.status === 403;
+
+            if (isAuthFailure) {
+                socket.disconnect();
+            }
 
             return thunkAPI.rejectWithValue(
                 error.response?.data?.message ||
-                "Unable to fetch user"
+                "Unable to fetch user",
+                { isAuthFailure }
             );
         }
     }
@@ -200,9 +219,14 @@ const authSlice = createSlice({
             .addCase(refreshToken.rejected, (state, action) => {
 
                 state.loading = false;
-                state.user = null;
-                state.isAuthenticated = false;
                 state.error = action.payload;
+
+                // Only clear authentication on definitive auth/session failure (HTTP 401/403).
+                // Do not log out the user on temporary network errors, timeouts, or 5xx responses.
+                if (action.meta?.isAuthFailure) {
+                    state.user = null;
+                    state.isAuthenticated = false;
+                }
             })
              // CURRENT USER
             .addCase(getMe.pending, (state) => {
@@ -223,9 +247,14 @@ const authSlice = createSlice({
             .addCase(getMe.rejected, (state, action) => {
 
                 state.loading = false;
-                state.user = null;
-                state.isAuthenticated = false;
                 state.error = action.payload;
+
+                // Only clear authentication on definitive auth/session failure (HTTP 401/403).
+                // Do not log out the user on temporary network errors or 5xx responses.
+                if (action.meta?.isAuthFailure) {
+                    state.user = null;
+                    state.isAuthenticated = false;
+                }
             })
 
 
@@ -249,6 +278,8 @@ const authSlice = createSlice({
             .addCase(logout.rejected, (state, action) => {
 
                 state.loading = false;
+                state.user = null;
+                state.isAuthenticated = false;
                 state.error = action.payload;
             });
     }
@@ -264,7 +295,8 @@ export {
     login,
     register,
     refreshToken,
-    logout
+    logout,
+    getMe
 };
 
 

@@ -84,7 +84,7 @@ export default function CreatorFinalCTA() {
           <div className="lg:col-span-5 relative min-h-[360px] sm:min-h-[440px] lg:min-h-full overflow-hidden bg-slate-100 dark:bg-white/5 group">
             
             {/* Visual Image */}
-            <Image src="https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=1000&q=80" alt="Elite Fashion & Lifestyle Creator" fill className="w-full h-full object-cover object-top transform group-hover:scale-105 transition-transform duration-500 ease-out" sizes="(max-width: 768px) 100vw, 50vw" />
+            <Image src="https://res.cloudinary.com/atr5osne/image/upload/v1792054750/creatorlink/public/creators/wgh3norjnvhnlp2jlfhl.webp" alt="Elite Fashion & Lifestyle Creator" fill className="w-full h-full object-cover object-top transform group-hover:scale-105 transition-transform duration-500 ease-out" sizes="(max-width: 768px) 100vw, 50vw" />
 
             {/* Subtle Inner Image Vignette Overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/10 pointer-events-none" />

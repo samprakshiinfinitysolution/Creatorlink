@@ -213,9 +213,8 @@ function ModalPortfolioCover({ cover, title, category }) {
             decoding="async"
             onLoad={() => setLoadedUrl(cover)}
             onError={() => setFailedUrl(cover)}
-            className={`w-full h-full object-cover transition-opacity duration-300 ${
-              isImgLoaded ? "opacity-100" : "opacity-0"
-            }`}
+            className={`w-full h-full object-cover transition-opacity duration-300 ${isImgLoaded ? "opacity-100" : "opacity-0"
+              }`}
           />
         </>
       ) : (
@@ -361,9 +360,8 @@ export default function BrandCreatorDetailModal({
                       alt={name}
                       onLoad={() => setLoadedAvatarUrl(cleanAvatarUrl)}
                       onError={() => setFailedAvatarUrl(cleanAvatarUrl)}
-                      className={`w-full h-full object-cover transition-opacity duration-300 ${
-                        isProfileImgLoaded ? "opacity-100" : "opacity-0"
-                      }`}
+                      className={`w-full h-full object-cover transition-opacity duration-300 ${isProfileImgLoaded ? "opacity-100" : "opacity-0"
+                        }`}
                     />
                   </>
                 ) : (
@@ -416,8 +414,8 @@ export default function BrandCreatorDetailModal({
             type="button"
             onClick={() => setActiveTab("overview")}
             className={`py-3 px-3 sm:px-4 text-xs font-semibold border-b-2 transition-colors cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${activeTab === "overview"
-                ? "border-secondary text-secondary"
-                : "border-transparent text-text-secondary hover:text-foreground"
+              ? "border-secondary text-secondary"
+              : "border-transparent text-text-secondary hover:text-foreground"
               }`}
           >
             <span>Profile & Overview</span>
@@ -427,8 +425,8 @@ export default function BrandCreatorDetailModal({
             type="button"
             onClick={() => setActiveTab("portfolio")}
             className={`py-3 px-3 sm:px-4 text-xs font-semibold border-b-2 transition-colors cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${activeTab === "portfolio"
-                ? "border-secondary text-secondary"
-                : "border-transparent text-text-secondary hover:text-foreground"
+              ? "border-secondary text-secondary"
+              : "border-transparent text-text-secondary hover:text-foreground"
               }`}
           >
             <span>Portfolio</span>
@@ -441,8 +439,8 @@ export default function BrandCreatorDetailModal({
             type="button"
             onClick={() => setActiveTab("services")}
             className={`py-3 px-3 sm:px-4 text-xs font-semibold border-b-2 transition-colors cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${activeTab === "services"
-                ? "border-secondary text-secondary"
-                : "border-transparent text-text-secondary hover:text-foreground"
+              ? "border-secondary text-secondary"
+              : "border-transparent text-text-secondary hover:text-foreground"
               }`}
           >
             <span>Services</span>

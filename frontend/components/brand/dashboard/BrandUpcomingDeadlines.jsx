@@ -63,7 +63,7 @@ function DeliverableAvatar({ title, thumbnail, fallbackText = "DL" }) {
 
   return (
     <div
-      className="w-10 h-10 rounded-xl bg-secondary/10 border border-secondary/20 flex items-center justify-center shrink-0 font-bold text-xs text-secondary tracking-wider font-sans select-none"
+      className="w-10 h-10 rounded-xl bg-secondary/5 border border-secondary/10 flex items-center justify-center shrink-0 font-semibold text-xs text-secondary tracking-wider font-sans select-none"
       aria-hidden="true"
     >
       {initials}
@@ -102,31 +102,30 @@ export default function BrandUpcomingDeadlines({ deadlines = [] }) {
   const safeDeadlines = Array.isArray(deadlines) ? deadlines : [];
 
   return (
-    <div className="bg-surface border border-border-theme rounded-2xl p-6 shadow-xs flex flex-col justify-between space-y-5 transition-colors">
-      <div className="flex items-center justify-between">
+    <div className="bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col h-full transition-colors min-w-0 overflow-hidden">
+      <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="font-sans font-bold text-lg sm:text-xl text-foreground tracking-tight">
+          <h2 className="font-sans font-semibold text-base sm:text-lg text-slate-900 dark:text-foreground tracking-tight">
             Upcoming Deliverables
           </h2>
-          <p className="text-xs text-text-secondary mt-0.5">
+          <p className="text-xs text-text-secondary mt-0.5 font-sans">
             Closest workspace milestones, reviews, and deadlines
           </p>
         </div>
         <Link
           href="/brand/workspace"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-secondary hover:underline"
+          className="text-xs font-semibold text-[#ff2d6c] hover:underline transition-colors"
         >
-          <span>View All</span>
-          <ArrowRightIcon />
+          View All
         </Link>
       </div>
 
       {safeDeadlines.length === 0 ? (
-        <div className="text-center py-12 px-4 border border-dashed border-border-theme rounded-2xl space-y-2">
-          <div className="w-12 h-12 mx-auto rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
-            <CalendarCheckIcon className="w-6 h-6" />
+        <div className="text-center py-8 px-4 border border-dashed border-border-theme rounded-xl space-y-2 flex-1 flex flex-col items-center justify-center my-auto">
+          <div className="w-10 h-10 mx-auto rounded-full bg-secondary/8 text-[#252525] dark:text-white flex items-center justify-center">
+            <CalendarCheckIcon className="w-5 h-5" />
           </div>
-          <h3 className="font-serif font-medium text-base text-foreground">
+          <h3 className="font-sans font-semibold text-sm sm:text-base text-foreground">
             No upcoming deliverables
           </h3>
           <p className="text-xs text-text-secondary max-w-xs mx-auto font-sans">
@@ -178,7 +177,7 @@ export default function BrandUpcomingDeadlines({ deadlines = [] }) {
               <Link
                 key={itemId || idx}
                 href={targetLink}
-                className="group block p-3 sm:p-3.5 rounded-xl border border-border-theme bg-surface-muted/40 hover:bg-surface-muted/70 hover:border-secondary/40 transition-all space-y-2"
+                className="group block p-3 sm:p-3.5 rounded-xl border border-border-theme bg-surface-muted/20 hover:bg-surface-muted/40 hover:border-secondary/40 transition-all space-y-2"
               >
                 {/* Top: Thumbnail/Avatar + Title + Platform/Creators + Date */}
                 <div className="flex items-start gap-3">
@@ -189,7 +188,7 @@ export default function BrandUpcomingDeadlines({ deadlines = [] }) {
                   />
                   <div className="min-w-0 flex-1">
                     <h4
-                      className="font-semibold text-foreground text-sm font-sans truncate group-hover:text-secondary transition-colors"
+                      className="font-semibold text-foreground text-[13px] font-sans truncate group-hover:text-secondary transition-colors"
                       title={item.title}
                     >
                       {item.title}
@@ -211,11 +210,11 @@ export default function BrandUpcomingDeadlines({ deadlines = [] }) {
                 {/* Bottom: Deliverables Progress Bar or Contextual Details */}
                 {hasDeliverables ? (
                   <div className="pt-1.5 border-t border-border-theme/40 space-y-1.5">
-                    <div className="flex items-center justify-between text-[11px] font-semibold tracking-wider font-sans">
-                      <span className="text-text-secondary uppercase text-[10px]">
+                    <div className="flex items-center justify-between font-semibold tracking-wider font-sans">
+                      <span className="text-text-secondary uppercase text-[9px]">
                         DELIVERABLES PROGRESS
                       </span>
-                      <span className="text-secondary font-bold text-xs font-sans">
+                      <span className="text-secondary font-semibold text-[11px] font-sans">
                         {clampedProgress}%
                       </span>
                     </div>
@@ -227,20 +226,20 @@ export default function BrandUpcomingDeadlines({ deadlines = [] }) {
                     </div>
                   </div>
                 ) : isWorkspace ? (
-                  <div className="pt-1.5 border-t border-border-theme/40 text-[11px] text-text-secondary italic font-sans">
+                  <div className="pt-1.5 border-t border-border-theme/40 text-[10.5px] text-text-secondary italic font-sans">
                     Pending milestone setup
                   </div>
                 ) : isCampaign && creatorCount !== null ? (
-                  <div className="pt-1.5 border-t border-border-theme/40 flex items-center justify-between text-xs font-sans">
-                    <span className="text-[10px] uppercase tracking-wider font-semibold text-text-secondary">
+                  <div className="pt-1.5 border-t border-border-theme/40 flex items-center justify-between font-sans">
+                    <span className="text-[9px] uppercase tracking-wider font-semibold text-text-secondary">
                       TARGET CREATORS
                     </span>
-                    <span className="font-medium text-foreground text-xs font-sans">
+                    <span className="font-medium text-foreground text-[11px] font-sans">
                       {creatorCount} {creatorCount === 1 ? "Creator" : "Creators"}
                     </span>
                   </div>
                 ) : !isCampaign && !isWorkspace ? (
-                  <div className="pt-1.5 border-t border-border-theme/40 text-[11px] text-text-secondary font-sans">
+                  <div className="pt-1.5 border-t border-border-theme/40 text-[10.5px] text-text-secondary font-sans">
                     {item.sourceType === "creator_proposal"
                       ? "Proposal awaiting review"
                       : "Proposal sent to creator"}

@@ -344,7 +344,7 @@ export default function CreatorNotificationsManager() {
                   </span>
                 )}
               </div>
-              <h1 className="font-serif font-bold text-3xl sm:text-4xl text-neutral-900 dark:text-white tracking-tight">
+              <h1 className="font-serif font-medium text-2xl sm:text-3xl text-foreground tracking-tight">
                 Notifications
               </h1>
               <p className="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400">

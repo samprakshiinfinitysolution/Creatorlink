@@ -199,7 +199,7 @@ export default function Navbar() {
               style={{ fontFamily: "var(--font-playfair), serif" }}
             >
               CREATORLINK
-              <span className="ml-1 text-secondary">•</span>
+              <span className="ml-1 text-secondary">✦</span>
             </Link>
           </div>
 
@@ -411,7 +411,7 @@ export default function Navbar() {
               style={{ fontFamily: "var(--font-playfair), serif" }}
             >
               CREATORLINK
-              <span className="ml-1 text-secondary">•</span>
+              <span className="ml-1 text-secondary">✦</span>
             </div>
 
             <div

@@ -466,7 +466,7 @@ export default function CreatorMessages() {
           {/* Header & Search Bar */}
           <div className="p-3.5 sm:p-4 border-b border-border-theme space-y-3 shrink-0">
             <div className="flex items-center justify-between">
-              <h2 className="font-serif font-semibold text-base sm:text-lg text-foreground tracking-tight">
+              <h2 className="font-sans font-semibold text-base sm:text-lg text-foreground tracking-tight">
                 Messages
               </h2>
               <button
@@ -745,7 +745,7 @@ export default function CreatorMessages() {
                 <ChatBubbleIcon className="w-8 h-8" />
               </div>
               <div className="space-y-1 max-w-sm">
-                <h3 className="font-serif font-semibold text-foreground text-base">
+                <h3 className="font-sans font-semibold text-foreground text-base tracking-tight">
                   Select a Conversation
                 </h3>
                 <p className="text-xs text-text-secondary">

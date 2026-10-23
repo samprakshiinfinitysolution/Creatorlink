@@ -1,8 +1,8 @@
 "use client";
-
 import React, { useState, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import BrandDashboardNavbar from "@/components/brand/dashboard/BrandDashboardNavbar";
+import BrandSidebar from "@/components/brand/dashboard/BrandSidebar";
+import BrandHeader from "@/components/brand/dashboard/BrandHeader";
 import BrandCampaignsHero from "@/components/brand/campaigns/BrandCampaignsHero";
 import {
   getBrandCampaigns,
@@ -60,41 +60,56 @@ function formatDateForInput(dateStr) {
 }
 
 function getStatusBadge(status) {
-  switch (status?.toLowerCase()) {
+  const normalized = typeof status === "string" ? status.trim().toLowerCase() : "";
+  switch (normalized) {
     case "published":
     case "active":
       return {
         label: "Published",
+        dotColor: "bg-emerald-500",
+        textColor: "text-emerald-500 dark:text-emerald-400",
         color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
       };
     case "in_progress":
       return {
         label: "In Progress",
+        dotColor: "bg-blue-500",
+        textColor: "text-blue-500 dark:text-blue-400",
         color: "bg-blue-500/10 text-blue-500 border-blue-500/20",
       };
     case "draft":
       return {
         label: "Draft",
+        dotColor: "bg-amber-500",
+        textColor: "text-amber-500 dark:text-amber-400",
         color: "bg-amber-500/10 text-amber-500 border-amber-500/20",
       };
     case "paused":
       return {
         label: "Paused",
-        color: "bg-orange-500/10 text-orange-500 border-orange-500/20",
+        dotColor: "bg-yellow-500",
+        textColor: "text-yellow-600 dark:text-yellow-400",
+        color: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20",
       };
     case "completed":
       return {
         label: "Completed",
+        dotColor: "bg-[#ff2d6c]",
+        textColor: "text-[#ff2d6c] dark:text-[#ff4f87]",
         color: "bg-secondary/10 text-secondary border-secondary/20",
       };
     case "closed":
       return {
         label: "Closed",
-        color: "bg-gray-500/10 text-gray-500 border-gray-500/20",
+        dotColor: "bg-slate-400",
+        textColor: "text-slate-500 dark:text-slate-400",
+        color: "bg-surface-muted text-text-secondary border-border-theme",
       };
     default:
       return {
-        label: status ? status.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()) : "Unknown",
+        label: status ? String(status).replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()) : "Draft",
+        dotColor: "bg-slate-400",
+        textColor: "text-slate-500 dark:text-slate-400",
         color: "bg-surface-muted text-text-secondary border-border-theme",
       };
   }
@@ -120,7 +135,7 @@ function CampaignAvatar({ title, thumbnail }) {
 
   if (thumbnail && !hasFailed) {
     return (
-      <div className="w-10 h-10 rounded-xl bg-secondary/10 border border-secondary/20 overflow-hidden shrink-0 flex items-center justify-center">
+      <div className="w-10 h-10 rounded-xl bg-secondary/5 border border-secondary/10 overflow-hidden shrink-0 flex items-center justify-center">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={thumbnail}
@@ -134,7 +149,7 @@ function CampaignAvatar({ title, thumbnail }) {
 
   return (
     <div
-      className="w-10 h-10 rounded-xl bg-secondary/10 border border-secondary/20 flex items-center justify-center shrink-0 font-bold text-xs text-secondary tracking-wider font-sans select-none"
+      className="w-10 h-10 rounded-xl bg-secondary/5 border border-secondary/10 flex items-center justify-center shrink-0 font-bold text-xs text-secondary tracking-wider font-sans select-none"
       aria-hidden="true"
     >
       {initials}
@@ -149,30 +164,35 @@ function getPlatformBadge(platform) {
       return {
         label: "Instagram",
         icon: InstagramIcon,
+        iconColor: "text-pink-500",
         className: "bg-pink-500/10 text-pink-600 dark:text-pink-400 border-pink-500/20",
       };
     case "youtube":
       return {
         label: "YouTube",
         icon: YoutubeIcon,
+        iconColor: "text-red-500",
         className: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20",
       };
     case "tiktok":
       return {
         label: "TikTok",
         icon: TiktokIcon,
+        iconColor: "text-cyan-500",
         className: "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20",
       };
     case "facebook":
       return {
         label: "Facebook",
         icon: FacebookIcon,
+        iconColor: "text-blue-600",
         className: "bg-blue-600/10 text-blue-600 dark:text-blue-400 border-blue-600/20",
       };
     case "website":
       return {
         label: "Website",
         icon: GlobeIcon,
+        iconColor: "text-emerald-500",
         className: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
       };
     default: {
@@ -182,6 +202,7 @@ function getPlatformBadge(platform) {
       return {
         label: displayLabel,
         icon: GlobeIcon,
+        iconColor: "text-text-secondary",
         className: "bg-surface-muted text-text-secondary border-border-theme",
       };
     }
@@ -355,6 +376,8 @@ const STATUS_TABS = [
 // MAIN COMPONENT
 // =========================================================
 export default function BrandCampaignsManager() {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
   // Search & Filter State
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
@@ -729,372 +752,374 @@ export default function BrandCampaignsManager() {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col font-sans transition-colors duration-200">
-      {/* Horizontal Navigation matching Brand Dashboard */}
-      <BrandDashboardNavbar />
+      {/* Brand Sidebar for universal portal navigation */}
+      <BrandSidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 
-      {/* Campaigns Main Container matching full-width Brand Dashboard */}
-      <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8">
-        {/* Success Notification Alert */}
-        {successMsg && (
-          <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-2xl p-4 text-xs font-sans flex items-center gap-2 animate-in fade-in duration-200">
-            <CheckCircleIcon className="w-5 h-5 shrink-0" />
-            <span>{successMsg}</span>
+      {/* Main Content Area Offset by Desktop Sidebar */}
+      <div className="flex-1 lg:ml-64 flex flex-col min-w-0 transition-all duration-300">
+        {/* Brand Header */}
+        <BrandHeader setMobileOpen={setMobileOpen} />
+
+        {/* Campaigns Main Container */}
+        <main className="flex-1 w-full px-3 sm:px-5 lg:px-6 py-4 sm:py-5 space-y-4 sm:space-y-5 max-w-[1536px] mx-auto min-w-0">
+          {/* Success Notification Alert */}
+          {successMsg && (
+            <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-2xl p-4 text-xs font-sans flex items-center gap-2 animate-in fade-in duration-200">
+              <CheckCircleIcon className="w-5 h-5 shrink-0" />
+              <span>{successMsg}</span>
+            </div>
+          )}
+
+          {/* Modern Reference Campaign Hero */}
+          <BrandCampaignsHero
+            onCreateClick={() => {
+              setFormError("");
+              setIsCreateOpen(true);
+            }}
+          />
+
+          {/* Status Tabs Navigation */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar -mx-1 px-1 sm:mx-0 sm:px-0 min-w-0 w-full max-w-full">
+            {STATUS_TABS.map((tab) => {
+              const isActive = status === tab.value;
+              return (
+                <button
+                  key={tab.value || "all"}
+                  type="button"
+                  onClick={() => {
+                    setStatus(tab.value);
+                    setPage(1);
+                    fetchCampaignsWithFilters({ status: tab.value, page: 1 });
+                  }}
+                  className={`px-4 py-2 text-xs font-semibold rounded-xl transition-all whitespace-nowrap cursor-pointer shrink-0 border ${isActive
+                      ? "bg-[#252525] text-white border-[#252525] shadow-xs"
+                      : "bg-surface border-border-theme text-text-secondary hover:text-foreground hover:bg-surface-muted"
+                    }`}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
           </div>
-        )}
 
-        {/* Modern Reference Campaign Hero */}
-        <BrandCampaignsHero
-          onCreateClick={() => {
-            setFormError("");
-            setIsCreateOpen(true);
-          }}
-        />
+          {/* Search & Filter Toolbar */}
+          <div className="bg-surface border border-border-theme rounded-2xl p-3.5 sm:p-4 shadow-xs space-y-3 sm:space-y-0 sm:flex sm:items-center sm:gap-3">
 
-        {/* Status Tabs Navigation */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-          {STATUS_TABS.map((tab) => {
-            const isActive = status === tab.value;
-            return (
-              <button
-                key={tab.value || "all"}
-                type="button"
-                onClick={() => {
-                  setStatus(tab.value);
-                  setPage(1);
-                  fetchCampaignsWithFilters({ status: tab.value, page: 1 });
-                }}
-                className={`px-4 py-2 text-xs font-semibold rounded-xl transition-all whitespace-nowrap cursor-pointer border ${
-                  isActive
-                    ? "bg-secondary text-white border-secondary shadow-xs"
-                    : "bg-surface border-border-theme text-text-secondary hover:text-foreground hover:bg-surface-muted"
-                }`}
+            {/* Search Input Form */}
+            <form onSubmit={handleSearchSubmit} className="flex-1 relative w-full">
+              <input
+                type="text"
+                placeholder="Search campaigns..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full bg-surface-muted/60 border border-border-theme text-foreground text-xs sm:text-sm rounded-xl pl-9 pr-4 py-2.5 focus:outline-none focus:border-secondary transition-colors"
+              />
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none">
+                <SearchIcon />
+              </span>
+            </form>
+
+            {/* Filter Dropdowns Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 w-full sm:w-auto shrink-0">
+
+              {/* Category Filter */}
+              <select
+                value={category}
+                onChange={handleCategoryChange}
+                className="bg-surface-muted/60 border border-border-theme text-foreground text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-secondary transition-colors cursor-pointer"
               >
-                {tab.label}
+                <option value="">All Categories</option>
+                <option value="Fashion">Fashion</option>
+                <option value="Beauty">Beauty</option>
+                <option value="Lifestyle">Lifestyle</option>
+                <option value="Tech">Tech</option>
+                <option value="Fitness">Fitness</option>
+                <option value="Food & Beverage">Food & Beverage</option>
+                <option value="Travel">Travel</option>
+                <option value="Gaming">Gaming</option>
+              </select>
+
+              {/* Platform Filter */}
+              <select
+                value={platform}
+                onChange={handlePlatformChange}
+                className="bg-surface-muted/60 border border-border-theme text-foreground text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-secondary transition-colors cursor-pointer"
+              >
+                <option value="">All Platforms</option>
+                <option value="instagram">Instagram</option>
+                <option value="facebook">Facebook</option>
+                <option value="youtube">YouTube</option>
+                <option value="tiktok">TikTok</option>
+                <option value="website">Website</option>
+              </select>
+
+              {/* Status Filter */}
+              <select
+                value={status}
+                onChange={handleStatusChange}
+                className="bg-surface-muted/60 border border-border-theme text-foreground text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-secondary transition-colors cursor-pointer"
+              >
+                <option value="">All Statuses</option>
+                <option value="draft">Draft</option>
+                <option value="published">Published</option>
+                <option value="in_progress">In Progress</option>
+                <option value="paused">Paused</option>
+                <option value="completed">Completed</option>
+                <option value="closed">Closed</option>
+              </select>
+
+            </div>
+          </div>
+
+          {/* Error Banner */}
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl p-4 text-xs font-sans flex items-center justify-between gap-4">
+              <span>{typeof error === "string" ? error : "Failed to load campaigns. Please try again."}</span>
+              <button
+                type="button"
+                onClick={handleRetry}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500 text-white text-xs font-semibold hover:bg-red-600 transition-colors shrink-0 cursor-pointer"
+              >
+                <ArrowPathIcon />
+                <span>Retry</span>
               </button>
-            );
-          })}
-        </div>
-
-        {/* Search & Filter Toolbar */}
-        <div className="bg-surface border border-border-theme rounded-2xl p-4 shadow-xs space-y-4 sm:space-y-0 sm:flex sm:items-center sm:gap-3">
-          
-          {/* Search Input Form */}
-          <form onSubmit={handleSearchSubmit} className="flex-1 relative">
-            <input
-              type="text"
-              placeholder="Search campaigns..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-surface-muted/60 border border-border-theme text-foreground text-xs sm:text-sm rounded-xl pl-9 pr-4 py-2.5 focus:outline-none focus:border-secondary transition-colors"
-            />
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none">
-              <SearchIcon />
-            </span>
-          </form>
-
-          {/* Filter Dropdowns Grid */}
-          <div className="grid grid-cols-3 gap-2 sm:flex sm:items-center sm:gap-3 shrink-0">
-            
-            {/* Category Filter */}
-            <select
-              value={category}
-              onChange={handleCategoryChange}
-              className="bg-surface-muted/60 border border-border-theme text-foreground text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-secondary transition-colors cursor-pointer"
-            >
-              <option value="">All Categories</option>
-              <option value="Fashion">Fashion</option>
-              <option value="Beauty">Beauty</option>
-              <option value="Lifestyle">Lifestyle</option>
-              <option value="Tech">Tech</option>
-              <option value="Fitness">Fitness</option>
-              <option value="Food & Beverage">Food & Beverage</option>
-              <option value="Travel">Travel</option>
-              <option value="Gaming">Gaming</option>
-            </select>
-
-            {/* Platform Filter */}
-            <select
-              value={platform}
-              onChange={handlePlatformChange}
-              className="bg-surface-muted/60 border border-border-theme text-foreground text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-secondary transition-colors cursor-pointer"
-            >
-              <option value="">All Platforms</option>
-              <option value="instagram">Instagram</option>
-              <option value="facebook">Facebook</option>
-              <option value="youtube">YouTube</option>
-              <option value="tiktok">TikTok</option>
-              <option value="website">Website</option>
-            </select>
-
-            {/* Status Filter */}
-            <select
-              value={status}
-              onChange={handleStatusChange}
-              className="bg-surface-muted/60 border border-border-theme text-foreground text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-secondary transition-colors cursor-pointer"
-            >
-              <option value="">All Statuses</option>
-              <option value="draft">Draft</option>
-              <option value="published">Published</option>
-              <option value="in_progress">In Progress</option>
-              <option value="paused">Paused</option>
-              <option value="completed">Completed</option>
-              <option value="closed">Closed</option>
-            </select>
-
-          </div>
-        </div>
-
-        {/* Error Banner */}
-        {error && (
-          <div className="bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl p-4 text-xs font-sans flex items-center justify-between gap-4">
-            <span>{typeof error === "string" ? error : "Failed to load campaigns. Please try again."}</span>
-            <button
-              type="button"
-              onClick={handleRetry}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500 text-white text-xs font-semibold hover:bg-red-600 transition-colors shrink-0 cursor-pointer"
-            >
-              <ArrowPathIcon />
-              <span>Retry</span>
-            </button>
-          </div>
-        )}
-
-        {/* Main Campaign List Section */}
-        <div className="bg-surface border border-border-theme rounded-2xl shadow-xs overflow-hidden">
-          
-          {/* Loading State Skeleton */}
-          {loading && !isViewOpen && !isEditOpen && (
-            <div className="p-6 space-y-4">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="h-14 bg-surface-muted rounded-xl animate-pulse w-full" />
-              ))}
             </div>
           )}
 
-          {/* Empty State */}
-          {!loading && !error && campaigns.length === 0 && (
-            <div className="text-center py-16 px-4 border-dashed border-border-theme space-y-3">
-              <div className="w-12 h-12 mx-auto rounded-full bg-secondary/10 text-secondary flex items-center justify-center">
-                <MegaPhoneIcon />
+          {/* Main Campaign List Section */}
+          <div className="bg-surface border border-border-theme rounded-2xl shadow-xs overflow-hidden min-w-0">
+
+            {/* Loading State Skeleton */}
+            {loading && !isViewOpen && !isEditOpen && (
+              <div className="p-6 space-y-4">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="h-14 bg-surface-muted rounded-xl animate-pulse w-full" />
+                ))}
               </div>
-              <h3 className="font-serif font-medium text-lg text-foreground">
-                No campaigns found
-              </h3>
-              <p className="text-xs text-text-secondary max-w-sm mx-auto">
-                {search || category || platform || status
-                  ? "No campaigns match your selected search criteria or filters. Try adjusting your search parameters."
-                  : "You haven't created any campaigns yet. Click the 'Create Campaign' button above to get started."}
-              </p>
-            </div>
-          )}
+            )}
 
-          {/* Campaign Table (Responsive Modern Redesign) */}
-          {!loading && !error && campaigns.length > 0 && (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
-                <thead>
-                  <tr className="border-b border-border-theme bg-surface-muted/40 text-text-secondary uppercase tracking-wider text-[10px] font-semibold">
-                    <th className="py-3.5 px-4 w-10 text-center">
-                      <input
-                        type="checkbox"
-                        aria-label="Select all campaigns on this page"
-                        checked={
-                          campaigns.length > 0 &&
-                          campaigns.every((c) => selectedIds.includes(c._id || c.id))
-                        }
-                        onChange={handleSelectAll}
-                        className="w-4 h-4 rounded border-border-theme text-secondary focus:ring-secondary/20 cursor-pointer accent-secondary"
-                      />
-                    </th>
-                    <th className="py-3.5 px-4 min-w-[220px]">Campaign</th>
-                    <th className="py-3.5 px-4 min-w-[120px]">Platform</th>
-                    <th className="py-3.5 px-4 min-w-[120px]">Category</th>
-                    <th className="py-3.5 px-4 min-w-[110px]">Budget</th>
-                    <th className="py-3.5 px-4 min-w-[100px]">Creators</th>
-                    <th className="py-3.5 px-4 min-w-[110px]">Status</th>
-                    <th className="py-3.5 px-4 min-w-[120px]">Deadline</th>
-                    <th className="py-3.5 px-5 text-right min-w-[90px]">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border-theme">
-                  {campaigns.map((c) => {
-                    const id = c._id || c.id;
-                    const isSelected = selectedIds.includes(id);
-                    const badge = getStatusBadge(c.status);
-                    const platformInfo = getPlatformBadge(c.platform);
-                    const PlatformIcon = platformInfo.icon;
-                    const reqCreators =
-                      typeof c.requiredCreators === "number"
-                        ? c.requiredCreators
-                        : Array.isArray(c.requiredCreators)
-                        ? c.requiredCreators.length
-                        : c.requiredCreators !== undefined && c.requiredCreators !== null
-                        ? c.requiredCreators
-                        : "—";
+            {/* Empty State */}
+            {!loading && !error && campaigns.length === 0 && (
+              <div className="text-center py-16 px-4 border-dashed border-border-theme space-y-3">
+                <div className="w-12 h-12 mx-auto rounded-full bg-secondary/8 text-[#252525] dark:text-white flex items-center justify-center">
+                  <MegaPhoneIcon />
+                </div>
+                <h3 className="font-serif font-medium text-lg text-foreground">
+                  No campaigns found
+                </h3>
+                <p className="text-xs text-text-secondary max-w-sm mx-auto">
+                  {search || category || platform || status
+                    ? "No campaigns match your selected search criteria or filters. Try adjusting your search parameters."
+                    : "You haven't created any campaigns yet. Click the 'Create Campaign' button above to get started."}
+                </p>
+              </div>
+            )}
 
-                    return (
-                      <tr
-                        key={id || c.title}
-                        className={`transition-colors ${
-                          isSelected
-                            ? "bg-secondary/5 hover:bg-secondary/10"
-                            : "hover:bg-surface-muted/30"
-                        }`}
-                      >
-                        {/* Frontend Selection Checkbox */}
-                        <td className="py-4 px-4 text-center">
-                          <input
-                            type="checkbox"
-                            aria-label={`Select campaign ${c.title}`}
-                            checked={isSelected}
-                            onChange={() => handleSelectRow(id)}
-                            className="w-4 h-4 rounded border-border-theme text-secondary focus:ring-secondary/20 cursor-pointer accent-secondary"
-                          />
-                        </td>
+            {/* Campaign Table (Responsive Modern Redesign) */}
+            {!loading && !error && campaigns.length > 0 && (
+              <div className="overflow-x-auto no-scrollbar">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="border-b border-border-theme bg-surface-muted/40 text-text-secondary uppercase tracking-wider text-[10px] font-semibold">
+                      <th className="py-3.5 px-4 w-10 text-center">
+                        <input
+                          type="checkbox"
+                          aria-label="Select all campaigns on this page"
+                          checked={
+                            campaigns.length > 0 &&
+                            campaigns.every((c) => selectedIds.includes(c._id || c.id))
+                          }
+                          onChange={handleSelectAll}
+                          className="w-4 h-4 rounded border-border-theme text-secondary focus:ring-secondary/20 cursor-pointer accent-secondary"
+                        />
+                      </th>
+                      <th className="py-3.5 px-4 min-w-[220px]">Campaign</th>
+                      <th className="py-3.5 px-4 min-w-[120px]">Platform</th>
+                      <th className="py-3.5 px-4 min-w-[120px]">Category</th>
+                      <th className="py-3.5 px-4 min-w-[110px]">Budget</th>
+                      <th className="py-3.5 px-4 min-w-[100px]">Creators</th>
+                      <th className="py-3.5 px-4 min-w-[110px]">Status</th>
+                      <th className="py-3.5 px-4 min-w-[120px]">Deadline</th>
+                      <th className="py-3.5 px-5 text-right min-w-[90px]">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border-theme">
+                    {campaigns.map((c) => {
+                      const id = c._id || c.id;
+                      const isSelected = selectedIds.includes(id);
+                      const badge = getStatusBadge(c.status);
+                      const platformInfo = getPlatformBadge(c.platform);
+                      const PlatformIcon = platformInfo.icon;
+                      const reqCreators =
+                        typeof c.requiredCreators === "number"
+                          ? c.requiredCreators
+                          : Array.isArray(c.requiredCreators)
+                            ? c.requiredCreators.length
+                            : c.requiredCreators !== undefined && c.requiredCreators !== null
+                              ? c.requiredCreators
+                              : "—";
 
-                        {/* Campaign Info (Avatar + Title + Category Subtitle) */}
-                        <td className="py-4 px-4">
-                          <div className="flex items-center gap-3">
-                            <CampaignAvatar title={c.title} thumbnail={c.thumbnail} />
-                            <div className="min-w-0">
+                      return (
+                        <tr
+                          key={id || c.title}
+                          className={`transition-colors ${isSelected
+                              ? "bg-secondary/5 hover:bg-secondary/10"
+                              : "hover:bg-surface-muted/30"
+                            }`}
+                        >
+                          {/* Frontend Selection Checkbox */}
+                          <td className="py-4 px-4 text-center">
+                            <input
+                              type="checkbox"
+                              aria-label={`Select campaign ${c.title}`}
+                              checked={isSelected}
+                              onChange={() => handleSelectRow(id)}
+                              className="w-4 h-4 rounded border-border-theme text-secondary focus:ring-secondary/20 cursor-pointer accent-secondary"
+                            />
+                          </td>
+
+                          {/* Campaign Info (Avatar + Title + Category Subtitle) */}
+                          <td className="py-4 px-4">
+                            <div className="flex items-center gap-3">
+                              <CampaignAvatar title={c.title} thumbnail={c.thumbnail} />
+                              <div className="min-w-0">
+                                <button
+                                  type="button"
+                                  onClick={() => handleViewClick(c)}
+                                  className="font-semibold text-foreground text-[13px] font-sans hover:text-secondary transition-colors text-left truncate block max-w-[240px] cursor-pointer"
+                                  title={c.title}
+                                >
+                                  {c.title}
+                                </button>
+                                <span className="text-[11px] text-text-secondary truncate block max-w-[240px]">
+                                  {c.category || "General"}
+                                </span>
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* Platform */}
+                          <td className="py-4 px-4 whitespace-nowrap">
+                            <div className="inline-flex items-center gap-1.5 text-xs font-medium text-foreground">
+                              <PlatformIcon className={`w-3.5 h-3.5 shrink-0 ${platformInfo.iconColor || "text-text-secondary"}`} />
+                              <span>{platformInfo.label}</span>
+                            </div>
+                          </td>
+
+                          {/* Category Badge */}
+                          <td className="py-4 px-4">
+                            <span className="inline-block px-2.5 py-1 rounded-lg text-[11px] font-medium bg-surface-muted border border-border-theme text-foreground">
+                              {c.category || "General"}
+                            </span>
+                          </td>
+
+                          {/* Budget */}
+                          <td className="py-4 px-4 font-semibold text-foreground">
+                            {formatCurrency(c.budget, c.currency)}
+                          </td>
+
+                          {/* Required Creators */}
+                          <td className="py-4 px-4">
+                            <span className="inline-flex items-center gap-1.5 text-text-secondary font-medium">
+                              <UsersIcon className="w-3.5 h-3.5 text-text-secondary/70 shrink-0" />
+                              <span>{reqCreators}</span>
+                            </span>
+                          </td>
+
+                          {/* Status Column with Inline Dot + Text */}
+                          <td className="py-4 px-4 whitespace-nowrap">
+                            <div className="inline-flex items-center gap-2">
+                              <span className={`w-2 h-2 rounded-full shrink-0 ${badge.dotColor || "bg-slate-400"}`} />
+                              <span className={`text-xs font-medium font-sans ${badge.textColor || "text-foreground"}`}>
+                                {badge.label}
+                              </span>
+                            </div>
+                          </td>
+
+                          {/* Deadline */}
+                          <td className="py-4 px-4">
+                            <span className="inline-flex items-center gap-1.5 text-text-secondary font-medium">
+                              <CalendarIcon className="w-3.5 h-3.5 text-text-secondary/70 shrink-0" />
+                              <span>{formatDate(c.deadline)}</span>
+                            </span>
+                          </td>
+
+                          {/* Actions */}
+                          <td className="py-4 px-5 text-right">
+                            <div className="inline-flex items-center justify-end gap-1">
                               <button
                                 type="button"
                                 onClick={() => handleViewClick(c)}
-                                className="font-semibold text-foreground text-sm font-sans hover:text-secondary transition-colors text-left truncate block max-w-[240px] cursor-pointer"
-                                title={c.title}
+                                className="p-1.5 rounded-lg text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors cursor-pointer"
+                                title="View Campaign Details"
                               >
-                                {c.title}
+                                <EyeIcon />
                               </button>
-                              <span className="text-[11px] text-text-secondary truncate block max-w-[240px]">
-                                {c.category || "General"}
-                              </span>
+                              <button
+                                type="button"
+                                onClick={() => handleEditClick(c)}
+                                className="p-1.5 rounded-lg text-text-secondary hover:text-secondary hover:bg-secondary/10 transition-colors cursor-pointer"
+                                title="Edit Campaign"
+                              >
+                                <PencilIcon />
+                              </button>
                             </div>
-                          </div>
-                        </td>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
 
-                        {/* Platform Badge with Icon */}
-                        <td className="py-4 px-4">
-                          <span
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border ${platformInfo.className}`}
-                          >
-                            <PlatformIcon className="w-3.5 h-3.5 shrink-0" />
-                            <span>{platformInfo.label}</span>
-                          </span>
-                        </td>
-
-                        {/* Category Badge */}
-                        <td className="py-4 px-4">
-                          <span className="inline-block px-2.5 py-1 rounded-lg text-[11px] font-medium bg-surface-muted border border-border-theme text-foreground">
-                            {c.category || "General"}
-                          </span>
-                        </td>
-
-                        {/* Budget */}
-                        <td className="py-4 px-4 font-semibold text-foreground">
-                          {formatCurrency(c.budget, c.currency)}
-                        </td>
-
-                        {/* Required Creators */}
-                        <td className="py-4 px-4">
-                          <span className="inline-flex items-center gap-1.5 text-text-secondary font-medium">
-                            <UsersIcon className="w-3.5 h-3.5 text-text-secondary/70 shrink-0" />
-                            <span>{reqCreators}</span>
-                          </span>
-                        </td>
-
-                        {/* Status Pill */}
-                        <td className="py-4 px-4">
-                          <span
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border ${badge.color}`}
-                          >
-                            <span className="w-1.5 h-1.5 rounded-full bg-current" />
-                            <span>{badge.label}</span>
-                          </span>
-                        </td>
-
-                        {/* Deadline */}
-                        <td className="py-4 px-4">
-                          <span className="inline-flex items-center gap-1.5 text-text-secondary font-medium">
-                            <CalendarIcon className="w-3.5 h-3.5 text-text-secondary/70 shrink-0" />
-                            <span>{formatDate(c.deadline)}</span>
-                          </span>
-                        </td>
-
-                        {/* Actions */}
-                        <td className="py-4 px-5 text-right">
-                          <div className="inline-flex items-center justify-end gap-1">
-                            <button
-                              type="button"
-                              onClick={() => handleViewClick(c)}
-                              className="p-1.5 rounded-lg text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors cursor-pointer"
-                              title="View Campaign Details"
-                            >
-                              <EyeIcon />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleEditClick(c)}
-                              className="p-1.5 rounded-lg text-text-secondary hover:text-secondary hover:bg-secondary/10 transition-colors cursor-pointer"
-                              title="Edit Campaign"
-                            >
-                              <PencilIcon />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {/* Pagination Controls */}
-          {!loading && !error && campaigns.length > 0 && (
-            <div className="border-t border-border-theme px-5 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="text-xs text-text-secondary flex items-center gap-2">
-                <span>
-                  Showing{" "}
-                  <span className="font-semibold text-foreground">
-                    {totalItems === 0 ? 0 : (currentPage - 1) * (pagination?.limit || 10) + 1}
-                    –
-                    {Math.min(currentPage * (pagination?.limit || 10), totalItems)}
-                  </span>{" "}
-                  of <span className="font-semibold text-foreground">{totalItems}</span> campaigns
-                </span>
-                {selectedIds.length > 0 && (
-                  <span className="px-2 py-0.5 rounded-md bg-secondary/10 text-secondary font-medium">
-                    {selectedIds.length} selected
+            {/* Pagination Controls */}
+            {!loading && !error && campaigns.length > 0 && (
+              <div className="border-t border-border-theme px-5 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="text-xs text-text-secondary flex items-center gap-2">
+                  <span>
+                    Showing{" "}
+                    <span className="font-semibold text-foreground">
+                      {totalItems === 0 ? 0 : (currentPage - 1) * (pagination?.limit || 10) + 1}
+                      –
+                      {Math.min(currentPage * (pagination?.limit || 10), totalItems)}
+                    </span>{" "}
+                    of <span className="font-semibold text-foreground">{totalItems}</span> campaigns
                   </span>
-                )}
+                  {selectedIds.length > 0 && (
+                    <span className="px-2 py-0.5 rounded-md bg-secondary/10 text-secondary font-medium">
+                      {selectedIds.length} selected
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={!hasPrevPage}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border border-border-theme bg-surface text-xs font-medium text-foreground hover:bg-surface-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                  >
+                    <ChevronLeftIcon />
+                    <span>Previous</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={!hasNextPage}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border border-border-theme bg-surface text-xs font-medium text-foreground hover:bg-surface-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                  >
+                    <span>Next</span>
+                    <ChevronRightIcon />
+                  </button>
+                </div>
               </div>
+            )}
 
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={!hasPrevPage}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border border-border-theme bg-surface text-xs font-medium text-foreground hover:bg-surface-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-                >
-                  <ChevronLeftIcon />
-                  <span>Previous</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={!hasNextPage}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border border-border-theme bg-surface text-xs font-medium text-foreground hover:bg-surface-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-                >
-                  <span>Next</span>
-                  <ChevronRightIcon />
-                </button>
-              </div>
-            </div>
-          )}
+          </div>
 
-        </div>
-
-      </main>
+        </main>
+      </div>
 
       {/* ========================================================= */}
       {/* 1. CREATE CAMPAIGN MODAL */}
@@ -1102,7 +1127,7 @@ export default function BrandCampaignsManager() {
       {isCreateOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs overflow-y-auto">
           <div className="bg-surface border border-border-theme rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl animate-in fade-in zoom-in-95 duration-150 my-auto">
-            
+
             {/* Modal Header */}
             <div className="px-6 py-4 border-b border-border-theme flex items-center justify-between">
               <div>
@@ -1124,7 +1149,7 @@ export default function BrandCampaignsManager() {
 
             {/* Modal Form */}
             <form onSubmit={handleCreateSubmit} className="flex-1 overflow-y-auto p-6 space-y-4 text-xs">
-              
+
               {/* Form Validation Error Banner */}
               {formError && (
                 <div className="bg-red-500/10 border border-red-500/20 text-red-500 rounded-xl p-3 text-xs">
@@ -1164,7 +1189,7 @@ export default function BrandCampaignsManager() {
 
               {/* Category & Platform Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                
+
                 {/* Category */}
                 <div className="space-y-1">
                   <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
@@ -1202,7 +1227,7 @@ export default function BrandCampaignsManager() {
 
               {/* Budget, Deadline, Required Creators Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                
+
                 {/* Budget */}
                 <div className="space-y-1">
                   <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
@@ -1332,7 +1357,7 @@ export default function BrandCampaignsManager() {
       {isViewOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs overflow-y-auto">
           <div className="bg-surface border border-border-theme rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl animate-in fade-in zoom-in-95 duration-150 my-auto">
-            
+
             {/* Modal Header */}
             <div className="px-6 py-4 border-b border-border-theme flex items-center justify-between">
               <div>
@@ -1368,13 +1393,12 @@ export default function BrandCampaignsManager() {
                       <span className="text-[10px] text-text-secondary uppercase tracking-wider block font-semibold">
                         Status
                       </span>
-                      <span
-                        className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-bold border mt-1 ${
-                          getStatusBadge(selectedCampaign.status).color
-                        }`}
-                      >
-                        {getStatusBadge(selectedCampaign.status).label}
-                      </span>
+                      <div className="inline-flex items-center gap-2 mt-1">
+                        <span className={`w-2 h-2 rounded-full shrink-0 ${getStatusBadge(selectedCampaign.status).dotColor || "bg-slate-400"}`} />
+                        <span className={`text-xs font-medium font-sans ${getStatusBadge(selectedCampaign.status).textColor || "text-foreground"}`}>
+                          {getStatusBadge(selectedCampaign.status).label}
+                        </span>
+                      </div>
                     </div>
 
                     <div>
@@ -1492,7 +1516,7 @@ export default function BrandCampaignsManager() {
       {isEditOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs overflow-y-auto">
           <div className="bg-surface border border-border-theme rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl animate-in fade-in zoom-in-95 duration-150 my-auto">
-            
+
             {/* Modal Header */}
             <div className="px-6 py-4 border-b border-border-theme flex items-center justify-between">
               <div>
@@ -1514,7 +1538,7 @@ export default function BrandCampaignsManager() {
 
             {/* Modal Form */}
             <form onSubmit={handleEditSubmit} className="flex-1 overflow-y-auto p-6 space-y-4 text-xs">
-              
+
               {/* Form Validation Error Banner */}
               {formError && (
                 <div className="bg-red-500/10 border border-red-500/20 text-red-500 rounded-xl p-3 text-xs">
@@ -1552,7 +1576,7 @@ export default function BrandCampaignsManager() {
 
               {/* Category, Platform & Status Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                
+
                 {/* Category */}
                 <div className="space-y-1">
                   <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
@@ -1598,9 +1622,8 @@ export default function BrandCampaignsManager() {
                       return (
                         <div className="py-2.5">
                           <span
-                            className={`inline-block px-3 py-1 rounded-full text-[10px] font-bold border ${
-                              getStatusBadge(currentStatus).color
-                            }`}
+                            className={`inline-block px-3 py-1 rounded-full text-[10px] font-bold border ${getStatusBadge(currentStatus).color
+                              }`}
                           >
                             {getStatusBadge(currentStatus).label} (Locked)
                           </span>
@@ -1631,7 +1654,7 @@ export default function BrandCampaignsManager() {
 
               {/* Budget, Deadline, Required Creators Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                
+
                 {/* Budget */}
                 <div className="space-y-1">
                   <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">

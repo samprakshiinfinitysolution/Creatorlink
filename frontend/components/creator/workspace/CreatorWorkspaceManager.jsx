@@ -364,13 +364,7 @@ export default function CreatorWorkspaceManager() {
                 <span className="text-xs sm:text-sm font-sans font-medium text-neutral-500 dark:text-neutral-400">
                   • Active Collaborations &amp; Deliverables
                 </span>
-              </div>
-
-              <div className="flex items-center gap-3.5 sm:gap-4 pt-0.5">
-                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white dark:bg-surface border border-neutral-200/80 dark:border-border-theme text-black dark:text-white shadow-xs flex items-center justify-center shrink-0">
-                  <WorkspaceIcon className="w-6 h-6 sm:w-7 sm:h-7 stroke-[1.8]" />
-                </div>
-                <h1 className="font-heading font-serif font-bold text-3xl sm:text-4xl lg:text-[42px] text-neutral-900 dark:text-white tracking-tight leading-tight">
+                <h1 className="font-sans font-bold text-2xl sm:text-3xl text-foreground tracking-tight">
                   Collaboration Workspace
                 </h1>
               </div>
@@ -590,8 +584,11 @@ export default function CreatorWorkspaceManager() {
               {searchQuery && (
                 <button
                   type="button"
-                  onClick={() => setSearchQuery("")}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-xs text-text-secondary hover:text-foreground cursor-pointer font-sans"
+                  onClick={() => handleTabChange(tab.id)}
+                  className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${isActive
+                      ? "bg-secondary text-white shadow-xs"
+                      : "text-text-secondary hover:text-foreground hover:bg-surface-muted"
+                    }`}
                 >
                   ✕
                 </button>
@@ -650,8 +647,8 @@ export default function CreatorWorkspaceManager() {
                 <BriefcaseIcon className="w-7 h-7" />
               </div>
               <div className="space-y-1">
-                <h3 className="font-heading font-medium text-xl text-foreground">
-                  {searchQuery ? "No matching workspaces found" : "No workspaces found"}
+                <h3 className="font-sans font-semibold text-lg text-foreground tracking-tight">
+                  No workspaces found
                 </h3>
                 <p className="text-xs text-text-secondary font-sans max-w-sm mx-auto leading-relaxed">
                   {searchQuery
@@ -741,37 +738,19 @@ export default function CreatorWorkspaceManager() {
                           >
                             {badge.label}
                           </span>
-                          <button
-                            type="button"
-                            title="Workspace options"
-                            className="w-7 h-7 rounded-lg flex items-center justify-center text-text-secondary hover:text-foreground hover:bg-neutral-100 dark:hover:bg-surface-muted transition-colors cursor-pointer"
-                          >
-                            <MoreVerticalIcon className="w-4 h-4" />
-                          </button>
+                          <h3 className="font-sans font-semibold text-base text-foreground line-clamp-1 mt-0.5 tracking-tight">
+                            {campaignTitle}
+                          </h3>
                         </div>
                       </div>
 
-                      {/* Campaign Title & Description */}
-                      <div className="mt-3">
-                        <h3 className="font-heading font-medium text-base sm:text-lg text-foreground line-clamp-1 tracking-tight group-hover:text-secondary transition-colors">
-                          {campaignTitle}
-                        </h3>
-                        {campaignDescription && (
-                          <p className="text-xs font-sans text-text-secondary line-clamp-2 leading-relaxed mt-1">
-                            {campaignDescription}
-                          </p>
-                        )}
-                      </div>
-
-                      {/* Campaign Image Banner with Soft Fallback */}
-                      {coverImage ? (
-                        <div className="h-28 sm:h-32 rounded-xl overflow-hidden relative border border-neutral-100 dark:border-border-theme/40 bg-surface-muted/30 mt-3">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={coverImage}
-                            alt={campaignTitle}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          />
+                      {/* Price & Deadline Metadata */}
+                      <div className="grid grid-cols-2 gap-2 bg-surface-muted/60 p-3 rounded-xl border border-border-theme/50 text-xs">
+                        <div>
+                          <span className="text-[10px] text-text-secondary block">Agreed Price</span>
+                          <span className="font-sans font-semibold text-foreground">
+                            {agreedPriceFormatted}
+                          </span>
                         </div>
                       ) : (
                         <div className="h-24 sm:h-28 rounded-xl overflow-hidden relative border border-neutral-100 dark:border-border-theme/40 bg-gradient-to-br from-pink-50/90 via-rose-50/50 to-neutral-50/60 dark:from-pink-950/20 dark:via-surface-muted/30 dark:to-surface/40 flex items-center justify-center px-4 mt-3">
@@ -904,11 +883,10 @@ export default function CreatorWorkspaceManager() {
                       key={pageNum}
                       type="button"
                       onClick={() => handlePageChange(pageNum)}
-                      className={`w-7 h-7 rounded-lg font-semibold text-xs transition-all cursor-pointer ${
-                        pageNum === currentPage
-                          ? "bg-neutral-950 text-white dark:bg-neutral-100 dark:text-neutral-950 shadow-2xs"
-                          : "bg-surface hover:bg-surface-muted text-text-secondary border border-border-theme/70"
-                      }`}
+                      className={`w-8 h-8 rounded-xl font-semibold text-xs transition-all cursor-pointer ${pageNum === currentPage
+                          ? "bg-secondary text-white shadow-xs"
+                          : "bg-surface hover:bg-surface-muted text-text-secondary border border-border-theme"
+                        }`}
                     >
                       {pageNum}
                     </button>

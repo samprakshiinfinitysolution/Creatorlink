@@ -285,7 +285,7 @@ export default function CreatorPaymentsManager() {
                   </span>
                 </div>
               )}
-              <h1 className="font-serif font-bold text-2xl sm:text-3xl text-foreground mt-1">
+              <h1 className="font-sans font-bold text-2xl sm:text-3xl text-foreground tracking-tight mt-1">
                 Received Payments & Earnings
               </h1>
               <p className="text-xs text-text-secondary mt-1">
@@ -306,55 +306,40 @@ export default function CreatorPaymentsManager() {
 
           {/* Stats Summary Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="bg-surface border border-border-theme p-4 sm:p-5 rounded-2xl shadow-xs flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-secondary/10 text-neutral-950 dark:text-white flex items-center justify-center shrink-0">
-                <WalletIcon className="w-6 h-6" />
-              </div>
-              <div className="space-y-1 min-w-0">
-                <span className="text-[11px] font-semibold text-text-secondary uppercase tracking-wider block">
-                  Page Paid Volume
-                </span>
-                <span className="font-serif font-bold text-2xl text-emerald-500 block">
-                  {formatPrice(totalPaidAmount)}
-                </span>
-                <span className="text-[10px] text-text-secondary block">
-                  Verified paid records on current page
-                </span>
-              </div>
+            <div className="bg-surface border border-border-theme p-4 sm:p-5 rounded-2xl shadow-xs space-y-1">
+              <span className="text-[11px] font-semibold text-text-secondary uppercase tracking-wider block">
+                Page Paid Volume
+              </span>
+              <span className="font-sans font-semibold text-2xl text-emerald-500 tracking-tight block">
+                {formatPrice(totalPaidAmount)}
+              </span>
+              <span className="text-[10px] text-text-secondary block">
+                Verified paid records on current page
+              </span>
             </div>
 
-            <div className="bg-surface border border-border-theme p-4 sm:p-5 rounded-2xl shadow-xs flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-secondary/10 text-neutral-950 dark:text-white flex items-center justify-center shrink-0">
-                <FileTextIcon className="w-6 h-6" />
-              </div>
-              <div className="space-y-1 min-w-0">
-                <span className="text-[11px] font-semibold text-text-secondary uppercase tracking-wider block">
-                  Total Account Records
-                </span>
-                <span className="font-serif font-bold text-2xl text-foreground block">
-                  {pagination?.totalItems ?? payments.length}
-                </span>
-                <span className="text-[10px] text-text-secondary block">
-                  Total received payment entries across all pages
-                </span>
-              </div>
+            <div className="bg-surface border border-border-theme p-4 sm:p-5 rounded-2xl shadow-xs space-y-1">
+              <span className="text-[11px] font-semibold text-text-secondary uppercase tracking-wider block">
+                Total Account Records
+              </span>
+              <span className="font-sans font-semibold text-2xl text-foreground tracking-tight block">
+                {pagination?.totalItems ?? payments.length}
+              </span>
+              <span className="text-[10px] text-text-secondary block">
+                Total received payment entries across all pages
+              </span>
             </div>
 
-            <div className="bg-surface border border-border-theme p-4 sm:p-5 rounded-2xl shadow-xs flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-secondary/10 text-neutral-950 dark:text-white flex items-center justify-center shrink-0">
-                <HourglassIcon className="w-6 h-6" />
-              </div>
-              <div className="space-y-1 min-w-0">
-                <span className="text-[11px] font-semibold text-text-secondary uppercase tracking-wider block">
-                  Page Pending / Processing
-                </span>
-                <span className="font-serif font-bold text-2xl text-amber-500 block">
-                  {pendingCount}
-                </span>
-                <span className="text-[10px] text-text-secondary block">
-                  Awaiting Brand payment or verification on this page
-                </span>
-              </div>
+            <div className="bg-surface border border-border-theme p-4 sm:p-5 rounded-2xl shadow-xs space-y-1">
+              <span className="text-[11px] font-semibold text-text-secondary uppercase tracking-wider block">
+                Page Pending / Processing
+              </span>
+              <span className="font-sans font-semibold text-2xl text-amber-500 tracking-tight block">
+                {pendingCount}
+              </span>
+              <span className="text-[10px] text-text-secondary block">
+                Awaiting Brand payment or verification on this page
+              </span>
             </div>
           </div>
 
@@ -412,7 +397,7 @@ export default function CreatorPaymentsManager() {
                   <CreditCardIcon className="w-7 h-7" />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="font-serif font-semibold text-lg text-foreground">
+                  <h3 className="font-sans font-semibold text-lg text-foreground tracking-tight">
                     No Received Payments Found
                   </h3>
                   <p className="text-xs text-text-secondary max-w-sm mx-auto leading-relaxed">
@@ -507,7 +492,7 @@ export default function CreatorPaymentsManager() {
                           </td>
 
                           {/* Amount */}
-                          <td className="py-3 px-4 font-sans font-bold text-sm sm:text-base text-neutral-950 dark:text-white tabular-nums tracking-tight whitespace-nowrap">
+                          <td className="py-3.5 px-4 font-sans font-semibold text-sm text-foreground">
                             {formatPrice(payment.amount, payment.currency)}
                           </td>
 

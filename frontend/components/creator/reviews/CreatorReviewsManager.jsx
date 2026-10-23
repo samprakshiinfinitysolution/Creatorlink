@@ -356,25 +356,19 @@ export default function CreatorReviewsManager() {
         {/* Main Content Area */}
         <main className="p-4 sm:p-6 lg:p-8 space-y-6 flex-1 max-w-7xl w-full mx-auto">
           {/* Header Section */}
-          <div className="relative overflow-hidden bg-white dark:bg-surface border border-neutral-200/80 dark:border-border-theme rounded-2xl p-6 sm:p-7 shadow-xs">
-            {/* Subtle light background decoration */}
-            <div className="absolute inset-0 pointer-events-none opacity-60 dark:opacity-10 overflow-hidden">
-              <svg
-                className="absolute -right-24 -top-16 w-[640px] h-[280px] text-neutral-200/70 dark:text-neutral-700"
-                viewBox="0 0 640 280"
-                fill="none"
-              >
-                <path
-                  d="M0 120C160 30 320 220 480 110C540 70 590 90 640 120V280H0V120Z"
-                  fill="currentColor"
-                  fillOpacity="0.25"
-                />
-                <path
-                  d="M80 180C220 80 380 230 540 140C580 115 615 125 640 140V280H80V180Z"
-                  fill="currentColor"
-                  fillOpacity="0.15"
-                />
-              </svg>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-secondary/10 text-secondary border border-secondary/20 uppercase tracking-wider">
+                  Verified Brand Feedback
+                </span>
+              </div>
+              <h1 className="font-sans font-bold text-2xl sm:text-3xl text-foreground tracking-tight mt-1">
+                Client Reviews & Reputation
+              </h1>
+              <p className="text-xs text-text-secondary mt-1">
+                Verified ratings and qualitative evaluations received from luxury brands across completed workspaces.
+              </p>
             </div>
 
             <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -444,33 +438,23 @@ export default function CreatorReviewsManager() {
 
           {/* Stats Summary Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {/* 1. Overall Average Rating */}
-            <div className="bg-white dark:bg-surface border border-neutral-200/80 dark:border-border-theme p-4 sm:p-5 lg:p-6 rounded-2xl shadow-xs flex items-center justify-between gap-3 sm:gap-4 min-h-[114px]">
-              <div className="flex items-center gap-3.5 sm:gap-4 min-w-0 flex-1">
-                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-neutral-100 dark:bg-surface-muted text-neutral-950 dark:text-white flex items-center justify-center shrink-0 border border-neutral-200/60 dark:border-border-theme">
-                  <StarIcon className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-950 dark:text-white" filled={false} />
-                </div>
-                <div className="space-y-1 min-w-0 flex-1">
-                  <span className="text-[11px] font-semibold text-text-secondary uppercase tracking-wider block truncate">
-                    Overall Average Rating
-                  </span>
-                  <div className="flex items-center gap-2 h-8 sm:h-9">
-                    <span className="font-serif font-bold text-2xl sm:text-3xl lg:text-4xl text-neutral-950 dark:text-white tracking-tight leading-none">
-                      {avgRatingValue > 0 ? avgRatingValue.toFixed(1) : "0.0"}
-                    </span>
-                    <div className="flex items-center gap-0.5 text-amber-400 shrink-0">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <StarIcon
-                          key={star}
-                          className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 fill-amber-400"
-                          filled={star <= Math.round(avgRatingValue)}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                  <span className="text-[11px] text-text-secondary block truncate">
-                    Based on all completed collaborations
-                  </span>
+            {/* 1. Average Rating */}
+            <div className="bg-surface border border-border-theme p-4 sm:p-5 rounded-2xl shadow-xs space-y-1">
+              <span className="text-[11px] font-semibold text-text-secondary uppercase tracking-wider block">
+                Overall Average Rating
+              </span>
+              <div className="flex items-baseline gap-2 pt-0.5">
+                <span className="font-sans font-semibold text-[22px] sm:text-[28px] text-amber-500 tracking-tight">
+                  {avgRatingValue > 0 ? avgRatingValue.toFixed(1) : "0.0"}
+                </span>
+                <div className="flex items-center gap-0.5 text-amber-400">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <StarIcon
+                      key={star}
+                      className="w-4 h-4 text-amber-400"
+                      filled={star <= Math.round(avgRatingValue)}
+                    />
+                  ))}
                 </div>
               </div>
 
@@ -483,78 +467,30 @@ export default function CreatorReviewsManager() {
               </div>
             </div>
 
-            {/* 2. Total Received Reviews */}
-            <div className="bg-white dark:bg-surface border border-neutral-200/80 dark:border-border-theme p-4 sm:p-5 lg:p-6 rounded-2xl shadow-xs flex items-center justify-between gap-3 sm:gap-4 min-h-[114px]">
-              <div className="flex items-center gap-3.5 sm:gap-4 min-w-0 flex-1">
-                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-neutral-100 dark:bg-surface-muted text-neutral-950 dark:text-white flex items-center justify-center shrink-0 border border-neutral-200/60 dark:border-border-theme">
-                  <MessageSquareTextIcon className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-950 dark:text-white" />
-                </div>
-                <div className="space-y-1 min-w-0 flex-1">
-                  <span className="text-[11px] font-semibold text-text-secondary uppercase tracking-wider block truncate">
-                    Total Received Reviews
-                  </span>
-                  <div className="flex items-center h-8 sm:h-9">
-                    <span className="font-serif font-bold text-2xl sm:text-3xl lg:text-4xl text-neutral-950 dark:text-white tracking-tight leading-none">
-                      {totalReviewsCount}
-                    </span>
-                  </div>
-                  <span className="text-[11px] text-text-secondary block truncate">
-                    Verified brand client endorsements
-                  </span>
-                </div>
-              </div>
-
-              {/* Subtle document graphic on right */}
-              <div className="hidden xl:flex w-9 h-9 rounded-full bg-neutral-50 dark:bg-surface-muted/60 text-neutral-400 dark:text-neutral-500 items-center justify-center shrink-0 border border-neutral-100 dark:border-border-theme/40" aria-hidden="true">
-                <DocumentTextIcon className="w-4 h-4" />
-              </div>
+            {/* 2. Total Reviews */}
+            <div className="bg-surface border border-border-theme p-4 sm:p-5 rounded-2xl shadow-xs space-y-1">
+              <span className="text-[11px] font-semibold text-text-secondary uppercase tracking-wider block">
+                Total Received Reviews
+              </span>
+              <span className="font-sans font-semibold text-[22px] sm:text-[28px] text-foreground tracking-tight block pt-0.5">
+                {totalReviewsCount}
+              </span>
+              <span className="text-[10px] text-text-secondary block">
+                Verified brand client endorsements
+              </span>
             </div>
 
-            {/* 3. 5-Star Share */}
-            <div className="bg-white dark:bg-surface border border-neutral-200/80 dark:border-border-theme p-4 sm:p-5 lg:p-6 rounded-2xl shadow-xs flex items-center justify-between gap-3 sm:gap-4 min-h-[114px]">
-              <div className="flex items-center gap-3.5 sm:gap-4 min-w-0 flex-1">
-                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-neutral-100 dark:bg-surface-muted text-neutral-950 dark:text-white flex items-center justify-center shrink-0 border border-neutral-200/60 dark:border-border-theme">
-                  <BarChartIcon className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-950 dark:text-white" />
-                </div>
-                <div className="space-y-1 min-w-0 flex-1">
-                  <span className="text-[11px] font-semibold text-text-secondary uppercase tracking-wider block truncate">
-                    5-Star Share
-                  </span>
-                  <div className="flex items-center h-8 sm:h-9">
-                    <span className="font-serif font-bold text-2xl sm:text-3xl lg:text-4xl text-neutral-950 dark:text-white tracking-tight leading-none">
-                      {currentPageReviewCount > 0 ? `${currentPageFiveStarPercentage}%` : "0%"}
-                    </span>
-                  </div>
-                  <span className="text-[11px] text-text-secondary block truncate">
-                    5-star reviews on current page
-                  </span>
-                </div>
-              </div>
-
-              {/* Circular gauge ring on right */}
-              <div className="relative w-11 h-11 sm:w-12 sm:h-12 lg:w-13 lg:h-13 shrink-0 flex items-center justify-center">
-                <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-                  <path
-                    className="text-neutral-100 dark:text-neutral-800"
-                    strokeWidth="3.5"
-                    stroke="currentColor"
-                    fill="none"
-                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  />
-                  <path
-                    className="text-emerald-600 dark:text-emerald-500 transition-all duration-500 ease-out"
-                    strokeDasharray={`${currentPageFiveStarPercentage}, 100`}
-                    strokeWidth="3.5"
-                    strokeLinecap="round"
-                    stroke="currentColor"
-                    fill="none"
-                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  />
-                </svg>
-                <span className="absolute font-bold text-[11px] sm:text-xs text-neutral-950 dark:text-white">
-                  {currentPageFiveStarPercentage}%
-                </span>
-              </div>
+            {/* 3. Page 5-Star Share */}
+            <div className="bg-surface border border-border-theme p-4 sm:p-5 rounded-2xl shadow-xs space-y-1">
+              <span className="text-[11px] font-semibold text-text-secondary uppercase tracking-wider block">
+                Page 5-Star Share
+              </span>
+              <span className="font-sans font-semibold text-[22px] sm:text-[28px] text-emerald-500 tracking-tight block pt-0.5">
+                {currentPageReviewCount > 0 ? `${currentPageFiveStarPercentage}%` : "0%"}
+              </span>
+              <span className="text-[10px] text-text-secondary block">
+                5-star reviews on current page
+              </span>
             </div>
           </div>
 
@@ -618,7 +554,7 @@ export default function CreatorReviewsManager() {
                 <StarIcon className="w-7 h-7 text-secondary" filled={true} />
               </div>
               <div className="space-y-1">
-                <h3 className="font-serif font-semibold text-lg text-foreground">
+                <h3 className="font-sans font-semibold text-lg text-foreground tracking-tight">
                   No Client Reviews Found
                 </h3>
                 <p className="text-xs text-text-secondary max-w-sm mx-auto leading-relaxed">

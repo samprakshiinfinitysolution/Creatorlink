@@ -25,18 +25,45 @@ function getInitials(name, email) {
   return "BU";
 }
 
-function MenuIcon({ className = "w-5 h-5" }) {
+function MenuIcon({ open }) {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-    </svg>
-  );
-}
-
-function CloseIcon({ className = "w-5 h-5" }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      className="transition-transform duration-300"
+    >
+      <line
+        x1="4"
+        y1="6"
+        x2="20"
+        y2="6"
+        className={`origin-center transition-all duration-300 ${
+          open ? "rotate-45 translate-y-[6px]" : ""
+        }`}
+      />
+      <line
+        x1="4"
+        y1="12"
+        x2="20"
+        y2="12"
+        className={`origin-center transition-all duration-300 ${
+          open ? "opacity-0 scale-x-0" : ""
+        }`}
+      />
+      <line
+        x1="4"
+        y1="18"
+        x2="20"
+        y2="18"
+        className={`origin-center transition-all duration-300 ${
+          open ? "-rotate-45 -translate-y-[6px]" : ""
+        }`}
+      />
     </svg>
   );
 }
@@ -66,7 +93,7 @@ function LogoutIcon({ className = "w-4 h-4" }) {
   );
 }
 
-const navLinks = [
+const dashboardNavLinks = [
   { name: "Dashboard", href: "/brand/dashboard" },
   { name: "Campaigns", href: "/brand/campaigns" },
   { name: "Discover Creators", href: "/brand/creators" },
@@ -199,52 +226,128 @@ export default function BrandDashboardNavbar() {
     };
   }, []);
 
-  return (
-    <header className="sticky top-0 z-40 w-full bg-surface/95 backdrop-blur-md border-b border-border-theme transition-colors">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 gap-4">
-          {/* Logo & Mobile Menu Button */}
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen((prev) => !prev)}
-              className="lg:hidden p-2 rounded-xl text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors cursor-pointer"
-              aria-label="Toggle navigation menu"
-            >
-              {mobileMenuOpen ? <CloseIcon /> : <MenuIcon />}
-            </button>
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileMenuOpen]);
 
+  return (
+    <>
+      <style>{`
+        .dark header nav {
+          background: #1b1b1b !important;
+          border-color: rgba(255, 255, 255, 0.08) !important;
+        }
+
+        .dark header nav a:not([class*="dark:text-black"]) {
+          color: #ffffff !important;
+        }
+
+        .dark header nav a:not([class*="dark:text-black"]):hover {
+          color: #ff6b9d !important;
+        }
+
+        .dark header nav a:first-child {
+          color: #ffffff !important;
+        }
+
+        .dark .mobile-menu {
+          background: #1b1b1b !important;
+          border-color: rgba(255, 255, 255, 0.08) !important;
+          color: #ffffff !important;
+        }
+
+        .dark .mobile-menu a:not([class*="dark:text-black"]) {
+          color: #ffffff !important;
+        }
+
+        .dark .mobile-menu a:not([class*="dark:text-black"]):hover {
+          color: #ff6b9d !important;
+        }
+      `}</style>
+
+      {/* =====================================================
+          DESKTOP FLOATING PILL NAVBAR (1024px+)
+      ===================================================== */}
+      <header className="fixed left-1/2 top-4 z-50 hidden w-[96%] -translate-x-1/2 lg:block xl:top-5 xl:w-[94%] 2xl:w-[90%]">
+        <nav
+          className="
+            flex h-[72px] items-center justify-between
+            rounded-full
+            border border-border-theme
+            bg-surface/95
+            px-5
+            shadow-[0_8px_30px_rgba(0,0,0,0.05)]
+            backdrop-blur-md
+            transition-colors duration-300
+            xl:h-[78px]
+            xl:px-8
+          "
+        >
+          {/* LOGO */}
+          <div className="flex items-center justify-start shrink-0">
             <Link
               href="/brand/dashboard"
-              className="flex items-center gap-1.5 font-serif text-lg sm:text-xl font-bold tracking-wider text-foreground hover:opacity-90 transition-opacity shrink-0"
+              className="
+                shrink-0
+                text-[18px]
+                tracking-[-0.04em]
+                text-primary
+                transition-colors
+                duration-300
+                xl:text-[22px]
+                font-bold
+              "
+              style={{ fontFamily: "var(--font-playfair), serif" }}
             >
-              <span>CREATORLINK</span>
-              <span className="text-secondary text-lg leading-none">✦</span>
+              CREATORLINK
+              <span className="ml-1 text-secondary">✦</span>
             </Link>
           </div>
 
-          {/* Desktop Horizontal Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-1 xl:gap-1.5 overflow-x-auto no-scrollbar">
-            {navLinks.map((item) => {
+          {/* DASHBOARD NAVIGATION LINKS */}
+          <div className="flex items-center justify-center gap-2 xl:gap-3 2xl:gap-4 overflow-x-auto no-scrollbar py-1">
+            {dashboardNavLinks.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-sans font-medium whitespace-nowrap transition-all duration-200 ${
-                    isActive
-                      ? "bg-secondary/15 text-secondary font-semibold shadow-2xs"
-                      : "text-text-secondary hover:text-foreground hover:bg-surface-muted"
-                  }`}
+                  className={`
+                    relative
+                    px-2.5
+                    py-1.5
+                    text-[12px]
+                    font-medium
+                    whitespace-nowrap
+                    transition-all
+                    duration-200
+                    hover:-translate-y-[2px]
+                    hover:text-secondary
+                    xl:px-3
+                    xl:text-[13px]
+                    2xl:text-[14px]
+
+                    ${isActive
+                      ? "text-secondary font-semibold after:absolute after:bottom-[-2px] after:left-2 after:right-2 after:h-[2px] after:bg-secondary"
+                      : "text-primary"
+                    }
+                  `}
                 >
                   {item.name}
                 </Link>
               );
             })}
-          </nav>
+          </div>
 
-          {/* Right Actions: Notifications, Theme Toggle, Profile */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          {/* RIGHT ACTIONS: NOTIFICATIONS, DAY/NIGHT THEME, PROFILE */}
+          <div className="flex items-center justify-end gap-3 xl:gap-4 shrink-0">
             {/* Notification Bell Dropdown */}
             <BrandNotificationDropdown
               isOpen={notificationOpen}
@@ -257,24 +360,22 @@ export default function BrandDashboardNavbar() {
               onClose={() => setNotificationOpen(false)}
             />
 
-            {/* Dark / Light Theme Toggle */}
+            {/* DAY & NIGHT THEME TOGGLE */}
             <ThemeToggle />
 
-            {/* Brand Profile Avatar Chip with Dropdown */}
-            <div className="relative pl-1 sm:pl-2 border-l border-border-theme" ref={dropdownRef}>
+            {/* BRAND PROFILE AVATAR & DROPDOWN */}
+            <div className="relative pl-1 border-l border-border-theme" ref={dropdownRef}>
               <button
                 type="button"
                 onClick={handleDropdownToggle}
                 aria-expanded={dropdownOpen}
                 aria-haspopup="true"
-                className="flex items-center gap-2 p-1 rounded-xl hover:bg-surface-muted transition-colors cursor-pointer text-left focus:outline-none"
+                className="flex items-center gap-2 p-1 rounded-full hover:bg-surface-muted transition-colors cursor-pointer text-left focus:outline-none"
               >
-                <div className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-secondary/15 text-secondary font-semibold font-sans text-xs sm:text-sm flex items-center justify-center border border-secondary/30 shrink-0 uppercase overflow-hidden">
+                <div className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-secondary/15 text-secondary font-semibold font-sans text-xs sm:text-sm flex items-center justify-center border border-secondary/30 shrink-0 uppercase overflow-hidden shadow-2xs">
                   {hasValidLogo ? (
                     <>
-                      {!isLoaded && (
-                        <span className="animate-pulse">{initials}</span>
-                      )}
+                      {!isLoaded && <span className="animate-pulse">{initials}</span>}
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         key={cleanLogoUrl}
@@ -295,7 +396,7 @@ export default function BrandDashboardNavbar() {
 
               {/* Profile Dropdown Menu */}
               {dropdownOpen && (
-                <div className="absolute right-0 top-full mt-2 w-52 bg-surface border border-border-theme rounded-2xl shadow-xl p-1.5 z-50 text-foreground font-sans select-none animate-in fade-in slide-in-from-top-1 duration-150">
+                <div className="absolute right-0 top-full mt-3 w-56 bg-surface border border-border-theme rounded-2xl shadow-xl p-2 z-50 text-foreground font-sans select-none animate-in fade-in slide-in-from-top-1 duration-150 backdrop-blur-md">
                   <div className="px-3 py-2 border-b border-border-theme mb-1">
                     <span className="block text-xs font-semibold text-foreground truncate">
                       {displayName || "Brand User"}
@@ -342,63 +443,230 @@ export default function BrandDashboardNavbar() {
               )}
             </div>
           </div>
-        </div>
-      </div>
+        </nav>
+      </header>
 
-      {/* Mobile Drawer Menu */}
-      {mobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 top-16 z-30 bg-black/50 backdrop-blur-xs flex">
-          <div className="w-full max-w-xs bg-surface border-r border-border-theme p-4 flex flex-col justify-between shadow-2xl h-[calc(100vh-4rem)] overflow-y-auto">
-            <div className="space-y-1">
-              <span className="text-[10px] font-semibold text-text-secondary uppercase tracking-wider px-3 py-1.5 block">
-                Navigation
+      {/* =====================================================
+          MOBILE + TABLET NAVBAR (Below 1024px)
+      ===================================================== */}
+      <header className="fixed left-0 top-0 z-50 w-full lg:hidden">
+        <nav
+          className="
+            relative
+            h-[92px]
+            border-b
+            border-border-theme
+            bg-surface/95
+            backdrop-blur-md
+            transition-colors
+            duration-300
+            sm:h-[104px]
+          "
+        >
+          {/* HAMBURGER TOGGLE */}
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileMenuOpen}
+            className="
+              absolute
+              left-5
+              top-1/2
+              flex
+              -translate-y-1/2
+              items-center
+              justify-center
+              text-primary
+              transition-colors
+              hover:text-secondary
+              cursor-pointer
+              sm:left-7
+            "
+          >
+            <MenuIcon open={mobileMenuOpen} />
+          </button>
+
+          {/* CENTER LOGO */}
+          <Link
+            href="/brand/dashboard"
+            className="
+              absolute
+              left-[68px]
+              right-[125px]
+              top-1/2
+              -translate-y-1/2
+              text-center
+              text-primary
+
+              min-[400px]:left-[78px]
+              min-[400px]:right-[135px]
+
+              sm:left-[90px]
+              sm:right-[145px]
+            "
+          >
+            <div
+              className="
+                whitespace-nowrap
+                text-[15px]
+                tracking-[-0.04em]
+
+                min-[375px]:text-[17px]
+                min-[400px]:text-[18px]
+                sm:text-[21px]
+              "
+              style={{ fontFamily: "var(--font-playfair), serif" }}
+            >
+              CREATORLINK
+              <span className="ml-1 text-secondary">✦</span>
+            </div>
+
+            <div
+              className="
+                mt-1
+                whitespace-nowrap
+                text-[8px]
+                font-medium
+                tracking-[0.12em]
+                text-secondary
+
+                min-[400px]:text-[9px]
+                sm:text-[10px]
+              "
+            >
+              TOP 1% CURATED SALON
+            </div>
+          </Link>
+
+          {/* RIGHT ACTIONS */}
+          <div
+            className="
+              absolute
+              right-3
+              top-1/2
+              flex
+              -translate-y-1/2
+              items-center
+              gap-2
+
+              min-[400px]:right-4
+              sm:right-6
+              sm:gap-3
+            "
+          >
+            {/* Notification Bell Dropdown */}
+            <BrandNotificationDropdown
+              isOpen={notificationOpen}
+              onToggle={() => {
+                setNotificationOpen((prev) => {
+                  if (!prev) setDropdownOpen(false);
+                  return !prev;
+                });
+              }}
+              onClose={() => setNotificationOpen(false)}
+            />
+
+            {/* DAY & NIGHT THEME TOGGLE */}
+            <ThemeToggle />
+          </div>
+        </nav>
+
+        {/* MOBILE DRAWER */}
+        {mobileMenuOpen && (
+          <div
+            className="
+              mobile-menu
+              h-[calc(100dvh-92px)]
+              sm:h-[calc(100dvh-104px)]
+              w-full
+              overflow-y-auto
+              border-b
+              border-border-theme
+              bg-surface
+              px-6
+              pt-4
+              pb-8
+              shadow-xl
+              transition-colors
+              duration-300
+            "
+          >
+            <div className="flex flex-col gap-1">
+              <span className="text-[10px] font-semibold text-text-secondary uppercase tracking-wider px-1 py-1 block">
+                Brand Dashboard
               </span>
-              {navLinks.map((item) => {
+
+              {/* DASHBOARD NAVIGATION LINKS */}
+              {dashboardNavLinks.map((item) => {
                 const isActive = pathname === item.href;
                 return (
                   <Link
                     key={item.name}
                     href={item.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className={`flex items-center px-3.5 py-2.5 rounded-xl text-xs font-sans font-medium transition-colors ${
-                      isActive
+                    className={`
+                      flex
+                      items-center
+                      py-2.5
+                      px-3
+                      rounded-xl
+                      text-[14px]
+                      font-medium
+                      transition-colors
+                      duration-200
+                      ${isActive
                         ? "bg-secondary/15 text-secondary font-semibold"
-                        : "text-text-secondary hover:text-foreground hover:bg-surface-muted"
-                    }`}
+                        : "text-primary hover:text-secondary hover:bg-surface-muted"
+                      }
+                    `}
                   >
                     {item.name}
                   </Link>
                 );
               })}
-            </div>
 
-            <div className="pt-4 border-t border-border-theme space-y-2">
-              <div className="px-3 py-2 rounded-xl bg-surface-muted/50 border border-border-theme">
-                <span className="block text-xs font-semibold text-foreground truncate">
-                  {displayName || "Brand User"}
-                </span>
-                {displayEmail && (
-                  <span className="block text-[10px] text-text-secondary truncate">
-                    {displayEmail}
+              {/* HORIZONTAL DIVIDER */}
+              <div className="my-3 h-px w-full bg-border-theme" />
+
+              {/* USER INFO & LOG OUT */}
+              <div className="space-y-3 pt-1">
+                <div className="px-3.5 py-2.5 rounded-xl bg-surface-muted/60 border border-border-theme">
+                  <span className="block text-xs font-semibold text-foreground truncate">
+                    {displayName || "Brand User"}
                   </span>
-                )}
+                  {displayEmail && (
+                    <span className="block text-[10px] text-text-secondary truncate mt-0.5">
+                      {displayEmail}
+                    </span>
+                  )}
+                </div>
+
+                <Link
+                  href="/brand/profile"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-medium text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors"
+                >
+                  <UserIcon />
+                  <span>Profile & Settings</span>
+                </Link>
+
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-medium text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer text-left"
+                >
+                  <LogoutIcon />
+                  <span>Log Out</span>
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-medium text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer text-left"
-              >
-                <LogoutIcon />
-                <span>Log Out</span>
-              </button>
             </div>
           </div>
-          <div
-            className="flex-1"
-            onClick={() => setMobileMenuOpen(false)}
-          />
-        </div>
-      )}
-    </header>
+        )}
+      </header>
+
+      {/* Layout Spacer so dashboard content smoothly clears the floating pill navbar */}
+      <div className="w-full h-[92px] sm:h-[104px] lg:h-[98px] xl:h-[110px] pointer-events-none" aria-hidden="true" />
+    </>
   );
 }

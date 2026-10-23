@@ -122,7 +122,7 @@ export default function CreatorSubmitWorkModal({
               <UploadIcon className="w-5 h-5" />
             </span>
             <div>
-              <h2 className="font-serif font-semibold text-lg text-foreground">
+              <h2 className="font-sans font-semibold text-lg text-foreground tracking-tight">
                 {isResubmission ? "Resubmit Deliverable Work" : "Submit Deliverable Work"}
               </h2>
               <p className="text-xs text-text-secondary mt-0.5">

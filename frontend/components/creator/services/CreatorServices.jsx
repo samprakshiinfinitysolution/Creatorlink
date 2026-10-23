@@ -657,34 +657,15 @@ export default function CreatorServices() {
 
         {/* Main Content Area */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl w-full mx-auto">
-          {/* 1. PAGE HEADER WITH INTEGRATED OVERVIEW STATS */}
-          <div className="relative overflow-hidden bg-gradient-to-br from-pink-50 via-white to-rose-100/80 dark:bg-gradient-to-br dark:from-surface dark:via-surface dark:to-pink-950/20 border border-pink-200/80 dark:border-pink-900/40 rounded-3xl p-5 sm:p-6 lg:p-7 shadow-[0_4px_24px_rgba(255,45,108,0.06)] space-y-5 sm:space-y-6">
-            {/* Ambient Blush-Pink Glow Accents */}
-            <div className="absolute -top-20 -right-20 w-96 h-96 rounded-full bg-pink-200/50 dark:bg-pink-600/10 blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-20 right-40 w-80 h-80 rounded-full bg-rose-200/40 dark:bg-rose-600/5 blur-3xl pointer-events-none" />
-            <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-56 h-56 rounded-full bg-pink-100/40 dark:bg-pink-600/5 blur-2xl pointer-events-none" />
-
-            {/* Top Row: Title, Description & Add Service Action */}
-            <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div>
-                <h1 className="font-heading font-medium text-2xl sm:text-3xl lg:text-4xl text-foreground tracking-tight">
-                  My Services
-                </h1>
-                <p className="text-xs sm:text-sm text-text-secondary mt-1 font-sans">
-                  Manage your service packages, pricing, and deliverables.
-                </p>
-              </div>
-
-              <div className="flex items-center gap-3 shrink-0">
-                <button
-                  type="button"
-                  onClick={handleOpenAddModal}
-                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-neutral-950 text-white text-xs font-semibold tracking-wide border border-neutral-900 shadow-xs hover:bg-neutral-900 hover:border-neutral-800 hover:shadow-xs hover:shadow-pink-500/10 active:scale-[0.99] transition-all duration-200 ease-out cursor-pointer shrink-0 dark:bg-neutral-100 dark:text-neutral-950 dark:border-neutral-200 dark:hover:bg-neutral-200"
-                >
-                  <PlusIcon />
-                  <span>Add Service</span>
-                </button>
-              </div>
+          {/* 1. PAGE HEADER */}
+          <div className="bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className="font-sans font-bold text-2xl sm:text-3xl text-foreground tracking-tight">
+                My Services
+              </h1>
+              <p className="text-xs sm:text-sm text-text-secondary mt-1">
+                Manage your service packages, pricing, and deliverables.
+              </p>
             </div>
 
             {/* Bottom Row: 4 Statistics Cards & Decorative Service Illustration */}
@@ -1041,12 +1022,9 @@ export default function CreatorServices() {
                         </div>
                       </div>
 
-                      {/* Service Title, Subtitle Category & Description */}
-                      <div className="mt-3.5 space-y-1">
-                        <h3
-                          className="font-heading font-medium text-2xl text-foreground tracking-tight leading-snug line-clamp-1 group-hover:text-secondary transition-colors"
-                          title={service.title}
-                        >
+                      {/* Title & Category */}
+                      <div>
+                        <h3 className="font-sans font-semibold text-lg text-foreground line-clamp-1 group-hover:text-secondary transition-colors tracking-tight">
                           {service.title}
                         </h3>
                         <p className="text-xs font-sans font-medium text-text-secondary">
@@ -1057,19 +1035,19 @@ export default function CreatorServices() {
                         </p>
                       </div>
 
-                      {/* Soft Pink Pricing Panel */}
-                      <div className="mt-4 p-4 rounded-2xl bg-pink-50/50 dark:bg-pink-950/20 border border-pink-100/70 dark:border-pink-900/30 flex items-center justify-between">
-                        <div>
-                          <span className="block text-xs font-sans font-medium text-text-secondary mb-1">
-                            Pricing
-                          </span>
-                          <div className="font-heading font-medium text-2xl sm:text-3xl text-foreground tabular-nums tracking-tight">
-                            {formatPrice(service)}
-                          </div>
-                        </div>
-                        <div className="w-10 h-10 rounded-full bg-pink-100/80 dark:bg-pink-900/40 text-black dark:text-white flex items-center justify-center shrink-0">
-                          <CoinsIcon className="w-5 h-5" />
-                        </div>
+                      {/* Description */}
+                      <p className="text-xs text-text-secondary line-clamp-2 leading-relaxed">
+                        {service.description || "No description provided."}
+                      </p>
+
+                      {/* Pricing Display Banner */}
+                      <div className="p-3 rounded-xl bg-surface-muted/60 border border-border-theme flex items-baseline justify-between">
+                        <span className="text-[10px] font-semibold text-text-secondary uppercase tracking-wider">
+                          Pricing
+                        </span>
+                        <span className="font-sans font-semibold text-base text-foreground">
+                          {formatPrice(service)}
+                        </span>
                       </div>
 
                       {/* Two Aligned Info Panels: Delivery Time & Included Revisions */}
@@ -1197,7 +1175,7 @@ export default function CreatorServices() {
                 <BriefcaseIcon />
               </div>
               <div className="space-y-1">
-                <h3 className="font-serif font-medium text-xl text-foreground">
+                <h3 className="font-sans font-semibold text-xl text-foreground tracking-tight">
                   No services found
                 </h3>
                 <p className="text-xs text-text-secondary max-w-xs mx-auto leading-relaxed">
@@ -1256,7 +1234,7 @@ export default function CreatorServices() {
             {/* Modal Header */}
             <div className="p-5 sm:p-6 border-b border-border-theme flex items-center justify-between">
               <div>
-                <h2 className="font-serif font-medium text-xl text-foreground">
+                <h2 className="font-sans font-semibold text-xl text-foreground tracking-tight">
                   {editingServiceId ? "Edit Service" : "Add Service"}
                 </h2>
                 <p className="text-xs text-text-secondary mt-0.5">
@@ -1550,7 +1528,7 @@ export default function CreatorServices() {
                 <TrashIcon className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-serif font-semibold text-base text-foreground">
+                <h3 className="font-sans font-semibold text-base text-foreground tracking-tight">
                   Delete Service?
                 </h3>
                 <p className="text-text-secondary text-xs">

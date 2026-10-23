@@ -52,6 +52,24 @@ function RefreshIcon({ className = "w-4 h-4" }) {
   );
 }
 
+function ReviewFeedbackIcon({ className = "w-7 h-7" }) {
+  return (
+    <svg
+      className={className}
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.75}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"
+      />
+    </svg>
+  );
+}
+
 function PlusIcon({ className = "w-4 h-4" }) {
   return (
     <svg
@@ -305,17 +323,17 @@ export default function BrandReviewsManager() {
         <BrandHeader setMobileOpen={setMobileOpen} />
 
         {/* Main Content Area */}
-        <main className="p-4 sm:p-6 lg:p-8 space-y-6 flex-1 max-w-7xl w-full mx-auto">
+        <main className="px-3 sm:px-5 lg:px-6 py-5 sm:py-6 space-y-5 sm:space-y-6 flex-1 max-w-[1536px] w-full mx-auto min-w-0">
           {/* Top Title Section & Action CTAs */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-secondary/10 text-secondary border border-secondary/20 uppercase tracking-wider">
-                  Brand Creator Feedback
+              <div className="mb-2">
+                <span className="font-bold text-[11px] tracking-wider uppercase text-[#ff2d6c] dark:text-[#ff4f87] font-sans">
+                  BRAND CREATOR FEEDBACK
                 </span>
               </div>
-              <h1 className="font-serif font-bold text-2xl sm:text-3xl text-foreground mt-1">
-                Reviews & Creator Evaluations
+              <h1 className="font-serif font-medium text-2xl sm:text-3xl text-foreground mt-1">
+                Reviews And Creator Evaluations
               </h1>
               <p className="text-xs text-text-secondary mt-1">
                 Manage performance reviews, star ratings, and testimonials submitted for completed campaign collaborations.
@@ -336,7 +354,7 @@ export default function BrandReviewsManager() {
               <button
                 type="button"
                 onClick={handleOpenModal}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-secondary hover:bg-secondary-dark text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#252525] hover:bg-[#111111] text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
               >
                 <PlusIcon className="w-4 h-4" />
                 <span>Write Review</span>
@@ -391,7 +409,7 @@ export default function BrandReviewsManager() {
               <span className="text-[11px] font-semibold text-text-secondary uppercase tracking-wider block">
                 Total Reviews Submitted
               </span>
-              <span className="font-serif font-bold text-3xl text-foreground block pt-0.5">
+              <span className="font-sans font-semibold text-[22px] sm:text-[28px] text-foreground tracking-tight block pt-0.5">
                 {totalReviewsCount}
               </span>
               <span className="text-[10px] text-text-secondary block">
@@ -405,7 +423,7 @@ export default function BrandReviewsManager() {
                 Page Average Rating
               </span>
               <div className="flex items-baseline gap-2 pt-0.5">
-                <span className="font-serif font-bold text-3xl text-amber-400">
+                <span className="font-sans font-semibold text-[22px] sm:text-[28px] text-amber-500 tracking-tight">
                   {Number(averageRatingGiven) > 0 ? averageRatingGiven : "0.0"}
                 </span>
                 <div className="flex items-center gap-0.5 text-amber-400">
@@ -428,7 +446,7 @@ export default function BrandReviewsManager() {
               <span className="text-[11px] font-semibold text-text-secondary uppercase tracking-wider block">
                 Page 5-Star Share
               </span>
-              <span className="font-serif font-bold text-3xl text-emerald-500 block pt-0.5">
+              <span className="font-sans font-semibold text-[22px] sm:text-[28px] text-emerald-500 tracking-tight block pt-0.5">
                 {reviews.length > 0 ? `${currentPageFiveStarPercentage}%` : "0%"}
               </span>
               <span className="text-[10px] text-text-secondary block">
@@ -438,7 +456,7 @@ export default function BrandReviewsManager() {
           </div>
 
           {/* Rating Filter Tabs */}
-          <div className="bg-surface border border-border-theme rounded-2xl p-2 flex items-center gap-1.5 overflow-x-auto custom-scrollbar">
+          <div className="bg-surface border border-border-theme rounded-2xl p-2 flex items-center gap-1.5 overflow-x-auto no-scrollbar min-w-0 w-full max-w-full">
             {[
               { id: "all", label: "All Reviews" },
               { id: "5", label: "5 Stars Only" },
@@ -449,9 +467,9 @@ export default function BrandReviewsManager() {
                 key={tab.id}
                 type="button"
                 onClick={() => setRatingFilter(tab.id)}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
                   ratingFilter === tab.id
-                    ? "bg-secondary text-white shadow-xs"
+                    ? "bg-[#252525] text-white shadow-xs"
                     : "text-text-secondary hover:text-foreground hover:bg-surface-muted"
                 }`}
               >
@@ -474,8 +492,8 @@ export default function BrandReviewsManager() {
           ) : filteredReviews.length === 0 ? (
             /* Empty State */
             <div className="bg-surface border border-border-theme rounded-2xl p-12 text-center space-y-3 shadow-xs">
-              <div className="w-14 h-14 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center mx-auto border border-secondary/20">
-                <StarIcon className="w-7 h-7 text-secondary" filled={true} />
+              <div className="w-14 h-14 rounded-2xl bg-secondary/8 text-[#252525] dark:text-white flex items-center justify-center mx-auto border border-secondary/15">
+                <ReviewFeedbackIcon className="w-7 h-7 text-[#252525] dark:text-white" />
               </div>
               <div className="space-y-1">
                 <h3 className="font-serif font-semibold text-lg text-foreground">
@@ -491,7 +509,7 @@ export default function BrandReviewsManager() {
                 <button
                   type="button"
                   onClick={handleOpenModal}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-secondary hover:bg-secondary-dark text-white text-xs font-semibold shadow-xs transition-all cursor-pointer"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#252525] hover:bg-[#111111] text-white text-xs font-semibold shadow-xs transition-all cursor-pointer"
                 >
                   <PlusIcon className="w-4 h-4" />
                   <span>Write a Review</span>

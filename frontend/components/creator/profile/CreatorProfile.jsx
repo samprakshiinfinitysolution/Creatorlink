@@ -341,7 +341,7 @@ export default function CreatorProfile() {
         <CreatorHeader setMobileOpen={setMobileOpen} />
 
         {/* Profile Main Container */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-6xl w-full mx-auto">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-[1400px] w-full mx-auto">
 
           {/* Toast Notification */}
           {successToast && (
@@ -431,7 +431,7 @@ export default function CreatorProfile() {
               {/* 1. PAGE HEADER */}
           <div className="bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="font-serif font-semibold text-2xl sm:text-3xl text-foreground tracking-tight">
+              <h1 className="font-sans font-bold text-2xl sm:text-3xl text-foreground tracking-tight">
                 My Profile
               </h1>
               <p className="text-xs sm:text-sm text-text-secondary mt-1">
@@ -488,7 +488,7 @@ export default function CreatorProfile() {
                     {currentAvatarUrl && !isAvatarError ? (
                       <>
                         {isAvatarLoading && (
-                          <div className="absolute inset-0 bg-surface-muted animate-pulse flex items-center justify-center text-text-secondary/40 font-serif font-bold text-2xl">
+                          <div className="absolute inset-0 bg-surface-muted animate-pulse flex items-center justify-center text-text-secondary/40 font-sans font-bold text-2xl">
                             {initials}
                           </div>
                         )}
@@ -504,7 +504,7 @@ export default function CreatorProfile() {
                         />
                       </>
                     ) : (
-                      <div className="w-full h-full bg-secondary/15 text-secondary font-serif font-bold text-2xl sm:text-3xl flex items-center justify-center border border-secondary/30">
+                      <div className="w-full h-full bg-secondary/15 text-secondary font-sans font-bold text-2xl sm:text-3xl flex items-center justify-center border border-secondary/30">
                         {initials}
                       </div>
                     )}
@@ -553,7 +553,7 @@ export default function CreatorProfile() {
                 <div className="space-y-1.5 pt-1 sm:pt-2">
                   {/* Creator Name & Category Tag */}
                   <div className="flex flex-wrap items-center gap-2.5">
-                    <h2 className="font-serif font-semibold text-2xl sm:text-3xl text-foreground tracking-tight">
+                    <h2 className="font-sans font-bold text-2xl sm:text-3xl text-foreground tracking-tight">
                       {displayName}
                     </h2>
                     <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold tracking-wide bg-secondary/10 text-secondary border border-secondary/20 uppercase">
@@ -603,7 +603,7 @@ export default function CreatorProfile() {
                 <span className="text-xs font-semibold text-text-secondary uppercase tracking-wider block">
                   Total Followers
                 </span>
-                <span className="font-serif text-2xl font-medium text-foreground block mt-1">
+                <span className="font-sans text-2xl font-semibold text-foreground tracking-tight block mt-1">
                   {profile?.followerCount !== undefined && profile?.followerCount !== null
                     ? profile.followerCount
                     : 0}
@@ -620,7 +620,7 @@ export default function CreatorProfile() {
                 <span className="text-xs font-semibold text-text-secondary uppercase tracking-wider block">
                   Engagement Rate
                 </span>
-                <span className="font-serif text-2xl font-medium text-foreground block mt-1">
+                <span className="font-sans text-2xl font-semibold text-foreground tracking-tight block mt-1">
                   {profile?.engagementRate !== undefined && profile?.engagementRate !== null
                     ? typeof profile.engagementRate === "number"
                       ? `${profile.engagementRate}%`
@@ -642,7 +642,7 @@ export default function CreatorProfile() {
               <div className="bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 shadow-xs space-y-4">
                 <div className="flex items-center justify-between border-b border-border-theme pb-3">
                   <div>
-                    <h3 className="font-serif font-medium text-lg text-foreground">
+                    <h3 className="font-sans font-semibold text-lg text-foreground tracking-tight">
                       About Creator
                     </h3>
                     <p className="text-xs text-text-secondary mt-0.5">
@@ -776,7 +776,7 @@ export default function CreatorProfile() {
               {/* 5. SOCIAL LINKS SECTION */}
               <div className="bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 shadow-xs space-y-4">
                 <div className="border-b border-border-theme pb-3">
-                  <h3 className="font-serif font-medium text-lg text-foreground">
+                  <h3 className="font-sans font-semibold text-lg text-foreground tracking-tight">
                     Social Links
                   </h3>
                   <p className="text-xs text-text-secondary mt-0.5">
@@ -913,7 +913,7 @@ export default function CreatorProfile() {
               {/* 6. PROFILE VISIBILITY SECTION */}
               <div className="bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 shadow-xs space-y-4">
                 <div className="border-b border-border-theme pb-3">
-                  <h3 className="font-serif font-medium text-lg text-foreground">
+                  <h3 className="font-sans font-semibold text-lg text-foreground tracking-tight">
                     Profile Visibility
                   </h3>
                   <p className="text-xs text-text-secondary mt-0.5">
@@ -953,7 +953,7 @@ export default function CreatorProfile() {
 
               {/* 7. SAVE / UPDATE ACTION AREA */}
               <div className="bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 shadow-xs space-y-3">
-                <h3 className="font-serif font-medium text-base text-foreground">
+                <h3 className="font-sans font-semibold text-base text-foreground tracking-tight">
                   {profile ? "Save Changes" : "Create Profile"}
                 </h3>
                 <p className="text-xs text-text-secondary">

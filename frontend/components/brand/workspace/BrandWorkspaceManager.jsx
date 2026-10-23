@@ -12,7 +12,7 @@ import BrandHeader from "@/components/brand/dashboard/BrandHeader";
 // =========================================================
 function WorkspaceIcon({ className = "w-5 h-5" }) {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
     </svg>
   );
@@ -228,19 +228,16 @@ export default function BrandWorkspaceManager() {
         <BrandHeader setMobileOpen={setMobileOpen} />
 
         {/* Page Content */}
-        <main className="p-4 sm:p-6 lg:p-8 space-y-6 flex-1 max-w-7xl w-full mx-auto">
+        <main className="px-3 sm:px-5 lg:px-6 py-4 sm:py-5 space-y-4 sm:space-y-5 flex-1 max-w-[1440px] w-full mx-auto min-w-0">
           {/* Header Banner */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="p-2 rounded-xl bg-secondary/15 text-secondary border border-secondary/20">
-                  <WorkspaceIcon className="w-5 h-5" />
-                </span>
-                <span className="inline-block px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase bg-secondary/15 text-secondary border border-secondary/20">
-                  Brand Workspace
+              <div className="mb-2">
+                <span className="font-bold text-[11px] tracking-wider uppercase text-[#ff2d6c] dark:text-[#ff4f87] font-sans">
+                  BRAND WORKSPACE
                 </span>
               </div>
-              <h1 className="font-serif font-semibold text-2xl sm:text-3xl text-foreground tracking-tight">
+              <h1 className="font-serif font-medium text-2xl sm:text-3xl text-foreground tracking-tight">
                 Collaboration Workspaces
               </h1>
               <p className="text-xs sm:text-sm text-text-secondary mt-1">
@@ -250,7 +247,7 @@ export default function BrandWorkspaceManager() {
           </div>
 
           {/* Status Filter Tabs */}
-          <div className="border-b border-border-theme flex items-center gap-2 overflow-x-auto pb-1 custom-scrollbar">
+          <div className="border-b border-border-theme flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar min-w-0 w-full max-w-full">
             {STATUS_TABS.map((tab) => {
               const isActive = activeTab === tab.id;
               return (
@@ -258,9 +255,9 @@ export default function BrandWorkspaceManager() {
                   key={tab.id}
                   type="button"
                   onClick={() => handleTabChange(tab.id)}
-                  className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                  className={`px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
                     isActive
-                      ? "bg-secondary text-white shadow-xs"
+                      ? "bg-[#252525] text-white shadow-xs"
                       : "text-text-secondary hover:text-foreground hover:bg-surface-muted"
                   }`}
                 >
@@ -306,7 +303,7 @@ export default function BrandWorkspaceManager() {
           ) : !loading && workspaces.length === 0 ? (
             /* Empty State */
             <div className="bg-surface border border-border-theme rounded-2xl p-10 text-center space-y-4">
-              <div className="w-16 h-16 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center mx-auto border border-secondary/20">
+              <div className="w-16 h-16 rounded-2xl bg-secondary/8 text-[#252525] dark:text-white flex items-center justify-center mx-auto border border-secondary/15">
                 <BriefcaseIcon className="w-8 h-8" />
               </div>
               <div className="space-y-1">
@@ -360,7 +357,7 @@ export default function BrandWorkspaceManager() {
                           <span className="text-[11px] font-semibold text-text-secondary block truncate">
                             Creator: {creatorName}
                           </span>
-                          <h3 className="font-serif font-semibold text-base text-foreground line-clamp-1 mt-0.5">
+                          <h3 className="font-sans font-semibold text-base text-foreground line-clamp-1 mt-0.5 tracking-tight">
                             {campaignTitle}
                           </h3>
                         </div>
@@ -386,7 +383,7 @@ export default function BrandWorkspaceManager() {
                       <div className="grid grid-cols-2 gap-2 bg-surface-muted/60 p-3 rounded-xl border border-border-theme/50 text-xs">
                         <div>
                           <span className="text-[10px] text-text-secondary block">Agreed Price</span>
-                          <span className="font-serif font-semibold text-foreground">
+                          <span className="font-sans font-semibold text-foreground">
                             {agreedPriceFormatted}
                           </span>
                         </div>
@@ -436,7 +433,7 @@ export default function BrandWorkspaceManager() {
                     <div className="pt-2 border-t border-border-theme flex items-center gap-2">
                       <Link
                         href={`/brand/workspace/${ws._id}`}
-                        className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-secondary hover:bg-secondary-dark text-white text-xs font-semibold transition-all cursor-pointer shadow-xs"
+                        className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#252525] hover:bg-[#111111] text-white text-xs font-semibold transition-all cursor-pointer shadow-xs"
                       >
                         <span>Manage Workspace</span>
                         <ArrowRightIcon className="w-3.5 h-3.5" />
@@ -483,7 +480,7 @@ export default function BrandWorkspaceManager() {
                       onClick={() => handlePageChange(pageNum)}
                       className={`w-8 h-8 rounded-xl font-semibold text-xs transition-all cursor-pointer ${
                         pageNum === currentPage
-                          ? "bg-secondary text-white shadow-xs"
+                          ? "bg-[#252525] text-white shadow-xs"
                           : "bg-surface hover:bg-surface-muted text-text-secondary border border-border-theme"
                       }`}
                     >

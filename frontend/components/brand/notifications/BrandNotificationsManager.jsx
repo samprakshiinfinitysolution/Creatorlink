@@ -257,21 +257,21 @@ export default function BrandNotificationsManager() {
         <BrandHeader setMobileOpen={setMobileOpen} />
 
         {/* Notifications Center Container */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-5xl w-full mx-auto">
+        <main className="flex-1 px-3 sm:px-5 lg:px-6 py-5 sm:py-6 space-y-5 sm:space-y-6 max-w-[1536px] w-full mx-auto min-w-0">
           {/* Header Title & Actions Banner */}
           <div className="bg-surface border border-border-theme rounded-2xl p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="inline-block px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase bg-secondary/15 text-secondary border border-secondary/20">
-                  Notification Center
+              <div className="flex items-center gap-2.5 mb-2">
+                <span className="font-bold text-[11px] tracking-wider uppercase text-[#ff2d6c] dark:text-[#ff4f87] font-sans">
+                  NOTIFICATION CENTER
                 </span>
                 {numUnread > 0 && (
-                  <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-secondary text-white">
+                  <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#252525] text-white">
                     {numUnread} Unread
                   </span>
                 )}
               </div>
-              <h1 className="font-serif font-bold text-2xl sm:text-3xl text-foreground tracking-tight">
+              <h1 className="font-serif font-medium text-2xl sm:text-3xl text-foreground tracking-tight">
                 Notifications
               </h1>
               <p className="text-xs sm:text-sm text-text-secondary mt-1">
@@ -293,9 +293,9 @@ export default function BrandNotificationsManager() {
           </div>
 
           {/* Filter Bar: Tabs & Categories */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-b border-border-theme pb-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-b border-border-theme pb-4 min-w-0 w-full">
             {/* All vs Unread Tabs */}
-            <div className="inline-flex p-1 bg-surface-muted rounded-xl self-start">
+            <div className="inline-flex p-1 bg-surface-muted rounded-xl self-start shrink-0">
               <button
                 type="button"
                 onClick={() => handleTabChange("all")}
@@ -324,15 +324,15 @@ export default function BrandNotificationsManager() {
             </div>
 
             {/* Category Filter Pills */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 no-scrollbar min-w-0 w-full max-w-full">
               {CATEGORY_FILTERS.map((cat) => (
                 <button
                   key={cat.value}
                   type="button"
                   onClick={() => handleCategoryChange(cat.value)}
-                  className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-colors cursor-pointer border ${
+                  className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-colors cursor-pointer shrink-0 border ${
                     categoryFilter === cat.value
-                      ? "bg-secondary text-white border-secondary"
+                      ? "bg-[#252525] text-white border-[#252525]"
                       : "bg-surface text-text-secondary border-border-theme hover:bg-surface-muted hover:text-foreground"
                   }`}
                 >
@@ -402,8 +402,8 @@ export default function BrandNotificationsManager() {
             ) : displayedNotifications.length === 0 ? (
               // Empty State
               <div className="bg-surface border border-border-theme rounded-2xl py-16 px-6 text-center flex flex-col items-center justify-center">
-                <div className="w-12 h-12 rounded-2xl bg-surface-muted flex items-center justify-center text-text-secondary mb-3">
-                  <BellIcon className="w-6 h-6 opacity-40" />
+                <div className="w-12 h-12 rounded-2xl bg-secondary/8 text-[#252525] dark:text-white flex items-center justify-center mb-3">
+                  <BellIcon className="w-6 h-6" />
                 </div>
                 <h3 className="font-semibold text-base text-foreground">No notifications found</h3>
                 <p className="text-xs text-text-secondary mt-1 max-w-sm">
@@ -514,31 +514,31 @@ export default function BrandNotificationsManager() {
 
           {/* Pagination Controls */}
           {pagination && totalPages > 1 && (
-            <div className="bg-surface border border-border-theme rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="bg-surface border border-border-theme rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 min-w-0 w-full overflow-hidden">
               <span className="text-xs text-text-secondary">
                 Showing page <strong className="text-foreground">{currentPage}</strong> of{" "}
                 <strong className="text-foreground">{totalPages}</strong> ({totalItems} total)
               </span>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar max-w-full">
                 <button
                   type="button"
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={!hasPrevPage}
-                  className="px-3.5 py-1.5 rounded-xl border border-border-theme text-xs font-semibold text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                  className="px-3.5 py-1.5 rounded-xl border border-border-theme text-xs font-semibold text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shrink-0"
                 >
                   Previous
                 </button>
 
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1 shrink-0">
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
                     <button
                       key={pageNum}
                       type="button"
                       onClick={() => setPage(pageNum)}
-                      className={`w-8 h-8 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
+                      className={`w-8 h-8 rounded-xl text-xs font-semibold transition-colors cursor-pointer shrink-0 ${
                         currentPage === pageNum
-                          ? "bg-secondary text-white"
+                          ? "bg-[#252525] text-white"
                           : "text-text-secondary hover:bg-surface-muted hover:text-foreground"
                       }`}
                     >
@@ -551,7 +551,7 @@ export default function BrandNotificationsManager() {
                   type="button"
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={!hasNextPage}
-                  className="px-3.5 py-1.5 rounded-xl border border-border-theme text-xs font-semibold text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                  className="px-3.5 py-1.5 rounded-xl border border-border-theme text-xs font-semibold text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shrink-0"
                 >
                   Next
                 </button>

@@ -472,7 +472,7 @@ useEffect(() => {
           {/* Header & Search Bar */}
           <div className="p-3.5 sm:p-4 border-b border-border-theme space-y-3 shrink-0">
             <div className="flex items-center justify-between">
-              <h2 className="font-serif font-semibold text-base sm:text-lg text-foreground tracking-tight">
+              <h2 className="font-serif font-medium text-base sm:text-lg text-foreground tracking-tight">
                 Messages
               </h2>
               <button
@@ -738,7 +738,7 @@ useEffect(() => {
                   <button
                     type="submit"
                     disabled={!messageInput.trim() || sending}
-                    className="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-secondary text-white font-sans font-medium text-xs flex items-center gap-1.5 hover:bg-secondary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0 cursor-pointer shadow-xs"
+                    className="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-[#252525] text-white font-sans font-medium text-xs flex items-center gap-1.5 hover:bg-[#111111] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0 cursor-pointer shadow-xs"
                   >
                     <span>Send</span>
                     <SendIcon />
@@ -749,11 +749,11 @@ useEffect(() => {
           ) : (
             // No Conversation Selected Empty State
             <div className="h-full flex flex-col items-center justify-center p-8 text-center text-text-secondary space-y-3">
-              <div className="w-16 h-16 rounded-full bg-surface-muted flex items-center justify-center text-text-secondary/50">
+              <div className="w-16 h-16 rounded-full bg-secondary/8 text-[#252525] dark:text-white flex items-center justify-center">
                 <ChatBubbleIcon className="w-8 h-8" />
               </div>
               <div className="space-y-1 max-w-sm">
-                <h3 className="font-serif font-semibold text-foreground text-base">
+                <h3 className="font-sans font-semibold text-foreground text-base tracking-tight">
                   Select a Conversation
                 </h3>
                 <p className="text-xs text-text-secondary">

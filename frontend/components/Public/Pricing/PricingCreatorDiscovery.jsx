@@ -18,7 +18,7 @@ export default function PricingCreatorDiscovery() {
       engagement: "6.8%",
       avgViews: "42K",
       buttonLabel: "View Media Kit",
-      image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80",
+      image: "https://res.cloudinary.com/atr5osne/image/upload/v1792054698/creatorlink/public/avatars/gye9m9prpdv81gc9ipkp.webp",
     },
     {
       id: "camille",
@@ -30,7 +30,7 @@ export default function PricingCreatorDiscovery() {
       engagement: "8.2%",
       avgViews: "61K",
       buttonLabel: "Send Invitation",
-      image: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=600&q=80",
+      image: "https://res.cloudinary.com/atr5osne/image/upload/v1792054750/creatorlink/public/creators/wgh3norjnvhnlp2jlfhl.webp",
     },
     {
       id: "sora",
@@ -42,7 +42,7 @@ export default function PricingCreatorDiscovery() {
       engagement: "5.4%",
       avgViews: "94K",
       buttonLabel: "View Media Kit",
-      image: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=600&q=80",
+      image: "https://res.cloudinary.com/atr5osne/image/upload/v1792054710/creatorlink/public/avatars/ra9dirifievmiawd57yl.webp",
     },
   ];
 

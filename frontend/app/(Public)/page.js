@@ -13,10 +13,12 @@ import SalonTestimonials from "@/components/Public/SalonTestimonials/SalonTestim
 import ProtocolArchitecture from "@/components/Public/ProtocolArchitecture/ProtocolArchitecture";
 import CollaborationCTA from "@/components/Public/CollaborationCTA/CollaborationCTA";
 import Footer from "@/components/Public/Footer/Footer";
+import ThreeDotLoader from "@/components/common/Loader/ThreeDotLoader";
 
 export default function Home() {
   return (
     <main className="min-h-screen bg-background text-foreground">
+      <ThreeDotLoader />
       <Navbar />
       <Hero />
       <CreatorShowcase />

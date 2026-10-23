@@ -1,7 +1,11 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useDispatch } from "react-redux";
+import store from "@/redux/store";
+import { login } from "@/redux/auth/auth_slice";
 
 // =========================================================
 // SVG ICONS
@@ -13,6 +17,18 @@ function MailIcon({ className = "w-5 h-5" }) {
         strokeLinecap="round"
         strokeLinejoin="round"
         d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+      />
+    </svg>
+  );
+}
+
+function LockIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
       />
     </svg>
   );
@@ -53,10 +69,72 @@ function AppleIcon({ className = "w-5 h-5" }) {
 // MAIN LOGIN FORM COMPONENT
 // =========================================================
 export default function LoginForm() {
-  const [email, setEmail] = useState("");
+  const router = useRouter();
 
-  const handleSubmit = (e) => {
+  let reduxDispatch;
+  try {
+    reduxDispatch = useDispatch();
+  } catch (e) {
+    reduxDispatch = null;
+  }
+  const dispatch = reduxDispatch || store.dispatch;
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState(null);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isLoading) return;
+
+    setErrorMsg(null);
+
+    if (!email.trim() || !password) {
+      setErrorMsg("Email and password are required");
+      return;
+    }
+
+    if (password.length < 6) {
+      setErrorMsg("Password must be at least 6 characters");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const credentials = {
+        email: email.trim(),
+        password
+      };
+
+      const resultAction = await dispatch(login(credentials));
+
+      if (login.fulfilled.match(resultAction)) {
+        const user = resultAction.payload?.data?.user;
+        const role = user?.role;
+
+        if (role === "creator") {
+          router.push("/creator/dashboard");
+        } else if (role === "brand") {
+          router.push("/brand/dashboard");
+        } else if (role === "admin") {
+          router.push("/admin/dashboard");
+        } else {
+          setErrorMsg("Account role not recognized. Please contact support.");
+        }
+      } else {
+        const message =
+          resultAction.payload ||
+          resultAction.error?.message ||
+          "Invalid email or password";
+        setErrorMsg(message);
+      }
+    } catch (err) {
+      setErrorMsg("An unexpected error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -69,8 +147,8 @@ export default function LoginForm() {
           href="/"
           className="inline-flex items-center gap-1.5 font-serif text-2xl font-medium tracking-wide text-foreground"
         >
-          <span>CREATOR</span>
-          <span className="text-secondary text-2xl leading-none">•</span>
+          <span>CREATORLINK</span>
+          <span className="text-secondary text-2xl leading-none">✦</span>
         </Link>
       </div>
 
@@ -84,8 +162,15 @@ export default function LoginForm() {
             Welcome back
           </h1>
           <p className="text-xs sm:text-sm text-text-secondary font-sans mb-8">
-            Enter your email to sign in to your Creator account.
+            Enter your email to sign in to your CreatorLink account.
           </p>
+
+          {/* Error Alert */}
+          {errorMsg && (
+            <div className="mb-5 p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-sans font-medium leading-relaxed">
+              {errorMsg}
+            </div>
+          )}
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -104,10 +189,38 @@ export default function LoginForm() {
                 </span>
                 <input
                   id="email"
+                  name="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="example@maisonsynergie.com"
+                  placeholder="example@collabstr.com"
+                  required
+                  className="w-full pl-11 pr-4 py-3 rounded-xl bg-background border border-border-theme text-foreground placeholder:text-text-secondary/50 text-sm font-sans focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all"
+                />
+              </div>
+            </div>
+
+            {/* Password Field */}
+            <div className="space-y-2">
+              <label
+                htmlFor="password"
+                className="text-xs font-semibold uppercase tracking-wider text-foreground block font-sans"
+              >
+                Password
+              </label>
+
+              <div className="relative flex items-center">
+                <span className="absolute left-3.5 text-text-secondary pointer-events-none">
+                  <LockIcon />
+                </span>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  minLength={6}
                   required
                   className="w-full pl-11 pr-4 py-3 rounded-xl bg-background border border-border-theme text-foreground placeholder:text-text-secondary/50 text-sm font-sans focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all"
                 />
@@ -117,10 +230,20 @@ export default function LoginForm() {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-secondary hover:bg-secondary-dark text-white font-sans font-semibold text-sm tracking-wide shadow-xs hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 cursor-pointer"
+              disabled={isLoading}
+              className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-secondary hover:bg-secondary-dark disabled:opacity-60 disabled:cursor-not-allowed text-white font-sans font-semibold text-sm tracking-wide shadow-xs hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 cursor-pointer mt-2"
             >
-              <span>Log in with Email</span>
-              <span className="text-base leading-none">→</span>
+              {isLoading ? (
+                <span className="inline-flex items-center gap-2">
+                  <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  <span>Logging in...</span>
+                </span>
+              ) : (
+                <span>Log in with Email</span>
+              )}
             </button>
           </form>
 
@@ -173,7 +296,7 @@ export default function LoginForm() {
         <a href="#" className="hover:text-foreground transition-colors">
           Terms
         </a>
-        <span className="mx-2 text-border-theme">•</span>
+        <span className="mx-2 text-border-theme">✦</span>
         <a href="#" className="hover:text-foreground transition-colors">
           Privacy Policy
         </a>

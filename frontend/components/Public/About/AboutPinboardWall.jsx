@@ -11,7 +11,7 @@ const CARDS_DATA = [
     label: 'CREATOR PIN',
     title: '@elena.sound',
     rightMeta: '15m audio',
-    image: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=800&q=80',
+    image: 'https://res.cloudinary.com/atr5osne/image/upload/v1792054768/creatorlink/public/editorial/xdrgoikjqafozpvsbjiw.webp',
     isBw: true,
   },
   {
@@ -21,7 +21,7 @@ const CARDS_DATA = [
     label: 'BRAND STILL',
     title: 'Aura Botanicals',
     rightBadge: 'VERIFIED',
-    image: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=600&q=80',
+    image: 'https://res.cloudinary.com/atr5osne/image/upload/v1792054733/creatorlink/public/campaigns/cru8rs8ckm8iszusol6z.webp',
   },
   {
     id: 3,
@@ -30,7 +30,7 @@ const CARDS_DATA = [
     label: 'COLLABORATION',
     title: 'Maison × Clara',
     rightMeta: 'season release',
-    image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=600&q=80',
+    image: 'https://res.cloudinary.com/atr5osne/image/upload/v1792054773/creatorlink/public/editorial/vtopzfgvylqioq3g2fbt.webp',
   },
   {
     id: 4,
@@ -39,7 +39,7 @@ const CARDS_DATA = [
     label: 'CONTENT',
     title: 'Spatial Forms',
     rightMeta: 'ARCHIVE',
-    image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80',
+    image: 'https://res.cloudinary.com/atr5osne/image/upload/v1792054730/creatorlink/public/editorial/kerribvpkxjoqrecd56w.webp',
   },
   {
     id: 5,
@@ -48,7 +48,7 @@ const CARDS_DATA = [
     label: 'CONTENT BOARD',
     title: 'Tableau Studio',
     rightMeta: '4.8k saves',
-    image: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&q=80',
+    image: 'https://res.cloudinary.com/atr5osne/image/upload/v1792054714/creatorlink/public/editorial/se3wpecdot8jphnowzci.webp',
   },
   {
     id: 6,
@@ -57,7 +57,7 @@ const CARDS_DATA = [
     label: 'CREATOR BOARD',
     title: 'Nordic Journal',
     rightMeta: '6.2k saves',
-    image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80',
+    image: 'https://res.cloudinary.com/atr5osne/image/upload/v1792055800/creatorlink/public/editorial/bulw0yvv7mo8ioklrp5o.webp',
   },
   {
     id: 7,
@@ -66,7 +66,7 @@ const CARDS_DATA = [
     label: 'GUILD REVIEW',
     title: 'Contact Sheet N° 09',
     rightStatusDot: true,
-    image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=600&q=80',
+    image: 'https://res.cloudinary.com/atr5osne/image/upload/v1792056050/creatorlink/public/editorial/xus8b1zuskyogjb6g198.webp',
   },
   {
     id: 8,
@@ -75,7 +75,7 @@ const CARDS_DATA = [
     label: 'STUDIO ARCHIVE',
     title: 'Set 04 / Paris',
     rightStatusDot: true,
-    image: 'https://images.unsplash.com/photo-1579632652768-6cb9dcf85912?auto=format&fit=crop&w=600&q=80',
+    image: 'https://res.cloudinary.com/atr5osne/image/upload/v1792054717/creatorlink/public/editorial/ir7hxl0x2guq9j4yoxto.webp',
   },
 ];
 

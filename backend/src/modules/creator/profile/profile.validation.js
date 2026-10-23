@@ -9,6 +9,7 @@ const createProfileValidation = (req, res, next) => {
         category,
         location,
         profileImage,
+        isPublic,
         socialLinks
     } = req.body;
 
@@ -77,6 +78,18 @@ const createProfileValidation = (req, res, next) => {
             throw createApiError(
                 400,
                 "Profile image must be a string"
+            );
+        }
+    }
+
+
+    // Validate isPublic visibility flag.
+    if (isPublic !== undefined) {
+
+        if (typeof isPublic !== "boolean") {
+            throw createApiError(
+                400,
+                "isPublic must be a boolean"
             );
         }
     }
@@ -163,6 +176,7 @@ const updateProfileValidation = (req, res, next) => {
         "category",
         "location",
         "profileImage",
+        "isPublic",
         "socialLinks"
     ];
 

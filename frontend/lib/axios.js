@@ -1,15 +1,54 @@
 import axios from "axios";
 
 
+const getBaseURL = () => {
+    if (typeof window !== "undefined" && window.location.hostname) {
+        const host = window.location.hostname;
+        if (
+            host === "localhost" ||
+            host === "127.0.0.1" ||
+            host.startsWith("192.168.") ||
+            host.startsWith("10.") ||
+            host.startsWith("172.")
+        ) {
+            return `${window.location.protocol}//${host}:5005/api`;
+        }
+    }
+    return process.env.NEXT_PUBLIC_API_URL || "http://192.168.1.4:5005/api";
+};
+
 const axiosInstance = axios.create({
-
-    baseURL: process.env.NEXT_PUBLIC_API_URL,
-
+    baseURL: getBaseURL(),
     withCredentials: true,
-
     headers: {
         "Content-Type": "application/json"
     }
+});
+
+axiosInstance.interceptors.request.use((config) => {
+    if (typeof window !== "undefined" && window.location.hostname) {
+        const host = window.location.hostname;
+        if (
+            host === "localhost" ||
+            host === "127.0.0.1" ||
+            host.startsWith("192.168.") ||
+            host.startsWith("10.") ||
+            host.startsWith("172.")
+        ) {
+            if (config.baseURL && (config.baseURL.includes(":5005") || config.baseURL.includes("localhost"))) {
+                config.baseURL = `${window.location.protocol}//${host}:5005/api`;
+            }
+        }
+    }
+
+    if (typeof FormData !== "undefined" && config.data instanceof FormData) {
+        if (config.headers?.delete) {
+            config.headers.delete("Content-Type");
+        } else if (config.headers) {
+            delete config.headers["Content-Type"];
+        }
+    }
+    return config;
 });
 
 
@@ -56,9 +95,9 @@ axiosInstance.interceptors.response.use(
 
         // Do not try to refresh the refresh request itself.
         if (
-            originalRequest?.url?.includes(
-                "/auth/refresh"
-            )
+            originalRequest?.url?.includes("/auth/login") ||
+            originalRequest?.url?.includes("/auth/register") ||
+            originalRequest?.url?.includes("/auth/refresh")
         ) {
             return Promise.reject(error);
         }
@@ -112,3 +151,6 @@ axiosInstance.interceptors.response.use(
 
 
 export default axiosInstance;
+
+
+

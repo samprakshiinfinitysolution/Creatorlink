@@ -1,0 +1,1124 @@
+"use client";
+
+import React, { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchBrandWorkspaceById,
+  clearSuccessMessage,
+} from "@/redux/brand/workspace/workspace_slice";
+import {
+  createPaymentOrder,
+  verifyPayment,
+  reportFailedPayment,
+  fetchBrandPayments,
+  clearPaymentError,
+  clearPaymentSuccessMessage,
+} from "@/redux/brand/payments/payments_slice";
+import BrandSidebar from "@/components/brand/dashboard/BrandSidebar";
+import BrandHeader from "@/components/brand/dashboard/BrandHeader";
+import BrandReviewModal from "./BrandReviewModal";
+import {
+  fetchBrandWorkspaceReview,
+  clearWorkspaceReview,
+} from "@/redux/brand/reviews/reviews_slice";
+import BrandSubmitReviewModal from "@/components/brand/reviews/BrandSubmitReviewModal";
+
+// =========================================================
+// SVG ICONS
+// =========================================================
+function StarIcon({ className = "w-4 h-4", filled = true }) {
+  return (
+    <svg
+      className={className}
+      fill={filled ? "currentColor" : "none"}
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+      />
+    </svg>
+  );
+}
+
+function CreditCardIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+    </svg>
+  );
+}
+function ChevronLeftIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+    </svg>
+  );
+}
+
+function CalendarIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+    </svg>
+  );
+}
+
+function CheckIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+    </svg>
+  );
+}
+
+function RefreshIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+    </svg>
+  );
+}
+
+function LinkIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+    </svg>
+  );
+}
+
+function DocumentIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+    </svg>
+  );
+}
+
+function ExclamationIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+    </svg>
+  );
+}
+
+function CheckCircleIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  );
+}
+
+function ChatBubbleIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h.008v.008H8.625V12zm4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h.008v.008h-.008V12zm4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h.008v.008h-.008V12zM21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+    </svg>
+  );
+}
+
+// =========================================================
+// HELPER UTILITIES & STATUS BADGES
+// =========================================================
+const formatPrice = (amount, currency = "INR") => {
+  if (typeof amount !== "number" || isNaN(amount)) return "N/A";
+  const symbol = currency === "INR" ? "₹" : `${currency} `;
+  return `${symbol}${new Intl.NumberFormat("en-IN").format(amount)}`;
+};
+
+const formatDate = (dateString) => {
+  if (!dateString) return "N/A";
+  try {
+    return new Date(dateString).toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  } catch {
+    return dateString;
+  }
+};
+
+const formatDateTime = (dateString) => {
+  if (!dateString) return "N/A";
+  try {
+    return new Date(dateString).toLocaleString("en-IN", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return dateString;
+  }
+};
+
+const getStatusBadge = (status) => {
+  switch (status) {
+    case "in_progress":
+      return {
+        label: "In Progress",
+        color: "bg-amber-500/10 text-amber-500 border-amber-500/20",
+      };
+    case "submitted":
+      return {
+        label: "Submitted",
+        color: "bg-purple-500/10 text-purple-500 border-purple-500/20",
+      };
+    case "revision_requested":
+      return {
+        label: "Revision Requested",
+        color: "bg-amber-500/10 text-amber-500 border-amber-500/20",
+      };
+    case "completed":
+      return {
+        label: "Completed",
+        color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+      };
+    case "cancelled":
+      return {
+        label: "Cancelled",
+        color: "bg-red-500/10 text-red-500 border-red-500/20",
+      };
+    default:
+      return {
+        label: status ? status.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()) : "Unknown",
+        color: "bg-surface-muted text-text-secondary border-border-theme",
+      };
+  }
+};
+
+const getDeliverableStatusBadge = (status) => {
+  switch (status) {
+    case "pending":
+      return {
+        label: "Pending",
+        color: "bg-slate-500/10 text-slate-400 border-slate-500/20",
+      };
+    case "in_progress":
+      return {
+        label: "In Progress",
+        color: "bg-amber-500/10 text-amber-500 border-amber-500/20",
+      };
+    case "submitted":
+      return {
+        label: "Submitted",
+        color: "bg-purple-500/10 text-purple-500 border-purple-500/20",
+      };
+    case "revision_requested":
+      return {
+        label: "Revision Requested",
+        color: "bg-amber-500/10 text-amber-500 border-amber-500/20",
+      };
+    case "approved":
+      return {
+        label: "Approved",
+        color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+      };
+    case "completed":
+      return {
+        label: "Completed",
+        color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+      };
+    default:
+      return {
+        label: status ? status.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()) : "Pending",
+        color: "bg-surface-muted text-text-secondary border-border-theme",
+      };
+  }
+};
+
+export default function BrandWorkspaceDetail({ workspaceId }) {
+  const dispatch = useDispatch();
+  const { selectedWorkspace, loading, error, successMessage } = useSelector(
+    (state) => state.brandWorkspace
+  );
+  const {
+    payments: brandPaymentsList,
+    creatingOrder: isCreatingOrder,
+    verifyingPayment: isVerifyingPayment,
+    error: reduxPaymentError,
+    successMessage: reduxPaymentSuccess,
+  } = useSelector((state) => state.brandPayments);
+  const {
+    workspaceReview,
+    workspaceReviewWorkspaceId,
+    workspaceReviewLoading,
+    workspaceReviewError,
+  } = useSelector((state) => state.brandReviews || {});
+
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [isCreatorReviewModalOpen, setIsCreatorReviewModalOpen] = useState(false);
+  const [reviewMode, setReviewMode] = useState("approve"); // 'approve' | 'revision'
+  const [selectedDeliverable, setSelectedDeliverable] = useState(null);
+  const [paymentActionError, setPaymentActionError] = useState("");
+  const [paymentActionSuccess, setPaymentActionSuccess] = useState("");
+  const [isInitiatingPayment, setIsInitiatingPayment] = useState(false);
+
+  useEffect(() => {
+    if (workspaceId) {
+      dispatch(fetchBrandWorkspaceById(workspaceId));
+      dispatch(fetchBrandPayments({ workspace: workspaceId, limit: 10 }));
+      dispatch(fetchBrandWorkspaceReview(workspaceId));
+    }
+    return () => {
+      dispatch(clearWorkspaceReview());
+    };
+  }, [dispatch, workspaceId]);
+
+  const isCurrentWorkspaceReview = useMemo(() => {
+    if (!workspaceReview || !workspaceId) return false;
+
+    // Check if review has a workspace property (either populated object with _id, or raw ID string)
+    const revWs = workspaceReview.workspace;
+    if (revWs !== undefined && revWs !== null) {
+      const revWsId =
+        typeof revWs === "object"
+          ? (revWs._id ? String(revWs._id) : String(revWs))
+          : String(revWs);
+      return revWsId === String(workspaceId);
+    }
+
+    // Fallback: If workspace reference property is not directly exposed on the review object,
+    // verify against the tracked workspaceReviewWorkspaceId in Redux state
+    if (workspaceReviewWorkspaceId && String(workspaceReviewWorkspaceId) === String(workspaceId)) {
+      return true;
+    }
+
+    return false;
+  }, [workspaceReview, workspaceId, workspaceReviewWorkspaceId]);
+
+  const handleRetry = () => {
+    if (workspaceId) {
+      dispatch(fetchBrandWorkspaceById(workspaceId));
+      dispatch(fetchBrandPayments({ workspace: workspaceId, limit: 10 }));
+      dispatch(fetchBrandWorkspaceReview(workspaceId));
+    }
+  };
+
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      try {
+        if (typeof window !== "undefined" && window.Razorpay) {
+          resolve(true);
+          return;
+        }
+        const script = document.createElement("script");
+        script.src = "https://checkout.razorpay.com/v1/checkout.js";
+        script.async = true;
+        script.onload = () => resolve(true);
+        script.onerror = () => resolve(false);
+        document.body.appendChild(script);
+      } catch (err) {
+        resolve(false);
+      }
+    });
+  };
+
+  const handleInitiatePayment = async () => {
+    if (!selectedWorkspace || selectedWorkspace.status !== "completed") return;
+    if (isInitiatingPayment || isCreatingOrder || isVerifyingPayment) return;
+
+    setIsInitiatingPayment(true);
+    setPaymentActionError("");
+    setPaymentActionSuccess("");
+    dispatch(clearPaymentError());
+    dispatch(clearPaymentSuccessMessage());
+
+    let scriptLoaded = false;
+    try {
+      scriptLoaded = await loadRazorpayScript();
+    } catch (sdkErr) {
+      scriptLoaded = false;
+    }
+
+    if (!scriptLoaded) {
+      setPaymentActionError("Failed to load Razorpay Checkout SDK. Please check your internet connection.");
+      setIsInitiatingPayment(false);
+      return;
+    }
+
+    try {
+      const orderResult = await dispatch(createPaymentOrder(selectedWorkspace._id)).unwrap();
+      const orderData = orderResult?.data || orderResult;
+      const { razorpayOrder, keyId } = orderData || {};
+
+      if (!razorpayOrder?.id || !keyId) {
+        setPaymentActionError("Invalid payment order payload returned from server.");
+        setIsInitiatingPayment(false);
+        return;
+      }
+
+      const options = {
+        key: keyId,
+        amount: razorpayOrder.amount,
+        currency: razorpayOrder.currency || "INR",
+        name: "CreatorLink",
+        description: `Payment for workspace: ${selectedWorkspace.campaign?.title || "Campaign Collaboration"}`,
+        order_id: razorpayOrder.id,
+        handler: async function (response) {
+          try {
+            const verifyResult = await dispatch(
+              verifyPayment({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              })
+            ).unwrap();
+
+            setPaymentActionSuccess(verifyResult?.message || "Payment verified and completed successfully!");
+            dispatch(fetchBrandWorkspaceById(selectedWorkspace._id));
+            dispatch(fetchBrandPayments({ workspace: selectedWorkspace._id, limit: 10 }));
+          } catch (verifyErr) {
+            setPaymentActionError(typeof verifyErr === "string" ? verifyErr : "Payment verification failed.");
+          } finally {
+            setIsInitiatingPayment(false);
+          }
+        },
+        modal: {
+          ondismiss: function () {
+            setIsInitiatingPayment(false);
+            setPaymentActionError("Payment checkout was closed. You can resume payment at any time.");
+          },
+        },
+        prefill: {
+          name: selectedWorkspace.brand?.name || "",
+          email: selectedWorkspace.brand?.email || "",
+        },
+        theme: {
+          color: "#4F46E5",
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+
+      rzp.on("payment.failed", async function (response) {
+        try {
+          const failureMetadata = response?.error?.metadata || {};
+          const razorpay_payment_id = response?.error?.payment_id || failureMetadata.payment_id;
+          const razorpay_order_id = failureMetadata.order_id || razorpayOrder.id;
+
+          if (razorpay_payment_id && razorpay_order_id) {
+            await dispatch(
+              reportFailedPayment({
+                razorpay_payment_id,
+                razorpay_order_id,
+              })
+            ).unwrap();
+          }
+          setPaymentActionError(
+            response?.error?.description || "Payment attempt failed. You can retry payment at any time."
+          );
+          dispatch(fetchBrandWorkspaceById(selectedWorkspace._id));
+          dispatch(fetchBrandPayments({ workspace: selectedWorkspace._id, limit: 10 }));
+        } catch (reportErr) {
+          setPaymentActionError(
+            typeof reportErr === "string" ? reportErr : "Payment failed and could not be reported."
+          );
+        } finally {
+          setIsInitiatingPayment(false);
+        }
+      });
+
+      rzp.open();
+    } catch (err) {
+      setPaymentActionError(typeof err === "string" ? err : "Failed to initiate payment order.");
+      setIsInitiatingPayment(false);
+    }
+  };
+
+  const handleOpenReviewModal = (mode, deliverable = null) => {
+    setSelectedDeliverable(deliverable);
+    setReviewMode(mode);
+    setIsReviewModalOpen(true);
+  };
+
+  const handleCloseReviewModal = () => {
+    setIsReviewModalOpen(false);
+    setSelectedDeliverable(null);
+  };
+
+  const workspace = selectedWorkspace;
+  const badge = getStatusBadge(workspace?.status);
+  const campaign = workspace?.campaign;
+  const creator = workspace?.creator;
+  const service = workspace?.service;
+
+  // Identify whether an active/completed paid payment already exists for this workspace
+  const existingPaidPayment = (brandPaymentsList || []).find(
+    (p) =>
+      (p.workspace === workspace?._id || p.workspace?._id === workspace?._id) &&
+      p.status === "paid"
+  );
+  const isPaid = Boolean(existingPaidPayment);
+  const isPaymentProcessing = isInitiatingPayment || isCreatingOrder || isVerifyingPayment;
+  const bookingId =
+    typeof workspace?.booking === "object" && workspace?.booking !== null
+      ? workspace.booking._id
+      : workspace?.booking;
+  const deliverables = Array.isArray(workspace?.deliverables) ? workspace.deliverables : [];
+  const submissions = Array.isArray(workspace?.submissions) ? workspace.submissions : [];
+  const revisions = Array.isArray(workspace?.revisions) ? workspace.revisions : [];
+
+
+  const activeDeliverables = deliverables.filter(
+    (item) =>
+      typeof item === "object" &&
+      item !== null &&
+      (item.status === "submitted" ||
+        item.status === "revision_requested" ||
+        item.status === "approved" ||
+        item.status === "completed")
+  );
+
+  const pendingDeliverables = deliverables.filter(
+    (item) =>
+      typeof item === "string" ||
+      item === null ||
+      !item.status ||
+      item.status === "pending" ||
+      item.status === "in_progress"
+  );
+
+  const renderDeliverableCard = (item, idx) => {
+    const isObject = typeof item === "object" && item !== null;
+    const deliverableId = isObject ? item._id : idx;
+    const title = isObject ? item.title || "Deliverable" : item;
+    const description = isObject ? item.description : null;
+    const dueDate = isObject ? item.dueDate : null;
+    const status = isObject ? item.status || "pending" : "pending";
+    const delBadge = getDeliverableStatusBadge(status);
+    const submission = isObject ? item.submission : null;
+    const isReviewable = status === "submitted" || status === "revision_requested";
+
+    return (
+      <div
+        key={deliverableId || idx}
+        className="bg-surface-muted/40 hover:bg-surface-muted/60 border border-border-theme/60 rounded-xl p-3.5 sm:p-4 space-y-2.5 transition-all"
+      >
+        <div className="space-y-1.5">
+          <div className="flex items-start justify-between gap-2 flex-wrap">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-semibold text-xs sm:text-sm text-foreground">
+                {title}
+              </span>
+              <span
+                className={`px-2 py-0.5 rounded-full text-[9.5px] font-bold border uppercase tracking-wider ${delBadge.color}`}
+              >
+                {delBadge.label}
+              </span>
+            </div>
+            {dueDate && (
+              <span className="text-[10.5px] text-text-secondary flex items-center gap-1 shrink-0">
+                <CalendarIcon className="w-3 h-3" />
+                Due: {formatDate(dueDate)}
+              </span>
+            )}
+          </div>
+
+          {description && (
+            <p className="text-xs text-text-secondary leading-relaxed">
+              {description}
+            </p>
+          )}
+
+          {/* Submission Details if available */}
+          {submission && (
+            <div className="bg-surface p-3 rounded-lg border border-border-theme/50 space-y-1.5 text-xs mt-2">
+              <div className="flex items-center justify-between text-[10px] text-text-secondary font-semibold">
+                <span className="uppercase tracking-wider">Submitted Work</span>
+                {submission.submittedAt && (
+                  <span>{formatDateTime(submission.submittedAt)}</span>
+                )}
+              </div>
+
+              {submission.title && (
+                <p className="font-semibold text-foreground text-xs">{submission.title}</p>
+              )}
+
+              {submission.notes && (
+                <p className="text-text-secondary leading-relaxed text-[11px]">
+                  {submission.notes}
+                </p>
+              )}
+
+              <div className="flex flex-wrap gap-2.5 pt-1">
+                {submission.link && (
+                  <a
+                    href={submission.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-[11px] text-secondary hover:underline font-semibold"
+                  >
+                    <LinkIcon className="w-3 h-3" />
+                    <span>View Content Link</span>
+                  </a>
+                )}
+                {submission.fileUrl && (
+                  <a
+                    href={submission.fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-[11px] text-secondary hover:underline font-semibold"
+                  >
+                    <DocumentIcon className="w-3 h-3" />
+                    <span>View Asset File</span>
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Review Actions */}
+        {isReviewable && (
+          <div className="pt-2.5 border-t border-border-theme/40 flex items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => handleOpenReviewModal("revision", isObject ? item : null)}
+              className="px-3 py-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 text-xs font-semibold transition-colors cursor-pointer"
+            >
+              Request Revision
+            </button>
+            <button
+              type="button"
+              onClick={() => handleOpenReviewModal("approve", isObject ? item : null)}
+              className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition-colors shadow-xs cursor-pointer"
+            >
+              <CheckIcon className="w-3.5 h-3.5" />
+              <span>Approve</span>
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
+      {/* Sidebar */}
+      <BrandSidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
+
+      {/* Main Container Offset by Desktop Sidebar */}
+      <div className="flex-1 lg:ml-64 flex flex-col min-w-0">
+        {/* Header */}
+        <BrandHeader setMobileOpen={setMobileOpen} />
+
+        {/* Page Content */}
+        <main className="px-3 sm:px-5 lg:px-6 py-4 sm:py-5 space-y-4 sm:space-y-5 flex-1 max-w-[1440px] w-full mx-auto min-w-0">
+          {/* Top Navigation */}
+          <div>
+            <Link
+              href="/brand/workspace"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-text-secondary hover:text-foreground transition-colors"
+            >
+              <ChevronLeftIcon />
+              <span>Back to Workspaces</span>
+            </Link>
+          </div>
+
+          {/* Success Banner */}
+          {successMessage && (
+            <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 p-4 rounded-2xl text-xs font-medium flex items-center justify-between gap-4 shadow-xs">
+              <div className="flex items-center gap-2">
+                <CheckCircleIcon className="w-4 h-4 shrink-0" />
+                <span>{successMessage}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => dispatch(clearSuccessMessage())}
+                className="text-text-secondary hover:text-foreground text-xs underline cursor-pointer"
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
+
+          {/* Error Banner */}
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/30 text-red-500 p-4 rounded-2xl text-xs font-medium flex items-center justify-between gap-4 shadow-xs">
+              <span>{typeof error === "string" ? error : "Failed to load workspace details."}</span>
+              <button
+                type="button"
+                onClick={handleRetry}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500 text-white font-semibold hover:bg-red-600 transition-colors cursor-pointer shrink-0"
+              >
+                <RefreshIcon className="w-3.5 h-3.5" />
+                <span>Retry</span>
+              </button>
+            </div>
+          )}
+
+          {/* Loading Skeleton */}
+          {loading && !workspace ? (
+            <div className="space-y-6 animate-pulse">
+              <div className="bg-surface border border-border-theme rounded-2xl p-6 space-y-4">
+                <div className="h-6 bg-surface-muted rounded-md w-1/3" />
+                <div className="h-4 bg-surface-muted rounded-md w-1/4" />
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="h-12 bg-surface-muted rounded-xl" />
+                  ))}
+                </div>
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2 h-64 bg-surface border border-border-theme rounded-2xl p-6" />
+                <div className="h-64 bg-surface border border-border-theme rounded-2xl p-6" />
+              </div>
+            </div>
+          ) : !loading && !workspace ? (
+            /* Not Found State */
+            <div className="bg-surface border border-border-theme rounded-2xl p-10 text-center space-y-4">
+              <div className="w-16 h-16 rounded-2xl bg-secondary/8 text-[#252525] dark:text-white flex items-center justify-center mx-auto border border-secondary/15">
+                <ExclamationIcon className="w-8 h-8" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="font-serif font-semibold text-lg text-foreground">
+                  Workspace Not Found
+                </h3>
+                <p className="text-xs text-text-secondary max-w-sm mx-auto">
+                  The requested workspace does not exist or you do not have permission to view it.
+                </p>
+              </div>
+              <div className="pt-2">
+                <Link
+                  href="/brand/workspace"
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#252525] hover:bg-[#111111] text-white text-xs font-semibold transition-all cursor-pointer shadow-xs"
+                >
+                  <span>Back to Workspaces</span>
+                </Link>
+              </div>
+            </div>
+          ) : (
+            /* Workspace Detail Content */
+            <div className="space-y-4 sm:space-y-5">
+              {/* Header / Summary Card */}
+              <div className="bg-surface border border-border-theme rounded-2xl p-4 sm:p-5 shadow-xs space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span
+                        className={`px-2.5 py-0.5 rounded-full text-[9.5px] font-bold border uppercase tracking-wider ${badge.color}`}
+                      >
+                        {badge.label}
+                      </span>
+                      {campaign?.category && (
+                        <span className="px-2.5 py-0.5 rounded-full text-[9.5px] font-semibold bg-surface-muted text-text-secondary border border-border-theme">
+                          {campaign.category}
+                        </span>
+                      )}
+                    </div>
+                    <h1 className="font-serif font-medium text-xl sm:text-2xl text-foreground mt-1.5 tracking-tight">
+                      {campaign?.title || "Campaign Workspace"}
+                    </h1>
+                    <div className="text-xs text-text-secondary mt-1 space-y-0.5">
+                      <p>
+                        Creator: <span className="text-foreground font-semibold">{creator?.name || "Creator Partner"}</span>
+                        {creator?.email && <span className="text-text-secondary"> ({creator.email})</span>}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 shrink-0 sm:self-start">
+                    {bookingId && (
+                      <Link
+                        href={`/brand/messages?bookingId=${bookingId}`}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#252525] hover:bg-[#111111] text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+                      >
+                        <ChatBubbleIcon className="w-4 h-4" />
+                        <span>Message Creator</span>
+                      </Link>
+                    )}
+
+                    {/* Payment Action / Paid Badge */}
+                    {isPaid ? (
+                      <div className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-xs font-semibold">
+                        <CheckCircleIcon className="w-4 h-4" />
+                        <span>Payment Completed ({formatPrice(existingPaidPayment.amount, existingPaidPayment.currency)})</span>
+                      </div>
+                    ) : workspace.status === "completed" ? (
+                      <button
+                        type="button"
+                        onClick={handleInitiatePayment}
+                        disabled={isPaymentProcessing}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isPaymentProcessing ? (
+                          <>
+                            <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            <span>Processing Payment...</span>
+                          </>
+                        ) : (
+                          <>
+                            <CreditCardIcon className="w-4 h-4" />
+                            <span>Pay Now (Razorpay Test)</span>
+                          </>
+                        )}
+                      </button>
+                    ) : null}
+
+                    {/* Review Creator Action / Reviewed Status - Only when workspace is completed */}
+                    {workspace.status === "completed" && (
+                      workspaceReviewLoading || (workspaceReviewWorkspaceId && workspaceReviewWorkspaceId !== workspaceId?.toString()) ? (
+                        <div className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-muted text-text-secondary border border-border-theme text-xs font-medium">
+                          <RefreshIcon className="w-3.5 h-3.5 animate-spin" />
+                          <span>Checking Review...</span>
+                        </div>
+                      ) : workspaceReviewError && !isCurrentWorkspaceReview ? (
+                        <div
+                          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-red-500/10 text-red-500 border border-red-500/20 text-xs font-semibold"
+                          title={typeof workspaceReviewError === "string" ? workspaceReviewError : "Review status unavailable"}
+                        >
+                          <ExclamationIcon className="w-4 h-4 text-red-500 shrink-0" />
+                          <span>Review Unavailable</span>
+                        </div>
+                      ) : isCurrentWorkspaceReview ? (
+                        <div
+                          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-xs font-semibold"
+                          title={workspaceReview.comment ? `Feedback: "${workspaceReview.comment}"` : "Rated by you"}
+                        >
+                          <StarIcon className="w-4 h-4 text-amber-500" filled={true} />
+                          <span>Reviewed ({workspaceReview.rating}★)</span>
+                        </div>
+                      ) : workspaceReviewWorkspaceId === workspaceId?.toString() ? (
+                        <button
+                          type="button"
+                          onClick={() => setIsCreatorReviewModalOpen(true)}
+                          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+                        >
+                          <StarIcon className="w-4 h-4 text-white" filled={true} />
+                          <span>Review Creator</span>
+                        </button>
+                      ) : (
+                        <div className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-muted text-text-secondary border border-border-theme text-xs font-medium">
+                          <RefreshIcon className="w-3.5 h-3.5 animate-spin" />
+                          <span>Checking Review...</span>
+                        </div>
+                      )
+                    )}
+                  </div>
+                </div>
+
+                {/* Review Specific Lookup Error Banner */}
+                {workspaceReviewError && workspace.status === "completed" && !isCurrentWorkspaceReview && (
+                  <div className="bg-red-500/10 border border-red-500/30 text-red-500 p-4 rounded-xl text-xs font-medium flex items-center justify-between gap-4">
+                    <span>
+                      {typeof workspaceReviewError === "string"
+                        ? workspaceReviewError
+                        : "Failed to verify review status for this workspace."}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => dispatch(fetchBrandWorkspaceReview(workspaceId))}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500 text-white text-xs font-semibold hover:bg-red-600 transition-colors cursor-pointer shrink-0"
+                    >
+                      <RefreshIcon className="w-3.5 h-3.5" />
+                      <span>Retry</span>
+                    </button>
+                  </div>
+                )}
+
+                {/* Payment Specific Action Error / Success Banners */}
+                {(paymentActionError || reduxPaymentError) && (
+                  <div className="bg-red-500/10 border border-red-500/30 text-red-500 p-4 rounded-xl text-xs font-medium flex items-center justify-between gap-4">
+                    <span>{paymentActionError || (typeof reduxPaymentError === "string" ? reduxPaymentError : "Payment failed.")}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPaymentActionError("");
+                        dispatch(clearPaymentError());
+                      }}
+                      className="text-xs font-semibold underline cursor-pointer"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
+                )}
+
+                {(paymentActionSuccess || reduxPaymentSuccess) && (
+                  <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 p-4 rounded-xl text-xs font-medium flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-2">
+                      <CheckCircleIcon className="w-4 h-4 shrink-0" />
+                      <span>{paymentActionSuccess || reduxPaymentSuccess}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPaymentActionSuccess("");
+                        dispatch(clearPaymentSuccessMessage());
+                      }}
+                      className="text-xs font-semibold underline cursor-pointer"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
+                )}
+
+                {/* Key Summary Stats */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 pt-3.5 border-t border-border-theme">
+                  <div className="bg-surface-muted/50 p-2.5 sm:p-3 rounded-xl border border-border-theme/40">
+                    <span className="text-[10px] font-semibold text-text-secondary uppercase tracking-wider block">
+                      Agreed Price
+                    </span>
+                    <span className="font-sans font-bold text-sm sm:text-base text-foreground mt-0.5 block">
+                      {formatPrice(workspace.agreedPrice, workspace.currency)}
+                    </span>
+                  </div>
+
+                  <div className="bg-surface-muted/50 p-2.5 sm:p-3 rounded-xl border border-border-theme/40">
+                    <span className="text-[10px] font-semibold text-text-secondary uppercase tracking-wider block flex items-center gap-1">
+                      <CalendarIcon className="w-3 h-3" />
+                      Deadline
+                    </span>
+                    <span className="font-medium text-xs sm:text-sm text-foreground mt-0.5 block">
+                      {formatDate(workspace.deadline)}
+                    </span>
+                  </div>
+
+                  <div className="bg-surface-muted/50 p-2.5 sm:p-3 rounded-xl border border-border-theme/40">
+                    <span className="text-[10px] font-semibold text-text-secondary uppercase tracking-wider block">
+                      Platform
+                    </span>
+                    <span className="font-medium text-xs sm:text-sm text-foreground mt-0.5 capitalize block">
+                      {campaign?.platform || service?.platform || "General"}
+                    </span>
+                  </div>
+
+                  <div className="bg-surface-muted/50 p-2.5 sm:p-3 rounded-xl border border-border-theme/40">
+                    <span className="text-[10px] font-semibold text-text-secondary uppercase tracking-wider block">
+                      Selected Service
+                    </span>
+                    <span className="font-medium text-xs sm:text-sm text-foreground mt-0.5 line-clamp-1 block">
+                      {service?.title || "Custom Package"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Main Content Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+                {/* Left Column: Deliverables (lg:col-span-7) */}
+                <div className="lg:col-span-7 space-y-4">
+                  {/* Campaign Deliverables Section */}
+                  <div className="bg-surface border border-border-theme rounded-2xl p-4 sm:p-5 space-y-4 shadow-xs">
+                    <div className="flex items-center justify-between pb-3 border-b border-border-theme">
+                      <div className="flex items-center gap-2">
+                        <h2 className="font-serif font-semibold text-base sm:text-lg text-foreground">
+                          Campaign Deliverables
+                        </h2>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-secondary/10 text-secondary border border-secondary/20">
+                          {deliverables.length} Total
+                        </span>
+                      </div>
+                    </div>
+
+                    {deliverables.length > 0 ? (
+                      <div className="space-y-4">
+                        {/* Active / Reviewable Group */}
+                        {activeDeliverables.length > 0 && (
+                          <div className="space-y-2.5">
+                            <h3 className="text-[11px] font-bold text-text-secondary uppercase tracking-wider">
+                              Reviewable & Active Deliverables ({activeDeliverables.length})
+                            </h3>
+                            <div className="space-y-3">
+                              {activeDeliverables.map((item, idx) => renderDeliverableCard(item, idx))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Pending Group */}
+                        {pendingDeliverables.length > 0 && (
+                          <div className="space-y-2.5">
+                            {activeDeliverables.length > 0 && (
+                              <h3 className="text-[11px] font-bold text-text-secondary uppercase tracking-wider pt-3 border-t border-border-theme">
+                                Pending Deliverables ({pendingDeliverables.length})
+                              </h3>
+                            )}
+                            <div className="space-y-3">
+                              {pendingDeliverables.map((item, idx) => renderDeliverableCard(item, idx))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-text-secondary">No specific deliverables listed.</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Right Column: Submitted Work, Campaign Brief & Revisions (lg:col-span-5) */}
+                <div className="lg:col-span-5 space-y-4">
+                  {/* Submitted Work Section */}
+                  <div className="bg-surface border border-border-theme rounded-2xl p-4 sm:p-5 space-y-3 shadow-xs">
+                    <div className="flex items-center justify-between pb-2.5 border-b border-border-theme">
+                      <h2 className="font-serif font-semibold text-sm sm:text-base text-foreground">
+                        Submitted Work
+                      </h2>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-surface-muted text-text-secondary border border-border-theme">
+                        {submissions.length} Total
+                      </span>
+                    </div>
+
+                    {submissions.length === 0 ? (
+                      <div className="bg-surface-muted/30 border border-border-theme/50 rounded-xl p-4 text-center">
+                        <p className="text-xs text-text-secondary font-medium">
+                          No work submitted yet.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2.5">
+                        {submissions.map((sub, idx) => (
+                          <div
+                            key={sub._id || idx}
+                            className="bg-surface-muted/50 border border-border-theme/60 p-3 rounded-xl space-y-1.5 text-xs"
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="font-semibold text-foreground line-clamp-1">
+                                {sub.title || `Submission #${idx + 1}`}
+                              </span>
+                              <span className="text-[10px] text-text-secondary shrink-0">
+                                {formatDateTime(sub.submittedAt)}
+                              </span>
+                            </div>
+
+                            {sub.notes && (
+                              <p className="text-text-secondary bg-surface p-2.5 rounded-lg border border-border-theme/50 line-clamp-3">
+                                {sub.notes}
+                              </p>
+                            )}
+
+                            <div className="flex flex-wrap gap-2 pt-1">
+                              {sub.link && (
+                                <a
+                                  href={sub.link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1 text-[11px] text-secondary hover:underline font-semibold"
+                                >
+                                  <LinkIcon className="w-3 h-3" />
+                                  <span>View Content Link</span>
+                                </a>
+                              )}
+                              {sub.fileUrl && (
+                                <a
+                                  href={sub.fileUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1 text-[11px] text-secondary hover:underline font-semibold"
+                                >
+                                  <DocumentIcon className="w-3 h-3" />
+                                  <span>View Asset File</span>
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Campaign & Service Details */}
+                  <div className="bg-surface border border-border-theme rounded-2xl p-4 sm:p-5 space-y-3.5 shadow-xs">
+                    <div className="pb-2 border-b border-border-theme">
+                      <h2 className="font-serif font-semibold text-sm sm:text-base text-foreground">
+                        Campaign & Service Brief
+                      </h2>
+                    </div>
+                    {campaign?.description && (
+                      <div className="space-y-1">
+                        <span className="text-xs font-semibold text-foreground block">
+                          Campaign Overview:
+                        </span>
+                        <p className="text-xs text-text-secondary whitespace-pre-line leading-relaxed">
+                          {campaign.description}
+                        </p>
+                      </div>
+                    )}
+                    {service?.description && (
+                      <div className="space-y-1 pt-2.5 border-t border-border-theme/60">
+                        <span className="text-xs font-semibold text-foreground block">
+                          Service Package Details:
+                        </span>
+                        <p className="text-xs text-text-secondary whitespace-pre-line leading-relaxed">
+                          {service.description}
+                        </p>
+                      </div>
+                    )}
+                    {service?.deliveryTime && (
+                      <div className="pt-2 border-t border-border-theme/60 text-xs text-text-secondary flex items-center justify-between">
+                        <span>Delivery Time:</span>
+                        <span className="font-semibold text-foreground">{service.deliveryTime} Days</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Revision History Section */}
+                  {revisions.length > 0 && (
+                    <div className="bg-surface border border-border-theme rounded-2xl p-4 sm:p-5 space-y-3 shadow-xs">
+                      <div className="flex items-center justify-between pb-2 border-b border-border-theme">
+                        <h2 className="font-serif font-semibold text-sm sm:text-base text-foreground">
+                          Revision History
+                        </h2>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                          {revisions.length} Total
+                        </span>
+                      </div>
+                      <div className="space-y-2.5">
+                        {revisions.map((rev, idx) => (
+                          <div
+                            key={rev._id || idx}
+                            className="bg-amber-500/5 border border-amber-500/20 p-3 rounded-xl space-y-1 text-xs"
+                          >
+                            <div className="flex items-center justify-between text-[10px] text-amber-500 font-semibold">
+                              <span>Revision Request #{idx + 1}</span>
+                              <span>{formatDateTime(rev.requestedAt)}</span>
+                            </div>
+                            <p className="text-foreground leading-relaxed">
+                              &ldquo;{rev.feedback}&rdquo;
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
+
+      {/* Deliverable Review Modal */}
+      <BrandReviewModal
+        isOpen={isReviewModalOpen}
+        onClose={handleCloseReviewModal}
+        workspaceId={workspaceId}
+        targetDeliverable={selectedDeliverable}
+        initialMode={reviewMode}
+      />
+
+      {/* Creator Rating & Review Modal */}
+      <BrandSubmitReviewModal
+        isOpen={isCreatorReviewModalOpen}
+        onClose={() => setIsCreatorReviewModalOpen(false)}
+        workspaceId={workspace?._id}
+        creatorName={creator?.name}
+        campaignTitle={campaign?.title}
+        onSuccess={() => {
+          if (workspace?._id) {
+            dispatch(fetchBrandWorkspaceReview(workspace._id));
+          }
+        }}
+      />
+    </div>
+  );
+}

@@ -185,7 +185,7 @@ export default function PricingWorkflow() {
                   
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 rounded-xl p-3.5 flex items-center gap-3">
-                      <Image src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80" alt="Aarohi Mehta" width={40} height={40} className="w-10 h-10 rounded-full object-cover" />
+                      <Image src="https://res.cloudinary.com/atr5osne/image/upload/v1792054698/creatorlink/public/avatars/gye9m9prpdv81gc9ipkp.webp" alt="Aarohi Mehta" width={40} height={40} className="w-10 h-10 rounded-full object-cover" />
                       <div>
                         <span className="font-sans font-semibold text-xs text-slate-900 dark:text-foreground block">
                           Aarohi Mehta
@@ -197,7 +197,7 @@ export default function PricingWorkflow() {
                     </div>
 
                     <div className="bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 rounded-xl p-3.5 flex items-center gap-3">
-                      <Image src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=120&q=80" alt="Camille Dupont" width={40} height={40} className="w-10 h-10 rounded-full object-cover" />
+                      <Image src="https://res.cloudinary.com/atr5osne/image/upload/v1792054701/creatorlink/public/avatars/qooau1mzc4okikpsrqri.webp" alt="Camille Dupont" width={40} height={40} className="w-10 h-10 rounded-full object-cover" />
                       <div>
                         <span className="font-sans font-semibold text-xs text-slate-900 dark:text-foreground block">
                           Camille Dupont
@@ -209,7 +209,7 @@ export default function PricingWorkflow() {
                     </div>
 
                     <div className="bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 rounded-xl p-3.5 flex items-center gap-3">
-                      <Image src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=120&q=80" alt="Sora Lin" width={40} height={40} className="w-10 h-10 rounded-full object-cover" />
+                      <Image src="https://res.cloudinary.com/atr5osne/image/upload/v1792054710/creatorlink/public/avatars/ra9dirifievmiawd57yl.webp" alt="Sora Lin" width={40} height={40} className="w-10 h-10 rounded-full object-cover" />
                       <div>
                         <span className="font-sans font-semibold text-xs text-slate-900 dark:text-foreground block">
                           Sora Lin

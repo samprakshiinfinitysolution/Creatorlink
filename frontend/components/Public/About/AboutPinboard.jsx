@@ -64,7 +64,7 @@ export default function AboutPinboard() {
               {/* Main Image with Overlay Badge */}
               <div className="relative rounded-xl overflow-hidden aspect-[16/10] h-44 sm:h-52 bg-surface-muted mb-4">
                 <Image
-                  src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80"
+                  src="https://res.cloudinary.com/atr5osne/image/upload/v1792054730/creatorlink/public/editorial/kerribvpkxjoqrecd56w.webp"
                   alt="Maison Nord Autumn Scope"
                   fill
                   className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover/card:scale-105"
@@ -128,7 +128,7 @@ export default function AboutPinboard() {
               {/* Main Image with Overlay Badge */}
               <div className="relative rounded-xl overflow-hidden aspect-[16/10] h-44 sm:h-52 bg-surface-muted mb-4">
                 <Image
-                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80"
+                  src="https://res.cloudinary.com/atr5osne/image/upload/v1792054698/creatorlink/public/avatars/gye9m9prpdv81gc9ipkp.webp"
                   alt="Soren K Copenhagen"
                   fill
                   className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover/card:scale-105"

@@ -1,11 +1,27 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useDispatch } from "react-redux";
+import store from "@/redux/store";
+import { register } from "@/redux/auth/auth_slice";
 
 // =========================================================
 // SVG ICONS
 // =========================================================
+function UserIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+      />
+    </svg>
+  );
+}
+
 function MailIcon({ className = "w-5 h-5" }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
@@ -13,6 +29,18 @@ function MailIcon({ className = "w-5 h-5" }) {
         strokeLinecap="round"
         strokeLinejoin="round"
         d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+      />
+    </svg>
+  );
+}
+
+function LockIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
       />
     </svg>
   );
@@ -53,10 +81,71 @@ function AppleIcon({ className = "w-5 h-5" }) {
 // MAIN SIGNUP FORM COMPONENT
 // =========================================================
 export default function SignupForm() {
-  const [email, setEmail] = useState("");
+  const router = useRouter();
 
-  const handleSubmit = (e) => {
+  let reduxDispatch;
+  try {
+    reduxDispatch = useDispatch();
+  } catch (e) {
+    reduxDispatch = null;
+  }
+  const dispatch = reduxDispatch || store.dispatch;
+
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState("creator");
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState(null);
+  const [successMsg, setSuccessMsg] = useState(null);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isLoading) return;
+
+    setErrorMsg(null);
+    setSuccessMsg(null);
+
+    if (!name.trim() || !email.trim() || !password) {
+      setErrorMsg("All fields are required");
+      return;
+    }
+
+    if (password.length < 6) {
+      setErrorMsg("Password must be at least 6 characters");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const userData = {
+        name: name.trim(),
+        email: email.trim(),
+        password,
+        role
+      };
+
+      const resultAction = await dispatch(register(userData));
+
+      if (register.fulfilled.match(resultAction)) {
+        setSuccessMsg("Account registered successfully! Redirecting to login...");
+        setTimeout(() => {
+          router.push("/login");
+        }, 1500);
+      } else {
+        const message =
+          resultAction.payload ||
+          resultAction.error?.message ||
+          "Registration failed. Please try again.";
+        setErrorMsg(message);
+      }
+    } catch (err) {
+      setErrorMsg("An unexpected error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -70,7 +159,7 @@ export default function SignupForm() {
           className="inline-flex items-center gap-1.5 font-serif text-2xl font-medium tracking-wide text-foreground"
         >
           <span>CREATORLINK</span>
-          <span className="text-secondary text-2xl leading-none">•</span>
+          <span className="text-secondary text-2xl leading-none">✦</span>
         </Link>
       </div>
 
@@ -81,11 +170,50 @@ export default function SignupForm() {
         <div className="bg-surface text-foreground rounded-2xl sm:rounded-3xl p-6 sm:p-10 border border-border-theme shadow-sm transition-colors duration-300">
           {/* Card Header */}
           <h1 className="text-2xl sm:text-3xl font-serif font-medium tracking-tight text-foreground mb-6">
-            Join Creators
+            Join CreatorLink
           </h1>
+
+          {/* Error & Success Feedback Alerts */}
+          {errorMsg && (
+            <div className="mb-5 p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-sans font-medium leading-relaxed">
+              {errorMsg}
+            </div>
+          )}
+
+          {successMsg && (
+            <div className="mb-5 p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-xs font-sans font-medium leading-relaxed">
+              {successMsg}
+            </div>
+          )}
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Name Field */}
+            <div className="space-y-2">
+              <label
+                htmlFor="name"
+                className="text-xs font-semibold uppercase tracking-wider text-foreground block font-sans"
+              >
+                Name
+              </label>
+
+              <div className="relative flex items-center">
+                <span className="absolute left-3.5 text-text-secondary pointer-events-none">
+                  <UserIcon />
+                </span>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Full Name"
+                  required
+                  className="w-full pl-11 pr-4 py-3 rounded-xl bg-background border border-border-theme text-foreground placeholder:text-text-secondary/50 text-sm font-sans focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all"
+                />
+              </div>
+            </div>
+
             {/* Email Field */}
             <div className="space-y-2">
               <label
@@ -112,12 +240,85 @@ export default function SignupForm() {
               </div>
             </div>
 
+            {/* Password Field */}
+            <div className="space-y-2">
+              <label
+                htmlFor="password"
+                className="text-xs font-semibold uppercase tracking-wider text-foreground block font-sans"
+              >
+                Password
+              </label>
+
+              <div className="relative flex items-center">
+                <span className="absolute left-3.5 text-text-secondary pointer-events-none">
+                  <LockIcon />
+                </span>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  minLength={6}
+                  required
+                  className="w-full pl-11 pr-4 py-3 rounded-xl bg-background border border-border-theme text-foreground placeholder:text-text-secondary/50 text-sm font-sans focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all"
+                />
+              </div>
+            </div>
+
+            {/* Role Selection */}
+            <div className="space-y-2">
+              <label className="text-xs font-semibold uppercase tracking-wider text-foreground block font-sans">
+                Account Type
+              </label>
+              <div className="grid grid-cols-2 gap-3" role="radiogroup" aria-label="Account Type">
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={role === "creator"}
+                  onClick={() => setRole("creator")}
+                  className={`px-4 py-2.5 rounded-xl text-xs font-sans font-semibold border text-center transition-all cursor-pointer ${
+                    role === "creator"
+                      ? "bg-secondary/10 border-secondary text-secondary shadow-xs"
+                      : "bg-background border-border-theme text-text-secondary hover:text-foreground hover:bg-surface-muted"
+                  }`}
+                >
+                  Creator
+                </button>
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={role === "brand"}
+                  onClick={() => setRole("brand")}
+                  className={`px-4 py-2.5 rounded-xl text-xs font-sans font-semibold border text-center transition-all cursor-pointer ${
+                    role === "brand"
+                      ? "bg-secondary/10 border-secondary text-secondary shadow-xs"
+                      : "bg-background border-border-theme text-text-secondary hover:text-foreground hover:bg-surface-muted"
+                  }`}
+                >
+                  Brand
+                </button>
+              </div>
+            </div>
+
             {/* Primary Submit Button */}
             <button
               type="submit"
-              className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-secondary hover:bg-secondary-dark text-white font-sans font-semibold text-sm tracking-wide shadow-xs hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 cursor-pointer"
+              disabled={isLoading}
+              className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-secondary hover:bg-secondary-dark disabled:opacity-60 disabled:cursor-not-allowed text-white font-sans font-semibold text-sm tracking-wide shadow-xs hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 cursor-pointer mt-2"
             >
-              <span>Sign Up</span>
+              {isLoading ? (
+                <span className="inline-flex items-center gap-2">
+                  <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  <span>Creating Account...</span>
+                </span>
+              ) : (
+                <span>Sign Up</span>
+              )}
             </button>
           </form>
 

@@ -4,15 +4,69 @@ import authRoutes from "../modules/auth/auth.route.js";
 import creatorProfileRoutes from "../modules/creator/profile/profile.route.js";
 import creatorPortfolioRoutes from "../modules/creator/portfolio/portfolio.route.js";
 import creatorServiceRoutes from "../modules/creator/services/services.route.js";
+import creatorCampaignRoutes from "../modules/creator/campaigns/campaigns.route.js";
+import creatorDashboardRoutes from "../modules/creator/dashboard/dashboard.route.js";
+import brandProfileRoutes from "../modules/brand/profile/profile.route.js";
+import campaignRoutes from "../modules/brand/campaigns/campaign.route.js";
+import brandDashboardRoutes from "../modules/brand/dashboard/dashboard.route.js";
+import {
+    creatorBookingRouter,
+    brandBookingRouter
+} from "../modules/booking/booking.route.js";
+import {
+    creatorWorkspaceRouter,
+    brandWorkspaceRouter
+} from "../modules/workspace/workspace.route.js";
+import {
+    creatorMessagesRouter,
+    brandMessagesRouter
+} from "../modules/messages/messages.route.js";
+import {
+    creatorPaymentRouter,
+    brandPaymentRouter
+} from "../modules/payments/payment.route.js";
+import {
+    creatorReviewRouter,
+    brandReviewRouter
+} from "../modules/reviews/reviews.route.js";
+import brandCreatorsRouter from "../modules/brand/creators/creators.route.js";
+import uploadRoutes from "../modules/upload/upload.route.js";
+import notificationRouter from "../modules/notifications/notification.route.js";
 
 const router = Router();
 
 // Authentication routes.
 router.use("/auth", authRoutes);
 
-// Creator profile routes.
+// Notification routes (shared endpoints and role aliases).
+router.use("/notifications", notificationRouter);
+router.use("/creator/notifications", notificationRouter);
+router.use("/brand/notifications", notificationRouter);
+
+// Creator routes.
+router.use("/creator/dashboard", creatorDashboardRoutes);
 router.use("/creator/profile", creatorProfileRoutes);
 router.use("/creator/portfolio", creatorPortfolioRoutes);
 router.use("/creator/services", creatorServiceRoutes);
+router.use("/creator/campaigns", creatorCampaignRoutes);
+router.use("/creator/bookings", creatorBookingRouter);
+router.use("/creator/workspace", creatorWorkspaceRouter);
+router.use("/creator/messages", creatorMessagesRouter);
+router.use("/creator/payments", creatorPaymentRouter);
+router.use("/creator/reviews", creatorReviewRouter);
+
+// Brand routes.
+router.use("/brand/dashboard", brandDashboardRoutes);
+router.use("/brand/profile", brandProfileRoutes);
+router.use("/brand/campaigns", campaignRoutes);
+router.use("/brand/creators", brandCreatorsRouter);
+router.use("/brand/bookings", brandBookingRouter);
+router.use("/brand/workspace", brandWorkspaceRouter);
+router.use("/brand/messages", brandMessagesRouter);
+router.use("/brand/payments", brandPaymentRouter);
+router.use("/brand/reviews", brandReviewRouter);
+
+// Upload routes.
+router.use("/upload", uploadRoutes);
 
 export default router;

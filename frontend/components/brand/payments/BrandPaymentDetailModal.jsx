@@ -109,7 +109,7 @@ export default function BrandPaymentDetailModal({ isOpen, onClose, payment }) {
               <span className="text-text-secondary font-medium">
                 {payment.status === "paid" ? "Amount Paid" : "Payment Amount"}
               </span>
-              <span className="font-serif font-bold text-lg text-foreground">
+              <span className="font-sans font-semibold text-lg text-foreground">
                 {formatPrice(payment.amount, payment.currency)}
               </span>
             </div>
@@ -196,7 +196,7 @@ export default function BrandPaymentDetailModal({ isOpen, onClose, payment }) {
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-secondary hover:bg-secondary-dark text-white text-xs font-semibold cursor-pointer shadow-xs"
+            className="px-4 py-2 rounded-xl bg-[#252525] hover:bg-[#111111] text-white text-xs font-semibold cursor-pointer shadow-xs"
           >
             Close Receipt
           </button>

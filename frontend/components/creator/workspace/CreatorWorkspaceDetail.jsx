@@ -297,7 +297,7 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
           {/* Main Content Row: Title (+ optional description) on left, Action Button on right */}
           <div className="flex items-start justify-between gap-3 flex-wrap sm:flex-nowrap">
             <div className="min-w-0 flex-1">
-              <h3 className="font-serif font-semibold text-base text-foreground">
+              <h3 className="font-sans font-semibold text-base text-foreground tracking-tight">
                 {title}
               </h3>
               {!isStringItem && item.description && (
@@ -443,7 +443,7 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                 <ExclamationIcon className="w-8 h-8" />
               </div>
               <div className="space-y-1">
-                <h3 className="font-serif font-semibold text-lg text-foreground">
+                <h3 className="font-sans font-semibold text-lg text-foreground tracking-tight">
                   Workspace Not Found
                 </h3>
                 <p className="text-xs text-text-secondary max-w-sm mx-auto">
@@ -494,7 +494,7 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                         </span>
                       )}
                     </div>
-                    <h1 className="font-serif font-bold text-2xl sm:text-3xl text-foreground mt-2">
+                    <h1 className="font-sans font-bold text-2xl sm:text-3xl text-foreground tracking-tight mt-2">
                       {campaign?.title || "Collaboration Workspace"}
                     </h1>
                     <p className="text-xs text-text-secondary mt-1">
@@ -532,7 +532,7 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                     <span className="text-[10px] font-semibold text-text-secondary uppercase tracking-wider block">
                       Agreed Price
                     </span>
-                    <span className="font-serif font-bold text-base text-foreground mt-0.5 block">
+                    <span className="font-sans font-semibold text-base text-foreground mt-0.5 block">
                       {formatPrice(workspace.agreedPrice, workspace.currency)}
                     </span>
                   </div>
@@ -573,7 +573,7 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                 <div className="lg:col-span-2 space-y-6">
                   {/* Required Deliverables Checklist Cards */}
                   <div className="space-y-4">
-                    <h2 className="font-serif font-semibold text-lg text-foreground px-1">
+                    <h2 className="font-sans font-semibold text-lg text-foreground px-1 tracking-tight">
                       Required Campaign Deliverables ({deliverables.length})
                     </h2>
                     {deliverables.length > 0 ? (
@@ -601,7 +601,7 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
 
                   {/* Campaign & Service Details */}
                   <div className="bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 space-y-4 shadow-xs">
-                    <h2 className="font-serif font-semibold text-lg text-foreground">
+                    <h2 className="font-sans font-semibold text-lg text-foreground tracking-tight">
                       Campaign Brief & Service Details
                     </h2>
                     {campaign?.description && (
@@ -632,7 +632,7 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                   {/* Submissions Section */}
                   <div className="bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 space-y-4 shadow-xs">
                     <div className="flex items-center justify-between">
-                      <h2 className="font-serif font-semibold text-base text-foreground">
+                      <h2 className="font-sans font-semibold text-base text-foreground tracking-tight">
                         Submitted Work ({submissions.length})
                       </h2>
                       {canSubmitWork && (
@@ -717,7 +717,7 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                   {/* Revision Log Section */}
                   {revisions.length > 0 && (
                     <div className="bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 space-y-3 shadow-xs">
-                      <h2 className="font-serif font-semibold text-base text-foreground">
+                      <h2 className="font-sans font-semibold text-base text-foreground tracking-tight">
                         Revision History ({revisions.length})
                       </h2>
                       <div className="space-y-3">

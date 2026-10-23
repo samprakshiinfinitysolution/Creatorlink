@@ -78,6 +78,7 @@ function CheckBadgeIcon({ className = "w-4 h-4" }) {
   );
 }
 
+
 function XMarkIcon({ className = "w-4 h-4" }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -212,9 +213,8 @@ function CreatorCard({ creator, onViewProfile }) {
                   decoding="async"
                   onLoad={() => setLoadedUrl(cleanAvatarUrl)}
                   onError={() => setFailedUrl(cleanAvatarUrl)}
-                  className={`w-full h-full object-cover transition-opacity duration-300 ${
-                    isImgLoaded ? "opacity-100" : "opacity-0"
-                  }`}
+                  className={`w-full h-full object-cover transition-opacity duration-300 ${isImgLoaded ? "opacity-100" : "opacity-0"
+                    }`}
                 />
               </>
             ) : (
@@ -299,7 +299,7 @@ function CreatorCard({ creator, onViewProfile }) {
         <button
           type="button"
           onClick={() => onViewProfile && onViewProfile(creator._id || creator.id)}
-          className="w-full py-2 px-3 rounded-xl bg-surface-muted hover:bg-secondary text-text-secondary hover:text-white border border-border-theme hover:border-secondary font-semibold text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs group-hover:border-secondary/40"
+          className="w-full py-2 px-3 rounded-xl bg-surface-muted hover:bg-[#252525] text-text-secondary hover:text-white border border-border-theme hover:border-[#252525] font-semibold text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs group-hover:border-[#252525]/40"
         >
           <EyeIcon className="w-3.5 h-3.5" />
           <span>View Profile</span>
@@ -502,13 +502,15 @@ export default function BrandCreatorsManager() {
         <BrandHeader setMobileOpen={setMobileOpen} />
 
         {/* Discovery Page Container */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl w-full mx-auto">
+        <main className="flex-1 px-3 sm:px-5 lg:px-6 py-5 sm:py-6 space-y-5 sm:space-y-6 w-full max-w-[1536px] mx-auto min-w-0">
           {/* Page Heading & Summary */}
           <div className="bg-surface border border-border-theme rounded-2xl p-6 sm:p-8 shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <span className="inline-block px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase bg-secondary/15 text-secondary border border-secondary/20 mb-3">
-                Talent Marketplace
-              </span>
+              <div className="mb-2">
+                <span className="font-bold text-[11px] tracking-wider uppercase text-[#ff2d6c] dark:text-[#ff4f87] font-sans">
+                  TALENT MARKETPLACE
+                </span>
+              </div>
               <h1 className="font-serif font-medium text-2xl sm:text-3xl text-foreground tracking-tight flex items-center gap-2">
                 <span>Discover Creators</span>
                 <span className="text-secondary text-lg">✦</span>
@@ -557,7 +559,7 @@ export default function BrandCreatorsManager() {
                   )}
                   <button
                     type="submit"
-                    className="px-3 py-1.5 rounded-lg bg-secondary hover:bg-secondary-dark text-white text-xs font-semibold tracking-wide transition-all cursor-pointer shadow-xs"
+                    className="px-3 py-1.5 rounded-lg bg-[#252525] hover:bg-[#111111] text-white text-xs font-semibold tracking-wide transition-all cursor-pointer shadow-xs"
                   >
                     Search
                   </button>
@@ -578,7 +580,7 @@ export default function BrandCreatorsManager() {
             </div>
 
             {/* Dropdown Filters Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2 border-t border-border-theme text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 pt-2 border-t border-border-theme text-xs">
               {/* Category Filter */}
               <div>
                 <label className="block text-[10px] font-medium text-text-secondary uppercase tracking-wider mb-1">
@@ -701,7 +703,7 @@ export default function BrandCreatorsManager() {
                   <button
                     type="button"
                     onClick={handleResetFilters}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-secondary hover:bg-secondary-dark text-white text-xs font-semibold tracking-wide transition-all cursor-pointer shadow-xs"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#252525] hover:bg-[#111111] text-white text-xs font-semibold tracking-wide transition-all cursor-pointer shadow-xs"
                   >
                     <ArrowPathIcon />
                     <span>Reset All Filters</span>

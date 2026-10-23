@@ -109,29 +109,29 @@ export default function BrandMetricsGrid({ metrics }) {
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
       {cards.map((c) => {
         const Icon = c.icon;
         return (
           <div
             key={c.title}
-            className="bg-white dark:bg-surface border border-border-theme rounded-2xl p-4 sm:p-5 shadow-xs hover:shadow-md hover:border-secondary/40 transition-all duration-200 flex items-center gap-3.5 sm:gap-4 h-full"
+            className="bg-white dark:bg-surface border border-border-theme rounded-xl p-3.5 sm:p-4 shadow-xs hover:shadow-md hover:border-secondary/40 transition-all duration-200 flex items-center gap-3 sm:gap-3.5 h-full"
           >
-            {/* Left Pink Icon Container (~60x60px desktop) */}
-            <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-[58px] lg:h-[58px] rounded-2xl bg-[#fff0f4] dark:bg-[#2a171f] text-[#ff2d6c] dark:text-[#ff4f87] flex items-center justify-center shrink-0 transition-transform duration-200 hover:scale-105">
-              <Icon className="w-6 h-6" />
+            {/* Left Pink Icon Container */}
+            <div className="w-11 h-11 sm:w-12 sm:h-12 lg:w-[50px] lg:h-[50px] rounded-xl bg-[#fff0f4]/50 dark:bg-[#2a171f]/50 text-[#ff2d6c] dark:text-[#ff4f87] flex items-center justify-center shrink-0 transition-transform duration-200 hover:scale-105">
+              <Icon className="w-5 h-5 sm:w-5.5 sm:h-5.5" />
             </div>
 
-            {/* Right Metric Content (Label above, Value directly below, Real breakdown subtitle) */}
+            {/* Right Metric Content */}
             <div className="flex-1 min-w-0 flex flex-col justify-center">
-              <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 dark:text-neutral-400 tracking-wider uppercase font-sans truncate">
+              <span className="text-[10px] sm:text-[10.5px] font-semibold text-slate-400 dark:text-neutral-400 tracking-wider uppercase font-sans truncate">
                 {c.title}
               </span>
-              <span className="text-2xl sm:text-[26px] lg:text-[28px] font-bold text-slate-900 dark:text-foreground font-sans tracking-tight block mt-1 leading-none truncate">
+              <span className="text-[19px] sm:text-[23px] lg:text-[24px] font-semibold text-slate-900 dark:text-foreground font-sans tracking-tight block mt-0.5 leading-none truncate">
                 {c.value}
               </span>
               {c.subtitle && (
-                <span className="text-[11px] text-text-secondary mt-1.5 block truncate font-medium">
+                <span className="text-[10.5px] sm:text-[11px] text-text-secondary mt-1 block truncate font-medium">
                   {c.subtitle}
                 </span>
               )}

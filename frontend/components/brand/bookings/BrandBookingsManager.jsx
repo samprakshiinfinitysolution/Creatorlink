@@ -81,6 +81,14 @@ function getStatusBadge(status) {
 // =========================================================
 // SVG ICONS
 // =========================================================
+function WorkspaceIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+    </svg>
+  );
+}
+
 function BookingsIcon({ className = "w-6 h-6" }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
@@ -232,16 +240,18 @@ export default function BrandBookingsManager() {
         <BrandHeader setMobileOpen={setMobileOpen} />
 
         {/* Bookings Main Container */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl w-full mx-auto">
+        <main className="flex-1 px-3 sm:px-5 lg:px-6 py-5 sm:py-6 space-y-5 sm:space-y-6 max-w-[1536px] w-full mx-auto min-w-0">
 
           {/* Page Header */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <span className="inline-block px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase bg-secondary/15 text-secondary border border-secondary/20 mb-2">
-                Brand Workspace
-              </span>
+              <div className="mb-2">
+                <span className="font-bold text-[11px] tracking-wider uppercase text-[#ff2d6c] dark:text-[#ff4f87] font-sans">
+                  BRAND WORKSPACE
+                </span>
+              </div>
               <h1 className="font-serif font-medium text-2xl sm:text-3xl text-foreground tracking-tight">
-                Bookings & Applications
+                Bookings And Applications
               </h1>
               <p className="text-xs sm:text-sm text-text-secondary mt-1">
                 View and manage creator applications and booking requests for your campaigns.
@@ -250,7 +260,7 @@ export default function BrandBookingsManager() {
           </div>
 
           {/* Filter Toolbar */}
-          <div className="bg-surface border border-border-theme rounded-2xl p-4 shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="bg-surface border border-border-theme rounded-2xl p-4 shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 min-w-0 w-full">
             <div className="flex items-center gap-2">
               <span className="text-xs font-semibold text-text-secondary uppercase tracking-wider shrink-0">
                 Filter by Status:
@@ -282,10 +292,11 @@ export default function BrandBookingsManager() {
                       fetchBookingsList({ status: opt.value, page: 1 });
                     }}
                     className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer shrink-0 ${isActive
-                        ? "bg-secondary text-white font-semibold shadow-xs"
-                        : "bg-surface-muted/60 text-text-secondary hover:text-foreground hover:bg-surface-muted"
+                      ? "bg-[#252525] text-white font-semibold shadow-xs"
+                      : "bg-surface-muted/60 text-text-secondary hover:text-foreground hover:bg-surface-muted"
                       }`}
                   >
+                    
                     {opt.label}
                   </button>
                 );
@@ -309,7 +320,7 @@ export default function BrandBookingsManager() {
           )}
 
           {/* Main Booking List Container */}
-          <div className="bg-surface border border-border-theme rounded-2xl shadow-xs overflow-hidden">
+          <div className="bg-surface border border-border-theme rounded-2xl shadow-xs overflow-hidden min-w-0">
 
             {/* Loading Skeleton State */}
             {loading && (
@@ -323,7 +334,7 @@ export default function BrandBookingsManager() {
             {/* Empty State */}
             {!loading && !error && bookings.length === 0 && (
               <div className="text-center py-16 px-4 border-dashed border-border-theme space-y-3">
-                <div className="w-12 h-12 mx-auto rounded-full bg-secondary/10 text-secondary flex items-center justify-center">
+                <div className="w-12 h-12 mx-auto rounded-full bg-secondary/8 text-[#252525] dark:text-white flex items-center justify-center">
                   <BookingsIcon />
                 </div>
                 <h3 className="font-serif font-medium text-lg text-foreground">
@@ -339,7 +350,7 @@ export default function BrandBookingsManager() {
 
             {/* Booking List Table (Desktop / Tablet / Mobile Responsive) */}
             {!loading && !error && bookings.length > 0 && (
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto no-scrollbar">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
                     <tr className="border-b border-border-theme bg-surface-muted/40 text-text-secondary uppercase tracking-wider text-[10px] font-semibold">

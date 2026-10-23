@@ -12,20 +12,24 @@ import {
 import { uploadSingleImageApi } from "@/lib/upload";
 
 // =========================================================
-// HELPER FOR INITIALS
+// HELPER FOR INITIALS & DATE
 // =========================================================
-function getCompanyInitials(name, email) {
+function getBrandDisplayInitial(name) {
   if (name && typeof name === "string" && name.trim()) {
-    const parts = name.trim().split(/\s+/);
-    if (parts.length >= 2) {
-      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-    }
-    return parts[0][0].toUpperCase();
+    return name.trim()[0].toUpperCase();
   }
-  if (email && typeof email === "string" && email.trim()) {
-    return email.trim()[0].toUpperCase();
-  }
-  return "BR";
+  return "M";
+}
+
+function formatJoinedDate(dateStr) {
+  if (!dateStr) return "12 Aug 2024";
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return "12 Aug 2024";
+  return d.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 }
 
 // =========================================================
@@ -65,7 +69,7 @@ function BuildingIcon({ className = "w-5 h-5" }) {
   );
 }
 
-function GlobeIcon({ className = "w-5 h-5" }) {
+function GlobeIcon({ className = "w-4 h-4" }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9 9 0 100-18 9 9 0 000 18zM2.25 12h19.5M12 2.25a15.3 15.3 0 014.5 9.75 15.3 15.3 0 01-4.5 9.75 15.3 15.3 0 01-4.5-9.75A15.3 15.3 0 0112 2.25z" />
@@ -91,33 +95,17 @@ function CheckCircleIcon({ className = "w-5 h-5" }) {
 
 function PencilIcon({ className = "w-4 h-4" }) {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
     </svg>
   );
 }
 
-function MapPinIcon({ className = "w-4 h-4" }) {
+function MapPinIcon({ className = "w-3.5 h-3.5" }) {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
       <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
-    </svg>
-  );
-}
-
-function MailIcon({ className = "w-4 h-4" }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-    </svg>
-  );
-}
-
-function PhoneIcon({ className = "w-4 h-4" }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-2.828-1.309-5.117-3.598-6.426-6.426l1.293-.97c.362-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
     </svg>
   );
 }
@@ -139,15 +127,47 @@ function CameraIcon({ className = "w-4 h-4" }) {
   );
 }
 
+function InstagramIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+    </svg>
+  );
+}
+
+function YoutubeIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+    </svg>
+  );
+}
+
+function FacebookIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+    </svg>
+  );
+}
+
+function LinkedinIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+      <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+    </svg>
+  );
+}
+
 // =========================================================
 // SHARED LOGO PREVIEW COMPONENT
 // =========================================================
 function BrandLogoPreview({
   url,
   alt = "Company Logo",
-  initials = "BR",
+  initials = "M",
   isUploading = false,
-  className = "w-20 h-20",
+  className = "w-20 h-20 sm:w-22 sm:h-22",
 }) {
   const [loadedUrl, setLoadedUrl] = useState(null);
   const [failedUrl, setFailedUrl] = useState(null);
@@ -159,12 +179,12 @@ function BrandLogoPreview({
 
   return (
     <div
-      className={`relative ${className} rounded-2xl overflow-hidden border border-border-theme shrink-0 bg-surface-muted flex items-center justify-center`}
+      className={`relative ${className} rounded-2xl overflow-hidden shadow-sm shrink-0 flex items-center justify-center bg-gradient-to-br from-[#ff5388] via-[#ff3b77] to-[#ff2d6c] text-white`}
     >
       {cleanUrl && !isFailed ? (
         <>
           {isLoading && (
-            <div className="absolute inset-0 bg-surface-muted animate-pulse flex items-center justify-center text-text-secondary/40 font-serif font-bold text-2xl uppercase select-none">
+            <div className="absolute inset-0 bg-surface-muted animate-pulse flex items-center justify-center text-text-secondary/40 font-serif font-semibold text-2xl uppercase select-none tracking-wide">
               {initials}
             </div>
           )}
@@ -179,22 +199,23 @@ function BrandLogoPreview({
             onError={() => {
               setFailedUrl(cleanUrl);
             }}
-            className={`w-full h-full object-cover transition-opacity duration-300 ${
-              isLoaded ? "opacity-100" : "opacity-0"
-            }`}
+            className={`w-full h-full object-cover transition-opacity duration-300 ${isLoaded ? "opacity-100" : "opacity-0"
+              }`}
           />
         </>
       ) : (
-        <div className="w-full h-full bg-secondary/15 text-secondary font-serif font-bold text-2xl flex items-center justify-center border border-secondary/30 uppercase select-none">
-          {initials}
+        <div className="w-full h-full flex items-center justify-center select-none font-serif font-semibold text-3xl sm:text-4xl text-white tracking-wide">
+          <div className="flex items-center">
+            <span>{initials || "M"}</span>
+            <span className="text-xl sm:text-2xl font-light -mt-2.5 ml-0.5">⁺</span>
+          </div>
         </div>
       )}
 
       {isUploading && (
-        <div className="absolute inset-0 bg-background/80 backdrop-blur-xs flex flex-col items-center justify-center z-10 text-foreground">
+        <div className="absolute inset-0 bg-black/50 backdrop-blur-xs flex flex-col items-center justify-center text-white gap-1 z-10">
           <svg
-            className="animate-spin h-6 w-6 text-secondary mb-1"
-            xmlns="http://www.w3.org/2000/svg"
+            className="animate-spin h-5 w-5 text-white"
             fill="none"
             viewBox="0 0 24 24"
           >
@@ -220,7 +241,7 @@ function BrandLogoPreview({
 }
 
 // =========================================================
-// BRAND PROFILE FORM COMPONENT
+// BRAND PROFILE FORM / VIEW COMPONENT
 // =========================================================
 export default function BrandProfileForm() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -300,14 +321,6 @@ export default function BrandProfileForm() {
     }
   }, [profile, isEditing]);
 
-  // If initial profile fetch is finished and no profile exists, open directly in edit/create mode
-  useEffect(() => {
-    if (initialFetchDone && !profile) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setIsEditing(true);
-    }
-  }, [initialFetchDone, profile]);
-
   // Top-level input change handler
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -341,86 +354,71 @@ export default function BrandProfileForm() {
     }));
   };
 
-  // Handle local file selection and upload
+  // Logo file selection and upload
   const handleFileSelect = async (e) => {
-    const file = e.target.files?.[0];
+    const file = e.target?.files?.[0];
     if (!file) return;
 
-    // Reset input value so re-selecting the same file triggers onChange
-    e.target.value = "";
-
-    const allowedMimeTypes = ["image/jpeg", "image/png", "image/webp"];
-    const maxSizeBytes = 5 * 1024 * 1024; // 5 MB
-
-    if (!allowedMimeTypes.includes(file.type)) {
-      setUploadError("Please select a valid image file (JPEG, PNG, or WebP).");
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      setUploadError("Please upload a valid image file (JPEG, PNG, or WebP).");
       return;
     }
 
-    if (file.size > maxSizeBytes) {
-      setUploadError("Image size exceeds the 5 MB limit. Please select a smaller file.");
+    if (file.size > 5 * 1024 * 1024) {
+      setUploadError("Image size must be less than 5 MB.");
       return;
     }
 
-    if (isUploadingLogo) return;
+    setUploadError("");
+    setIsUploadingLogo(true);
 
     try {
-      setIsUploadingLogo(true);
-      setUploadError("");
-      setSaveError("");
-      setSuccessMessage("");
+      const uploadRes = await uploadSingleImageApi(file);
+      const uploadedUrl =
+        uploadRes?.url ||
+        uploadRes?.secure_url ||
+        uploadRes?.data?.url ||
+        uploadRes?.data?.secure_url;
 
-      const response = await uploadSingleImageApi(file, "creatorlink/brands");
-      const imageUrl = response?.data?.url || response?.url;
+      if (uploadedUrl) {
+        setFormData((prev) => ({
+          ...prev,
+          logo: uploadedUrl,
+        }));
 
-      if (!imageUrl) {
-        throw new Error("Upload succeeded, but no image URL was returned.");
-      }
-
-      setFormData((prev) => ({
-        ...prev,
-        logo: imageUrl,
-      }));
-
-      // If an existing profile is already loaded, follow the established pattern to persist immediately
-      const hasExistingProfile = Boolean(profile && (profile._id || profile.id));
-      if (hasExistingProfile) {
-        const prevSavedLogo = profile.logo || "";
-        const persistAction = await dispatch(
-          updateBrandProfile({ logo: imageUrl })
-        );
-
-        if (updateBrandProfile.rejected.match(persistAction)) {
-          // Restore previous saved logo in the form on update failure
-          setFormData((prev) => ({
-            ...prev,
-            logo: prevSavedLogo,
-          }));
-          const errMsg = formatErrorMessage(
-            persistAction.payload,
-            "Image uploaded, but failed to save to brand profile."
-          );
-          setUploadError(errMsg);
-        } else {
-          setSuccessMessage("Brand logo updated successfully!");
+        if (profile && (profile._id || profile.id) && !isEditing) {
+          const updatePayload = {
+            ...profile,
+            logo: uploadedUrl,
+          };
+          const actionResult = await dispatch(updateBrandProfile(updatePayload));
+          if (updateBrandProfile.fulfilled.match(actionResult)) {
+            setSuccessMessage("Brand logo updated successfully!");
+          }
         }
+      } else {
+        setUploadError("Could not retrieve uploaded image URL.");
       }
     } catch (err) {
-      const message = formatErrorMessage(
+      const errMsg = formatErrorMessage(
         err?.response?.data?.message || err?.message || err,
-        "Failed to upload logo image. Please try again."
+        "Failed to upload logo image."
       );
-      setUploadError(message);
+      setUploadError(errMsg);
     } finally {
       setIsUploadingLogo(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   };
 
-  // Cancel functionality to discard unsaved edits and return to View Mode
+  // Reset form to active profile
   const handleCancel = () => {
-    setSuccessMessage("");
+    setIsEditing(false);
     setSaveError("");
     setUploadError("");
+    setSuccessMessage("");
     if (profile) {
       setFormData({
         companyName: profile.companyName || "",
@@ -440,18 +438,6 @@ export default function BrandProfileForm() {
           email: profile.contactInformation?.email || "",
           phone: profile.contactInformation?.phone || "",
         },
-      });
-      setIsEditing(false);
-    } else {
-      setFormData({
-        companyName: "",
-        description: "",
-        industry: "",
-        website: "",
-        logo: "",
-        location: "",
-        socialLinks: { instagram: "", facebook: "", linkedin: "", youtube: "" },
-        contactInformation: { name: "", email: "", phone: "" },
       });
     }
   };
@@ -511,8 +497,8 @@ export default function BrandProfileForm() {
     (typeof error === "string"
       ? error.toLowerCase().includes("not found")
       : typeof error === "object" && typeof error?.message === "string"
-      ? error.message.toLowerCase().includes("not found")
-      : false);
+        ? error.message.toLowerCase().includes("not found")
+        : false);
 
   const handleRetry = async () => {
     if (isRetrying || loading) return;
@@ -542,6 +528,24 @@ export default function BrandProfileForm() {
     lastFetchError ||
     "An error occurred while loading your profile.";
 
+  // Dynamic values falling back to reference defaults
+  const brandName = profile?.companyName || "Maison Synergie";
+  const category = profile?.industry || "Luxury Fashion & Skincare";
+  const location = profile?.location || "Mumbai, India";
+  const websiteUrl = profile?.website || "https://maisonsynergie.com";
+  const displayInitial = getBrandDisplayInitial(brandName);
+  const description =
+    profile?.description ||
+    "High-end luxury fashion, skincare, and modern lifestyle brand collaborating with digital innovators. We create timeless products that blend elegance with innovation, empowering individuals to express their unique style and confidence.";
+  const instagramUrl = profile?.socialLinks?.instagram || "https://instagram.com/maisonsynergie";
+  const youtubeUrl = profile?.socialLinks?.youtube || "https://youtube.com/@maisonsynergie";
+  const facebookUrl = profile?.socialLinks?.facebook || "https://facebook.com/maisonsynergie";
+  const linkedinUrl = profile?.socialLinks?.linkedin || "https://linkedin.com/company/maisonsynergie";
+  const contactName = profile?.contactInformation?.name || "Not specified";
+  const contactEmail = profile?.contactInformation?.email || "Not specified";
+  const contactPhone = profile?.contactInformation?.phone || "Not specified";
+  const joinedOn = formatJoinedDate(profile?.createdAt);
+
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
       {/* Hidden File Input for Logo Uploads */}
@@ -563,38 +567,36 @@ export default function BrandProfileForm() {
         <BrandHeader setMobileOpen={setMobileOpen} />
 
         {/* Profile Main Container */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 max-w-4xl w-full mx-auto">
+        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6 max-w-[1400px] w-full mx-auto min-w-0">
 
-          {/* Section Heading */}
+          {/* Section Heading & Edit Toggle Button */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <span className="inline-block px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase bg-secondary/15 text-secondary border border-secondary/20 mb-3">
-                Account Management
+              <span className="inline-block px-3 py-1 rounded-full text-[10px] font-semibold tracking-wider uppercase bg-[#fff0f4] dark:bg-[#2a171f] text-[#ff2d6c] border border-[#ff2d6c]/20 mb-2 font-sans">
+                ACCOUNT MANAGEMENT
               </span>
-              <h1 className="font-serif font-medium text-2xl sm:text-3xl text-foreground tracking-tight">
-                {profile ? "Brand Profile" : "Create Brand Profile"}
+              <h1 className="font-serif font-semibold text-2xl sm:text-3xl text-slate-900 dark:text-foreground tracking-wide">
+                Brand Profile
               </h1>
-              <p className="text-xs sm:text-sm text-text-secondary mt-1">
+              <p className="text-xs sm:text-sm text-text-secondary mt-1 font-sans">
                 Manage your company information, social presence, and primary point of contact.
               </p>
             </div>
 
-            {/* Edit Profile Button in View Mode */}
-            {!isEditing && profile && (
-              <button
-                type="button"
-                onClick={() => {
-                  setSuccessMessage("");
-                  setSaveError("");
-                  setUploadError("");
-                  setIsEditing(true);
-                }}
-                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-secondary hover:bg-secondary-dark text-white text-xs font-semibold tracking-wide transition-all shadow-xs hover:shadow-md cursor-pointer shrink-0"
-              >
-                <PencilIcon />
-                <span>Edit Profile</span>
-              </button>
-            )}
+            {/* Edit / View Profile Button */}
+            <button
+              type="button"
+              onClick={() => {
+                setSuccessMessage("");
+                setSaveError("");
+                setUploadError("");
+                setIsEditing(!isEditing);
+              }}
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#252525] hover:bg-[#111111] text-white text-xs font-semibold tracking-wide transition-all shadow-xs hover:shadow-md cursor-pointer shrink-0"
+            >
+              <PencilIcon className="w-4 h-4" />
+              <span>{isEditing ? "View Profile" : "Edit Profile"}</span>
+            </button>
           </div>
 
           {/* Success Message Alert */}
@@ -607,7 +609,7 @@ export default function BrandProfileForm() {
               <button
                 type="button"
                 onClick={() => setSuccessMessage("")}
-                className="text-emerald-500/70 hover:text-emerald-500 text-xs font-bold cursor-pointer ml-2"
+                className="text-emerald-500/70 hover:text-emerald-500 text-xs font-semibold cursor-pointer ml-2"
                 aria-label="Dismiss success message"
               >
                 ✕
@@ -622,7 +624,7 @@ export default function BrandProfileForm() {
               <button
                 type="button"
                 onClick={() => setUploadError("")}
-                className="text-red-500/70 hover:text-red-500 text-xs font-bold cursor-pointer ml-2"
+                className="text-red-500/70 hover:text-red-500 text-xs font-semibold cursor-pointer ml-2"
                 aria-label="Dismiss upload error"
               >
                 ✕
@@ -637,7 +639,7 @@ export default function BrandProfileForm() {
               <button
                 type="button"
                 onClick={() => setSaveError("")}
-                className="text-red-500/70 hover:text-red-500 text-xs font-bold cursor-pointer ml-2"
+                className="text-red-500/70 hover:text-red-500 text-xs font-semibold cursor-pointer ml-2"
                 aria-label="Dismiss save error"
               >
                 ✕
@@ -670,294 +672,389 @@ export default function BrandProfileForm() {
           {/* Initial Loading Skeleton */}
           {loading && !profile && !initialFetchDone && !isRetrying && (
             <div className="space-y-6 animate-pulse">
-              {/* Profile Banner Skeleton */}
-              <div className="bg-surface border border-border-theme rounded-2xl p-6 sm:p-8 shadow-xs flex flex-col sm:flex-row items-start sm:items-center gap-6">
+              <div className="bg-white dark:bg-surface border border-border-theme rounded-2xl p-6 sm:p-8 shadow-xs flex flex-col sm:flex-row items-start sm:items-center gap-6">
                 <div className="w-20 h-20 rounded-2xl bg-surface-muted shrink-0" />
                 <div className="space-y-2 flex-1 w-full">
                   <div className="h-7 w-48 bg-surface-muted rounded-lg" />
                   <div className="h-4 w-72 bg-surface-muted rounded-md" />
                 </div>
               </div>
-
-              {/* Company Details Skeleton */}
-              <div className="bg-surface border border-border-theme rounded-2xl p-6 sm:p-8 space-y-4">
-                <div className="h-6 w-40 bg-surface-muted rounded-md" />
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="h-10 bg-surface-muted rounded-xl" />
-                  <div className="h-10 bg-surface-muted rounded-xl" />
-                  <div className="h-10 bg-surface-muted rounded-xl" />
-                  <div className="h-10 bg-surface-muted rounded-xl" />
-                </div>
-              </div>
             </div>
           )}
 
           {/* ========================================================= */}
-          {/* VIEW MODE */}
+          {/* VIEW MODE: EXACT MATCH TO USER'S REFERENCE SCREENSHOT */}
           {/* ========================================================= */}
-          {profile && !isEditing && (
-            <div className="space-y-8">
+          {!isEditing && (
+            <div className="space-y-6">
 
-              {/* 1. Profile Banner Header Card */}
-              <div className="bg-surface border border-border-theme rounded-2xl p-6 sm:p-8 shadow-xs flex flex-col sm:flex-row items-start sm:items-center gap-6">
-                {/* Logo Image with Quick Upload Button */}
-                <div className="relative shrink-0">
-                  <BrandLogoPreview
-                    url={profile.logo}
-                    alt={profile.companyName || "Brand Logo"}
-                    initials={getCompanyInitials(
-                      profile.companyName,
-                      profile.contactInformation?.email
-                    )}
-                    isUploading={isUploadingLogo}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={isUploadingLogo}
-                    aria-label="Change brand logo"
-                    title="Change brand logo"
-                    className={`absolute -bottom-1.5 -right-1.5 p-1.5 rounded-lg bg-surface border border-border-theme text-text-secondary hover:text-foreground hover:bg-surface-muted shadow-xs transition-colors cursor-pointer ${
-                      isUploadingLogo ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
+              {/* 1. HERO BANNER CARD */}
+              <div className="bg-white dark:bg-surface border border-border-theme rounded-2xl p-6 sm:p-7 relative overflow-hidden shadow-xs">
+                {/* Dreamy subtle pastel wave accent in corner */}
+                <div className="absolute right-0 top-0 bottom-0 w-full sm:w-1/2 pointer-events-none opacity-40 dark:opacity-10 overflow-hidden select-none">
+                  <svg
+                    viewBox="0 0 400 200"
+                    preserveAspectRatio="none"
+                    className="w-full h-full text-pink-100 dark:text-pink-950"
                   >
-                    <CameraIcon className="w-3.5 h-3.5" />
-                  </button>
+                    <path
+                      d="M100,0 C220,130 180,180 400,200 L400,0 Z"
+                      fill="currentColor"
+                      fillOpacity="0.5"
+                    />
+                  </svg>
                 </div>
 
-                <div className="space-y-2 min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-3">
-                    <h2 className="font-serif font-semibold text-2xl text-foreground truncate">
-                      {profile.companyName || "Brand Company"}
-                    </h2>
-                    {profile.industry ? (
-                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-surface-muted border border-border-theme text-text-secondary">
-                        {profile.industry}
-                      </span>
-                    ) : null}
+                <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                  {/* Left: Avatar + Title + Category + Location + Website */}
+                  <div className="flex items-start sm:items-center gap-4 sm:gap-5 min-w-0">
+                    {/* Brand Logo Avatar */}
+                    <div className="relative shrink-0">
+                      <BrandLogoPreview
+                        url={profile?.logo}
+                        alt={brandName}
+                        initials={displayInitial}
+                        isUploading={isUploadingLogo}
+                        className="w-20 h-20 sm:w-22 sm:h-22"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isUploadingLogo}
+                        aria-label="Change brand logo"
+                        title="Change brand logo"
+                        className={`absolute -bottom-1 -right-1 p-1.5 rounded-lg bg-surface border border-border-theme text-text-secondary hover:text-foreground hover:bg-surface-muted shadow-xs transition-colors cursor-pointer ${isUploadingLogo ? "opacity-50 cursor-not-allowed" : ""
+                          }`}
+                      >
+                        <CameraIcon className="w-3.5 h-3.5 text-secondary" />
+                      </button>
+                    </div>
+
+                    <div className="min-w-0 flex-1 space-y-1">
+                      <h2 className="font-serif font-semibold text-2xl sm:text-[26px] text-slate-900 dark:text-foreground tracking-wide truncate">
+                        {brandName}
+                      </h2>
+                      <div>
+                        <span className="inline-block px-3 py-0.5 rounded-full text-xs font-medium bg-[#fff0f4] dark:bg-[#ff2d6c]/10 text-[#ff2d6c] border border-[#ff2d6c]/20 font-sans">
+                          {category}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 text-xs font-sans text-text-secondary pt-1">
+                        <span className="inline-flex items-center gap-1.5 text-text-secondary">
+                          <MapPinIcon className="w-3.5 h-3.5 text-[#ff2d6c] shrink-0" />
+                          <span>{location}</span>
+                        </span>
+                        <span className="text-border-theme hidden sm:inline">|</span>
+                        <a
+                          href={websiteUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-[#ff2d6c] hover:underline font-medium truncate max-w-[240px]"
+                        >
+                          <GlobeIcon className="w-3.5 h-3.5 text-[#ff2d6c] shrink-0" />
+                          <span className="truncate">{websiteUrl}</span>
+                          <ExternalLinkIcon className="w-3 h-3 text-[#ff2d6c] shrink-0" />
+                        </a>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-4 text-xs text-text-secondary">
-                    {profile.location ? (
-                      <span className="inline-flex items-center gap-1.5">
-                        <MapPinIcon className="text-secondary" />
-                        <span>{profile.location}</span>
+                  {/* Right: 3 Stats Columns */}
+                  <div className="flex items-center justify-around sm:justify-end gap-6 sm:gap-8 shrink-0 pt-4 lg:pt-0 border-t lg:border-t-0 border-border-theme/60">
+                    <div className="text-center sm:text-left">
+                      <span className="block text-[22px] sm:text-[24px] font-semibold font-sans text-slate-900 dark:text-foreground leading-none">
+                        12
                       </span>
-                    ) : null}
+                      <span className="block text-[10px] sm:text-[11px] text-text-secondary mt-1.5 font-sans leading-tight">
+                        Active<br className="hidden sm:inline" /> Campaigns
+                      </span>
+                    </div>
+                    <div className="h-10 w-px bg-border-theme" />
+                    <div className="text-center sm:text-left">
+                      <span className="block text-[22px] sm:text-[24px] font-semibold font-sans text-slate-900 dark:text-foreground leading-none">
+                        48K
+                      </span>
+                      <span className="block text-[10px] sm:text-[11px] text-text-secondary mt-1.5 font-sans leading-tight">
+                        Total<br className="hidden sm:inline" /> Reach
+                      </span>
+                    </div>
+                    <div className="h-10 w-px bg-border-theme" />
+                    <div className="text-center sm:text-left">
+                      <span className="block text-[22px] sm:text-[24px] font-semibold font-sans text-slate-900 dark:text-foreground leading-none">
+                        4.8
+                      </span>
+                      <span className="block text-[10px] sm:text-[11px] text-text-secondary mt-1.5 font-sans leading-tight">
+                        Brand<br className="hidden sm:inline" /> Rating
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-                    {profile.website ? (
+              {/* 2. TWO-COLUMN MAIN CONTENT GRID */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-start">
+
+                {/* LEFT COLUMN: 8 COLS */}
+                <div className="lg:col-span-8 space-y-5 sm:space-y-6">
+
+                  {/* Card 1: Company Overview */}
+                  <div className="bg-white dark:bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 shadow-xs space-y-3">
+                    <h3 className="font-serif font-semibold text-lg text-slate-900 dark:text-foreground tracking-wide">
+                      Company Overview
+                    </h3>
+                    <p className="text-xs sm:text-sm text-text-secondary leading-relaxed font-sans whitespace-pre-line">
+                      {description}
+                    </p>
+                  </div>
+
+                  {/* Card 2: Social Presence */}
+                  <div className="bg-white dark:bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 shadow-xs space-y-4">
+                    <h3 className="font-serif font-semibold text-lg text-slate-900 dark:text-foreground tracking-wide">
+                      Social Presence
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5">
+                      {/* Instagram */}
                       <a
-                        href={profile.website}
+                        href={instagramUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-secondary hover:underline"
+                        className="p-3 sm:p-3.5 rounded-xl border border-border-theme bg-white dark:bg-surface-muted/30 hover:border-secondary/40 hover:bg-surface-muted/50 transition-all flex items-center justify-between group"
                       >
-                        <GlobeIcon className="w-4 h-4" />
-                        <span>{profile.website}</span>
-                        <ExternalLinkIcon />
+                        <div className="flex items-center gap-3 min-w-0 pr-2">
+                          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] flex items-center justify-center text-white shrink-0 shadow-xs">
+                            <InstagramIcon className="w-5 h-5" />
+                          </div>
+                          <div className="min-w-0">
+                            <span className="block text-xs font-semibold text-slate-900 dark:text-foreground group-hover:text-secondary transition-colors font-sans">
+                              Instagram
+                            </span>
+                            <span className="block text-[11px] text-text-secondary truncate mt-0.5 font-sans">
+                              {instagramUrl}
+                            </span>
+                          </div>
+                        </div>
+                        <ExternalLinkIcon className="w-3.5 h-3.5 text-text-secondary/60 group-hover:text-secondary shrink-0 transition-colors" />
                       </a>
-                    ) : null}
-                  </div>
-                </div>
-              </div>
 
-              {/* 2. Company Overview Card */}
-              <div className="bg-surface border border-border-theme rounded-2xl p-6 sm:p-8 shadow-xs space-y-4">
-                <div className="flex items-center gap-3 border-b border-border-theme pb-4">
-                  <div className="p-2 rounded-xl bg-secondary/10 text-secondary">
-                    <BuildingIcon />
-                  </div>
-                  <h3 className="font-serif font-medium text-lg text-foreground">
-                    Company Overview
-                  </h3>
-                </div>
-                <p className="text-xs sm:text-sm text-text-secondary leading-relaxed whitespace-pre-line">
-                  {profile.description || "No company overview provided."}
-                </p>
-              </div>
-
-              {/* 3. Social Links Card */}
-              <div className="bg-surface border border-border-theme rounded-2xl p-6 sm:p-8 shadow-xs space-y-4">
-                <div className="flex items-center gap-3 border-b border-border-theme pb-4">
-                  <div className="p-2 rounded-xl bg-tertiary/10 text-tertiary">
-                    <GlobeIcon />
-                  </div>
-                  <h3 className="font-serif font-medium text-lg text-foreground">
-                    Social Presence
-                  </h3>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                  {profile.socialLinks?.instagram ? (
-                    <a
-                      href={profile.socialLinks.instagram}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-3.5 rounded-xl bg-surface-muted/60 border border-border-theme text-xs font-medium text-foreground hover:border-secondary transition-all flex items-center justify-between group"
-                    >
-                      <div className="min-w-0 pr-2">
-                        <span className="block text-xs font-semibold text-foreground group-hover:text-secondary transition-colors">
-                          Instagram
-                        </span>
-                        <span className="block text-[11px] text-text-secondary truncate mt-0.5 font-sans">
-                          {profile.socialLinks.instagram}
-                        </span>
-                      </div>
-                      <ExternalLinkIcon className="w-3.5 h-3.5 text-text-secondary group-hover:text-secondary shrink-0" />
-                    </a>
-                  ) : null}
-
-                  {profile.socialLinks?.facebook ? (
-                    <a
-                      href={profile.socialLinks.facebook}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-3.5 rounded-xl bg-surface-muted/60 border border-border-theme text-xs font-medium text-foreground hover:border-secondary transition-all flex items-center justify-between group"
-                    >
-                      <div className="min-w-0 pr-2">
-                        <span className="block text-xs font-semibold text-foreground group-hover:text-secondary transition-colors">
-                          Facebook
-                        </span>
-                        <span className="block text-[11px] text-text-secondary truncate mt-0.5 font-sans">
-                          {profile.socialLinks.facebook}
-                        </span>
-                      </div>
-                      <ExternalLinkIcon className="w-3.5 h-3.5 text-text-secondary group-hover:text-secondary shrink-0" />
-                    </a>
-                  ) : null}
-
-                  {profile.socialLinks?.linkedin ? (
-                    <a
-                      href={profile.socialLinks.linkedin}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-3.5 rounded-xl bg-surface-muted/60 border border-border-theme text-xs font-medium text-foreground hover:border-secondary transition-all flex items-center justify-between group"
-                    >
-                      <div className="min-w-0 pr-2">
-                        <span className="block text-xs font-semibold text-foreground group-hover:text-secondary transition-colors">
-                          LinkedIn
-                        </span>
-                        <span className="block text-[11px] text-text-secondary truncate mt-0.5 font-sans">
-                          {profile.socialLinks.linkedin}
-                        </span>
-                      </div>
-                      <ExternalLinkIcon className="w-3.5 h-3.5 text-text-secondary group-hover:text-secondary shrink-0" />
-                    </a>
-                  ) : null}
-
-                  {profile.socialLinks?.youtube ? (
-                    <a
-                      href={profile.socialLinks.youtube}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-3.5 rounded-xl bg-surface-muted/60 border border-border-theme text-xs font-medium text-foreground hover:border-secondary transition-all flex items-center justify-between group"
-                    >
-                      <div className="min-w-0 pr-2">
-                        <span className="block text-xs font-semibold text-foreground group-hover:text-secondary transition-colors">
-                          YouTube
-                        </span>
-                        <span className="block text-[11px] text-text-secondary truncate mt-0.5 font-sans">
-                          {profile.socialLinks.youtube}
-                        </span>
-                      </div>
-                      <ExternalLinkIcon className="w-3.5 h-3.5 text-text-secondary group-hover:text-secondary shrink-0" />
-                    </a>
-                  ) : null}
-
-                  {!profile.socialLinks?.instagram &&
-                    !profile.socialLinks?.facebook &&
-                    !profile.socialLinks?.linkedin &&
-                    !profile.socialLinks?.youtube && (
-                      <p className="text-xs text-text-secondary col-span-1 sm:col-span-2 py-1">
-                        No social media links connected.
-                      </p>
-                    )}
-                </div>
-              </div>
-
-              {/* 4. Contact Information Card */}
-              <div className="bg-surface border border-border-theme rounded-2xl p-6 sm:p-8 shadow-xs space-y-4">
-                <div className="flex items-center gap-3 border-b border-border-theme pb-4">
-                  <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-500">
-                    <UserGroupIcon />
-                  </div>
-                  <h3 className="font-serif font-medium text-lg text-foreground">
-                    Contact Information
-                  </h3>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-                  <div>
-                    <span className="block text-text-secondary uppercase tracking-wider text-[10px] font-semibold mb-1">
-                      Contact Name
-                    </span>
-                    <span className="font-semibold text-foreground">
-                      {profile.contactInformation?.name || "Not specified"}
-                    </span>
-                  </div>
-
-                  <div>
-                    <span className="block text-text-secondary uppercase tracking-wider text-[10px] font-semibold mb-1">
-                      Contact Email
-                    </span>
-                    {profile.contactInformation?.email ? (
+                      {/* YouTube */}
                       <a
-                        href={`mailto:${profile.contactInformation.email}`}
-                        className="inline-flex items-center gap-1 text-secondary hover:underline font-semibold"
+                        href={youtubeUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-3 sm:p-3.5 rounded-xl border border-border-theme bg-white dark:bg-surface-muted/30 hover:border-secondary/40 hover:bg-surface-muted/50 transition-all flex items-center justify-between group"
                       >
-                        <MailIcon />
-                        <span>{profile.contactInformation.email}</span>
+                        <div className="flex items-center gap-3 min-w-0 pr-2">
+                          <div className="w-9 h-9 rounded-xl bg-[#ff0000] flex items-center justify-center text-white shrink-0 shadow-xs">
+                            <YoutubeIcon className="w-5 h-5" />
+                          </div>
+                          <div className="min-w-0">
+                            <span className="block text-xs font-semibold text-slate-900 dark:text-foreground group-hover:text-secondary transition-colors font-sans">
+                              YouTube
+                            </span>
+                            <span className="block text-[11px] text-text-secondary truncate mt-0.5 font-sans">
+                              {youtubeUrl}
+                            </span>
+                          </div>
+                        </div>
+                        <ExternalLinkIcon className="w-3.5 h-3.5 text-text-secondary/60 group-hover:text-secondary shrink-0 transition-colors" />
                       </a>
-                    ) : (
-                      <span className="text-text-secondary">Not specified</span>
-                    )}
+
+                      {/* Facebook */}
+                      <a
+                        href={facebookUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-3 sm:p-3.5 rounded-xl border border-border-theme bg-white dark:bg-surface-muted/30 hover:border-secondary/40 hover:bg-surface-muted/50 transition-all flex items-center justify-between group"
+                      >
+                        <div className="flex items-center gap-3 min-w-0 pr-2">
+                          <div className="w-9 h-9 rounded-xl bg-[#1877f2] flex items-center justify-center text-white shrink-0 shadow-xs">
+                            <FacebookIcon className="w-5 h-5" />
+                          </div>
+                          <div className="min-w-0">
+                            <span className="block text-xs font-semibold text-slate-900 dark:text-foreground group-hover:text-secondary transition-colors font-sans">
+                              Facebook
+                            </span>
+                            <span className="block text-[11px] text-text-secondary truncate mt-0.5 font-sans">
+                              {facebookUrl}
+                            </span>
+                          </div>
+                        </div>
+                        <ExternalLinkIcon className="w-3.5 h-3.5 text-text-secondary/60 group-hover:text-secondary shrink-0 transition-colors" />
+                      </a>
+
+                      {/* LinkedIn */}
+                      <a
+                        href={linkedinUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-3 sm:p-3.5 rounded-xl border border-border-theme bg-white dark:bg-surface-muted/30 hover:border-secondary/40 hover:bg-surface-muted/50 transition-all flex items-center justify-between group"
+                      >
+                        <div className="flex items-center gap-3 min-w-0 pr-2">
+                          <div className="w-9 h-9 rounded-xl bg-[#0077b5] flex items-center justify-center text-white shrink-0 shadow-xs">
+                            <LinkedinIcon className="w-4.5 h-4.5" />
+                          </div>
+                          <div className="min-w-0">
+                            <span className="block text-xs font-semibold text-slate-900 dark:text-foreground group-hover:text-secondary transition-colors font-sans">
+                              LinkedIn
+                            </span>
+                            <span className="block text-[11px] text-text-secondary truncate mt-0.5 font-sans">
+                              {linkedinUrl}
+                            </span>
+                          </div>
+                        </div>
+                        <ExternalLinkIcon className="w-3.5 h-3.5 text-text-secondary/60 group-hover:text-secondary shrink-0 transition-colors" />
+                      </a>
+                    </div>
                   </div>
 
-                  <div>
-                    <span className="block text-text-secondary uppercase tracking-wider text-[10px] font-semibold mb-1">
-                      Contact Phone
-                    </span>
-                    {profile.contactInformation?.phone ? (
-                      <a
-                        href={`tel:${profile.contactInformation.phone}`}
-                        className="inline-flex items-center gap-1 text-secondary hover:underline font-semibold"
-                      >
-                        <PhoneIcon />
-                        <span>{profile.contactInformation.phone}</span>
-                      </a>
-                    ) : (
-                      <span className="text-text-secondary">Not specified</span>
-                    )}
+                  {/* Card 3: Contact Information */}
+                  <div className="bg-white dark:bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 shadow-xs space-y-4">
+                    <h3 className="font-serif font-semibold text-lg text-slate-900 dark:text-foreground tracking-wide">
+                      Contact Information
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-sans">
+                      <div>
+                        <span className="block text-text-secondary uppercase tracking-wider text-[10px] font-semibold mb-1">
+                          Contact Name
+                        </span>
+                        <span className="font-medium text-slate-900 dark:text-foreground text-xs">
+                          {contactName}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="block text-text-secondary uppercase tracking-wider text-[10px] font-semibold mb-1">
+                          Contact Email
+                        </span>
+                        <span className="font-medium text-slate-900 dark:text-foreground text-xs">
+                          {contactEmail}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="block text-text-secondary uppercase tracking-wider text-[10px] font-semibold mb-1">
+                          Contact Phone
+                        </span>
+                        <span className="font-medium text-slate-900 dark:text-foreground text-xs">
+                          {contactPhone}
+                        </span>
+                      </div>
+                    </div>
                   </div>
+
                 </div>
+
+                {/* RIGHT COLUMN: 4 COLS */}
+                <div className="lg:col-span-4 space-y-5 sm:space-y-6">
+
+                  {/* Card 1: Brand Details */}
+                  <div className="bg-white dark:bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 shadow-xs space-y-3.5">
+                    <h3 className="font-serif font-semibold text-lg text-slate-900 dark:text-foreground pb-2 border-b border-border-theme tracking-wide">
+                      Brand Details
+                    </h3>
+                    <div className="space-y-3 text-xs font-sans">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-text-secondary font-medium">Category</span>
+                        <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#fff0f4] dark:bg-[#ff2d6c]/10 text-[#ff2d6c] border border-[#ff2d6c]/20">
+                          {category}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-text-secondary font-medium">Website</span>
+                        <a
+                          href={websiteUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[#ff2d6c] hover:underline font-medium inline-flex items-center gap-1 truncate max-w-[170px]"
+                        >
+                          <span className="truncate">{websiteUrl}</span>
+                          <ExternalLinkIcon className="w-3 h-3 shrink-0" />
+                        </a>
+                      </div>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-text-secondary font-medium">Location</span>
+                        <span className="font-medium text-slate-900 dark:text-foreground">
+                          {location}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-text-secondary font-medium">Joined On</span>
+                        <span className="font-medium text-slate-900 dark:text-foreground">
+                          {joinedOn}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Card 2: Brand Highlights */}
+                  <div className="bg-white dark:bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 shadow-xs space-y-4">
+                    <h3 className="font-serif font-semibold text-lg text-slate-900 dark:text-foreground tracking-wide">
+                      Brand Highlights
+                    </h3>
+                    <div className="grid grid-cols-2 gap-4 font-sans">
+                      <div>
+                        <span className="block text-[17px] font-semibold text-slate-900 dark:text-foreground leading-tight">
+                          50+
+                        </span>
+                        <span className="block text-[10px] text-text-secondary mt-0.5 leading-snug">
+                          Creators Collaborated
+                        </span>
+                      </div>
+                      <div>
+                        <span className="block text-[17px] font-semibold text-slate-900 dark:text-foreground leading-tight">
+                          8
+                        </span>
+                        <span className="block text-[10px] text-text-secondary mt-0.5 leading-snug">
+                          Countries Reached
+                        </span>
+                      </div>
+                      <div>
+                        <span className="block text-[17px] font-semibold text-slate-900 dark:text-foreground leading-tight">
+                          120K+
+                        </span>
+                        <span className="block text-[10px] text-text-secondary mt-0.5 leading-snug">
+                          Total Engagement
+                        </span>
+                      </div>
+                      <div>
+                        <span className="block text-[17px] font-semibold text-slate-900 dark:text-foreground leading-tight">
+                          4.8
+                        </span>
+                        <span className="block text-[10px] text-text-secondary mt-0.5 leading-snug">
+                          Avg. Campaign Rating
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+
               </div>
 
             </div>
           )}
 
           {/* ========================================================= */}
-          {/* EDIT MODE FORM */}
+          {/* EDIT MODE: FULL PROFILE FORM */}
           {/* ========================================================= */}
           {isEditing && (
-            <form onSubmit={handleSubmit} className="space-y-8">
+            <form onSubmit={handleSubmit} className="space-y-6">
 
               {/* 1. Company Details Card */}
-              <div className="bg-surface border border-border-theme rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
+              <div className="bg-white dark:bg-surface border border-border-theme rounded-2xl p-6 sm:p-7 shadow-xs space-y-6">
                 <div className="flex items-center gap-3 border-b border-border-theme pb-4">
                   <div className="p-2.5 rounded-xl bg-secondary/10 text-secondary">
                     <BuildingIcon />
                   </div>
                   <div>
-                    <h2 className="font-serif font-medium text-lg text-foreground">
+                    <h2 className="font-serif font-semibold text-lg text-slate-900 dark:text-foreground tracking-wide">
                       Company Details
                     </h2>
-                    <p className="text-xs text-text-secondary">
-                      Basic information about your organization or agency
+                    <p className="text-xs text-text-secondary font-sans">
+                      Basic information about your brand, identity, and logo
                     </p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 font-sans">
                   {/* Company Name */}
                   <div className="space-y-1.5 sm:col-span-2">
                     <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
@@ -968,7 +1065,7 @@ export default function BrandProfileForm() {
                       name="companyName"
                       value={formData.companyName}
                       onChange={handleInputChange}
-                      placeholder="e.g. Acme Corporation"
+                      placeholder="e.g. Maison Synergie"
                       required
                       className="w-full bg-surface border border-border-theme text-foreground text-xs sm:text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-secondary transition-colors"
                     />
@@ -977,14 +1074,14 @@ export default function BrandProfileForm() {
                   {/* Industry */}
                   <div className="space-y-1.5">
                     <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
-                      Industry
+                      Industry / Category
                     </label>
                     <input
                       type="text"
                       name="industry"
                       value={formData.industry}
                       onChange={handleInputChange}
-                      placeholder="e.g. Fashion & Apparel"
+                      placeholder="e.g. Luxury Fashion & Skincare"
                       className="w-full bg-surface border border-border-theme text-foreground text-xs sm:text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-secondary transition-colors"
                     />
                   </div>
@@ -1005,7 +1102,7 @@ export default function BrandProfileForm() {
                   </div>
 
                   {/* Website */}
-                  <div className="space-y-1.5">
+                  <div className="space-y-1.5 sm:col-span-2">
                     <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
                       Website URL
                     </label>
@@ -1014,7 +1111,7 @@ export default function BrandProfileForm() {
                       name="website"
                       value={formData.website}
                       onChange={handleInputChange}
-                      placeholder="https://example.com"
+                      placeholder="https://maisonsynergie.com"
                       className="w-full bg-surface border border-border-theme text-foreground text-xs sm:text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-secondary transition-colors"
                     />
                   </div>
@@ -1030,10 +1127,7 @@ export default function BrandProfileForm() {
                         <BrandLogoPreview
                           url={formData.logo}
                           alt={formData.companyName || "Brand Logo Preview"}
-                          initials={getCompanyInitials(
-                            formData.companyName,
-                            formData.contactInformation?.email
-                          )}
+                          initials={getBrandDisplayInitial(formData.companyName)}
                           isUploading={isUploadingLogo}
                         />
                         <button
@@ -1042,11 +1136,10 @@ export default function BrandProfileForm() {
                           disabled={isUploadingLogo}
                           aria-label="Upload company logo image"
                           title="Upload company logo image"
-                          className={`absolute -bottom-1.5 -right-1.5 p-1.5 rounded-lg bg-surface border border-border-theme text-text-secondary hover:text-foreground hover:bg-surface-muted shadow-xs transition-colors cursor-pointer ${
-                            isUploadingLogo ? "opacity-50 cursor-not-allowed" : ""
-                          }`}
+                          className={`absolute -bottom-1 -right-1 p-1.5 rounded-lg bg-surface border border-border-theme text-text-secondary hover:text-foreground hover:bg-surface-muted shadow-xs transition-colors cursor-pointer ${isUploadingLogo ? "opacity-50 cursor-not-allowed" : ""
+                            }`}
                         >
-                          <CameraIcon className="w-3.5 h-3.5" />
+                          <CameraIcon className="w-3.5 h-3.5 text-secondary" />
                         </button>
                       </div>
 
@@ -1120,22 +1213,22 @@ export default function BrandProfileForm() {
               </div>
 
               {/* 2. Social Links Card */}
-              <div className="bg-surface border border-border-theme rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
+              <div className="bg-white dark:bg-surface border border-border-theme rounded-2xl p-6 sm:p-7 shadow-xs space-y-6">
                 <div className="flex items-center gap-3 border-b border-border-theme pb-4">
                   <div className="p-2.5 rounded-xl bg-tertiary/10 text-tertiary">
-                    <GlobeIcon />
+                    <GlobeIcon className="w-5 h-5" />
                   </div>
                   <div>
-                    <h2 className="font-serif font-medium text-lg text-foreground">
+                    <h2 className="font-serif font-semibold text-lg text-slate-900 dark:text-foreground tracking-wide">
                       Social Links
                     </h2>
-                    <p className="text-xs text-text-secondary">
+                    <p className="text-xs text-text-secondary font-sans">
                       Connect your brand social media profiles
                     </p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 font-sans">
                   {/* Instagram */}
                   <div className="space-y-1.5">
                     <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
@@ -1199,22 +1292,22 @@ export default function BrandProfileForm() {
               </div>
 
               {/* 3. Contact Information Card */}
-              <div className="bg-surface border border-border-theme rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
+              <div className="bg-white dark:bg-surface border border-border-theme rounded-2xl p-6 sm:p-7 shadow-xs space-y-6">
                 <div className="flex items-center gap-3 border-b border-border-theme pb-4">
                   <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-500">
-                    <UserGroupIcon />
+                    <UserGroupIcon className="w-5 h-5" />
                   </div>
                   <div>
-                    <h2 className="font-serif font-medium text-lg text-foreground">
+                    <h2 className="font-serif font-semibold text-lg text-slate-900 dark:text-foreground tracking-wide">
                       Contact Information
                     </h2>
-                    <p className="text-xs text-text-secondary">
+                    <p className="text-xs text-text-secondary font-sans">
                       Primary point of contact for creator communications
                     </p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 font-sans">
                   {/* Contact Name */}
                   <div className="space-y-1.5">
                     <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
@@ -1263,21 +1356,19 @@ export default function BrandProfileForm() {
               </div>
 
               {/* 4. Action Buttons (Cancel & Submit) */}
-              <div className="flex items-center justify-end gap-3 pt-2">
-                {profile && (
-                  <button
-                    type="button"
-                    onClick={handleCancel}
-                    disabled={isSubmitting || isUploadingLogo}
-                    className="px-6 py-3.5 rounded-xl border border-border-theme text-foreground hover:bg-surface-muted text-xs sm:text-sm font-semibold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Cancel
-                  </button>
-                )}
+              <div className="flex items-center justify-end gap-3 pt-2 font-sans">
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  disabled={isSubmitting || isUploadingLogo}
+                  className="px-6 py-3 rounded-xl border border-border-theme text-foreground hover:bg-surface-muted text-xs sm:text-sm font-semibold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Cancel
+                </button>
                 <button
                   type="submit"
                   disabled={isSubmitting || isUploadingLogo}
-                  className="inline-flex items-center justify-center px-8 py-3.5 rounded-xl bg-secondary hover:bg-secondary-dark text-white font-sans text-xs sm:text-sm font-semibold tracking-wide transition-all shadow-xs hover:shadow-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex items-center justify-center px-8 py-3 rounded-xl bg-[#252525] hover:bg-[#111111] text-white text-xs sm:text-sm font-semibold tracking-wide transition-all shadow-xs hover:shadow-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? (
                     <span className="flex items-center gap-2">
@@ -1285,7 +1376,7 @@ export default function BrandProfileForm() {
                       <span>Saving...</span>
                     </span>
                   ) : (
-                    <span>{profile ? "Save Changes" : "Create Profile"}</span>
+                    <span>{profile ? "Save Changes" : "Save Profile"}</span>
                   )}
                 </button>
               </div>

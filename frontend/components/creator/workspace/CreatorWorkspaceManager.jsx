@@ -211,7 +211,7 @@ export default function CreatorWorkspaceManager() {
                 <span className="p-2 rounded-xl bg-secondary/15 text-secondary border border-secondary/20">
                   <WorkspaceIcon className="w-5 h-5" />
                 </span>
-                <h1 className="font-serif font-bold text-2xl text-foreground">
+                <h1 className="font-sans font-bold text-2xl sm:text-3xl text-foreground tracking-tight">
                   Collaboration Workspace
                 </h1>
               </div>
@@ -230,11 +230,10 @@ export default function CreatorWorkspaceManager() {
                   key={tab.id}
                   type="button"
                   onClick={() => handleTabChange(tab.id)}
-                  className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                    isActive
+                  className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${isActive
                       ? "bg-secondary text-white shadow-xs"
                       : "text-text-secondary hover:text-foreground hover:bg-surface-muted"
-                  }`}
+                    }`}
                 >
                   {tab.label}
                 </button>
@@ -282,7 +281,7 @@ export default function CreatorWorkspaceManager() {
                 <BriefcaseIcon className="w-8 h-8" />
               </div>
               <div className="space-y-1">
-                <h3 className="font-serif font-semibold text-lg text-foreground">
+                <h3 className="font-sans font-semibold text-lg text-foreground tracking-tight">
                   No workspaces found
                 </h3>
                 <p className="text-xs text-text-secondary max-w-sm mx-auto">
@@ -320,7 +319,7 @@ export default function CreatorWorkspaceManager() {
                           <span className="text-[11px] font-semibold text-text-secondary block truncate">
                             Brand: {brandName}
                           </span>
-                          <h3 className="font-serif font-semibold text-base text-foreground line-clamp-1 mt-0.5">
+                          <h3 className="font-sans font-semibold text-base text-foreground line-clamp-1 mt-0.5 tracking-tight">
                             {campaignTitle}
                           </h3>
                         </div>
@@ -335,7 +334,7 @@ export default function CreatorWorkspaceManager() {
                       <div className="grid grid-cols-2 gap-2 bg-surface-muted/60 p-3 rounded-xl border border-border-theme/50 text-xs">
                         <div>
                           <span className="text-[10px] text-text-secondary block">Agreed Price</span>
-                          <span className="font-serif font-semibold text-foreground">
+                          <span className="font-sans font-semibold text-foreground">
                             {agreedPriceFormatted}
                           </span>
                         </div>
@@ -430,11 +429,10 @@ export default function CreatorWorkspaceManager() {
                       key={pageNum}
                       type="button"
                       onClick={() => handlePageChange(pageNum)}
-                      className={`w-8 h-8 rounded-xl font-semibold text-xs transition-all cursor-pointer ${
-                        pageNum === currentPage
+                      className={`w-8 h-8 rounded-xl font-semibold text-xs transition-all cursor-pointer ${pageNum === currentPage
                           ? "bg-secondary text-white shadow-xs"
                           : "bg-surface hover:bg-surface-muted text-text-secondary border border-border-theme"
-                      }`}
+                        }`}
                     >
                       {pageNum}
                     </button>

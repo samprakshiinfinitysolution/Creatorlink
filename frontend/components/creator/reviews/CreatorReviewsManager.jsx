@@ -232,7 +232,7 @@ export default function CreatorReviewsManager() {
                   Verified Brand Feedback
                 </span>
               </div>
-              <h1 className="font-serif font-bold text-2xl sm:text-3xl text-foreground mt-1">
+              <h1 className="font-sans font-bold text-2xl sm:text-3xl text-foreground tracking-tight mt-1">
                 Client Reviews & Reputation
               </h1>
               <p className="text-xs text-text-secondary mt-1">
@@ -273,7 +273,7 @@ export default function CreatorReviewsManager() {
                 Overall Average Rating
               </span>
               <div className="flex items-baseline gap-2 pt-0.5">
-                <span className="font-serif font-bold text-3xl text-amber-400">
+                <span className="font-sans font-semibold text-[22px] sm:text-[28px] text-amber-500 tracking-tight">
                   {avgRatingValue > 0 ? avgRatingValue.toFixed(1) : "0.0"}
                 </span>
                 <div className="flex items-center gap-0.5 text-amber-400">
@@ -296,7 +296,7 @@ export default function CreatorReviewsManager() {
               <span className="text-[11px] font-semibold text-text-secondary uppercase tracking-wider block">
                 Total Received Reviews
               </span>
-              <span className="font-serif font-bold text-3xl text-foreground block pt-0.5">
+              <span className="font-sans font-semibold text-[22px] sm:text-[28px] text-foreground tracking-tight block pt-0.5">
                 {totalReviewsCount}
               </span>
               <span className="text-[10px] text-text-secondary block">
@@ -309,7 +309,7 @@ export default function CreatorReviewsManager() {
               <span className="text-[11px] font-semibold text-text-secondary uppercase tracking-wider block">
                 Page 5-Star Share
               </span>
-              <span className="font-serif font-bold text-3xl text-emerald-500 block pt-0.5">
+              <span className="font-sans font-semibold text-[22px] sm:text-[28px] text-emerald-500 tracking-tight block pt-0.5">
                 {currentPageReviewCount > 0 ? `${currentPageFiveStarPercentage}%` : "0%"}
               </span>
               <span className="text-[10px] text-text-secondary block">
@@ -359,7 +359,7 @@ export default function CreatorReviewsManager() {
                 <StarIcon className="w-7 h-7 text-secondary" filled={true} />
               </div>
               <div className="space-y-1">
-                <h3 className="font-serif font-semibold text-lg text-foreground">
+                <h3 className="font-sans font-semibold text-lg text-foreground tracking-tight">
                   No Client Reviews Found
                 </h3>
                 <p className="text-xs text-text-secondary max-w-sm mx-auto leading-relaxed">

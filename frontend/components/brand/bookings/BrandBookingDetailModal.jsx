@@ -229,8 +229,8 @@ export default function BrandBookingDetailModal({
     Array.isArray(booking?.deliverables) && booking.deliverables.length > 0
       ? booking.deliverables
       : Array.isArray(booking?.campaign?.deliverables)
-      ? booking.campaign.deliverables
-      : [];
+        ? booking.campaign.deliverables
+        : [];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
@@ -252,7 +252,7 @@ export default function BrandBookingDetailModal({
                 </span>
               )}
             </div>
-            <h2 className="font-serif font-semibold text-xl text-foreground mt-1">
+            <h2 className="font-sans font-semibold text-xl text-foreground tracking-tight mt-1">
               {campaignTitle}
             </h2>
           </div>
@@ -268,7 +268,7 @@ export default function BrandBookingDetailModal({
 
         {/* Modal Body */}
         <div className="p-5 sm:p-6 overflow-y-auto space-y-6 flex-1 custom-scrollbar">
-          
+
           {/* Loading State Skeleton */}
           {loading && !booking && (
             <div className="space-y-4 animate-pulse">
@@ -297,11 +297,10 @@ export default function BrandBookingDetailModal({
           {/* Feedback Success / Error Banners */}
           {localFeedback && (
             <div
-              className={`p-4 rounded-xl text-xs font-medium flex items-center gap-2 border ${
-                localFeedback.type === "success"
+              className={`p-4 rounded-xl text-xs font-medium flex items-center gap-2 border ${localFeedback.type === "success"
                   ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-500"
                   : "bg-red-500/10 border-red-500/30 text-red-500"
-              }`}
+                }`}
             >
               {localFeedback.type === "success" && <CheckCircleIcon className="w-4 h-4 shrink-0" />}
               <span>{localFeedback.text}</span>
@@ -318,7 +317,7 @@ export default function BrandBookingDetailModal({
           {/* Booking Details Grid */}
           {!loading && booking && (
             <div className="space-y-6">
-              
+
               {/* Creator & Proposal Overview Card */}
               <div className="bg-surface-muted/40 border border-border-theme rounded-2xl p-5 space-y-4">
                 <span className="text-[10px] font-bold text-text-secondary uppercase tracking-wider block">
@@ -485,11 +484,10 @@ export default function BrandBookingDetailModal({
                     type="button"
                     onClick={handleConfirmStatusChange}
                     disabled={submitting}
-                    className={`px-3 py-1.5 rounded-lg text-white text-xs font-semibold transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
-                      confirmAction === "accept"
+                    className={`px-3 py-1.5 rounded-lg text-white text-xs font-semibold transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${confirmAction === "accept"
                         ? "bg-emerald-600 hover:bg-emerald-700"
                         : "bg-red-600 hover:bg-red-700"
-                    }`}
+                      }`}
                   >
                     {submitting ? (
                       <span className="flex items-center gap-1.5">
@@ -538,26 +536,26 @@ export default function BrandBookingDetailModal({
           {/* Accepted or In-Progress Workspace Action */}
           {(booking?.status?.toLowerCase() === "accepted" ||
             booking?.status?.toLowerCase() === "in_progress") && (
-            <Link
-              href={`/brand/workspace/${booking._id || booking.id}`}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-secondary hover:bg-secondary-dark text-white text-xs font-semibold transition-all shadow-xs cursor-pointer"
-            >
-              <span>Open Workspace</span>
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
+              <Link
+                href={`/brand/workspace/${booking._id || booking.id}`}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-secondary hover:bg-secondary-dark text-white text-xs font-semibold transition-all shadow-xs cursor-pointer"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
-                />
-              </svg>
-            </Link>
-          )}
+                <span>Open Workspace</span>
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                  />
+                </svg>
+              </Link>
+            )}
         </div>
       </div>
     </div>

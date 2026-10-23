@@ -176,17 +176,17 @@ export default function BrandPaymentsManager() {
         <BrandHeader setMobileOpen={setMobileOpen} />
 
         {/* Main Content Area */}
-        <main className="p-4 sm:p-6 lg:p-8 space-y-6 flex-1 max-w-7xl w-full mx-auto">
+        <main className="px-3 sm:px-5 lg:px-6 py-5 sm:py-6 space-y-5 sm:space-y-6 flex-1 max-w-[1536px] w-full mx-auto min-w-0">
           {/* Header Section */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-secondary/10 text-secondary border border-secondary/20 uppercase tracking-wider">
-                  Test Mode Enabled
+              <div className="mb-2">
+                <span className="font-bold text-[11px] tracking-wider uppercase text-[#ff2d6c] dark:text-[#ff4f87] font-sans">
+                  TEST MODE ENABLED
                 </span>
               </div>
-              <h1 className="font-serif font-bold text-2xl sm:text-3xl text-foreground mt-1">
-                Payment History & Escrow Receipts
+              <h1 className="font-serif font-medium text-2xl sm:text-3xl text-foreground mt-1">
+                Payment History And Escrow Receipts
               </h1>
               <p className="text-xs text-text-secondary mt-1">
                 Monitor and verify Razorpay payments for completed campaign workspaces.
@@ -210,7 +210,7 @@ export default function BrandPaymentsManager() {
               <span className="text-[11px] font-semibold text-text-secondary uppercase tracking-wider block">
                 Page Paid Volume
               </span>
-              <span className="font-serif font-bold text-2xl text-emerald-500 block">
+              <span className="font-sans font-semibold text-2xl text-emerald-500 tracking-tight block">
                 {formatPrice(totalPaidAmount)}
               </span>
               <span className="text-[10px] text-text-secondary block">
@@ -222,7 +222,7 @@ export default function BrandPaymentsManager() {
               <span className="text-[11px] font-semibold text-text-secondary uppercase tracking-wider block">
                 Total Account Records
               </span>
-              <span className="font-serif font-bold text-2xl text-foreground block">
+              <span className="font-sans font-semibold text-2xl text-foreground tracking-tight block">
                 {pagination?.totalItems ?? payments.length}
               </span>
               <span className="text-[10px] text-text-secondary block">
@@ -234,7 +234,7 @@ export default function BrandPaymentsManager() {
               <span className="text-[11px] font-semibold text-text-secondary uppercase tracking-wider block">
                 Page Pending / Processing
               </span>
-              <span className="font-serif font-bold text-2xl text-amber-500 block">
+              <span className="font-sans font-semibold text-2xl text-amber-500 tracking-tight block">
                 {pendingCount}
               </span>
               <span className="text-[10px] text-text-secondary block">
@@ -258,7 +258,7 @@ export default function BrandPaymentsManager() {
           )}
 
           {/* Filter Tabs */}
-          <div className="bg-surface border border-border-theme rounded-2xl p-2 flex items-center gap-1.5 overflow-x-auto custom-scrollbar">
+          <div className="bg-surface border border-border-theme rounded-2xl p-2 flex items-center gap-1.5 overflow-x-auto no-scrollbar min-w-0 w-full max-w-full">
             {[
               { id: "all", label: "All Payments" },
               { id: "paid", label: "Paid Only" },
@@ -270,11 +270,10 @@ export default function BrandPaymentsManager() {
                 key={tab.id}
                 type="button"
                 onClick={() => handleStatusFilterChange(tab.id)}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                  selectedStatus === tab.id
-                    ? "bg-secondary text-white shadow-xs"
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${selectedStatus === tab.id
+                    ? "bg-[#252525] text-white shadow-xs"
                     : "text-text-secondary hover:text-foreground hover:bg-surface-muted"
-                }`}
+                  }`}
               >
                 {tab.label}
               </button>
@@ -282,7 +281,7 @@ export default function BrandPaymentsManager() {
           </div>
 
           {/* Payments Table / List */}
-          <div className="bg-surface border border-border-theme rounded-2xl shadow-xs overflow-hidden">
+          <div className="bg-surface border border-border-theme rounded-2xl shadow-xs overflow-hidden min-w-0">
             {loading ? (
               /* Loading Skeleton */
               <div className="p-6 space-y-4 animate-pulse">
@@ -293,7 +292,7 @@ export default function BrandPaymentsManager() {
             ) : payments.length === 0 ? (
               /* Empty State */
               <div className="p-12 text-center space-y-3">
-                <div className="w-14 h-14 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center mx-auto border border-secondary/20">
+                <div className="w-14 h-14 rounded-2xl bg-secondary/8 text-[#252525] dark:text-white flex items-center justify-center mx-auto border border-secondary/15">
                   <CreditCardIcon className="w-7 h-7" />
                 </div>
                 <div className="space-y-1">
@@ -309,7 +308,7 @@ export default function BrandPaymentsManager() {
                 <div className="pt-2">
                   <Link
                     href="/brand/workspace"
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-secondary hover:bg-secondary-dark text-white text-xs font-semibold shadow-xs transition-all cursor-pointer"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#252525] hover:bg-[#111111] text-white text-xs font-semibold shadow-xs transition-all cursor-pointer"
                   >
                     <span>View Completed Workspaces</span>
                   </Link>
@@ -317,7 +316,7 @@ export default function BrandPaymentsManager() {
               </div>
             ) : (
               /* Payments Data Table */
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto no-scrollbar">
                 <table className="w-full text-left text-xs">
                   <thead className="bg-surface-muted/60 text-text-secondary font-semibold uppercase tracking-wider text-[10px] border-b border-border-theme">
                     <tr>
@@ -360,7 +359,7 @@ export default function BrandPaymentsManager() {
                           </td>
 
                           {/* Amount */}
-                          <td className="py-3.5 px-4 font-serif font-bold text-sm text-foreground">
+                          <td className="py-3.5 px-4 font-sans font-semibold text-sm text-foreground">
                             {formatPrice(payment.amount, payment.currency)}
                           </td>
 

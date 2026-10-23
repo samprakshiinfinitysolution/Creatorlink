@@ -503,22 +503,22 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
     return (
       <div
         key={deliverableId || idx}
-        className="bg-surface-muted/60 border border-border-theme/60 rounded-xl p-4 space-y-3 flex flex-col justify-between"
+        className="bg-surface-muted/40 hover:bg-surface-muted/60 border border-border-theme/60 rounded-xl p-3.5 sm:p-4 space-y-2.5 transition-all"
       >
-        <div className="space-y-2">
-          <div className="flex items-start justify-between gap-2">
+        <div className="space-y-1.5">
+          <div className="flex items-start justify-between gap-2 flex-wrap">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-semibold text-sm text-foreground line-clamp-1">
+              <span className="font-semibold text-xs sm:text-sm text-foreground">
                 {title}
               </span>
               <span
-                className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wider ${delBadge.color}`}
+                className={`px-2 py-0.5 rounded-full text-[9.5px] font-bold border uppercase tracking-wider ${delBadge.color}`}
               >
                 {delBadge.label}
               </span>
             </div>
             {dueDate && (
-              <span className="text-[10px] text-text-secondary flex items-center gap-1 shrink-0">
+              <span className="text-[10.5px] text-text-secondary flex items-center gap-1 shrink-0">
                 <CalendarIcon className="w-3 h-3" />
                 Due: {formatDate(dueDate)}
               </span>
@@ -526,7 +526,7 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
           </div>
 
           {description && (
-            <p className="text-xs text-text-secondary line-clamp-2 leading-relaxed">
+            <p className="text-xs text-text-secondary leading-relaxed">
               {description}
             </p>
           )}
@@ -535,29 +535,29 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
           {submission && (
             <div className="bg-surface p-3 rounded-lg border border-border-theme/50 space-y-1.5 text-xs mt-2">
               <div className="flex items-center justify-between text-[10px] text-text-secondary font-semibold">
-                <span>Submitted Work</span>
+                <span className="uppercase tracking-wider">Submitted Work</span>
                 {submission.submittedAt && (
                   <span>{formatDateTime(submission.submittedAt)}</span>
                 )}
               </div>
 
               {submission.title && (
-                <p className="font-semibold text-foreground">{submission.title}</p>
+                <p className="font-semibold text-foreground text-xs">{submission.title}</p>
               )}
 
               {submission.notes && (
-                <p className="text-text-secondary leading-relaxed text-[11px] line-clamp-2">
+                <p className="text-text-secondary leading-relaxed text-[11px]">
                   {submission.notes}
                 </p>
               )}
 
-              <div className="flex flex-wrap gap-2 pt-1">
+              <div className="flex flex-wrap gap-2.5 pt-1">
                 {submission.link && (
                   <a
                     href={submission.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-[11px] text-secondary hover:underline font-medium"
+                    className="inline-flex items-center gap-1 text-[11px] text-secondary hover:underline font-semibold"
                   >
                     <LinkIcon className="w-3 h-3" />
                     <span>View Content Link</span>
@@ -568,7 +568,7 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
                     href={submission.fileUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-[11px] text-secondary hover:underline font-medium"
+                    className="inline-flex items-center gap-1 text-[11px] text-secondary hover:underline font-semibold"
                   >
                     <DocumentIcon className="w-3 h-3" />
                     <span>View Asset File</span>
@@ -581,7 +581,7 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
 
         {/* Review Actions */}
         {isReviewable && (
-          <div className="pt-3 border-t border-border-theme/50 flex items-center justify-end gap-2">
+          <div className="pt-2.5 border-t border-border-theme/40 flex items-center justify-end gap-2">
             <button
               type="button"
               onClick={() => handleOpenReviewModal("revision", isObject ? item : null)}
@@ -614,7 +614,7 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
         <BrandHeader setMobileOpen={setMobileOpen} />
 
         {/* Page Content */}
-        <main className="p-4 sm:p-6 lg:p-8 space-y-6 flex-1 max-w-7xl w-full mx-auto">
+        <main className="px-3 sm:px-5 lg:px-6 py-4 sm:py-5 space-y-4 sm:space-y-5 flex-1 max-w-[1440px] w-full mx-auto min-w-0">
           {/* Top Navigation */}
           <div>
             <Link
@@ -678,7 +678,7 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
           ) : !loading && !workspace ? (
             /* Not Found State */
             <div className="bg-surface border border-border-theme rounded-2xl p-10 text-center space-y-4">
-              <div className="w-16 h-16 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center mx-auto border border-secondary/20">
+              <div className="w-16 h-16 rounded-2xl bg-secondary/8 text-[#252525] dark:text-white flex items-center justify-center mx-auto border border-secondary/15">
                 <ExclamationIcon className="w-8 h-8" />
               </div>
               <div className="space-y-1">
@@ -692,7 +692,7 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
               <div className="pt-2">
                 <Link
                   href="/brand/workspace"
-                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-secondary hover:bg-secondary-dark text-white text-xs font-semibold transition-all cursor-pointer shadow-xs"
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#252525] hover:bg-[#111111] text-white text-xs font-semibold transition-all cursor-pointer shadow-xs"
                 >
                   <span>Back to Workspaces</span>
                 </Link>
@@ -700,24 +700,24 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
             </div>
           ) : (
             /* Workspace Detail Content */
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-5">
               {/* Header / Summary Card */}
-              <div className="bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 shadow-xs space-y-5">
+              <div className="bg-surface border border-border-theme rounded-2xl p-4 sm:p-5 shadow-xs space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                   <div>
-                    <div className="flex items-center gap-2.5 flex-wrap">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <span
-                        className={`px-3 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wider ${badge.color}`}
+                        className={`px-2.5 py-0.5 rounded-full text-[9.5px] font-bold border uppercase tracking-wider ${badge.color}`}
                       >
                         {badge.label}
                       </span>
                       {campaign?.category && (
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-surface-muted text-text-secondary border border-border-theme">
+                        <span className="px-2.5 py-0.5 rounded-full text-[9.5px] font-semibold bg-surface-muted text-text-secondary border border-border-theme">
                           {campaign.category}
                         </span>
                       )}
                     </div>
-                    <h1 className="font-serif font-bold text-2xl sm:text-3xl text-foreground mt-2">
+                    <h1 className="font-serif font-medium text-xl sm:text-2xl text-foreground mt-1.5 tracking-tight">
                       {campaign?.title || "Campaign Workspace"}
                     </h1>
                     <div className="text-xs text-text-secondary mt-1 space-y-0.5">
@@ -728,11 +728,11 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-3 shrink-0 sm:self-start">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 shrink-0 sm:self-start">
                     {bookingId && (
                       <Link
                         href={`/brand/messages?bookingId=${bookingId}`}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-secondary hover:bg-secondary-dark text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#252525] hover:bg-[#111111] text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
                       >
                         <ChatBubbleIcon className="w-4 h-4" />
                         <span>Message Creator</span>
@@ -741,7 +741,7 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
 
                     {/* Payment Action / Paid Badge */}
                     {isPaid ? (
-                      <div className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-xs font-semibold">
+                      <div className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-xs font-semibold">
                         <CheckCircleIcon className="w-4 h-4" />
                         <span>Payment Completed ({formatPrice(existingPaidPayment.amount, existingPaidPayment.currency)})</span>
                       </div>
@@ -750,7 +750,7 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
                         type="button"
                         onClick={handleInitiatePayment}
                         disabled={isPaymentProcessing}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {isPaymentProcessing ? (
                           <>
@@ -793,7 +793,7 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
                         <button
                           type="button"
                           onClick={() => setIsCreatorReviewModalOpen(true)}
-                          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+                          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
                         >
                           <StarIcon className="w-4 h-4 text-white" filled={true} />
                           <span>Review Creator</span>
@@ -864,40 +864,40 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
                 )}
 
                 {/* Key Summary Stats */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-border-theme">
-                  <div className="bg-surface-muted/60 p-3 rounded-xl border border-border-theme/50">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 pt-3.5 border-t border-border-theme">
+                  <div className="bg-surface-muted/50 p-2.5 sm:p-3 rounded-xl border border-border-theme/40">
                     <span className="text-[10px] font-semibold text-text-secondary uppercase tracking-wider block">
                       Agreed Price
                     </span>
-                    <span className="font-serif font-bold text-base text-foreground mt-0.5 block">
+                    <span className="font-sans font-bold text-sm sm:text-base text-foreground mt-0.5 block">
                       {formatPrice(workspace.agreedPrice, workspace.currency)}
                     </span>
                   </div>
 
-                  <div className="bg-surface-muted/60 p-3 rounded-xl border border-border-theme/50">
+                  <div className="bg-surface-muted/50 p-2.5 sm:p-3 rounded-xl border border-border-theme/40">
                     <span className="text-[10px] font-semibold text-text-secondary uppercase tracking-wider block flex items-center gap-1">
                       <CalendarIcon className="w-3 h-3" />
                       Deadline
                     </span>
-                    <span className="font-medium text-xs text-foreground mt-1 block">
+                    <span className="font-medium text-xs sm:text-sm text-foreground mt-0.5 block">
                       {formatDate(workspace.deadline)}
                     </span>
                   </div>
 
-                  <div className="bg-surface-muted/60 p-3 rounded-xl border border-border-theme/50">
+                  <div className="bg-surface-muted/50 p-2.5 sm:p-3 rounded-xl border border-border-theme/40">
                     <span className="text-[10px] font-semibold text-text-secondary uppercase tracking-wider block">
                       Platform
                     </span>
-                    <span className="font-medium text-xs text-foreground mt-1 capitalize block">
+                    <span className="font-medium text-xs sm:text-sm text-foreground mt-0.5 capitalize block">
                       {campaign?.platform || service?.platform || "General"}
                     </span>
                   </div>
 
-                  <div className="bg-surface-muted/60 p-3 rounded-xl border border-border-theme/50">
+                  <div className="bg-surface-muted/50 p-2.5 sm:p-3 rounded-xl border border-border-theme/40">
                     <span className="text-[10px] font-semibold text-text-secondary uppercase tracking-wider block">
                       Selected Service
                     </span>
-                    <span className="font-medium text-xs text-foreground mt-1 line-clamp-1 block">
+                    <span className="font-medium text-xs sm:text-sm text-foreground mt-0.5 line-clamp-1 block">
                       {service?.title || "Custom Package"}
                     </span>
                   </div>
@@ -905,29 +905,31 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
               </div>
 
               {/* Main Content Grid */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Left Column: Deliverables & Details */}
-                <div className="lg:col-span-2 space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+                {/* Left Column: Deliverables (lg:col-span-7) */}
+                <div className="lg:col-span-7 space-y-4">
                   {/* Campaign Deliverables Section */}
-                  <div className="bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 space-y-6 shadow-xs">
-                    <div className="flex items-center justify-between">
-                      <h2 className="font-serif font-semibold text-lg text-foreground">
-                        Campaign Deliverables
-                      </h2>
-                      <span className="text-xs text-text-secondary font-medium">
-                        {deliverables.length} Total
-                      </span>
+                  <div className="bg-surface border border-border-theme rounded-2xl p-4 sm:p-5 space-y-4 shadow-xs">
+                    <div className="flex items-center justify-between pb-3 border-b border-border-theme">
+                      <div className="flex items-center gap-2">
+                        <h2 className="font-serif font-semibold text-base sm:text-lg text-foreground">
+                          Campaign Deliverables
+                        </h2>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-secondary/10 text-secondary border border-secondary/20">
+                          {deliverables.length} Total
+                        </span>
+                      </div>
                     </div>
 
                     {deliverables.length > 0 ? (
-                      <div className="space-y-6">
+                      <div className="space-y-4">
                         {/* Active / Reviewable Group */}
                         {activeDeliverables.length > 0 && (
-                          <div className="space-y-3">
-                            <h3 className="text-xs font-bold text-text-secondary uppercase tracking-wider">
+                          <div className="space-y-2.5">
+                            <h3 className="text-[11px] font-bold text-text-secondary uppercase tracking-wider">
                               Reviewable & Active Deliverables ({activeDeliverables.length})
                             </h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+                            <div className="space-y-3">
                               {activeDeliverables.map((item, idx) => renderDeliverableCard(item, idx))}
                             </div>
                           </div>
@@ -935,13 +937,13 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
 
                         {/* Pending Group */}
                         {pendingDeliverables.length > 0 && (
-                          <div className="space-y-3">
+                          <div className="space-y-2.5">
                             {activeDeliverables.length > 0 && (
-                              <h3 className="text-xs font-bold text-text-secondary uppercase tracking-wider pt-2 border-t border-border-theme">
+                              <h3 className="text-[11px] font-bold text-text-secondary uppercase tracking-wider pt-3 border-t border-border-theme">
                                 Pending Deliverables ({pendingDeliverables.length})
                               </h3>
                             )}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+                            <div className="space-y-3">
                               {pendingDeliverables.map((item, idx) => renderDeliverableCard(item, idx))}
                             </div>
                           </div>
@@ -951,60 +953,33 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
                       <p className="text-xs text-text-secondary">No specific deliverables listed.</p>
                     )}
                   </div>
-
-                  {/* Campaign & Service Details */}
-                  <div className="bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 space-y-4 shadow-xs">
-                    <h2 className="font-serif font-semibold text-lg text-foreground">
-                      Campaign & Service Brief
-                    </h2>
-                    {campaign?.description && (
-                      <div className="space-y-1">
-                        <span className="text-xs font-semibold text-foreground block">
-                          Campaign Overview:
-                        </span>
-                        <p className="text-xs text-text-secondary whitespace-pre-line leading-relaxed">
-                          {campaign.description}
-                        </p>
-                      </div>
-                    )}
-                    {service?.description && (
-                      <div className="space-y-1 pt-2 border-t border-border-theme">
-                        <span className="text-xs font-semibold text-foreground block">
-                          Service Package Details:
-                        </span>
-                        <p className="text-xs text-text-secondary whitespace-pre-line leading-relaxed">
-                          {service.description}
-                        </p>
-                      </div>
-                    )}
-                    {service?.deliveryTime && (
-                      <div className="pt-2 border-t border-border-theme text-xs text-text-secondary">
-                        Delivery Time: <span className="font-semibold text-foreground">{service.deliveryTime} Days</span>
-                      </div>
-                    )}
-                  </div>
                 </div>
 
-                {/* Right Column: Submitted Work & Revision History */}
-                <div className="space-y-6">
+                {/* Right Column: Submitted Work, Campaign Brief & Revisions (lg:col-span-5) */}
+                <div className="lg:col-span-5 space-y-4">
                   {/* Submitted Work Section */}
-                  <div className="bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 space-y-4 shadow-xs">
-                    <h2 className="font-serif font-semibold text-base text-foreground">
-                      Submitted Work ({submissions.length})
-                    </h2>
+                  <div className="bg-surface border border-border-theme rounded-2xl p-4 sm:p-5 space-y-3 shadow-xs">
+                    <div className="flex items-center justify-between pb-2.5 border-b border-border-theme">
+                      <h2 className="font-serif font-semibold text-sm sm:text-base text-foreground">
+                        Submitted Work
+                      </h2>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-surface-muted text-text-secondary border border-border-theme">
+                        {submissions.length} Total
+                      </span>
+                    </div>
 
                     {submissions.length === 0 ? (
-                      <div className="bg-surface-muted/40 border border-border-theme/60 rounded-xl p-6 text-center space-y-2">
+                      <div className="bg-surface-muted/30 border border-border-theme/50 rounded-xl p-4 text-center">
                         <p className="text-xs text-text-secondary font-medium">
                           No work submitted yet.
                         </p>
                       </div>
                     ) : (
-                      <div className="space-y-3">
+                      <div className="space-y-2.5">
                         {submissions.map((sub, idx) => (
                           <div
                             key={sub._id || idx}
-                            className="bg-surface-muted/60 border border-border-theme/70 p-4 rounded-xl space-y-2 text-xs"
+                            className="bg-surface-muted/50 border border-border-theme/60 p-3 rounded-xl space-y-1.5 text-xs"
                           >
                             <div className="flex items-center justify-between gap-2">
                               <span className="font-semibold text-foreground line-clamp-1">
@@ -1027,7 +1002,7 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
                                   href={sub.link}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1 text-[11px] text-secondary hover:underline font-medium"
+                                  className="inline-flex items-center gap-1 text-[11px] text-secondary hover:underline font-semibold"
                                 >
                                   <LinkIcon className="w-3 h-3" />
                                   <span>View Content Link</span>
@@ -1038,7 +1013,7 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
                                   href={sub.fileUrl}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1 text-[11px] text-secondary hover:underline font-medium"
+                                  className="inline-flex items-center gap-1 text-[11px] text-secondary hover:underline font-semibold"
                                 >
                                   <DocumentIcon className="w-3 h-3" />
                                   <span>View Asset File</span>
@@ -1051,17 +1026,57 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
                     )}
                   </div>
 
+                  {/* Campaign & Service Details */}
+                  <div className="bg-surface border border-border-theme rounded-2xl p-4 sm:p-5 space-y-3.5 shadow-xs">
+                    <div className="pb-2 border-b border-border-theme">
+                      <h2 className="font-serif font-semibold text-sm sm:text-base text-foreground">
+                        Campaign & Service Brief
+                      </h2>
+                    </div>
+                    {campaign?.description && (
+                      <div className="space-y-1">
+                        <span className="text-xs font-semibold text-foreground block">
+                          Campaign Overview:
+                        </span>
+                        <p className="text-xs text-text-secondary whitespace-pre-line leading-relaxed">
+                          {campaign.description}
+                        </p>
+                      </div>
+                    )}
+                    {service?.description && (
+                      <div className="space-y-1 pt-2.5 border-t border-border-theme/60">
+                        <span className="text-xs font-semibold text-foreground block">
+                          Service Package Details:
+                        </span>
+                        <p className="text-xs text-text-secondary whitespace-pre-line leading-relaxed">
+                          {service.description}
+                        </p>
+                      </div>
+                    )}
+                    {service?.deliveryTime && (
+                      <div className="pt-2 border-t border-border-theme/60 text-xs text-text-secondary flex items-center justify-between">
+                        <span>Delivery Time:</span>
+                        <span className="font-semibold text-foreground">{service.deliveryTime} Days</span>
+                      </div>
+                    )}
+                  </div>
+
                   {/* Revision History Section */}
                   {revisions.length > 0 && (
-                    <div className="bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 space-y-3 shadow-xs">
-                      <h2 className="font-serif font-semibold text-base text-foreground">
-                        Revision History ({revisions.length})
-                      </h2>
-                      <div className="space-y-3">
+                    <div className="bg-surface border border-border-theme rounded-2xl p-4 sm:p-5 space-y-3 shadow-xs">
+                      <div className="flex items-center justify-between pb-2 border-b border-border-theme">
+                        <h2 className="font-serif font-semibold text-sm sm:text-base text-foreground">
+                          Revision History
+                        </h2>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                          {revisions.length} Total
+                        </span>
+                      </div>
+                      <div className="space-y-2.5">
                         {revisions.map((rev, idx) => (
                           <div
                             key={rev._id || idx}
-                            className="bg-amber-500/5 border border-amber-500/20 p-3.5 rounded-xl space-y-1.5 text-xs"
+                            className="bg-amber-500/5 border border-amber-500/20 p-3 rounded-xl space-y-1 text-xs"
                           >
                             <div className="flex items-center justify-between text-[10px] text-amber-500 font-semibold">
                               <span>Revision Request #{idx + 1}</span>

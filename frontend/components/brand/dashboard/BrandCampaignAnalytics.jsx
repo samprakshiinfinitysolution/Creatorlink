@@ -170,7 +170,7 @@ function CampaignStatusDonut({ statusBreakdown = {}, totalCampaigns = 0 }) {
 
         {/* Center Content */}
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none text-center">
-          <span className="font-sans text-2xl sm:text-3xl font-bold text-slate-900 dark:text-foreground leading-none">
+          <span className="font-sans text-2xl sm:text-3xl font-semibold text-slate-900 dark:text-foreground leading-none">
             {hoveredIndex !== null ? validSegments[hoveredIndex]?.count : totalCampaigns}
           </span>
           <span className="text-[11px] font-sans font-medium text-text-secondary mt-1">
@@ -377,13 +377,13 @@ function CampaignPerformanceChart({
     };
   }, [timelineMonths, recentCampaigns, paymentsHistory]);
 
-  // Enhanced chart dimensions giving ample vertical room for both series
-  const svgWidth = 660;
-  const svgHeight = 260;
-  const paddingLeft = 78;
+  // Enhanced chart dimensions giving ample horizontal room for Y-axis currency labels and vertical room for both series
+  const svgWidth = 680;
+  const svgHeight = 210;
+  const paddingLeft = 92;
   const paddingRight = 32;
-  const paddingTop = 26;
-  const paddingBottom = 34;
+  const paddingTop = 20;
+  const paddingBottom = 28;
   const innerWidth = svgWidth - paddingLeft - paddingRight;
   const innerHeight = svgHeight - paddingTop - paddingBottom;
   const baselineY = paddingTop + innerHeight;
@@ -510,12 +510,12 @@ function CampaignPerformanceChart({
   );
 
   return (
-    <div className="w-full flex flex-col justify-between h-full space-y-3">
+    <div className="w-full flex flex-col justify-between h-full space-y-3 min-w-0">
       {/* Responsive SVG Chart Canvas */}
-      <div className="relative w-full">
+      <div className="relative w-full overflow-hidden">
         <svg
           viewBox={`0 0 ${svgWidth} ${svgHeight}`}
-          className="w-full h-56 sm:h-64 lg:h-72 overflow-visible select-none"
+          className="w-full h-56 sm:h-64 lg:h-72 select-none"
           onMouseLeave={() => {
             if (!isRecentTouch()) {
               setActiveTooltip(null);
@@ -574,10 +574,10 @@ function CampaignPerformanceChart({
                   strokeWidth="1"
                 />
                 <text
-                  x={paddingLeft - 12}
+                  x={paddingLeft - 10}
                   y={y + 3.5}
                   textAnchor="end"
-                  className="text-[11px] sm:text-[12px] fill-slate-400 dark:fill-neutral-500 font-sans font-medium"
+                  className="text-[11px] sm:text-[11.5px] fill-slate-400 dark:fill-neutral-500 font-sans font-medium"
                 >
                   {formatYAxisINR(labelValue)}
                 </text>
@@ -708,7 +708,7 @@ function CampaignPerformanceChart({
                   x={octoberSlot.x - 44}
                   y={badgeY + 14}
                   textAnchor="middle"
-                  className="fill-[#ec4899] dark:fill-[#f472b6] font-sans font-bold text-[10px]"
+                  className="fill-[#ec4899] dark:fill-[#f472b6] font-sans font-semibold text-[10px]"
                 >
                   {formatCurrency(octoberSlot.budget, "INR")}
                 </text>
@@ -737,7 +737,7 @@ function CampaignPerformanceChart({
                   y={badgeY + 14}
                   textAnchor="middle"
                   fill="#ffffff"
-                  className="font-sans font-bold text-[10px]"
+                  className="font-sans font-semibold text-[10px]"
                 >
                   {formatCurrency(octoberSlot.spends, "INR")}
                 </text>
@@ -799,7 +799,7 @@ function CampaignPerformanceChart({
                 top: `${(minY / svgHeight) * 100}%`,
               }}
             >
-              <div className="font-bold text-foreground mb-1">
+              <div className="font-semibold text-foreground mb-1">
                 {activeTooltip.label} {activeTooltip.year}
               </div>
               <div className="flex items-center gap-2 mb-0.5">
@@ -936,19 +936,19 @@ export default function BrandCampaignAnalytics({ metrics, recentCampaigns = [] }
   }, [recentCampaigns]);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 items-stretch min-w-0">
       {/* Left Card: Campaign Performance Line Chart */}
-      <div className="lg:col-span-8 bg-surface border border-border-theme rounded-2xl p-6 shadow-xs flex flex-col justify-between transition-colors">
-        <div className="mb-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="lg:col-span-8 bg-surface border border-border-theme rounded-2xl p-3.5 sm:p-4.5 md:p-5 shadow-xs flex flex-col justify-between transition-colors min-w-0 overflow-hidden">
+        <div className="mb-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
             <div>
-              <h2 className="font-sans font-bold text-lg sm:text-xl text-slate-900 dark:text-foreground tracking-tight">
+              <h2 className="font-sans font-semibold text-base sm:text-lg text-slate-900 dark:text-foreground tracking-tight">
                 Campaign Performance
               </h2>
             </div>
 
             {/* Compact Header Legend with Real Amounts & Truthful Budget Label */}
-            <div className="flex items-center gap-4 text-xs font-sans shrink-0">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3.5 text-xs font-sans">
               <div className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#ff2d6c] shrink-0" />
                 <span className="text-text-secondary font-medium">Spends:</span>
@@ -981,10 +981,10 @@ export default function BrandCampaignAnalytics({ metrics, recentCampaigns = [] }
       </div>
 
       {/* Right Card: Campaign Status Donut Chart */}
-      <div className="lg:col-span-4 bg-surface border border-border-theme rounded-2xl p-6 shadow-xs flex flex-col justify-between transition-colors">
-        <div className="mb-4">
+      <div className="lg:col-span-4 bg-surface border border-border-theme rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col justify-between transition-colors min-w-0 overflow-hidden">
+        <div className="mb-2">
           <div className="flex items-center justify-between">
-            <h2 className="font-sans font-bold text-lg sm:text-xl text-slate-900 dark:text-foreground tracking-tight">
+            <h2 className="font-sans font-semibold text-base sm:text-lg text-slate-900 dark:text-foreground tracking-tight">
               Campaign Status
             </h2>
             <span className="text-xs font-semibold text-text-secondary font-sans">
@@ -996,10 +996,12 @@ export default function BrandCampaignAnalytics({ metrics, recentCampaigns = [] }
           </p>
         </div>
 
-        <CampaignStatusDonut
-          statusBreakdown={statusBreakdown}
-          totalCampaigns={totalCampaigns}
-        />
+        <div className="flex-1 flex flex-col justify-center my-auto py-2">
+          <CampaignStatusDonut
+            statusBreakdown={statusBreakdown}
+            totalCampaigns={totalCampaigns}
+          />
+        </div>
       </div>
     </div>
   );

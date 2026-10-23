@@ -92,7 +92,7 @@ export default function BrandRecentCollaborations({ collaborations = [] }) {
     <div className="bg-surface border border-border-theme rounded-2xl p-6 shadow-xs flex flex-col justify-between space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="font-serif font-medium text-lg sm:text-xl text-foreground">
+          <h2 className="font-sans font-semibold text-lg sm:text-xl text-foreground tracking-tight">
             Active Collaborations
           </h2>
           <p className="text-xs text-text-secondary mt-0.5">
@@ -101,19 +101,18 @@ export default function BrandRecentCollaborations({ collaborations = [] }) {
         </div>
         <Link
           href="/brand/workspace"
-          className="inline-flex items-center gap-1 text-xs font-semibold text-secondary hover:underline"
+          className="text-xs font-semibold text-[#ff2d6c] hover:underline transition-colors"
         >
-          <span>View All</span>
-          <ArrowRightIcon />
+          View All
         </Link>
       </div>
 
       {safeCollaborations.length === 0 ? (
         <div className="text-center py-10 px-4 border border-dashed border-border-theme rounded-xl space-y-3">
-          <div className="w-12 h-12 mx-auto rounded-full bg-secondary/10 text-secondary flex items-center justify-center">
+          <div className="w-12 h-12 mx-auto rounded-full bg-secondary/8 text-[#252525] dark:text-white flex items-center justify-center">
             <WorkspaceFolderIcon className="w-6 h-6" />
           </div>
-          <h3 className="font-serif font-medium text-base text-foreground">
+          <h3 className="font-sans font-semibold text-base text-foreground tracking-tight">
             No active collaborations
           </h3>
           <p className="text-xs text-text-secondary max-w-xs mx-auto">
@@ -122,7 +121,7 @@ export default function BrandRecentCollaborations({ collaborations = [] }) {
           <div className="pt-1">
             <Link
               href="/brand/creators"
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-secondary text-white text-xs font-medium hover:bg-secondary-dark transition-colors"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#252525] hover:bg-[#111111] text-white text-xs font-medium transition-colors"
             >
               <span>Discover Creators</span>
             </Link>

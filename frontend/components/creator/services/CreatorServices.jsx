@@ -533,7 +533,7 @@ export default function CreatorServices() {
           {/* 1. PAGE HEADER */}
           <div className="bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="font-serif font-semibold text-2xl sm:text-3xl text-foreground tracking-tight">
+              <h1 className="font-sans font-bold text-2xl sm:text-3xl text-foreground tracking-tight">
                 My Services
               </h1>
               <p className="text-xs sm:text-sm text-text-secondary mt-1">
@@ -708,7 +708,7 @@ export default function CreatorServices() {
 
                       {/* Title & Category */}
                       <div>
-                        <h3 className="font-serif font-medium text-lg text-foreground line-clamp-1 group-hover:text-secondary transition-colors">
+                        <h3 className="font-sans font-semibold text-lg text-foreground line-clamp-1 group-hover:text-secondary transition-colors tracking-tight">
                           {service.title}
                         </h3>
                         <span className="text-[11px] font-medium text-text-secondary block mt-0.5">
@@ -726,7 +726,7 @@ export default function CreatorServices() {
                         <span className="text-[10px] font-semibold text-text-secondary uppercase tracking-wider">
                           Pricing
                         </span>
-                        <span className="font-serif font-semibold text-base text-foreground">
+                        <span className="font-sans font-semibold text-base text-foreground">
                           {formatPrice(service)}
                         </span>
                       </div>
@@ -811,7 +811,7 @@ export default function CreatorServices() {
                 <BriefcaseIcon />
               </div>
               <div className="space-y-1">
-                <h3 className="font-serif font-medium text-xl text-foreground">
+                <h3 className="font-sans font-semibold text-xl text-foreground tracking-tight">
                   No services found
                 </h3>
                 <p className="text-xs text-text-secondary max-w-xs mx-auto leading-relaxed">
@@ -870,7 +870,7 @@ export default function CreatorServices() {
             {/* Modal Header */}
             <div className="p-5 sm:p-6 border-b border-border-theme flex items-center justify-between">
               <div>
-                <h2 className="font-serif font-medium text-xl text-foreground">
+                <h2 className="font-sans font-semibold text-xl text-foreground tracking-tight">
                   {editingServiceId ? "Edit Service" : "Add Service"}
                 </h2>
                 <p className="text-xs text-text-secondary mt-0.5">
@@ -1164,7 +1164,7 @@ export default function CreatorServices() {
                 <TrashIcon className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-serif font-semibold text-base text-foreground">
+                <h3 className="font-sans font-semibold text-base text-foreground tracking-tight">
                   Delete Service?
                 </h3>
                 <p className="text-text-secondary text-xs">

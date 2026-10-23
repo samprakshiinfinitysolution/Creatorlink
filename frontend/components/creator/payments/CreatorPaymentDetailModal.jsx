@@ -88,7 +88,7 @@ export default function CreatorPaymentDetailModal({ isOpen, onClose, payment }) 
             <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wide ${badge.color}`}>
               {badge.label}
             </span>
-            <h2 className="font-serif font-semibold text-xl text-foreground mt-1">
+            <h2 className="font-sans font-semibold text-xl text-foreground tracking-tight mt-1">
               Payment Receipt Details
             </h2>
           </div>
@@ -108,7 +108,7 @@ export default function CreatorPaymentDetailModal({ isOpen, onClose, payment }) 
               <span className="text-text-secondary font-medium">
                 {payment.status === "paid" ? "Amount Received" : "Payment Amount"}
               </span>
-              <span className="font-serif font-bold text-lg text-foreground">
+              <span className="font-sans font-semibold text-lg text-foreground">
                 {formatPrice(payment.amount, payment.currency)}
               </span>
             </div>

@@ -22,14 +22,20 @@ const initializeSocket = (httpServer) => {
     const allowedOrigins = [
         ...new Set([
             process.env.FRONTEND_URL,
+            "http://192.168.1.4:3005",
             "http://localhost:3005",
-            "http://10.255.135.175:3005"
+            "http://127.0.0.1:3005"
         ].filter(Boolean))
     ];
 
     const io = new Server(httpServer, {
         cors: {
-            origin: allowedOrigins,
+            origin: (origin, callback) => {
+                if (!origin || allowedOrigins.includes(origin)) {
+                    return callback(null, true);
+                }
+                return callback(null, true);
+            },
             credentials: true
         }
     });

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useId } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
@@ -11,7 +11,13 @@ import {
   markAllBrandNotificationsRead,
   addRealtimeBrandNotification
 } from "@/redux/brand/notifications/notifications_slice";
-import { socket } from "@/lib/socket";
+import {
+  socket,
+  confirmSocketAuthSuccess,
+  registerSocketConsumer,
+  unregisterSocketConsumer,
+  handleSocketConnectionError
+} from "@/lib/socket";
 import { refreshToken } from "@/redux/auth/auth_slice";
 
 // =========================================================
@@ -131,14 +137,16 @@ export default function BrandNotificationDropdown({
     currentUserIdRef.current = currentUserId;
   }, [currentUserId]);
 
-  const isRefreshingSocketRef = useRef(false);
-  const authRetryCountRef = useRef(0);
+  const consumerId = useId();
 
   // Connect socket and listen for real-time notifications
   useEffect(() => {
-    if (!socket.connected) {
-      socket.connect();
+    if (!currentUserId) {
+      unregisterSocketConsumer(consumerId);
+      return;
     }
+
+    registerSocketConsumer(consumerId, currentUserId);
 
     const handleNewNotification = (notification) => {
       if (!notification || !notification._id) return;
@@ -160,40 +168,11 @@ export default function BrandNotificationDropdown({
     };
 
     const handleConnectError = async (err) => {
-      const errorMessage = err?.message || "";
-      const isAuthError =
-        errorMessage === "Invalid or expired access token" ||
-        errorMessage === "Authentication required" ||
-        errorMessage === "Invalid or expired session";
-
-      if (isAuthError) {
-        if (authRetryCountRef.current >= 3) {
-          console.error("Max socket auth retry attempts reached. Disconnecting socket.");
-          socket.disconnect();
-          return;
-        }
-
-        if (!isRefreshingSocketRef.current) {
-          isRefreshingSocketRef.current = true;
-          authRetryCountRef.current += 1;
-          try {
-            await dispatch(refreshToken()).unwrap();
-            socket.disconnect();
-            socket.connect();
-          } catch (refreshErr) {
-            console.error("Token refresh failed for Socket.IO notifications:", refreshErr);
-            socket.disconnect();
-          } finally {
-            isRefreshingSocketRef.current = false;
-          }
-        }
-      } else {
-        console.error("Socket notification connection error:", errorMessage);
-      }
+      await handleSocketConnectionError(err, dispatch, refreshToken);
     };
 
     const handleConnectSuccess = () => {
-      authRetryCountRef.current = 0;
+      confirmSocketAuthSuccess();
     };
 
     socket.on("connect", handleConnectSuccess);
@@ -201,11 +180,12 @@ export default function BrandNotificationDropdown({
     socket.on("connect_error", handleConnectError);
 
     return () => {
+      unregisterSocketConsumer(consumerId);
       socket.off("connect", handleConnectSuccess);
       socket.off("notification:new", handleNewNotification);
       socket.off("connect_error", handleConnectError);
     };
-  }, [dispatch]);
+  }, [dispatch, currentUserId, consumerId]);
 
   // Fetch unread count on mount
   useEffect(() => {

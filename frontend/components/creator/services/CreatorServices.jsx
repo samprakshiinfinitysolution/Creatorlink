@@ -22,6 +22,32 @@ function PlusIcon({ className = "w-4 h-4" }) {
   );
 }
 
+function LayersIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6.429 9.75L2.25 12l9.75 5.25 9.75-5.25-4.179-2.25m-11.321 4.5L2.25 16.5l9.75 5.25 9.75-5.25-4.179-2.25M12 3.75L2.25 9l9.75 5.25 9.75-5.25L12 3.75z" />
+    </svg>
+  );
+}
+
+function RupeeIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6 3h12M6 8h12M6 13h7a4 4 0 000-8H6m0 8l7 8" />
+    </svg>
+  );
+}
+
+
+
+function BarChartIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+    </svg>
+  );
+}
+
 function SearchIcon({ className = "w-4 h-4" }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
@@ -112,6 +138,64 @@ function ChevronRightIcon({ className = "w-4 h-4" }) {
       <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
     </svg>
   );
+}
+
+function ArrowRightIcon({ className = "w-3.5 h-3.5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+    </svg>
+  );
+}
+
+function EllipsisVerticalIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z" />
+    </svg>
+  );
+}
+
+function CoinsIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <ellipse cx="12" cy="7" rx="6" ry="3" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6 7v5c0 1.66 2.69 3 6 3s6-1.34 6-3V7" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6 12v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5" />
+    </svg>
+  );
+}
+
+function PlaySquareIcon({ className = "w-3.5 h-3.5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <rect x="2.5" y="4.5" width="19" height="15" rx="3.5" />
+      <polygon points="10 8.5 16 12 10 15.5 10 8.5" fill="currentColor" />
+    </svg>
+  );
+}
+
+function InstagramCameraIcon({ className = "w-3.5 h-3.5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.5" cy="6.5" r="1" fill="currentColor" />
+    </svg>
+  );
+}
+
+function PlatformBadgeIcon({ platform, className = "w-3.5 h-3.5" }) {
+  const norm = typeof platform === "string" ? platform.toLowerCase() : "";
+  if (norm.includes("youtube")) {
+    return (
+      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+        <rect x="2.5" y="4.5" width="19" height="15" rx="4" />
+        <polygon points="10 9 15.5 12 10 15 10 9" fill="currentColor" />
+      </svg>
+    );
+  }
+  return <InstagramCameraIcon className={className} />;
 }
 
 // =========================================================
@@ -248,6 +332,9 @@ export default function CreatorServices() {
   // Active Toggle Loading State per ID
   const [togglingStatusId, setTogglingStatusId] = useState(null);
 
+  // Card 3-dot dropdown action menu state
+  const [openMenuId, setOpenMenuId] = useState(null);
+
   // Fetch Services via Redux Query API
   useEffect(() => {
     const query = {
@@ -283,6 +370,46 @@ export default function CreatorServices() {
   ]);
 
   const serviceItems = Array.isArray(services) ? services : [];
+
+  // Service Overview Statistics Calculations
+  const totalServicesCount =
+    pagination && typeof pagination.totalItems === "number"
+      ? pagination.totalItems
+      : serviceItems.length;
+
+  const activeServicesCount = serviceItems.filter((s) => Boolean(s.isActive)).length;
+
+  const pricedServices = serviceItems.filter(
+    (s) =>
+      typeof s.price === "number" &&
+      !isNaN(s.price) &&
+      s.price > 0 &&
+      s.pricingType !== "custom"
+  );
+
+  let startingPriceFormatted = "—";
+  if (pricedServices.length > 0) {
+    const minPrice = Math.min(...pricedServices.map((s) => s.price));
+    const matchedService = pricedServices.find((s) => s.price === minPrice);
+    const currencyCode = matchedService?.currency || "INR";
+    const symbol = currencyCode === "INR" ? "₹" : `${currencyCode} `;
+    startingPriceFormatted = `${symbol}${new Intl.NumberFormat("en-IN").format(minPrice)}`;
+  } else if (serviceItems.length > 0 && serviceItems.some((s) => s.price === 0)) {
+    startingPriceFormatted = "₹0";
+  }
+
+  const deliveryServices = serviceItems.filter(
+    (s) => typeof s.deliveryTime === "number" && !isNaN(s.deliveryTime) && s.deliveryTime > 0
+  );
+
+  let avgDeliveryFormatted = "—";
+  if (deliveryServices.length > 0) {
+    const totalDays = deliveryServices.reduce((acc, s) => acc + s.deliveryTime, 0);
+    const avgDays = Math.round(totalDays / deliveryServices.length);
+    avgDeliveryFormatted = `${avgDays} Day${avgDays !== 1 ? "s" : ""}`;
+  }
+
+
 
   // Extract categories dynamically from current services
   const defaultCategories = [
@@ -530,26 +657,161 @@ export default function CreatorServices() {
 
         {/* Main Content Area */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl w-full mx-auto">
-          {/* 1. PAGE HEADER */}
-          <div className="bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="font-serif font-semibold text-2xl sm:text-3xl text-foreground tracking-tight">
-                My Services
-              </h1>
-              <p className="text-xs sm:text-sm text-text-secondary mt-1">
-                Manage your service packages, pricing, and deliverables.
-              </p>
+          {/* 1. PAGE HEADER WITH INTEGRATED OVERVIEW STATS */}
+          <div className="relative overflow-hidden bg-gradient-to-br from-pink-50 via-white to-rose-100/80 dark:bg-gradient-to-br dark:from-surface dark:via-surface dark:to-pink-950/20 border border-pink-200/80 dark:border-pink-900/40 rounded-3xl p-5 sm:p-6 lg:p-7 shadow-[0_4px_24px_rgba(255,45,108,0.06)] space-y-5 sm:space-y-6">
+            {/* Ambient Blush-Pink Glow Accents */}
+            <div className="absolute -top-20 -right-20 w-96 h-96 rounded-full bg-pink-200/50 dark:bg-pink-600/10 blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-20 right-40 w-80 h-80 rounded-full bg-rose-200/40 dark:bg-rose-600/5 blur-3xl pointer-events-none" />
+            <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-56 h-56 rounded-full bg-pink-100/40 dark:bg-pink-600/5 blur-2xl pointer-events-none" />
+
+            {/* Top Row: Title, Description & Add Service Action */}
+            <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h1 className="font-heading font-medium text-2xl sm:text-3xl lg:text-4xl text-foreground tracking-tight">
+                  My Services
+                </h1>
+                <p className="text-xs sm:text-sm text-text-secondary mt-1 font-sans">
+                  Manage your service packages, pricing, and deliverables.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3 shrink-0">
+                <button
+                  type="button"
+                  onClick={handleOpenAddModal}
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-neutral-950 text-white text-xs font-semibold tracking-wide border border-neutral-900 shadow-xs hover:bg-neutral-900 hover:border-neutral-800 hover:shadow-xs hover:shadow-pink-500/10 active:scale-[0.99] transition-all duration-200 ease-out cursor-pointer shrink-0 dark:bg-neutral-100 dark:text-neutral-950 dark:border-neutral-200 dark:hover:bg-neutral-200"
+                >
+                  <PlusIcon />
+                  <span>Add Service</span>
+                </button>
+              </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={handleOpenAddModal}
-                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-secondary hover:bg-secondary-dark text-white text-xs font-semibold tracking-wide transition-all shadow-xs cursor-pointer shrink-0"
-              >
-                <PlusIcon />
-                <span>Add Service</span>
-              </button>
+            {/* Bottom Row: 4 Statistics Cards & Decorative Service Illustration */}
+            <div className="relative z-10 flex flex-col 2xl:flex-row items-stretch 2xl:items-center justify-between gap-4 2xl:gap-6">
+              {/* Four Compact Statistic Cards */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5 flex-1 min-w-0">
+                {/* 1. Total Services */}
+                <div className="bg-white/95 dark:bg-surface/90 backdrop-blur-xs rounded-2xl p-3 sm:p-3.5 border border-pink-100/90 dark:border-border-theme/70 shadow-xs flex items-center gap-2.5 sm:gap-3 min-w-0 transition-transform duration-200 hover:-translate-y-0.5">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-pink-50 dark:bg-pink-950/40 text-black dark:text-white flex items-center justify-center shrink-0">
+                    <LayersIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <span className="text-[11px] sm:text-xs font-semibold text-text-secondary block leading-tight truncate">
+                      Total Services
+                    </span>
+                    <span className="font-sans font-bold text-lg sm:text-2xl text-foreground tracking-tight leading-tight block mt-0.5 truncate">
+                      {totalServicesCount}
+                    </span>
+                    <span className="text-[10px] sm:text-[11px] text-text-secondary block leading-tight mt-0.5 truncate">
+                      Your listed packages
+                    </span>
+                  </div>
+                </div>
+
+                {/* 2. Active Services */}
+                <div className="bg-white/95 dark:bg-surface/90 backdrop-blur-xs rounded-2xl p-3 sm:p-3.5 border border-pink-100/90 dark:border-border-theme/70 shadow-xs flex items-center gap-2.5 sm:gap-3 min-w-0 transition-transform duration-200 hover:-translate-y-0.5">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-black dark:text-white flex items-center justify-center shrink-0">
+                    <CheckIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-black dark:text-white" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <span className="text-[11px] sm:text-xs font-semibold text-text-secondary block leading-tight truncate">
+                      Active Services
+                    </span>
+                    <span className="font-sans font-bold text-lg sm:text-2xl text-foreground tracking-tight leading-tight block mt-0.5 truncate">
+                      {activeServicesCount}
+                    </span>
+                    <span className="text-[10px] sm:text-[11px] text-text-secondary block leading-tight mt-0.5 truncate">
+                      Currently available
+                    </span>
+                  </div>
+                </div>
+
+                {/* 3. Starting Price */}
+                <div className="bg-white/95 dark:bg-surface/90 backdrop-blur-xs rounded-2xl p-3 sm:p-3.5 border border-pink-100/90 dark:border-border-theme/70 shadow-xs flex items-center gap-2.5 sm:gap-3 min-w-0 transition-transform duration-200 hover:-translate-y-0.5">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-pink-50 dark:bg-pink-950/40 text-black dark:text-white flex items-center justify-center shrink-0">
+                    <RupeeIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <span className="text-[11px] sm:text-xs font-semibold text-text-secondary block leading-tight truncate">
+                      Starting Price
+                    </span>
+                    <span className="font-sans font-bold text-lg sm:text-2xl text-foreground tracking-tight leading-tight block mt-0.5 truncate">
+                      {startingPriceFormatted}
+                    </span>
+                    <span className="text-[10px] sm:text-[11px] text-text-secondary block leading-tight mt-0.5 truncate">
+                      From your lowest-priced service
+                    </span>
+                  </div>
+                </div>
+
+                {/* 4. Average Delivery Time */}
+                <div className="bg-white/95 dark:bg-surface/90 backdrop-blur-xs rounded-2xl p-3 sm:p-3.5 border border-pink-100/90 dark:border-border-theme/70 shadow-xs flex items-center gap-2.5 sm:gap-3 min-w-0 transition-transform duration-200 hover:-translate-y-0.5">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-pink-50 dark:bg-pink-950/40 text-black dark:text-white flex items-center justify-center shrink-0">
+                    <ClockIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <span className="text-[11px] sm:text-xs font-semibold text-text-secondary block leading-tight truncate">
+                      Avg. Delivery Time
+                    </span>
+                    <span className="font-sans font-bold text-lg sm:text-2xl text-foreground tracking-tight leading-tight block mt-0.5 truncate">
+                      {avgDeliveryFormatted}
+                    </span>
+                    <span className="text-[10px] sm:text-[11px] text-text-secondary block leading-tight mt-0.5 truncate">
+                      Across your services
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Decorative Service Card Illustration (Extra-Wide Screens) */}
+              <div className="hidden 2xl:flex items-center gap-3 shrink-0 pl-2">
+                <div className="flex flex-col items-center select-none pointer-events-none">
+                  <span className="text-[10px] 2xl:text-[11px] font-medium italic text-pink-500 dark:text-pink-400 text-center leading-tight max-w-[85px]">
+                    Turn your skills into opportunities
+                  </span>
+                  <svg className="w-6 h-6 2xl:w-7 2xl:h-7 text-pink-400 -rotate-12 mt-1" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M10 8 C 12 24, 22 28, 30 24" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M24 22 L 30 24 L 28 30" />
+                  </svg>
+                </div>
+
+                <div className="relative w-44 sm:w-48 bg-white dark:bg-surface rounded-2xl p-3 sm:p-3.5 shadow-md shadow-pink-500/10 border border-pink-200/80 dark:border-pink-900/50 rotate-[2.5deg] select-none pointer-events-none shrink-0 transition-transform hover:rotate-0 duration-300">
+                  {/* Floating Instagram Badge */}
+                  <div className="absolute -top-3 -right-3 w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gradient-to-tr from-black-500 via-black-500 to-black-600 text-black flex items-center justify-center shadow-md bg-grey" >
+                    <InstagramCameraIcon className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-black" />
+                  </div>
+
+                  {/* Thumbnail */}
+                  <div className="h-14 sm:h-16 rounded-xl bg-gradient-to-br from-pink-50 via-rose-50 to-pink-100/80 dark:from-pink-950/40 dark:to-surface-muted flex items-center justify-center">
+                    <div className="w-8 h-6 sm:w-9 sm:h-7 rounded-lg bg-pink-500/15 dark:bg-pink-500/25 flex items-center justify-center text-black dark:text-white">
+                      <svg className="w-3.5 h-3.5 fill-current ml-0.5" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Mini Service Details */}
+                  <p className="text-[11px] sm:text-xs font-bold text-foreground leading-tight mt-2 line-clamp-1">
+                    Social Media Content Creation
+                  </p>
+
+                  <div className="flex items-center justify-between mt-1.5 pt-1 border-t border-pink-100/60 dark:border-border-theme/40">
+                    <span className="text-xs sm:text-sm font-bold text-foreground font-sans">
+                      ₹12,000
+                    </span>
+                    <span className="inline-flex items-center gap-1 text-[9px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200/60 dark:border-emerald-900/40">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      Active
+                    </span>
+                  </div>
+
+                  {/* Floating Chart Badge */}
+                  <div className="absolute -bottom-2.5 -right-2.5 w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-white dark:bg-surface border border-pink-200/80 dark:border-border-theme text-black dark:text-white flex items-center justify-center shadow-md">
+                    <BarChartIcon className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -670,110 +932,234 @@ export default function CreatorServices() {
               {serviceItems.map((service) => {
                 const serviceId = service._id || service.id;
                 const isToggling = togglingStatusId === serviceId;
+                const validDeliverables = getDeliverablesList(service.deliverables);
 
                 return (
                   <div
                     key={serviceId}
-                    className="bg-surface border border-border-theme rounded-2xl overflow-hidden shadow-xs hover:border-secondary/40 transition-all duration-200 flex flex-col justify-between p-5 group"
+                    className="bg-white dark:bg-surface border border-pink-100/90 dark:border-pink-900/40 hover:border-pink-200/90 dark:hover:border-pink-500/30 rounded-3xl p-5 sm:p-6 shadow-[0_2px_12px_rgba(255,45,108,0.04)] hover:shadow-md transition-all duration-200 flex flex-col justify-between group relative"
                   >
-                    <div className="space-y-3.5">
-                      {/* Top Badges: Platform & Active/Inactive */}
+                    <div>
+                      {/* Top Badges: Platform (left) & Active Pill + 3-Dot Menu (right) */}
                       <div className="flex items-center justify-between gap-2">
-                        <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-secondary/10 text-secondary border border-secondary/20 uppercase tracking-wide">
-                          {getPlatformLabel(service.platform)}
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-sans font-semibold tracking-wider uppercase text-black dark:text-white bg-pink-50/80 dark:bg-pink-950/40 border border-black/20 dark:border-white/20">
+                          <PlatformBadgeIcon
+                            platform={service.platform}
+                            className="w-3.5 h-3.5 text-black dark:text-white shrink-0"
+                          />
+                          <span>
+                            {service.platform ? getPlatformLabel(service.platform).toUpperCase() : "INSTAGRAM"}
+                          </span>
                         </span>
 
-                        <button
-                          type="button"
-                          disabled={isToggling}
-                          onClick={() => handleToggleActive(service)}
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold border transition-colors cursor-pointer ${
-                            service.isActive
-                              ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/30 hover:bg-emerald-500/20"
-                              : "bg-amber-500/10 text-amber-500 border-amber-500/30 hover:bg-amber-500/20"
-                          }`}
-                          title="Click to toggle active status"
-                        >
-                          {service.isActive ? (
+                        <div className="flex items-center gap-2 relative">
+                          <button
+                            type="button"
+                            disabled={isToggling}
+                            onClick={() => handleToggleActive(service)}
+                            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-sans font-medium border transition-colors cursor-pointer ${
+                              service.isActive
+                                ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400 border-emerald-200/60 dark:border-emerald-800/40 hover:bg-emerald-100/60"
+                                : "bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400 border-amber-200/60 dark:border-amber-800/40 hover:bg-amber-100/60"
+                            }`}
+                            title="Click to toggle active status"
+                          >
+                            <span
+                              className={`w-2 h-2 rounded-full ${
+                                service.isActive ? "bg-emerald-500" : "bg-amber-500"
+                              }`}
+                            />
+                            <span>{service.isActive ? "Active" : "Inactive"}</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            aria-label="Service actions"
+                            aria-haspopup="true"
+                            aria-expanded={openMenuId === serviceId}
+                            onClick={() =>
+                              setOpenMenuId((prev) => (prev === serviceId ? null : serviceId))
+                            }
+                            className="w-8 h-8 rounded-xl border border-border-theme/70 bg-surface hover:bg-surface-muted text-text-secondary hover:text-foreground flex items-center justify-center transition-colors cursor-pointer"
+                          >
+                            <EllipsisVerticalIcon className="w-4 h-4" />
+                          </button>
+
+                          {openMenuId === serviceId && (
                             <>
-                              <EyeIcon className="w-3 h-3" /> Active
-                            </>
-                          ) : (
-                            <>
-                              <LockClosedIcon className="w-3 h-3" /> Inactive
+                              <div
+                                className="fixed inset-0 z-20"
+                                onClick={() => setOpenMenuId(null)}
+                              />
+                              <div className="absolute right-0 top-10 w-44 bg-surface border border-border-theme rounded-2xl shadow-lg p-1.5 z-30 font-sans text-xs space-y-0.5 animate-in fade-in slide-in-from-top-1 duration-150">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setOpenMenuId(null);
+                                    handleOpenEditModal(service);
+                                  }}
+                                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors text-left cursor-pointer"
+                                >
+                                  <PencilIcon className="w-3.5 h-3.5" />
+                                  <span>Edit Service</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setOpenMenuId(null);
+                                    handleToggleActive(service);
+                                  }}
+                                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors text-left cursor-pointer"
+                                >
+                                  {service.isActive ? (
+                                    <>
+                                      <LockClosedIcon className="w-3.5 h-3.5" />
+                                      <span>Mark as Inactive</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <EyeIcon className="w-3.5 h-3.5" />
+                                      <span>Mark as Active</span>
+                                    </>
+                                  )}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setOpenMenuId(null);
+                                    setDeleteConfirmService(service);
+                                    setDeleteError(null);
+                                  }}
+                                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-rose-500 hover:bg-rose-500/10 transition-colors text-left cursor-pointer"
+                                >
+                                  <TrashIcon className="w-3.5 h-3.5" />
+                                  <span>Delete Service</span>
+                                </button>
+                              </div>
                             </>
                           )}
-                        </button>
+                        </div>
                       </div>
 
-                      {/* Title & Category */}
-                      <div>
-                        <h3 className="font-serif font-medium text-lg text-foreground line-clamp-1 group-hover:text-secondary transition-colors">
+                      {/* Service Title, Subtitle Category & Description */}
+                      <div className="mt-3.5 space-y-1">
+                        <h3
+                          className="font-heading font-medium text-2xl text-foreground tracking-tight leading-snug line-clamp-1 group-hover:text-secondary transition-colors"
+                          title={service.title}
+                        >
                           {service.title}
                         </h3>
-                        <span className="text-[11px] font-medium text-text-secondary block mt-0.5">
-                          {service.category}
-                        </span>
+                        <p className="text-xs font-sans font-medium text-text-secondary">
+                          {service.category || "Social Media Campaign"}
+                        </p>
+                        <p className="text-xs font-sans text-text-secondary/80 line-clamp-2 leading-relaxed pt-0.5">
+                          {service.description || "No description provided."}
+                        </p>
                       </div>
 
-                      {/* Description */}
-                      <p className="text-xs text-text-secondary line-clamp-2 leading-relaxed">
-                        {service.description || "No description provided."}
-                      </p>
-
-                      {/* Pricing Display Banner */}
-                      <div className="p-3 rounded-xl bg-surface-muted/60 border border-border-theme flex items-baseline justify-between">
-                        <span className="text-[10px] font-semibold text-text-secondary uppercase tracking-wider">
-                          Pricing
-                        </span>
-                        <span className="font-serif font-semibold text-base text-foreground">
-                          {formatPrice(service)}
-                        </span>
-                      </div>
-
-                      {/* Specs: Delivery Time & Revisions */}
-                      <div className="grid grid-cols-2 gap-2 text-xs text-text-secondary pt-1">
-                        <div className="flex items-center gap-1.5 bg-surface-muted/30 p-2 rounded-lg border border-border-theme/50">
-                          <ClockIcon className="w-3.5 h-3.5 text-secondary shrink-0" />
-                          <span className="truncate">{service.deliveryTime || 7} Days Delivery</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 bg-surface-muted/30 p-2 rounded-lg border border-border-theme/50">
-                          <RefreshIcon className="w-3.5 h-3.5 text-secondary shrink-0" />
-                          <span className="truncate">
-                            {service.revisions === 0 ? "No Revisions" : `${service.revisions} Revision${service.revisions > 1 ? "s" : ""}`}
+                      {/* Soft Pink Pricing Panel */}
+                      <div className="mt-4 p-4 rounded-2xl bg-pink-50/50 dark:bg-pink-950/20 border border-pink-100/70 dark:border-pink-900/30 flex items-center justify-between">
+                        <div>
+                          <span className="block text-xs font-sans font-medium text-text-secondary mb-1">
+                            Pricing
                           </span>
+                          <div className="font-heading font-medium text-2xl sm:text-3xl text-foreground tabular-nums tracking-tight">
+                            {formatPrice(service)}
+                          </div>
+                        </div>
+                        <div className="w-10 h-10 rounded-full bg-pink-100/80 dark:bg-pink-900/40 text-black dark:text-white flex items-center justify-center shrink-0">
+                          <CoinsIcon className="w-5 h-5" />
                         </div>
                       </div>
 
-                      {/* Deliverables List */}
-                      {(() => {
-                        const validDeliverables = getDeliverablesList(service.deliverables);
-                        if (validDeliverables.length === 0) return null;
-
-                        return (
-                          <div className="space-y-1.5 pt-1">
-                            <span className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary block">
-                              Deliverables ({validDeliverables.length})
-                            </span>
-                            <div className="flex flex-wrap gap-1.5">
-                              {validDeliverables.map((itemText, idx) => (
-                                <span
-                                  key={idx}
-                                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-surface-muted text-foreground border border-border-theme/80"
-                                >
-                                  <CheckIcon className="text-emerald-500 shrink-0 w-3.5 h-3.5" />
-                                  <span className="truncate max-w-[200px]">{itemText}</span>
-                                </span>
-                              ))}
-                            </div>
+                      {/* Two Aligned Info Panels: Delivery Time & Included Revisions */}
+                      <div className="grid grid-cols-2 gap-3 mt-3">
+                        <div className="p-3 rounded-2xl bg-surface-muted/40 dark:bg-surface-muted/20 border border-border-theme/60 flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full bg-pink-100/80 dark:bg-pink-900/40 text-black dark:text-white flex items-center justify-center shrink-0">
+                            <ClockIcon className="w-4 h-4" />
                           </div>
-                        );
-                      })()}
+                          <div className="min-w-0">
+                            <span className="block font-sans font-semibold text-xs sm:text-sm text-foreground truncate">
+                              {service.deliveryTime || 7} Days
+                            </span>
+                            <span className="block text-[11px] font-sans text-text-secondary mt-0.5 truncate">
+                              Delivery Time
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="p-3 rounded-2xl bg-surface-muted/40 dark:bg-surface-muted/20 border border-border-theme/60 flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full bg-pink-100/80 dark:bg-pink-900/40 text-black dark:text-white flex items-center justify-center shrink-0">
+                            <RefreshIcon className="w-4 h-4" />
+                          </div>
+                          <div className="min-w-0">
+                            <span className="block font-sans font-semibold text-xs sm:text-sm text-foreground truncate">
+                              {service.revisions === 0
+                                ? "No Revisions"
+                                : `${service.revisions} Revision${service.revisions > 1 ? "s" : ""}`}
+                            </span>
+                            <span className="block text-[11px] font-sans text-text-secondary mt-0.5 truncate">
+                              Included Revisions
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Divider followed by Deliverables Section */}
+                      <div className="border-t border-border-theme/60 my-4" />
+
+                      <div>
+                        <div className="flex items-center justify-between gap-2 mb-2.5">
+                          <span className="font-sans font-semibold text-xs sm:text-sm text-foreground">
+                            Deliverables ({validDeliverables.length})
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEditModal(service)}
+                            className="inline-flex items-center gap-1 text-xs font-sans font-semibold text-black dark:text-white hover:underline cursor-pointer"
+                          >
+                            <span>View Details</span>
+                            <ArrowRightIcon className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+
+                        {validDeliverables.length === 0 ? (
+                          <p className="text-xs text-text-secondary font-sans italic py-1">
+                            No specific deliverables listed.
+                          </p>
+                        ) : (
+                          <div className="space-y-1.5">
+                            {validDeliverables.slice(0, 3).map((itemText, idx) => (
+                              <div
+                                key={idx}
+                                className="bg-surface-muted/40 dark:bg-surface-muted/20 border border-border-theme/60 rounded-xl p-2.5 px-3 flex items-center justify-between gap-2"
+                              >
+                                <div className="flex items-center gap-2.5 min-w-0">
+                                  <div className="w-5 h-5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center shrink-0">
+                                    <CheckIcon className="text-emerald-500 w-3 h-3" />
+                                  </div>
+                                  <span className="font-sans font-medium text-xs text-foreground truncate">
+                                    {itemText}
+                                  </span>
+                                </div>
+                                <div className="w-6 h-6 rounded-md bg-surface border border-border-theme/70 flex items-center justify-center text-text-secondary shrink-0">
+                                  <PlaySquareIcon className="w-3.5 h-3.5" />
+                                </div>
+                              </div>
+                            ))}
+                            {validDeliverables.length > 3 && (
+                              <p className="text-[11px] font-sans font-medium text-text-secondary pt-0.5">
+                                +{validDeliverables.length - 3} more deliverable{validDeliverables.length - 3 > 1 ? "s" : ""}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
 
-                    {/* Card Footer Actions */}
-                    <div className="pt-4 mt-4 border-t border-border-theme flex items-center justify-between">
-                      <span className="text-[10px] text-text-secondary">
+                    {/* Bottom Divider, Service ID & Edit / Delete Icon Buttons */}
+                    <div className="pt-3.5 mt-4 border-t border-border-theme/60 flex items-center justify-between">
+                      <span className="text-xs font-sans font-medium text-text-secondary">
                         ID: {serviceId ? serviceId.slice(-6) : ""}
                       </span>
 
@@ -782,9 +1168,9 @@ export default function CreatorServices() {
                           type="button"
                           title="Edit Service"
                           onClick={() => handleOpenEditModal(service)}
-                          className="p-2 rounded-xl text-text-secondary hover:text-foreground hover:bg-surface-muted border border-border-theme transition-colors cursor-pointer"
+                          className="w-9 h-9 rounded-xl border border-border-theme/70 bg-surface hover:bg-surface-muted text-black dark:text-white flex items-center justify-center transition-colors cursor-pointer"
                         >
-                          <PencilIcon />
+                          <PencilIcon className="w-4 h-4" />
                         </button>
 
                         <button
@@ -794,9 +1180,9 @@ export default function CreatorServices() {
                             setDeleteConfirmService(service);
                             setDeleteError(null);
                           }}
-                          className="p-2 rounded-xl text-text-secondary hover:text-red-500 hover:bg-red-500/10 border border-border-theme transition-colors cursor-pointer"
+                          className="w-9 h-9 rounded-xl border border-rose-200/80 dark:border-rose-900/40 bg-rose-50/60 dark:bg-rose-950/30 text-black dark:text-white hover:bg-rose-100/80 dark:hover:bg-rose-900/50 transition-colors cursor-pointer flex items-center justify-center"
                         >
-                          <TrashIcon />
+                          <TrashIcon className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
@@ -822,7 +1208,7 @@ export default function CreatorServices() {
                 <button
                   type="button"
                   onClick={handleOpenAddModal}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-secondary hover:bg-secondary-dark text-white text-xs font-semibold tracking-wide transition-all shadow-xs cursor-pointer"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-neutral-950 text-white text-xs font-semibold tracking-wide border border-neutral-900 shadow-xs hover:bg-neutral-900 hover:border-neutral-800 hover:shadow-xs hover:shadow-pink-500/10 active:scale-[0.99] transition-all duration-200 ease-out cursor-pointer dark:bg-neutral-100 dark:text-neutral-950 dark:border-neutral-200 dark:hover:bg-neutral-200"
                 >
                   <PlusIcon />
                   <span>Add Service</span>
@@ -1144,7 +1530,7 @@ export default function CreatorServices() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2 rounded-xl bg-secondary hover:bg-secondary-dark text-white font-semibold shadow-xs disabled:opacity-50 transition-all cursor-pointer"
+                  className="px-5 py-2 rounded-xl bg-neutral-950 text-white font-semibold border border-neutral-900 shadow-xs hover:bg-neutral-900 hover:border-neutral-800 hover:shadow-xs hover:shadow-pink-500/10 active:scale-[0.99] disabled:opacity-50 transition-all duration-200 ease-out cursor-pointer dark:bg-neutral-100 dark:text-neutral-950 dark:border-neutral-200 dark:hover:bg-neutral-200"
                 >
                   {submitting ? "Saving..." : editingServiceId ? "Update Service" : "Create Service"}
                 </button>

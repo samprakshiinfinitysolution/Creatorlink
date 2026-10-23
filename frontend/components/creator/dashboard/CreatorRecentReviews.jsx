@@ -68,46 +68,48 @@ export default function CreatorRecentReviews({ reviews }) {
       : safeReviews.length;
 
   return (
-    <div className="bg-surface border border-border-theme rounded-2xl p-6 shadow-xs flex flex-col justify-between space-y-6">
+    <div className="bg-surface border border-border-theme hover:border-pink-200 dark:hover:border-pink-500/30 rounded-3xl p-6 sm:p-7 shadow-xs flex flex-col justify-between space-y-6 transition-all duration-300">
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="font-serif font-medium text-lg sm:text-xl text-foreground">
+            <h2 className="font-heading font-medium text-xl sm:text-2xl text-foreground">
               Recent Reviews & Feedback
             </h2>
             {averageRating > 0 && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/10 text-amber-500 border border-amber-500/20">
+              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
                 <span>★ {averageRating.toFixed(1)}</span>
-                <span className="text-text-secondary text-[10px]">
+                <span className="text-text-secondary text-[11px]">
                   ({totalReviews} review{totalReviews === 1 ? "" : "s"})
                 </span>
               </span>
             )}
           </div>
-          <p className="text-xs text-text-secondary mt-0.5">
-            Ratings and feedback from verified brand partners
+          <p className="text-xs text-text-secondary font-sans mt-0.5">
+            Ratings and direct client testimonials from brand partnerships
           </p>
         </div>
 
         <Link
           href="/creator/reviews"
-          className="inline-flex items-center gap-1 text-xs font-semibold text-secondary hover:underline self-start sm:self-auto"
+          className="inline-flex items-center gap-1 text-xs font-semibold text-black dark:text-white hover:underline self-start sm:self-auto"
         >
           <span>View All</span>
-          <ArrowRightIcon />
+          <ArrowRightIcon className="w-3.5 h-3.5" />
         </Link>
       </div>
 
+      {/* Content */}
       {safeReviews.length === 0 ? (
-        <div className="text-center py-10 px-4 border border-dashed border-border-theme rounded-xl space-y-3">
+        <div className="text-center py-12 px-4 border border-dashed border-border-theme rounded-2xl space-y-3">
           <div className="w-12 h-12 mx-auto rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center">
             <StarIcon filled className="w-6 h-6" />
           </div>
-          <h3 className="font-serif font-medium text-base text-foreground">
-            No reviews yet
+          <h3 className="font-heading font-medium text-base text-foreground">
+            No Brand Reviews Yet
           </h3>
-          <p className="text-xs text-text-secondary max-w-xs mx-auto">
-            Reviews and testimonials from brand partners will appear here once workspaces are completed.
+          <p className="text-xs text-text-secondary font-sans max-w-xs mx-auto">
+            Reviews and testimonials from brand partners will appear here once your first collaborations are completed.
           </p>
         </div>
       ) : (
@@ -119,44 +121,50 @@ export default function CreatorRecentReviews({ reviews }) {
               ? Math.min(5, Math.max(0, rawRating))
               : 0;
             const reviewId = rev.id || rev._id;
+            const reviewerInitial = reviewer.charAt(0).toUpperCase() || "B";
 
             return (
               <div
                 key={reviewId || idx}
-                className="p-4 rounded-xl border border-border-theme bg-surface hover:bg-surface-muted/40 transition-colors flex flex-col justify-between space-y-3"
+                className="p-5 rounded-2xl border border-border-theme/80 bg-surface hover:bg-surface-muted/40 hover:border-pink-200 dark:hover:border-pink-500/30 transition-all flex flex-col justify-between space-y-3.5 shadow-2xs"
               >
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <StarRating rating={ratingVal} />
-                      <span className="text-xs font-bold text-foreground">
+                      <span className="text-xs font-semibold font-sans text-foreground">
                         {ratingVal > 0 ? ratingVal.toFixed(1) : "—"}
                       </span>
                     </div>
                     {rev.createdAt && (
-                      <span className="text-[10px] text-text-secondary">
+                      <span className="text-[10px] text-text-secondary font-sans">
                         {formatDate(rev.createdAt)}
                       </span>
                     )}
                   </div>
 
                   {rev.comment ? (
-                    <p className="text-xs text-foreground italic leading-relaxed line-clamp-3">
-                      "{rev.comment}"
+                    <p className="text-xs text-foreground italic leading-relaxed line-clamp-3 font-sans">
+                      &ldquo;{rev.comment}&rdquo;
                     </p>
                   ) : (
-                    <p className="text-xs text-text-secondary italic">
+                    <p className="text-xs text-text-secondary italic font-sans">
                       No written feedback provided.
                     </p>
                   )}
                 </div>
 
-                <div className="pt-2 border-t border-border-theme/60 flex items-center justify-between gap-2 text-[11px]">
-                  <span className="font-semibold text-foreground truncate">
-                    {reviewer}
-                  </span>
+                <div className="pt-3 border-t border-border-theme/60 flex items-center justify-between gap-3 text-xs">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="w-6 h-6 rounded-full bg-secondary/15 text-secondary font-semibold font-sans text-[10px] flex items-center justify-center shrink-0">
+                      {reviewerInitial}
+                    </div>
+                    <span className="font-semibold text-foreground truncate font-sans">
+                      {reviewer}
+                    </span>
+                  </div>
                   {rev.campaignTitle && (
-                    <span className="text-text-secondary truncate max-w-[180px]">
+                    <span className="text-[11px] text-text-secondary truncate max-w-[180px] font-sans">
                       {rev.campaignTitle}
                     </span>
                   )}

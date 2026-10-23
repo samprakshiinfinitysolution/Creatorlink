@@ -160,7 +160,7 @@ export default function CreatorHeader({ setMobileOpen = () => { } }) {
         </button>
 
         <div className="min-w-0 flex-1">
-          <h1 className="font-serif font-semibold text-base sm:text-xl text-foreground tracking-tight leading-none truncate">
+          <h1 className="font-heading font-semibold text-base sm:text-xl text-foreground tracking-tight leading-none truncate">
             Creator Dashboard
           </h1>
           <p className="text-[11px] sm:text-xs text-text-secondary font-sans mt-1 hidden sm:block truncate">

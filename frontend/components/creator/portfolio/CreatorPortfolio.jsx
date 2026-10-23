@@ -436,7 +436,7 @@ export default function CreatorPortfolio() {
               <button
                 type="button"
                 onClick={handleOpenAddModal}
-                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-secondary hover:bg-secondary-dark text-white text-xs font-semibold tracking-wide transition-all shadow-xs cursor-pointer shrink-0"
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-neutral-950 hover:bg-neutral-800 text-white text-xs font-semibold tracking-wide transition-all shadow-xs cursor-pointer shrink-0 dark:bg-white dark:text-black dark:hover:bg-neutral-100"
               >
                 <PlusIcon />
                 <span>Add Portfolio</span>
@@ -605,7 +605,7 @@ export default function CreatorPortfolio() {
           ) : !error ? (
             /* EMPTY STATE UI */
             <div className="bg-surface border border-border-theme rounded-2xl p-8 sm:p-12 text-center shadow-xs space-y-4 max-w-lg mx-auto my-8">
-              <div className="w-16 h-16 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center mx-auto border border-secondary/20">
+              <div className="w-16 h-16 rounded-2xl bg-neutral-100 dark:bg-surface-muted text-black dark:text-white flex items-center justify-center mx-auto border border-neutral-200 dark:border-border-theme">
                 <FolderIcon />
               </div>
               <div className="space-y-1">
@@ -620,7 +620,7 @@ export default function CreatorPortfolio() {
                 <button
                   type="button"
                   onClick={handleOpenAddModal}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-secondary hover:bg-secondary-dark text-white text-xs font-semibold tracking-wide transition-all shadow-xs cursor-pointer"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-neutral-950 hover:bg-neutral-800 text-white text-xs font-semibold tracking-wide transition-all shadow-xs cursor-pointer dark:bg-white dark:text-black dark:hover:bg-neutral-100"
                 >
                   <PlusIcon />
                   <span>Add Portfolio</span>

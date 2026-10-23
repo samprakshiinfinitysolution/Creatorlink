@@ -229,7 +229,7 @@ export default function CreatorCampaignDetail({ campaignId }) {
                 <button
                   type="button"
                   onClick={handleRetry}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-secondary hover:bg-secondary-dark text-white text-xs font-semibold transition-all cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-neutral-950 text-white text-xs font-semibold border border-neutral-900 shadow-xs hover:bg-neutral-900 hover:border-neutral-800 hover:shadow-xs hover:shadow-pink-500/10 active:scale-[0.99] transition-all duration-200 ease-out cursor-pointer dark:bg-neutral-100 dark:text-neutral-950 dark:border-neutral-200 dark:hover:bg-neutral-200"
                 >
                   <RefreshIcon className="w-3.5 h-3.5" />
                   <span>Retry</span>
@@ -279,7 +279,7 @@ export default function CreatorCampaignDetail({ campaignId }) {
               <div className="pt-2">
                 <Link
                   href="/creator/campaigns/discover"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-secondary hover:bg-secondary-dark text-white text-xs font-semibold tracking-wide transition-all shadow-xs cursor-pointer"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-neutral-950 text-white text-xs font-semibold tracking-wide border border-neutral-900 shadow-xs hover:bg-neutral-900 hover:border-neutral-800 hover:shadow-xs hover:shadow-pink-500/10 active:scale-[0.99] transition-all duration-200 ease-out cursor-pointer dark:bg-neutral-100 dark:text-neutral-950 dark:border-neutral-200 dark:hover:bg-neutral-200"
                 >
                   <span>Back to Discover Campaigns</span>
                 </Link>
@@ -308,7 +308,7 @@ export default function CreatorCampaignDetail({ campaignId }) {
                     <button
                       type="button"
                       onClick={() => setIsApplyModalOpen(true)}
-                      className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-secondary hover:bg-secondary-dark text-white text-xs font-semibold tracking-wide transition-all shadow-xs cursor-pointer shrink-0"
+                      className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-neutral-950 text-white text-xs font-semibold tracking-wide border border-neutral-900 shadow-xs hover:bg-neutral-900 hover:border-neutral-800 hover:shadow-xs hover:shadow-pink-500/10 active:scale-[0.99] transition-all duration-200 ease-out cursor-pointer shrink-0 dark:bg-neutral-100 dark:text-neutral-950 dark:border-neutral-200 dark:hover:bg-neutral-200"
                     >
                       <span>Apply to Campaign</span>
                       <ArrowRightIcon className="w-3.5 h-3.5" />

@@ -488,7 +488,7 @@ export default function CreatorMessages() {
                 placeholder="Search brand or campaign..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 rounded-xl bg-surface-muted border border-border-theme text-xs text-foreground placeholder:text-text-secondary focus:outline-none focus:border-secondary transition-colors min-w-0"
+                className="w-full pl-9 pr-3 py-2 rounded-xl bg-surface-muted border border-border-theme text-xs text-foreground placeholder:text-text-secondary focus:outline-none focus:border-neutral-950 dark:focus:border-neutral-300 transition-colors min-w-0"
               />
             </div>
           </div>
@@ -539,12 +539,12 @@ export default function CreatorMessages() {
                     onClick={() => handleSelectConversation(item._id)}
                     className={`w-full text-left p-3.5 flex items-start gap-3 transition-colors cursor-pointer min-w-0 ${
                       isSelected
-                        ? "bg-secondary/10 border-l-4 border-secondary"
+                        ? "bg-neutral-100 border-l-4 border-neutral-950 dark:bg-surface-muted dark:border-white"
                         : "hover:bg-surface-muted"
                     }`}
                   >
                     {/* Brand Initials Avatar */}
-                    <div className="w-10 h-10 rounded-full bg-secondary/15 text-secondary font-semibold text-xs flex items-center justify-center shrink-0 border border-secondary/30 uppercase mt-0.5">
+                    <div className="w-10 h-10 rounded-full bg-neutral-100 dark:bg-surface-muted text-black dark:text-white font-semibold text-xs flex items-center justify-center shrink-0 border border-neutral-200 dark:border-border-theme uppercase mt-0.5">
                       {brandInitials}
                     </div>
 
@@ -561,7 +561,7 @@ export default function CreatorMessages() {
 
                       {/* Campaign Badge / Subtitle */}
                       {item.campaign?.title && (
-                        <span className="inline-block text-[10px] font-medium text-secondary truncate max-w-full">
+                        <span className="inline-block text-[10px] font-medium text-neutral-800 dark:text-neutral-200 truncate max-w-full">
                           {item.campaign.title}
                         </span>
                       )}
@@ -601,7 +601,7 @@ export default function CreatorMessages() {
                   </button>
 
                   {/* Active Brand Avatar */}
-                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-secondary/15 text-secondary font-semibold text-xs flex items-center justify-center shrink-0 border border-secondary/30 uppercase">
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-neutral-100 dark:bg-surface-muted text-black dark:text-white font-semibold text-xs flex items-center justify-center shrink-0 border border-neutral-200 dark:border-border-theme uppercase">
                     {activeBrandInitials}
                   </div>
 
@@ -663,9 +663,9 @@ export default function CreatorMessages() {
                       >
                         {/* Bubble Container */}
                         <div
-                          className={`max-w-[85%] sm:max-w-[70%] px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl text-xs font-sans leading-relaxed break-words [overflow-wrap:anywhere] shadow-xs ${
+                          className={`max-w-[85%] sm:max-w-[70%] px-3.5 sm:px-4 py-0.5 sm:py-0.5 rounded-2xl text-xs font-sans leading-relaxed break-words [overflow-wrap:anywhere] shadow-xs ${
                             isCreatorSender
-                              ? "bg-secondary text-white rounded-tr-xs"
+                              ? "bg-neutral-950 text-white rounded-tr-xs dark:bg-neutral-900"
                               : "bg-surface text-foreground border border-border-theme rounded-tl-xs"
                           }`}
                         >
@@ -681,7 +681,7 @@ export default function CreatorMessages() {
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className={`block underline text-[11px] truncate ${
-                                    isCreatorSender ? "text-white/90 hover:text-white" : "text-secondary hover:underline"
+                                    isCreatorSender ? "text-neutral-300 hover:text-white" : "text-neutral-900 dark:text-neutral-100 hover:underline"
                                   }`}
                                 >
                                   Attachment {idx + 1}
@@ -693,16 +693,16 @@ export default function CreatorMessages() {
                           {/* Timestamp & Read Indicator */}
                           <div
                             className={`flex items-center justify-end gap-1 text-[10px] mt-1 ${
-                              isCreatorSender ? "text-white/75" : "text-text-secondary"
+                              isCreatorSender ? "text-neutral-400" : "text-text-secondary"
                             }`}
                           >
                             <span>{formatTime(msg.createdAt)}</span>
                             {isCreatorSender && (
                               <span>
                                 {msg.isRead ? (
-                                  <CheckCheckIcon className="w-3.5 h-3.5 text-white" />
+                                  <CheckCheckIcon className="w-3.5 h-3.5 text-neutral-300" />
                                 ) : (
-                                  <CheckIcon className="w-3.5 h-3.5 text-white/75" />
+                                  <CheckIcon className="w-3.5 h-3.5 text-neutral-400" />
                                 )}
                               </span>
                             )}
@@ -725,12 +725,12 @@ export default function CreatorMessages() {
                     value={messageInput}
                     onChange={(e) => setMessageInput(e.target.value)}
                     disabled={sending}
-                    className="flex-1 min-w-0 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-surface-muted border border-border-theme text-xs text-foreground placeholder:text-text-secondary focus:outline-none focus:border-secondary transition-colors disabled:opacity-50"
+                    className="flex-1 min-w-0 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-surface-muted border border-border-theme text-xs text-foreground placeholder:text-text-secondary focus:outline-none focus:border-neutral-950 dark:focus:border-neutral-300 transition-colors disabled:opacity-50"
                   />
                   <button
                     type="submit"
                     disabled={!messageInput.trim() || sending}
-                    className="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-secondary text-white font-sans font-medium text-xs flex items-center gap-1.5 hover:bg-secondary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0 cursor-pointer shadow-xs"
+                    className="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-neutral-950 text-white font-sans font-medium text-xs flex items-center gap-1.5 hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0 cursor-pointer shadow-xs dark:bg-white dark:text-black dark:hover:bg-neutral-200"
                   >
                     <span>Send</span>
                     <SendIcon />

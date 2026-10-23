@@ -14,6 +14,38 @@ import CreatorPaymentDetailModal from "./CreatorPaymentDetailModal";
 // =========================================================
 // SVG ICONS
 // =========================================================
+function WalletIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M19 7V4a1 1 0 00-1-1H5a2 2 0 000 4h15a1 1 0 011 1v4h-3a2 2 0 000 4h3a1 1 0 001-1v-2a1 1 0 00-1-1" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 5v14a2 2 0 002 2h15a1 1 0 001-1v-4" />
+    </svg>
+  );
+}
+
+function FileTextIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z" />
+      <polyline strokeLinecap="round" strokeLinejoin="round" points="14 2 14 8 20 8" />
+      <line strokeLinecap="round" strokeLinejoin="round" x1="16" y1="13" x2="8" y2="13" />
+      <line strokeLinecap="round" strokeLinejoin="round" x1="16" y1="17" x2="8" y2="17" />
+      <line strokeLinecap="round" strokeLinejoin="round" x1="10" y1="9" x2="8" y2="9" />
+    </svg>
+  );
+}
+
+function HourglassIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M5 22h14" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M5 2h14" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M17 22v-4.172a2 2 0 00-.586-1.414L12 12l-4.414 4.414A2 2 0 007 17.828V22" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M7 2v4.172a2 2 0 00.586 1.414L12 12l4.414-4.414A2 2 0 0017 6.172V2" />
+    </svg>
+  );
+}
+
 function CreditCardIcon({ className = "w-5 h-5" }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
@@ -65,50 +97,114 @@ const formatPrice = (amount, currency = "INR") => {
   return `${symbol}${new Intl.NumberFormat("en-IN").format(numericAmount)}`;
 };
 
-const formatDate = (dateString) => {
-  if (!dateString) return "N/A";
+const formatPaymentDate = (dateString) => {
+  if (!dateString) return { date: "N/A", time: null };
   try {
     const d = new Date(dateString);
-    if (isNaN(d.getTime())) return "N/A";
-    return d.toLocaleDateString("en-IN", {
+    if (isNaN(d.getTime())) return { date: "N/A", time: null };
+    const date = d.toLocaleDateString("en-IN", {
       day: "numeric",
       month: "short",
       year: "numeric",
     });
+    const time = d.toLocaleTimeString("en-IN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+    return { date, time };
   } catch {
-    return "N/A";
+    return { date: "N/A", time: null };
   }
 };
 
 const getStatusBadge = (status) => {
-  switch (status) {
+  const norm = (status || "").toLowerCase();
+  switch (norm) {
     case "paid":
+    case "completed":
       return {
-        label: "Paid",
-        color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+        label: "COMPLETED",
+        bg: "bg-emerald-50 dark:bg-emerald-950/40",
+        text: "text-emerald-700 dark:text-emerald-400",
+        border: "border-emerald-200/80 dark:border-emerald-800/50",
+        iconType: "check",
       };
     case "pending":
       return {
-        label: "Pending",
-        color: "bg-amber-500/10 text-amber-500 border-amber-500/20",
+        label: "PENDING",
+        bg: "bg-amber-50 dark:bg-amber-950/40",
+        text: "text-amber-700 dark:text-amber-400",
+        border: "border-amber-200/80 dark:border-amber-800/50",
+        iconType: "pending",
       };
     case "processing":
       return {
-        label: "Processing",
-        color: "bg-purple-500/10 text-purple-500 border-purple-500/20",
+        label: "PROCESSING",
+        bg: "bg-purple-50 dark:bg-purple-950/40",
+        text: "text-purple-700 dark:text-purple-400",
+        border: "border-purple-200/80 dark:border-purple-800/50",
+        iconType: "processing",
       };
     case "failed":
       return {
-        label: "Failed",
-        color: "bg-red-500/10 text-red-500 border-red-500/20",
+        label: "FAILED",
+        bg: "bg-red-50 dark:bg-red-950/40",
+        text: "text-red-700 dark:text-red-400",
+        border: "border-red-200/80 dark:border-red-800/50",
+        iconType: "failed",
       };
     default:
       return {
-        label: status || "Unknown",
-        color: "bg-surface-muted text-text-secondary border-border-theme",
+        label: (status || "UNKNOWN").toUpperCase(),
+        bg: "bg-neutral-100 dark:bg-surface-muted",
+        text: "text-neutral-700 dark:text-neutral-300",
+        border: "border-neutral-200 dark:border-border-theme",
+        iconType: "default",
       };
   }
 };
+
+const getCampaignInitials = (title) => {
+  if (title && typeof title === "string" && title.trim()) {
+    const words = title.trim().split(/\s+/);
+    if (words.length >= 2) {
+      return (words[0][0] + words[1][0]).toUpperCase();
+    }
+    return words[0].slice(0, 2).toUpperCase();
+  }
+  return "CP";
+};
+
+function CampaignAvatar({ image, title }) {
+  const [failedUrl, setFailedUrl] = useState(null);
+
+  const initials = getCampaignInitials(title);
+  const isImageValid = Boolean(image && typeof image === "string" && image.trim() && failedUrl !== image);
+
+  if (isImageValid) {
+    return (
+      <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl overflow-hidden bg-secondary/10 dark:bg-secondary/15 shrink-0 border border-neutral-200/60 dark:border-border-theme">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={image}
+          alt={title || "Campaign"}
+          onError={() => setFailedUrl(image)}
+          className="w-full h-full object-cover"
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      aria-label={title || "Campaign avatar"}
+      className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-secondary/10 dark:bg-secondary/15 text-neutral-950 dark:text-white flex items-center justify-center shrink-0 border border-neutral-200/60 dark:border-border-theme font-bold text-xs sm:text-sm tracking-wide select-none"
+    >
+      {initials}
+    </div>
+  );
+}
 
 export default function CreatorPaymentsManager() {
   const dispatch = useDispatch();
@@ -262,7 +358,7 @@ export default function CreatorPaymentsManager() {
           )}
 
           {/* Filter Tabs */}
-          <div className="bg-surface border border-border-theme rounded-2xl p-2 flex items-center gap-1.5 overflow-x-auto custom-scrollbar">
+          <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar py-1">
             {[
               { id: "all", label: "All Payments" },
               { id: "paid", label: "Paid Only" },
@@ -274,10 +370,10 @@ export default function CreatorPaymentsManager() {
                 key={tab.id}
                 type="button"
                 onClick={() => handleStatusFilterChange(tab.id)}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                   selectedStatus === tab.id
-                    ? "bg-secondary text-white shadow-xs"
-                    : "text-text-secondary hover:text-foreground hover:bg-surface-muted"
+                    ? "bg-neutral-950 text-white shadow-xs dark:bg-white dark:text-neutral-950"
+                    : "bg-neutral-100/90 dark:bg-surface-muted text-neutral-700 dark:text-neutral-300 hover:text-neutral-950 dark:hover:text-white hover:bg-neutral-200/70"
                 }`}
               >
                 {tab.label}
@@ -286,10 +382,10 @@ export default function CreatorPaymentsManager() {
           </div>
 
           {/* Payments Data Table */}
-          <div className="bg-surface border border-border-theme rounded-2xl shadow-xs overflow-hidden">
+          <div className="bg-white dark:bg-surface border border-neutral-200/80 dark:border-border-theme rounded-2xl shadow-xs overflow-hidden">
             {loading ? (
               /* Loading Skeleton */
-              <div className="p-6 space-y-4 animate-pulse">
+              <div className="p-6 space-y-3.5 animate-pulse">
                 {[1, 2, 3, 4, 5].map((i) => (
                   <div key={i} className="h-14 bg-surface-muted rounded-xl w-full" />
                 ))}
@@ -297,7 +393,7 @@ export default function CreatorPaymentsManager() {
             ) : payments.length === 0 ? (
               /* Empty State */
               <div className="p-12 text-center space-y-3">
-                <div className="w-14 h-14 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center mx-auto border border-secondary/20">
+                <div className="w-14 h-14 rounded-2xl bg-neutral-100 dark:bg-surface-muted text-black dark:text-white flex items-center justify-center mx-auto border border-neutral-200 dark:border-border-theme">
                   <CreditCardIcon className="w-7 h-7" />
                 </div>
                 <div className="space-y-1">
@@ -313,7 +409,7 @@ export default function CreatorPaymentsManager() {
                 <div className="pt-2">
                   <Link
                     href="/creator/workspace"
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-secondary hover:bg-secondary-dark text-white text-xs font-semibold shadow-xs transition-all cursor-pointer"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-neutral-950 hover:bg-neutral-800 text-white text-xs font-semibold shadow-xs transition-all cursor-pointer dark:bg-white dark:text-black dark:hover:bg-neutral-100"
                   >
                     <span>View Active Workspaces</span>
                   </Link>
@@ -322,19 +418,34 @@ export default function CreatorPaymentsManager() {
             ) : (
               /* Data Table */
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-surface-muted/60 text-text-secondary font-semibold uppercase tracking-wider text-[10px] border-b border-border-theme">
+                <table className="w-full text-left text-xs min-w-[720px]">
+                  <thead className="bg-neutral-50/70 dark:bg-surface-muted/60 text-text-secondary font-semibold uppercase tracking-wider text-[10px] sm:text-[11px] border-b border-neutral-200/80 dark:border-border-theme">
                     <tr>
-                      <th className="py-3.5 px-4">Campaign & Brand</th>
-                      <th className="py-3.5 px-4">Amount</th>
-                      <th className="py-3.5 px-4">Status</th>
-                      <th className="py-3.5 px-4">Payment Method</th>
-                      <th className="py-3.5 px-4">Razorpay Ref</th>
-                      <th className="py-3.5 px-4">Date</th>
-                      <th className="py-3.5 px-4 text-right">Actions</th>
+                      <th className="py-3 px-4">Campaign &amp; Brand</th>
+                      <th className="py-3 px-4">Amount</th>
+                      <th className="py-3 px-4">Status</th>
+                      <th className="py-3 px-4">Payment Method</th>
+                      <th className="py-3 px-4">Razorpay Ref</th>
+                      <th className="py-3 px-4">
+                        <div className="inline-flex items-center gap-1">
+                          <span>Date</span>
+                          <svg
+                            className="w-3 h-3 text-neutral-400 shrink-0"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={2.2}
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M7 15l5 5 5-5M7 9l5-5 5 5" />
+                          </svg>
+                        </div>
+                      </th>
+                      <th className="py-3 px-4">Receipt</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border-theme/60">
+                  <tbody className="divide-y divide-neutral-100 dark:divide-border-theme/40">
                     {payments.map((payment) => {
                       const badge = getStatusBadge(payment.status);
                       const campaignTitle =
@@ -345,21 +456,38 @@ export default function CreatorPaymentsManager() {
                         typeof payment.brand === "object" && payment.brand !== null && payment.brand.name
                           ? payment.brand.name
                           : "Brand Partner";
+                      const campaignImage =
+                        typeof payment.campaign === "object" && payment.campaign !== null
+                          ? (typeof payment.campaign.coverImage === "string" ? payment.campaign.coverImage : payment.campaign.coverImage?.url) ||
+                            (typeof payment.campaign.image === "string" ? payment.campaign.image : payment.campaign.image?.url) ||
+                            (Array.isArray(payment.campaign.images) && payment.campaign.images.length > 0
+                              ? (typeof payment.campaign.images[0] === "string" ? payment.campaign.images[0] : payment.campaign.images[0]?.url)
+                              : null)
+                          : null;
+                      const dateObj = formatPaymentDate(payment.paidAt || payment.createdAt);
 
                       return (
                         <tr
                           key={payment._id}
-                          className="hover:bg-surface-muted/40 transition-colors"
+                          className="hover:bg-neutral-50/60 dark:hover:bg-surface-muted/40 transition-colors"
                         >
                           {/* Campaign & Brand */}
-                          <td className="py-3.5 px-4">
-                            <div className="space-y-0.5">
-                              <span className="font-semibold text-foreground block line-clamp-1">
-                                {campaignTitle}
-                              </span>
-                              <span className="text-[11px] text-text-secondary block">
-                                Brand: {brandName}
-                              </span>
+                          <td className="py-3 px-4">
+                            <div className="flex items-center gap-3">
+                              <CampaignAvatar image={campaignImage} title={campaignTitle} />
+                              <div className="space-y-0.5 min-w-0">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="font-semibold text-foreground text-xs sm:text-sm line-clamp-1">
+                                    {campaignTitle}
+                                  </span>
+                                  <svg className="w-3.5 h-3.5 text-text-secondary/60 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" />
+                                  </svg>
+                                </div>
+                                <span className="text-[11px] text-text-secondary block truncate">
+                                  Brand: {brandName}
+                                </span>
+                              </div>
                             </div>
                           </td>
 
@@ -369,39 +497,64 @@ export default function CreatorPaymentsManager() {
                           </td>
 
                           {/* Status */}
-                          <td className="py-3.5 px-4">
+                          <td className="py-3 px-4 whitespace-nowrap">
                             <span
-                              className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wider inline-block ${badge.color}`}
+                              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider border uppercase ${badge.bg} ${badge.text} ${badge.border}`}
                             >
-                              {badge.label}
+                              {badge.iconType === "check" && (
+                                <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0">
+                                  <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="20 6 9 17 4 12" />
+                                  </svg>
+                                </span>
+                              )}
+                              {badge.iconType === "pending" && (
+                                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+                              )}
+                              {badge.iconType === "processing" && (
+                                <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse shrink-0" />
+                              )}
+                              {badge.iconType === "failed" && (
+                                <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
+                              )}
+                              <span>{badge.label}</span>
                             </span>
                           </td>
 
-                          {/* Method */}
-                          <td className="py-3.5 px-4">
-                            <span className="font-mono text-[11px] px-2 py-0.5 rounded bg-surface-muted text-foreground border border-border-theme">
+                          {/* Payment Method */}
+                          <td className="py-3 px-4 whitespace-nowrap">
+                            <span className="inline-block font-mono text-[10.5px] px-2.5 py-0.5 rounded-md bg-neutral-100 dark:bg-surface-muted text-neutral-700 dark:text-neutral-300 border border-neutral-200/70 dark:border-border-theme font-medium tracking-wide">
                               {payment.paymentMethod || "RAZORPAY_TEST"}
                             </span>
                           </td>
 
-                          {/* Ref */}
-                          <td className="py-3.5 px-4 font-mono text-[11px] text-text-secondary">
-                            {payment.transactionId || payment.razorpayPaymentId || payment.razorpayOrderId || "—"}
+                          {/* Razorpay Ref */}
+                          <td className="py-3 px-4 font-mono text-xs text-text-secondary whitespace-nowrap">
+                            {payment.transactionId || payment.razorpayPaymentId || payment.razorpayOrderId || "-"}
                           </td>
 
                           {/* Date */}
-                          <td className="py-3.5 px-4 text-text-secondary whitespace-nowrap">
-                            {formatDate(payment.paidAt || payment.createdAt)}
+                          <td className="py-3 px-4 text-xs whitespace-nowrap">
+                            <div className="space-y-0.5">
+                              <span className="font-medium text-neutral-800 dark:text-neutral-200 block">
+                                {dateObj.date}
+                              </span>
+                              {dateObj.time && (
+                                <span className="text-[10px] text-text-secondary block">
+                                  {dateObj.time}
+                                </span>
+                              )}
+                            </div>
                           </td>
 
-                          {/* Actions */}
-                          <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                          {/* View Receipt */}
+                          <td className="py-3 px-4 whitespace-nowrap">
                             <button
                               type="button"
                               onClick={() => handleViewDetails(payment)}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border-theme bg-surface hover:bg-surface-muted text-foreground text-xs font-medium transition-colors cursor-pointer"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-neutral-200 dark:border-border-theme bg-white dark:bg-surface hover:bg-neutral-50 dark:hover:bg-surface-muted text-neutral-900 dark:text-white text-xs font-medium transition-colors shadow-2xs cursor-pointer"
                             >
-                              <EyeIcon className="w-3.5 h-3.5 text-text-secondary" />
+                              <EyeIcon className="w-3.5 h-3.5 text-neutral-900 dark:text-white shrink-0" />
                               <span>View Receipt</span>
                             </button>
                           </td>
@@ -414,32 +567,50 @@ export default function CreatorPaymentsManager() {
             )}
 
             {/* Pagination Controls */}
-            {pagination && pagination.totalPages > 1 && (
-              <div className="p-4 border-t border-border-theme flex items-center justify-between gap-4 text-xs">
-                <span className="text-text-secondary">
-                  Showing Page <strong className="text-foreground">{pagination.currentPage}</strong> of{" "}
-                  <strong className="text-foreground">{pagination.totalPages}</strong> ({pagination.totalItems} records)
-                </span>
+            {payments.length > 0 && (
+              <div className="px-6 py-4 border-t border-neutral-100 dark:border-border-theme/40 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+                {(() => {
+                  const totalRecords = pagination?.totalItems ?? payments.length;
+                  const currentPageNum = pagination?.page || pagination?.currentPage || currentPage || 1;
+                  const totalPages = pagination?.totalPages || 1;
+                  const limit = pagination?.limit || 10;
+                  const startRecord = totalRecords === 0 ? 0 : (currentPageNum - 1) * limit + 1;
+                  const endRecord = Math.min(currentPageNum * limit, totalRecords);
 
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                    disabled={currentPage <= 1 || loading}
-                    className="p-2 rounded-xl border border-border-theme bg-surface hover:bg-surface-muted text-foreground transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    <ChevronLeftIcon />
-                  </button>
+                  return (
+                    <>
+                      <span className="text-text-secondary">
+                        Showing {startRecord} to {endRecord} of {totalRecords} payments
+                      </span>
 
-                  <button
-                    type="button"
-                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, pagination.totalPages))}
-                    disabled={currentPage >= pagination.totalPages || loading}
-                    className="p-2 rounded-xl border border-border-theme bg-surface hover:bg-surface-muted text-foreground transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    <ChevronRightIcon />
-                  </button>
-                </div>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                          disabled={currentPageNum <= 1 || loading}
+                          aria-label="Previous page"
+                          className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-neutral-200/80 dark:border-border-theme bg-white dark:bg-surface hover:bg-neutral-50 dark:hover:bg-surface-muted text-neutral-700 dark:text-neutral-300 flex items-center justify-center transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed shadow-2xs"
+                        >
+                          <ChevronLeftIcon className="w-3.5 h-3.5" />
+                        </button>
+
+                        <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-neutral-950 text-white dark:bg-white dark:text-neutral-950 font-bold text-xs flex items-center justify-center shadow-xs">
+                          {currentPageNum}
+                        </span>
+
+                        <button
+                          type="button"
+                          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                          disabled={currentPageNum >= totalPages || loading}
+                          aria-label="Next page"
+                          className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-neutral-200/80 dark:border-border-theme bg-white dark:bg-surface hover:bg-neutral-50 dark:hover:bg-surface-muted text-neutral-700 dark:text-neutral-300 flex items-center justify-center transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed shadow-2xs"
+                        >
+                          <ChevronRightIcon className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
             )}
           </div>

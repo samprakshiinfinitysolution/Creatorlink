@@ -21,10 +21,12 @@ function MegaphoneIcon({ className = "w-5 h-5" }) {
   );
 }
 
-function CurrencyIcon({ className = "w-4 h-4" }) {
+
+function MoneyBagIcon({ className = "w-5 h-5" }) {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v2m-3-2a3 3 0 00-3 3v.5a5.5 5.5 0 00-2 4.25c0 4.5 4 7.25 8 7.25s8-2.75 8-7.25a5.5 5.5 0 00-2-4.25V7a3 3 0 00-3-3h-6z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 11h6m-6 3h4m-1-4v5" />
     </svg>
   );
 }
@@ -49,6 +51,61 @@ function CheckIcon({ className = "w-3.5 h-3.5" }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+    </svg>
+  );
+}
+
+function CheckCircleIcon({ className = "w-3.5 h-3.5" }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="currentColor">
+      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
+    </svg>
+  );
+}
+
+function XCircleIcon({ className = "w-3.5 h-3.5" }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="currentColor">
+      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
+    </svg>
+  );
+}
+
+function FlagIcon({ className = "w-3.5 h-3.5" }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path fillRule="evenodd" d="M3 3.75a.75.75 0 01.75-.75h14.25a.75.75 0 01.6 1.2L16 7.5l2.6 3.3a.75.75 0 01-.6 1.2H3.75a.75.75 0 01-.75-.75V3.75zM3 12.75v7.5a.75.75 0 001.5 0v-7.5H3z" clipRule="evenodd" />
+    </svg>
+  );
+}
+
+function InstagramIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+    </svg>
+  );
+}
+
+function YouTubeIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+    </svg>
+  );
+}
+
+function PlatformIcon({ platform, className = "w-4 h-4" }) {
+  const norm = (platform || "").toLowerCase();
+  if (norm.includes("youtube")) {
+    return <YouTubeIcon className={`${className} text-black dark:text-white`} />;
+  }
+  if (norm.includes("instagram")) {
+    return <InstagramIcon className={`${className} text-black dark:text-white`} />;
+  }
+  return (
+    <svg className={`${className} text-black dark:text-white`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-.778.099-1.533.284-2.253" />
     </svg>
   );
 }
@@ -142,37 +199,44 @@ const getStatusBadge = (status) => {
     case "pending":
       return {
         label: "Pending",
-        color: "bg-amber-500/10 text-amber-500 border-amber-500/30",
+        color: "bg-amber-50 text-amber-600 border border-amber-200/70 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/40",
+        Icon: ClockIcon,
       };
     case "accepted":
       return {
         label: "Accepted",
-        color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/30",
+        color: "bg-emerald-50 text-emerald-600 border border-emerald-200/70 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/40",
+        Icon: CheckCircleIcon,
       };
     case "in_progress":
       return {
-        label: "Active (In Progress)",
-        color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/30",
+        label: "Active",
+        color: "bg-emerald-50 text-emerald-600 border border-emerald-200/70 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/40",
+        Icon: CheckCircleIcon,
       };
     case "completed":
       return {
         label: "Completed",
-        color: "bg-secondary/10 text-secondary border-secondary/30",
+        color: "bg-purple-50 text-purple-600 border border-purple-200/70 dark:bg-purple-950/30 dark:text-purple-400 dark:border-purple-900/40",
+        Icon: FlagIcon,
       };
     case "rejected":
       return {
         label: "Rejected",
-        color: "bg-red-500/10 text-red-500 border-red-500/30",
+        color: "bg-rose-50 text-rose-600 border border-rose-200/70 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/40",
+        Icon: XCircleIcon,
       };
     case "cancelled":
       return {
         label: "Cancelled",
-        color: "bg-surface-muted text-text-secondary border-border-theme",
+        color: "bg-neutral-100 text-neutral-600 border border-neutral-200 dark:bg-surface-muted dark:text-text-secondary dark:border-border-theme",
+        Icon: XCircleIcon,
       };
     default:
       return {
         label: status || "Unknown",
-        color: "bg-surface-muted text-text-secondary border-border-theme",
+        color: "bg-neutral-100 text-neutral-600 border border-neutral-200 dark:bg-surface-muted dark:text-text-secondary dark:border-border-theme",
+        Icon: ClockIcon,
       };
   }
 };
@@ -304,11 +368,17 @@ export default function CreatorAppliedCampaignsManager() {
 
         {/* Main Content Area */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl w-full mx-auto">
-          {/* 1. PAGE HEADER BANNER */}
-          <div className="bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-1.5">
-                <span className="inline-block px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase bg-secondary/15 text-secondary border border-secondary/20">
+          {/* 1. PAGE HEADER HERO WITH CAMPAIGN COLLABORATION & PROGRESS ILLUSTRATION */}
+          <div className="relative overflow-hidden bg-gradient-to-br from-pink-50 via-white to-rose-100/80 dark:bg-gradient-to-br dark:from-surface dark:via-surface dark:to-pink-950/20 border border-pink-200/80 dark:border-pink-900/40 rounded-3xl p-6 sm:p-7 lg:p-8 shadow-[0_4px_24px_rgba(255,45,108,0.06)] flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 transition-colors">
+            {/* Ambient Blush-Pink Glow Accents */}
+            <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-pink-200/50 dark:bg-pink-600/10 blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-20 right-48 w-72 h-72 rounded-full bg-rose-200/40 dark:bg-rose-600/5 blur-3xl pointer-events-none" />
+            <div className="absolute -top-10 left-1/3 w-48 h-48 rounded-full bg-pink-100/40 dark:bg-pink-600/5 blur-2xl pointer-events-none" />
+
+            {/* Left Content Area */}
+            <div className="relative z-10 max-w-xl space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="inline-block px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase bg-secondary/15 text-black dark:text-white border border-secondary/20">
                   Collaborations
                 </span>
                 {appliedPagination?.totalItems !== undefined && (
@@ -317,21 +387,133 @@ export default function CreatorAppliedCampaignsManager() {
                   </span>
                 )}
               </div>
-              <h1 className="font-serif font-semibold text-2xl sm:text-3xl text-foreground tracking-tight">
+
+              <h1 className="font-heading font-medium text-2xl sm:text-3xl lg:text-4xl text-foreground tracking-tight">
                 My Campaigns
               </h1>
-              <p className="text-xs sm:text-sm text-text-secondary mt-1">
+
+              <p className="text-xs sm:text-sm text-text-secondary font-sans leading-relaxed">
                 View and track your campaign applications, active bookings, and collaboration statuses.
               </p>
+
+              <div className="pt-1.5">
+                <Link
+                  href="/creator/campaigns/discover"
+                  className="group/btn inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-neutral-950 text-white text-xs sm:text-sm font-semibold tracking-wide border border-neutral-900 shadow-xs hover:bg-neutral-900 hover:border-neutral-800 hover:shadow-md hover:shadow-black/20 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] transition-all duration-300 ease-out shrink-0 cursor-pointer dark:bg-neutral-100 dark:text-neutral-950 dark:border-neutral-200 dark:hover:bg-neutral-200 motion-reduce:transform-none motion-reduce:transition-none"
+                >
+                  <span>Discover Campaigns</span>
+                  <ArrowRightIcon className="w-3.5 h-3.5 transition-transform duration-200 group-hover/btn:translate-x-0.5 motion-reduce:transform-none" />
+                </Link>
+              </div>
             </div>
 
-            <Link
-              href="/creator/campaigns/discover"
-              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-secondary hover:bg-secondary-dark text-white text-xs font-semibold tracking-wide transition-all shadow-xs shrink-0 cursor-pointer"
-            >
-              <span>Discover Campaigns</span>
-              <ArrowRightIcon className="w-3.5 h-3.5" />
-            </Link>
+            {/* Right Decorative Composition: Static Campaign Journey Illustration */}
+            <div className="relative z-10 hidden lg:flex flex-col items-center justify-center gap-3 w-[360px] xl:w-[420px] shrink-0 select-none pointer-events-none py-1">
+              {/* Soft Ambient Background Glow */}
+              <div className="absolute inset-0 bg-gradient-to-r from-pink-200/20 via-rose-100/30 to-pink-200/15 dark:from-pink-950/20 dark:to-transparent rounded-3xl blur-2xl -z-10" />
+
+              {/* Top Row: Brand × Creator Collaboration Label & Sparkle Accent */}
+              <div className="w-full flex items-center justify-between px-2">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 dark:bg-surface/90 backdrop-blur-sm border border-pink-200/80 dark:border-pink-900/50 shadow-xs shadow-pink-500/5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-black dark:bg-white animate-pulse motion-reduce:animate-none" />
+                  <span className="text-[10.5px] font-semibold text-foreground tracking-wide font-sans">
+                    Brand <span className="text-pink-500 font-bold">×</span> Creator
+                  </span>
+                </div>
+
+                {/* Subtle Decorative Black Sparkles */}
+                <div className="flex items-center gap-1.5 text-black dark:text-white">
+                  <svg className="w-3.5 h-3.5 fill-current animate-pulse motion-reduce:animate-none" viewBox="0 0 24 24">
+                    <path d="M12 0L14.59 9.41L24 12L14.59 14.59L12 24L9.41 14.59L0 12L9.41 9.41L12 0Z" />
+                  </svg>
+                  <span className="w-1 h-1 rounded-full bg-black dark:bg-white opacity-80" />
+                  <svg className="w-2.5 h-2.5 fill-current opacity-70 animate-pulse motion-reduce:animate-none [animation-delay:400ms]" viewBox="0 0 24 24">
+                    <path d="M12 0L14.59 9.41L24 12L14.59 14.59L12 24L9.41 14.59L0 12L9.41 9.41L12 0Z" />
+                  </svg>
+                </div>
+              </div>
+
+              {/* Center: Horizontal 4-Milestone Campaign Journey */}
+              <div className="relative w-full py-1">
+                {/* Connecting Progress Line (Black/Dark Neutral with Subtle Animation) */}
+                <div className="absolute top-5 left-7 right-7 h-0.5 bg-neutral-200 dark:bg-neutral-800 -z-0 overflow-hidden rounded-full">
+                  <div className="w-full h-full bg-gradient-to-r from-neutral-400 via-neutral-950 to-neutral-400 dark:from-neutral-600 dark:via-neutral-100 dark:to-neutral-600 animate-pulse motion-reduce:animate-none" />
+                </div>
+
+                {/* 4 Connected Milestones */}
+                <div className="relative z-10 flex items-start justify-between">
+                  {/* Milestone 1: Discover */}
+                  <div className="flex flex-col items-center text-center w-16">
+                    <div className="w-10 h-10 rounded-full bg-white dark:bg-surface border border-pink-100/90 dark:border-border-theme shadow-xs flex items-center justify-center text-text-secondary">
+                      <svg className="w-4 h-4 text-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                      </svg>
+                    </div>
+                    <span className="text-[10px] font-medium text-text-secondary mt-1.5 font-sans">
+                      Discover
+                    </span>
+                  </div>
+
+                  {/* Milestone 2: Apply */}
+                  <div className="flex flex-col items-center text-center w-16">
+                    <div className="w-10 h-10 rounded-full bg-white dark:bg-surface border border-pink-100/90 dark:border-border-theme shadow-xs flex items-center justify-center text-text-secondary">
+                      <svg className="w-4 h-4 text-text-secondary -rotate-45 ml-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                      </svg>
+                    </div>
+                    <span className="text-[10px] font-medium text-text-secondary mt-1.5 font-sans">
+                      Apply
+                    </span>
+                  </div>
+
+                  {/* Milestone 3: Collaborate (Highlighted with black background and white icon) */}
+                  <div className="flex flex-col items-center text-center w-16 -mt-1">
+                    <div className="relative w-11 h-11 rounded-full bg-neutral-950 dark:bg-neutral-900 text-white shadow-md shadow-black/30 dark:shadow-black/60 ring-4 ring-neutral-200/90 dark:ring-neutral-700/60 flex items-center justify-center">
+                      <div className="absolute inset-0 rounded-full bg-neutral-950/20 dark:bg-white/20 animate-ping motion-reduce:animate-none -z-10" />
+                      <div className="absolute -inset-1 rounded-full bg-black/10 dark:bg-white/10 blur-xs animate-pulse motion-reduce:animate-none -z-10" />
+                      <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+                        <path d="m11 17 2 2a1 1 0 0 0 1.4 0l4.3-4.3a1 1 0 0 0 0-1.4L16 11" />
+                        <path d="m13 7 1.3-1.3a1 1 0 0 1 1.4 0l4.3 4.3a1 1 0 0 1 0 1.4L18 13" />
+                        <path d="m2 12 5.3-5.3a1 1 0 0 1 1.4 0L12 10" />
+                        <path d="m5 15 3 3a1 1 0 0 0 1.4 0l3.6-3.6" />
+                      </svg>
+                    </div>
+                    <span className="text-[10px] font-bold text-black dark:text-white mt-1.5 font-sans">
+                      Collaborate
+                    </span>
+                  </div>
+
+                  {/* Milestone 4: Complete */}
+                  <div className="flex flex-col items-center text-center w-16">
+                    <div className="w-10 h-10 rounded-full bg-white dark:bg-surface border border-pink-100/90 dark:border-border-theme shadow-xs flex items-center justify-center text-emerald-500">
+                      <svg className="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <span className="text-[10px] font-medium text-text-secondary mt-1.5 font-sans">
+                      Complete
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom Row: Tiny Deliverables Checklist Pill */}
+              <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/90 dark:bg-surface/90 backdrop-blur-sm border border-pink-200/80 dark:border-pink-900/40 shadow-xs shadow-pink-500/5">
+                <div className="flex items-center gap-1.5 text-[10px] font-medium text-foreground font-sans">
+                  <span className="w-3.5 h-3.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-[8px] font-bold">
+                    ✓
+                  </span>
+                  <span>Campaign Brief</span>
+                </div>
+                <span className="w-1 h-1 rounded-full bg-black dark:bg-white" />
+                <div className="flex items-center gap-1.5 text-[10px] font-medium text-foreground font-sans">
+                  <span className="w-3.5 h-3.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-[8px] font-bold">
+                    ✓
+                  </span>
+                  <span>Deliverables Approved</span>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* 2. FILTER & SEARCH BAR */}
@@ -347,7 +529,7 @@ export default function CreatorAppliedCampaignsManager() {
                     onClick={() => handleStatusChange(tab.id)}
                     className={`px-3.5 py-2 rounded-xl text-xs font-medium transition-all shrink-0 cursor-pointer ${
                       isActive
-                        ? "bg-secondary text-white font-semibold shadow-xs"
+                        ? "bg-neutral-950 text-white font-semibold shadow-xs dark:bg-neutral-100 dark:text-neutral-950"
                         : "bg-surface-muted text-text-secondary hover:text-foreground hover:bg-surface-muted/80 border border-border-theme/60"
                     }`}
                   >
@@ -445,158 +627,269 @@ export default function CreatorAppliedCampaignsManager() {
                 const campaignObj = item.campaign || {};
                 const brandObj = item.brand || {};
                 const badge = getStatusBadge(item.status);
+                const StatusIcon = badge.Icon;
                 const displayPrice = item.agreedPrice || campaignObj.budget;
+                const brandInitial = (brandObj.name || "B").charAt(0).toUpperCase();
+
+                const deliverablesList =
+                  (Array.isArray(item.deliverables) && item.deliverables.length > 0
+                    ? item.deliverables
+                    : campaignObj.deliverables) || [];
+                const validDeliverables = deliverablesList
+                  .map(formatDeliverableItem)
+                  .filter(Boolean);
+
+                const serviceTitle =
+                  item.service?.title ||
+                  (campaignObj.category ? `${campaignObj.category} Creator` : "Custom Deliverable");
 
                 return (
                   <div
                     key={bookingId}
-                    className="bg-surface border border-border-theme rounded-2xl overflow-hidden shadow-xs hover:border-secondary/40 transition-all duration-200 flex flex-col justify-between p-6 group"
+                    className="bg-white dark:bg-surface border border-neutral-200/80 dark:border-border-theme hover:border-pink-200/90 dark:hover:border-pink-500/30 rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-[0_2px_12px_rgba(255,45,108,0.03)] hover:shadow-md transition-all duration-200 flex flex-col justify-between group"
                   >
-                    <div className="space-y-4">
-                      {/* Top Row: Category, Origin & Status Badge */}
-                      <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <div className="space-y-2.5">
+                      {/* 1. TOP ROW: Category & Proposal Badges (Left), Status Badge (Right) */}
+                      <div className="flex items-center justify-between gap-1.5 flex-wrap">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-secondary/10 text-secondary border border-secondary/20 uppercase tracking-wide truncate max-w-[140px]">
-                            {campaignObj.category || "General"}
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-sans font-bold tracking-wider uppercase bg-pink-50 text-pink-500 border border-pink-100 dark:bg-pink-950/40 dark:text-pink-400 dark:border-pink-900/50 truncate max-w-[130px]">
+                            {campaignObj.category || "Fashion"}
                           </span>
+
                           {item.initiatedBy === "brand" ? (
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 uppercase tracking-wide">
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-sans font-bold tracking-wider uppercase bg-amber-50 text-amber-700 border border-amber-200/70 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/40">
                               Brand Proposal
                             </span>
                           ) : (
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-surface-muted text-text-secondary border border-border-theme uppercase tracking-wide">
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-sans font-bold tracking-wider uppercase bg-neutral-100 text-neutral-600 border border-neutral-200/80 dark:bg-surface-muted dark:text-text-secondary dark:border-border-theme">
                               My Application
                             </span>
                           )}
                         </div>
+
                         <span
-                          className={`px-2.5 py-1 rounded-full text-[10px] font-bold border uppercase tracking-wide ${badge.color}`}
+                          className={`px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-sans font-bold tracking-wider uppercase flex items-center gap-1.5 ${badge.color}`}
                         >
-                          {badge.label}
+                          {StatusIcon && <StatusIcon className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />}
+                          <span>{badge.label}</span>
                         </span>
                       </div>
 
-                      {/* Title & Brand Name */}
-                      <div>
-                        <h2 className="font-serif font-medium text-xl text-foreground line-clamp-2 group-hover:text-secondary transition-colors">
-                          {campaignObj.title || "Campaign"}
-                        </h2>
-                        {brandObj.name && (
-                          <span className="text-xs text-text-secondary font-medium block mt-1">
-                            by {brandObj.name}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Description / Application Proposal Message */}
-                      <p className="text-xs text-text-secondary line-clamp-3 leading-relaxed">
-                        {item.message || campaignObj.description || "No proposal message provided."}
-                      </p>
-
-                      {/* Agreed Price / Budget Banner */}
-                      <div className="p-3.5 rounded-xl bg-surface-muted/60 border border-border-theme flex items-center justify-between">
-                        <div className="flex items-center gap-1.5 text-text-secondary text-xs">
-                          <CurrencyIcon className="text-secondary shrink-0" />
-                          <span className="font-medium">Agreed Price</span>
-                        </div>
-                        <span className="font-serif font-semibold text-lg text-foreground">
-                          {formatPrice(displayPrice, item.currency || "INR")}
-                        </span>
-                      </div>
-
-                      {/* Dates: Start Date & Deadline */}
-                      <div className="grid grid-cols-2 gap-2 text-xs text-text-secondary">
-                        <div className="flex items-center gap-1.5 bg-surface-muted/30 p-2.5 rounded-xl border border-border-theme/50">
-                          <CalendarIcon className="w-3.5 h-3.5 text-secondary shrink-0" />
-                          <span className="truncate">Start: {formatDate(item.startDate || item.createdAt)}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 bg-surface-muted/30 p-2.5 rounded-xl border border-border-theme/50">
-                          <ClockIcon className="w-3.5 h-3.5 text-secondary shrink-0" />
-                          <span className="truncate">Ends: {formatDate(item.deadline || campaignObj.deadline)}</span>
-                        </div>
-                      </div>
-
-                      {/* Deliverables List */}
-                      {Array.isArray(item.deliverables) && item.deliverables.length > 0 && (() => {
-                        const validDeliverables = item.deliverables
-                          .map(formatDeliverableItem)
-                          .filter(Boolean);
-
-                        if (validDeliverables.length === 0) return null;
-
-                        return (
-                          <div className="space-y-1.5 pt-1">
-                            <span className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary block">
-                              Deliverables ({validDeliverables.length})
-                            </span>
-                            <div className="flex flex-wrap gap-1.5">
-                              {validDeliverables.map((itemText, idx) => (
-                                <span
-                                  key={idx}
-                                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-surface-muted text-foreground border border-border-theme/80"
-                                >
-                                  <CheckIcon className="text-emerald-500 shrink-0 w-3.5 h-3.5" />
-                                  <span className="truncate max-w-[200px]">{itemText}</span>
-                                </span>
-                              ))}
+                      {/* 2. CAMPAIGN VISUAL BANNER WITH FLOATING BRAND BADGE */}
+                      <div className="h-28 sm:h-32 rounded-xl sm:rounded-2xl overflow-hidden relative border border-neutral-100 dark:border-border-theme/40 bg-surface-muted/60 dark:bg-surface-muted/20">
+                        {campaignObj.coverImage || campaignObj.image ? (
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img
+                            src={campaignObj.coverImage || campaignObj.image}
+                            alt={campaignObj.title || "Campaign banner"}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                        ) : (
+                          <div className="w-full h-full relative overflow-hidden bg-gradient-to-br from-pink-100/70 via-rose-50/50 to-amber-50/40 dark:from-pink-950/40 dark:via-purple-950/20 dark:to-surface-muted/40 flex items-center justify-center">
+                            <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-pink-200/40 dark:bg-pink-600/10 blur-xl pointer-events-none" />
+                            <div className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full bg-rose-200/30 dark:bg-rose-600/10 blur-xl pointer-events-none" />
+                            <div className="text-center px-3 relative z-10 opacity-70">
+                              <span className="font-heading font-medium italic text-xs sm:text-sm text-foreground/80 tracking-wide line-clamp-1">
+                                {campaignObj.title || "Editorial Brief"}
+                              </span>
                             </div>
                           </div>
-                        );
-                      })()}
-                      {/* Optional Service Package Badge */}
-                      {item.service?.title && (
-                        <div className="text-[11px] text-text-secondary flex items-center gap-1 pt-1">
-                          <span className="font-semibold text-foreground">Service Package:</span>
-                          <span className="truncate">{item.service.title}</span>
+                        )}
+
+                        {/* Floating Brand Badge Bottom-Left */}
+                        <div className="absolute bottom-2 left-2 bg-white/95 dark:bg-surface/95 backdrop-blur-xs px-2 py-0.5 rounded-lg shadow-xs border border-border-theme/60 flex items-center gap-1.5 max-w-[85%]">
+                          <div className="w-3.5 h-3.5 rounded-full bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 flex items-center justify-center text-[8px] font-heading font-bold shrink-0">
+                            {brandInitial}
+                          </div>
+                          <span className="text-[10px] sm:text-[11px] font-sans font-semibold text-foreground truncate">
+                            {brandObj.name || "Brand Partner"}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* 3. CAMPAIGN TITLE & BRAND ROW */}
+                      <div>
+                        <h2 className="font-heading font-medium text-base sm:text-lg text-black dark:text-white line-clamp-1 group-hover:text-black dark:group-hover:text-white transition-colors tracking-tight">
+                          {campaignObj.title || "Campaign Collaboration"}
+                        </h2>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <div className="w-3.5 h-3.5 rounded-full bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 flex items-center justify-center text-[8px] font-heading font-semibold shrink-0">
+                            {brandInitial}
+                          </div>
+                          <span className="text-xs font-sans text-text-secondary truncate">
+                            by {brandObj.name || "Brand User"}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* 4. DESCRIPTION / PROPOSAL MESSAGE */}
+                      <p className="text-xs font-sans text-text-secondary line-clamp-2 leading-normal">
+                        {item.message || campaignObj.description || "Looking for creators to promote our campaign collection..."}
+                      </p>
+
+                      {/* 5. COMPACT BLUSH-PINK PRICING PANEL */}
+                      <div className="p-2.5 sm:p-3 rounded-xl bg-pink-50/50 dark:bg-pink-950/20 border border-pink-100/70 dark:border-pink-900/40 flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-pink-100/70 dark:bg-pink-900/40 border border-pink-200/60 dark:border-pink-800/40 flex items-center justify-center text-black dark:text-white shrink-0">
+                          <MoneyBagIcon className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <span className="text-[10px] sm:text-[11px] font-sans font-medium text-text-secondary block leading-none mb-0.5">
+                            Agreed Price
+                          </span>
+                          <span className="font-heading font-medium text-xl sm:text-2xl text-foreground tabular-nums tracking-tight leading-none block">
+                            {formatPrice(displayPrice, item.currency || "INR")}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* 6. ALIGNED COMPACT DATES */}
+                      <div className="grid grid-cols-2 gap-2 text-xs font-sans text-text-secondary">
+                        <div className="flex items-center gap-2 p-2 rounded-xl border border-neutral-100 dark:border-border-theme/60 bg-neutral-50/50 dark:bg-surface-muted/20">
+                          <div className="w-6 h-6 rounded-lg bg-pink-50 dark:bg-pink-950/40 text-black dark:text-white flex items-center justify-center shrink-0">
+                            <CalendarIcon className="w-3 h-3" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <span className="text-[9px] sm:text-[10px] text-text-secondary font-medium block leading-tight">
+                              Start Date
+                            </span>
+                            <span className="text-[11px] sm:text-xs font-semibold text-foreground block truncate leading-tight mt-0.5">
+                              {formatDate(item.startDate || item.createdAt)}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 p-2 rounded-xl border border-neutral-100 dark:border-border-theme/60 bg-neutral-50/50 dark:bg-surface-muted/20">
+                          <div className="w-6 h-6 rounded-lg bg-pink-50 dark:bg-pink-950/40 text-black dark:text-white flex items-center justify-center shrink-0">
+                            <ClockIcon className="w-3 h-3" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <span className="text-[9px] sm:text-[10px] text-text-secondary font-medium block leading-tight">
+                              End Date
+                            </span>
+                            <span className="text-[11px] sm:text-xs font-semibold text-foreground block truncate leading-tight mt-0.5">
+                              {formatDate(item.deadline || campaignObj.deadline)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 7. DELIVERABLES PILLS */}
+                      {validDeliverables.length > 0 && (
+                        <div className="space-y-1 pt-0">
+                          <span className="text-[9px] sm:text-[10px] font-sans font-bold uppercase tracking-wider text-text-secondary block">
+                            DELIVERABLES ({validDeliverables.length})
+                          </span>
+                          <div className="flex flex-wrap gap-1.5">
+                            {validDeliverables.map((itemText, idx) => (
+                              <span
+                                key={idx}
+                                className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[11px] font-sans font-medium bg-neutral-50 dark:bg-surface-muted/40 text-foreground border border-neutral-200/70 dark:border-border-theme"
+                              >
+                                <CheckIcon className="text-emerald-500 shrink-0 w-3 h-3" />
+                                <span className="truncate max-w-[190px]">{itemText}</span>
+                              </span>
+                            ))}
+                          </div>
                         </div>
                       )}
+
+                      {/* 8. SERVICE PACKAGE LINE */}
+                      <div className="text-[11px] sm:text-xs font-sans text-text-secondary pt-0">
+                        <span className="font-semibold text-foreground">Service Package:</span>{" "}
+                        <span>{serviceTitle}</span>
+                      </div>
                     </div>
 
-                    {/* Accept / Reject Buttons for Pending Brand Proposals */}
-                    {item.initiatedBy === "brand" && item.status === "pending" && (
-                      <div className="pt-3.5 mt-3 border-t border-border-theme flex items-center gap-2">
-                        <button
-                          type="button"
-                          disabled={processingBookingId === bookingId}
-                          onClick={() => handleUpdateStatus(bookingId, "accepted")}
-                          className="flex-1 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {processingBookingId === bookingId ? (
-                            <RefreshIcon className="w-3.5 h-3.5 animate-spin" />
-                          ) : (
-                            <CheckIcon className="w-3.5 h-3.5" />
-                          )}
-                          <span>Accept</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          disabled={processingBookingId === bookingId}
-                          onClick={() => handleUpdateStatus(bookingId, "rejected")}
-                          className="flex-1 py-2 px-3 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-500 font-semibold text-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          <span>Reject</span>
-                        </button>
+                    {/* 9. BOTTOM METADATA & ACTIONS FOOTER */}
+                    <div className="space-y-2 pt-2.5 border-t border-border-theme/40 mt-2.5">
+                      {/* Quiet Metadata Footer: Platform & ID */}
+                      <div className="flex items-center justify-between text-[11px] sm:text-xs font-sans text-text-secondary">
+                        <div className="flex items-center gap-1.5">
+                          <PlatformIcon platform={campaignObj.platform} className="w-3.5 h-3.5 shrink-0" />
+                          <span>Platform: {formatPlatform(campaignObj.platform)}</span>
+                        </div>
+                        <span className="text-[10px] sm:text-[11px] font-mono text-text-secondary">
+                          ID: {bookingId ? String(bookingId).slice(-6) : ""}
+                        </span>
                       </div>
-                    )}
 
-                    {/* Go to Workspace Button for Accepted or In-Progress Bookings */}
-                    {(item.status === "accepted" || item.status === "in_progress") && (
-                      <div className="pt-3.5 mt-3 border-t border-border-theme">
-                        <Link
-                          href={`/creator/workspace/${item.bookingId || item._id}`}
-                          className="w-full py-2 px-3 rounded-xl bg-secondary hover:bg-secondary-dark text-white font-semibold text-xs transition-colors flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
-                        >
-                          <span>Go to Workspace</span>
-                          <ArrowRightIcon className="w-3.5 h-3.5" />
-                        </Link>
-                      </div>
-                    )}
+                      {/* Primary Black Button for Accepted or In-Progress */}
+                      {(item.status === "accepted" || item.status === "in_progress") && (
+                        <div className="pt-0.5">
+                          <Link
+                            href={`/creator/workspace/${bookingId}`}
+                            className="group/btn w-full py-2 px-3.5 rounded-xl bg-neutral-950 text-white font-sans font-semibold text-xs border border-neutral-900 shadow-xs hover:bg-neutral-900 hover:border-neutral-800 hover:shadow-xs hover:shadow-pink-500/10 active:scale-[0.99] transition-all duration-200 ease-out flex items-center justify-center gap-1.5 cursor-pointer dark:bg-neutral-100 dark:text-neutral-950 dark:border-neutral-200 dark:hover:bg-neutral-200"
+                          >
+                            <span>Go to Workspace</span>
+                            <ArrowRightIcon className="w-3.5 h-3.5 transition-transform duration-200 group-hover/btn:translate-x-0.5" />
+                          </Link>
+                        </div>
+                      )}
 
-                    {/* Card Footer: Platform Label */}
-                    <div className="pt-4 mt-4 border-t border-border-theme flex items-center justify-between text-xs text-text-secondary">
-                      <span>Platform: {formatPlatform(campaignObj.platform)}</span>
-                      <span className="text-[10px] font-mono">ID: {bookingId ? String(bookingId).slice(-6) : ""}</span>
+                      {/* Interactive Buttons for Pending Brand Proposals */}
+                      {item.initiatedBy === "brand" && item.status === "pending" && (
+                        <div className="flex items-center gap-2 pt-0.5">
+                          <button
+                            type="button"
+                            disabled={processingBookingId === bookingId}
+                            onClick={() => handleUpdateStatus(bookingId, "accepted")}
+                            className="flex-1 py-1.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-sans font-semibold text-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {processingBookingId === bookingId ? (
+                              <RefreshIcon className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <CheckIcon className="w-3.5 h-3.5" />
+                            )}
+                            <span>Accept</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            disabled={processingBookingId === bookingId}
+                            onClick={() => handleUpdateStatus(bookingId, "rejected")}
+                            className="flex-1 py-1.5 px-3 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-500 font-sans font-semibold text-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <span>Reject</span>
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Subtle Link Actions: View Details (Rejected / Creator Pending) or View Workspace (Completed) */}
+                      {item.status === "rejected" && (
+                        <div className="pt-0.5 text-center">
+                          <Link
+                            href={campaignObj._id ? `/creator/campaigns/${campaignObj._id}` : `/creator/campaigns`}
+                            className="inline-flex items-center justify-center gap-1 text-xs font-sans font-semibold text-black dark:text-white hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors"
+                          >
+                            <span>View Details</span>
+                            <ArrowRightIcon className="w-3.5 h-3.5" />
+                          </Link>
+                        </div>
+                      )}
+
+                      {item.status === "completed" && (
+                        <div className="pt-0.5 text-center">
+                          <Link
+                            href={`/creator/workspace/${bookingId}`}
+                            className="inline-flex items-center justify-center gap-1 text-xs font-sans font-semibold text-black dark:text-white hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors"
+                          >
+                            <span>View Workspace</span>
+                            <ArrowRightIcon className="w-3.5 h-3.5" />
+                          </Link>
+                        </div>
+                      )}
+
+                      {item.initiatedBy !== "brand" && item.status === "pending" && (
+                        <div className="pt-0.5 text-center">
+                          <Link
+                            href={campaignObj._id ? `/creator/campaigns/${campaignObj._id}` : `/creator/campaigns`}
+                            className="inline-flex items-center justify-center gap-1 text-xs font-sans font-semibold text-black dark:text-white hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors"
+                          >
+                            <span>View Details</span>
+                            <ArrowRightIcon className="w-3.5 h-3.5" />
+                          </Link>
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
@@ -609,7 +902,7 @@ export default function CreatorAppliedCampaignsManager() {
                 <MegaphoneIcon className="w-8 h-8" />
               </div>
               <div className="space-y-1">
-                <h3 className="font-serif font-medium text-xl text-foreground">
+                <h3 className="font-heading font-medium text-xl text-foreground">
                   {selectedStatus === "All"
                     ? "No applied campaigns yet"
                     : `No ${selectedStatus} campaigns found`}
@@ -625,7 +918,7 @@ export default function CreatorAppliedCampaignsManager() {
                 <div className="pt-2">
                   <Link
                     href="/creator/campaigns/discover"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-secondary hover:bg-secondary-dark text-white text-xs font-semibold tracking-wide transition-all shadow-xs cursor-pointer"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-neutral-950 text-white text-xs font-semibold tracking-wide border border-neutral-900 shadow-xs hover:bg-neutral-900 hover:border-neutral-800 hover:shadow-xs hover:shadow-pink-500/10 active:scale-[0.99] transition-all duration-200 ease-out cursor-pointer dark:bg-neutral-100 dark:text-neutral-950 dark:border-neutral-200 dark:hover:bg-neutral-200"
                   >
                     <span>Discover Campaigns</span>
                     <ArrowRightIcon className="w-3.5 h-3.5" />

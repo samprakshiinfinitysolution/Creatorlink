@@ -29,15 +29,7 @@ function formatCurrency(amount, currency = "INR") {
 function CurrencyIcon({ className = "w-5 h-5" }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-  );
-}
-
-function LayersIcon({ className = "w-5 h-5" }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M6.429 9.75L2.25 12l9.75 5.25 9.75-5.25-4.179-2.25m-11.142 4.5l-4.179 2.25 9.75 5.25 9.75-5.25-4.179-2.25M12 2.25L2.25 7.5l9.75 5.25 9.75-5.25L12 2.25z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
     </svg>
   );
 }
@@ -46,6 +38,14 @@ function ClockIcon({ className = "w-5 h-5" }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  );
+}
+
+function LayersIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6.429 9.75L2.25 12l9.75 5.25 9.75-5.25-4.179-2.25m-11.142 4.5l-4.179 2.25 9.75 5.25 9.75-5.25-4.179-2.25M12 2.25L2.25 7.5l9.75 5.25 9.75-5.25L12 2.25z" />
     </svg>
   );
 }
@@ -59,99 +59,137 @@ function StarIcon({ className = "w-5 h-5" }) {
 }
 
 export default function CreatorMetricsGrid({ metrics }) {
-  // Earnings
+  // 1. Total Received Earnings (Paid settlements)
   const totalEarnings = metrics?.totalEarnings?.amount ?? 0;
   const earningsCurrency = metrics?.totalEarnings?.currency || "INR";
   const paidCount = metrics?.totalEarnings?.paidTransactionsCount ?? 0;
+
+  // 2. Estimated Pending / Outstanding Payments
   const pendingEst =
     metrics?.pendingPayments?.totalOutstandingEstimated ??
     metrics?.pendingPayments?.amount ??
     0;
   const pendingCurrency = metrics?.pendingPayments?.currency || "INR";
+  const directPendingCount = metrics?.pendingPayments?.directPendingCount ?? 0;
+  const unpaidWorkspacesCount = metrics?.pendingPayments?.unpaidWorkspacesCount ?? 0;
 
-  // Active Collaborations
+  // 3. Active Collaborations
   const activeWorkspaces = metrics?.activeCollaborations?.total ?? 0;
   const inProgress = metrics?.activeCollaborations?.breakdown?.inProgress ?? 0;
   const submitted = metrics?.activeCollaborations?.breakdown?.submitted ?? 0;
   const revisionRequested = metrics?.activeCollaborations?.breakdown?.revisionRequested ?? 0;
   const completedWorkspaces = metrics?.completedCollaborations?.total ?? 0;
 
-  // Pending Requests
-  const pendingRequests = metrics?.pendingRequests?.total ?? 0;
-  const proposalsReceived = metrics?.pendingRequests?.proposalsReceived ?? 0;
-  const applicationsSubmitted = metrics?.pendingRequests?.applicationsSubmitted ?? 0;
-
-  // Reviews & Rating
+  // 4. Reviews & Rating
   const avgRating = metrics?.reviews?.averageRating ?? 0;
   const totalReviews = metrics?.reviews?.totalReviews ?? 0;
 
   const cards = [
     {
-      title: "Total Earnings",
+      id: "paid-earnings",
+      title: "Paid Earnings",
+      badge: "Settled",
       value: formatCurrency(totalEarnings, earningsCurrency),
-      subtitle: `${paidCount} paid${pendingEst > 0 ? ` · Est. ${formatCurrency(pendingEst, pendingCurrency)} pending` : ""}`,
+      subtitle: `${paidCount} settled payment${paidCount === 1 ? "" : "s"}`,
+      secondaryNote: pendingEst > 0 ? `+${formatCurrency(pendingEst, pendingCurrency)} in pipeline` : null,
       icon: CurrencyIcon,
-      accent: "text-emerald-500 bg-emerald-500/10",
-      borderHover: "hover:border-emerald-500/40",
+      accentBg: "bg-black/10 text-black dark:text-white dark:bg-white/10 border border-black/20 dark:border-white/20",
+      badgeBg: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
     },
     {
-      title: "Active Collaborations",
-      value: activeWorkspaces.toString(),
-      subtitle: `${inProgress} in progress · ${submitted} submitted${
-        revisionRequested > 0
-          ? ` · ${revisionRequested} revision${revisionRequested > 1 ? "s" : ""}`
-          : completedWorkspaces > 0
-          ? ` · ${completedWorkspaces} done`
-          : ""
-      }`,
-      icon: LayersIcon,
-      accent: "text-blue-500 bg-blue-500/10",
-      borderHover: "hover:border-blue-500/40",
-    },
-    {
-      title: "Pending Requests",
-      value: pendingRequests.toString(),
-      subtitle: `${proposalsReceived} brand proposal${proposalsReceived === 1 ? "" : "s"} · ${applicationsSubmitted} applied`,
+      id: "pending-payments",
+      title: "Estimated Pending",
+      badge: "Pipeline",
+      value: formatCurrency(pendingEst, pendingCurrency),
+      subtitle:
+        directPendingCount > 0
+          ? `${directPendingCount} active order${directPendingCount > 1 ? "s" : ""} pending`
+          : unpaidWorkspacesCount > 0
+          ? `${unpaidWorkspacesCount} workspace${unpaidWorkspacesCount > 1 ? "s" : ""} in clearance`
+          : "Awaiting milestone clearance",
+      secondaryNote: "Disbursed upon completion",
       icon: ClockIcon,
-      accent: "text-amber-500 bg-amber-500/10",
-      borderHover: "hover:border-amber-500/40",
+      accentBg: "bg-black/10 text-black dark:text-white dark:bg-white/10 border border-black/20 dark:border-white/20",
+      badgeBg: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
     },
     {
-      title: "Reviews & Rating",
-      value: avgRating > 0 ? `${avgRating.toFixed(1)} ★` : "No reviews",
-      subtitle: `${totalReviews} brand review${totalReviews === 1 ? "" : "s"}${
-        completedWorkspaces > 0 ? ` · ${completedWorkspaces} completed` : ""
-      }`,
+      id: "active-collaborations",
+      title: "Active Collaborations",
+      badge: activeWorkspaces > 0 ? "Active" : "Ready",
+      value: activeWorkspaces.toString(),
+      subtitle: `${inProgress} in progress · ${submitted} under review`,
+      secondaryNote:
+        revisionRequested > 0
+          ? `${revisionRequested} revision requested`
+          : completedWorkspaces > 0
+          ? `${completedWorkspaces} completed total`
+          : null,
+      icon: LayersIcon,
+      accentBg: "bg-black/10 text-black dark:text-white dark:bg-white/10 border border-black/20 dark:border-white/20",
+      badgeBg: "bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20",
+    },
+    {
+      id: "client-reputation",
+      title: "Client Reputation",
+      badge: totalReviews > 0 ? "Reviews" : "Rating",
+      value:
+        totalReviews > 0 && avgRating > 0
+          ? `${avgRating.toFixed(1)} ★`
+          : "No reviews yet",
+      subtitle:
+        totalReviews > 0
+          ? `${totalReviews} brand review${totalReviews === 1 ? "" : "s"}`
+          : "No reviews yet",
+      secondaryNote:
+        totalReviews > 0
+          ? "Average rating from brand partners"
+          : "Reviews appear after workspace completion",
       icon: StarIcon,
-      accent: "text-purple-500 bg-purple-500/10",
-      borderHover: "hover:border-purple-500/40",
+      accentBg: "bg-black/10 text-black dark:text-white dark:bg-white/10 border border-black/20 dark:border-white/20",
+      badgeBg: "bg-[#ff2d6c]/10 text-[#ff2d6c] border-[#ff2d6c]/20",
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 items-stretch">
       {cards.map((c) => {
         const Icon = c.icon;
         return (
           <div
-            key={c.title}
-            className={`bg-surface border border-border-theme rounded-2xl p-5 shadow-xs flex flex-col justify-between transition-all duration-200 ${c.borderHover}`}
+            key={c.id}
+            className="relative bg-surface border border-border-theme hover:border-pink-200/90 dark:hover:border-pink-500/30 rounded-3xl p-5 sm:p-6 shadow-xs hover:shadow-sm transition-all duration-200 flex flex-col justify-between h-full group"
           >
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-xs font-semibold text-text-secondary uppercase tracking-wider">
-                {c.title}
-              </span>
-              <div className={`p-2.5 rounded-xl ${c.accent}`}>
+            {/* Top row: Card Title & Badge + Accent Icon */}
+            <div className="flex items-start justify-between gap-3 mb-4">
+              <div className="space-y-1 min-w-0 flex-1">
+                <h3 className="font-heading font-medium text-sm sm:text-base text-foreground tracking-tight truncate">
+                  {c.title}
+                </h3>
+                <span
+                  className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-sans font-semibold border uppercase tracking-wider ${c.badgeBg}`}
+                >
+                  {c.badge}
+                </span>
+              </div>
+              <div className={`p-2.5 rounded-2xl shrink-0 ${c.accentBg}`}>
                 <Icon />
               </div>
             </div>
-            <div>
-              <span className="font-serif text-2xl sm:text-3xl font-medium text-foreground block tracking-tight">
+
+            {/* Bottom block: Prominent Metric Value & Supporting Text */}
+            <div className="space-y-1.5 mt-auto pt-2">
+              <div
+                className="font-heading font-medium text-2xl sm:text-3xl lg:text-[26px] xl:text-3xl text-foreground tracking-tight tabular-nums truncate group-hover:text-secondary transition-colors"
+                title={c.value}
+              >
                 {c.value}
-              </span>
-              <span className="text-[11px] text-text-secondary mt-1 block truncate font-medium">
+              </div>
+              <p className="text-xs text-text-secondary font-sans font-medium leading-relaxed truncate">
                 {c.subtitle}
-              </span>
+              </p>
+              <p className="text-[11px] text-text-secondary/70 font-sans truncate min-h-[16px]">
+                {c.secondaryNote || "\u00A0"}
+              </p>
             </div>
           </div>
         );

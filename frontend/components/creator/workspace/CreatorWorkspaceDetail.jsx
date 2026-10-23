@@ -29,7 +29,7 @@ function CalendarIcon({ className = "w-4 h-4" }) {
 
 function CheckIcon({ className = "w-4 h-4" }) {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.25}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
     </svg>
   );
@@ -78,7 +78,15 @@ function ExclamationIcon({ className = "w-5 h-5" }) {
 function ChatBubbleIcon({ className = "w-4 h-4" }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a.596.596 0 01-.643-.655 4.5 4.5 0 011.02-2.316A7.478 7.478 0 013 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h.008v.008H8.625V12zm4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h.008v.008h-.008V12zm4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h.008v.008h-.008V12zM21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+    </svg>
+  );
+}
+
+function ClockIcon({ className = "w-3.5 h-3.5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
     </svg>
   );
 }
@@ -95,20 +103,24 @@ const formatPrice = (amount, currency = "INR") => {
 const formatDate = (dateString) => {
   if (!dateString) return "N/A";
   try {
-    return new Date(dateString).toLocaleDateString("en-IN", {
+    const d = new Date(dateString);
+    if (isNaN(d.getTime())) return "N/A";
+    return d.toLocaleDateString("en-IN", {
       day: "numeric",
       month: "short",
       year: "numeric",
     });
   } catch {
-    return dateString;
+    return "N/A";
   }
 };
 
 const formatDateTime = (dateString) => {
   if (!dateString) return "N/A";
   try {
-    return new Date(dateString).toLocaleString("en-IN", {
+    const d = new Date(dateString);
+    if (isNaN(d.getTime())) return "N/A";
+    return d.toLocaleString("en-IN", {
       day: "numeric",
       month: "short",
       year: "numeric",
@@ -116,8 +128,20 @@ const formatDateTime = (dateString) => {
       minute: "2-digit",
     });
   } catch {
-    return dateString;
+    return "N/A";
   }
+};
+
+const formatPlatform = (val) => {
+  if (!val) return "General";
+  const map = {
+    instagram: "Instagram",
+    facebook: "Facebook",
+    youtube: "YouTube",
+    tiktok: "TikTok",
+    website: "Website",
+  };
+  return map[val.toLowerCase()] || val;
 };
 
 const getStatusBadge = (status) => {
@@ -125,32 +149,32 @@ const getStatusBadge = (status) => {
     case "in_progress":
       return {
         label: "In Progress",
-        color: "bg-amber-500/10 text-amber-500 border-amber-500/20",
+        color: "bg-amber-50 text-amber-600 border border-amber-200/70 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/40",
       };
     case "submitted":
       return {
         label: "Submitted",
-        color: "bg-purple-500/10 text-purple-500 border-purple-500/20",
+        color: "bg-purple-50 text-purple-600 border border-purple-200/70 dark:bg-purple-950/30 dark:text-purple-400 dark:border-purple-900/40",
       };
     case "revision_requested":
       return {
         label: "Revision Requested",
-        color: "bg-amber-500/10 text-amber-500 border-amber-500/20",
+        color: "bg-rose-50 text-rose-600 border border-rose-200/70 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/40",
       };
     case "completed":
       return {
         label: "Completed",
-        color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+        color: "bg-emerald-50 text-emerald-600 border border-emerald-200/70 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/40",
       };
     case "cancelled":
       return {
         label: "Cancelled",
-        color: "bg-red-500/10 text-red-500 border-red-500/20",
+        color: "bg-neutral-100 text-neutral-600 border border-neutral-200/80 dark:bg-surface-muted dark:text-text-secondary dark:border-border-theme",
       };
     default:
       return {
-        label: status ? status.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()) : "Unknown",
-        color: "bg-surface-muted text-text-secondary border-border-theme",
+        label: status ? status.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()) : "Active",
+        color: "bg-neutral-100 text-neutral-600 border border-neutral-200/80 dark:bg-surface-muted dark:text-text-secondary dark:border-border-theme",
       };
   }
 };
@@ -160,37 +184,33 @@ const getDeliverableStatusBadge = (status) => {
     case "pending":
       return {
         label: "Pending",
-        color: "bg-slate-500/10 text-slate-400 border-slate-500/20",
+        color: "bg-neutral-100 text-neutral-600 border-neutral-200/70 dark:bg-surface-muted dark:text-text-secondary dark:border-border-theme",
       };
     case "in_progress":
       return {
         label: "In Progress",
-        color: "bg-amber-500/10 text-amber-500 border-amber-500/20",
+        color: "bg-amber-50 text-amber-600 border-amber-200/70 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/40",
       };
     case "submitted":
       return {
         label: "Submitted",
-        color: "bg-purple-500/10 text-purple-500 border-purple-500/20",
+        color: "bg-purple-50 text-purple-600 border-purple-200/70 dark:bg-purple-950/30 dark:text-purple-400 dark:border-purple-900/40",
       };
     case "revision_requested":
       return {
         label: "Revision Requested",
-        color: "bg-amber-500/10 text-amber-500 border-amber-500/20",
+        color: "bg-rose-50 text-rose-600 border-rose-200/70 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/40",
       };
     case "approved":
-      return {
-        label: "Approved",
-        color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
-      };
     case "completed":
       return {
-        label: "Completed",
-        color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+        label: "Approved",
+        color: "bg-emerald-50 text-emerald-600 border-emerald-200/70 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/40",
       };
     default:
       return {
         label: status ? status.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()) : "Pending",
-        color: "bg-surface-muted text-text-secondary border-border-theme",
+        color: "bg-neutral-100 text-neutral-600 border-neutral-200/70 dark:bg-surface-muted dark:text-text-secondary dark:border-border-theme",
       };
   }
 };
@@ -232,10 +252,23 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
   const campaign = workspace?.campaign;
   const brand = workspace?.brand;
   const service = workspace?.service;
+  const brandName = brand?.name || brand?.email?.split("@")[0] || "Brand Partner";
+  const brandInitial = brandName.charAt(0).toUpperCase() || "B";
   const deliverables = Array.isArray(workspace?.deliverables) ? workspace.deliverables : [];
-  const submissions = Array.isArray(workspace?.submissions) ? workspace.submissions : [];
+  const rawSubmissions = Array.isArray(workspace?.submissions) ? workspace.submissions : [];
   const revisions = Array.isArray(workspace?.revisions) ? workspace.revisions : [];
   const latestRevision = revisions.length > 0 ? revisions[revisions.length - 1] : null;
+
+  // Aggregate all submissions from top-level submissions array and individual deliverables
+  const allSubmissions = [
+    ...rawSubmissions,
+    ...deliverables
+      .filter((d) => d?.submission && !rawSubmissions.some((s) => s?._id === d.submission?._id))
+      .map((d) => ({
+        ...d.submission,
+        deliverableTitle: d.title,
+      })),
+  ];
 
   const submittableDeliverable = deliverables.find(
     (d) => typeof d === "object" && (d.status === "pending" || d.status === "in_progress" || d.status === "revision_requested")
@@ -392,14 +425,14 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
         <CreatorHeader setMobileOpen={setMobileOpen} />
 
         {/* Page Content */}
-        <main className="p-4 sm:p-6 lg:p-8 space-y-6 flex-1">
+        <main className="p-4 sm:p-6 lg:p-8 space-y-6 flex-1 max-w-7xl w-full mx-auto">
           {/* Top Bar Navigation */}
           <div>
             <Link
               href="/creator/workspace"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-text-secondary hover:text-foreground transition-colors"
+              className="inline-flex items-center gap-1.5 text-xs font-sans font-semibold text-text-secondary hover:text-foreground transition-colors group cursor-pointer"
             >
-              <ChevronLeftIcon />
+              <ChevronLeftIcon className="transition-transform group-hover:-translate-x-0.5" />
               <span>Back to Workspaces</span>
             </Link>
           </div>
@@ -422,38 +455,39 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
           {/* Loading Skeleton */}
           {loading && !workspace ? (
             <div className="space-y-6 animate-pulse">
-              <div className="bg-surface border border-border-theme rounded-2xl p-6 space-y-4">
-                <div className="h-6 bg-surface-muted rounded-md w-1/3" />
-                <div className="h-4 bg-surface-muted rounded-md w-1/4" />
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4">
+              <div className="bg-white dark:bg-surface border border-neutral-200/80 dark:border-border-theme rounded-2xl sm:rounded-3xl p-6 space-y-4 shadow-xs">
+                <div className="h-4 bg-surface-muted rounded-full w-28" />
+                <div className="h-7 bg-surface-muted rounded-md w-1/2" />
+                <div className="h-3.5 bg-surface-muted rounded-md w-1/4" />
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-border-theme/40">
                   {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="h-12 bg-surface-muted rounded-xl" />
+                    <div key={i} className="h-14 bg-surface-muted rounded-xl" />
                   ))}
                 </div>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 h-64 bg-surface border border-border-theme rounded-2xl p-6" />
-                <div className="h-64 bg-surface border border-border-theme rounded-2xl p-6" />
+                <div className="lg:col-span-2 h-72 bg-white dark:bg-surface border border-neutral-200/80 dark:border-border-theme rounded-2xl p-6 shadow-xs" />
+                <div className="h-72 bg-white dark:bg-surface border border-neutral-200/80 dark:border-border-theme rounded-2xl p-6 shadow-xs" />
               </div>
             </div>
           ) : !loading && !workspace ? (
             /* Not Found State */
-            <div className="bg-surface border border-border-theme rounded-2xl p-10 text-center space-y-4">
-              <div className="w-16 h-16 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center mx-auto border border-secondary/20">
-                <ExclamationIcon className="w-8 h-8" />
+            <div className="bg-white dark:bg-surface border border-neutral-200/80 dark:border-border-theme rounded-2xl sm:rounded-3xl p-10 text-center space-y-4 max-w-lg mx-auto my-8 shadow-xs">
+              <div className="w-14 h-14 rounded-2xl bg-pink-50 dark:bg-pink-950/40 text-pink-500 border border-pink-100 dark:border-pink-900/40 flex items-center justify-center mx-auto">
+                <ExclamationIcon className="w-7 h-7" />
               </div>
               <div className="space-y-1">
                 <h3 className="font-sans font-semibold text-lg text-foreground tracking-tight">
                   Workspace Not Found
                 </h3>
-                <p className="text-xs text-text-secondary max-w-sm mx-auto">
+                <p className="text-xs text-text-secondary font-sans max-w-sm mx-auto leading-relaxed">
                   The workspace you are looking for does not exist or you do not have permission to view it.
                 </p>
               </div>
               <div className="pt-2">
                 <Link
                   href="/creator/workspace"
-                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-secondary hover:bg-secondary-dark text-white text-xs font-semibold transition-all cursor-pointer shadow-xs"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-neutral-950 text-white text-xs font-sans font-semibold tracking-wide border border-neutral-900 shadow-xs hover:bg-neutral-900 transition-all cursor-pointer dark:bg-neutral-100 dark:text-neutral-950"
                 >
                   <span>Return to Workspaces</span>
                 </Link>
@@ -464,32 +498,32 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
             <div className="space-y-6">
               {/* Revision Feedback Banner (if active) */}
               {isRevisionMode && latestRevision && (
-                <div className="bg-amber-500/10 border border-amber-500/30 p-5 rounded-2xl space-y-2 shadow-xs">
-                  <div className="flex items-center gap-2 text-amber-500 font-semibold text-xs uppercase tracking-wide">
-                    <ExclamationIcon className="w-4 h-4" />
-                    <span>Revision Requested by Brand</span>
-                    <span className="text-[10px] text-text-secondary font-normal ml-auto">
+                <div className="bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200/80 dark:border-amber-900/50 p-4 sm:p-5 rounded-2xl space-y-2 shadow-xs">
+                  <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-sans font-semibold text-xs tracking-wide">
+                    <ExclamationIcon className="w-4 h-4 shrink-0" />
+                    <span>Revision Requested by Brand Partner</span>
+                    <span className="text-[11px] text-text-secondary font-normal ml-auto">
                       {formatDateTime(latestRevision.requestedAt)}
                     </span>
                   </div>
-                  <p className="text-xs text-foreground bg-surface/80 p-3.5 rounded-xl border border-amber-500/20">
+                  <p className="text-xs font-sans text-foreground bg-white/80 dark:bg-surface/80 p-3 rounded-xl border border-amber-200/60 dark:border-amber-900/30 leading-relaxed">
                     &ldquo;{latestRevision.feedback}&rdquo;
                   </p>
                 </div>
               )}
 
               {/* Workspace Header Banner */}
-              <div className="bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 shadow-xs space-y-5">
+              <div className="bg-gradient-to-r from-pink-50/80 via-pink-50/40 to-rose-50/60 dark:from-pink-950/30 dark:via-surface dark:to-pink-950/10 border border-pink-100/80 dark:border-border-theme rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-xs space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                   <div>
-                    <div className="flex items-center gap-2.5 flex-wrap">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <span
-                        className={`px-3 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wider ${badge.color}`}
+                        className={`px-3 py-0.5 rounded-full text-[10px] sm:text-[11px] font-sans font-bold tracking-wider uppercase border ${badge.color}`}
                       >
                         {badge.label}
                       </span>
                       {campaign?.category && (
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-surface-muted text-text-secondary border border-border-theme">
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-sans font-semibold bg-white/80 dark:bg-surface-muted text-text-secondary border border-neutral-200/80 dark:border-border-theme">
                           {campaign.category}
                         </span>
                       )}
@@ -497,19 +531,25 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                     <h1 className="font-sans font-bold text-2xl sm:text-3xl text-foreground tracking-tight mt-2">
                       {campaign?.title || "Collaboration Workspace"}
                     </h1>
-                    <p className="text-xs text-text-secondary mt-1">
-                      Brand Partner: <span className="text-foreground font-semibold">{brand?.name || brand?.email || "Brand"}</span>
-                      {brand?.email && <span className="text-text-secondary"> ({brand.email})</span>}
-                    </p>
+
+                    <div className="flex items-center gap-2 mt-1.5">
+                      <div className="w-4 h-4 rounded-full bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 flex items-center justify-center text-[9px] font-heading font-bold shrink-0">
+                        {brandInitial}
+                      </div>
+                      <p className="text-xs font-sans text-text-secondary">
+                        Brand Partner: <span className="text-foreground font-semibold">{brandName}</span>
+                        {brand?.email && <span className="text-text-secondary"> ({brand.email})</span>}
+                      </p>
+                    </div>
                   </div>
 
-                  {/* Action Buttons: Message Brand & Submit Work */}
-                  <div className="flex items-center gap-2.5 flex-wrap shrink-0">
+                  {/* Header Actions: Message Brand & Submit Work */}
+                  <div className="flex items-center gap-2 flex-wrap shrink-0">
                     <Link
                       href={`/creator/messages?bookingId=${workspace.booking?._id || workspace.booking}`}
-                      className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-border-theme bg-surface hover:bg-surface-muted text-foreground text-xs font-semibold transition-all shadow-xs cursor-pointer shrink-0"
+                      className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl border border-neutral-200/80 dark:border-border-theme bg-white dark:bg-surface hover:bg-neutral-100 dark:hover:bg-surface-muted text-foreground text-xs font-sans font-semibold transition-all shadow-2xs cursor-pointer shrink-0"
                     >
-                      <ChatBubbleIcon className="w-4 h-4 text-secondary" />
+                      <ChatBubbleIcon className="w-4 h-4 text-pink-500" />
                       <span>Message Brand</span>
                     </Link>
 
@@ -517,9 +557,9 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                       <button
                         type="button"
                         onClick={() => handleOpenSubmitModal(submittableDeliverable || deliverables[0] || null)}
-                        className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-secondary hover:bg-secondary-dark text-white text-xs font-semibold transition-all shadow-xs cursor-pointer shrink-0"
+                        className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-neutral-950 text-white text-xs font-sans font-semibold tracking-wide border border-neutral-900 shadow-xs hover:bg-neutral-900 hover:border-neutral-800 hover:shadow-xs hover:shadow-pink-500/10 active:scale-[0.99] transition-all duration-200 ease-out cursor-pointer shrink-0 dark:bg-neutral-100 dark:text-neutral-950 dark:border-neutral-200 dark:hover:bg-neutral-200"
                       >
-                        <UploadIcon className="w-4 h-4" />
+                        <UploadIcon className="w-3.5 h-3.5" />
                         <span>{isRevisionMode ? "Resubmit Work" : "Submit Work"}</span>
                       </button>
                     )}
@@ -537,39 +577,56 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                     </span>
                   </div>
 
-                  <div className="bg-surface-muted/60 p-3 rounded-xl border border-border-theme/50">
-                    <span className="text-[10px] font-semibold text-text-secondary uppercase tracking-wider block flex items-center gap-1">
-                      <CalendarIcon className="w-3 h-3" />
-                      Deadline
-                    </span>
-                    <span className="font-medium text-xs text-foreground mt-1 block">
-                      {formatDate(workspace.deadline)}
-                    </span>
+                  {/* Deadline */}
+                  <div className="bg-white/80 dark:bg-surface-muted/40 p-2.5 sm:p-3 rounded-xl border border-neutral-200/70 dark:border-border-theme/60 shadow-2xs flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-lg bg-pink-50 dark:bg-pink-950/40 text-pink-500 flex items-center justify-center shrink-0">
+                      <CalendarIcon className="w-3.5 h-3.5" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <span className="text-[10px] sm:text-[11px] font-sans text-text-secondary block leading-none mb-0.5">
+                        Deadline
+                      </span>
+                      <span className="font-sans font-semibold text-xs sm:text-sm text-foreground block truncate">
+                        {deadlineFormatted}
+                      </span>
+                    </div>
                   </div>
 
-                  <div className="bg-surface-muted/60 p-3 rounded-xl border border-border-theme/50">
-                    <span className="text-[10px] font-semibold text-text-secondary uppercase tracking-wider block">
-                      Platform
-                    </span>
-                    <span className="font-medium text-xs text-foreground mt-1 capitalize block">
-                      {campaign?.platform || service?.platform || "General"}
-                    </span>
+                  {/* Platform */}
+                  <div className="bg-white/80 dark:bg-surface-muted/40 p-2.5 sm:p-3 rounded-xl border border-neutral-200/70 dark:border-border-theme/60 shadow-2xs flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-lg bg-neutral-100 dark:bg-surface-muted text-neutral-600 dark:text-text-secondary flex items-center justify-center shrink-0">
+                      <span className="text-[10px] font-bold">#</span>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <span className="text-[10px] sm:text-[11px] font-sans text-text-secondary block leading-none mb-0.5">
+                        Platform
+                      </span>
+                      <span className="font-sans font-semibold text-xs sm:text-sm text-foreground block truncate capitalize">
+                        {platformLabel}
+                      </span>
+                    </div>
                   </div>
 
-                  <div className="bg-surface-muted/60 p-3 rounded-xl border border-border-theme/50">
-                    <span className="text-[10px] font-semibold text-text-secondary uppercase tracking-wider block">
-                      Selected Service
-                    </span>
-                    <span className="font-medium text-xs text-foreground mt-1 line-clamp-1 block">
-                      {service?.title || "Custom Package"}
-                    </span>
+                  {/* Selected Service */}
+                  <div className="bg-white/80 dark:bg-surface-muted/40 p-2.5 sm:p-3 rounded-xl border border-neutral-200/70 dark:border-border-theme/60 shadow-2xs flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-lg bg-neutral-100 dark:bg-surface-muted text-neutral-600 dark:text-text-secondary flex items-center justify-center shrink-0">
+                      <span className="text-[10px] font-bold">★</span>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <span className="text-[10px] sm:text-[11px] font-sans text-text-secondary block leading-none mb-0.5">
+                        Selected Service
+                      </span>
+                      <span className="font-sans font-semibold text-xs sm:text-sm text-foreground block truncate">
+                        {service?.title || "Custom Package"}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* 2-Column Main Layout Grid */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Left Column: Required Deliverables & Overview */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6 items-start">
+                {/* Left Column: Required Deliverables & Campaign Brief (2 cols wide) */}
                 <div className="lg:col-span-2 space-y-6">
                   {/* Required Deliverables Checklist Cards */}
                   <div className="space-y-4">
@@ -585,16 +642,133 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                           </div>
                         )}
 
-                        {/* Group 2: Pending / In Progress Deliverables */}
-                        {pendingDeliverables.length > 0 && (
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-                            {pendingDeliverables.map((item, idx) => renderDeliverableCard(item, idx))}
-                          </div>
-                        )}
+                    {deliverables.length > 0 ? (
+                      /* 2-Column Grid on Desktop, 1 Column on Mobile */
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4 items-stretch">
+                        {deliverables.map((item, idx) => {
+                          const isStringItem = typeof item === "string";
+                          const title = isStringItem ? item : item.title || `Deliverable #${idx + 1}`;
+                          const status = isStringItem ? "pending" : item.status || "pending";
+                          const delivBadge = getDeliverableStatusBadge(status);
+
+                          return (
+                            <div
+                              key={!isStringItem && item._id ? item._id : idx}
+                              className="bg-white dark:bg-surface border border-neutral-200/80 dark:border-border-theme hover:border-neutral-300 dark:hover:border-neutral-700 rounded-2xl p-4 shadow-xs transition-all flex flex-col justify-between space-y-3 group"
+                            >
+                              <div className="space-y-2">
+                                {/* Top Row: Status Badge & Due Date */}
+                                <div className="flex items-center justify-between gap-2 flex-wrap">
+                                  <span
+                                    className={`px-2.5 py-0.5 rounded-full text-[10px] font-sans font-bold border uppercase tracking-wider ${delivBadge.color}`}
+                                  >
+                                    {delivBadge.label}
+                                  </span>
+                                  {!isStringItem && item.dueDate && (
+                                    <span className="text-[11px] font-sans text-text-secondary flex items-center gap-1 font-medium ml-auto">
+                                      <CalendarIcon className="w-3.5 h-3.5 text-pink-500" />
+                                      Due: {formatDate(item.dueDate)}
+                                    </span>
+                                  )}
+                                </div>
+
+                                {/* Deliverable Title & Optional Description */}
+                                <div>
+                                  <h3 className="font-heading font-medium text-sm sm:text-base text-foreground tracking-tight line-clamp-1 group-hover:text-secondary transition-colors">
+                                    {title}
+                                  </h3>
+                                  {!isStringItem && item.description && (
+                                    <p className="text-xs font-sans text-text-secondary leading-snug mt-1 line-clamp-2">
+                                      {item.description}
+                                    </p>
+                                  )}
+                                </div>
+
+                                {/* Submission Preview Box if deliverable has submission */}
+                                {!isStringItem && item.submission && (
+                                  <div className="bg-neutral-50/70 dark:bg-surface-muted/30 border border-neutral-200/60 dark:border-border-theme/60 p-2.5 rounded-xl space-y-1.5 text-xs mt-2.5">
+                                    <div className="flex items-center justify-between gap-1.5 text-[11px]">
+                                      <span className="font-sans font-semibold text-foreground truncate">
+                                        {item.submission.title || "Submitted Content"}
+                                      </span>
+                                      {item.submittedAt && (
+                                        <span className="text-[10px] font-sans text-text-secondary shrink-0">
+                                          {formatDate(item.submittedAt)}
+                                        </span>
+                                      )}
+                                    </div>
+                                    {item.submission.notes && (
+                                      <p className="text-[11px] font-sans text-text-secondary line-clamp-2 leading-snug">
+                                        {item.submission.notes}
+                                      </p>
+                                    )}
+                                    <div className="flex flex-wrap gap-2 pt-0.5">
+                                      {item.submission.link && (
+                                        <a
+                                          href={item.submission.link}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="inline-flex items-center gap-1 text-[11px] font-sans text-pink-500 hover:text-pink-600 hover:underline font-medium"
+                                        >
+                                          <LinkIcon className="w-3 h-3" />
+                                          <span>Live Content Link</span>
+                                        </a>
+                                      )}
+                                      {item.submission.fileUrl && (
+                                        <a
+                                          href={item.submission.fileUrl}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="inline-flex items-center gap-1 text-[11px] font-sans text-pink-500 hover:text-pink-600 hover:underline font-medium"
+                                        >
+                                          <DocumentIcon className="w-3 h-3" />
+                                          <span>Asset File Reference</span>
+                                        </a>
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Deliverable Footer Action Button */}
+                              <div className="pt-2.5 mt-2 border-t border-border-theme/40 flex items-center justify-between">
+                                {!isStringItem && (status === "pending" || status === "in_progress") ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleOpenSubmitModal(item)}
+                                    className="w-full inline-flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl bg-neutral-950 text-white text-xs font-sans font-semibold hover:bg-neutral-900 hover:shadow-xs hover:shadow-pink-500/10 active:scale-[0.99] transition-all cursor-pointer dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-neutral-200"
+                                  >
+                                    <UploadIcon className="w-3.5 h-3.5" />
+                                    <span>Submit Work</span>
+                                  </button>
+                                ) : !isStringItem && status === "revision_requested" ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleOpenSubmitModal(item)}
+                                    className="w-full inline-flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl bg-amber-500 text-white text-xs font-sans font-semibold hover:bg-amber-600 active:scale-[0.99] transition-all cursor-pointer shadow-2xs"
+                                  >
+                                    <RefreshIcon className="w-3.5 h-3.5" />
+                                    <span>Resubmit Work</span>
+                                  </button>
+                                ) : status === "submitted" ? (
+                                  <div className="w-full flex items-center justify-center gap-1.5 text-[11px] font-sans text-purple-600 dark:text-purple-400 font-medium py-1">
+                                    <ClockIcon className="w-3.5 h-3.5" />
+                                    <span>Under Review by Brand</span>
+                                  </div>
+                                ) : (
+                                  <div className="w-full flex items-center justify-center gap-1.5 text-[11px] font-sans text-emerald-600 dark:text-emerald-400 font-medium py-1">
+                                    <CheckIcon className="w-3.5 h-3.5" />
+                                    <span>Approved &amp; Completed</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     ) : (
-                      <div className="bg-surface border border-border-theme rounded-2xl p-5 text-center">
-                        <p className="text-xs text-text-secondary">No specific deliverables listed.</p>
+                      <div className="bg-white dark:bg-surface border border-neutral-200/80 dark:border-border-theme rounded-2xl p-6 text-center shadow-xs">
+                        <p className="text-xs text-text-secondary font-sans">No deliverables listed for this collaboration.</p>
                       </div>
                     )}
                   </div>
@@ -604,22 +778,26 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                     <h2 className="font-sans font-semibold text-lg text-foreground tracking-tight">
                       Campaign Brief & Service Details
                     </h2>
-                    {campaign?.description && (
-                      <div className="space-y-1">
-                        <span className="text-xs font-semibold text-foreground block">
-                          Campaign Description:
+
+                    {/* Campaign Description */}
+                    {(campaign?.description || workspace?.brief) && (
+                      <div className="space-y-1.5">
+                        <span className="text-xs font-sans font-semibold text-foreground uppercase tracking-wider block">
+                          Campaign Description
                         </span>
-                        <p className="text-xs text-text-secondary whitespace-pre-line leading-relaxed">
-                          {campaign.description}
+                        <p className="text-xs font-sans text-text-secondary leading-relaxed whitespace-pre-line">
+                          {campaign?.description || workspace?.brief}
                         </p>
                       </div>
                     )}
+
+                    {/* Package Scope */}
                     {service?.description && (
-                      <div className="space-y-1 pt-2 border-t border-border-theme">
-                        <span className="text-xs font-semibold text-foreground block">
-                          Package Scope:
+                      <div className="space-y-1.5 pt-3 border-t border-border-theme/40">
+                        <span className="text-xs font-sans font-semibold text-foreground uppercase tracking-wider block">
+                          Package Scope
                         </span>
-                        <p className="text-xs text-text-secondary whitespace-pre-line leading-relaxed">
+                        <p className="text-xs font-sans text-text-secondary leading-relaxed whitespace-pre-line">
                           {service.description}
                         </p>
                       </div>
@@ -627,10 +805,10 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                   </div>
                 </div>
 
-                {/* Right Column: Submission & Revision History */}
+                {/* Right Column: Submitted Work & Revision History */}
                 <div className="space-y-6">
-                  {/* Submissions Section */}
-                  <div className="bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 space-y-4 shadow-xs">
+                  {/* Submitted Work Section */}
+                  <div className="bg-white dark:bg-surface border border-neutral-200/80 dark:border-border-theme rounded-2xl p-5 sm:p-6 space-y-4 shadow-xs">
                     <div className="flex items-center justify-between">
                       <h2 className="font-sans font-semibold text-base text-foreground tracking-tight">
                         Submitted Work ({submissions.length})
@@ -639,24 +817,26 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                         <button
                           type="button"
                           onClick={() => handleOpenSubmitModal(submittableDeliverable || deliverables[0] || null)}
-                          className="text-xs font-semibold text-secondary hover:underline cursor-pointer"
+                          className="text-xs font-sans font-medium text-pink-500 hover:text-pink-600 transition-colors cursor-pointer"
                         >
                           + Submit Work
                         </button>
                       )}
                     </div>
 
-                    {submissions.length === 0 ? (
-                      <div className="bg-surface-muted/40 border border-border-theme/60 rounded-xl p-6 text-center space-y-2">
-                        <UploadIcon className="w-6 h-6 text-text-secondary mx-auto" />
-                        <p className="text-xs text-text-secondary font-medium">
+                    {allSubmissions.length === 0 ? (
+                      <div className="bg-neutral-50/60 dark:bg-surface-muted/30 border border-neutral-200/60 dark:border-border-theme/60 rounded-xl p-5 text-center space-y-2">
+                        <div className="w-10 h-10 rounded-xl bg-pink-50 dark:bg-pink-950/40 text-pink-500 flex items-center justify-center mx-auto">
+                          <UploadIcon className="w-5 h-5" />
+                        </div>
+                        <p className="text-xs font-sans text-text-secondary font-medium">
                           No work submitted yet.
                         </p>
                         {canSubmitWork && (
                           <button
                             type="button"
                             onClick={() => handleOpenSubmitModal(submittableDeliverable || deliverables[0] || null)}
-                            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-secondary text-white text-xs font-semibold transition-all cursor-pointer mt-1"
+                            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-neutral-950 text-white text-xs font-sans font-semibold hover:bg-neutral-900 transition-all cursor-pointer mt-1 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-neutral-200"
                           >
                             <span>Submit Now</span>
                           </button>
@@ -664,22 +844,22 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                       </div>
                     ) : (
                       <div className="space-y-3">
-                        {submissions.map((sub, idx) => (
+                        {allSubmissions.map((sub, idx) => (
                           <div
                             key={sub._id || idx}
-                            className="bg-surface-muted/60 border border-border-theme/70 p-4 rounded-xl space-y-2 text-xs"
+                            className="bg-neutral-50/60 dark:bg-surface-muted/30 border border-neutral-200/70 dark:border-border-theme/70 p-3.5 rounded-xl space-y-2 text-xs"
                           >
                             <div className="flex items-center justify-between gap-2">
-                              <span className="font-semibold text-foreground line-clamp-1">
-                                {sub.title || `Submission #${idx + 1}`}
+                              <span className="font-sans font-semibold text-foreground line-clamp-1">
+                                {sub.title || sub.deliverableTitle || `Submission #${idx + 1}`}
                               </span>
-                              <span className="text-[10px] text-text-secondary shrink-0">
+                              <span className="text-[10px] font-sans text-text-secondary shrink-0">
                                 {formatDateTime(sub.submittedAt)}
                               </span>
                             </div>
 
                             {sub.notes && (
-                              <p className="text-text-secondary bg-surface p-2.5 rounded-lg border border-border-theme/50 line-clamp-3">
+                              <p className="text-text-secondary bg-white dark:bg-surface p-2.5 rounded-lg border border-neutral-200/60 dark:border-border-theme/50 line-clamp-3 leading-relaxed text-[11px] font-sans">
                                 {sub.notes}
                               </p>
                             )}
@@ -690,7 +870,7 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                                   href={sub.link}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1 text-[11px] text-secondary hover:underline font-medium"
+                                  className="inline-flex items-center gap-1 text-[11px] font-sans text-pink-500 hover:text-pink-600 hover:underline font-medium"
                                 >
                                   <LinkIcon className="w-3 h-3" />
                                   <span>Live Content Link</span>
@@ -701,7 +881,7 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                                   href={sub.fileUrl}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1 text-[11px] text-secondary hover:underline font-medium"
+                                  className="inline-flex items-center gap-1 text-[11px] font-sans text-pink-500 hover:text-pink-600 hover:underline font-medium"
                                 >
                                   <DocumentIcon className="w-3 h-3" />
                                   <span>Asset File Reference</span>
@@ -724,13 +904,13 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                         {revisions.map((rev, idx) => (
                           <div
                             key={rev._id || idx}
-                            className="bg-amber-500/5 border border-amber-500/20 p-3.5 rounded-xl space-y-1.5 text-xs"
+                            className="bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-900/40 p-3 rounded-xl space-y-1 text-xs"
                           >
-                            <div className="flex items-center justify-between text-[10px] text-amber-500 font-semibold">
+                            <div className="flex items-center justify-between text-[10px] font-sans text-amber-600 dark:text-amber-400 font-semibold">
                               <span>Revision #{idx + 1}</span>
                               <span>{formatDateTime(rev.requestedAt)}</span>
                             </div>
-                            <p className="text-foreground leading-relaxed">
+                            <p className="text-foreground font-sans text-xs leading-relaxed">
                               &ldquo;{rev.feedback}&rdquo;
                             </p>
                           </div>

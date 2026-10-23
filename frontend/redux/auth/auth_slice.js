@@ -1,6 +1,4 @@
-import { createAsyncThunk, createSlice} from "@reduxjs/toolkit";
-
-import { socket } from "@/lib/socket";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 import {
     loginUser,
@@ -64,10 +62,6 @@ const refreshToken = createAsyncThunk(
                 error.response?.status === 401 ||
                 error.response?.status === 403;
 
-            if (isAuthFailure) {
-                socket.disconnect();
-            }
-
             return rejectWithValue(
                 error.response?.data?.message ||
                 (isAuthFailure
@@ -95,8 +89,6 @@ const logout = createAsyncThunk(
                 error.response?.data?.message ||
                 "Logout failed"
             );
-        } finally {
-            socket.disconnect();
         }
     }
 );
@@ -115,10 +107,6 @@ const getMe = createAsyncThunk(
             const isAuthFailure =
                 error.response?.status === 401 ||
                 error.response?.status === 403;
-
-            if (isAuthFailure) {
-                socket.disconnect();
-            }
 
             return thunkAPI.rejectWithValue(
                 error.response?.data?.message ||

@@ -62,7 +62,7 @@ function CreatorDashboardContent() {
                 </svg>
               </div>
               <div className="space-y-1">
-                <h3 className="font-serif font-medium text-lg sm:text-xl text-foreground">
+                <h3 className="font-heading font-medium text-lg sm:text-xl text-foreground">
                   Unable to load creator dashboard data
                 </h3>
                 <p className="text-xs sm:text-sm text-text-secondary max-w-md mx-auto">
@@ -115,17 +115,17 @@ function CreatorDashboardContent() {
               {/* 2. 4 Core Aggregate Metric Cards */}
               <CreatorMetricsGrid metrics={metrics} />
 
-              {/* 3. 2-Column Section: Deadlines & Active Collaborations */}
+              {/* 3. Production Workflow Pipeline & Quick Action Tools */}
+              <CreatorQuickActions metrics={metrics} />
+
+              {/* 4. 2-Column Section: Deadlines & Active Collaborations */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
                 <CreatorUpcomingDeadlines deadlines={upcomingDeadlines} />
                 <CreatorRecentCollaborations collaborations={recentWorkspaces} />
               </div>
 
-              {/* 4. Recent Reviews & Testimonials */}
+              {/* 5. Recent Reviews & Testimonials */}
               <CreatorRecentReviews reviews={reviews} />
-
-              {/* 5. Quick Actions Shortcuts */}
-              <CreatorQuickActions />
             </>
           )}
         </main>

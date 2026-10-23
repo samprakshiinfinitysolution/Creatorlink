@@ -232,9 +232,9 @@ const creatorNotificationsSlice = createSlice({
             .addCase(markCreatorNotificationRead.fulfilled, (state, action) => {
                 state.markingRead = false;
                 const updatedNotification = action.payload?.data;
-                const updatedId = updatedNotification?._id;
+                const updatedId = updatedNotification?._id || action.meta?.arg;
 
-                if (updatedId && updatedNotification?.isRead === true) {
+                if (updatedId) {
                     const targetIdStr = String(updatedId);
                     let wasUnread = false;
 
@@ -245,10 +245,16 @@ const creatorNotificationsSlice = createSlice({
                         if (!state.notifications[index].isRead) {
                             wasUnread = true;
                         }
+                        const existingSender = state.notifications[index].sender;
                         state.notifications[index] = {
                             ...state.notifications[index],
                             ...updatedNotification,
-                            isRead: true
+                            sender:
+                                existingSender && typeof existingSender === "object"
+                                    ? existingSender
+                                    : updatedNotification?.sender || existingSender,
+                            isRead: true,
+                            readAt: updatedNotification?.readAt || new Date().toISOString()
                         };
                     }
 
@@ -259,10 +265,16 @@ const creatorNotificationsSlice = createSlice({
                         if (!state.dropdownNotifications[dropIndex].isRead) {
                             wasUnread = true;
                         }
+                        const existingSender = state.dropdownNotifications[dropIndex].sender;
                         state.dropdownNotifications[dropIndex] = {
                             ...state.dropdownNotifications[dropIndex],
                             ...updatedNotification,
-                            isRead: true
+                            sender:
+                                existingSender && typeof existingSender === "object"
+                                    ? existingSender
+                                    : updatedNotification?.sender || existingSender,
+                            isRead: true,
+                            readAt: updatedNotification?.readAt || new Date().toISOString()
                         };
                     }
 

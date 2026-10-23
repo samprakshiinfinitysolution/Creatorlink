@@ -127,7 +127,7 @@ function SidebarContent({ pathname, setMobileOpen, handleLogout }) {
     <div className="flex flex-col h-full bg-surface text-foreground border-r border-border-theme w-64 select-none">
       {/* Brand Header */}
       <div className="p-6 border-b border-border-theme flex items-center justify-between">
-        <Link href="/" className="inline-flex items-center gap-1.5 font-serif text-xl font-medium tracking-wide text-foreground">
+        <Link href="/" className="inline-flex items-center gap-1.5 font-heading text-xl font-medium tracking-wide text-foreground">
           <span>CREATORLINK</span>
           <span className="text-secondary text-xl leading-none">✦</span>
         </Link>
@@ -152,11 +152,10 @@ function SidebarContent({ pathname, setMobileOpen, handleLogout }) {
               key={item.name}
               href={item.href}
               onClick={() => setMobileOpen(false)}
-              className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-sans font-medium transition-all duration-200 ${
-                isActive
+              className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-sans font-medium transition-all duration-200 ${isActive
                   ? "bg-secondary/10 text-secondary font-semibold shadow-xs"
                   : "text-text-secondary hover:text-foreground hover:bg-surface-muted"
-              }`}
+                }`}
             >
               <Icon className={`w-4 h-4 ${isActive ? "text-secondary" : "text-text-secondary"}`} />
               <span>{item.name}</span>
@@ -180,7 +179,7 @@ function SidebarContent({ pathname, setMobileOpen, handleLogout }) {
   );
 }
 
-export default function CreatorSidebar({ mobileOpen = false, setMobileOpen = () => {} }) {
+export default function CreatorSidebar({ mobileOpen = false, setMobileOpen = () => { } }) {
   const pathname = usePathname();
   const router = useRouter();
   const dispatch = useDispatch();

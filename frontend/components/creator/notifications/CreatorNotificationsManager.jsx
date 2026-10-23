@@ -28,7 +28,11 @@ function formatTimeAgo(dateString) {
     const hours = Math.floor(minutes / 60);
     if (hours < 24) return `${hours}h ago`;
     const days = Math.floor(hours / 24);
-    if (days < 7) return `${days}d ago`;
+    if (days === 1) return "1 day ago";
+    if (days < 30) return `${days} days ago`;
+    const months = Math.floor(days / 30);
+    if (months === 1) return "1 month ago";
+    if (months < 12) return `${months} months ago`;
     return date.toLocaleDateString(undefined, {
       month: "short",
       day: "numeric",
@@ -58,47 +62,95 @@ function CheckIcon({ className = "w-4 h-4" }) {
   );
 }
 
-function NotificationTypeIcon({ entityType, className = "w-5 h-5" }) {
-  if (entityType === "payment") {
-    return (
-      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    );
-  }
-  if (entityType === "workspace") {
-    return (
-      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006A3.013 3.013 0 0118 15.75H6a3.013 3.013 0 01-2.25-1.044m16.5 0v-4.25" />
-      </svg>
-    );
-  }
-  if (entityType === "booking") {
-    return (
-      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-      </svg>
-    );
-  }
-  if (entityType === "campaign") {
-    return (
-      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.111-1.53-.472-.433-.933-.778-1.92-1.026-2.953m2.69-1.248a48.36 48.36 0 004.832-.821c.642-.143 1.084-.716 1.084-1.376v-1.83c0-.66-.442-1.233-1.084-1.376a48.36 48.36 0 00-4.832-.821m0 6.222V9.618" />
-      </svg>
-    );
-  }
-  if (entityType === "review") {
-    return (
-      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
-      </svg>
-    );
-  }
+function MessageIcon({ className = "w-5 h-5" }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.502 49.188 49.188 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"
+      />
     </svg>
   );
+}
+
+function FlagIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M3 3v1.5M3 21v-6m0 0l2.77-.693a9 9 0 016.208.682l.108.054a9 9 0 006.086.71l3.114-.779V4.5l-3.114.779a9 9 0 01-6.086-.71l-.108-.054a9 9 0 00-6.208-.682L3 4.5v10.5z"
+      />
+    </svg>
+  );
+}
+
+function CalendarIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
+      />
+    </svg>
+  );
+}
+
+function StarIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"
+      />
+    </svg>
+  );
+}
+
+function DocumentTextIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
+      />
+    </svg>
+  );
+}
+
+function BriefcaseIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006A3.013 3.013 0 0118 15.75H6a3.013 3.013 0 01-2.25-1.044m16.5 0v-4.25"
+      />
+    </svg>
+  );
+}
+
+function NotificationTypeIcon({ entityType, className = "w-5 h-5" }) {
+  switch (entityType) {
+    case "message":
+      return <MessageIcon className={className} />;
+    case "campaign":
+      return <FlagIcon className={className} />;
+    case "booking":
+      return <CalendarIcon className={className} />;
+    case "review":
+      return <StarIcon className={className} />;
+    case "payment":
+      return <DocumentTextIcon className={className} />;
+    case "workspace":
+      return <BriefcaseIcon className={className} />;
+    default:
+      return <BellIcon className={className} />;
+  }
 }
 
 const CATEGORY_FILTERS = [
@@ -181,10 +233,11 @@ export default function CreatorNotificationsManager() {
   };
 
   const handleMarkAllRead = async () => {
-    if (unreadCount > 0 && !markingAllRead) {
+    if (numUnread > 0 && !markingAllRead) {
       setActionError(null);
       try {
         await dispatch(markAllCreatorNotificationsRead()).unwrap();
+        dispatch(fetchCreatorUnreadNotificationCount());
       } catch (err) {
         setActionError(
           typeof err === "string" ? err : "Failed to mark all notifications as read"
@@ -193,15 +246,19 @@ export default function CreatorNotificationsManager() {
     }
   };
 
+  const isNotificationRead = (item) => Boolean(item?.isRead || item?.readAt);
+
   const handleItemClick = async (item) => {
     if (!item) return;
 
-    if (item._id && !item.isRead) {
+    const isItemUnread = !isNotificationRead(item);
+    if (item._id && isItemUnread) {
       if (markingIds.includes(item._id)) return;
       setActionError(null);
       setMarkingIds((prev) => [...prev, item._id]);
       try {
         await dispatch(markCreatorNotificationRead(item._id)).unwrap();
+        dispatch(fetchCreatorUnreadNotificationCount());
       } catch (err) {
         setActionError(
           typeof err === "string" ? err : "Failed to mark notification as read"
@@ -223,13 +280,15 @@ export default function CreatorNotificationsManager() {
 
   const handleMarkSingleRead = async (e, item) => {
     e.stopPropagation();
-    if (!item?._id || item?.isRead || markingIds.includes(item._id)) {
+    const isItemRead = isNotificationRead(item);
+    if (!item?._id || isItemRead || markingIds.includes(item._id)) {
       return;
     }
     setActionError(null);
     setMarkingIds((prev) => [...prev, item._id]);
     try {
       await dispatch(markCreatorNotificationRead(item._id)).unwrap();
+      dispatch(fetchCreatorUnreadNotificationCount());
     } catch (err) {
       setActionError(
         typeof err === "string" ? err : "Failed to mark notification as read"
@@ -241,20 +300,27 @@ export default function CreatorNotificationsManager() {
 
   // Exclude newly read items when in unread tab and filter by category if set
   const displayedNotifications = notifications.filter((item) => {
-    if (readFilter === "unread" && item.isRead) return false;
-    if (categoryFilter !== "all" && item.entityType !== categoryFilter) return false;
+    const isItemRead = isNotificationRead(item);
+    if (readFilter === "unread" && isItemRead) return false;
+    if (categoryFilter !== "all" && item?.entityType !== categoryFilter) return false;
     return true;
   });
 
   const currentPage = pagination?.page ?? page;
-  const totalPages = pagination?.totalPages || 1;
-  const totalItems = pagination?.totalItems ?? notifications.length;
+  const numUnread = Number(unreadCount) || 0;
+  const totalItems =
+    readFilter === "unread"
+      ? numUnread
+      : (pagination?.totalItems ?? notifications.length);
+  const totalPages =
+    readFilter === "unread"
+      ? Math.max(1, Math.ceil(numUnread / limit))
+      : (pagination?.totalPages || 1);
   const hasPrevPage = pagination?.hasPrevPage ?? (currentPage > 1);
   const hasNextPage = pagination?.hasNextPage ?? (currentPage < totalPages);
-  const numUnread = Number(unreadCount) || 0;
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
+    <div className="min-h-screen bg-[#f8f9fa] dark:bg-background text-foreground flex flex-col font-sans">
       {/* Sidebar Component */}
       <CreatorSidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 
@@ -264,52 +330,50 @@ export default function CreatorNotificationsManager() {
         <CreatorHeader setMobileOpen={setMobileOpen} />
 
         {/* Notifications Center Container */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-5xl w-full mx-auto">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-5 max-w-7xl w-full mx-auto">
           {/* Header Title & Actions Banner */}
-          <div className="bg-surface border border-border-theme rounded-2xl p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="inline-block px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase bg-secondary/15 text-secondary border border-secondary/20">
+          <div className="bg-white dark:bg-surface border border-neutral-200/80 dark:border-border-theme rounded-2xl p-6 sm:p-7 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-semibold tracking-wider text-neutral-500 dark:text-neutral-400 uppercase">
                   Notification Center
                 </span>
                 {numUnread > 0 && (
-                  <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-secondary text-white">
-                    {numUnread} Unread
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-pink-50 dark:bg-pink-950/40 text-pink-500 dark:text-pink-400 border border-pink-200/60 dark:border-pink-800/40">
+                    {numUnread} unread
                   </span>
                 )}
               </div>
               <h1 className="font-serif font-medium text-2xl sm:text-3xl text-foreground tracking-tight">
                 Notifications
               </h1>
-              <p className="text-xs sm:text-sm text-text-secondary mt-1">
-                Stay updated on brand booking requests, milestone approvals, releases, and reviews.
+              <p className="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400">
+                Stay on top of bookings, workspace updates, payments and reviews.
               </p>
             </div>
 
-            {numUnread > 0 && (
-              <button
-                type="button"
-                onClick={handleMarkAllRead}
-                disabled={markingAllRead}
-                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-secondary/10 hover:bg-secondary/20 text-secondary border border-secondary/30 text-xs font-semibold tracking-wide transition-all cursor-pointer disabled:opacity-50 shrink-0"
-              >
-                <CheckIcon className="w-4 h-4" />
-                <span>{markingAllRead ? "Marking all..." : "Mark all as read"}</span>
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={handleMarkAllRead}
+              disabled={numUnread === 0 || markingAllRead}
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-neutral-950 hover:bg-neutral-800 text-white dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-100 text-xs font-semibold tracking-wide transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shrink-0 shadow-2xs"
+            >
+              <CheckIcon className="w-4 h-4 stroke-[2.5]" />
+              <span>{markingAllRead ? "Marking all..." : "Mark all as read"}</span>
+            </button>
           </div>
 
-          {/* Filter Bar: Tabs & Categories */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-b border-border-theme pb-4">
+          {/* Filter Bar: Tabs & Categories in separate white rounded container */}
+          <div className="bg-white dark:bg-surface border border-neutral-200/80 dark:border-border-theme rounded-2xl p-2 sm:p-2.5 flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-2xs">
             {/* All vs Unread Tabs */}
-            <div className="inline-flex p-1 bg-surface-muted rounded-xl self-start">
+            <div className="flex items-center gap-2 shrink-0">
               <button
                 type="button"
                 onClick={() => handleTabChange("all")}
-                className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                className={`px-5 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                   readFilter === "all"
-                    ? "bg-surface text-foreground shadow-xs"
-                    : "text-text-secondary hover:text-foreground"
+                    ? "bg-neutral-950 text-white dark:bg-white dark:text-neutral-950 shadow-2xs"
+                    : "bg-white dark:bg-surface text-neutral-700 dark:text-neutral-300 border border-neutral-200/80 dark:border-border-theme hover:bg-neutral-50 dark:hover:bg-surface-muted"
                 }`}
               >
                 All
@@ -317,40 +381,43 @@ export default function CreatorNotificationsManager() {
               <button
                 type="button"
                 onClick={() => handleTabChange("unread")}
-                className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+                className={`px-5 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer inline-flex items-center gap-1.5 ${
                   readFilter === "unread"
-                    ? "bg-surface text-foreground shadow-xs"
-                    : "text-text-secondary hover:text-foreground"
+                    ? "bg-neutral-950 text-white dark:bg-white dark:text-neutral-950 shadow-2xs"
+                    : "bg-white dark:bg-surface text-neutral-700 dark:text-neutral-300 border border-neutral-200/80 dark:border-border-theme hover:bg-neutral-50 dark:hover:bg-surface-muted"
                 }`}
               >
                 <span>Unread</span>
                 {numUnread > 0 && (
-                  <span className="w-2 h-2 rounded-full bg-secondary" />
+                  <span className="w-2 h-2 rounded-full bg-pink-500 shrink-0" />
                 )}
               </button>
             </div>
 
             {/* Category Filter Pills */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
-              {CATEGORY_FILTERS.map((cat) => (
-                <button
-                  key={cat.value}
-                  type="button"
-                  onClick={() => handleCategoryChange(cat.value)}
-                  className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-colors cursor-pointer border ${
-                    categoryFilter === cat.value
-                      ? "bg-secondary text-white border-secondary"
-                      : "bg-surface text-text-secondary border-border-theme hover:bg-surface-muted hover:text-foreground"
-                  }`}
-                >
-                  {cat.label}
-                </button>
-              ))}
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
+              {CATEGORY_FILTERS.map((cat) => {
+                const isActive = categoryFilter === cat.value;
+                return (
+                  <button
+                    key={cat.value}
+                    type="button"
+                    onClick={() => handleCategoryChange(cat.value)}
+                    className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                      isActive
+                        ? "bg-neutral-950 text-white dark:bg-white dark:text-neutral-950 shadow-2xs"
+                        : "bg-white dark:bg-surface text-neutral-700 dark:text-neutral-300 border border-neutral-200/80 dark:border-border-theme hover:bg-neutral-50 dark:hover:bg-surface-muted"
+                    }`}
+                  >
+                    {cat.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
           {/* Main Feed Content */}
-          <div className="space-y-2">
+          <div className="space-y-3">
             {actionError && (
               <div className="bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl p-4 flex items-center justify-between gap-3">
                 <p className="text-xs sm:text-sm font-semibold">{actionError}</p>
@@ -379,17 +446,17 @@ export default function CreatorNotificationsManager() {
 
             {loading && notifications.length === 0 ? (
               // Loading Skeleton State
-              <div className="space-y-2">
-                {[1, 2, 3, 4].map((i) => (
+              <div className="space-y-3">
+                {[1, 2, 3, 4, 5].map((i) => (
                   <div
                     key={i}
-                    className="animate-pulse bg-surface border border-border-theme rounded-xl sm:rounded-2xl py-2.5 px-3.5 sm:py-3 sm:px-4 flex items-start gap-3"
+                    className="animate-pulse bg-white dark:bg-surface border border-neutral-200/80 dark:border-border-theme rounded-2xl p-4 sm:p-5 flex items-start gap-3.5 shadow-2xs"
                   >
-                    <div className="w-8.5 h-8.5 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-surface-muted shrink-0" />
+                    <div className="w-11 h-11 rounded-full bg-neutral-100 dark:bg-surface-muted shrink-0" />
                     <div className="flex-1 space-y-2">
-                      <div className="h-3.5 bg-surface-muted rounded w-1/3" />
-                      <div className="h-3 bg-surface-muted rounded w-3/4" />
-                      <div className="h-2.5 bg-surface-muted rounded w-1/4" />
+                      <div className="h-4 bg-neutral-100 dark:bg-surface-muted rounded w-1/3" />
+                      <div className="h-3 bg-neutral-100 dark:bg-surface-muted rounded w-3/4" />
+                      <div className="h-2.5 bg-neutral-100 dark:bg-surface-muted rounded w-1/4" />
                     </div>
                   </div>
                 ))}
@@ -408,9 +475,9 @@ export default function CreatorNotificationsManager() {
               </div>
             ) : displayedNotifications.length === 0 ? (
               // Empty State
-              <div className="bg-surface border border-border-theme rounded-2xl py-16 px-6 text-center flex flex-col items-center justify-center">
-                <div className="w-12 h-12 rounded-2xl bg-surface-muted flex items-center justify-center text-text-secondary mb-3">
-                  <BellIcon className="w-6 h-6 opacity-40" />
+              <div className="bg-white dark:bg-surface border border-neutral-200/80 dark:border-border-theme rounded-2xl py-16 px-6 text-center flex flex-col items-center justify-center shadow-2xs">
+                <div className="w-12 h-12 rounded-2xl bg-neutral-100 dark:bg-surface-muted flex items-center justify-center text-neutral-400 mb-3">
+                  <BellIcon className="w-6 h-6" />
                 </div>
                 <h3 className="font-semibold text-base text-foreground">No notifications found</h3>
                 <p className="text-xs text-text-secondary mt-1 max-w-sm">
@@ -424,91 +491,98 @@ export default function CreatorNotificationsManager() {
             ) : (
               // Notifications Card List
               displayedNotifications.map((item) => {
-                const isUnread = !item.isRead;
+                const isUnread = !isNotificationRead(item);
                 const hasValidDestination =
                   typeof item?.destination === "string" &&
                   item.destination.startsWith("/") &&
                   !item.destination.startsWith("//");
 
+                const iconBgClass =
+                  "bg-neutral-100/90 text-neutral-700 border border-neutral-200/50 dark:bg-neutral-800/80 dark:text-neutral-300 dark:border-neutral-700/50";
+
                 return (
                   <div
                     key={item._id}
                     onClick={() => handleItemClick(item)}
-                    className={`group bg-surface border rounded-xl sm:rounded-2xl py-2.5 px-3.5 sm:py-3 sm:px-4 transition-all duration-200 cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
-                      isUnread
-                        ? "border-secondary/30 bg-secondary/5 hover:border-secondary/60 hover:bg-secondary/10"
-                        : "border-border-theme hover:border-border-theme hover:bg-surface-muted/50"
-                    }`}
+                    className="bg-white dark:bg-surface border border-neutral-200/80 dark:border-border-theme rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs hover:border-neutral-300 dark:hover:border-neutral-600 transition-colors cursor-pointer group"
                   >
                     {/* Left: Icon + Content */}
-                    <div className="flex items-start gap-3 min-w-0 flex-1">
+                    <div className="flex items-start gap-3.5 min-w-0 flex-1">
                       <div
-                        className={`w-8.5 h-8.5 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 transition-colors ${
-                          isUnread
-                            ? "bg-secondary text-white shadow-xs"
-                            : "bg-surface-muted text-text-secondary"
-                        }`}
+                        className={`w-11 h-11 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${iconBgClass}`}
                       >
-                        <NotificationTypeIcon entityType={item.entityType} className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+                        <NotificationTypeIcon
+                          entityType={item.entityType}
+                          className="w-5 h-5 text-neutral-700 dark:text-neutral-200"
+                        />
                       </div>
 
-                      <div className="min-w-0 flex-1 space-y-0.5">
+                      <div className="min-w-0 flex-1 space-y-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h3
-                            className={`text-sm tracking-tight truncate ${
-                              isUnread ? "font-bold text-foreground" : "font-medium text-foreground"
-                            }`}
-                          >
+                          <h3 className="font-serif font-bold text-sm sm:text-base text-neutral-900 dark:text-white tracking-tight">
                             {item.title}
                           </h3>
 
+                          {/* Pink dot if unread */}
+                          {isUnread && (
+                            <span className="w-2 h-2 rounded-full bg-pink-500 shrink-0" />
+                          )}
+
                           {/* Entity Type Badge */}
                           {item.entityType && (
-                            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md uppercase tracking-wider bg-surface-muted text-text-secondary border border-border-theme">
+                            <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-md tracking-wider bg-neutral-100 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400 border border-neutral-200/60 dark:border-neutral-700/60">
                               {item.entityType}
                             </span>
                           )}
-
-                          {/* Sender name badge if populated */}
-                          {item.sender?.name && (
-                            <span className="text-[10px] text-text-secondary font-medium">
-                              from {item.sender.name}
-                            </span>
-                          )}
-
-                          {isUnread && (
-                            <span className="w-2 h-2 rounded-full bg-secondary shrink-0" />
-                          )}
                         </div>
 
-                        <p className="text-xs text-text-secondary leading-normal">
-                          {item.message}
-                        </p>
+                        {item.message && (
+                          <p className="text-xs sm:text-[13px] text-neutral-600 dark:text-neutral-300 leading-relaxed">
+                            {item.message}
+                          </p>
+                        )}
 
-                        <div className="text-[11px] text-text-secondary/80">
-                          {formatTimeAgo(item.createdAt)}
+                        <div className="text-xs text-neutral-400 dark:text-neutral-500 flex items-center gap-1.5 pt-0.5">
+                          {item.sender?.name && (
+                            <>
+                              <span>{item.sender.name}</span>
+                              <span>·</span>
+                            </>
+                          )}
+                          <span>{formatTimeAgo(item.createdAt)}</span>
                         </div>
                       </div>
                     </div>
 
                     {/* Right: Actions */}
-                    <div className="flex items-center gap-2 sm:self-center shrink-0 border-t sm:border-t-0 border-border-theme/40 pt-1.5 sm:pt-0">
-                      {isUnread && (
+                    <div className="flex items-center gap-4 sm:gap-6 shrink-0 sm:self-center border-t sm:border-t-0 border-neutral-100 dark:border-border-theme/40 pt-2 sm:pt-0">
+                      {isUnread ? (
                         <button
                           type="button"
                           onClick={(e) => handleMarkSingleRead(e, item)}
                           disabled={markingIds.includes(item._id)}
                           title="Mark as read"
-                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold text-text-secondary hover:text-secondary hover:bg-secondary/10 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="inline-flex items-center gap-1.5 text-xs font-medium text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition-colors cursor-pointer disabled:opacity-50"
                         >
-                          <CheckIcon className="w-3.5 h-3.5" />
+                          <CheckIcon className="w-3.5 h-3.5 stroke-[2.5]" />
                           <span>{markingIds.includes(item._id) ? "Marking..." : "Mark read"}</span>
                         </button>
+                      ) : (
+                        <div className="inline-flex items-center gap-1.5 text-xs text-neutral-600 dark:text-neutral-400 font-medium">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                          <span>Read</span>
+                        </div>
                       )}
 
                       {hasValidDestination && (
-                        <span className="text-xs font-semibold text-secondary group-hover:translate-x-0.5 transition-transform inline-flex items-center gap-1">
-                          <span>View Details</span>
+                        <span
+                          className={`text-xs font-semibold inline-flex items-center gap-1 transition-transform group-hover:translate-x-0.5 ${
+                            isUnread
+                              ? "text-pink-500 dark:text-pink-400 hover:text-pink-600"
+                              : "text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white"
+                          }`}
+                        >
+                          <span>View details</span>
                           <span aria-hidden="true">→</span>
                         </span>
                       )}
@@ -521,8 +595,8 @@ export default function CreatorNotificationsManager() {
 
           {/* Pagination Controls */}
           {pagination && totalPages > 1 && (
-            <div className="bg-surface border border-border-theme rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-              <span className="text-xs text-text-secondary">
+            <div className="bg-white dark:bg-surface border border-neutral-200/80 dark:border-border-theme rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-2xs">
+              <span className="text-xs text-neutral-500 dark:text-neutral-400">
                 Showing page <strong className="text-foreground">{currentPage}</strong> of{" "}
                 <strong className="text-foreground">{totalPages}</strong> ({totalItems} total)
               </span>
@@ -532,7 +606,7 @@ export default function CreatorNotificationsManager() {
                   type="button"
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={!hasPrevPage}
-                  className="px-3.5 py-1.5 rounded-xl border border-border-theme text-xs font-semibold text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                  className="px-3.5 py-1.5 rounded-xl border border-neutral-200/80 dark:border-border-theme text-xs font-semibold text-neutral-700 dark:text-neutral-300 hover:text-foreground hover:bg-neutral-50 dark:hover:bg-surface-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                 >
                   Previous
                 </button>
@@ -545,8 +619,8 @@ export default function CreatorNotificationsManager() {
                       onClick={() => setPage(pageNum)}
                       className={`w-8 h-8 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
                         currentPage === pageNum
-                          ? "bg-secondary text-white"
-                          : "text-text-secondary hover:bg-surface-muted hover:text-foreground"
+                          ? "bg-neutral-950 text-white dark:bg-white dark:text-neutral-950 shadow-2xs"
+                          : "text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-surface-muted hover:text-foreground"
                       }`}
                     >
                       {pageNum}
@@ -558,7 +632,7 @@ export default function CreatorNotificationsManager() {
                   type="button"
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={!hasNextPage}
-                  className="px-3.5 py-1.5 rounded-xl border border-border-theme text-xs font-semibold text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                  className="px-3.5 py-1.5 rounded-xl border border-neutral-200/80 dark:border-border-theme text-xs font-semibold text-neutral-700 dark:text-neutral-300 hover:text-foreground hover:bg-neutral-50 dark:hover:bg-surface-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                 >
                   Next
                 </button>

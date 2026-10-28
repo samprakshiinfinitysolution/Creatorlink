@@ -57,10 +57,27 @@ const logoutUser = async () => {
 };
 
 
+// Changes the password for the currently authenticated user.
+const changePassword = async ({ currentPassword, newPassword, confirmPassword }) => {
+
+    const response = await axiosInstance.patch(
+        "/auth/change-password",
+        {
+            currentPassword,
+            newPassword,
+            confirmPassword
+        }
+    );
+
+    return response.data;
+};
+
+
 export {
     loginUser,
     registerUser,
     refreshAccessToken,
     logoutUser,
-    getCurrentUser
+    getCurrentUser,
+    changePassword
 };

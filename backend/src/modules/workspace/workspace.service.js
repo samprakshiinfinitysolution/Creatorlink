@@ -4,12 +4,127 @@ import Workspace from "./workspace.model.js";
 import Review from "../reviews/reviews.model.js";
 import Conversation from "../messages/conversation.model.js";
 import Campaign from "../brand/campaigns/campaign.model.js";
+import BrandProfile from "../brand/profile/profile.model.js";
+import CreatorProfile from "../creator/profile/profile.model.js";
 import { createNotificationSafe } from "../notifications/notification.service.js";
 import createApiError from "../../utils/ApiError.js";
 import {
     getPagination,
     getPaginationData
 } from "../../utils/pagination.js";
+
+// Helper to enrich workspaces with BrandProfile (logo, companyName) and CreatorProfile (profileImage)
+const attachWorkspaceProfiles = async (workspaces) => {
+    if (!workspaces) return workspaces;
+    const isSingle = !Array.isArray(workspaces);
+    const workspaceList = isSingle ? [workspaces] : workspaces;
+    if (workspaceList.length === 0) return workspaces;
+
+    const brandIds = new Set();
+    const creatorIds = new Set();
+
+    const extractEntityId = (entity) => {
+        if (!entity) return null;
+        if (entity._id) {
+            return entity._id.toString ? entity._id.toString() : String(entity._id);
+        }
+        if (mongoose.Types.ObjectId.isValid(entity)) {
+            return entity.toString ? entity.toString() : String(entity);
+        }
+        return null;
+    };
+
+    workspaceList.forEach((ws) => {
+        const wsObj = ws?.toObject ? ws.toObject() : ws;
+        if (!wsObj) return;
+        const bId = extractEntityId(wsObj.brand);
+        const cId = extractEntityId(wsObj.creator);
+        if (bId) brandIds.add(bId);
+        if (cId) creatorIds.add(cId);
+    });
+
+    const isDbConnected = mongoose.connection?.readyState === 1;
+
+    const [brandProfiles, creatorProfiles] = await Promise.all([
+        brandIds.size > 0 && isDbConnected
+            ? BrandProfile.find({
+                user: { $in: Array.from(brandIds).map((id) => new mongoose.Types.ObjectId(id)) }
+            })
+                .select("user logo companyName")
+                .lean()
+            : [],
+        creatorIds.size > 0 && isDbConnected
+            ? CreatorProfile.find({
+                user: { $in: Array.from(creatorIds).map((id) => new mongoose.Types.ObjectId(id)) }
+            })
+                .select("user profileImage")
+                .lean()
+            : []
+    ]);
+
+    const brandMap = new Map();
+    brandProfiles.forEach((bp) => {
+        if (bp?.user) brandMap.set(bp.user.toString(), bp);
+    });
+
+    const creatorMap = new Map();
+    creatorProfiles.forEach((cp) => {
+        if (cp?.user) creatorMap.set(cp.user.toString(), cp);
+    });
+
+    const enriched = workspaceList.map((ws) => {
+        const wsObj = ws?.toObject ? ws.toObject() : { ...ws };
+
+        const bId = extractEntityId(wsObj.brand);
+        const bp = bId ? brandMap.get(bId) : null;
+        if (bp) {
+            const isPopulated = wsObj.brand && typeof wsObj.brand === "object" && wsObj.brand._id;
+            const brandBase = isPopulated
+                ? (wsObj.brand.toObject ? wsObj.brand.toObject() : { ...wsObj.brand })
+                : { _id: wsObj.brand };
+
+            wsObj.brand = {
+                ...brandBase,
+                logo: bp.logo || brandBase.logo || "",
+                avatar: bp.logo || brandBase.avatar || "",
+                profileImage: bp.logo || brandBase.profileImage || "",
+                ...(bp.companyName ? { companyName: bp.companyName } : {})
+            };
+        }
+
+        const cId = extractEntityId(wsObj.creator);
+        const cp = cId ? creatorMap.get(cId) : null;
+        if (cp) {
+            const isPopulated = wsObj.creator && typeof wsObj.creator === "object" && wsObj.creator._id;
+            const creatorBase = isPopulated
+                ? (wsObj.creator.toObject ? wsObj.creator.toObject() : { ...wsObj.creator })
+                : { _id: wsObj.creator };
+
+            wsObj.creator = {
+                ...creatorBase,
+                profileImage: cp.profileImage || creatorBase.profileImage || "",
+                avatar: cp.profileImage || creatorBase.avatar || "",
+                image: cp.profileImage || creatorBase.image || ""
+            };
+        }
+
+        if (Array.isArray(wsObj.deliverables) && !wsObj.deliverables.id) {
+            if (ws?.deliverables && typeof ws.deliverables.id === "function") {
+                wsObj.deliverables.id = ws.deliverables.id.bind(ws.deliverables);
+            } else {
+                wsObj.deliverables.id = function (targetId) {
+                    if (!targetId) return null;
+                    const strId = targetId.toString ? targetId.toString() : String(targetId);
+                    return this.find((d) => d && (d._id?.toString() === strId || d.id === strId)) || null;
+                };
+            }
+        }
+
+        return wsObj;
+    });
+
+    return isSingle ? enriched[0] : enriched;
+};
 
 // Helper function to convert raw string/object deliverables into structured deliverable objects.
 const parseDeliverablesToObjects = (rawDeliverables = [], deadline = null) => {
@@ -202,9 +317,10 @@ const getCreatorWorkspacesService = async (creatorId, query = {}) => {
     const [workspaces, totalItems] = await Promise.all([
         Workspace.find(filter)
             .populate("brand", "name email")
+            .populate("creator", "name email")
             .populate(
                 "campaign",
-                "title category budget deadline platform"
+                "title category budget deadline platform coverImage"
             )
             .populate(
                 "service",
@@ -218,8 +334,10 @@ const getCreatorWorkspacesService = async (creatorId, query = {}) => {
         Workspace.countDocuments(filter)
     ]);
 
+    const enrichedWorkspaces = await attachWorkspaceProfiles(workspaces);
+
     return {
-        workspaces,
+        workspaces: enrichedWorkspaces,
         pagination: getPaginationData(
             currentPage,
             itemsPerPage,
@@ -248,6 +366,7 @@ const getCreatorWorkspaceByIdService = async (
         ]
     })
         .populate("brand", "name email")
+        .populate("creator", "name email")
         .populate("campaign")
         .populate("service")
         .populate("booking");
@@ -259,7 +378,8 @@ const getCreatorWorkspaceByIdService = async (
         );
     }
 
-    return workspace;
+    const wsObj = workspace.toObject ? workspace.toObject() : { ...workspace };
+    return await attachWorkspaceProfiles(wsObj);
 };
 
 // Helper function to evaluate workspace completion status based on deliverable statuses
@@ -384,27 +504,33 @@ const submitCreatorWorkspaceDeliverableService = async (
     } = submissionData;
 
     const submittedAtDate = new Date();
-    const subObj = {
-        title: title ? title.trim() : deliverable.title,
-        link: link ? link.trim() : "",
-        fileUrl: fileUrl ? fileUrl.trim() : "",
-        notes: notes ? notes.trim() : "",
-        submittedAt: submittedAtDate
-    };
+const submissionId = new mongoose.Types.ObjectId();
 
-    deliverable.submission = subObj;
-    deliverable.submittedAt = submittedAtDate;
-    deliverable.status = "submitted";
+const subObj = {
+    _id: submissionId,
+    title: title ? title.trim() : deliverable.title,
+    link: link ? link.trim() : "",
+    fileUrl: fileUrl ? fileUrl.trim() : "",
+    notes: notes ? notes.trim() : "",
+    submittedAt: submittedAtDate
+};
 
-    // Preserved top-level submissions array for backward compatibility
-    workspace.submissions.push(subObj);
+deliverable.submission = subObj;
+deliverable.submittedAt = submittedAtDate;
+deliverable.status = "submitted";
+
+// Preserve top-level submissions array for backward compatibility.
+workspace.submissions.push(subObj);
 
     checkAndUpdateWorkspaceCompletion(workspace);
 
     await workspace.save();
 
     const currentSubmission = workspace.submissions[workspace.submissions.length - 1];
-    const submissionId = currentSubmission?._id || deliverable.submission?._id || submittedAtDate.getTime();
+const notificationSubmissionId =
+    currentSubmission?._id ||
+    deliverable.submission?._id ||
+    submittedAtDate.getTime();
 
     await createNotificationSafe({
         recipient: workspace.brand,
@@ -421,14 +547,16 @@ const submitCreatorWorkspaceDeliverableService = async (
             deliverableTitle: deliverable.title,
             submissionLink: subObj.link || ""
         },
-        idempotencyKey: `workspace:deliverable_submitted:${workspace._id}:${deliverable._id}:${submissionId}`
+        idempotencyKey: `workspace:deliverable_submitted:${workspace._id}:${deliverable._id}:${notificationSubmissionId}`
     });
 
-    return await Workspace.findById(workspace._id)
+    const updated = await Workspace.findById(workspace._id)
         .populate("brand", "name email")
         .populate("campaign")
         .populate("service")
         .populate("booking");
+
+    return await attachWorkspaceProfiles(updated);
 };
 
 // Submits work for a workspace by creator (legacy wrapper / fallback).
@@ -471,12 +599,17 @@ const getBrandWorkspacesService = async (
         filter.status = status.trim();
     }
 
-    const [workspaces, totalItems] = await Promise.all([
+    const brandObjectId = mongoose.Types.ObjectId.isValid(brandId)
+        ? new mongoose.Types.ObjectId(brandId)
+        : brandId;
+
+    const [workspaces, totalItems, statusAgg] = await Promise.all([
         Workspace.find(filter)
+            .populate("brand", "name email")
             .populate("creator", "name email")
             .populate(
                 "campaign",
-                "title category budget deadline platform"
+                "title category budget deadline platform coverImage"
             )
             .populate(
                 "service",
@@ -487,8 +620,58 @@ const getBrandWorkspacesService = async (
             .skip(skip)
             .limit(itemsPerPage),
 
-        Workspace.countDocuments(filter)
+        Workspace.countDocuments(filter),
+
+        Workspace.aggregate([
+            {
+                $match: {
+                    brand: brandObjectId
+                }
+            },
+            {
+                $group: {
+                    _id: "$status",
+                    count: { $sum: 1 }
+                }
+            }
+        ])
     ]);
+
+    // Aggregate summary counts across all workspaces for this brand
+    const summary = {
+        total: 0,
+        inProgress: 0,
+        completed: 0,
+        cancelled: 0,
+        byStatus: {
+            in_progress: 0,
+            submitted: 0,
+            revision_requested: 0,
+            completed: 0,
+            cancelled: 0
+        }
+    };
+
+    if (Array.isArray(statusAgg)) {
+        statusAgg.forEach((item) => {
+            const count = item.count || 0;
+            summary.total += count;
+            if (item._id && summary.byStatus[item._id] !== undefined) {
+                summary.byStatus[item._id] = count;
+            }
+            if (
+                item._id === "in_progress" ||
+                item._id === "submitted" ||
+                item._id === "revision_requested"
+            ) {
+                summary.inProgress += count;
+            } else if (item._id === "completed") {
+                summary.completed += count;
+            } else if (item._id === "cancelled") {
+                summary.cancelled += count;
+            }
+        });
+    }
 
     // Lookup reviews submitted by this brand for any returned completed workspaces
     const completedWorkspaceIds = workspaces
@@ -521,13 +704,16 @@ const getBrandWorkspacesService = async (
         return wsObj;
     });
 
+    const enrichedWorkspaces = await attachWorkspaceProfiles(workspacesWithReviews);
+
     return {
-        workspaces: workspacesWithReviews,
+        workspaces: enrichedWorkspaces,
         pagination: getPaginationData(
             currentPage,
             itemsPerPage,
             totalItems
-        )
+        ),
+        summary
     };
 };
 
@@ -550,6 +736,7 @@ const getBrandWorkspaceByIdService = async (
             { booking: workspaceId }
         ]
     })
+        .populate("brand", "name email")
         .populate("creator", "name email")
         .populate("campaign")
         .populate("service")
@@ -581,7 +768,7 @@ const getBrandWorkspaceByIdService = async (
         wsObj.review = null;
     }
 
-    return wsObj;
+    return await attachWorkspaceProfiles(wsObj);
 };
 
 // Reviews a specific deliverable in workspace by brand.
@@ -767,11 +954,13 @@ const reviewBrandWorkspaceDeliverableService = async (
         });
     }
 
-    return await Workspace.findById(workspace._id)
+    const updated = await Workspace.findById(workspace._id)
         .populate("creator", "name email")
         .populate("campaign")
         .populate("service")
         .populate("booking");
+
+    return await attachWorkspaceProfiles(updated);
 };
 
 // Reviews workspace by brand (legacy wrapper / fallback).

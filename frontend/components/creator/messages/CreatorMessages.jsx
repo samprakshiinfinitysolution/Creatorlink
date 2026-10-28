@@ -94,6 +94,42 @@ function getInitials(name = "", email = "") {
   return "BR";
 }
 
+function ProfileAvatar({ image, name, initials, sizeClassName = "w-10 h-10", className = "" }) {
+  const [failedUrl, setFailedUrl] = useState(null);
+
+  const hasValidImage = Boolean(
+    image &&
+    typeof image === "string" &&
+    image.trim() &&
+    failedUrl !== image
+  );
+
+  if (hasValidImage) {
+    return (
+      <div
+        className={`${sizeClassName} rounded-full overflow-hidden bg-neutral-100 dark:bg-surface-muted shrink-0 border border-neutral-200 dark:border-border-theme ${className}`}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={image}
+          alt={name || "Profile avatar"}
+          onError={() => setFailedUrl(image)}
+          className="w-full h-full object-cover"
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`${sizeClassName} rounded-full bg-neutral-100 dark:bg-surface-muted text-black dark:text-white font-semibold text-xs flex items-center justify-center shrink-0 border border-neutral-200 dark:border-border-theme uppercase ${className}`}
+    >
+      {initials}
+    </div>
+  );
+}
+
+
 function formatTime(dateStr) {
   if (!dateStr) return "";
   const date = new Date(dateStr);
@@ -434,6 +470,21 @@ export default function CreatorMessages() {
   const activeBrandName = activeBrand?.name || "Brand";
   const activeBrandEmail = activeBrand?.email || "";
   const activeBrandInitials = getInitials(activeBrandName, activeBrandEmail);
+  const selectedConvFromList = conversations.find(
+    (c) => String(c._id) === String(selectedConversation?._id)
+  );
+  const activeBrandFromList = selectedConvFromList?.participants?.find(
+    (p) => String(p._id || p.id) !== String(currentCreatorId)
+  );
+  const activeBrandImage =
+    activeBrand?.profileImage ||
+    activeBrand?.logo ||
+    activeBrand?.avatar ||
+    activeBrand?.image ||
+    activeBrandFromList?.profileImage ||
+    activeBrandFromList?.logo ||
+    activeBrandFromList?.avatar ||
+    activeBrandFromList?.image;
   const activeCampaignTitle = selectedConversation?.campaign?.title;
   const activeBookingPrice = formatCurrency(selectedConversation?.booking?.agreedPrice);
 
@@ -530,6 +581,7 @@ export default function CreatorMessages() {
 
                 const brandName = brand?.name || "Brand";
                 const brandInitials = getInitials(brandName, brand?.email);
+                const brandImage = brand?.profileImage || brand?.logo || brand?.avatar || brand?.image;
                 const isSelected = selectedConversation?._id && String(selectedConversation._id) === String(item._id);
 
                 return (
@@ -543,10 +595,14 @@ export default function CreatorMessages() {
                         : "hover:bg-surface-muted"
                     }`}
                   >
-                    {/* Brand Initials Avatar */}
-                    <div className="w-10 h-10 rounded-full bg-neutral-100 dark:bg-surface-muted text-black dark:text-white font-semibold text-xs flex items-center justify-center shrink-0 border border-neutral-200 dark:border-border-theme uppercase mt-0.5">
-                      {brandInitials}
-                    </div>
+                    {/* Brand Avatar */}
+                    <ProfileAvatar
+                      image={brandImage}
+                      name={brandName}
+                      initials={brandInitials}
+                      sizeClassName="w-10 h-10"
+                      className="mt-0.5"
+                    />
 
                     {/* Content Details */}
                     <div className="flex-1 min-w-0">
@@ -601,9 +657,13 @@ export default function CreatorMessages() {
                   </button>
 
                   {/* Active Brand Avatar */}
-                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-neutral-100 dark:bg-surface-muted text-black dark:text-white font-semibold text-xs flex items-center justify-center shrink-0 border border-neutral-200 dark:border-border-theme uppercase">
-                    {activeBrandInitials}
-                  </div>
+                  <ProfileAvatar
+                    key={activeBrand?._id || activeBrandImage || activeBrandInitials}
+                    image={activeBrandImage}
+                    name={activeBrandName}
+                    initials={activeBrandInitials}
+                    sizeClassName="w-8 h-8 sm:w-9 sm:h-9"
+                  />
 
                   {/* Active Brand Info */}
                   <div className="min-w-0 flex-1">

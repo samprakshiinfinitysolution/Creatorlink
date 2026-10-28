@@ -2,6 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
+import ScrollReveal from "@/components/theme/ScrollReveal";
 
 // =========================================================
 // CENTRALIZED MOCK DATA (UI ONLY - READY FOR API REPLACEMENT)
@@ -85,7 +86,7 @@ export default function SpotlightCarousel() {
       {/* =========================================================
           DESKTOP HEADER (>= 768px) - LEFT ALIGNED
       ========================================================= */}
-      <div className="hidden md:flex items-end justify-between mb-8 w-full">
+      <ScrollReveal direction="up" className="hidden md:flex items-end justify-between mb-8 w-full">
         <div>
           <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-secondary block mb-2">
             SPOTLIGHT CAROUSEL
@@ -103,64 +104,70 @@ export default function SpotlightCarousel() {
           <span className="text-xs sm:text-sm font-semibold whitespace-nowrap">View All Case Studies</span>
           <ArrowRightIcon className="text-secondary group-hover:translate-x-1.5 transition-transform duration-300 shrink-0 w-4 h-4" />
         </button>
-      </div>
+      </ScrollReveal>
 
       {/* =========================================================
           MOBILE HEADER (< 768px) - UNCHANGED
       ========================================================= */}
-      <div className="flex md:hidden flex-col mb-6">
+      <ScrollReveal direction="up" className="flex md:hidden flex-col mb-6">
         <span className="text-[11px] font-bold tracking-[0.18em] uppercase text-secondary block mb-1">
           HIGH-IMPACT CONVERSIONS
         </span>
         <h2 className="text-2xl font-bold font-serif tracking-tight text-foreground">
           Creators Everyone Is Talking About
         </h2>
-      </div>
+      </ScrollReveal>
 
       {/* =========================================================
           DESKTOP CARDS ROW (>= 768px) - LEFT ALIGNED COMPACT CARDS
       ========================================================= */}
       <div className="hidden md:flex justify-start items-stretch gap-6 w-full">
-        {SPOTLIGHT_CASES.map((item) => (
-          <div
+        {SPOTLIGHT_CASES.map((item, index) => (
+          <ScrollReveal
             key={item.id}
-            className="group relative flex flex-col h-full w-[310px] lg:w-[330px] xl:w-[340px] shrink-0 overflow-hidden rounded-2xl border border-border-theme bg-surface shadow-xs hover:scale-[1.015] hover:border-secondary/50 hover:shadow-[0_12px_35px_rgba(255,79,135,0.18)] dark:hover:shadow-[0_12px_35px_rgba(255,79,135,0.22)] transition-all duration-300"
+            direction="up"
+            delay={index * 100}
+            className="h-full shrink-0"
           >
-            {/* IMAGE + COLLAB BADGE (ASPECT 1.5/1 SHORTER & WIDER) */}
-            <div className="relative w-full aspect-[1.5/1] shrink-0 overflow-hidden bg-black/5 dark:bg-white/5">
-              <Image src={item.desktopImage || item.image} alt={item.creatorName} fill className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" sizes="300px" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-75" />
+            <div
+              className="group relative flex flex-col h-full w-[310px] lg:w-[330px] xl:w-[340px] shrink-0 overflow-hidden rounded-2xl border border-border-theme bg-surface shadow-xs hover:scale-[1.015] hover:border-secondary/50 hover:shadow-[0_12px_35px_rgba(255,79,135,0.18)] dark:hover:shadow-[0_12px_35px_rgba(255,79,135,0.22)] transition-all duration-300"
+            >
+              {/* IMAGE + COLLAB BADGE (ASPECT 1.5/1 SHORTER & WIDER) */}
+              <div className="relative w-full aspect-[1.5/1] shrink-0 overflow-hidden bg-black/5 dark:bg-white/5">
+                <Image src={item.desktopImage || item.image} alt={item.creatorName} fill className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" sizes="300px" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-75" />
 
-              {/* Collab Badge */}
-              <span className="absolute bottom-3 left-3 px-2.5 py-1 rounded-full text-[11px] font-semibold text-white bg-black/70 backdrop-blur-md border border-white/20 shadow-xs">
-                {item.collaboratedWith}
-              </span>
-            </div>
-
-            {/* CARD WHITE BODY */}
-            <div className="p-4 sm:p-5 flex flex-col flex-1 justify-between gap-3 bg-surface">
-              <div>
-                <h3 className="text-base font-bold font-serif text-foreground group-hover:text-secondary transition-colors">
-                  {item.title}
-                </h3>
-                <p className="text-xs text-text-secondary leading-relaxed line-clamp-2 mt-1">
-                  {item.description}
-                </p>
-              </div>
-
-              <div className="w-full h-[1px] bg-border-theme my-1" />
-
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-text-secondary">
-                  {item.handle}
-                </span>
-                <span className="text-xs font-bold text-secondary flex items-center gap-1">
-                  <TrendUpIcon />
-                  {item.roi}
+                {/* Collab Badge */}
+                <span className="absolute bottom-3 left-3 px-2.5 py-1 rounded-full text-[11px] font-semibold text-white bg-black/70 backdrop-blur-md border border-white/20 shadow-xs">
+                  {item.collaboratedWith}
                 </span>
               </div>
+
+              {/* CARD WHITE BODY */}
+              <div className="p-4 sm:p-5 flex flex-col flex-1 justify-between gap-3 bg-surface">
+                <div>
+                  <h3 className="text-base font-bold font-serif text-foreground group-hover:text-secondary transition-colors">
+                    {item.title}
+                  </h3>
+                  <p className="text-xs text-text-secondary leading-relaxed line-clamp-2 mt-1">
+                    {item.description}
+                  </p>
+                </div>
+
+                <div className="w-full h-[1px] bg-border-theme my-1" />
+
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium text-text-secondary">
+                    {item.handle}
+                  </span>
+                  <span className="text-xs font-bold text-secondary flex items-center gap-1">
+                    <TrendUpIcon />
+                    {item.roi}
+                  </span>
+                </div>
+              </div>
             </div>
-          </div>
+          </ScrollReveal>
         ))}
       </div>
 

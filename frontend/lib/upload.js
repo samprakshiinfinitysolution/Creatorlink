@@ -17,5 +17,25 @@ const uploadSingleImageApi = async (file, folder = "creatorlink/general") => {
     return response.data;
 };
 
-export { uploadSingleImageApi };
+/**
+ * Uploads a single video to Cloudinary via the backend upload endpoint.
+ *
+ * @param {File|Blob} file - The video file to upload.
+ * @param {string} [folder="creatorlink/deliverables"] - Target Cloudinary folder.
+ * @returns {Promise<object>} The backend API response.
+ */
+const uploadSingleVideoApi = async (file, folder = "creatorlink/deliverables") => {
+    const formData = new FormData();
+    formData.append("video", file);
+    formData.append("folder", folder);
+
+    const response = await axiosInstance.post("/upload/video", formData);
+
+    return response.data;
+};
+
+export {
+    uploadSingleImageApi,
+    uploadSingleVideoApi
+};
 export default uploadSingleImageApi;

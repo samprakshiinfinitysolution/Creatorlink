@@ -332,35 +332,37 @@ export default function CreatorNotificationsManager() {
         {/* Notifications Center Container */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-5 max-w-7xl w-full mx-auto">
           {/* Header Title & Actions Banner */}
-          <div className="bg-white dark:bg-surface border border-neutral-200/80 dark:border-border-theme rounded-2xl p-6 sm:p-7 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] font-semibold tracking-wider text-neutral-500 dark:text-neutral-400 uppercase">
-                  Notification Center
+          <div className="bg-surface border border-border-theme rounded-2xl p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2.5 mb-2">
+                <span className="font-bold text-[11px] tracking-wider uppercase text-[#ff2d6c] dark:text-[#ff4f87] font-sans">
+                  NOTIFICATION CENTER
                 </span>
                 {numUnread > 0 && (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-pink-50 dark:bg-pink-950/40 text-pink-500 dark:text-pink-400 border border-pink-200/60 dark:border-pink-800/40">
-                    {numUnread} unread
+                  <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#252525] text-white">
+                    {numUnread} Unread
                   </span>
                 )}
               </div>
               <h1 className="font-serif font-medium text-2xl sm:text-3xl text-foreground tracking-tight">
                 Notifications
               </h1>
-              <p className="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400">
-                Stay on top of bookings, workspace updates, payments and reviews.
+              <p className="text-xs sm:text-sm text-text-secondary mt-1">
+                Stay updated on campaign proposals, workspace progress, escrow receipts, and collaboration activities.
               </p>
             </div>
 
-            <button
-              type="button"
-              onClick={handleMarkAllRead}
-              disabled={numUnread === 0 || markingAllRead}
-              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-neutral-950 hover:bg-neutral-800 text-white dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-100 text-xs font-semibold tracking-wide transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shrink-0 shadow-2xs"
-            >
-              <CheckIcon className="w-4 h-4 stroke-[2.5]" />
-              <span>{markingAllRead ? "Marking all..." : "Mark all as read"}</span>
-            </button>
+            {numUnread > 0 && (
+              <button
+                type="button"
+                onClick={handleMarkAllRead}
+                disabled={markingAllRead}
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-neutral-950 hover:bg-neutral-800 text-white dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-100 text-xs font-semibold tracking-wide transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shrink-0 shadow-xs"
+              >
+                <CheckIcon className="w-4 h-4" />
+                <span>{markingAllRead ? "Marking all..." : "Mark all as read"}</span>
+              </button>
+            )}
           </div>
 
           {/* Filter Bar: Tabs & Categories in separate white rounded container */}
@@ -497,92 +499,84 @@ export default function CreatorNotificationsManager() {
                   item.destination.startsWith("/") &&
                   !item.destination.startsWith("//");
 
-                const iconBgClass =
-                  "bg-neutral-100/90 text-neutral-700 border border-neutral-200/50 dark:bg-neutral-800/80 dark:text-neutral-300 dark:border-neutral-700/50";
-
                 return (
                   <div
                     key={item._id}
                     onClick={() => handleItemClick(item)}
-                    className="bg-white dark:bg-surface border border-neutral-200/80 dark:border-border-theme rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs hover:border-neutral-300 dark:hover:border-neutral-600 transition-colors cursor-pointer group"
+                    className={`group bg-surface border rounded-xl sm:rounded-2xl py-2.5 px-3.5 sm:py-3 sm:px-4 transition-all duration-200 cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                      isUnread
+                        ? "border-secondary/30 bg-secondary/5 hover:border-secondary/60 hover:bg-secondary/10"
+                        : "border-border-theme hover:border-border-theme hover:bg-surface-muted/50"
+                    }`}
                   >
                     {/* Left: Icon + Content */}
-                    <div className="flex items-start gap-3.5 min-w-0 flex-1">
-                      <div
-                        className={`w-11 h-11 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${iconBgClass}`}
-                      >
+                    <div className="flex items-start gap-3 min-w-0 flex-1">
+                      <div className="w-8.5 h-8.5 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 transition-colors bg-surface-muted text-neutral-800 dark:text-neutral-200 border border-border-theme">
                         <NotificationTypeIcon
                           entityType={item.entityType}
-                          className="w-5 h-5 text-neutral-700 dark:text-neutral-200"
+                          className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-neutral-800 dark:text-neutral-200"
                         />
                       </div>
 
-                      <div className="min-w-0 flex-1 space-y-1">
+                      <div className="min-w-0 flex-1 space-y-0.5">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="font-serif font-bold text-sm sm:text-base text-neutral-900 dark:text-white tracking-tight">
+                          <h3
+                            className={`text-sm tracking-tight truncate ${
+                              isUnread ? "font-bold text-foreground" : "font-medium text-foreground"
+                            }`}
+                          >
                             {item.title}
                           </h3>
 
-                          {/* Pink dot if unread */}
-                          {isUnread && (
-                            <span className="w-2 h-2 rounded-full bg-pink-500 shrink-0" />
-                          )}
-
                           {/* Entity Type Badge */}
                           {item.entityType && (
-                            <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-md tracking-wider bg-neutral-100 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400 border border-neutral-200/60 dark:border-neutral-700/60">
+                            <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-md tracking-wider bg-surface-muted text-text-secondary border border-border-theme">
                               {item.entityType}
                             </span>
+                          )}
+
+                          {/* Sender name badge if populated */}
+                          {item.sender?.name && (
+                            <span className="text-[10px] text-text-secondary font-medium">
+                              from {item.sender.name}
+                            </span>
+                          )}
+
+                          {isUnread && (
+                            <span className="w-2 h-2 rounded-full bg-secondary shrink-0" />
                           )}
                         </div>
 
                         {item.message && (
-                          <p className="text-xs sm:text-[13px] text-neutral-600 dark:text-neutral-300 leading-relaxed">
+                          <p className="text-xs text-text-secondary leading-normal">
                             {item.message}
                           </p>
                         )}
 
-                        <div className="text-xs text-neutral-400 dark:text-neutral-500 flex items-center gap-1.5 pt-0.5">
-                          {item.sender?.name && (
-                            <>
-                              <span>{item.sender.name}</span>
-                              <span>·</span>
-                            </>
-                          )}
-                          <span>{formatTimeAgo(item.createdAt)}</span>
+                        <div className="text-[11px] text-text-secondary/80">
+                          {formatTimeAgo(item.createdAt)}
                         </div>
                       </div>
                     </div>
 
                     {/* Right: Actions */}
-                    <div className="flex items-center gap-4 sm:gap-6 shrink-0 sm:self-center border-t sm:border-t-0 border-neutral-100 dark:border-border-theme/40 pt-2 sm:pt-0">
-                      {isUnread ? (
+                    <div className="flex items-center gap-2 sm:self-center shrink-0 border-t sm:border-t-0 border-border-theme/40 pt-1.5 sm:pt-0">
+                      {isUnread && (
                         <button
                           type="button"
                           onClick={(e) => handleMarkSingleRead(e, item)}
                           disabled={markingIds.includes(item._id)}
                           title="Mark as read"
-                          className="inline-flex items-center gap-1.5 text-xs font-medium text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition-colors cursor-pointer disabled:opacity-50"
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold text-text-secondary hover:text-secondary hover:bg-secondary/10 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          <CheckIcon className="w-3.5 h-3.5 stroke-[2.5]" />
+                          <CheckIcon className="w-3.5 h-3.5" />
                           <span>{markingIds.includes(item._id) ? "Marking..." : "Mark read"}</span>
                         </button>
-                      ) : (
-                        <div className="inline-flex items-center gap-1.5 text-xs text-neutral-600 dark:text-neutral-400 font-medium">
-                          <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
-                          <span>Read</span>
-                        </div>
                       )}
 
                       {hasValidDestination && (
-                        <span
-                          className={`text-xs font-semibold inline-flex items-center gap-1 transition-transform group-hover:translate-x-0.5 ${
-                            isUnread
-                              ? "text-pink-500 dark:text-pink-400 hover:text-pink-600"
-                              : "text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white"
-                          }`}
-                        >
-                          <span>View details</span>
+                        <span className="text-xs font-semibold text-secondary group-hover:translate-x-0.5 transition-transform inline-flex items-center gap-1">
+                          <span>View Details</span>
                           <span aria-hidden="true">→</span>
                         </span>
                       )}
@@ -594,33 +588,33 @@ export default function CreatorNotificationsManager() {
           </div>
 
           {/* Pagination Controls */}
-          {pagination && totalPages > 1 && (
-            <div className="bg-white dark:bg-surface border border-neutral-200/80 dark:border-border-theme rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-2xs">
-              <span className="text-xs text-neutral-500 dark:text-neutral-400">
+          {pagination && (totalPages > 1 || totalItems > 0) && (
+            <div className="bg-surface border border-border-theme rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 min-w-0 w-full overflow-hidden shadow-xs">
+              <span className="text-xs text-text-secondary">
                 Showing page <strong className="text-foreground">{currentPage}</strong> of{" "}
                 <strong className="text-foreground">{totalPages}</strong> ({totalItems} total)
               </span>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar max-w-full">
                 <button
                   type="button"
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={!hasPrevPage}
-                  className="px-3.5 py-1.5 rounded-xl border border-neutral-200/80 dark:border-border-theme text-xs font-semibold text-neutral-700 dark:text-neutral-300 hover:text-foreground hover:bg-neutral-50 dark:hover:bg-surface-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                  className="px-3.5 py-1.5 rounded-xl border border-border-theme text-xs font-semibold text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shrink-0"
                 >
                   Previous
                 </button>
 
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1 shrink-0">
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
                     <button
                       key={pageNum}
                       type="button"
                       onClick={() => setPage(pageNum)}
-                      className={`w-8 h-8 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
+                      className={`w-8 h-8 rounded-xl text-xs font-semibold transition-colors cursor-pointer shrink-0 ${
                         currentPage === pageNum
-                          ? "bg-neutral-950 text-white dark:bg-white dark:text-neutral-950 shadow-2xs"
-                          : "text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-surface-muted hover:text-foreground"
+                          ? "bg-[#252525] text-white"
+                          : "text-text-secondary hover:bg-surface-muted hover:text-foreground"
                       }`}
                     >
                       {pageNum}
@@ -632,7 +626,7 @@ export default function CreatorNotificationsManager() {
                   type="button"
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={!hasNextPage}
-                  className="px-3.5 py-1.5 rounded-xl border border-neutral-200/80 dark:border-border-theme text-xs font-semibold text-neutral-700 dark:text-neutral-300 hover:text-foreground hover:bg-neutral-50 dark:hover:bg-surface-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                  className="px-3.5 py-1.5 rounded-xl border border-border-theme text-xs font-semibold text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shrink-0"
                 >
                   Next
                 </button>

@@ -1,5 +1,28 @@
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
+
+function ReviewerAvatar({ name, image, initial }) {
+  const [hasError, setHasError] = useState(false);
+  const rawSrc = typeof image === "string" ? image.trim() : null;
+  const showImage = Boolean(rawSrc && !hasError);
+
+  return (
+    <div className="w-6 h-6 rounded-full bg-secondary/15 text-secondary font-semibold font-sans text-[10px] flex items-center justify-center shrink-0 overflow-hidden select-none">
+      {showImage ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          key={rawSrc}
+          src={rawSrc}
+          alt={name || "Reviewer"}
+          className="w-full h-full object-cover"
+          onError={() => setHasError(true)}
+        />
+      ) : (
+        initial
+      )}
+    </div>
+  );
+}
 
 function formatDate(dateStr) {
   if (!dateStr) return "N/A";
@@ -73,7 +96,7 @@ export default function CreatorRecentReviews({ reviews }) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="font-heading font-medium text-xl sm:text-2xl text-foreground">
+            <h2 className="font-serif font-medium text-xl sm:text-2xl text-foreground">
               Recent Reviews & Feedback
             </h2>
             {averageRating > 0 && (
@@ -105,7 +128,7 @@ export default function CreatorRecentReviews({ reviews }) {
           <div className="w-12 h-12 mx-auto rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center">
             <StarIcon filled className="w-6 h-6" />
           </div>
-          <h3 className="font-heading font-medium text-base text-foreground">
+          <h3 className="font-serif font-medium text-base text-foreground">
             No Brand Reviews Yet
           </h3>
           <p className="text-xs text-text-secondary font-sans max-w-xs mx-auto">
@@ -122,6 +145,13 @@ export default function CreatorRecentReviews({ reviews }) {
               : 0;
             const reviewId = rev.id || rev._id;
             const reviewerInitial = reviewer.charAt(0).toUpperCase() || "B";
+            const reviewerImage =
+              rev.reviewerImage ||
+              rev.reviewerAvatar ||
+              rev.avatar ||
+              rev.reviewer?.logo ||
+              rev.reviewer?.profileImage ||
+              null;
 
             return (
               <div
@@ -156,9 +186,11 @@ export default function CreatorRecentReviews({ reviews }) {
 
                 <div className="pt-3 border-t border-border-theme/60 flex items-center justify-between gap-3 text-xs">
                   <div className="flex items-center gap-2 min-w-0">
-                    <div className="w-6 h-6 rounded-full bg-secondary/15 text-secondary font-semibold font-sans text-[10px] flex items-center justify-center shrink-0">
-                      {reviewerInitial}
-                    </div>
+                    <ReviewerAvatar
+                      name={reviewer}
+                      image={reviewerImage}
+                      initial={reviewerInitial}
+                    />
                     <span className="font-semibold text-foreground truncate font-sans">
                       {reviewer}
                     </span>

@@ -9,6 +9,8 @@ import Notification from "../../notifications/notification.model.js";
 import Auth from "../../auth/auth.model.js";
 import CreatorService from "../services/services.model.js";
 import Campaign from "../../brand/campaigns/campaign.model.js";
+import BrandProfile from "../../brand/profile/profile.model.js";
+import Profile from "../profile/profile.model.js";
 import createApiError from "../../../utils/ApiError.js";
 
 // Fetches aggregated creator dashboard overview metrics, recent collaborations, and upcoming deadlines
@@ -192,7 +194,7 @@ const getCreatorDashboardOverviewService = async (creatorId, query = {}) => {
         Review.find({ reviewee: creatorObjectId })
             .sort({ createdAt: -1 })
             .limit(3)
-            .populate("reviewer", "name")
+            .populate("reviewer", "name role")
             .populate("campaign", "title")
             .select("rating comment reviewer campaign createdAt"),
 
@@ -201,7 +203,7 @@ const getCreatorDashboardOverviewService = async (creatorId, query = {}) => {
             .sort({ createdAt: -1 })
             .limit(recentLimit)
             .populate("brand", "name")
-            .populate("campaign", "title category platform budget")
+            .populate("campaign", "title category platform budget coverImage")
             .populate("service", "title price deliveryTime"),
 
         // 15. Upcoming Active Workspace Deadlines
@@ -213,7 +215,7 @@ const getCreatorDashboardOverviewService = async (creatorId, query = {}) => {
             .sort({ deadline: 1 })
             .limit(deadlinesLimit)
             .populate("brand", "name")
-            .populate("campaign", "title category platform")
+            .populate("campaign", "title category platform coverImage")
             .select("_id deadline status agreedPrice currency campaign brand deliverables"),
 
         // 16. Upcoming Pending Booking Deadlines
@@ -225,19 +227,52 @@ const getCreatorDashboardOverviewService = async (creatorId, query = {}) => {
             .sort({ deadline: 1 })
             .limit(deadlinesLimit)
             .populate("brand", "name")
-            .populate("campaign", "title category platform budget")
+            .populate("campaign", "title category platform budget coverImage")
             .select("_id deadline status agreedPrice currency campaign brand initiatedBy"),
 
         // 17. Authenticated Creator User basic info
         Auth.findById(creatorObjectId).select("name email role")
     ]);
 
-    // Query unpaid completed workspaces with no existing payment record to prevent double-counting
-    const unpaidCompletedWorkspaces = await Workspace.find({
-        creator: creatorObjectId,
-        status: "completed",
-        _id: { $nin: paidOrPendingWorkspaceIds }
-    }).select("agreedPrice currency");
+    // Extract unique reviewer user IDs to batch fetch associated profile images
+    const reviewerUserIds = Array.from(
+        new Set(
+            recentReviews
+                .map((rev) => (rev.reviewer?._id || rev.reviewer)?.toString())
+                .filter((id) => id && mongoose.Types.ObjectId.isValid(id))
+        )
+    ).map((id) => new mongoose.Types.ObjectId(id));
+
+    // Query unpaid completed workspaces and batch fetch reviewer profiles in parallel
+    const [unpaidCompletedWorkspaces, brandProfiles, creatorProfiles] = await Promise.all([
+        Workspace.find({
+            creator: creatorObjectId,
+            status: "completed",
+            _id: { $nin: paidOrPendingWorkspaceIds }
+        }).select("agreedPrice currency"),
+        reviewerUserIds.length > 0
+            ? BrandProfile.find({ user: { $in: reviewerUserIds } }).select("user logo companyName").lean()
+            : [],
+        reviewerUserIds.length > 0
+            ? Profile.find({ user: { $in: reviewerUserIds } }).select("user profileImage").lean()
+            : []
+    ]);
+
+    // Map reviewer image: BrandProfile.logo prioritized for brands, CreatorProfile.profileImage for creators
+    const reviewerImageMap = new Map();
+    brandProfiles.forEach((bp) => {
+        if (bp.user) {
+            reviewerImageMap.set(bp.user.toString(), bp.logo || "");
+        }
+    });
+    creatorProfiles.forEach((cp) => {
+        if (cp.user) {
+            const uid = cp.user.toString();
+            if (!reviewerImageMap.has(uid) || !reviewerImageMap.get(uid)) {
+                reviewerImageMap.set(uid, cp.profileImage || "");
+            }
+        }
+    });
 
     // Process earnings aggregates by currency
     const earningsByCurrency = earningsAgg.map((item) => ({
@@ -317,7 +352,15 @@ const getCreatorDashboardOverviewService = async (creatorId, query = {}) => {
         deadline: ws.deadline,
         agreedPrice: ws.agreedPrice,
         currency: ws.currency || "INR",
-        deliverablesCount: ws.deliverables?.length || 0
+        deliverablesCount: ws.deliverables?.length || 0,
+        coverImage: ws.campaign?.coverImage || "",
+        thumbnail: ws.campaign?.coverImage || "",
+        image: ws.campaign?.coverImage || "",
+        campaign: ws.campaign ? {
+            id: ws.campaign._id,
+            title: ws.campaign.title,
+            coverImage: ws.campaign.coverImage || ""
+        } : null
     }));
 
     const bookingDeadlines = upcomingBookingDeadlines.map((b) => ({
@@ -331,7 +374,15 @@ const getCreatorDashboardOverviewService = async (creatorId, query = {}) => {
         deadline: b.deadline,
         agreedPrice: b.agreedPrice,
         currency: b.currency || "INR",
-        initiatedBy: b.initiatedBy
+        initiatedBy: b.initiatedBy,
+        coverImage: b.campaign?.coverImage || "",
+        thumbnail: b.campaign?.coverImage || "",
+        image: b.campaign?.coverImage || "",
+        campaign: b.campaign ? {
+            id: b.campaign._id,
+            title: b.campaign.title,
+            coverImage: b.campaign.coverImage || ""
+        } : null
     }));
 
     const combinedDeadlines = [...workspaceDeadlines, ...bookingDeadlines]
@@ -360,6 +411,14 @@ const getCreatorDashboardOverviewService = async (creatorId, query = {}) => {
         status: ws.status,
         deliverablesCount: ws.deliverables?.length || 0,
         deadline: ws.deadline,
+        coverImage: ws.campaign?.coverImage || "",
+        thumbnail: ws.campaign?.coverImage || "",
+        image: ws.campaign?.coverImage || "",
+        campaign: ws.campaign ? {
+            id: ws.campaign._id,
+            title: ws.campaign.title,
+            coverImage: ws.campaign.coverImage || ""
+        } : null,
         createdAt: ws.createdAt,
         updatedAt: ws.updatedAt
     }));
@@ -369,14 +428,21 @@ const getCreatorDashboardOverviewService = async (creatorId, query = {}) => {
         ? Math.round(reviewsAgg[0].averageRating * 10) / 10
         : 0;
     const totalReviews = reviewsAgg[0]?.totalReviews || 0;
-    const formattedReviews = recentReviews.map((rev) => ({
-        id: rev._id,
-        rating: rev.rating,
-        comment: rev.comment,
-        reviewerName: rev.reviewer?.name || "Brand",
-        campaignTitle: rev.campaign?.title || "",
-        createdAt: rev.createdAt
-    }));
+    const formattedReviews = recentReviews.map((rev) => {
+        const reviewerId = (rev.reviewer?._id || rev.reviewer)?.toString();
+        const reviewerImage = (reviewerId && reviewerImageMap.get(reviewerId)) || "";
+
+        return {
+            id: rev._id,
+            rating: rev.rating,
+            comment: rev.comment,
+            reviewerName: rev.reviewer?.name || "Brand",
+            reviewerImage,
+            reviewerAvatar: reviewerImage,
+            campaignTitle: rev.campaign?.title || "",
+            createdAt: rev.createdAt
+        };
+    });
 
     return {
         creator: {

@@ -54,7 +54,7 @@ function getStageStyle(stageId, count) {
     return {
       border: "border-emerald-500/30 dark:border-emerald-500/40",
       bg: "bg-emerald-500/[0.04] dark:bg-emerald-500/[0.08]",
-      pill: "text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border-emerald-500/20",
+      pill: "text-emerald-700 dark:text-emerald-300 bg-transparent border border-emerald-500/30",
       pillText: `${count} done`,
       countColor: "text-emerald-600 dark:text-emerald-400",
     };
@@ -66,7 +66,7 @@ function getStageStyle(stageId, count) {
       return {
         border: "border-amber-500/30 dark:border-amber-500/40",
         bg: "bg-amber-500/[0.04] dark:bg-amber-500/[0.08]",
-        pill: "text-amber-700 dark:text-amber-300 bg-amber-500/10 border-amber-500/20",
+        pill: "text-amber-700 dark:text-amber-300 bg-transparent border border-amber-500/30",
         pillText: `${count} active`,
         countColor: "text-amber-600 dark:text-amber-400",
       };
@@ -74,7 +74,7 @@ function getStageStyle(stageId, count) {
       return {
         border: "border-blue-500/30 dark:border-blue-500/40",
         bg: "bg-blue-500/[0.04] dark:bg-blue-500/[0.08]",
-        pill: "text-blue-700 dark:text-blue-300 bg-blue-500/10 border-blue-500/20",
+        pill: "text-blue-700 dark:text-blue-300 bg-transparent border border-blue-500/30",
         pillText: `${count} active`,
         countColor: "text-blue-600 dark:text-blue-400",
       };
@@ -82,7 +82,7 @@ function getStageStyle(stageId, count) {
       return {
         border: "border-purple-500/30 dark:border-purple-500/40",
         bg: "bg-purple-500/[0.04] dark:bg-purple-500/[0.08]",
-        pill: "text-purple-700 dark:text-purple-300 bg-purple-500/10 border-purple-500/20",
+        pill: "text-purple-700 dark:text-purple-300 bg-transparent border border-purple-500/30",
         pillText: `${count} active`,
         countColor: "text-purple-600 dark:text-purple-400",
       };
@@ -90,7 +90,7 @@ function getStageStyle(stageId, count) {
       return {
         border: "border-rose-500/30 dark:border-rose-500/40",
         bg: "bg-rose-500/[0.04] dark:bg-rose-500/[0.08]",
-        pill: "text-rose-700 dark:text-rose-300 bg-rose-500/10 border-rose-500/20",
+        pill: "text-rose-700 dark:text-rose-300 bg-transparent border border-rose-500/30",
         pillText: `${count} active`,
         countColor: "text-rose-600 dark:text-rose-400",
       };
@@ -98,7 +98,7 @@ function getStageStyle(stageId, count) {
       return {
         border: "border-border-theme",
         bg: "bg-surface",
-        pill: "text-text-secondary bg-surface-muted border-border-theme",
+        pill: "text-text-secondary bg-transparent border border-border-theme",
         pillText: `${count} active`,
         countColor: "text-foreground",
       };
@@ -184,7 +184,7 @@ export default function CreatorQuickActions({ metrics, actions: customActions })
       <div className="bg-surface border border-border-theme rounded-3xl p-5 sm:p-6 lg:p-7 shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
-            <h3 className="font-heading font-medium text-lg sm:text-xl text-foreground">
+            <h3 className="font-serif font-semibold text-lg sm:text-xl text-foreground">
               Production Workflow Pipeline
             </h3>
             <p className="text-xs text-text-secondary font-sans mt-0.5">
@@ -228,7 +228,7 @@ export default function CreatorQuickActions({ metrics, actions: customActions })
                 {/* Middle: Prominent Count */}
                 <div className="my-auto py-1">
                   <span
-                    className={`font-heading font-medium text-2xl sm:text-3xl ${style.countColor} block tracking-tight group-hover:text-secondary transition-colors`}
+                    className={`font-sans font-bold text-2xl sm:text-3xl ${style.countColor} block tracking-tight group-hover:text-secondary transition-colors`}
                   >
                     {stage.count}
                   </span>
@@ -271,7 +271,7 @@ export default function CreatorQuickActions({ metrics, actions: customActions })
                   )}
                 </div>
 
-                <h4 className="font-heading font-medium text-base sm:text-lg text-foreground block tracking-tight group-hover:text-secondary transition-colors">
+                <h4 className="font-sans font-semibold text-base sm:text-lg text-foreground block tracking-tight group-hover:text-secondary transition-colors">
                   {act.title}
                 </h4>
                 <p className="text-xs text-text-secondary font-sans mt-1.5 leading-relaxed line-clamp-2">

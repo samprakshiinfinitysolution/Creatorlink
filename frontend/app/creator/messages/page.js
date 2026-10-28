@@ -15,7 +15,7 @@ function CreatorMessagesContent() {
       <CreatorSidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 lg:pl-64 h-full min-h-0 overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 lg:ml-64 h-full min-h-0 overflow-hidden transition-all duration-300">
         {/* Creator Top Header */}
         <div className="shrink-0">
           <CreatorHeader setMobileOpen={setMobileOpen} />

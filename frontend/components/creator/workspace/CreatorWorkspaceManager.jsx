@@ -13,8 +13,8 @@ import CreatorHeader from "@/components/creator/dashboard/CreatorHeader";
 // =========================================================
 function WorkspaceIcon({ className = "w-5 h-5" }) {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 13.5h3.86a2.25 2.25 0 012.012 1.244l.256.512a2.25 2.25 0 002.013 1.244h3.218a2.25 2.25 0 002.013-1.244l.256-.512a2.25 2.25 0 012.013-1.244h3.859m-19.5.375l2.25-7.5A2.25 2.25 0 014.26 4.5h15.48a2.25 2.25 0 012.19 1.875l2.25 7.5m-19.5 0v5.625c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125V13.875" />
     </svg>
   );
 }
@@ -217,32 +217,32 @@ const getStatusBadge = (status) => {
     case "in_progress":
       return {
         label: "In Progress",
-        color: "bg-amber-50 text-amber-600 border-amber-200/70 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/40",
+        color: "text-amber-600 dark:text-amber-400",
       };
     case "submitted":
       return {
         label: "Submitted",
-        color: "bg-purple-50 text-purple-600 border-purple-200/70 dark:bg-purple-950/30 dark:text-purple-400 dark:border-purple-900/40",
+        color: "text-purple-600 dark:text-purple-400",
       };
     case "revision_requested":
       return {
         label: "Revision Requested",
-        color: "bg-rose-50 text-rose-600 border-rose-200/70 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/40",
+        color: "text-rose-600 dark:text-rose-400",
       };
     case "completed":
       return {
         label: "Completed",
-        color: "bg-emerald-50 text-emerald-600 border-emerald-200/70 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/40",
+        color: "text-emerald-600 dark:text-emerald-400",
       };
     case "cancelled":
       return {
         label: "Cancelled",
-        color: "bg-neutral-100 text-neutral-600 border-neutral-200/80 dark:bg-surface-muted dark:text-text-secondary dark:border-border-theme",
+        color: "text-neutral-600 dark:text-neutral-400",
       };
     default:
       return {
         label: status ? status.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()) : "Active",
-        color: "bg-neutral-100 text-neutral-600 border-neutral-200/80 dark:bg-surface-muted dark:text-text-secondary dark:border-border-theme",
+        color: "text-neutral-600 dark:text-neutral-400",
       };
   }
 };
@@ -258,6 +258,8 @@ export default function CreatorWorkspaceManager() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [allWorkspacesSummary, setAllWorkspacesSummary] = useState([]);
+  const [failedCoverUrls, setFailedCoverUrls] = useState({});
+  const [failedBrandAvatars, setFailedBrandAvatars] = useState({});
 
   // Fetch summary counts for the 4 header metric cards (unfiltered global count)
   useEffect(() => {
@@ -349,207 +351,208 @@ export default function CreatorWorkspaceManager() {
 
         {/* Page Content */}
         <main className="p-4 sm:p-6 lg:p-8 space-y-6 flex-1 max-w-7xl w-full mx-auto">
-          {/* 1. HERO SECTION WITH EXACT COLLABORATION DELIVERABLES ILLUSTRATION MATCHING REFERENCE */}
-          <div className="bg-gradient-to-r from-[#fff5f8] via-[#fffbfd] to-[#fff0f5] dark:bg-gradient-to-r dark:from-surface dark:via-surface dark:to-pink-950/20 border border-pink-100/90 dark:border-pink-900/30 rounded-3xl p-6 sm:p-8 lg:p-10 shadow-[0_4px_24px_rgba(255,45,108,0.05)] relative overflow-hidden flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+          {/* 1. HERO SECTION WITH EXACT COLLABORATION DELIVERABLES ILLUSTRATION & INTEGRATED METRICS */}
+          <div className="bg-gradient-to-r from-[#fff5f8] via-[#fffbfd] to-[#fff0f5] dark:bg-gradient-to-r dark:from-surface dark:via-surface dark:to-pink-950/20 border border-pink-100/90 dark:border-pink-900/30 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-[0_4px_24px_rgba(255,45,108,0.05)] relative overflow-hidden space-y-3.5 sm:space-y-4">
             {/* Ambient Soft Blush Background Accents */}
             <div className="absolute -top-16 -left-16 w-64 h-64 bg-pink-200/25 dark:bg-pink-900/10 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute -bottom-16 right-1/4 w-60 h-60 bg-rose-200/20 dark:bg-rose-900/10 rounded-full blur-3xl pointer-events-none" />
 
-            {/* Left Column: Heading, Badge, Subtitle */}
-            <div className="relative z-10 max-w-xl space-y-3.5">
-              <div className="flex items-center gap-2.5">
-                <span className="inline-block px-3 py-1 rounded-full text-[10px] sm:text-[11px] font-sans font-bold tracking-wider uppercase bg-[#fce7f0] dark:bg-pink-950/60 text-pink-600 dark:text-white border border-pink-200/60 dark:border-pink-900/40">
-                  WORKSPACE
-                </span>
-                <span className="text-xs sm:text-sm font-sans font-medium text-neutral-500 dark:text-neutral-400">
-                  • Active Collaborations &amp; Deliverables
-                </span>
-                <h1 className="font-sans font-bold text-2xl sm:text-3xl text-foreground tracking-tight">
-                  Collaboration Workspace
+            {/* Top Row: Heading on Left & Deliverables Illustration on Right */}
+            <div className="relative z-10 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 sm:gap-6">
+              {/* Left Column: Heading moved up & aligned to top */}
+              <div className="max-w-xl space-y-1.5 pt-0.5">
+                <div>
+                  <span className="font-bold text-[11px] tracking-wider uppercase text-[#ff2d6c] dark:text-[#ff4f87] font-sans">
+                    CREATOR WORKSPACE
+                  </span>
+                </div>
+
+                <h1 className="font-serif font-medium text-2xl sm:text-3xl lg:text-4xl text-neutral-950 dark:text-white tracking-tight">
+                  Collaboration Workspaces
                 </h1>
+
+                <p className="text-xs sm:text-sm text-text-secondary leading-relaxed">
+                  Track deliverables, submit campaign work, and review brand feedback.
+                </p>
               </div>
 
-              <p className="text-sm sm:text-base text-neutral-600 dark:text-neutral-400 font-sans leading-relaxed max-w-lg">
-                Track deliverables, submit campaign work, and review brand feedback.
-              </p>
-            </div>
+              {/* Right Column: Polished Deliverables Illustration Matching Reference Screenshot */}
+              <div className="flex items-center justify-center lg:justify-end w-full lg:w-auto shrink-0 select-none">
+                <div className="relative w-[300px] sm:w-[350px] h-[155px] sm:h-[165px] scale-90 sm:scale-95 origin-top lg:origin-top-right">
+                  {/* Dotted Accent Curve */}
+                  <svg
+                    className="absolute inset-0 w-full h-full pointer-events-none"
+                    viewBox="0 0 380 210"
+                    fill="none"
+                  >
+                    <path
+                      d="M 50 160 C 25 70, 140 25, 230 25 C 290 25, 360 45, 365 95"
+                      stroke="rgba(244, 114, 182, 0.4)"
+                      strokeWidth="1.5"
+                      strokeDasharray="3 4"
+                      strokeLinecap="round"
+                    />
+                  </svg>
 
-            {/* Right Column: Polished Deliverables Illustration Matching Reference Screenshot */}
-            <div className="relative z-10 flex items-center justify-center lg:justify-end w-full lg:w-auto shrink-0 select-none py-2">
-              <div className="relative w-[340px] sm:w-[380px] h-[190px] sm:h-[210px]">
-                {/* Dotted Accent Curve */}
-                <svg
-                  className="absolute inset-0 w-full h-full pointer-events-none"
-                  viewBox="0 0 380 210"
-                  fill="none"
-                >
-                  <path
-                    d="M 50 160 C 25 70, 140 25, 230 25 C 290 25, 360 45, 365 95"
-                    stroke="rgba(244, 114, 182, 0.4)"
-                    strokeWidth="1.5"
-                    strokeDasharray="3 4"
-                    strokeLinecap="round"
-                  />
-                </svg>
-
-                {/* Decorative Sparkles */}
-                {/* Bottom-left black sparkle */}
-                <div className="absolute left-6 bottom-3 text-black dark:text-white pointer-events-none animate-pulse motion-reduce:animate-none">
-                  <SparkleIcon className="w-3.5 h-3.5 fill-current" />
-                </div>
-                {/* Top-center soft pink sparkle */}
-                <div className="absolute left-32 top-3 text-pink-300 dark:text-pink-400 pointer-events-none">
-                  <SparkleIcon className="w-3.5 h-3.5 fill-current" />
-                </div>
-                {/* Sparkle above Deliverables card */}
-                <div className="absolute left-52 top-1 text-black dark:text-white pointer-events-none">
-                  <SparkleIcon className="w-3 h-3 fill-current" />
-                </div>
-                {/* Top-right sparkle 1 (black, larger) */}
-                <div className="absolute right-10 top-2 text-black dark:text-white pointer-events-none animate-pulse motion-reduce:animate-none [animation-delay:400ms]">
-                  <SparkleIcon className="w-3.5 h-3.5 fill-current" />
-                </div>
-                {/* Top-right sparkle 2 (black, smaller) */}
-                <div className="absolute right-3 top-8 text-black dark:text-white pointer-events-none opacity-80">
-                  <SparkleIcon className="w-2.5 h-2.5 fill-current" />
-                </div>
-
-                {/* Floating Photo Icon Card (Top-Left) */}
-                <div className="absolute left-4 sm:left-6 top-1 w-11 h-11 rounded-2xl bg-white dark:bg-surface border border-neutral-100 dark:border-border-theme shadow-md shadow-black/[0.04] flex items-center justify-center text-black dark:text-white z-20 creator-float motion-reduce:animate-none">
-                  <PhotoIcon className="w-5 h-5 fill-current" />
-                </div>
-
-                {/* Floating Send/Paper Airplane Card (Mid-Left) */}
-                <div className="absolute left-9 sm:left-12 bottom-6 sm:bottom-8 w-11 h-11 rounded-2xl bg-white dark:bg-surface border border-neutral-100 dark:border-border-theme shadow-md shadow-black/[0.04] flex items-center justify-center text-black dark:text-white z-20 creator-float motion-reduce:animate-none [animation-delay:600ms]">
-                  <PaperAirplaneIcon className="w-5 h-5 -rotate-45" />
-                </div>
-
-                {/* Floating Message Card with 3 dots (Bottom-Right of Deliverables card) */}
-                <div className="absolute right-24 sm:right-28 bottom-2 sm:bottom-3 w-11 h-11 rounded-2xl bg-white dark:bg-surface border border-neutral-100 dark:border-border-theme shadow-md shadow-black/[0.04] flex items-center justify-center text-black dark:text-white z-20 creator-float motion-reduce:animate-none [animation-delay:1000ms]">
-                  <ChatBubbleDotsIcon className="w-5 h-5 text-black dark:text-white" />
-                </div>
-
-                {/* Background Media Preview Card (Tilted Clockwise) */}
-                <div className="absolute right-2 sm:right-4 top-5 w-44 sm:w-48 bg-white/95 dark:bg-surface/95 backdrop-blur-sm rounded-2xl border border-pink-100/70 dark:border-border-theme shadow-lg shadow-black/[0.04] p-3.5 rotate-[8deg] z-5">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-11 h-11 rounded-xl bg-pink-100/70 dark:bg-pink-950/50 flex items-center justify-center shrink-0">
-                      <svg className="w-4 h-4 text-pink-400 dark:text-pink-300 ml-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-                        <polygon points="5 3 19 12 5 21 5 3" />
-                      </svg>
-                    </div>
-                    <div className="space-y-1.5 flex-1 min-w-0">
-                      <div className="h-2 w-16 bg-pink-100/90 dark:bg-pink-900/40 rounded-full" />
-                      <div className="h-1.5 w-20 bg-neutral-100 dark:bg-neutral-800 rounded-full" />
-                      <div className="h-1.5 w-12 bg-neutral-100 dark:bg-neutral-800 rounded-full" />
-                    </div>
+                  {/* Decorative Sparkles */}
+                  {/* Bottom-left black sparkle */}
+                  <div className="absolute left-6 bottom-3 text-black dark:text-white pointer-events-none animate-pulse motion-reduce:animate-none">
+                    <SparkleIcon className="w-3.5 h-3.5 fill-current" />
                   </div>
-                </div>
+                  {/* Top-center soft pink sparkle */}
+                  <div className="absolute left-32 top-3 text-pink-300 dark:text-pink-400 pointer-events-none">
+                    <SparkleIcon className="w-3.5 h-3.5 fill-current" />
+                  </div>
+                  {/* Sparkle above Deliverables card */}
+                  <div className="absolute left-52 top-1 text-black dark:text-white pointer-events-none">
+                    <SparkleIcon className="w-3 h-3 fill-current" />
+                  </div>
+                  {/* Top-right sparkle 1 (black, larger) */}
+                  <div className="absolute right-10 top-2 text-black dark:text-white pointer-events-none animate-pulse motion-reduce:animate-none [animation-delay:400ms]">
+                    <SparkleIcon className="w-3.5 h-3.5 fill-current" />
+                  </div>
+                  {/* Top-right sparkle 2 (black, smaller) */}
+                  <div className="absolute right-3 top-8 text-black dark:text-white pointer-events-none opacity-80">
+                    <SparkleIcon className="w-2.5 h-2.5 fill-current" />
+                  </div>
 
-                {/* Foreground Deliverables Checklist Card (Tilted Counter-Clockwise) */}
-                <div className="absolute left-16 sm:left-20 top-0 w-48 sm:w-52 -rotate-[3deg] bg-white dark:bg-surface border border-neutral-100 dark:border-border-theme rounded-2xl p-4 sm:p-5 shadow-xl shadow-black/[0.05] z-10">
-                  <h4 className="text-sm sm:text-base font-bold font-sans text-neutral-900 dark:text-white mb-3">
-                    Deliverables
-                  </h4>
-                  <div className="space-y-2.5">
-                    <div className="flex items-center gap-2.5">
-                      <CheckIcon className="w-3.5 h-3.5 text-black dark:text-white stroke-[2.5] shrink-0" />
-                      <span className="text-[11px] sm:text-xs font-medium text-neutral-700 dark:text-neutral-300">
-                        Create Content
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2.5">
-                      <CheckIcon className="w-3.5 h-3.5 text-black dark:text-white stroke-[2.5] shrink-0" />
-                      <span className="text-[11px] sm:text-xs font-medium text-neutral-700 dark:text-neutral-300">
-                        Submit for Review
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2.5">
-                      <CheckIcon className="w-3.5 h-3.5 text-black dark:text-white stroke-[2.5] shrink-0" />
-                      <span className="text-[11px] sm:text-xs font-medium text-neutral-700 dark:text-neutral-300">
-                        Get Feedback
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-4 h-4 rounded-full bg-black dark:bg-white text-white dark:text-black flex items-center justify-center shrink-0">
-                        <CheckIcon className="w-2.5 h-2.5 stroke-[3]" />
+                  {/* Floating Photo Icon Card (Top-Left) */}
+                  <div className="absolute left-4 sm:left-6 top-1 w-10 h-10 rounded-2xl bg-white dark:bg-surface border border-neutral-100 dark:border-border-theme shadow-md shadow-black/[0.04] flex items-center justify-center text-black dark:text-white z-20 creator-float motion-reduce:animate-none">
+                    <PhotoIcon className="w-4.5 h-4.5 fill-current" />
+                  </div>
+
+                  {/* Floating Send/Paper Airplane Card (Mid-Left) */}
+                  <div className="absolute left-9 sm:left-12 bottom-6 sm:bottom-8 w-10 h-10 rounded-2xl bg-white dark:bg-surface border border-neutral-100 dark:border-border-theme shadow-md shadow-black/[0.04] flex items-center justify-center text-black dark:text-white z-20 creator-float motion-reduce:animate-none [animation-delay:600ms]">
+                    <PaperAirplaneIcon className="w-4.5 h-4.5 -rotate-45" />
+                  </div>
+
+                  {/* Floating Message Card with 3 dots (Bottom-Right of Deliverables card) */}
+                  <div className="absolute right-24 sm:right-28 bottom-2 sm:bottom-3 w-10 h-10 rounded-2xl bg-white dark:bg-surface border border-neutral-100 dark:border-border-theme shadow-md shadow-black/[0.04] flex items-center justify-center text-black dark:text-white z-20 creator-float motion-reduce:animate-none [animation-delay:1000ms]">
+                    <ChatBubbleDotsIcon className="w-4.5 h-4.5 text-black dark:text-white" />
+                  </div>
+
+                  {/* Background Media Preview Card (Tilted Clockwise) */}
+                  <div className="absolute right-2 sm:right-4 top-5 w-40 sm:w-44 bg-white/95 dark:bg-surface/95 backdrop-blur-sm rounded-2xl border border-pink-100/70 dark:border-border-theme shadow-lg shadow-black/[0.04] p-3 rotate-[8deg] z-5">
+                    <div className="flex items-center gap-2">
+                      <div className="w-10 h-10 rounded-xl bg-pink-100/70 dark:bg-pink-950/50 flex items-center justify-center shrink-0">
+                        <svg className="w-4 h-4 text-pink-400 dark:text-pink-300 ml-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                          <polygon points="5 3 19 12 5 21 5 3" />
+                        </svg>
                       </div>
-                      <span className="text-[11px] sm:text-xs font-bold text-neutral-950 dark:text-white">
-                        Completed
-                      </span>
+                      <div className="space-y-1.5 flex-1 min-w-0">
+                        <div className="h-2 w-14 bg-pink-100/90 dark:bg-pink-900/40 rounded-full" />
+                        <div className="h-1.5 w-16 bg-neutral-100 dark:bg-neutral-800 rounded-full" />
+                        <div className="h-1.5 w-10 bg-neutral-100 dark:bg-neutral-800 rounded-full" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Foreground Deliverables Checklist Card (Tilted Counter-Clockwise) */}
+                  <div className="absolute left-16 sm:left-20 top-0 w-44 sm:w-48 -rotate-[3deg] bg-white dark:bg-surface border border-neutral-100 dark:border-border-theme rounded-2xl p-3.5 sm:p-4 shadow-xl shadow-black/[0.05] z-10">
+                    <h4 className="text-xs sm:text-sm font-bold font-sans text-neutral-900 dark:text-white mb-2.5">
+                      Deliverables
+                    </h4>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <CheckIcon className="w-3 h-3 text-black dark:text-white stroke-[2.5] shrink-0" />
+                        <span className="text-[10px] sm:text-[11px] font-medium text-neutral-700 dark:text-neutral-300">
+                          Create Content
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckIcon className="w-3 h-3 text-black dark:text-white stroke-[2.5] shrink-0" />
+                        <span className="text-[10px] sm:text-[11px] font-medium text-neutral-700 dark:text-neutral-300">
+                          Submit for Review
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckIcon className="w-3 h-3 text-black dark:text-white stroke-[2.5] shrink-0" />
+                        <span className="text-[10px] sm:text-[11px] font-medium text-neutral-700 dark:text-neutral-300">
+                          Get Feedback
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3.5 h-3.5 rounded-full bg-black dark:bg-white text-white dark:text-black flex items-center justify-center shrink-0">
+                          <CheckIcon className="w-2 h-2 stroke-[3]" />
+                        </div>
+                        <span className="text-[10px] sm:text-[11px] font-bold text-neutral-950 dark:text-white">
+                          Completed
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* 2. FOUR STATISTICS CARDS IN ONE HORIZONTAL ROW MATCHING REFERENCE */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
-            {/* Total Workspaces */}
-            <div className="bg-white dark:bg-surface border border-neutral-100/90 dark:border-border-theme rounded-2xl p-4 sm:p-5 shadow-xs flex items-center gap-4 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-md cursor-default motion-reduce:transform-none motion-reduce:transition-none">
-              <div className="w-12 h-12 rounded-full bg-[#fce7f0] dark:bg-pink-950/40 text-black dark:text-white flex items-center justify-center shrink-0">
-                <WorkspaceIcon className="w-6 h-6 stroke-[1.8]" />
+            {/* Bottom Row: 4 Statistics Cards Integrated Inside Hero Section */}
+            <div className="relative z-10 grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5 pt-3 border-t border-pink-100/80 dark:border-pink-900/30">
+              {/* Total Workspaces */}
+              <div className="bg-white/95 dark:bg-surface/90 backdrop-blur-xs border border-pink-100/80 dark:border-border-theme rounded-xl sm:rounded-2xl py-2.5 px-3 sm:py-3 sm:px-4 shadow-2xs flex items-center gap-3 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-md cursor-default">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#fce7f0] dark:bg-pink-950/40 text-black dark:text-white flex items-center justify-center shrink-0">
+                  <WorkspaceIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5 stroke-[1.8]" />
+                </div>
+                <div className="min-w-0">
+                  <span className="text-[11px] sm:text-xs font-sans text-neutral-500 dark:text-text-secondary block leading-none mb-1">
+                    Total Workspaces
+                  </span>
+                  <span className="font-sans font-bold text-xl sm:text-2xl text-neutral-950 dark:text-white tabular-nums tracking-tight leading-none block">
+                    {totalCount}
+                  </span>
+                </div>
               </div>
-              <div className="min-w-0">
-                <span className="text-xs font-sans text-neutral-500 dark:text-text-secondary block leading-none mb-1.5">
-                  Total Workspaces
-                </span>
-                <span className="font-heading font-serif font-bold text-2xl sm:text-3xl text-neutral-950 dark:text-white tabular-nums tracking-tight leading-none block">
-                  {totalCount}
-                </span>
-              </div>
-            </div>
 
-            {/* In Progress */}
-            <div className="bg-white dark:bg-surface border border-neutral-100/90 dark:border-border-theme rounded-2xl p-4 sm:p-5 shadow-xs flex items-center gap-4 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-md cursor-default motion-reduce:transform-none motion-reduce:transition-none">
-              <div className="w-12 h-12 rounded-full bg-[#fef3c7] dark:bg-amber-950/40 text-black dark:text-white flex items-center justify-center shrink-0">
-                <ClockIcon className="w-6 h-6 stroke-2" />
+              {/* In Progress */}
+              <div className="bg-white/95 dark:bg-surface/90 backdrop-blur-xs border border-pink-100/80 dark:border-border-theme rounded-xl sm:rounded-2xl py-2.5 px-3 sm:py-3 sm:px-4 shadow-2xs flex items-center gap-3 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-md cursor-default">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#fce7f0] dark:bg-pink-950/40 text-black dark:text-white flex items-center justify-center shrink-0">
+                  <ClockIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5 stroke-2" />
+                </div>
+                <div className="min-w-0">
+                  <span className="text-[11px] sm:text-xs font-sans text-neutral-500 dark:text-text-secondary block leading-none mb-1">
+                    In Progress
+                  </span>
+                  <span className="font-sans font-bold text-xl sm:text-2xl text-neutral-950 dark:text-white tabular-nums tracking-tight leading-none block">
+                    {inProgressCount}
+                  </span>
+                </div>
               </div>
-              <div className="min-w-0">
-                <span className="text-xs font-sans text-neutral-500 dark:text-text-secondary block leading-none mb-1.5">
-                  In Progress
-                </span>
-                <span className="font-heading font-serif font-bold text-2xl sm:text-3xl text-neutral-950 dark:text-white tabular-nums tracking-tight leading-none block">
-                  {inProgressCount}
-                </span>
-              </div>
-            </div>
 
-            {/* Completed */}
-            <div className="bg-white dark:bg-surface border border-neutral-100/90 dark:border-border-theme rounded-2xl p-4 sm:p-5 shadow-xs flex items-center gap-4 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-md cursor-default motion-reduce:transform-none motion-reduce:transition-none">
-              <div className="w-12 h-12 rounded-full bg-[#dcfce7] dark:bg-emerald-950/40 text-black dark:text-white flex items-center justify-center shrink-0">
-                <CheckCircleIcon className="w-6 h-6 stroke-2" />
+              {/* Completed */}
+              <div className="bg-white/95 dark:bg-surface/90 backdrop-blur-xs border border-pink-100/80 dark:border-border-theme rounded-xl sm:rounded-2xl py-2.5 px-3 sm:py-3 sm:px-4 shadow-2xs flex items-center gap-3 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-md cursor-default">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#fce7f0] dark:bg-pink-950/40 text-black dark:text-white flex items-center justify-center shrink-0">
+                  <CheckCircleIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5 stroke-2" />
+                </div>
+                <div className="min-w-0">
+                  <span className="text-[11px] sm:text-xs font-sans text-neutral-500 dark:text-text-secondary block leading-none mb-1">
+                    Completed
+                  </span>
+                  <span className="font-sans font-bold text-xl sm:text-2xl text-neutral-950 dark:text-white tabular-nums tracking-tight leading-none block">
+                    {completedCount}
+                  </span>
+                </div>
               </div>
-              <div className="min-w-0">
-                <span className="text-xs font-sans text-neutral-500 dark:text-text-secondary block leading-none mb-1.5">
-                  Completed
-                </span>
-                <span className="font-heading font-serif font-bold text-2xl sm:text-3xl text-neutral-950 dark:text-white tabular-nums tracking-tight leading-none block">
-                  {completedCount}
-                </span>
-              </div>
-            </div>
 
-            {/* Cancelled */}
-            <div className="bg-white dark:bg-surface border border-neutral-100/90 dark:border-border-theme rounded-2xl p-4 sm:p-5 shadow-xs flex items-center gap-4 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-md cursor-default motion-reduce:transform-none motion-reduce:transition-none">
-              <div className="w-12 h-12 rounded-full bg-[#f3f4f6] dark:bg-surface-muted text-black dark:text-white flex items-center justify-center shrink-0">
-                <XCircleIcon className="w-6 h-6 stroke-2" />
-              </div>
-              <div className="min-w-0">
-                <span className="text-xs font-sans text-neutral-500 dark:text-text-secondary block leading-none mb-1.5">
-                  Cancelled
-                </span>
-                <span className="font-heading font-serif font-bold text-2xl sm:text-3xl text-neutral-950 dark:text-white tabular-nums tracking-tight leading-none block">
-                  {cancelledCount}
-                </span>
+              {/* Cancelled */}
+              <div className="bg-white/95 dark:bg-surface/90 backdrop-blur-xs border border-pink-100/80 dark:border-border-theme rounded-xl sm:rounded-2xl py-2.5 px-3 sm:py-3 sm:px-4 shadow-2xs flex items-center gap-3 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-md cursor-default">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#fce7f0] dark:bg-pink-950/40 text-black dark:text-white flex items-center justify-center shrink-0">
+                  <XCircleIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5 stroke-2" />
+                </div>
+                <div className="min-w-0">
+                  <span className="text-[11px] sm:text-xs font-sans text-neutral-500 dark:text-text-secondary block leading-none mb-1">
+                    Cancelled
+                  </span>
+                  <span className="font-sans font-bold text-xl sm:text-2xl text-neutral-950 dark:text-white tabular-nums tracking-tight leading-none block">
+                    {cancelledCount}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
 
           {/* 3. STATUS FILTERS & SEARCH CONTAINER */}
-          <div className="bg-surface border border-border-theme rounded-2xl p-4 shadow-xs space-y-4">
+          <div className="bg-surface border border-border-theme rounded-2xl p-3 sm:p-4 shadow-xs space-y-3 sm:space-y-4">
             {/* Status Tabs */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 custom-scrollbar">
+            <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto custom-scrollbar py-3 ">
               {STATUS_TABS.map((tab) => {
                 const isActive = activeTab === tab.id;
                 return (
@@ -557,11 +560,10 @@ export default function CreatorWorkspaceManager() {
                     key={tab.id}
                     type="button"
                     onClick={() => handleTabChange(tab.id)}
-                    className={`px-3.5 py-2 rounded-xl text-xs font-medium transition-all shrink-0 cursor-pointer ${
-                      isActive
+                    className={`px-3.5 py-2 rounded-xl text-xs font-medium transition-all shrink-0 cursor-pointer ${isActive
                         ? "bg-neutral-950 text-white font-semibold shadow-xs dark:bg-neutral-100 dark:text-neutral-950"
                         : "bg-surface-muted text-text-secondary hover:text-foreground hover:bg-surface-muted/80 border border-border-theme/60"
-                    }`}
+                      }`}
                   >
                     {tab.label}
                   </button>
@@ -578,17 +580,15 @@ export default function CreatorWorkspaceManager() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search workspaces by campaign or brand..."
+                placeholder="Search workspaces..."
                 className="w-full text-xs pl-10 pr-9 py-2.5 rounded-xl bg-surface-muted border border-border-theme text-foreground placeholder:text-text-secondary focus:outline-none focus:border-secondary transition-colors"
               />
               {searchQuery && (
                 <button
                   type="button"
-                  onClick={() => handleTabChange(tab.id)}
-                  className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${isActive
-                      ? "bg-secondary text-white shadow-xs"
-                      : "text-text-secondary hover:text-foreground hover:bg-surface-muted"
-                    }`}
+                  onClick={() => setSearchQuery("")}
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-text-secondary hover:text-foreground cursor-pointer text-xs"
+                  title="Clear search"
                 >
                   ✕
                 </button>
@@ -654,8 +654,8 @@ export default function CreatorWorkspaceManager() {
                   {searchQuery
                     ? `No workspaces match your search query "${searchQuery}". Try searching with a different campaign or brand term.`
                     : activeTab !== "All"
-                    ? `You currently have no workspaces in the "${STATUS_TABS.find((t) => t.id === activeTab)?.label || activeTab}" stage.`
-                    : "Once a brand accepts your campaign application or booking proposal, your collaboration workspace will appear here."}
+                      ? `You currently have no workspaces in the "${STATUS_TABS.find((t) => t.id === activeTab)?.label || activeTab}" stage.`
+                      : "Once a brand accepts your campaign application or booking proposal, your collaboration workspace will appear here."}
                 </p>
               </div>
               {(searchQuery || activeTab !== "All") && (
@@ -682,6 +682,8 @@ export default function CreatorWorkspaceManager() {
                 const campaignTitle = ws.campaign?.title || ws.service?.title || "Campaign Workspace";
                 const brandName = ws.brand?.name || ws.brand?.email?.split("@")[0] || "Brand Partner";
                 const brandInitial = brandName.charAt(0).toUpperCase() || "B";
+                const brandLogo = ws.brand?.logo || ws.brand?.avatar || ws.brand?.profileImage || null;
+                const showBrandLogo = Boolean(brandLogo) && !failedBrandAvatars[ws._id];
                 const agreedPriceFormatted = formatPrice(ws.agreedPrice, ws.currency);
                 const deadlineFormatted = formatDate(ws.deadline);
                 const deliverables = Array.isArray(ws.deliverables) ? ws.deliverables : [];
@@ -691,10 +693,10 @@ export default function CreatorWorkspaceManager() {
                 const brandSubtitle = category && platform
                   ? `${category} • ${platform}`
                   : category
-                  ? `${category} • Collaboration`
-                  : platform
-                  ? `${platform} • Collaboration`
-                  : "Brand Partner • Collaboration";
+                    ? `${category} • Collaboration`
+                    : platform
+                      ? `${platform} • Collaboration`
+                      : "Brand Partner • Collaboration";
 
                 const campaignDescription =
                   ws.brief ||
@@ -718,8 +720,22 @@ export default function CreatorWorkspaceManager() {
                       <div className="flex items-start justify-between gap-2.5">
                         {/* Brand Avatar & Name */}
                         <div className="flex items-center gap-2.5 min-w-0">
-                          <div className="w-9 h-9 rounded-full bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 flex items-center justify-center font-heading font-bold text-sm shrink-0 shadow-2xs">
-                            {brandInitial}
+                          <div className="w-9 h-9 rounded-full bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 flex items-center justify-center font-sans font-semibold text-sm shrink-0 shadow-2xs overflow-hidden">
+                            {showBrandLogo ? (
+                              <img
+                                src={brandLogo}
+                                alt={brandName}
+                                className="w-full h-full object-cover"
+                                onError={() =>
+                                  setFailedBrandAvatars((prev) => ({
+                                    ...prev,
+                                    [ws._id]: true,
+                                  }))
+                                }
+                              />
+                            ) : (
+                              brandInitial
+                            )}
                           </div>
                           <div className="min-w-0 flex-1">
                             <span className="text-xs font-sans font-semibold text-foreground block truncate">
@@ -731,30 +747,40 @@ export default function CreatorWorkspaceManager() {
                           </div>
                         </div>
 
-                        {/* Status Badge & Three-Dot Menu */}
+                        {/* Status Badge */}
                         <div className="flex items-center gap-1.5 shrink-0">
                           <span
-                            className={`px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-sans font-bold tracking-wider capitalize border ${badge.color}`}
+                            className={`text-[10px] sm:text-[11px] font-sans font-bold tracking-wider capitalize ${badge.color}`}
                           >
                             {badge.label}
                           </span>
-                          <h3 className="font-sans font-semibold text-base text-foreground line-clamp-1 mt-0.5 tracking-tight">
-                            {campaignTitle}
-                          </h3>
                         </div>
                       </div>
 
-                      {/* Price & Deadline Metadata */}
-                      <div className="grid grid-cols-2 gap-2 bg-surface-muted/60 p-3 rounded-xl border border-border-theme/50 text-xs">
-                        <div>
-                          <span className="text-[10px] text-text-secondary block">Agreed Price</span>
-                          <span className="font-sans font-semibold text-foreground">
-                            {agreedPriceFormatted}
-                          </span>
+                      {/* Campaign Title */}
+                      <h3 className="font-sans font-semibold text-base text-foreground line-clamp-1 mt-2.5 tracking-tight">
+                        {campaignTitle}
+                      </h3>
+
+                      {/* Campaign Cover Image or Title Banner */}
+                      {coverImage && !failedCoverUrls[ws._id] ? (
+                        <div className="h-24 sm:h-28 rounded-xl overflow-hidden relative border border-neutral-100 dark:border-border-theme/40 mt-3">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={coverImage}
+                            alt={campaignTitle}
+                            className="w-full h-full object-cover transition-transform duration-300 ease-out hover:scale-105 group-hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
+                            onError={() =>
+                              setFailedCoverUrls((prev) => ({
+                                ...prev,
+                                [ws._id]: true,
+                              }))
+                            }
+                          />
                         </div>
                       ) : (
                         <div className="h-24 sm:h-28 rounded-xl overflow-hidden relative border border-neutral-100 dark:border-border-theme/40 bg-gradient-to-br from-pink-50/90 via-rose-50/50 to-neutral-50/60 dark:from-pink-950/20 dark:via-surface-muted/30 dark:to-surface/40 flex items-center justify-center px-4 mt-3">
-                          <span className="font-heading font-medium text-xs sm:text-sm text-neutral-800 dark:text-neutral-200 line-clamp-1 tracking-wide">
+                          <span className="font-sans font-medium text-xs sm:text-sm text-neutral-800 dark:text-neutral-200 line-clamp-1 tracking-wide">
                             {campaignTitle}
                           </span>
                         </div>
@@ -771,7 +797,7 @@ export default function CreatorWorkspaceManager() {
                             <span className="text-[10px] sm:text-[11px] font-sans text-text-secondary block leading-tight">
                               Agreed Price
                             </span>
-                            <span className="font-heading font-medium text-sm sm:text-base text-foreground block truncate tracking-tight mt-0.5">
+                            <span className="font-sans font-semibold text-sm sm:text-base text-foreground block truncate tracking-tight mt-0.5">
                               {agreedPriceFormatted}
                             </span>
                           </div>
@@ -817,7 +843,7 @@ export default function CreatorWorkspaceManager() {
                                   key={item?._id || idx}
                                   className="flex items-center gap-2 text-xs font-sans text-text-secondary"
                                 >
-                                  <div className="w-4 h-4 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                                  <div className="w-4 h-4 rounded-full bg-transparent text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center justify-center shrink-0">
                                     <CheckIcon className="w-2.5 h-2.5" />
                                   </div>
                                   <span className="line-clamp-1">{title}</span>
@@ -884,8 +910,8 @@ export default function CreatorWorkspaceManager() {
                       type="button"
                       onClick={() => handlePageChange(pageNum)}
                       className={`w-8 h-8 rounded-xl font-semibold text-xs transition-all cursor-pointer ${pageNum === currentPage
-                          ? "bg-secondary text-white shadow-xs"
-                          : "bg-surface hover:bg-surface-muted text-text-secondary border border-border-theme"
+                        ? "bg-secondary text-white shadow-xs"
+                        : "bg-surface hover:bg-surface-muted text-text-secondary border border-border-theme"
                         }`}
                     >
                       {pageNum}

@@ -47,7 +47,7 @@ function CreatorDashboardContent() {
       <CreatorSidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 
       {/* Main Content Area Offset by Desktop Sidebar */}
-      <div className="flex-1 lg:ml-64 flex flex-col min-w-0">
+      <div className="flex-1 lg:ml-64 flex flex-col min-w-0 transition-all duration-300">
         {/* Header Bar Component */}
         <CreatorHeader setMobileOpen={setMobileOpen} />
 
@@ -62,7 +62,7 @@ function CreatorDashboardContent() {
                 </svg>
               </div>
               <div className="space-y-1">
-                <h3 className="font-heading font-medium text-lg sm:text-xl text-foreground">
+                <h3 className="font-serif font-medium text-lg sm:text-xl text-foreground">
                   Unable to load creator dashboard data
                 </h3>
                 <p className="text-xs sm:text-sm text-text-secondary max-w-md mx-auto">

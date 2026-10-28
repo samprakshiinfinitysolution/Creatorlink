@@ -3,7 +3,8 @@ import sendResponse from "../../utils/response.js";
 import createApiError from "../../utils/ApiError.js";
 import {
     uploadImageToCloudinary,
-    uploadMultipleImagesToCloudinary
+    uploadMultipleImagesToCloudinary,
+    uploadVideoToCloudinary
 } from "../../utils/helpers/cloudinary.helper.js";
 
 // Approved upload folders in Cloudinary.
@@ -12,7 +13,9 @@ const ALLOWED_FOLDERS = [
     "creatorlink/profiles",
     "creatorlink/portfolios",
     "creatorlink/brands",
-    "creatorlink/deliverables"
+    "creatorlink/deliverables",
+    "creatorlink/services",
+    "creatorlink/campaigns"
 ];
 
 const DEFAULT_FOLDER = "creatorlink/general";
@@ -21,11 +24,12 @@ const DEFAULT_FOLDER = "creatorlink/general";
  * Validates and resolves the upload folder against an approved allowlist.
  *
  * @param {string} [requestedFolder]
+ * @param {string} [defaultFolder="creatorlink/general"]
  * @returns {string}
  */
-const resolveUploadFolder = (requestedFolder) => {
+const resolveUploadFolder = (requestedFolder, defaultFolder = DEFAULT_FOLDER) => {
     if (!requestedFolder) {
-        return DEFAULT_FOLDER;
+        return defaultFolder;
     }
 
     if (ALLOWED_FOLDERS.includes(requestedFolder)) {
@@ -37,6 +41,30 @@ const resolveUploadFolder = (requestedFolder) => {
         `Invalid upload folder. Allowed folders: ${ALLOWED_FOLDERS.join(", ")}`
     );
 };
+
+/**
+ * Handles single video upload to Cloudinary.
+ * Expects req.file populated by uploadSingleVideo middleware.
+ * Default folder for videos is "creatorlink/deliverables".
+ */
+const uploadSingleVideoHandler = asyncHandler(async (req, res) => {
+    if (!req.file || !req.file.buffer) {
+        throw createApiError(
+            400,
+            "Please provide a video file under the 'video' field"
+        );
+    }
+
+    const folder = resolveUploadFolder(req.body.folder, "creatorlink/deliverables");
+    const result = await uploadVideoToCloudinary(req.file.buffer, folder);
+
+    return sendResponse(
+        res,
+        200,
+        "Video uploaded successfully",
+        result
+    );
+});
 
 /**
  * Handles single image upload to Cloudinary.
@@ -87,5 +115,7 @@ const uploadMultipleImagesHandler = asyncHandler(async (req, res) => {
 
 export {
     uploadSingleImageHandler,
-    uploadMultipleImagesHandler
+    uploadMultipleImagesHandler,
+    uploadSingleVideoHandler
 };
+

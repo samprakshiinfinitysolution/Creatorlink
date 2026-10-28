@@ -199,43 +199,43 @@ const getStatusBadge = (status) => {
     case "pending":
       return {
         label: "Pending",
-        color: "bg-amber-50 text-amber-600 border border-amber-200/70 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/40",
+        color: "text-amber-600 dark:text-amber-400",
         Icon: ClockIcon,
       };
     case "accepted":
       return {
         label: "Accepted",
-        color: "bg-emerald-50 text-emerald-600 border border-emerald-200/70 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/40",
+        color: "text-emerald-600 dark:text-emerald-400",
         Icon: CheckCircleIcon,
       };
     case "in_progress":
       return {
         label: "Active",
-        color: "bg-emerald-50 text-emerald-600 border border-emerald-200/70 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/40",
+        color: "text-emerald-600 dark:text-emerald-400",
         Icon: CheckCircleIcon,
       };
     case "completed":
       return {
         label: "Completed",
-        color: "bg-purple-50 text-purple-600 border border-purple-200/70 dark:bg-purple-950/30 dark:text-purple-400 dark:border-purple-900/40",
+        color: "text-purple-600 dark:text-purple-400",
         Icon: FlagIcon,
       };
     case "rejected":
       return {
         label: "Rejected",
-        color: "bg-rose-50 text-rose-600 border border-rose-200/70 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/40",
+        color: "text-rose-600 dark:text-rose-400",
         Icon: XCircleIcon,
       };
     case "cancelled":
       return {
         label: "Cancelled",
-        color: "bg-neutral-100 text-neutral-600 border border-neutral-200 dark:bg-surface-muted dark:text-text-secondary dark:border-border-theme",
+        color: "text-neutral-600 dark:text-neutral-400",
         Icon: XCircleIcon,
       };
     default:
       return {
         label: status || "Unknown",
-        color: "bg-neutral-100 text-neutral-600 border border-neutral-200 dark:bg-surface-muted dark:text-text-secondary dark:border-border-theme",
+        color: "text-neutral-600 dark:text-neutral-400",
         Icon: ClockIcon,
       };
   }
@@ -265,6 +265,7 @@ export default function CreatorAppliedCampaignsManager() {
   const [currentPage, setCurrentPage] = useState(1);
   const [processingBookingId, setProcessingBookingId] = useState(null);
   const [actionFeedback, setActionFeedback] = useState(null);
+  const [failedImgUrls, setFailedImgUrls] = useState({});
 
   // Fetch applied campaigns on mount and when filters/page change
   useEffect(() => {
@@ -388,7 +389,7 @@ export default function CreatorAppliedCampaignsManager() {
                 )}
               </div>
 
-              <h1 className="font-heading font-medium text-2xl sm:text-3xl lg:text-4xl text-foreground tracking-tight">
+              <h1 className="font-serif font-medium text-2xl sm:text-3xl lg:text-4xl text-foreground tracking-tight">
                 My Campaigns
               </h1>
 
@@ -498,16 +499,16 @@ export default function CreatorAppliedCampaignsManager() {
               </div>
 
               {/* Bottom Row: Tiny Deliverables Checklist Pill */}
-              <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/90 dark:bg-surface/90 backdrop-blur-sm border border-pink-200/80 dark:border-pink-900/40 shadow-xs shadow-pink-500/5">
+              <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-transparent border border-pink-200/80 dark:border-pink-900/40 shadow-xs shadow-pink-500/5">
                 <div className="flex items-center gap-1.5 text-[10px] font-medium text-foreground font-sans">
-                  <span className="w-3.5 h-3.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-[8px] font-bold">
+                  <span className="w-3.5 h-3.5 rounded-full bg-transparent text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-[8px] font-bold">
                     ✓
                   </span>
                   <span>Campaign Brief</span>
                 </div>
                 <span className="w-1 h-1 rounded-full bg-black dark:bg-white" />
                 <div className="flex items-center gap-1.5 text-[10px] font-medium text-foreground font-sans">
-                  <span className="w-3.5 h-3.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-[8px] font-bold">
+                  <span className="w-3.5 h-3.5 rounded-full bg-transparent text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-[8px] font-bold">
                     ✓
                   </span>
                   <span>Deliverables Approved</span>
@@ -517,9 +518,9 @@ export default function CreatorAppliedCampaignsManager() {
           </div>
 
           {/* 2. FILTER & SEARCH BAR */}
-          <div className="bg-surface border border-border-theme rounded-2xl p-4 shadow-xs space-y-4">
+          <div className="bg-surface border border-border-theme rounded-2xl p-3 sm:p-4 shadow-xs space-y-3 sm:space-y-4">
             {/* Status Tabs */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 custom-scrollbar">
+            <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto custom-scrollbar py-3 select-none">
               {STATUS_TABS.map((tab) => {
                 const isActive = selectedStatus === tab.id;
                 return (
@@ -551,9 +552,22 @@ export default function CreatorAppliedCampaignsManager() {
                   setSearchQuery(e.target.value);
                   setCurrentPage(1);
                 }}
-                placeholder="Search applied campaigns by title, description, or category..."
-                className="w-full text-xs pl-10 pr-4 py-2.5 rounded-xl bg-surface-muted border border-border-theme text-foreground placeholder:text-text-secondary focus:outline-none focus:border-secondary transition-colors"
+                placeholder="Search applied campaigns..."
+                className="w-full text-xs pl-10 pr-9 py-2.5 rounded-xl bg-surface-muted border border-border-theme text-foreground placeholder:text-text-secondary focus:outline-none focus:border-secondary transition-colors"
               />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setCurrentPage(1);
+                  }}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-xs text-text-secondary hover:text-foreground cursor-pointer font-sans"
+                  title="Clear search"
+                >
+                  ✕
+                </button>
+              )}
             </div>
           </div>
 
@@ -649,26 +663,26 @@ export default function CreatorAppliedCampaignsManager() {
                     className="bg-white dark:bg-surface border border-neutral-200/80 dark:border-border-theme hover:border-pink-200/90 dark:hover:border-pink-500/30 rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-[0_2px_12px_rgba(255,45,108,0.03)] hover:shadow-md transition-all duration-200 flex flex-col justify-between group"
                   >
                     <div className="space-y-2.5">
-                      {/* 1. TOP ROW: Category & Proposal Badges (Left), Status Badge (Right) */}
+                      {/* 1. TOP ROW: Category (Pink) & Proposal Text (Left), Status (Right) - Clean Text Without Pill Outlines */}
                       <div className="flex items-center justify-between gap-1.5 flex-wrap">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-sans font-bold tracking-wider uppercase bg-pink-50 text-pink-500 border border-pink-100 dark:bg-pink-950/40 dark:text-pink-400 dark:border-pink-900/50 truncate max-w-[130px]">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-[10px] sm:text-[11px] font-sans font-bold tracking-wider uppercase text-pink-500 dark:text-pink-400 truncate max-w-[130px]">
                             {campaignObj.category || "Fashion"}
                           </span>
 
                           {item.initiatedBy === "brand" ? (
-                            <span className="px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-sans font-bold tracking-wider uppercase bg-amber-50 text-amber-700 border border-amber-200/70 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/40">
+                            <span className="text-[10px] sm:text-[11px] font-sans font-bold tracking-wider uppercase text-amber-700 dark:text-amber-400">
                               Brand Proposal
                             </span>
                           ) : (
-                            <span className="px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-sans font-bold tracking-wider uppercase bg-neutral-100 text-neutral-600 border border-neutral-200/80 dark:bg-surface-muted dark:text-text-secondary dark:border-border-theme">
+                            <span className="text-[10px] sm:text-[11px] font-sans font-bold tracking-wider uppercase text-neutral-600 dark:text-text-secondary">
                               My Application
                             </span>
                           )}
                         </div>
 
                         <span
-                          className={`px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-sans font-bold tracking-wider uppercase flex items-center gap-1.5 ${badge.color}`}
+                          className={`text-[10px] sm:text-[11px] font-sans font-bold tracking-wider uppercase flex items-center gap-1.5 ${badge.color}`}
                         >
                           {StatusIcon && <StatusIcon className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />}
                           <span>{badge.label}</span>
@@ -677,19 +691,20 @@ export default function CreatorAppliedCampaignsManager() {
 
                       {/* 2. CAMPAIGN VISUAL BANNER WITH FLOATING BRAND BADGE */}
                       <div className="h-28 sm:h-32 rounded-xl sm:rounded-2xl overflow-hidden relative border border-neutral-100 dark:border-border-theme/40 bg-surface-muted/60 dark:bg-surface-muted/20">
-                        {campaignObj.coverImage || campaignObj.image ? (
+                        {(campaignObj.coverImage || campaignObj.image) && !failedImgUrls[bookingId] ? (
                           /* eslint-disable-next-line @next/next/no-img-element */
                           <img
                             src={campaignObj.coverImage || campaignObj.image}
                             alt={campaignObj.title || "Campaign banner"}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            onError={() => setFailedImgUrls((prev) => ({ ...prev, [bookingId]: true }))}
                           />
                         ) : (
                           <div className="w-full h-full relative overflow-hidden bg-gradient-to-br from-pink-100/70 via-rose-50/50 to-amber-50/40 dark:from-pink-950/40 dark:via-purple-950/20 dark:to-surface-muted/40 flex items-center justify-center">
                             <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-pink-200/40 dark:bg-pink-600/10 blur-xl pointer-events-none" />
                             <div className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full bg-rose-200/30 dark:bg-rose-600/10 blur-xl pointer-events-none" />
                             <div className="text-center px-3 relative z-10 opacity-70">
-                              <span className="font-heading font-medium italic text-xs sm:text-sm text-foreground/80 tracking-wide line-clamp-1">
+                              <span className="font-sans font-medium text-xs sm:text-sm text-foreground/80 tracking-wide line-clamp-1">
                                 {campaignObj.title || "Editorial Brief"}
                               </span>
                             </div>
@@ -698,7 +713,7 @@ export default function CreatorAppliedCampaignsManager() {
 
                         {/* Floating Brand Badge Bottom-Left */}
                         <div className="absolute bottom-2 left-2 bg-white/95 dark:bg-surface/95 backdrop-blur-xs px-2 py-0.5 rounded-lg shadow-xs border border-border-theme/60 flex items-center gap-1.5 max-w-[85%]">
-                          <div className="w-3.5 h-3.5 rounded-full bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 flex items-center justify-center text-[8px] font-heading font-bold shrink-0">
+                          <div className="w-3.5 h-3.5 rounded-full bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 flex items-center justify-center text-[8px] font-sans font-semibold shrink-0">
                             {brandInitial}
                           </div>
                           <span className="text-[10px] sm:text-[11px] font-sans font-semibold text-foreground truncate">
@@ -709,11 +724,11 @@ export default function CreatorAppliedCampaignsManager() {
 
                       {/* 3. CAMPAIGN TITLE & BRAND ROW */}
                       <div>
-                        <h2 className="font-heading font-medium text-base sm:text-lg text-black dark:text-white line-clamp-1 group-hover:text-black dark:group-hover:text-white transition-colors tracking-tight">
+                        <h2 className="font-sans font-semibold text-base sm:text-lg text-black dark:text-white line-clamp-1 group-hover:text-black dark:group-hover:text-white transition-colors tracking-tight">
                           {campaignObj.title || "Campaign Collaboration"}
                         </h2>
                         <div className="flex items-center gap-1.5 mt-0.5">
-                          <div className="w-3.5 h-3.5 rounded-full bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 flex items-center justify-center text-[8px] font-heading font-semibold shrink-0">
+                          <div className="w-3.5 h-3.5 rounded-full bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 flex items-center justify-center text-[8px] font-sans font-semibold shrink-0">
                             {brandInitial}
                           </div>
                           <span className="text-xs font-sans text-text-secondary truncate">
@@ -736,7 +751,7 @@ export default function CreatorAppliedCampaignsManager() {
                           <span className="text-[10px] sm:text-[11px] font-sans font-medium text-text-secondary block leading-none mb-0.5">
                             Agreed Price
                           </span>
-                          <span className="font-heading font-medium text-xl sm:text-2xl text-foreground tabular-nums tracking-tight leading-none block">
+                          <span className="font-sans font-bold text-xl sm:text-2xl text-foreground tabular-nums tracking-tight leading-none block">
                             {formatPrice(displayPrice, item.currency || "INR")}
                           </span>
                         </div>
@@ -902,7 +917,7 @@ export default function CreatorAppliedCampaignsManager() {
                 <MegaphoneIcon className="w-8 h-8" />
               </div>
               <div className="space-y-1">
-                <h3 className="font-heading font-medium text-xl text-foreground">
+                <h3 className="font-serif font-medium text-xl text-foreground">
                   {selectedStatus === "All"
                     ? "No applied campaigns yet"
                     : `No ${selectedStatus} campaigns found`}

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import ScrollReveal from "@/components/theme/ScrollReveal";
 
 // =========================================================
 // MAIN COMPONENT: COLLABORATION CTA
@@ -10,7 +11,7 @@ export default function CollaborationCTA() {
     <section className="relative bg-background text-foreground py-14 sm:py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-10 xl:px-12 transition-colors duration-300">
       <div className="mx-auto max-w-[1440px]">
         {/* Outer Dark CTA Box Container */}
-        <div className="relative overflow-hidden bg-primary dark:bg-[#161616] text-white rounded-[28px] sm:rounded-[36px] lg:rounded-[40px] p-8 sm:p-12 md:p-16 lg:p-20 shadow-2xl border border-white/10">
+        <ScrollReveal direction="scale" delay={100} className="relative overflow-hidden bg-primary dark:bg-[#161616] text-white rounded-[28px] sm:rounded-[36px] lg:rounded-[40px] p-8 sm:p-12 md:p-16 lg:p-20 shadow-2xl border border-white/10">
           {/* Subtle Ambient Pink/Burgundy Gradient Glow (Right Side) */}
           <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-1/2 bg-gradient-to-l from-secondary/25 via-secondary/[0.08] to-transparent blur-[70px] opacity-70" />
 
@@ -55,7 +56,7 @@ export default function CollaborationCTA() {
               </button>
             </div>
           </div>
-        </div>
+        </ScrollReveal>
       </div>
     </section>
   );

@@ -67,6 +67,7 @@ const paymentSchema = new mongoose.Schema(
                 "pending",
                 "processing",
                 "paid",
+                "completed",
                 "failed",
                 "refunded",
                 "cancelled"

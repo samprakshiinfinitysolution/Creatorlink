@@ -168,12 +168,109 @@ const uploadMultipleImagesToCloudinary = async (
     return results;
 };
 
+/**
+ * Uploads a video Buffer directly to Cloudinary using upload_stream with resource_type: "video".
+ * Never passes video buffers to Sharp or convertImageToWebp.
+ *
+ * @param {Buffer} buffer - Video file buffer.
+ * @param {string} folder - Target Cloudinary folder path.
+ * @returns {Promise<{ url: string, publicId: string, duration?: number, format?: string }>}
+ */
+const uploadVideoToCloudinary = async (buffer, folder) => {
+    // Validate buffer.
+    if (!buffer || !Buffer.isBuffer(buffer) || buffer.length === 0) {
+        throw createApiError(
+            400,
+            "Invalid video buffer provided"
+        );
+    }
+
+    // Validate target folder.
+    if (!folder || typeof folder !== "string" || !folder.trim()) {
+        throw createApiError(
+            400,
+            "A valid upload folder must be specified"
+        );
+    }
+
+    return new Promise((resolve, reject) => {
+        let isSettled = false;
+
+        const uploadStream = cloudinary.uploader.upload_stream(
+            {
+                folder: folder.trim(),
+                resource_type: "video"
+            },
+            (error, result) => {
+                if (isSettled) return;
+                isSettled = true;
+
+                if (error) {
+                    return reject(
+                        createApiError(
+                            500,
+                            error.message || "Failed to upload video to Cloudinary"
+                        )
+                    );
+                }
+
+                if (!result || !result.secure_url) {
+                    return reject(
+                        createApiError(
+                            500,
+                            "Cloudinary upload succeeded but no secure URL was returned"
+                        )
+                    );
+                }
+
+                resolve({
+                    url: result.secure_url,
+                    publicId: result.public_id,
+                    duration: result.duration,
+                    format: result.format
+                });
+            }
+        );
+
+        uploadStream.on("error", (streamError) => {
+            if (isSettled) return;
+            isSettled = true;
+
+            reject(
+                createApiError(
+                    500,
+                    streamError.message || "Cloudinary upload stream encountered an error"
+                )
+            );
+        });
+
+        // Stream the raw video buffer directly to Cloudinary without Sharp processing.
+        const readableStream = Readable.from(buffer);
+
+        readableStream.on("error", (streamError) => {
+            if (isSettled) return;
+            isSettled = true;
+
+            reject(
+                createApiError(
+                    500,
+                    streamError.message || "Video stream error"
+                )
+            );
+        });
+
+        readableStream.pipe(uploadStream);
+    });
+};
+
 export {
     uploadImageToCloudinary,
-    uploadMultipleImagesToCloudinary
+    uploadMultipleImagesToCloudinary,
+    uploadVideoToCloudinary
 };
 
 export default {
     uploadImageToCloudinary,
-    uploadMultipleImagesToCloudinary
+    uploadMultipleImagesToCloudinary,
+    uploadVideoToCloudinary
 };

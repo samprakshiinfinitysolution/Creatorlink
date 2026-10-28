@@ -193,14 +193,14 @@ const getBrandDashboardOverviewService = async (brandId, query = {}) => {
         Campaign.find({ brand: brandObjectId })
             .sort({ createdAt: -1 })
             .limit(recentLimit)
-            .select("_id title category platform budget currency deadline requiredCreators deliverables status createdAt"),
+            .select("_id title category platform budget currency deadline requiredCreators deliverables status coverImage createdAt"),
 
         // 16. Recent Collaborations / Workspaces (Data minimized: creator name only, no email)
         Workspace.find({ brand: brandObjectId })
             .sort({ createdAt: -1 })
             .limit(recentLimit)
             .populate("creator", "name")
-            .populate("campaign", "title category platform budget")
+            .populate("campaign", "title category platform budget coverImage")
             .populate("service", "title price deliveryTime"),
 
         // 17. Upcoming Active Campaign Deadlines
@@ -211,7 +211,7 @@ const getBrandDashboardOverviewService = async (brandId, query = {}) => {
         })
             .sort({ deadline: 1 })
             .limit(deadlinesLimit)
-            .select("_id title category platform budget currency deadline status requiredCreators"),
+            .select("_id title category platform budget currency deadline status requiredCreators coverImage"),
 
         // 18. Upcoming Active Workspace Deadlines
         Workspace.find({
@@ -222,7 +222,7 @@ const getBrandDashboardOverviewService = async (brandId, query = {}) => {
             .sort({ deadline: 1 })
             .limit(deadlinesLimit)
             .populate("creator", "name")
-            .populate("campaign", "title category platform")
+            .populate("campaign", "title category platform coverImage")
             .select("_id deadline status agreedPrice currency campaign creator deliverables"),
 
         // 19. Upcoming Pending Booking Deadlines
@@ -234,7 +234,7 @@ const getBrandDashboardOverviewService = async (brandId, query = {}) => {
             .sort({ deadline: 1 })
             .limit(deadlinesLimit)
             .populate("creator", "name")
-            .populate("campaign", "title category platform budget")
+            .populate("campaign", "title category platform budget coverImage")
             .select("_id deadline status agreedPrice currency campaign creator initiatedBy"),
 
         // 20. Authenticated Brand User basic info
@@ -348,7 +348,10 @@ const getBrandDashboardOverviewService = async (brandId, query = {}) => {
         deadline: c.deadline,
         budget: c.budget,
         currency: c.currency || "INR",
-        requiredCreators: c.requiredCreators
+        requiredCreators: c.requiredCreators,
+        coverImage: c.coverImage || "",
+        thumbnail: c.coverImage || "",
+        image: c.coverImage || ""
     }));
 
     const workspaceDeadlines = upcomingWorkspaceDeadlines.map((ws) => {
@@ -374,7 +377,10 @@ const getBrandDashboardOverviewService = async (brandId, query = {}) => {
             currency: ws.currency || "INR",
             deliverablesCount,
             completedDeliverablesCount,
-            deliverablesProgress
+            deliverablesProgress,
+            coverImage: ws.campaign?.coverImage || "",
+            thumbnail: ws.campaign?.coverImage || "",
+            image: ws.campaign?.coverImage || ""
         };
     });
 
@@ -389,7 +395,10 @@ const getBrandDashboardOverviewService = async (brandId, query = {}) => {
         deadline: b.deadline,
         agreedPrice: b.agreedPrice,
         currency: b.currency || "INR",
-        initiatedBy: b.initiatedBy
+        initiatedBy: b.initiatedBy,
+        coverImage: b.campaign?.coverImage || "",
+        thumbnail: b.campaign?.coverImage || "",
+        image: b.campaign?.coverImage || ""
     }));
 
     const combinedDeadlines = [...campaignDeadlines, ...workspaceDeadlines, ...bookingDeadlines]
@@ -408,6 +417,7 @@ const getBrandDashboardOverviewService = async (brandId, query = {}) => {
         requiredCreators: c.requiredCreators,
         deliverablesCount: c.deliverables?.length || 0,
         status: c.status,
+        coverImage: c.coverImage || "",
         createdAt: c.createdAt
     }));
 

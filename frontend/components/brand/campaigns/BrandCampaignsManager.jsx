@@ -1,9 +1,10 @@
 "use client";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import BrandSidebar from "@/components/brand/dashboard/BrandSidebar";
 import BrandHeader from "@/components/brand/dashboard/BrandHeader";
 import BrandCampaignsHero from "@/components/brand/campaigns/BrandCampaignsHero";
+import { uploadSingleImageApi } from "@/lib/upload";
 import {
   getBrandCampaigns,
   createCampaign,
@@ -57,6 +58,17 @@ function formatDateForInput(dateStr) {
   const date = new Date(dateStr);
   if (isNaN(date.getTime())) return "";
   return date.toISOString().split("T")[0];
+}
+
+function isValidImageUrl(urlStr) {
+  if (!urlStr || typeof urlStr !== "string") return false;
+  const trimmed = urlStr.trim();
+  try {
+    const parsed = new URL(trimmed);
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
+  } catch {
+    return false;
+  }
 }
 
 function getStatusBadge(status) {
@@ -128,20 +140,21 @@ function getCampaignInitials(title) {
   return clean.slice(0, 2).toUpperCase();
 }
 
-function CampaignAvatar({ title, thumbnail }) {
+function CampaignAvatar({ title, coverImage, thumbnail, image }) {
+  const imgUrl = coverImage || image || thumbnail;
   const [failedUrl, setFailedUrl] = useState(null);
   const initials = getCampaignInitials(title);
-  const hasFailed = Boolean(thumbnail && failedUrl === thumbnail);
+  const hasFailed = Boolean(imgUrl && failedUrl === imgUrl);
 
-  if (thumbnail && !hasFailed) {
+  if (imgUrl && !hasFailed) {
     return (
       <div className="w-10 h-10 rounded-xl bg-secondary/5 border border-secondary/10 overflow-hidden shrink-0 flex items-center justify-center">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={thumbnail}
+          src={imgUrl}
           alt={title || "Campaign"}
           className="w-full h-full object-cover"
-          onError={() => setFailedUrl(thumbnail)}
+          onError={() => setFailedUrl(imgUrl)}
         />
       </div>
     );
@@ -362,6 +375,352 @@ function GlobeIcon({ className = "w-3.5 h-3.5" }) {
   );
 }
 
+function PhotoIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+    </svg>
+  );
+}
+
+function ArrowUpTrayIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+    </svg>
+  );
+}
+
+function LinkIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+    </svg>
+  );
+}
+
+function TrashIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+    </svg>
+  );
+}
+
+// =========================================================
+// REUSABLE CAMPAIGN COVER UPLOADER COMPONENT
+// =========================================================
+function CampaignCoverUpload({
+  coverImage = "",
+  onChange,
+  onUploadingChange,
+  disabled = false,
+}) {
+  const [isUploading, setIsUploading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [uploadError, setUploadError] = useState(null);
+  const [previewError, setPreviewError] = useState(false);
+  const fileInputRef = useRef(null);
+
+  const [prevCover, setPrevCover] = useState(coverImage);
+  if (prevCover !== coverImage) {
+    setPrevCover(coverImage);
+    setPreviewError(false);
+  }
+
+  const notifyUploading = (state) => {
+    setIsUploading(state);
+    if (onUploadingChange) onUploadingChange(state);
+  };
+
+  const processFile = async (file) => {
+    if (!file) return;
+
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      setUploadError("Please upload a valid image file (JPEG, PNG, or WebP).");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setUploadError("Image size must be less than 5 MB.");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    setUploadError(null);
+    setPreviewError(false);
+    notifyUploading(true);
+
+    try {
+      const uploadRes = await uploadSingleImageApi(file, "creatorlink/campaigns");
+      const uploadedUrl =
+        uploadRes?.url ||
+        uploadRes?.secure_url ||
+        uploadRes?.data?.url ||
+        uploadRes?.data?.secure_url;
+
+      if (uploadedUrl) {
+        onChange(uploadedUrl);
+      } else {
+        setUploadError("Could not retrieve uploaded image URL.");
+      }
+    } catch (err) {
+      const errMsg =
+        err?.response?.data?.message || err?.message || "Failed to upload campaign cover image.";
+      setUploadError(errMsg);
+    } finally {
+      notifyUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  const handleFileSelect = (e) => {
+    const file = e.target?.files?.[0];
+    if (file) {
+      processFile(file);
+    }
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isUploading && !disabled) {
+      setIsDragging(true);
+    }
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    if (isUploading || disabled) return;
+
+    const file = e.dataTransfer?.files?.[0];
+    if (file) {
+      processFile(file);
+    }
+  };
+
+  const handleRemove = (e) => {
+    e?.stopPropagation();
+    onChange("");
+    setUploadError(null);
+    setPreviewError(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const hasImage = Boolean(coverImage && coverImage.trim());
+
+  return (
+    <div className="space-y-2.5">
+      <div>
+        <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
+          Cover Image <span className="text-text-secondary font-normal lowercase">(optional)</span>
+        </label>
+        <p className="text-[11px] text-text-secondary mt-0.5">
+          Upload a high-quality visual banner for this campaign (JPG, PNG, WebP, max 5MB)
+        </p>
+      </div>
+
+      <input
+        type="file"
+        ref={fileInputRef}
+        accept="image/jpeg,image/png,image/webp"
+        onChange={handleFileSelect}
+        className="hidden"
+      />
+
+      {hasImage ? (
+        /* Image Exists: 2-Column Preview & Actions */
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-stretch">
+          {/* Left: Preview */}
+          <div className="relative rounded-2xl overflow-hidden border border-border-theme bg-surface-muted/60 h-32 sm:h-36 group">
+            {!previewError ? (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img
+                src={coverImage}
+                alt="Campaign Cover Preview"
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                onError={() => setPreviewError(true)}
+              />
+            ) : (
+              <div className="w-full h-full flex flex-col items-center justify-center p-3 text-center bg-surface-muted text-text-secondary">
+                <PhotoIcon className="w-6 h-6 opacity-40 mb-1" />
+                <span className="text-[11px] font-medium opacity-80">Image preview unavailable</span>
+              </div>
+            )}
+
+            {/* Floating Remove Button */}
+            <button
+              type="button"
+              disabled={isUploading || disabled}
+              onClick={handleRemove}
+              className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center transition-all cursor-pointer disabled:opacity-50"
+              title="Remove image"
+            >
+              <XMarkIcon className="w-3.5 h-3.5" />
+            </button>
+
+            {isUploading && (
+              <div className="absolute inset-0 bg-black/60 backdrop-blur-2xs flex flex-col items-center justify-center gap-1.5 text-white p-3 text-center">
+                <ArrowPathIcon className="w-5 h-5 animate-spin" />
+                <span className="text-xs font-medium">Uploading cover image...</span>
+              </div>
+            )}
+          </div>
+
+          {/* Right: Upload controls */}
+          <div className="flex flex-col justify-between gap-2">
+            <div
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={() => {
+                if (!isUploading && !disabled) fileInputRef.current?.click();
+              }}
+              className={`border-2 border-dashed rounded-2xl p-3 sm:p-4 flex flex-col items-center justify-center text-center cursor-pointer transition-all flex-1 min-h-[90px] ${
+                isDragging
+                  ? "border-secondary bg-secondary/10 scale-[0.99]"
+                  : "border-border-theme hover:border-secondary/60 bg-surface-muted/30 hover:bg-surface-muted/60"
+              } ${isUploading || disabled ? "pointer-events-none opacity-60" : ""}`}
+            >
+              <div className="w-8 h-8 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary mb-1.5">
+                <ArrowUpTrayIcon className="w-4 h-4" />
+              </div>
+              <p className="font-semibold text-xs text-foreground">Click to upload</p>
+              <p className="text-[10px] text-text-secondary mt-0.5">or drag and drop new image</p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                disabled={isUploading || disabled}
+                onClick={() => fileInputRef.current?.click()}
+                className="px-3 py-2 rounded-xl bg-surface hover:bg-surface-muted border border-border-theme text-foreground font-semibold text-xs flex items-center justify-center gap-1.5 flex-1 transition-colors cursor-pointer disabled:opacity-50"
+              >
+                <PhotoIcon className="w-3.5 h-3.5 text-text-secondary" />
+                <span>Change Image</span>
+              </button>
+              <button
+                type="button"
+                disabled={isUploading || disabled}
+                onClick={handleRemove}
+                className="px-3 py-2 rounded-xl bg-red-50 hover:bg-red-100 dark:bg-red-950/40 dark:hover:bg-red-900/50 border border-red-200/80 dark:border-red-900/60 text-red-600 dark:text-red-400 font-semibold text-xs flex items-center justify-center gap-1.5 flex-1 transition-colors cursor-pointer disabled:opacity-50"
+              >
+                <TrashIcon className="w-3.5 h-3.5" />
+                <span>Remove</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* Empty State: Full-Width Dropzone */
+        <div
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          onClick={() => {
+            if (!isUploading && !disabled) fileInputRef.current?.click();
+          }}
+          className={`border-2 border-dashed rounded-2xl p-6 sm:p-7 flex flex-col items-center justify-center text-center cursor-pointer transition-all ${
+            isDragging
+              ? "border-secondary bg-secondary/10 scale-[0.99]"
+              : "border-border-theme hover:border-secondary/60 bg-surface-muted/20 hover:bg-surface-muted/50"
+          } ${isUploading || disabled ? "pointer-events-none opacity-60" : ""}`}
+        >
+          {isUploading ? (
+            <div className="flex flex-col items-center justify-center gap-2 text-foreground">
+              <ArrowPathIcon className="w-6 h-6 text-secondary animate-spin mb-1" />
+              <span className="text-xs font-semibold">Uploading cover image...</span>
+              <span className="text-[11px] text-text-secondary">Please wait</span>
+            </div>
+          ) : (
+            <>
+              <div className="w-10 h-10 rounded-2xl bg-secondary/10 flex items-center justify-center text-secondary mb-2">
+                <ArrowUpTrayIcon className="w-5 h-5" />
+              </div>
+              <p className="font-semibold text-xs sm:text-sm text-foreground">
+                Click to upload <span className="font-normal text-text-secondary text-xs">or drag and drop</span>
+              </p>
+              <p className="text-[10px] text-text-secondary mt-1">
+                JPG, PNG, WebP (Max 5MB)
+              </p>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* OR Divider */}
+      <div className="relative my-2 flex items-center justify-center">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-border-theme/70" />
+        </div>
+        <div className="relative bg-surface px-2.5">
+          <span className="text-[10px] font-semibold text-text-secondary tracking-wider uppercase">
+            OR
+          </span>
+        </div>
+      </div>
+
+      {/* Manual Image URL Input */}
+      <div>
+        <label className="block text-[11px] font-semibold text-foreground mb-1">
+          Paste Image URL
+        </label>
+        <div className="relative flex items-center">
+          <LinkIcon className="w-3.5 h-3.5 text-text-secondary absolute left-3.5 pointer-events-none" />
+          <input
+            type="url"
+            disabled={isUploading || disabled}
+            value={coverImage}
+            onChange={(e) => {
+              const val = e.target.value;
+              onChange(val);
+              setPreviewError(false);
+              if (!val.trim() || isValidImageUrl(val)) {
+                setUploadError(null);
+              }
+            }}
+            onPaste={(e) => {
+              const pasted = e.clipboardData?.getData("text")?.trim();
+              if (pasted && !isValidImageUrl(pasted)) {
+                setUploadError("Please enter a valid HTTP or HTTPS URL.");
+              } else {
+                setUploadError(null);
+              }
+            }}
+            onBlur={(e) => {
+              const val = e.target.value?.trim();
+              if (val && !isValidImageUrl(val)) {
+                setUploadError("Please enter a valid HTTP or HTTPS URL.");
+              }
+            }}
+            placeholder="https://images.unsplash.com/photo-..."
+            className="w-full pl-9 pr-3.5 py-2 text-xs rounded-xl bg-surface-muted/60 border border-border-theme text-foreground placeholder:text-text-secondary/50 focus:outline-none focus:border-secondary transition-colors disabled:opacity-50"
+          />
+        </div>
+      </div>
+
+      {uploadError && (
+        <p className="text-xs text-red-500 font-medium">
+          {uploadError}
+        </p>
+      )}
+    </div>
+  );
+}
+
 const STATUS_TABS = [
   { label: "All Campaigns", value: "" },
   { label: "In Progress", value: "in_progress" },
@@ -385,9 +744,6 @@ export default function BrandCampaignsManager() {
   const [status, setStatus] = useState("");
   const [page, setPage] = useState(1);
 
-  // Frontend-only selection state
-  const [selectedIds, setSelectedIds] = useState([]);
-
   // Feedback Notification & Modal States
   const [successMsg, setSuccessMsg] = useState("");
   const [formError, setFormError] = useState("");
@@ -397,11 +753,16 @@ export default function BrandCampaignsManager() {
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
 
+  // Uploading state for cover images
+  const [isUploadingCreate, setIsUploadingCreate] = useState(false);
+  const [isUploadingEdit, setIsUploadingEdit] = useState(false);
+
   // Create Form State
   const [createForm, setCreateForm] = useState({
     title: "",
     description: "",
     category: "",
+    coverImage: "",
     platform: "instagram",
     budget: "",
     deadline: "",
@@ -415,6 +776,7 @@ export default function BrandCampaignsManager() {
     title: "",
     description: "",
     category: "",
+    coverImage: "",
     platform: "instagram",
     budget: "",
     deadline: "",
@@ -476,6 +838,7 @@ export default function BrandCampaignsManager() {
           title: selectedCampaign.title || "",
           description: selectedCampaign.description || "",
           category: selectedCampaign.category || "",
+          coverImage: selectedCampaign.coverImage || selectedCampaign.image || "",
           platform: selectedCampaign.platform || "instagram",
           budget: selectedCampaign.budget !== undefined ? String(selectedCampaign.budget) : "",
           deadline: formatDateForInput(selectedCampaign.deadline),
@@ -527,23 +890,6 @@ export default function BrandCampaignsManager() {
     fetchCampaignsWithFilters({ page: newPage });
   };
 
-  // Frontend-only Selection Handlers
-  const handleSelectAll = (e) => {
-    if (e.target.checked) {
-      const pageIds = campaigns.map((c) => c._id || c.id).filter(Boolean);
-      setSelectedIds((prev) => Array.from(new Set([...prev, ...pageIds])));
-    } else {
-      const pageIds = new Set(campaigns.map((c) => c._id || c.id).filter(Boolean));
-      setSelectedIds((prev) => prev.filter((id) => !pageIds.has(id)));
-    }
-  };
-
-  const handleSelectRow = (id) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
-  };
-
   // Deliverables Handlers for Create Form
   const addCreateDeliverable = () => {
     if (createDeliverableInput.trim()) {
@@ -573,6 +919,11 @@ export default function BrandCampaignsManager() {
     if (!data.title || !data.title.trim()) return "Campaign Title is required.";
     if (!data.description || !data.description.trim()) return "Description is required.";
     if (!data.category || !data.category.trim()) return "Category is required.";
+    if (data.coverImage && data.coverImage.trim()) {
+      if (!isValidImageUrl(data.coverImage)) {
+        return "Cover image must be a valid HTTP or HTTPS URL.";
+      }
+    }
     if (!data.platform) return "Platform is required.";
     if (data.budget === "" || isNaN(Number(data.budget)) || Number(data.budget) < 0) {
       return "Budget must be a number greater than or equal to 0.";
@@ -594,6 +945,7 @@ export default function BrandCampaignsManager() {
   // Handle Create Submission
   const handleCreateSubmit = async (e) => {
     e.preventDefault();
+    if (submitting || isUploadingCreate) return;
     setFormError("");
 
     const valError = validateCampaignForm(createForm, createDeliverables);
@@ -607,6 +959,7 @@ export default function BrandCampaignsManager() {
       title: createForm.title.trim(),
       description: createForm.description.trim(),
       category: createForm.category.trim(),
+      coverImage: createForm.coverImage ? createForm.coverImage.trim() : "",
       platform: createForm.platform,
       budget: Number(createForm.budget),
       deadline: createForm.deadline,
@@ -623,6 +976,7 @@ export default function BrandCampaignsManager() {
         title: "",
         description: "",
         category: "",
+        coverImage: "",
         platform: "instagram",
         budget: "",
         deadline: "",
@@ -659,6 +1013,7 @@ export default function BrandCampaignsManager() {
         title: campaign.title || "",
         description: campaign.description || "",
         category: campaign.category || "",
+        coverImage: campaign.coverImage || campaign.image || "",
         platform: campaign.platform || "instagram",
         budget: campaign.budget !== undefined ? String(campaign.budget) : "",
         deadline: formatDateForInput(campaign.deadline),
@@ -679,6 +1034,7 @@ export default function BrandCampaignsManager() {
   // Handle Edit Submission
   const handleEditSubmit = async (e) => {
     e.preventDefault();
+    if (submitting || isUploadingEdit) return;
     setFormError("");
 
     const valError = validateCampaignForm(editForm, editDeliverables);
@@ -700,6 +1056,7 @@ export default function BrandCampaignsManager() {
         title: editForm.title.trim(),
         description: editForm.description.trim(),
         category: editForm.category.trim(),
+        coverImage: editForm.coverImage ? editForm.coverImage.trim() : "",
         platform: editForm.platform,
         budget: Number(editForm.budget),
         deadline: editForm.deadline,
@@ -729,8 +1086,10 @@ export default function BrandCampaignsManager() {
 
   // Modal Closing Handlers
   const closeCreateModal = () => {
+    if (submitting || isUploadingCreate) return;
     setIsCreateOpen(false);
     setFormError("");
+    setCreateForm((prev) => ({ ...prev, coverImage: "" }));
   };
 
   const closeViewModal = () => {
@@ -739,6 +1098,7 @@ export default function BrandCampaignsManager() {
   };
 
   const closeEditModal = () => {
+    if (submitting || isUploadingEdit) return;
     setIsEditOpen(false);
     setFormError("");
     dispatch(clearSelectedCampaign());
@@ -921,19 +1281,7 @@ export default function BrandCampaignsManager() {
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
                     <tr className="border-b border-border-theme bg-surface-muted/40 text-text-secondary uppercase tracking-wider text-[10px] font-semibold">
-                      <th className="py-3.5 px-4 w-10 text-center">
-                        <input
-                          type="checkbox"
-                          aria-label="Select all campaigns on this page"
-                          checked={
-                            campaigns.length > 0 &&
-                            campaigns.every((c) => selectedIds.includes(c._id || c.id))
-                          }
-                          onChange={handleSelectAll}
-                          className="w-4 h-4 rounded border-border-theme text-secondary focus:ring-secondary/20 cursor-pointer accent-secondary"
-                        />
-                      </th>
-                      <th className="py-3.5 px-4 min-w-[220px]">Campaign</th>
+                      <th className="py-3.5 px-5 min-w-[220px]">Campaign</th>
                       <th className="py-3.5 px-4 min-w-[120px]">Platform</th>
                       <th className="py-3.5 px-4 min-w-[120px]">Category</th>
                       <th className="py-3.5 px-4 min-w-[110px]">Budget</th>
@@ -946,7 +1294,6 @@ export default function BrandCampaignsManager() {
                   <tbody className="divide-y divide-border-theme">
                     {campaigns.map((c) => {
                       const id = c._id || c.id;
-                      const isSelected = selectedIds.includes(id);
                       const badge = getStatusBadge(c.status);
                       const platformInfo = getPlatformBadge(c.platform);
                       const PlatformIcon = platformInfo.icon;
@@ -962,26 +1309,12 @@ export default function BrandCampaignsManager() {
                       return (
                         <tr
                           key={id || c.title}
-                          className={`transition-colors ${isSelected
-                              ? "bg-secondary/5 hover:bg-secondary/10"
-                              : "hover:bg-surface-muted/30"
-                            }`}
+                          className="hover:bg-surface-muted/30 transition-colors"
                         >
-                          {/* Frontend Selection Checkbox */}
-                          <td className="py-4 px-4 text-center">
-                            <input
-                              type="checkbox"
-                              aria-label={`Select campaign ${c.title}`}
-                              checked={isSelected}
-                              onChange={() => handleSelectRow(id)}
-                              className="w-4 h-4 rounded border-border-theme text-secondary focus:ring-secondary/20 cursor-pointer accent-secondary"
-                            />
-                          </td>
-
                           {/* Campaign Info (Avatar + Title + Category Subtitle) */}
-                          <td className="py-4 px-4">
+                          <td className="py-4 px-5">
                             <div className="flex items-center gap-3">
-                              <CampaignAvatar title={c.title} thumbnail={c.thumbnail} />
+                              <CampaignAvatar title={c.title} coverImage={c.coverImage || c.image || c.thumbnail} />
                               <div className="min-w-0">
                                 <button
                                   type="button"
@@ -1086,11 +1419,6 @@ export default function BrandCampaignsManager() {
                     </span>{" "}
                     of <span className="font-semibold text-foreground">{totalItems}</span> campaigns
                   </span>
-                  {selectedIds.length > 0 && (
-                    <span className="px-2 py-0.5 rounded-md bg-secondary/10 text-secondary font-medium">
-                      {selectedIds.length} selected
-                    </span>
-                  )}
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -1141,7 +1469,8 @@ export default function BrandCampaignsManager() {
               <button
                 type="button"
                 onClick={closeCreateModal}
-                className="p-1 rounded-lg text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors cursor-pointer"
+                disabled={submitting || isUploadingCreate}
+                className="p-1 rounded-lg text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <XMarkIcon />
               </button>
@@ -1156,6 +1485,14 @@ export default function BrandCampaignsManager() {
                   {formError}
                 </div>
               )}
+
+              {/* Cover Image Upload */}
+              <CampaignCoverUpload
+                coverImage={createForm.coverImage}
+                onChange={(url) => setCreateForm((prev) => ({ ...prev, coverImage: url }))}
+                onUploadingChange={setIsUploadingCreate}
+                disabled={submitting}
+              />
 
               {/* Title */}
               <div className="space-y-1">
@@ -1331,14 +1668,14 @@ export default function BrandCampaignsManager() {
                 <button
                   type="button"
                   onClick={closeCreateModal}
-                  disabled={submitting}
-                  className="px-4 py-2.5 rounded-xl border border-border-theme text-foreground text-xs font-semibold hover:bg-surface-muted transition-colors cursor-pointer"
+                  disabled={submitting || isUploadingCreate}
+                  className="px-4 py-2.5 rounded-xl border border-border-theme text-foreground text-xs font-semibold hover:bg-surface-muted transition-colors cursor-pointer disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  disabled={submitting}
+                  disabled={submitting || isUploadingCreate}
                   className="px-5 py-2.5 rounded-xl bg-secondary hover:bg-secondary-dark text-white text-xs font-semibold transition-all cursor-pointer disabled:opacity-50"
                 >
                   {submitting ? "Creating..." : "Create Campaign"}
@@ -1387,6 +1724,18 @@ export default function BrandCampaignsManager() {
                 </div>
               ) : selectedCampaign ? (
                 <>
+                  {/* Campaign Cover Banner (if present) */}
+                  {(selectedCampaign.coverImage || selectedCampaign.image) && (
+                    <div className="relative h-44 sm:h-52 w-full rounded-2xl overflow-hidden border border-border-theme bg-surface-muted/60 shrink-0">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={selectedCampaign.coverImage || selectedCampaign.image}
+                        alt={selectedCampaign.title || "Campaign banner"}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+
                   {/* Status & Category Banner */}
                   <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-xl bg-surface-muted/50 border border-border-theme">
                     <div>
@@ -1530,7 +1879,8 @@ export default function BrandCampaignsManager() {
               <button
                 type="button"
                 onClick={closeEditModal}
-                className="p-1 rounded-lg text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors cursor-pointer"
+                disabled={submitting || isUploadingEdit}
+                className="p-1 rounded-lg text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <XMarkIcon />
               </button>
@@ -1545,6 +1895,14 @@ export default function BrandCampaignsManager() {
                   {formError}
                 </div>
               )}
+
+              {/* Cover Image Upload */}
+              <CampaignCoverUpload
+                coverImage={editForm.coverImage}
+                onChange={(url) => setEditForm((prev) => ({ ...prev, coverImage: url }))}
+                onUploadingChange={setIsUploadingEdit}
+                disabled={submitting}
+              />
 
               {/* Title */}
               <div className="space-y-1">
@@ -1756,14 +2114,14 @@ export default function BrandCampaignsManager() {
                 <button
                   type="button"
                   onClick={closeEditModal}
-                  disabled={submitting}
-                  className="px-4 py-2.5 rounded-xl border border-border-theme text-foreground text-xs font-semibold hover:bg-surface-muted transition-colors cursor-pointer"
+                  disabled={submitting || isUploadingEdit}
+                  className="px-4 py-2.5 rounded-xl border border-border-theme text-foreground text-xs font-semibold hover:bg-surface-muted transition-colors cursor-pointer disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  disabled={submitting}
+                  disabled={submitting || isUploadingEdit}
                   className="px-5 py-2.5 rounded-xl bg-secondary hover:bg-secondary-dark text-white text-xs font-semibold transition-all cursor-pointer disabled:opacity-50"
                 >
                   {submitting ? "Saving..." : "Save Changes"}

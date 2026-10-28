@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import ScrollReveal from "@/components/theme/ScrollReveal";
 
 const PLATFORM_OPTIONS = [
   "All Channels",
@@ -230,7 +231,7 @@ export default function CreatorDiscovery() {
         "
       >
         {/* ================= CARD HEADER ================= */}
-        <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+        <ScrollReveal direction="up" className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
           <div className="max-w-[760px]">
             <h2
               className="
@@ -266,13 +267,15 @@ export default function CreatorDiscovery() {
               <span className="text-[10px] sm:text-[11px]">ACTIVE RIGHT NOW</span>
             </div>
           </div>
-        </div>
+        </ScrollReveal>
 
         {/* ================= THIN DIVIDER ================= */}
         <div className="my-6 h-px w-full bg-border-theme sm:my-8" />
 
         {/* ================= 4 FILTERS + EXPLORE CTA ================= */}
-        <div
+        <ScrollReveal
+          direction="up"
+          delay={100}
           className="
             grid grid-cols-1 gap-2.5
             sm:grid-cols-2
@@ -353,10 +356,10 @@ export default function CreatorDiscovery() {
               →
             </span>
           </button>
-        </div>
+        </ScrollReveal>
 
         {/* ================= CATEGORY CHIPS ================= */}
-        <div className="mt-7 sm:mt-8">
+        <ScrollReveal direction="up" delay={180} className="mt-7 sm:mt-8">
           <div
             className="
               flex items-center gap-2 overflow-x-auto pb-1.5 pt-0.5
@@ -396,7 +399,7 @@ export default function CreatorDiscovery() {
               );
             })}
           </div>
-        </div>
+        </ScrollReveal>
       </div>
     </section>
   );

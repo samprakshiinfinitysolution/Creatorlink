@@ -26,6 +26,7 @@ const validateCreateService = (req, res, next) => {
         title,
         description,
         category,
+        coverImage,
         platform,
         deliverables,
         pricingType,
@@ -86,6 +87,19 @@ const validateCreateService = (req, res, next) => {
             res,
             400,
             "Service category is required",
+            null
+        );
+    }
+
+
+    if (
+        coverImage !== undefined &&
+        typeof coverImage !== "string"
+    ) {
+        return sendResponse(
+            res,
+            400,
+            "Cover image must be a string",
             null
         );
     }
@@ -244,6 +258,7 @@ const validateUpdateService = (req, res, next) => {
         title,
         description,
         category,
+        coverImage,
         platform,
         deliverables,
         pricingType,
@@ -299,6 +314,19 @@ const validateUpdateService = (req, res, next) => {
             res,
             400,
             "Invalid service category",
+            null
+        );
+    }
+
+
+    if (
+        coverImage !== undefined &&
+        typeof coverImage !== "string"
+    ) {
+        return sendResponse(
+            res,
+            400,
+            "Cover image must be a string",
             null
         );
     }

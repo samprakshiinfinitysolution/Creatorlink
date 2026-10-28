@@ -73,7 +73,8 @@ const loginUser = async ({ email, password }) => {
 
     const tokenPayload = {
         userId: user._id.toString(),
-        role: user.role
+        role: user.role,
+        tokenVersion: user.passwordVersion || 0
     };
 
     const accessToken = generateAccessToken(
@@ -143,7 +144,8 @@ const refreshAccessToken = async (refreshToken) => {
 
     const tokenPayload = {
         userId: user._id.toString(),
-        role: user.role
+        role: user.role,
+        tokenVersion: user.passwordVersion || 0
     };
 
     const accessToken = generateAccessToken(
@@ -206,10 +208,75 @@ const getCurrentUser = async (userId) => {
 };
 
 
+// Changes password for authenticated user and safely invalidates previous refresh sessions.
+
+const changeUserPassword = async (userId, { currentPassword, newPassword }) => {
+
+    const user = await Auth.findById(userId);
+
+    if (!user) {
+        throw createApiError(
+            404,
+            "User not found"
+        );
+    }
+
+    const passwordMatched = await comparePassword(
+        currentPassword,
+        user.password
+    );
+
+    if (!passwordMatched) {
+        throw createApiError(
+            400,
+            "Current password is incorrect"
+        );
+    }
+
+    if (currentPassword === newPassword) {
+        throw createApiError(
+            400,
+            "New password must be different from current password"
+        );
+    }
+
+    const hashedPassword = await hashPassword(newPassword);
+    user.password = hashedPassword;
+    user.passwordVersion = (user.passwordVersion || 0) + 1;
+    user.passwordChangedAt = new Date();
+
+    // Safely invalidate all previous refresh sessions for security.
+    user.sessions = [];
+
+    // Issue a fresh session pair for the current authenticated client.
+    const tokenPayload = {
+        userId: user._id.toString(),
+        role: user.role,
+        tokenVersion: user.passwordVersion
+    };
+
+    const accessToken = generateAccessToken(tokenPayload);
+    const refreshToken = generateRefreshToken(tokenPayload);
+    const hashedRefreshToken = hashRefreshToken(refreshToken);
+
+    user.sessions.push({
+        refreshToken: hashedRefreshToken
+    });
+
+    await user.save();
+
+    return {
+        accessToken,
+        refreshToken
+    };
+};
+
+
 export {
     registerUser,
     loginUser,
     refreshAccessToken,
     logoutUser,
-    getCurrentUser
+    getCurrentUser,
+    changeUserPassword
 };

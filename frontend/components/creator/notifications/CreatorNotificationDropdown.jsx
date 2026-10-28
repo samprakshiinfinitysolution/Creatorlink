@@ -414,16 +414,10 @@ export default function CreatorNotificationDropdown({
                         : "hover:bg-surface-muted"
                     }`}
                   >
-                    <div
-                      className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
-                        isUnread
-                          ? "bg-secondary/20 text-secondary"
-                          : "bg-surface-muted text-text-secondary"
-                      }`}
-                    >
+                    <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 bg-surface-muted text-neutral-800 dark:text-neutral-200 border border-border-theme">
                       <NotificationTypeIcon
                         entityType={item.entityType}
-                        className="w-4 h-4"
+                        className="w-4 h-4 text-neutral-800 dark:text-neutral-200"
                       />
                     </div>
 

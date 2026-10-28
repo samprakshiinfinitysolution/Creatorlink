@@ -29,6 +29,12 @@ const campaignSchema = new mongoose.Schema(
             maxlength: 100
         },
 
+        coverImage: {
+            type: String,
+            trim: true,
+            default: ""
+        },
+
         platform: {
             type: String,
             enum: [

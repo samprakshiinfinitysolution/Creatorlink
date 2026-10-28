@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import ScrollReveal from "@/components/theme/ScrollReveal";
 
 // =========================================================
 // CENTRALIZED MOCK DATA (UI ONLY - READY FOR API REPLACEMENT)
@@ -75,48 +76,54 @@ export default function SalonTestimonials() {
         {/* =========================================================
             HEADER: EYEBROW & HEADING
         ========================================================= */}
-        <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-12 md:mb-16">
+        <ScrollReveal direction="up" className="text-center max-w-3xl mx-auto mb-10 sm:mb-12 md:mb-16">
           <span className="text-[11px] font-bold tracking-[0.25em] uppercase text-secondary block mb-3">
             SALON TESTIMONIALS
           </span>
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-[40px] font-serif font-medium tracking-tight text-foreground leading-[1.2]">
             What happens inside the Synergie ecosystem.
           </h2>
-        </div>
+        </ScrollReveal>
 
         {/* =========================================================
             DESKTOP LAYOUT (3 EQUAL CARDS - VISIBLE ON MD+)
         ========================================================= */}
         <div className="hidden md:grid grid-cols-3 gap-6 lg:gap-8 items-stretch">
-          {DESKTOP_TESTIMONIALS.map((item) => (
-            <div
+          {DESKTOP_TESTIMONIALS.map((item, index) => (
+            <ScrollReveal
               key={item.id}
-              className="bg-surface text-foreground rounded-2xl lg:rounded-3xl p-6 lg:p-8 border border-border-theme shadow-sm transition-all duration-350 ease-out flex flex-col justify-between lg:hover:-translate-y-1 lg:hover:scale-[1.01] lg:hover:border-secondary/40 lg:hover:shadow-[0_12px_30px_rgba(255,79,135,0.18)] dark:lg:hover:shadow-[0_12px_30px_rgba(255,107,157,0.22)]"
+              direction="up"
+              delay={index * 120}
+              className="h-full"
             >
-              {/* Top Pink 5-Star Rating */}
-              <div className="flex items-center gap-1 text-secondary text-xs sm:text-sm mb-4">
-                {Array.from({ length: item.rating }).map((_, i) => (
-                  <span key={i} className="text-secondary select-none">
-                    ★
-                  </span>
-                ))}
-              </div>
+              <div
+                className="bg-surface text-foreground rounded-2xl lg:rounded-3xl p-6 lg:p-8 border border-border-theme shadow-sm transition-all duration-350 ease-out flex flex-col justify-between h-full lg:hover:-translate-y-1 lg:hover:scale-[1.01] lg:hover:border-secondary/40 lg:hover:shadow-[0_12px_30px_rgba(255,79,135,0.18)] dark:lg:hover:shadow-[0_12px_30px_rgba(255,107,157,0.22)]"
+              >
+                {/* Top Pink 5-Star Rating */}
+                <div className="flex items-center gap-1 text-secondary text-xs sm:text-sm mb-4">
+                  {Array.from({ length: item.rating }).map((_, i) => (
+                    <span key={i} className="text-secondary select-none">
+                      ★
+                    </span>
+                  ))}
+                </div>
 
-              {/* Quote Text */}
-              <p className="font-serif italic text-xs sm:text-sm lg:text-[14px] text-foreground/90 leading-relaxed mb-6 flex-1">
-                {item.quote}
-              </p>
-
-              {/* Divider & Author Info */}
-              <div className="border-t border-border-theme/60 pt-4 mt-auto">
-                <h3 className="font-serif font-medium text-sm lg:text-base text-foreground">
-                  {item.name}
-                </h3>
-                <p className="text-xs text-text-secondary font-sans mt-0.5">
-                  {item.role}
+                {/* Quote Text */}
+                <p className="font-serif italic text-xs sm:text-sm lg:text-[14px] text-foreground/90 leading-relaxed mb-6 flex-1">
+                  {item.quote}
                 </p>
+
+                {/* Divider & Author Info */}
+                <div className="border-t border-border-theme/60 pt-4 mt-auto">
+                  <h3 className="font-serif font-medium text-sm lg:text-base text-foreground">
+                    {item.name}
+                  </h3>
+                  <p className="text-xs text-text-secondary font-sans mt-0.5">
+                    {item.role}
+                  </p>
+                </div>
               </div>
-            </div>
+            </ScrollReveal>
           ))}
         </div>
 
@@ -124,36 +131,39 @@ export default function SalonTestimonials() {
             MOBILE LAYOUT (1 CARD PER ROW STACKED - VISIBLE ON MOBILE)
         ========================================================= */}
         <div className="block md:hidden space-y-5">
-          {MOBILE_TESTIMONIALS.map((item) => (
-            <div
+          {MOBILE_TESTIMONIALS.map((item, index) => (
+            <ScrollReveal
               key={item.id}
-              className="bg-surface text-foreground rounded-[24px] p-6 relative border border-border-theme shadow-sm"
+              direction="up"
+              delay={index * 80}
             >
-              {/* Subtle Pale-Pink Quotation Mark Top-Right */}
-              <span className="absolute top-5 right-6 text-4xl sm:text-5xl font-serif text-secondary/30 leading-none select-none pointer-events-none">
-                “
-              </span>
+              <div className="bg-surface text-foreground rounded-[24px] p-6 relative border border-border-theme shadow-sm">
+                {/* Subtle Pale-Pink Quotation Mark Top-Right */}
+                <span className="absolute top-5 right-6 text-4xl sm:text-5xl font-serif text-secondary/30 leading-none select-none pointer-events-none">
+                  “
+                </span>
 
-              {/* Quote Text */}
-              <p className="font-serif italic text-[16px] sm:text-[18px] text-foreground leading-snug mb-6 pr-6">
-                {item.quote}
-              </p>
+                {/* Quote Text */}
+                <p className="font-serif italic text-[16px] sm:text-[18px] text-foreground leading-snug mb-6 pr-6">
+                  {item.quote}
+                </p>
 
-              {/* Author Row with Black Initials Badge */}
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-black dark:bg-white text-white dark:text-black flex items-center justify-center font-bold text-xs tracking-tight shrink-0">
-                  {item.initials}
-                </div>
-                <div>
-                  <h3 className="font-bold text-sm text-foreground font-sans">
-                    {item.name}
-                  </h3>
-                  <p className="text-xs text-text-secondary font-sans">
-                    {item.role}
-                  </p>
+                {/* Author Row with Black Initials Badge */}
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-black dark:bg-white text-white dark:text-black flex items-center justify-center font-bold text-xs tracking-tight shrink-0">
+                    {item.initials}
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-sm text-foreground font-sans">
+                      {item.name}
+                    </h3>
+                    <p className="text-xs text-text-secondary font-sans">
+                      {item.role}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
+            </ScrollReveal>
           ))}
         </div>
       </div>

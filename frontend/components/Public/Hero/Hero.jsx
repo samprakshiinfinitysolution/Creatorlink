@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ScrollReveal from "@/components/theme/ScrollReveal";
 
 export default function Hero() {
   return (
@@ -80,7 +81,7 @@ export default function Hero() {
 
       {/* ================= LOCATION ================= */}
 
-      <div className="flex justify-start lg:justify-center">
+      <ScrollReveal direction="up" delay={0} className="flex justify-start lg:justify-center">
         <div
           className="
             inline-flex
@@ -109,11 +110,13 @@ export default function Hero() {
 
           PARIS • MILAN • TOKYO • NY
         </div>
-      </div>
+      </ScrollReveal>
 
       {/* ================= HEADING ================= */}
 
-      <div
+      <ScrollReveal
+        direction="up"
+        delay={80}
         className="
           mt-6
           w-full
@@ -199,11 +202,13 @@ export default function Hero() {
             Create high-conversion cultural moments that audiences remember.
           </span>
         </p>
-      </div>
+      </ScrollReveal>
 
       {/* ================= BUTTONS ================= */}
 
-      <div
+      <ScrollReveal
+        direction="up"
+        delay={160}
         className="
           mt-7
           flex
@@ -280,13 +285,13 @@ export default function Hero() {
         >
           Join as Creator
         </Link>
-      </div>
+      </ScrollReveal>
 
       {/* =====================================================
           FEATURES
       ===================================================== */}
 
-      <div className="mx-auto mt-7 w-full max-w-[850px] sm:mt-8 lg:mt-10">
+      <ScrollReveal direction="up" delay={240} className="mx-auto mt-7 w-full max-w-[850px] sm:mt-8 lg:mt-10">
 
         {/* ===================================================
             MOBILE + TABLET FEATURES
@@ -479,7 +484,7 @@ export default function Hero() {
             <span>48h Turnaround</span>
           </div>
         </div>
-      </div>
+      </ScrollReveal>
     </section>
   );
 }

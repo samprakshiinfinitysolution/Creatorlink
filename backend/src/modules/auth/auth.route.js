@@ -5,13 +5,15 @@ import {
     login,
     refreshToken,
     logout,
-    getMe
+    getMe,
+    changePassword
 } from "./auth.controller.js";
 
 import {
     validateRegister,
     validateLogin,
-    validateRefreshToken
+    validateRefreshToken,
+    validateChangePassword
 } from "./auth.validation.js";
 import authenticateUser from "../../middleware/auth.middleware.js";
 
@@ -53,6 +55,21 @@ router.post(
     "/logout",
     validateRefreshToken,
     logout
+);
+
+// Change password for currently authenticated user.
+router.patch(
+    "/change-password",
+    authenticateUser,
+    validateChangePassword,
+    changePassword
+);
+
+router.post(
+    "/change-password",
+    authenticateUser,
+    validateChangePassword,
+    changePassword
 );
 
 

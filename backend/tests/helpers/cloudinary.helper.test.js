@@ -6,7 +6,8 @@ import sharp from "sharp";
 import cloudinary from "../../src/config/cloudinary.js";
 import {
     uploadImageToCloudinary,
-    uploadMultipleImagesToCloudinary
+    uploadMultipleImagesToCloudinary,
+    uploadVideoToCloudinary
 } from "../../src/utils/helpers/cloudinary.helper.js";
 
 describe("Cloudinary Helper (uploadImageToCloudinary & uploadMultipleImagesToCloudinary)", () => {
@@ -326,3 +327,191 @@ describe("Cloudinary Helper (uploadImageToCloudinary & uploadMultipleImagesToClo
         );
     });
 });
+
+describe("Cloudinary Helper (uploadVideoToCloudinary)", () => {
+    let originalUploadStream;
+
+    beforeEach(() => {
+        originalUploadStream = cloudinary.uploader.upload_stream;
+    });
+
+    afterEach(() => {
+        cloudinary.uploader.upload_stream = originalUploadStream;
+    });
+
+    it("streams raw video buffer directly to Cloudinary mock with resource_type: video and returns url and publicId", async () => {
+        let capturedOptions = null;
+        let capturedStreamedBuffer = null;
+
+        const fakeVideoBuffer = Buffer.from("fake-mp4-video-stream-content-bytes-12345");
+
+        cloudinary.uploader.upload_stream = (options, callback) => {
+            capturedOptions = options;
+            const chunks = [];
+
+            const writable = new Writable({
+                write(chunk, encoding, next) {
+                    chunks.push(chunk);
+                    next();
+                },
+                final(done) {
+                    capturedStreamedBuffer = Buffer.concat(chunks);
+                    callback(null, {
+                        public_id: `${options.folder}/test_video_asset_999`,
+                        secure_url: `https://res.cloudinary.com/test-cloud/video/upload/v12345/${options.folder}/test_video_asset_999.mp4`,
+                        duration: 12.5,
+                        format: "mp4"
+                    });
+                    done();
+                }
+            });
+
+            return writable;
+        };
+
+        const result = await uploadVideoToCloudinary(fakeVideoBuffer, "creatorlink/deliverables");
+
+        assert.ok(result, "Result should be defined");
+        assert.equal(typeof result.url, "string");
+        assert.equal(typeof result.publicId, "string");
+        assert.equal(result.publicId, "creatorlink/deliverables/test_video_asset_999");
+        assert.ok(result.url.endsWith(".mp4"), "URL should end with .mp4");
+        assert.equal(result.duration, 12.5);
+        assert.equal(result.format, "mp4");
+
+        assert.ok(capturedOptions, "Options must be passed to upload_stream");
+        assert.equal(capturedOptions.folder, "creatorlink/deliverables");
+        assert.equal(capturedOptions.resource_type, "video");
+
+        assert.ok(capturedStreamedBuffer, "Streamed buffer must be captured");
+        assert.deepEqual(
+            capturedStreamedBuffer,
+            fakeVideoBuffer,
+            "Video buffer must be streamed directly without alteration"
+        );
+    });
+
+    it("validates input buffer and rejects invalid buffers with 400 ApiError", async () => {
+        await assert.rejects(
+            async () => uploadVideoToCloudinary(null, "creatorlink/deliverables"),
+            (err) => {
+                assert.equal(err.statusCode, 400);
+                assert.equal(err.message, "Invalid video buffer provided");
+                return true;
+            }
+        );
+
+        await assert.rejects(
+            async () => uploadVideoToCloudinary(Buffer.alloc(0), "creatorlink/deliverables"),
+            (err) => {
+                assert.equal(err.statusCode, 400);
+                assert.equal(err.message, "Invalid video buffer provided");
+                return true;
+            }
+        );
+    });
+
+    it("validates target folder and rejects invalid folders with 400 ApiError", async () => {
+        const fakeVideoBuffer = Buffer.from("fake-video-bytes");
+
+        await assert.rejects(
+            async () => uploadVideoToCloudinary(fakeVideoBuffer, ""),
+            (err) => {
+                assert.equal(err.statusCode, 400);
+                assert.equal(err.message, "A valid upload folder must be specified");
+                return true;
+            }
+        );
+
+        await assert.rejects(
+            async () => uploadVideoToCloudinary(fakeVideoBuffer, "   "),
+            (err) => {
+                assert.equal(err.statusCode, 400);
+                assert.equal(err.message, "A valid upload folder must be specified");
+                return true;
+            }
+        );
+    });
+
+    it("handles Cloudinary callback upload error safely with 500 ApiError", async () => {
+        const fakeVideoBuffer = Buffer.from("fake-video-bytes");
+
+        cloudinary.uploader.upload_stream = (options, callback) => {
+            const writable = new Writable({
+                write(chunk, enc, next) {
+                    next();
+                },
+                final(done) {
+                    callback(new Error("Cloudinary video quota exceeded"));
+                    done();
+                }
+            });
+            return writable;
+        };
+
+        await assert.rejects(
+            async () => uploadVideoToCloudinary(fakeVideoBuffer, "creatorlink/deliverables"),
+            (err) => {
+                assert.equal(err.statusCode, 500);
+                assert.equal(err.message, "Cloudinary video quota exceeded");
+                return true;
+            }
+        );
+    });
+
+    it("handles Cloudinary stream error event safely with 500 ApiError", async () => {
+        const fakeVideoBuffer = Buffer.from("fake-video-bytes");
+
+        cloudinary.uploader.upload_stream = (options, callback) => {
+            const writable = new Writable({
+                write(chunk, enc, next) {
+                    next();
+                },
+                final(done) {
+                    writable.emit("error", new Error("Video socket stream error"));
+                    done();
+                }
+            });
+            return writable;
+        };
+
+        await assert.rejects(
+            async () => uploadVideoToCloudinary(fakeVideoBuffer, "creatorlink/deliverables"),
+            (err) => {
+                assert.equal(err.statusCode, 500);
+                assert.equal(err.message, "Video socket stream error");
+                return true;
+            }
+        );
+    });
+
+    it("handles missing secure_url in Cloudinary response with 500 ApiError", async () => {
+        const fakeVideoBuffer = Buffer.from("fake-video-bytes");
+
+        cloudinary.uploader.upload_stream = (options, callback) => {
+            const writable = new Writable({
+                write(chunk, enc, next) {
+                    next();
+                },
+                final(done) {
+                    callback(null, { public_id: "missing_video_url_id" });
+                    done();
+                }
+            });
+            return writable;
+        };
+
+        await assert.rejects(
+            async () => uploadVideoToCloudinary(fakeVideoBuffer, "creatorlink/deliverables"),
+            (err) => {
+                assert.equal(err.statusCode, 500);
+                assert.equal(
+                    err.message,
+                    "Cloudinary upload succeeded but no secure URL was returned"
+                );
+                return true;
+            }
+        );
+    });
+});
+

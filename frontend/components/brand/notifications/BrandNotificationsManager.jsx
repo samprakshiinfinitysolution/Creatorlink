@@ -284,7 +284,7 @@ export default function BrandNotificationsManager() {
                 type="button"
                 onClick={handleMarkAllRead}
                 disabled={markingAllRead}
-                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-secondary/10 hover:bg-secondary/20 text-secondary border border-secondary/30 text-xs font-semibold tracking-wide transition-all cursor-pointer disabled:opacity-50 shrink-0"
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-neutral-950 hover:bg-neutral-800 text-white dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-100 text-xs font-semibold tracking-wide transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shrink-0 shadow-xs"
               >
                 <CheckIcon className="w-4 h-4" />
                 <span>{markingAllRead ? "Marking all..." : "Mark all as read"}</span>
@@ -435,14 +435,8 @@ export default function BrandNotificationsManager() {
                   >
                     {/* Left: Icon + Content */}
                     <div className="flex items-start gap-3 min-w-0 flex-1">
-                      <div
-                        className={`w-8.5 h-8.5 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 transition-colors ${
-                          isUnread
-                            ? "bg-secondary text-white shadow-xs"
-                            : "bg-surface-muted text-text-secondary"
-                        }`}
-                      >
-                        <NotificationTypeIcon entityType={item.entityType} className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+                      <div className="w-8.5 h-8.5 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 transition-colors bg-surface-muted text-neutral-800 dark:text-neutral-200 border border-border-theme">
+                        <NotificationTypeIcon entityType={item.entityType} className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-neutral-800 dark:text-neutral-200" />
                       </div>
 
                       <div className="min-w-0 flex-1 space-y-0.5">
@@ -513,7 +507,7 @@ export default function BrandNotificationsManager() {
           </div>
 
           {/* Pagination Controls */}
-          {pagination && totalPages > 1 && (
+          {pagination && (totalPages > 1 || totalItems > 0) && (
             <div className="bg-surface border border-border-theme rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 min-w-0 w-full overflow-hidden">
               <span className="text-xs text-text-secondary">
                 Showing page <strong className="text-foreground">{currentPage}</strong> of{" "}

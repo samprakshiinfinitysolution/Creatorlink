@@ -1,12 +1,105 @@
 import mongoose from "mongoose";
 import Review from "./reviews.model.js";
 import Workspace from "../workspace/workspace.model.js";
+import BrandProfile from "../brand/profile/profile.model.js";
+import Profile from "../creator/profile/profile.model.js";
 import { createNotificationSafe } from "../notifications/notification.service.js";
 import createApiError from "../../utils/ApiError.js";
 import {
     getPagination,
     getPaginationData
 } from "../../utils/pagination.js";
+
+// Helper to enrich reviews with BrandProfile (logo, companyName) and Creator Profile (profileImage)
+const attachReviewProfiles = async (reviews) => {
+    if (!reviews) return reviews;
+    const isSingle = !Array.isArray(reviews);
+    const reviewList = isSingle ? [reviews] : reviews;
+    if (reviewList.length === 0) return reviews;
+
+    const userIds = new Set();
+    reviewList.forEach((rev) => {
+        const revObj = rev.toObject ? rev.toObject() : rev;
+        const reviewerId = revObj.reviewer?._id || (typeof revObj.reviewer === "string" ? revObj.reviewer : null);
+        const revieweeId = revObj.reviewee?._id || (typeof revObj.reviewee === "string" ? revObj.reviewee : null);
+        if (reviewerId) userIds.add(reviewerId.toString());
+        if (revieweeId) userIds.add(revieweeId.toString());
+    });
+
+    const idList = Array.from(userIds).map((id) => new mongoose.Types.ObjectId(id));
+
+    const [brandProfiles, creatorProfiles] = await Promise.all([
+        idList.length > 0
+            ? BrandProfile.find({ user: { $in: idList } }).select("user logo companyName").lean()
+            : [],
+        idList.length > 0
+            ? Profile.find({ user: { $in: idList } }).select("user profileImage").lean()
+            : []
+    ]);
+
+    const brandMap = new Map();
+    brandProfiles.forEach((bp) => {
+        if (bp.user) brandMap.set(bp.user.toString(), bp);
+    });
+
+    const creatorMap = new Map();
+    creatorProfiles.forEach((cp) => {
+        if (cp.user) creatorMap.set(cp.user.toString(), cp);
+    });
+
+    const enriched = reviewList.map((rev) => {
+        const revObj = rev.toObject ? rev.toObject() : { ...rev };
+
+        if (revObj.reviewer && typeof revObj.reviewer === "object") {
+            const rId = revObj.reviewer._id?.toString();
+            const bp = rId ? brandMap.get(rId) : null;
+            if (bp) {
+                revObj.reviewer = {
+                    ...revObj.reviewer,
+                    logo: bp.logo || "",
+                    avatar: bp.logo || "",
+                    profileImage: bp.logo || "",
+                    ...(bp.companyName ? { companyName: bp.companyName } : {})
+                };
+            }
+            const cp = rId ? creatorMap.get(rId) : null;
+            if (cp) {
+                revObj.reviewer = {
+                    ...revObj.reviewer,
+                    profileImage: cp.profileImage || "",
+                    avatar: cp.profileImage || ""
+                };
+            }
+        }
+
+        if (revObj.reviewee && typeof revObj.reviewee === "object") {
+            const reId = revObj.reviewee._id?.toString();
+            const cp = reId ? creatorMap.get(reId) : null;
+            if (cp) {
+                revObj.reviewee = {
+                    ...revObj.reviewee,
+                    profileImage: cp.profileImage || "",
+                    avatar: cp.profileImage || "",
+                    image: cp.profileImage || ""
+                };
+            }
+            const bp = reId ? brandMap.get(reId) : null;
+            if (bp) {
+                revObj.reviewee = {
+                    ...revObj.reviewee,
+                    logo: bp.logo || "",
+                    avatar: bp.logo || "",
+                    profileImage: bp.logo || "",
+                    ...(bp.companyName ? { companyName: bp.companyName } : {})
+                };
+            }
+        }
+
+        return revObj;
+    });
+
+    return isSingle ? enriched[0] : enriched;
+};
 
 // Brand submits a review for a completed workspace
 const createBrandReviewService = async (brandId, payload) => {
@@ -83,7 +176,7 @@ const createBrandReviewService = async (brandId, payload) => {
         })
         .populate({
             path: "campaign",
-            select: "title"
+            select: "title coverImage"
         })
         .populate({
             path: "workspace",
@@ -108,7 +201,8 @@ const createBrandReviewService = async (brandId, payload) => {
         idempotencyKey: `review:received:${newReview._id}`
     });
 
-    return populatedReview;
+    const enrichedReview = await attachReviewProfiles(populatedReview);
+    return enrichedReview;
 };
 
 // Brand fetches reviews submitted by them
@@ -130,7 +224,7 @@ const getBrandReviewsService = async (brandId, query = {}) => {
         })
         .populate({
             path: "campaign",
-            select: "title"
+            select: "title coverImage"
         })
         .populate({
             path: "workspace",
@@ -138,9 +232,10 @@ const getBrandReviewsService = async (brandId, query = {}) => {
         });
 
     const pagination = getPaginationData(currentPage, itemsPerPage, totalReviews);
+    const enrichedReviews = await attachReviewProfiles(reviews);
 
     return {
-        reviews,
+        reviews: enrichedReviews,
         pagination
     };
 };
@@ -173,7 +268,7 @@ const getCreatorReviewsService = async (creatorId, query = {}) => {
         })
         .populate({
             path: "campaign",
-            select: "title"
+            select: "title coverImage"
         })
         .populate({
             path: "workspace",
@@ -193,9 +288,10 @@ const getCreatorReviewsService = async (creatorId, query = {}) => {
     }
 
     const pagination = getPaginationData(currentPage, itemsPerPage, totalReviews);
+    const enrichedReviews = await attachReviewProfiles(reviews);
 
     return {
-        reviews,
+        reviews: enrichedReviews,
         stats: {
             totalReviews,
             averageRating
@@ -239,14 +335,15 @@ const getWorkspaceReviewService = async (workspaceId, userId) => {
         })
         .populate({
             path: "campaign",
-            select: "title"
+            select: "title coverImage"
         })
         .populate({
             path: "workspace",
             select: "status agreedPrice currency"
         });
 
-    return review;
+    const enrichedReview = review ? await attachReviewProfiles(review) : null;
+    return enrichedReview;
 };
 
 export {

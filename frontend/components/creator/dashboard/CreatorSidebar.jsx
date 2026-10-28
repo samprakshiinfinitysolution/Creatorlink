@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
@@ -10,6 +10,14 @@ import { clearProfile } from "@/redux/creator/profile/profile_slice";
 // =========================================================
 // SVG ICONS
 // =========================================================
+function HamburgerIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+    </svg>
+  );
+}
+
 function DashboardIcon({ className = "w-5 h-5" }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
@@ -122,67 +130,185 @@ const navItems = [
   { name: "Notifications", href: "/creator/notifications", icon: NotificationsIcon },
 ];
 
-function SidebarContent({ pathname, setMobileOpen, handleLogout }) {
+function SidebarContent({ pathname, setMobileOpen, handleLogout, collapsed = false, toggleCollapsed = () => {} }) {
   return (
-    <div className="flex flex-col h-full bg-surface text-foreground border-r border-border-theme w-64 select-none">
-      {/* Brand Header */}
-      <div className="p-6 border-b border-border-theme flex items-center justify-between">
-        <Link href="/" className="inline-flex items-center gap-1.5 font-heading text-xl font-medium tracking-wide text-foreground">
-          <span>CREATORLINK</span>
-          <span className="text-secondary text-xl leading-none">✦</span>
-        </Link>
-        <button
-          type="button"
-          onClick={() => setMobileOpen(false)}
-          className="lg:hidden p-1.5 rounded-lg text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors"
-          aria-label="Close sidebar"
-        >
-          <CloseIcon />
-        </button>
+    <div
+      className={`flex flex-col h-full bg-surface text-foreground border-r border-border-theme select-none transition-all duration-300 ease-in-out ${
+        collapsed ? "w-[72px]" : "w-64"
+      }`}
+    >
+      {/* Top Header with 3-bar Toggle Button */}
+      <div
+        className={`border-b border-border-theme flex items-center h-16 shrink-0 transition-all ${
+          collapsed ? "justify-center px-2" : "justify-between px-4 sm:px-5"
+        }`}
+      >
+        {!collapsed ? (
+          <>
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1.5 font-serif text-lg font-medium tracking-wide text-foreground truncate"
+            >
+              <span>CREATORLINK</span>
+              <span className="text-secondary text-lg leading-none">✦</span>
+            </Link>
+
+            {/* Desktop 3-bar toggle button */}
+            <button
+              type="button"
+              onClick={toggleCollapsed}
+              className="hidden lg:flex p-1.5 rounded-xl text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors cursor-pointer"
+              title="Collapse sidebar"
+              aria-label="Collapse sidebar"
+            >
+              <HamburgerIcon className="w-5 h-5" />
+            </button>
+
+            {/* Mobile Close Button */}
+            <button
+              type="button"
+              onClick={() => setMobileOpen(false)}
+              className="lg:hidden p-1.5 rounded-lg text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors cursor-pointer"
+              aria-label="Close sidebar"
+            >
+              <CloseIcon />
+            </button>
+          </>
+        ) : (
+          /* Collapsed Header: Centered 3-bar Toggle Button */
+          <button
+            type="button"
+            onClick={toggleCollapsed}
+            className="hidden lg:flex p-2 rounded-xl text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors cursor-pointer"
+            title="Expand sidebar"
+            aria-label="Expand sidebar"
+          >
+            <HamburgerIcon className="w-5 h-5 text-secondary" />
+          </button>
+        )}
       </div>
 
       {/* Navigation Items List */}
-      <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto custom-scrollbar">
+      <nav
+        className={`flex-1 space-y-0.5 overflow-y-auto custom-scrollbar transition-all ${
+          collapsed ? "px-2 py-2.5" : "px-3 py-3"
+        }`}
+      >
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = pathname === item.href;
+          const isActive =
+            pathname === item.href ||
+            (item.href !== "/creator/dashboard" &&
+              item.href !== "/creator/campaigns" &&
+              pathname?.startsWith(item.href + "/")) ||
+            (item.href === "/creator/campaigns" &&
+              pathname?.startsWith("/creator/campaigns/") &&
+              !pathname?.startsWith("/creator/campaigns/discover"));
 
           return (
             <Link
               key={item.name}
               href={item.href}
               onClick={() => setMobileOpen(false)}
-              className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-sans font-medium transition-all duration-200 ${isActive
-                  ? "bg-secondary/10 text-secondary font-semibold shadow-xs"
-                  : "text-text-secondary hover:text-foreground hover:bg-surface-muted"
-                }`}
+              title={item.name}
+              className={`flex items-center rounded-xl font-sans font-medium text-[13px] sm:text-[13.5px] transition-all duration-150 group ${
+                collapsed
+                  ? `justify-center w-full h-10 ${
+                      isActive
+                        ? "bg-[#fff0f4] dark:bg-[#2a171f] text-[#ff2d6c] font-semibold"
+                        : "text-text-secondary hover:text-foreground hover:bg-surface-muted"
+                    }`
+                  : `gap-2.5 px-3 py-2 ${
+                      isActive
+                        ? "bg-[#fff0f4] dark:bg-[#2a171f] text-[#ff2d6c] font-semibold"
+                        : "text-text-secondary hover:text-foreground hover:bg-surface-muted"
+                    }`
+              }`}
             >
-              <Icon className={`w-4 h-4 ${isActive ? "text-secondary" : "text-text-secondary"}`} />
-              <span>{item.name}</span>
+              <Icon
+                className={`w-[18px] h-[18px] shrink-0 transition-colors ${
+                  isActive ? "text-[#ff2d6c]" : "text-text-secondary group-hover:text-foreground"
+                }`}
+              />
+              {!collapsed && <span className="truncate">{item.name}</span>}
             </Link>
           );
         })}
       </nav>
 
       {/* Footer / Logout */}
-      <div className="p-4 border-t border-border-theme">
+      <div className={`border-t border-border-theme transition-all ${collapsed ? "p-2" : "p-3"}`}>
         <button
           type="button"
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-sans font-medium text-text-secondary hover:text-red-500 hover:bg-red-500/10 transition-all duration-200 cursor-pointer text-left"
+          title="Log Out"
+          className={`w-full flex items-center rounded-xl font-sans font-medium text-[13px] sm:text-[13.5px] text-text-secondary hover:text-red-500 hover:bg-red-500/10 transition-all duration-150 cursor-pointer text-left ${
+            collapsed ? "justify-center h-10" : "gap-2.5 px-3 py-2"
+          }`}
         >
-          <LogoutIcon className="w-4 h-4" />
-          <span>Log Out</span>
+          <LogoutIcon className="w-[18px] h-[18px] shrink-0" />
+          {!collapsed && <span>Log Out</span>}
         </button>
       </div>
     </div>
   );
 }
 
-export default function CreatorSidebar({ mobileOpen = false, setMobileOpen = () => { } }) {
+// Persistent memory across client-side page navigation to prevent flicker
+let isGlobalCreatorSidebarCollapsed = false;
+if (typeof window !== "undefined") {
+  try {
+    isGlobalCreatorSidebarCollapsed = localStorage.getItem("creator_sidebar_collapsed") === "true";
+  } catch {
+    // ignore
+  }
+}
+
+export default function CreatorSidebar({ mobileOpen = false, setMobileOpen = () => {} }) {
   const pathname = usePathname();
   const router = useRouter();
   const dispatch = useDispatch();
+
+  const [collapsed, setCollapsed] = useState(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("creator_sidebar_collapsed");
+        if (saved !== null) {
+          return saved === "true";
+        }
+      } catch {
+        // ignore
+      }
+    }
+    return isGlobalCreatorSidebarCollapsed;
+  });
+
+  // Ensure body class is synchronized
+  useEffect(() => {
+    if (collapsed) {
+      document.body.classList.add("creator-sidebar-collapsed");
+    } else {
+      document.body.classList.remove("creator-sidebar-collapsed");
+    }
+  }, [collapsed]);
+
+  const toggleCollapsed = () => {
+    setCollapsed((prev) => {
+      const next = !prev;
+      isGlobalCreatorSidebarCollapsed = next;
+      try {
+        localStorage.setItem("creator_sidebar_collapsed", String(next));
+      } catch {
+        // ignore
+      }
+      if (next) {
+        document.body.classList.add("creator-sidebar-collapsed");
+      } else {
+        document.body.classList.remove("creator-sidebar-collapsed");
+      }
+      return next;
+    });
+  };
 
   const handleLogout = async () => {
     setMobileOpen(false);
@@ -193,9 +319,19 @@ export default function CreatorSidebar({ mobileOpen = false, setMobileOpen = () 
 
   return (
     <>
-      {/* Desktop Fixed Sidebar */}
-      <aside className="hidden lg:flex fixed top-0 left-0 bottom-0 z-30 w-64 shrink-0">
-        <SidebarContent pathname={pathname} setMobileOpen={setMobileOpen} handleLogout={handleLogout} />
+      {/* Desktop Fixed Sidebar with Expand / Collapse Transition */}
+      <aside
+        className={`hidden lg:flex fixed top-0 left-0 bottom-0 z-30 shrink-0 transition-all duration-300 ease-in-out ${
+          collapsed ? "w-[72px]" : "w-64"
+        }`}
+      >
+        <SidebarContent
+          pathname={pathname}
+          setMobileOpen={setMobileOpen}
+          handleLogout={handleLogout}
+          collapsed={collapsed}
+          toggleCollapsed={toggleCollapsed}
+        />
       </aside>
 
       {/* Mobile Drawer Backdrop & Menu */}
@@ -206,7 +342,13 @@ export default function CreatorSidebar({ mobileOpen = false, setMobileOpen = () 
             onClick={() => setMobileOpen(false)}
           />
           <div className="relative z-10 flex flex-col w-64 max-w-full h-full shadow-2xl">
-            <SidebarContent pathname={pathname} setMobileOpen={setMobileOpen} handleLogout={handleLogout} />
+            <SidebarContent
+              pathname={pathname}
+              setMobileOpen={setMobileOpen}
+              handleLogout={handleLogout}
+              collapsed={false}
+              toggleCollapsed={() => {}}
+            />
           </div>
         </div>
       )}

@@ -31,39 +31,6 @@ function StarIcon({ className = "w-4 h-4", filled = true }) {
   );
 }
 
-function MessageSquareTextIcon({ className = "w-5 h-5" }) {
-  return (
-    <svg
-      className={className}
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={1.75}
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"
-      />
-      <path strokeLinecap="round" strokeLinejoin="round" d="M8 9h8m-8 4h5" />
-    </svg>
-  );
-}
-
-function BarChartIcon({ className = "w-5 h-5" }) {
-  return (
-    <svg
-      className={className}
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={2.2}
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" d="M6 14v6M12 8v12M18 11v9" />
-    </svg>
-  );
-}
-
 function DocumentTextIcon({ className = "w-4 h-4" }) {
   return (
     <svg
@@ -311,6 +278,7 @@ export default function CreatorReviewsManager() {
   const [currentPage, setCurrentPage] = useState(1);
   const [ratingFilter, setRatingFilter] = useState("all");
   const [activeMenuId, setActiveMenuId] = useState(null);
+  const [failedCoverUrls, setFailedCoverUrls] = useState({});
 
   useEffect(() => {
     dispatch(fetchCreatorReviews({ page: currentPage, limit: 10 }));
@@ -356,22 +324,7 @@ export default function CreatorReviewsManager() {
         {/* Main Content Area */}
         <main className="p-4 sm:p-6 lg:p-8 space-y-6 flex-1 max-w-7xl w-full mx-auto">
           {/* Header Section */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-secondary/10 text-secondary border border-secondary/20 uppercase tracking-wider">
-                  Verified Brand Feedback
-                </span>
-              </div>
-              <h1 className="font-sans font-bold text-2xl sm:text-3xl text-foreground tracking-tight mt-1">
-                Client Reviews & Reputation
-              </h1>
-              <p className="text-xs text-text-secondary mt-1">
-                Verified ratings and qualitative evaluations received from luxury brands across completed workspaces.
-              </p>
-            </div>
-
-            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div className="space-y-2">
                 {/* Verification Badge */}
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white dark:bg-surface-muted border border-neutral-200/80 dark:border-border-theme text-xs font-semibold text-neutral-900 dark:text-white shadow-2xs">
@@ -383,8 +336,8 @@ export default function CreatorReviewsManager() {
                   <span>Verified Brand Feedback</span>
                 </div>
 
-                <h1 className="font-serif font-bold text-3xl sm:text-4xl text-neutral-950 dark:text-white tracking-tight">
-                  Client Reviews &amp; Reputation
+                <h1 className="font-serif font-medium text-3xl sm:text-4xl text-neutral-950 dark:text-white tracking-tight">
+                  Client Reviews And Reputation
                 </h1>
                 <p className="text-xs sm:text-sm text-text-secondary max-w-xl">
                   Trusted by top brands. Real feedback from completed collaborations.
@@ -420,7 +373,6 @@ export default function CreatorReviewsManager() {
                 )}
               </div>
             </div>
-          </div>
 
           {/* Error Banner */}
           {error && (
@@ -495,7 +447,7 @@ export default function CreatorReviewsManager() {
           </div>
 
           {/* Rating Filter Tabs */}
-          <div className="bg-white dark:bg-surface border border-neutral-200/80 dark:border-border-theme rounded-2xl p-2 sm:p-2.5 shadow-xs flex items-center gap-2 sm:gap-2.5 overflow-x-auto custom-scrollbar">
+          <div className="bg-white dark:bg-surface border border-neutral-200/80 dark:border-border-theme rounded-2xl p-2 sm:p-2.5 shadow-xs flex items-center gap-2 sm:gap-2.5 overflow-x-auto custom-scrollbar py-3">
             {[
               { id: "all", label: "All Reviews" },
               { id: "5", label: "5 Stars Only" },
@@ -576,7 +528,10 @@ export default function CreatorReviewsManager() {
             /* Reviews Card Grid */
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
               {filteredReviews.map((review) => {
-                const brandName = review.reviewer?.name || "Brand Partner";
+                const brandName =
+                  review.reviewer?.companyName ||
+                  review.reviewer?.name ||
+                  "Brand Partner";
                 const initials = getInitials(brandName);
                 const rawRating = Number(review.rating);
                 const hasValidRating =
@@ -603,6 +558,9 @@ export default function CreatorReviewsManager() {
                   review.reviewer?.avatar ||
                   review.reviewer?.profileImage ||
                   review.reviewer?.logo ||
+                  review.reviewer?.image ||
+                  review.brandProfile?.logo ||
+                  review.brand?.logo ||
                   null;
 
                 const isVerified = Boolean(
@@ -626,19 +584,20 @@ export default function CreatorReviewsManager() {
                     <div className="space-y-3.5">
                       {/* Top Cover-Image Banner */}
                       <div className="h-28 sm:h-32 rounded-xl sm:rounded-2xl overflow-hidden relative border border-neutral-200/70 dark:border-border-theme/40 bg-pink-50 dark:bg-surface-muted group/banner">
-                        {coverImage ? (
+                        {coverImage && !failedCoverUrls[review._id] ? (
                           /* eslint-disable-next-line @next/next/no-img-element */
                           <img
                             src={coverImage}
                             alt={campaignTitle}
                             className="w-full h-full object-cover transition-transform duration-500 group-hover/banner:scale-105"
+                            onError={() => setFailedCoverUrls((prev) => ({ ...prev, [review._id]: true }))}
                           />
                         ) : (
                           <div className="w-full h-full bg-gradient-to-br from-pink-50 via-rose-50 to-pink-100 dark:from-pink-950/20 dark:via-rose-950/15 dark:to-surface flex items-center justify-between px-4 sm:px-5 relative overflow-hidden">
                             {/* Ambient Graphic in Fallback Banner */}
                             <div className="absolute -right-8 -bottom-8 w-28 h-28 rounded-full bg-pink-200/40 dark:bg-pink-500/10 blur-xl pointer-events-none" />
                             <div className="min-w-0 pr-8">
-                              <span className="font-heading font-black tracking-widest text-base sm:text-lg text-neutral-900 dark:text-neutral-100 uppercase truncate block">
+                              <span className="font-serif font-bold tracking-wider text-base sm:text-lg text-neutral-900 dark:text-neutral-100 uppercase truncate block">
                                 {brandName}
                               </span>
                               <span className="text-[10px] text-neutral-600 dark:text-neutral-400 tracking-wider font-sans uppercase mt-0.5 block truncate">
@@ -667,13 +626,21 @@ export default function CreatorReviewsManager() {
                             <img
                               src={brandAvatar}
                               alt={brandName}
+                              onError={(e) => {
+                                e.currentTarget.style.display = "none";
+                                const fallback = e.currentTarget.parentElement?.querySelector(".avatar-fallback");
+                                if (fallback) fallback.classList.remove("hidden");
+                              }}
                               className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover border border-neutral-200 dark:border-neutral-700 shrink-0 shadow-2xs"
                             />
-                          ) : (
-                            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-neutral-950 dark:bg-neutral-800 text-white font-sans font-bold text-xs sm:text-sm flex items-center justify-center border border-neutral-200 dark:border-neutral-700 shrink-0 shadow-2xs uppercase tracking-wider">
-                              {initials}
-                            </div>
-                          )}
+                          ) : null}
+                          <div
+                            className={`avatar-fallback w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-neutral-950 dark:bg-neutral-800 text-white font-sans font-bold text-xs sm:text-sm flex items-center justify-center border border-neutral-200 dark:border-neutral-700 shrink-0 shadow-2xs uppercase tracking-wider ${
+                              brandAvatar ? "hidden" : ""
+                            }`}
+                          >
+                            {initials}
+                          </div>
 
                           <div className="min-w-0">
                             <div className="flex items-center gap-1.5 flex-wrap">
@@ -681,7 +648,7 @@ export default function CreatorReviewsManager() {
                                 {brandName}
                               </h3>
                               {isVerified && (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/70 dark:border-emerald-800/60 leading-none">
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-transparent text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 dark:border-emerald-500/30 leading-none">
                                   <CheckCircleIcon className="w-3 h-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
                                   <span>Verified</span>
                                 </span>
@@ -695,7 +662,7 @@ export default function CreatorReviewsManager() {
                         </div>
 
                         {/* Star Rating Badge */}
-                        <div className="flex items-center gap-1.5 bg-amber-50 dark:bg-amber-950/40 px-2.5 py-1 sm:py-1.5 rounded-xl border border-amber-200/70 dark:border-amber-800/50 shrink-0">
+                        <div className="flex items-center gap-1.5 bg-transparent px-2.5 py-1 sm:py-1.5 rounded-xl border border-amber-500/30 dark:border-amber-500/30 shrink-0">
                           <span className="font-bold text-xs sm:text-sm text-amber-700 dark:text-amber-400 tabular-nums">
                             {hasValidRating ? ratingNum.toFixed(1) : "N/A"}
                           </span>

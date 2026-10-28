@@ -22,7 +22,7 @@ const initializeSocket = (httpServer) => {
     const allowedOrigins = [
         ...new Set([
             process.env.FRONTEND_URL,
-            "http://192.168.1.4:3005",
+            "http://192.168.1.23:3005",
             "http://localhost:3005",
             "http://127.0.0.1:3005"
         ].filter(Boolean))

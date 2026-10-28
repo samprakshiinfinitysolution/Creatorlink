@@ -41,21 +41,23 @@ function getInitials(title, fallback = "DL") {
   return clean.slice(0, 2).toUpperCase();
 }
 
-function DeliverableAvatar({ title, thumbnail, fallbackText = "DL" }) {
+function DeliverableAvatar({ title, coverImage, thumbnail, fallbackText = "DL" }) {
   const [failedUrl, setFailedUrl] = useState(null);
   const initials = getInitials(title, fallbackText);
-  const hasFailed = Boolean(thumbnail && failedUrl === thumbnail);
+  const rawSrc = coverImage || thumbnail;
+  const imageSrc = typeof rawSrc === "string" && rawSrc.trim() ? rawSrc.trim() : null;
+  const hasFailed = Boolean(imageSrc && failedUrl === imageSrc);
 
-  if (thumbnail && !hasFailed) {
+  if (imageSrc && !hasFailed) {
     return (
       <div className="w-10 h-10 rounded-xl bg-surface-muted/60 border border-border-theme overflow-hidden shrink-0 flex items-center justify-center">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          key={thumbnail}
-          src={thumbnail}
+          key={imageSrc}
+          src={imageSrc}
           alt={title || "Deliverable"}
           className="w-full h-full object-cover"
-          onError={() => setFailedUrl(thumbnail)}
+          onError={() => setFailedUrl(imageSrc)}
         />
       </div>
     );
@@ -183,6 +185,7 @@ export default function BrandUpcomingDeadlines({ deadlines = [] }) {
                 <div className="flex items-start gap-3">
                   <DeliverableAvatar
                     title={item.title}
+                    coverImage={item.coverImage}
                     thumbnail={item.thumbnail || item.image}
                     fallbackText={isCampaign ? "CP" : "WS"}
                   />

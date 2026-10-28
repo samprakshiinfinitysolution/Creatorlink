@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import ScrollReveal from "@/components/theme/ScrollReveal";
 
 // =========================================================
 // CENTRALIZED MOCK DATA (UI ONLY - READY FOR API REPLACEMENT)
@@ -237,7 +238,7 @@ export default function MaisonProtocol() {
           {/* =========================================================
               LEFT COLUMN: HEADER & SUPPORTING FEATURES (DESKTOP)
           ========================================================= */}
-          <div className="md:col-span-5 flex flex-col justify-center">
+          <ScrollReveal direction="up" className="md:col-span-5 flex flex-col justify-center">
             <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-secondary block mb-2">
               {PROTOCOL_DATA.eyebrow}
             </span>
@@ -266,12 +267,12 @@ export default function MaisonProtocol() {
                 </div>
               ))}
             </div>
-          </div>
+          </ScrollReveal>
 
           {/* =========================================================
               RIGHT COLUMN: CAMPAIGN GOVERNANCE CARD
           ========================================================= */}
-          <div className="md:col-span-7">
+          <ScrollReveal direction="left" delay={150} className="md:col-span-7">
             <div className="relative overflow-hidden rounded-2xl border border-border-theme bg-surface p-5 sm:p-7 shadow-sm transition-all duration-300">
               {/* CARD HEADER: STATUS & CAMPAIGN DETAILS */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-border-theme">
@@ -472,7 +473,7 @@ export default function MaisonProtocol() {
                 </div>
               </div>
             </div>
-          </div>
+          </ScrollReveal>
         </div>
       </div>
     </section>

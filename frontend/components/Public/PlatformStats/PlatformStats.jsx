@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import ScrollReveal from "@/components/theme/ScrollReveal";
 
 // =========================================================
 // CENTRALIZED MOCK DATA (UI ONLY - READY FOR API REPLACEMENT)
@@ -38,9 +39,11 @@ export default function PlatformStats() {
         {/* STATS ROW / GRID WITH BOTTOM DIVIDER */}
         <div className="pb-8 md:pb-10 border-b border-border-theme">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 sm:gap-10 md:gap-12 lg:gap-16 items-center">
-            {STATS_DATA.map((stat) => (
-              <div
+            {STATS_DATA.map((stat, index) => (
+              <ScrollReveal
                 key={stat.id}
+                direction="up"
+                delay={index * 100}
                 className="flex flex-col items-center justify-center text-center group"
               >
                 {/* Large Editorial Serif Number */}
@@ -52,7 +55,7 @@ export default function PlatformStats() {
                 <span className="text-[10px] sm:text-xs font-bold tracking-[0.16em] uppercase text-text-secondary leading-tight">
                   {stat.label}
                 </span>
-              </div>
+              </ScrollReveal>
             ))}
           </div>
         </div>

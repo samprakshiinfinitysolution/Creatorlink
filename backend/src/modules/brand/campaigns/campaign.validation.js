@@ -29,6 +29,7 @@ const validateCreateCampaign = (req, res, next) => {
         title,
         description,
         category,
+        coverImage,
         platform,
         budget,
         currency,
@@ -88,6 +89,21 @@ const validateCreateCampaign = (req, res, next) => {
         throw createApiError(
             400,
             "Category must be a string with maximum 100 characters"
+        );
+    }
+
+
+    // Validate cover image if provided.
+    if (
+        coverImage !== undefined &&
+        (
+            typeof coverImage !== "string" ||
+            coverImage.length > 2000
+        )
+    ) {
+        throw createApiError(
+            400,
+            "Cover image must be a string with maximum 2000 characters"
         );
     }
 
@@ -186,6 +202,7 @@ const validateUpdateCampaign = (req, res, next) => {
         "title",
         "description",
         "category",
+        "coverImage",
         "platform",
         "budget",
         "currency",
@@ -226,6 +243,7 @@ const validateUpdateCampaign = (req, res, next) => {
         title,
         description,
         category,
+        coverImage,
         platform,
         budget,
         currency,
@@ -277,6 +295,21 @@ const validateUpdateCampaign = (req, res, next) => {
         throw createApiError(
             400,
             "Category must be a string with maximum 100 characters"
+        );
+    }
+
+
+    // Validate cover image if provided.
+    if (
+        coverImage !== undefined &&
+        (
+            typeof coverImage !== "string" ||
+            coverImage.length > 2000
+        )
+    ) {
+        throw createApiError(
+            400,
+            "Cover image must be a string with maximum 2000 characters"
         );
     }
 

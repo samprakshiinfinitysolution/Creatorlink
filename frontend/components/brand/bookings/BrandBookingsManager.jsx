@@ -38,6 +38,17 @@ function formatDate(dateStr) {
   });
 }
 
+function getCreatorInitials(name) {
+  if (!name || typeof name !== "string") return "C";
+  const trimmed = name.trim();
+  if (!trimmed) return "C";
+  const parts = trimmed.split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+  return trimmed[0].toUpperCase();
+}
+
 function getStatusBadge(status) {
   switch (status?.toLowerCase()) {
     case "pending":
@@ -152,6 +163,7 @@ export default function BrandBookingsManager() {
   // Detail Modal State
   const [selectedBookingId, setSelectedBookingId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [failedCreatorAvatars, setFailedCreatorAvatars] = useState({});
 
   const dispatch = useDispatch();
 
@@ -296,7 +308,7 @@ export default function BrandBookingsManager() {
                       : "bg-surface-muted/60 text-text-secondary hover:text-foreground hover:bg-surface-muted"
                       }`}
                   >
-                    
+
                     {opt.label}
                   </button>
                 );
@@ -365,7 +377,7 @@ export default function BrandBookingsManager() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border-theme">
-                    {bookings.map((booking) => {
+                    {bookings.map((booking, index) => {
                       const creatorName =
                         booking.creator?.name ||
                         booking.creator?.displayName ||
@@ -377,6 +389,17 @@ export default function BrandBookingsManager() {
                         booking.creator?.email ||
                         booking.creator?.user?.email ||
                         "N/A";
+
+                      const bookingId = String(booking._id || booking.id || index);
+                      const rawPhoto =
+                        booking.creator?.profileImage ||
+                        booking.creator?.avatar ||
+                        booking.creator?.image ||
+                        null;
+                      const creatorPhoto =
+                        typeof rawPhoto === "string" && rawPhoto.trim() ? rawPhoto.trim() : null;
+                      const showCreatorPhoto = Boolean(creatorPhoto) && !failedCreatorAvatars[bookingId];
+                      const creatorInitials = getCreatorInitials(creatorName);
 
                       const campaignTitle = booking.campaign?.title || "Campaign";
                       const campaignCategory = booking.campaign?.category || "N/A";
@@ -400,11 +423,32 @@ export default function BrandBookingsManager() {
                         >
                           {/* Creator Column */}
                           <td className="py-4 px-5">
-                            <div className="font-semibold text-foreground text-sm font-sans">
-                              {creatorName}
-                            </div>
-                            <div className="text-[11px] text-text-secondary mt-0.5">
-                              {creatorEmail}
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 flex items-center justify-center font-sans font-semibold text-xs sm:text-sm shrink-0 shadow-2xs overflow-hidden">
+                                {showCreatorPhoto ? (
+                                  <img
+                                    src={creatorPhoto}
+                                    alt={creatorName}
+                                    className="w-full h-full object-cover"
+                                    onError={() =>
+                                      setFailedCreatorAvatars((prev) => ({
+                                        ...prev,
+                                        [bookingId]: true,
+                                      }))
+                                    }
+                                  />
+                                ) : (
+                                  creatorInitials
+                                )}
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="font-semibold text-foreground text-sm font-sans truncate">
+                                  {creatorName}
+                                </div>
+                                <div className="text-[11px] text-text-secondary mt-0.5 truncate">
+                                  {creatorEmail}
+                                </div>
+                              </div>
                             </div>
                           </td>
 

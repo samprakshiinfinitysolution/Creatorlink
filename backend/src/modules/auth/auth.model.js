@@ -24,6 +24,17 @@ const authSchema = new mongoose.Schema(
             required: true
         },
 
+        // Password version incremented upon password change to invalidate older access tokens.
+        passwordVersion: {
+            type: Number,
+            default: 0
+        },
+
+        // Timestamp of most recent password change.
+        passwordChangedAt: {
+            type: Date
+        },
+
         // User role.
         role: {
             type: String,

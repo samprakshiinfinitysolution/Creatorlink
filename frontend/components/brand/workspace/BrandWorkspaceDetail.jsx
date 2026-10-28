@@ -52,10 +52,19 @@ function CreditCardIcon({ className = "w-4 h-4" }) {
     </svg>
   );
 }
+
 function ChevronLeftIcon({ className = "w-4 h-4" }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+    </svg>
+  );
+}
+
+function ChevronDownIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
     </svg>
   );
 }
@@ -70,7 +79,7 @@ function CalendarIcon({ className = "w-4 h-4" }) {
 
 function CheckIcon({ className = "w-4 h-4" }) {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
     </svg>
   );
@@ -78,16 +87,8 @@ function CheckIcon({ className = "w-4 h-4" }) {
 
 function RefreshIcon({ className = "w-4 h-4" }) {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
-    </svg>
-  );
-}
-
-function LinkIcon({ className = "w-4 h-4" }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
     </svg>
   );
 }
@@ -120,6 +121,78 @@ function ChatBubbleIcon({ className = "w-4 h-4" }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h.008v.008H8.625V12zm4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h.008v.008h-.008V12zm4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h.008v.008h-.008V12zM21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+    </svg>
+  );
+}
+
+function UploadIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+    </svg>
+  );
+}
+
+function ShieldCheckIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+    </svg>
+  );
+}
+
+function LayersIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6.429 9.75L2.25 12l4.179 2.25m0-4.5l5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-4.179 2.25m0 0L21.75 12l-4.179 2.25m0 0l4.179 2.25L12 21.75 2.25 16.5l4.179-2.25m11.142 0l-5.571 3-5.571-3" />
+    </svg>
+  );
+}
+
+function PlayIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M8 5v14l11-7z" />
+    </svg>
+  );
+}
+
+function ExternalLinkIcon({ className = "w-3.5 h-3.5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+    </svg>
+  );
+}
+
+function ClockIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  );
+}
+
+function SparklesIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+    </svg>
+  );
+}
+
+function FolderIcon({ className = "w-3.5 h-3.5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
+    </svg>
+  );
+}
+
+function HistoryIcon({ className = "w-3.5 h-3.5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
     </svg>
   );
 }
@@ -161,81 +234,296 @@ const formatDateTime = (dateString) => {
   }
 };
 
+const isValidExternalUrl = (url) => {
+  if (!url || typeof url !== "string") return false;
+  const trimmed = url.trim();
+  if (!trimmed) return false;
+  try {
+    const parsed = new URL(trimmed);
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
+  } catch {
+    return false;
+  }
+};
+
+const detectMediaType = (url) => {
+  if (!url || typeof url !== "string") return "unknown";
+  const trimmed = url.trim();
+  if (!trimmed) return "unknown";
+  const cleanUrl = trimmed.split("?")[0].split("#")[0].toLowerCase();
+  if (
+    cleanUrl.includes("/video/upload/") ||
+    cleanUrl.endsWith(".mp4") ||
+    cleanUrl.endsWith(".webm") ||
+    cleanUrl.endsWith(".mov") ||
+    cleanUrl.endsWith(".m4v")
+  ) {
+    return "video";
+  }
+  if (
+    cleanUrl.includes("/image/upload/") ||
+    cleanUrl.endsWith(".webp") ||
+    cleanUrl.endsWith(".jpg") ||
+    cleanUrl.endsWith(".jpeg") ||
+    cleanUrl.endsWith(".png") ||
+    cleanUrl.endsWith(".gif") ||
+    cleanUrl.endsWith(".avif")
+  ) {
+    return "image";
+  }
+  return "file";
+};
+
+// Action Links with strict HTTP/HTTPS URL validation
+function SubmissionActionLinks({ link, fileUrl, className = "" }) {
+  const cleanLink = isValidExternalUrl(link) ? link.trim() : null;
+  const cleanFileUrl = isValidExternalUrl(fileUrl) ? fileUrl.trim() : null;
+
+  if (!cleanLink && !cleanFileUrl) return null;
+
+  const mediaType = cleanFileUrl ? detectMediaType(cleanFileUrl) : null;
+  const secondaryLabel =
+    mediaType === "video" ? "Video" : mediaType === "image" ? "Image" : "File";
+
+  return (
+    <div className={`flex flex-col gap-2 pt-2 ${className}`}>
+      {cleanFileUrl && (
+        <a
+          href={cleanFileUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#E11D48] dark:text-[#FB7185] hover:opacity-85 transition-opacity group"
+          title={`Open ${secondaryLabel.toLowerCase()} asset in a new tab`}
+        >
+          <ExternalLinkIcon className="w-3.5 h-3.5 shrink-0 group-hover:translate-x-0.5 transition-transform" />
+          <span>View Asset</span>
+          <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-[#F1F3F5] dark:bg-zinc-800 text-[#495057] dark:text-zinc-300 border border-gray-200/50 dark:border-zinc-700/60 ml-0.5">
+            {secondaryLabel}
+          </span>
+        </a>
+      )}
+      {cleanLink && (
+        <a
+          href={cleanLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#E11D48] dark:text-[#FB7185] hover:opacity-85 transition-opacity group"
+          title="Open live content in a new tab"
+        >
+          <ExternalLinkIcon className="w-3.5 h-3.5 shrink-0 group-hover:translate-x-0.5 transition-transform" />
+          <span>View Content</span>
+          <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-[#F1F3F5] dark:bg-zinc-800 text-[#495057] dark:text-zinc-300 border border-gray-200/50 dark:border-zinc-700/60 ml-0.5">
+            Open Link
+          </span>
+        </a>
+      )}
+    </div>
+  );
+}
+
+const isSubmissionInHistory = (delivSub, history) => {
+  if (!delivSub || !Array.isArray(history) || history.length === 0) return false;
+
+  return history.some((hist) => {
+    if (!hist) return false;
+
+    // 1. Direct ID match
+    if (hist._id && delivSub._id && String(hist._id) === String(delivSub._id)) {
+      return true;
+    }
+
+    // 2. Exact timestamp match within 2000ms
+    if (hist.submittedAt && delivSub.submittedAt) {
+      const histTime = new Date(hist.submittedAt).getTime();
+      const delivTime = new Date(delivSub.submittedAt).getTime();
+      if (!Number.isNaN(histTime) && !Number.isNaN(delivTime) && Math.abs(histTime - delivTime) < 2000) {
+        return true;
+      }
+    }
+
+    // 3. Exact content match (fileUrl, link, and notes)
+    const histFile = typeof hist.fileUrl === "string" ? hist.fileUrl.trim() : "";
+    const delivFile = typeof delivSub.fileUrl === "string" ? delivSub.fileUrl.trim() : "";
+    const histLink = typeof hist.link === "string" ? hist.link.trim() : "";
+    const delivLink = typeof delivSub.link === "string" ? delivSub.link.trim() : "";
+    const histNotes = typeof hist.notes === "string" ? hist.notes.trim() : "";
+    const delivNotes = typeof delivSub.notes === "string" ? delivSub.notes.trim() : "";
+
+    if (
+      (histFile || histLink) &&
+      histFile === delivFile &&
+      histLink === delivLink &&
+      histNotes === delivNotes
+    ) {
+      return true;
+    }
+
+    return false;
+  });
+};
+
+const findDeliverableForSubmission = (sub, deliverablesList) => {
+  if (!sub || typeof sub !== "object" || !Array.isArray(deliverablesList) || deliverablesList.length === 0) {
+    return null;
+  }
+
+  // 1. Explicit deliverableId matched against the deliverable _id
+  if (sub.deliverableId) {
+    const found = deliverablesList.find(
+      (d) => d && typeof d === "object" && String(d._id) === String(sub.deliverableId)
+    );
+    if (found) return found;
+  }
+
+  // 2. Direct ID match on d.submission._id
+  if (sub._id) {
+    const found = deliverablesList.find(
+      (d) =>
+        d &&
+        typeof d === "object" &&
+        d.submission?._id &&
+        String(d.submission._id) === String(sub._id)
+    );
+    if (found) return found;
+  }
+
+  // 3. Submission timestamp within a reasonable tolerance (2s), only when unambiguous
+  if (sub.submittedAt) {
+    const subTime = new Date(sub.submittedAt).getTime();
+    if (!Number.isNaN(subTime) && subTime > 0) {
+      const matches = deliverablesList.filter((d) => {
+        if (!d || typeof d !== "object" || !d.submission?.submittedAt) return false;
+        const dTime = new Date(d.submission.submittedAt).getTime();
+        return !Number.isNaN(dTime) && Math.abs(dTime - subTime) < 2000;
+      });
+      if (matches.length === 1) {
+        return matches[0];
+      }
+    }
+  }
+
+  // 4. Matching asset URL and other submission fields, only when unambiguous
+  const subFile = typeof sub.fileUrl === "string" ? sub.fileUrl.trim() : "";
+  const subLink = typeof sub.link === "string" ? sub.link.trim() : "";
+  if (subFile || subLink) {
+    const matches = deliverablesList.filter((d) => {
+      if (!d || typeof d !== "object" || !d.submission) return false;
+      const dFile = typeof d.submission.fileUrl === "string" ? d.submission.fileUrl.trim() : "";
+      const dLink = typeof d.submission.link === "string" ? d.submission.link.trim() : "";
+
+      const fileMatch = subFile && dFile === subFile;
+      const linkMatch = subLink && dLink === subLink;
+
+      if (subFile && subLink) {
+        return fileMatch && linkMatch;
+      }
+      return Boolean(fileMatch || linkMatch);
+    });
+    if (matches.length === 1) {
+      return matches[0];
+    }
+  }
+
+  // 5. Title as a fallback only when exactly one deliverable matches
+  const searchTitle = (
+    typeof sub.deliverableTitle === "string" && sub.deliverableTitle.trim()
+      ? sub.deliverableTitle.trim()
+      : typeof sub.title === "string"
+      ? sub.title.trim()
+      : ""
+  ).toLowerCase();
+
+  if (searchTitle) {
+    const matches = deliverablesList.filter(
+      (d) =>
+        d &&
+        typeof d === "object" &&
+        typeof d.title === "string" &&
+        d.title.trim().toLowerCase() === searchTitle
+    );
+    if (matches.length === 1) {
+      return matches[0];
+    }
+  }
+
+  return null;
+};
+
+
 const getStatusBadge = (status) => {
   switch (status) {
-    case "in_progress":
-      return {
-        label: "In Progress",
-        color: "bg-amber-500/10 text-amber-500 border-amber-500/20",
-      };
     case "submitted":
       return {
-        label: "Submitted",
-        color: "bg-purple-500/10 text-purple-500 border-purple-500/20",
+        label: "SUBMITTED",
+        color: "bg-[#F3E8FF] text-[#9333EA] border-[#E9D5FF] dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800",
+      };
+    case "in_progress":
+      return {
+        label: "IN PROGRESS",
+        color: "bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800",
       };
     case "revision_requested":
       return {
-        label: "Revision Requested",
-        color: "bg-amber-500/10 text-amber-500 border-amber-500/20",
+        label: "REVISION REQUESTED",
+        color: "bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800",
       };
     case "completed":
       return {
-        label: "Completed",
-        color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+        label: "COMPLETED",
+        color: "bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800",
       };
     case "cancelled":
       return {
-        label: "Cancelled",
-        color: "bg-red-500/10 text-red-500 border-red-500/20",
+        label: "CANCELLED",
+        color: "bg-rose-50 text-rose-600 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800",
       };
     default:
       return {
-        label: status ? status.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()) : "Unknown",
-        color: "bg-surface-muted text-text-secondary border-border-theme",
+        label: status ? status.replace(/_/g, " ").toUpperCase() : "ACTIVE",
+        color: "bg-gray-100 text-gray-700 border-gray-200 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700",
       };
   }
 };
 
 const getDeliverableStatusBadge = (status) => {
   switch (status) {
-    case "pending":
-      return {
-        label: "Pending",
-        color: "bg-slate-500/10 text-slate-400 border-slate-500/20",
-      };
-    case "in_progress":
-      return {
-        label: "In Progress",
-        color: "bg-amber-500/10 text-amber-500 border-amber-500/20",
-      };
     case "submitted":
       return {
-        label: "Submitted",
-        color: "bg-purple-500/10 text-purple-500 border-purple-500/20",
-      };
-    case "revision_requested":
-      return {
-        label: "Revision Requested",
-        color: "bg-amber-500/10 text-amber-500 border-amber-500/20",
+        label: "SUBMITTED",
+        color: "bg-[#F3E8FF] text-[#9333EA] border-[#E9D5FF] dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800",
       };
     case "approved":
       return {
-        label: "Approved",
-        color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+        label: "APPROVED",
+        color: "bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800",
       };
     case "completed":
       return {
-        label: "Completed",
-        color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+        label: "COMPLETED",
+        color: "bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800",
       };
+    case "revision_requested":
+      return {
+        label: "REVISION REQUESTED",
+        color: "bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800",
+      };
+    case "in_progress":
+      return {
+        label: "IN PROGRESS",
+        color: "bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800",
+      };
+    case "pending":
     default:
       return {
-        label: status ? status.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()) : "Pending",
-        color: "bg-surface-muted text-text-secondary border-border-theme",
+        label: "PENDING",
+        color: "bg-gray-100 text-gray-500 border-gray-200 dark:bg-zinc-800 dark:text-zinc-400 dark:border-zinc-700",
       };
   }
 };
 
+// =========================================================
+// MAIN COMPONENT
+// =========================================================
 export default function BrandWorkspaceDetail({ workspaceId }) {
   const dispatch = useDispatch();
   const { selectedWorkspace, loading, error, successMessage } = useSelector(
@@ -263,6 +551,13 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
   const [paymentActionError, setPaymentActionError] = useState("");
   const [paymentActionSuccess, setPaymentActionSuccess] = useState("");
   const [isInitiatingPayment, setIsInitiatingPayment] = useState(false);
+  const [deliverableFilter, setDeliverableFilter] = useState("all"); // 'all' | 'submitted' | 'pending'
+  const [isOlderSubmissionsOpen, setIsOlderSubmissionsOpen] = useState(false);
+  const [failedAvatarImages, setFailedAvatarImages] = useState({});
+
+  useEffect(() => {
+    setFailedAvatarImages({});
+  }, [workspaceId]);
 
   useEffect(() => {
     if (workspaceId) {
@@ -278,7 +573,6 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
   const isCurrentWorkspaceReview = useMemo(() => {
     if (!workspaceReview || !workspaceId) return false;
 
-    // Check if review has a workspace property (either populated object with _id, or raw ID string)
     const revWs = workspaceReview.workspace;
     if (revWs !== undefined && revWs !== null) {
       const revWsId =
@@ -288,8 +582,6 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
       return revWsId === String(workspaceId);
     }
 
-    // Fallback: If workspace reference property is not directly exposed on the review object,
-    // verify against the tracked workspaceReviewWorkspaceId in Redux state
     if (workspaceReviewWorkspaceId && String(workspaceReviewWorkspaceId) === String(workspaceId)) {
       return true;
     }
@@ -318,7 +610,7 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
         script.onload = () => resolve(true);
         script.onerror = () => resolve(false);
         document.body.appendChild(script);
-      } catch (err) {
+      } catch {
         resolve(false);
       }
     });
@@ -337,7 +629,7 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
     let scriptLoaded = false;
     try {
       scriptLoaded = await loadRazorpayScript();
-    } catch (sdkErr) {
+    } catch {
       scriptLoaded = false;
     }
 
@@ -395,7 +687,7 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
           email: selectedWorkspace.brand?.email || "",
         },
         theme: {
-          color: "#4F46E5",
+          color: "#FF4F87",
         },
       };
 
@@ -451,7 +743,20 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
   const badge = getStatusBadge(workspace?.status);
   const campaign = workspace?.campaign;
   const creator = workspace?.creator;
+  const brand = workspace?.brand;
   const service = workspace?.service;
+  const campaignCover = campaign?.coverImage || campaign?.image || (Array.isArray(campaign?.images) && campaign?.images[0] ? (typeof campaign.images[0] === "string" ? campaign.images[0] : campaign.images[0]?.url) : null);
+  const creatorPhoto = creator?.profileImage || creator?.avatar || creator?.image;
+
+  // Determine active avatar image with safe error fallback:
+  // If creatorPhoto fails, fallback to campaignCover. If both fail or are invalid, fallback to initials.
+  const activeAvatarImage =
+    creatorPhoto && !failedAvatarImages[creatorPhoto]
+      ? creatorPhoto
+      : campaignCover && !failedAvatarImages[campaignCover]
+      ? campaignCover
+      : null;
+  const avatarInitial = ((creator?.name || brand?.name || campaign?.title || "C")[0] || "C").toUpperCase();
 
   // Identify whether an active/completed paid payment already exists for this workspace
   const existingPaidPayment = (brandPaymentsList || []).find(
@@ -465,138 +770,283 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
     typeof workspace?.booking === "object" && workspace?.booking !== null
       ? workspace.booking._id
       : workspace?.booking;
-  const deliverables = Array.isArray(workspace?.deliverables) ? workspace.deliverables : [];
-  const submissions = Array.isArray(workspace?.submissions) ? workspace.submissions : [];
-  const revisions = Array.isArray(workspace?.revisions) ? workspace.revisions : [];
-
-
-  const activeDeliverables = deliverables.filter(
-    (item) =>
-      typeof item === "object" &&
-      item !== null &&
-      (item.status === "submitted" ||
-        item.status === "revision_requested" ||
-        item.status === "approved" ||
-        item.status === "completed")
+  const deliverables = useMemo(
+    () => (Array.isArray(workspace?.deliverables) ? workspace.deliverables : []),
+    [workspace]
+  );
+  const rawSubmissions = useMemo(
+    () => (Array.isArray(workspace?.submissions) ? workspace.submissions : []),
+    [workspace]
+  );
+  const revisions = useMemo(
+    () => (Array.isArray(workspace?.revisions) ? workspace.revisions : []),
+    [workspace]
   );
 
-  const pendingDeliverables = deliverables.filter(
-    (item) =>
-      typeof item === "string" ||
-      item === null ||
-      !item.status ||
-      item.status === "pending" ||
-      item.status === "in_progress"
-  );
+  // Deduplicate and aggregate submissions reliably:
+  const allSubmissions = useMemo(() => {
+    if (rawSubmissions.length > 0) {
+      return [
+        ...rawSubmissions,
+        ...deliverables
+          .filter(
+            (d) =>
+              d &&
+              typeof d === "object" &&
+              d.submission &&
+              !isSubmissionInHistory(d.submission, rawSubmissions)
+          )
+          .map((d) => ({
+            ...d.submission,
+            deliverableId: d._id,
+            deliverableTitle: d.title,
+          })),
+      ];
+    }
+    return deliverables
+      .filter((d) => d && typeof d === "object" && d.submission)
+      .map((d) => ({
+        ...d.submission,
+        deliverableId: d._id,
+        deliverableTitle: d.title,
+      }));
+  }, [rawSubmissions, deliverables]);
 
+  // Sort submissions chronologically descending (newest first)
+  const submissions = useMemo(() => {
+    return [...allSubmissions].sort((a, b) => {
+      const timeA = a.submittedAt ? new Date(a.submittedAt).getTime() : 0;
+      const timeB = b.submittedAt ? new Date(b.submittedAt).getTime() : 0;
+      return timeB - timeA;
+    });
+  }, [allSubmissions]);
+
+  const submittedDeliverables = useMemo(() => {
+    return deliverables.filter(
+      (item) =>
+        typeof item === "object" &&
+        item !== null &&
+        (item.status === "submitted" ||
+          item.status === "approved" ||
+          item.status === "completed" ||
+          Boolean(item.submission))
+    );
+  }, [deliverables]);
+
+  const pendingDeliverables = useMemo(() => {
+    return deliverables.filter(
+      (item) =>
+        typeof item === "string" ||
+        item === null ||
+        !item.status ||
+        item.status === "pending" ||
+        (item.status === "in_progress" && !item.submission)
+    );
+  }, [deliverables]);
+
+  // Deliverables to display according to the filter tabs
+  const displayedDeliverables = useMemo(() => {
+    if (deliverableFilter === "submitted") {
+      return submittedDeliverables;
+    }
+    if (deliverableFilter === "pending") {
+      return pendingDeliverables;
+    }
+    return deliverables;
+  }, [deliverableFilter, submittedDeliverables, pendingDeliverables, deliverables]);
+
+  // Render Deliverable Card matching the reference design
   const renderDeliverableCard = (item, idx) => {
     const isObject = typeof item === "object" && item !== null;
     const deliverableId = isObject ? item._id : idx;
-    const title = isObject ? item.title || "Deliverable" : item;
+    const title = isObject ? item.title || `Deliverable #${idx + 1}` : item;
     const description = isObject ? item.description : null;
     const dueDate = isObject ? item.dueDate : null;
     const status = isObject ? item.status || "pending" : "pending";
     const delBadge = getDeliverableStatusBadge(status);
     const submission = isObject ? item.submission : null;
     const isReviewable = status === "submitted" || status === "revision_requested";
+    const validFileUrl = submission?.fileUrl && isValidExternalUrl(submission.fileUrl) ? submission.fileUrl.trim() : null;
+    const validLink = submission?.link && isValidExternalUrl(submission.link) ? submission.link.trim() : null;
+    const mediaType = validFileUrl ? detectMediaType(validFileUrl) : null;
+    const secondaryLabel = mediaType === "video" ? "Video" : mediaType === "image" ? "Image" : "File";
 
     return (
       <div
         key={deliverableId || idx}
-        className="bg-surface-muted/40 hover:bg-surface-muted/60 border border-border-theme/60 rounded-xl p-3.5 sm:p-4 space-y-2.5 transition-all"
+        className="bg-white dark:bg-zinc-900 border border-gray-100/90 dark:border-zinc-800 rounded-3xl p-5 sm:p-6 shadow-xs space-y-4 transition-all"
       >
+        {/* Deliverable Header */}
         <div className="space-y-1.5">
-          <div className="flex items-start justify-between gap-2 flex-wrap">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-semibold text-xs sm:text-sm text-foreground">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <h3 className="font-bold text-base sm:text-lg text-gray-900 dark:text-white">
                 {title}
-              </span>
+              </h3>
               <span
-                className={`px-2 py-0.5 rounded-full text-[9.5px] font-bold border uppercase tracking-wider ${delBadge.color}`}
+                className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border tracking-wider uppercase ${delBadge.color}`}
               >
                 {delBadge.label}
               </span>
             </div>
             {dueDate && (
-              <span className="text-[10.5px] text-text-secondary flex items-center gap-1 shrink-0">
-                <CalendarIcon className="w-3 h-3" />
+              <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5 shrink-0 font-medium">
+                <CalendarIcon className="w-3.5 h-3.5 text-gray-400" />
                 Due: {formatDate(dueDate)}
               </span>
             )}
           </div>
 
           {description && (
-            <p className="text-xs text-text-secondary leading-relaxed">
+            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
               {description}
             </p>
           )}
-
-          {/* Submission Details if available */}
-          {submission && (
-            <div className="bg-surface p-3 rounded-lg border border-border-theme/50 space-y-1.5 text-xs mt-2">
-              <div className="flex items-center justify-between text-[10px] text-text-secondary font-semibold">
-                <span className="uppercase tracking-wider">Submitted Work</span>
-                {submission.submittedAt && (
-                  <span>{formatDateTime(submission.submittedAt)}</span>
-                )}
-              </div>
-
-              {submission.title && (
-                <p className="font-semibold text-foreground text-xs">{submission.title}</p>
-              )}
-
-              {submission.notes && (
-                <p className="text-text-secondary leading-relaxed text-[11px]">
-                  {submission.notes}
-                </p>
-              )}
-
-              <div className="flex flex-wrap gap-2.5 pt-1">
-                {submission.link && (
-                  <a
-                    href={submission.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-[11px] text-secondary hover:underline font-semibold"
-                  >
-                    <LinkIcon className="w-3 h-3" />
-                    <span>View Content Link</span>
-                  </a>
-                )}
-                {submission.fileUrl && (
-                  <a
-                    href={submission.fileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-[11px] text-secondary hover:underline font-semibold"
-                  >
-                    <DocumentIcon className="w-3 h-3" />
-                    <span>View Asset File</span>
-                  </a>
-                )}
-              </div>
-            </div>
-          )}
         </div>
 
-        {/* Review Actions */}
+        {/* Media Preview & Submission Details (Two Column Layout) */}
+        {submission ? (
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-stretch pt-1">
+            {/* Left: Media Preview */}
+            <div className="md:col-span-7">
+              {validFileUrl ? (
+                mediaType === "video" ? (
+                  <div className="w-full aspect-[16/10] sm:aspect-[16/9] rounded-2xl overflow-hidden bg-black/95 relative border border-gray-100 dark:border-zinc-800 shadow-xs flex items-center justify-center">
+                    <video
+                      src={validFileUrl}
+                      controls
+                      playsInline
+                      preload="metadata"
+                      className="w-full h-full object-cover rounded-2xl"
+                    />
+                  </div>
+                ) : mediaType === "image" ? (
+                  <div className="w-full aspect-[16/10] sm:aspect-[16/9] rounded-2xl overflow-hidden bg-gray-50 dark:bg-zinc-800 relative border border-gray-100 dark:border-zinc-800 shadow-xs flex items-center justify-center">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={validFileUrl}
+                      alt={submission.title || title || "Deliverable asset"}
+                      className="w-full h-full object-cover rounded-2xl transition-transform duration-300 ease-out hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
+                      loading="lazy"
+                    />
+                  </div>
+                ) : (
+                  /* Neutral File Asset Preview for non-image/non-video file types */
+                  <div className="w-full aspect-[16/10] sm:aspect-[16/9] rounded-2xl bg-gray-50 dark:bg-zinc-800 border border-gray-100 dark:border-zinc-800 flex flex-col items-center justify-center p-4 text-center">
+                    <DocumentIcon className="w-8 h-8 text-gray-400 mb-2" />
+                    <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                      {secondaryLabel} Asset Attached
+                    </span>
+                    <span className="text-[11px] text-gray-400 mt-0.5">Click View Asset below to open file</span>
+                  </div>
+                )
+              ) : validLink ? (
+                <div className="w-full aspect-[16/10] sm:aspect-[16/9] rounded-2xl bg-[#FFF0F3]/40 dark:bg-rose-950/20 border border-pink-100 dark:border-rose-900/30 flex flex-col items-center justify-center p-4 text-center">
+                  <ExternalLinkIcon className="w-8 h-8 text-[#FF4F87] mb-2" />
+                  <span className="text-xs font-semibold text-gray-800 dark:text-gray-200">Live Content Link Attached</span>
+                  <span className="text-[11px] text-gray-500 mt-0.5">Click View Content below to view submission</span>
+                </div>
+              ) : (
+                <div className="w-full aspect-[16/10] sm:aspect-[16/9] rounded-2xl bg-gray-50 dark:bg-zinc-800 border border-gray-100 dark:border-zinc-800 flex items-center justify-center">
+                  <span className="text-xs text-gray-400 font-medium">No valid media uploaded</span>
+                </div>
+              )}
+            </div>
+
+            {/* Right: Submission Details */}
+            <div className="md:col-span-5 flex flex-col justify-between space-y-3.5 py-0.5">
+              <div className="space-y-3.5">
+                <h4 className="font-bold text-xs sm:text-sm text-gray-900 dark:text-white">
+                  Submission Details
+                </h4>
+
+                {/* Submitted Timestamp */}
+                <div className="flex items-start gap-2.5">
+                  <div className="w-7 h-7 rounded-lg border border-gray-200 dark:border-zinc-700 flex items-center justify-center shrink-0 text-gray-500 dark:text-gray-400 mt-0.5">
+                    <CalendarIcon className="w-3.5 h-3.5" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-zinc-400 tracking-wider block">
+                      Submitted
+                    </span>
+                    <span className="text-xs font-semibold text-gray-800 dark:text-gray-200 block">
+                      {formatDateTime(submission.submittedAt)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Notes */}
+                <div className="flex items-start gap-2.5">
+                  <div className="w-7 h-7 rounded-lg border border-gray-200 dark:border-zinc-700 flex items-center justify-center shrink-0 text-gray-500 dark:text-gray-400 mt-0.5">
+                    <DocumentIcon className="w-3.5 h-3.5" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-zinc-400 tracking-wider block">
+                      Notes
+                    </span>
+                    <p className="text-xs text-gray-700 dark:text-gray-300 font-medium leading-relaxed">
+                      {submission.notes || "No notes provided"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Action Links (View Asset & View Content) */}
+                <SubmissionActionLinks
+                  link={submission.link}
+                  fileUrl={submission.fileUrl}
+                />
+              </div>
+            </div>
+          </div>
+        ) : (
+          /* Awaiting Submission State */
+          <div className="bg-[#FAF7F7]/60 dark:bg-zinc-800/40 border border-dashed border-gray-200 dark:border-zinc-700 rounded-2xl p-6 text-center space-y-2">
+            <div className="w-9 h-9 rounded-xl bg-white dark:bg-zinc-800 text-gray-400 flex items-center justify-center mx-auto border border-gray-100 dark:border-zinc-700 shadow-2xs">
+              <UploadIcon className="w-4 h-4" />
+            </div>
+            <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+              Awaiting Deliverable Submission
+            </p>
+            <p className="text-[11px] text-gray-400 max-w-sm mx-auto">
+              The creator has not yet submitted work for this deliverable. Once uploaded, assets and links will appear here for review.
+            </p>
+          </div>
+        )}
+
+        {/* Deliverable Review Actions (Only on Current Reviewable Submission) */}
         {isReviewable && (
-          <div className="pt-2.5 border-t border-border-theme/40 flex items-center justify-end gap-2">
+          <div className="pt-3 border-t border-gray-100 dark:border-zinc-800/80 flex items-center justify-end gap-3 flex-wrap">
             <button
               type="button"
               onClick={() => handleOpenReviewModal("revision", isObject ? item : null)}
-              className="px-3 py-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 text-xs font-semibold transition-colors cursor-pointer"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-[#FDE68A] bg-[#FFFBEB] hover:bg-[#FEF3C7] text-[#D97706] dark:bg-amber-950/30 dark:text-amber-300 dark:border-amber-800 text-xs font-semibold transition-all cursor-pointer shadow-2xs"
             >
-              Request Revision
+              <RefreshIcon className="w-3.5 h-3.5" />
+              <span>Request Revision</span>
             </button>
             <button
               type="button"
               onClick={() => handleOpenReviewModal("approve", isObject ? item : null)}
-              className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition-colors shadow-xs cursor-pointer"
+              className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-[#059669] hover:bg-[#047857] text-white text-xs font-semibold transition-all shadow-xs cursor-pointer"
             >
               <CheckIcon className="w-3.5 h-3.5" />
               <span>Approve</span>
             </button>
+          </div>
+        )}
+
+        {/* Deliverable Approved Banner */}
+        {status === "approved" && (
+          <div className="pt-3 border-t border-gray-100 dark:border-zinc-800 flex items-center justify-between text-xs">
+            <span className="inline-flex items-center gap-1.5 font-semibold text-emerald-600 dark:text-emerald-400">
+              <CheckCircleIcon className="w-4 h-4" />
+              <span>Deliverable Approved</span>
+            </span>
+            {item.approvedAt && (
+              <span className="text-[11px] text-gray-400 font-medium">
+                {formatDate(item.approvedAt)}
+              </span>
+            )}
           </div>
         )}
       </div>
@@ -604,7 +1054,7 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
+    <div className="min-h-screen bg-[#FFF7F8] dark:bg-[#111111] text-foreground flex flex-col font-sans transition-colors duration-200">
       {/* Sidebar */}
       <BrandSidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 
@@ -614,21 +1064,21 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
         <BrandHeader setMobileOpen={setMobileOpen} />
 
         {/* Page Content */}
-        <main className="px-3 sm:px-5 lg:px-6 py-4 sm:py-5 space-y-4 sm:space-y-5 flex-1 max-w-[1440px] w-full mx-auto min-w-0">
+        <main className="px-3 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-5 flex-1 max-w-[1440px] w-full mx-auto min-w-0">
           {/* Top Navigation */}
           <div>
             <Link
               href="/brand/workspace"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-text-secondary hover:text-foreground transition-colors"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
             >
-              <ChevronLeftIcon />
+              <ChevronLeftIcon className="w-4 h-4" />
               <span>Back to Workspaces</span>
             </Link>
           </div>
 
           {/* Success Banner */}
           {successMessage && (
-            <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 p-4 rounded-2xl text-xs font-medium flex items-center justify-between gap-4 shadow-xs">
+            <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 p-4 rounded-2xl text-xs font-medium flex items-center justify-between gap-4 shadow-xs">
               <div className="flex items-center gap-2">
                 <CheckCircleIcon className="w-4 h-4 shrink-0" />
                 <span>{successMessage}</span>
@@ -636,7 +1086,7 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
               <button
                 type="button"
                 onClick={() => dispatch(clearSuccessMessage())}
-                className="text-text-secondary hover:text-foreground text-xs underline cursor-pointer"
+                className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white text-xs underline cursor-pointer"
               >
                 Dismiss
               </button>
@@ -645,12 +1095,12 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
 
           {/* Error Banner */}
           {error && (
-            <div className="bg-red-500/10 border border-red-500/30 text-red-500 p-4 rounded-2xl text-xs font-medium flex items-center justify-between gap-4 shadow-xs">
+            <div className="bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 p-4 rounded-2xl text-xs font-medium flex items-center justify-between gap-4 shadow-xs">
               <span>{typeof error === "string" ? error : "Failed to load workspace details."}</span>
               <button
                 type="button"
                 onClick={handleRetry}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500 text-white font-semibold hover:bg-red-600 transition-colors cursor-pointer shrink-0"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-600 text-white font-semibold hover:bg-rose-700 transition-colors cursor-pointer shrink-0"
               >
                 <RefreshIcon className="w-3.5 h-3.5" />
                 <span>Retry</span>
@@ -661,38 +1111,42 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
           {/* Loading Skeleton */}
           {loading && !workspace ? (
             <div className="space-y-6 animate-pulse">
-              <div className="bg-surface border border-border-theme rounded-2xl p-6 space-y-4">
-                <div className="h-6 bg-surface-muted rounded-md w-1/3" />
-                <div className="h-4 bg-surface-muted rounded-md w-1/4" />
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4">
+              <div className="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-6 sm:p-7 space-y-5">
+                <div className="flex gap-2">
+                  <div className="h-5 bg-gray-100 dark:bg-zinc-800 rounded-full w-20" />
+                  <div className="h-5 bg-gray-100 dark:bg-zinc-800 rounded-full w-20" />
+                </div>
+                <div className="h-8 bg-gray-100 dark:bg-zinc-800 rounded-md w-1/3" />
+                <div className="h-4 bg-gray-100 dark:bg-zinc-800 rounded-md w-1/4" />
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-gray-100 dark:border-zinc-800">
                   {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="h-12 bg-surface-muted rounded-xl" />
+                    <div key={i} className="h-16 bg-gray-100 dark:bg-zinc-800 rounded-2xl" />
                   ))}
                 </div>
               </div>
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 h-64 bg-surface border border-border-theme rounded-2xl p-6" />
-                <div className="h-64 bg-surface border border-border-theme rounded-2xl p-6" />
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div className="lg:col-span-7 h-96 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-6" />
+                <div className="lg:col-span-5 h-96 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-6" />
               </div>
             </div>
           ) : !loading && !workspace ? (
             /* Not Found State */
-            <div className="bg-surface border border-border-theme rounded-2xl p-10 text-center space-y-4">
-              <div className="w-16 h-16 rounded-2xl bg-secondary/8 text-[#252525] dark:text-white flex items-center justify-center mx-auto border border-secondary/15">
+            <div className="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-12 text-center space-y-4 shadow-xs">
+              <div className="w-16 h-16 rounded-2xl bg-pink-50 dark:bg-pink-950/30 text-[#FF4F87] flex items-center justify-center mx-auto border border-pink-100 dark:border-pink-900/40">
                 <ExclamationIcon className="w-8 h-8" />
               </div>
               <div className="space-y-1">
-                <h3 className="font-serif font-semibold text-lg text-foreground">
+                <h3 className="font-serif font-semibold text-xl text-gray-900 dark:text-white">
                   Workspace Not Found
                 </h3>
-                <p className="text-xs text-text-secondary max-w-sm mx-auto">
+                <p className="text-xs text-gray-500 dark:text-gray-400 max-w-sm mx-auto">
                   The requested workspace does not exist or you do not have permission to view it.
                 </p>
               </div>
               <div className="pt-2">
                 <Link
                   href="/brand/workspace"
-                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#252525] hover:bg-[#111111] text-white text-xs font-semibold transition-all cursor-pointer shadow-xs"
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#111111] hover:bg-black text-white text-xs font-semibold transition-all cursor-pointer shadow-xs"
                 >
                   <span>Back to Workspaces</span>
                 </Link>
@@ -700,48 +1154,97 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
             </div>
           ) : (
             /* Workspace Detail Content */
-            <div className="space-y-4 sm:space-y-5">
-              {/* Header / Summary Card */}
-              <div className="bg-surface border border-border-theme rounded-2xl p-4 sm:p-5 shadow-xs space-y-4">
+            <div className="space-y-5">
+              {/* Top Campaign Summary Card */}
+              <div className="bg-white dark:bg-zinc-900 border border-pink-100/60 dark:border-zinc-800 rounded-3xl p-6 sm:p-7 shadow-[0_2px_12px_rgba(0,0,0,0.02)] space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                  <div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span
-                        className={`px-2.5 py-0.5 rounded-full text-[9.5px] font-bold border uppercase tracking-wider ${badge.color}`}
-                      >
-                        {badge.label}
-                      </span>
-                      {campaign?.category && (
-                        <span className="px-2.5 py-0.5 rounded-full text-[9.5px] font-semibold bg-surface-muted text-text-secondary border border-border-theme">
-                          {campaign.category}
+                  {/* Left: Creator/Campaign Logo + Info */}
+                  <div className="flex items-start gap-4">
+                    {/* Creator / Campaign Logo Card (Matching Creator Workspace Detail Styling) */}
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white dark:bg-zinc-850 border border-gray-100 dark:border-zinc-700 shadow-xs flex items-center justify-center p-2 shrink-0 overflow-hidden">
+                      {activeAvatarImage ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img
+                          src={activeAvatarImage}
+                          alt={creator?.name || campaign?.title || "Workspace avatar"}
+                          className="w-full h-full object-cover rounded-xl transition-transform duration-300 ease-out hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
+                          onError={() => {
+                            if (activeAvatarImage) {
+                              setFailedAvatarImages((prev) => ({
+                                ...prev,
+                                [activeAvatarImage]: true,
+                              }));
+                            }
+                          }}
+                        />
+                      ) : (
+                        <span className="w-10 h-10 rounded-xl bg-black text-white dark:bg-white dark:text-black flex items-center justify-center font-bold text-base shadow-2xs">
+                          {avatarInitial}
                         </span>
                       )}
                     </div>
-                    <h1 className="font-serif font-medium text-xl sm:text-2xl text-foreground mt-1.5 tracking-tight">
-                      {campaign?.title || "Campaign Workspace"}
-                    </h1>
-                    <div className="text-xs text-text-secondary mt-1 space-y-0.5">
-                      <p>
-                        Creator: <span className="text-foreground font-semibold">{creator?.name || "Creator Partner"}</span>
-                        {creator?.email && <span className="text-text-secondary"> ({creator.email})</span>}
-                      </p>
+
+                    <div>
+                      {/* Top Badges */}
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span
+                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border tracking-wider uppercase ${badge.color}`}
+                        >
+                          {badge.label}
+                        </span>
+                        {campaign?.category && (
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-[#FFE4E6] text-[#E11D48] border border-rose-200/60 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800/60">
+                            {campaign.category}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Campaign Title in Serif Font */}
+                      <h1 className="font-serif text-2xl sm:text-3xl font-medium tracking-tight text-gray-900 dark:text-white mt-1.5">
+                        {campaign?.title || "Campaign Workspace"}
+                      </h1>
+
+                      {/* Creator Partner Subtitle with Real Data */}
+                      <div className="flex items-center gap-2 mt-2 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                        <span>
+                          Creator Partner:{" "}
+                          <strong className="text-gray-900 dark:text-white font-semibold">
+                            {creator?.name || "Creator Partner"}
+                          </strong>
+                          <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-[#E11D48] text-white text-[9px] font-bold ml-1.5">
+                            ✓
+                          </span>
+                          {creator?.email && (
+                            <span className="text-gray-500 dark:text-gray-400 font-normal">
+                              {" "}({creator.email})
+                            </span>
+                          )}
+                          {brand?.name && (
+                            <span className="text-gray-400 dark:text-zinc-500 font-normal">
+                              {" • Brand: "}
+                              <strong className="text-gray-800 dark:text-gray-200 font-semibold">{brand.name}</strong>
+                            </span>
+                          )}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 shrink-0 sm:self-start">
+                  {/* Top Right Action Buttons */}
+                  <div className="flex flex-wrap items-center gap-2.5 shrink-0 sm:self-start">
                     {bookingId && (
                       <Link
                         href={`/brand/messages?bookingId=${bookingId}`}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#252525] hover:bg-[#111111] text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+                        className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-black hover:bg-neutral-800 text-white dark:bg-white dark:text-black dark:hover:bg-neutral-200 text-xs sm:text-sm font-semibold shadow-xs transition-all cursor-pointer"
                       >
-                        <ChatBubbleIcon className="w-4 h-4" />
+                        <ChatBubbleIcon className="w-4 h-4 text-white dark:text-black" />
                         <span>Message Creator</span>
                       </Link>
                     )}
 
                     {/* Payment Action / Paid Badge */}
                     {isPaid ? (
-                      <div className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-xs font-semibold">
+                      <div className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200 text-xs font-semibold dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800">
                         <CheckCircleIcon className="w-4 h-4" />
                         <span>Payment Completed ({formatPrice(existingPaidPayment.amount, existingPaidPayment.currency)})</span>
                       </div>
@@ -750,7 +1253,7 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
                         type="button"
                         onClick={handleInitiatePayment}
                         disabled={isPaymentProcessing}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold shadow-xs transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {isPaymentProcessing ? (
                           <>
@@ -766,24 +1269,24 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
                       </button>
                     ) : null}
 
-                    {/* Review Creator Action / Reviewed Status - Only when workspace is completed */}
+                    {/* Review Creator Action / Reviewed Status - When workspace is completed */}
                     {workspace.status === "completed" && (
                       workspaceReviewLoading || (workspaceReviewWorkspaceId && workspaceReviewWorkspaceId !== workspaceId?.toString()) ? (
-                        <div className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-muted text-text-secondary border border-border-theme text-xs font-medium">
+                        <div className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-gray-50 text-gray-500 border border-gray-200 text-xs font-medium dark:bg-zinc-800 dark:text-zinc-400 dark:border-zinc-700">
                           <RefreshIcon className="w-3.5 h-3.5 animate-spin" />
                           <span>Checking Review...</span>
                         </div>
                       ) : workspaceReviewError && !isCurrentWorkspaceReview ? (
                         <div
-                          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-red-500/10 text-red-500 border border-red-500/20 text-xs font-semibold"
+                          className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 text-xs font-semibold dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800"
                           title={typeof workspaceReviewError === "string" ? workspaceReviewError : "Review status unavailable"}
                         >
-                          <ExclamationIcon className="w-4 h-4 text-red-500 shrink-0" />
+                          <ExclamationIcon className="w-4 h-4 text-rose-500 shrink-0" />
                           <span>Review Unavailable</span>
                         </div>
                       ) : isCurrentWorkspaceReview ? (
                         <div
-                          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-xs font-semibold"
+                          className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-amber-50 text-amber-600 border border-amber-200 text-xs font-semibold dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800"
                           title={workspaceReview.comment ? `Feedback: "${workspaceReview.comment}"` : "Rated by you"}
                         >
                           <StarIcon className="w-4 h-4 text-amber-500" filled={true} />
@@ -793,13 +1296,13 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
                         <button
                           type="button"
                           onClick={() => setIsCreatorReviewModalOpen(true)}
-                          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+                          className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
                         >
                           <StarIcon className="w-4 h-4 text-white" filled={true} />
                           <span>Review Creator</span>
                         </button>
                       ) : (
-                        <div className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-muted text-text-secondary border border-border-theme text-xs font-medium">
+                        <div className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-gray-50 text-gray-500 border border-gray-200 text-xs font-medium dark:bg-zinc-800 dark:text-zinc-400 dark:border-zinc-700">
                           <RefreshIcon className="w-3.5 h-3.5 animate-spin" />
                           <span>Checking Review...</span>
                         </div>
@@ -808,9 +1311,9 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
                   </div>
                 </div>
 
-                {/* Review Specific Lookup Error Banner */}
+                {/* Review Specific Error Banner */}
                 {workspaceReviewError && workspace.status === "completed" && !isCurrentWorkspaceReview && (
-                  <div className="bg-red-500/10 border border-red-500/30 text-red-500 p-4 rounded-xl text-xs font-medium flex items-center justify-between gap-4">
+                  <div className="bg-rose-50 border border-rose-200 text-rose-600 dark:bg-rose-950/30 dark:border-rose-900/40 dark:text-rose-300 p-4 rounded-xl text-xs font-medium flex items-center justify-between gap-4">
                     <span>
                       {typeof workspaceReviewError === "string"
                         ? workspaceReviewError
@@ -819,7 +1322,7 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
                     <button
                       type="button"
                       onClick={() => dispatch(fetchBrandWorkspaceReview(workspaceId))}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500 text-white text-xs font-semibold hover:bg-red-600 transition-colors cursor-pointer shrink-0"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-600 text-white text-xs font-semibold hover:bg-rose-700 transition-colors cursor-pointer shrink-0"
                     >
                       <RefreshIcon className="w-3.5 h-3.5" />
                       <span>Retry</span>
@@ -827,9 +1330,9 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
                   </div>
                 )}
 
-                {/* Payment Specific Action Error / Success Banners */}
+                {/* Payment Error / Success Banners */}
                 {(paymentActionError || reduxPaymentError) && (
-                  <div className="bg-red-500/10 border border-red-500/30 text-red-500 p-4 rounded-xl text-xs font-medium flex items-center justify-between gap-4">
+                  <div className="bg-rose-50 border border-rose-200 text-rose-600 dark:bg-rose-950/30 dark:border-rose-900/40 dark:text-rose-300 p-4 rounded-xl text-xs font-medium flex items-center justify-between gap-4">
                     <span>{paymentActionError || (typeof reduxPaymentError === "string" ? reduxPaymentError : "Payment failed.")}</span>
                     <button
                       type="button"
@@ -845,7 +1348,7 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
                 )}
 
                 {(paymentActionSuccess || reduxPaymentSuccess) && (
-                  <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 p-4 rounded-xl text-xs font-medium flex items-center justify-between gap-4">
+                  <div className="bg-emerald-50 border border-emerald-200 text-emerald-600 dark:bg-emerald-950/30 dark:border-emerald-900/40 dark:text-emerald-300 p-4 rounded-xl text-xs font-medium flex items-center justify-between gap-4">
                     <div className="flex items-center gap-2">
                       <CheckCircleIcon className="w-4 h-4 shrink-0" />
                       <span>{paymentActionSuccess || reduxPaymentSuccess}</span>
@@ -863,226 +1366,629 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
                   </div>
                 )}
 
-                {/* Key Summary Stats */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 pt-3.5 border-t border-border-theme">
-                  <div className="bg-surface-muted/50 p-2.5 sm:p-3 rounded-xl border border-border-theme/40">
-                    <span className="text-[10px] font-semibold text-text-secondary uppercase tracking-wider block">
-                      Agreed Price
+                {/* 4 Stat Cards in 4-Column Responsive Grid with Neutral Fallbacks */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 pt-4 border-t border-gray-100 dark:border-zinc-800">
+                  {/* Stat 1: AGREED PRICE */}
+                  <div className="bg-white dark:bg-zinc-850 border border-gray-100 dark:border-zinc-800 rounded-2xl p-4 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+                    <span className="text-[10px] font-bold text-gray-400 dark:text-zinc-400 uppercase tracking-wider block">
+                      AGREED PRICE
                     </span>
-                    <span className="font-sans font-bold text-sm sm:text-base text-foreground mt-0.5 block">
+                    <span className="font-sans font-bold text-lg sm:text-xl text-gray-900 dark:text-white mt-1 block">
                       {formatPrice(workspace.agreedPrice, workspace.currency)}
                     </span>
                   </div>
 
-                  <div className="bg-surface-muted/50 p-2.5 sm:p-3 rounded-xl border border-border-theme/40">
-                    <span className="text-[10px] font-semibold text-text-secondary uppercase tracking-wider block flex items-center gap-1">
-                      <CalendarIcon className="w-3 h-3" />
-                      Deadline
-                    </span>
-                    <span className="font-medium text-xs sm:text-sm text-foreground mt-0.5 block">
-                      {formatDate(workspace.deadline)}
-                    </span>
+                  {/* Stat 2: Deadline */}
+                  <div className="bg-white dark:bg-zinc-850 border border-gray-100 dark:border-zinc-800 rounded-2xl p-4 flex items-center gap-3 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+                    <div className="w-9 h-9 rounded-xl bg-gray-50 dark:bg-zinc-800 text-gray-700 dark:text-gray-300 flex items-center justify-center shrink-0">
+                      <CalendarIcon className="w-4 h-4 text-gray-700 dark:text-gray-300" />
+                    </div>
+                    <div className="min-w-0">
+                      <span className="text-[10px] font-bold text-gray-400 dark:text-zinc-400 uppercase tracking-wider block">
+                        Deadline
+                      </span>
+                      <span className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white mt-0.5 block truncate">
+                        {formatDate(workspace.deadline)}
+                      </span>
+                    </div>
                   </div>
 
-                  <div className="bg-surface-muted/50 p-2.5 sm:p-3 rounded-xl border border-border-theme/40">
-                    <span className="text-[10px] font-semibold text-text-secondary uppercase tracking-wider block">
-                      Platform
-                    </span>
-                    <span className="font-medium text-xs sm:text-sm text-foreground mt-0.5 capitalize block">
-                      {campaign?.platform || service?.platform || "General"}
-                    </span>
+                  {/* Stat 3: Platform */}
+                  <div className="bg-white dark:bg-zinc-850 border border-gray-100 dark:border-zinc-800 rounded-2xl p-4 flex items-center gap-3 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+                    <div className="w-9 h-9 rounded-xl bg-gray-50 dark:bg-zinc-800 text-gray-500 dark:text-gray-400 flex items-center justify-center shrink-0">
+                      <ShieldCheckIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                    </div>
+                    <div className="min-w-0">
+                      <span className="text-[10px] font-bold text-gray-400 dark:text-zinc-400 uppercase tracking-wider block">
+                        Platform
+                      </span>
+                      <span className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white mt-0.5 capitalize block truncate">
+                        {campaign?.platform || service?.platform || "Not specified"}
+                      </span>
+                    </div>
                   </div>
 
-                  <div className="bg-surface-muted/50 p-2.5 sm:p-3 rounded-xl border border-border-theme/40">
-                    <span className="text-[10px] font-semibold text-text-secondary uppercase tracking-wider block">
-                      Selected Service
-                    </span>
-                    <span className="font-medium text-xs sm:text-sm text-foreground mt-0.5 line-clamp-1 block">
-                      {service?.title || "Custom Package"}
-                    </span>
+                  {/* Stat 4: Selected Service */}
+                  <div className="bg-white dark:bg-zinc-850 border border-gray-100 dark:border-zinc-800 rounded-2xl p-4 flex items-center gap-3 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+                    <div className="w-9 h-9 rounded-xl bg-gray-50 dark:bg-zinc-800 text-gray-500 dark:text-gray-400 flex items-center justify-center shrink-0">
+                      <LayersIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                    </div>
+                    <div className="min-w-0">
+                      <span className="text-[10px] font-bold text-gray-400 dark:text-zinc-400 uppercase tracking-wider block">
+                        Selected Service
+                      </span>
+                      <span
+                        className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white mt-0.5 block truncate"
+                        title={service?.title || "Custom Package"}
+                      >
+                        {service?.title || "Custom Package"}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Main Content Grid */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-                {/* Left Column: Deliverables (lg:col-span-7) */}
+              {/* Main Two-Column Layout */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                {/* Left Column: Campaign Deliverables (lg:col-span-7) */}
                 <div className="lg:col-span-7 space-y-4">
-                  {/* Campaign Deliverables Section */}
-                  <div className="bg-surface border border-border-theme rounded-2xl p-4 sm:p-5 space-y-4 shadow-xs">
-                    <div className="flex items-center justify-between pb-3 border-b border-border-theme">
-                      <div className="flex items-center gap-2">
-                        <h2 className="font-serif font-semibold text-base sm:text-lg text-foreground">
-                          Campaign Deliverables
-                        </h2>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-secondary/10 text-secondary border border-secondary/20">
-                          {deliverables.length} Total
-                        </span>
-                      </div>
-                    </div>
-
-                    {deliverables.length > 0 ? (
-                      <div className="space-y-4">
-                        {/* Active / Reviewable Group */}
-                        {activeDeliverables.length > 0 && (
-                          <div className="space-y-2.5">
-                            <h3 className="text-[11px] font-bold text-text-secondary uppercase tracking-wider">
-                              Reviewable & Active Deliverables ({activeDeliverables.length})
-                            </h3>
-                            <div className="space-y-3">
-                              {activeDeliverables.map((item, idx) => renderDeliverableCard(item, idx))}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Pending Group */}
-                        {pendingDeliverables.length > 0 && (
-                          <div className="space-y-2.5">
-                            {activeDeliverables.length > 0 && (
-                              <h3 className="text-[11px] font-bold text-text-secondary uppercase tracking-wider pt-3 border-t border-border-theme">
-                                Pending Deliverables ({pendingDeliverables.length})
-                              </h3>
-                            )}
-                            <div className="space-y-3">
-                              {pendingDeliverables.map((item, idx) => renderDeliverableCard(item, idx))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <p className="text-xs text-text-secondary">No specific deliverables listed.</p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Right Column: Submitted Work, Campaign Brief & Revisions (lg:col-span-5) */}
-                <div className="lg:col-span-5 space-y-4">
-                  {/* Submitted Work Section */}
-                  <div className="bg-surface border border-border-theme rounded-2xl p-4 sm:p-5 space-y-3 shadow-xs">
-                    <div className="flex items-center justify-between pb-2.5 border-b border-border-theme">
-                      <h2 className="font-serif font-semibold text-sm sm:text-base text-foreground">
-                        Submitted Work
+                  {/* Campaign Deliverables Header */}
+                  <div className="flex items-center justify-between gap-3 flex-wrap">
+                    <div className="flex items-center gap-2.5">
+                      <h2 className="font-serif text-xl sm:text-2xl font-medium text-gray-900 dark:text-white tracking-tight">
+                        Required Campaign Deliverables
                       </h2>
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-surface-muted text-text-secondary border border-border-theme">
-                        {submissions.length} Total
+                      <span className="bg-[#FFF0F3] text-[#FF4F87] border border-[#FFD0DC]/80 dark:bg-rose-950/30 dark:text-rose-300 dark:border-rose-900/40 text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+                        {submittedDeliverables.length} Submitted
+                      </span>
+                      <span className="bg-gray-100 text-gray-600 border border-gray-200 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700 text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+                        {pendingDeliverables.length} Pending
                       </span>
                     </div>
 
+                    {/* Filter Tabs matching Reference */}
+                    <div className="flex items-center gap-1.5 bg-white/70 dark:bg-zinc-900/70 p-1 rounded-full border border-gray-100 dark:border-zinc-800">
+                      <button
+                        type="button"
+                        onClick={() => setDeliverableFilter("all")}
+                        className={`text-xs px-3.5 py-1 rounded-full font-bold transition-all cursor-pointer ${
+                          deliverableFilter === "all"
+                            ? "bg-[#FFF0F3] text-[#E11D48] border border-[#FECDD3] dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800 shadow-2xs"
+                            : "text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white font-medium"
+                        }`}
+                      >
+                        All ({deliverables.length})
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDeliverableFilter("submitted")}
+                        className={`text-xs px-3.5 py-1 rounded-full font-bold transition-all cursor-pointer ${
+                          deliverableFilter === "submitted"
+                            ? "bg-[#FFF0F3] text-[#E11D48] border border-[#FECDD3] dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800 shadow-2xs"
+                            : "text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white font-medium"
+                        }`}
+                      >
+                        Submitted ({submittedDeliverables.length})
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDeliverableFilter("pending")}
+                        className={`text-xs px-3.5 py-1 rounded-full font-bold transition-all cursor-pointer ${
+                          deliverableFilter === "pending"
+                            ? "bg-[#FFF0F3] text-[#E11D48] border border-[#FECDD3] dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800 shadow-2xs"
+                            : "text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white font-medium"
+                        }`}
+                      >
+                        Pending ({pendingDeliverables.length})
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Deliverables List */}
+                  {displayedDeliverables.length > 0 ? (
+                    <div className="space-y-4">
+                      {displayedDeliverables.map((item, idx) => renderDeliverableCard(item, idx))}
+                    </div>
+                  ) : (
+                    <div className="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-8 text-center space-y-2">
+                      <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                        No deliverables found in this view.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setDeliverableFilter("all")}
+                        className="text-xs text-[#FF4F87] font-semibold underline cursor-pointer"
+                      >
+                        View all deliverables ({deliverables.length})
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Right Column: Submitted Work & Campaign Brief (lg:col-span-5) */}
+                <div className="lg:col-span-5 space-y-5">
+                  {/* Card 1: Submitted Work (Version History) */}
+                  <div className="bg-white dark:bg-zinc-900 border border-gray-100/90 dark:border-zinc-800 rounded-3xl p-5 sm:p-6 shadow-xs space-y-4">
+                    <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-zinc-800">
+                      <div className="flex items-center gap-2">
+                        <h2 className="font-serif text-lg sm:text-xl font-medium text-gray-900 dark:text-white tracking-tight">
+                          Submitted Work
+                        </h2>
+                        <span className="bg-[#FFF0F3] text-[#FF4F87] border border-[#FFD0DC]/80 dark:bg-rose-950/30 dark:text-rose-300 dark:border-rose-900/40 text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+                          {submissions.length} Total
+                        </span>
+                      </div>
+                    </div>
+
                     {submissions.length === 0 ? (
-                      <div className="bg-surface-muted/30 border border-border-theme/50 rounded-xl p-4 text-center">
-                        <p className="text-xs text-text-secondary font-medium">
-                          No work submitted yet.
+                      <div className="bg-[#FAF7F7]/60 dark:bg-zinc-800/40 border border-gray-100 dark:border-zinc-800 rounded-2xl p-6 text-center space-y-2">
+                        <div className="w-8 h-8 rounded-xl bg-white dark:bg-zinc-800 text-gray-400 flex items-center justify-center mx-auto border border-gray-100 dark:border-zinc-700 shadow-2xs">
+                          <UploadIcon className="w-4 h-4" />
+                        </div>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 font-semibold">
+                          No work submitted yet
+                        </p>
+                        <p className="text-[11px] text-gray-400 max-w-xs mx-auto">
+                          When the creator uploads deliverables or content links, they will appear here in chronological order.
                         </p>
                       </div>
                     ) : (
-                      <div className="space-y-2.5">
-                        {submissions.map((sub, idx) => (
-                          <div
-                            key={sub._id || idx}
-                            className="bg-surface-muted/50 border border-border-theme/60 p-3 rounded-xl space-y-1.5 text-xs"
+                      /* Chronological Version History Timeline */
+                      <div className="relative pl-3 space-y-5 before:absolute before:top-3 before:bottom-3 before:left-[17px] before:w-0.5 before:bg-gray-100 dark:before:bg-zinc-800">
+                        {/* 1. Latest Submission */}
+                        {submissions.slice(0, 1).map((sub, idx) => {
+                          const matchedDeliv = findDeliverableForSubmission(sub, deliverables);
+                          const subTitle =
+                            sub.title ||
+                            sub.deliverableTitle ||
+                            matchedDeliv?.title ||
+                            (sub.submittedAt ? `Submission (${formatDate(sub.submittedAt)})` : "Deliverable Submission");
+                          const delivBadge = matchedDeliv
+                            ? getDeliverableStatusBadge(matchedDeliv.status)
+                            : getDeliverableStatusBadge("submitted");
+                          const validFileUrl = isValidExternalUrl(sub.fileUrl) ? sub.fileUrl.trim() : null;
+                          const validLink = isValidExternalUrl(sub.link) ? sub.link.trim() : null;
+                          const mediaType = validFileUrl ? detectMediaType(validFileUrl) : null;
+                          const secondaryLabel =
+                            mediaType === "video" ? "Video" : mediaType === "image" ? "Image" : "File";
+
+                          return (
+                            <div key={sub._id || idx} className="relative group">
+                              {/* Timeline Marker */}
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2.5">
+                                  <div className="w-3 h-3 rounded-full bg-[#E11D48] ring-4 ring-pink-100 dark:ring-pink-950/60 shrink-0 z-10" />
+                                  <div className="flex items-center gap-1.5 text-[#E11D48] dark:text-[#FB7185] text-xs font-bold">
+                                    <FolderIcon className="w-3.5 h-3.5" />
+                                    <span>Latest Submission</span>
+                                  </div>
+                                </div>
+                                <span className="text-[11px] text-gray-400 dark:text-zinc-500 font-medium">
+                                  {formatDateTime(sub.submittedAt)}
+                                </span>
+                              </div>
+
+                              {/* Submission Card */}
+                              <div className="ml-5 mt-2 bg-gray-50/70 dark:bg-zinc-800/40 hover:bg-gray-50 dark:hover:bg-zinc-800/70 border border-gray-100 dark:border-zinc-800 rounded-2xl p-3 flex items-center gap-3.5 transition-all shadow-2xs">
+                                {/* Thumbnail */}
+                                {validFileUrl ? (
+                                  mediaType === "video" ? (
+                                    <div className="w-24 h-16 sm:w-28 sm:h-20 rounded-xl overflow-hidden relative shrink-0 bg-black/90 border border-gray-100 dark:border-zinc-800">
+                                      <video
+                                        src={validFileUrl}
+                                        preload="metadata"
+                                        className="w-full h-full object-cover"
+                                      />
+                                      <div className="absolute inset-0 flex items-center justify-center bg-black/25">
+                                        <div className="w-6 h-6 rounded-full bg-white/90 text-gray-900 flex items-center justify-center shadow-xs">
+                                          <PlayIcon className="w-3 h-3 translate-x-0.5 fill-current" />
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ) : mediaType === "image" ? (
+                                    <div className="w-24 h-16 sm:w-28 sm:h-20 rounded-xl overflow-hidden relative shrink-0 bg-gray-100 dark:bg-zinc-800 border border-gray-100 dark:border-zinc-800">
+                                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                                      <img
+                                        src={validFileUrl}
+                                        alt={subTitle}
+                                        className="w-full h-full object-cover transition-transform duration-300 ease-out hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
+                                        loading="lazy"
+                                      />
+                                    </div>
+                                  ) : (
+                                    /* Neutral File Preview for non-image/non-video file types */
+                                    <div className="w-24 h-16 sm:w-28 sm:h-20 rounded-xl bg-gray-50 dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 flex flex-col items-center justify-center text-gray-400 shrink-0">
+                                      <DocumentIcon className="w-5 h-5 text-gray-400 mb-0.5" />
+                                      <span className="text-[9px] font-medium text-gray-500 uppercase tracking-wider">
+                                        {secondaryLabel}
+                                      </span>
+                                    </div>
+                                  )
+                                ) : validLink ? (
+                                  <div className="w-24 h-16 sm:w-28 sm:h-20 rounded-xl bg-pink-50/50 dark:bg-pink-950/20 border border-pink-100 dark:border-pink-900/40 flex flex-col items-center justify-center text-[#FF4F87] shrink-0">
+                                    <ExternalLinkIcon className="w-5 h-5 mb-0.5" />
+                                    <span className="text-[9px] font-medium uppercase tracking-wider">Link</span>
+                                  </div>
+                                ) : (
+                                  <div className="w-24 h-16 sm:w-28 sm:h-20 rounded-xl bg-white dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 flex items-center justify-center text-gray-400 shrink-0">
+                                    <DocumentIcon className="w-5 h-5" />
+                                  </div>
+                                )}
+
+                                {/* Details */}
+                                <div className="min-w-0 flex-1 space-y-1">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="font-bold text-xs sm:text-sm text-gray-900 dark:text-white truncate block">
+                                      {subTitle}
+                                    </span>
+                                    <span
+                                      className={`px-2 py-0.2 rounded-full text-[9px] font-bold border uppercase tracking-wider ${delivBadge.color}`}
+                                    >
+                                      {delivBadge.label}
+                                    </span>
+                                  </div>
+
+                                  {sub.notes && (
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate block">
+                                      {sub.notes}
+                                    </p>
+                                  )}
+
+                                  {/* View Asset & View Content Links with HTTP/HTTPS URL Validation */}
+                                  <div className="pt-0.5 flex flex-wrap items-center gap-2">
+                                    {validFileUrl && (
+                                      <a
+                                        href={validFileUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-1 text-xs font-semibold text-[#E11D48] dark:text-[#FB7185] hover:opacity-85 transition-opacity"
+                                      >
+                                        <ExternalLinkIcon className="w-3 h-3" />
+                                        <span>View Asset</span>
+                                        <span className="text-[9px] font-medium px-1.5 py-0.2 rounded bg-gray-200/70 dark:bg-zinc-700 text-gray-600 dark:text-zinc-300 ml-1">
+                                          {secondaryLabel}
+                                        </span>
+                                      </a>
+                                    )}
+                                    {validLink && (
+                                      <a
+                                        href={validLink}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-1 text-xs font-semibold text-[#E11D48] dark:text-[#FB7185] hover:opacity-85 transition-opacity"
+                                      >
+                                        <ExternalLinkIcon className="w-3 h-3" />
+                                        <span>View Content</span>
+                                        <span className="text-[9px] font-medium px-1.5 py-0.2 rounded bg-gray-200/70 dark:bg-zinc-700 text-gray-600 dark:text-zinc-300 ml-1">
+                                          Open Link
+                                        </span>
+                                      </a>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+
+                        {/* 2. Previous Version (Revised) */}
+                        {submissions.slice(1, 2).map((sub, idx) => {
+                          const matchedDeliv = findDeliverableForSubmission(sub, deliverables);
+                          const subTitle =
+                            sub.title ||
+                            sub.deliverableTitle ||
+                            matchedDeliv?.title ||
+                            (sub.submittedAt ? `Submission (${formatDate(sub.submittedAt)})` : "Deliverable Submission");
+                          const delivBadge = matchedDeliv
+                            ? getDeliverableStatusBadge(matchedDeliv.status)
+                            : getDeliverableStatusBadge("submitted");
+                          const validFileUrl = isValidExternalUrl(sub.fileUrl) ? sub.fileUrl.trim() : null;
+                          const validLink = isValidExternalUrl(sub.link) ? sub.link.trim() : null;
+                          const mediaType = validFileUrl ? detectMediaType(validFileUrl) : null;
+                          const secondaryLabel =
+                            mediaType === "video" ? "Video" : mediaType === "image" ? "Image" : "File";
+
+                          return (
+                            <div key={sub._id || idx} className="relative group">
+                              {/* Timeline Marker */}
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2.5">
+                                  <div className="w-3 h-3 rounded-full bg-gray-400 dark:bg-zinc-600 ring-4 ring-gray-100 dark:ring-zinc-800 shrink-0 z-10" />
+                                  <div className="flex items-center gap-1.5 text-gray-600 dark:text-gray-400 text-xs font-semibold">
+                                    <HistoryIcon className="w-3.5 h-3.5" />
+                                    <span>Previous Version (Revised)</span>
+                                  </div>
+                                </div>
+                                <span className="text-[11px] text-gray-400 dark:text-zinc-500 font-medium">
+                                  {formatDateTime(sub.submittedAt)}
+                                </span>
+                              </div>
+
+                              {/* Submission Card */}
+                              <div className="ml-5 mt-2 bg-gray-50/70 dark:bg-zinc-800/40 hover:bg-gray-50 dark:hover:bg-zinc-800/70 border border-gray-100 dark:border-zinc-800 rounded-2xl p-3 flex items-center gap-3.5 transition-all shadow-2xs">
+                                {/* Thumbnail */}
+                                {validFileUrl ? (
+                                  mediaType === "video" ? (
+                                    <div className="w-24 h-16 sm:w-28 sm:h-20 rounded-xl overflow-hidden relative shrink-0 bg-black/90 border border-gray-100 dark:border-zinc-800">
+                                      <video
+                                        src={validFileUrl}
+                                        preload="metadata"
+                                        className="w-full h-full object-cover"
+                                      />
+                                      <div className="absolute inset-0 flex items-center justify-center bg-black/25">
+                                        <div className="w-6 h-6 rounded-full bg-white/90 text-gray-900 flex items-center justify-center shadow-xs">
+                                          <PlayIcon className="w-3 h-3 translate-x-0.5 fill-current" />
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ) : mediaType === "image" ? (
+                                    <div className="w-24 h-16 sm:w-28 sm:h-20 rounded-xl overflow-hidden relative shrink-0 bg-gray-100 dark:bg-zinc-800 border border-gray-100 dark:border-zinc-800">
+                                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                                      <img
+                                        src={validFileUrl}
+                                        alt={subTitle}
+                                        className="w-full h-full object-cover transition-transform duration-300 ease-out hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
+                                        loading="lazy"
+                                      />
+                                    </div>
+                                  ) : (
+                                    /* Neutral File Preview for non-image/non-video file types */
+                                    <div className="w-24 h-16 sm:w-28 sm:h-20 rounded-xl bg-gray-50 dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 flex flex-col items-center justify-center text-gray-400 shrink-0">
+                                      <DocumentIcon className="w-5 h-5 text-gray-400 mb-0.5" />
+                                      <span className="text-[9px] font-medium text-gray-500 uppercase tracking-wider">
+                                        {secondaryLabel}
+                                      </span>
+                                    </div>
+                                  )
+                                ) : validLink ? (
+                                  <div className="w-24 h-16 sm:w-28 sm:h-20 rounded-xl bg-pink-50/50 dark:bg-pink-950/20 border border-pink-100 dark:border-pink-900/40 flex flex-col items-center justify-center text-[#FF4F87] shrink-0">
+                                    <ExternalLinkIcon className="w-5 h-5 mb-0.5" />
+                                    <span className="text-[9px] font-medium uppercase tracking-wider">Link</span>
+                                  </div>
+                                ) : (
+                                  <div className="w-24 h-16 sm:w-28 sm:h-20 rounded-xl bg-white dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 flex items-center justify-center text-gray-400 shrink-0">
+                                    <DocumentIcon className="w-5 h-5" />
+                                  </div>
+                                )}
+
+                                {/* Details */}
+                                <div className="min-w-0 flex-1 space-y-1">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="font-bold text-xs sm:text-sm text-gray-900 dark:text-white truncate block">
+                                      {subTitle}
+                                    </span>
+                                    <span
+                                      className={`px-2 py-0.2 rounded-full text-[9px] font-bold border uppercase tracking-wider ${delivBadge.color}`}
+                                    >
+                                      {delivBadge.label}
+                                    </span>
+                                  </div>
+
+                                  {sub.notes && (
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate block">
+                                      {sub.notes}
+                                    </p>
+                                  )}
+
+                                  {/* View Asset & View Content Links with HTTP/HTTPS URL Validation */}
+                                  <div className="pt-0.5 flex flex-wrap items-center gap-2">
+                                    {validFileUrl && (
+                                      <a
+                                        href={validFileUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-1 text-xs font-semibold text-[#E11D48] dark:text-[#FB7185] hover:opacity-85 transition-opacity"
+                                      >
+                                        <ExternalLinkIcon className="w-3 h-3" />
+                                        <span>View Asset</span>
+                                        <span className="text-[9px] font-medium px-1.5 py-0.2 rounded bg-gray-200/70 dark:bg-zinc-700 text-gray-600 dark:text-zinc-300 ml-1">
+                                          {secondaryLabel}
+                                        </span>
+                                      </a>
+                                    )}
+                                    {validLink && (
+                                      <a
+                                        href={validLink}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-1 text-xs font-semibold text-[#E11D48] dark:text-[#FB7185] hover:opacity-85 transition-opacity"
+                                      >
+                                        <ExternalLinkIcon className="w-3 h-3" />
+                                        <span>View Content</span>
+                                        <span className="text-[9px] font-medium px-1.5 py-0.2 rounded bg-gray-200/70 dark:bg-zinc-700 text-gray-600 dark:text-zinc-300 ml-1">
+                                          Open Link
+                                        </span>
+                                      </a>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+
+                        {/* 3. Older Submissions (Accordion) */}
+                        <div className="pt-2 border-t border-gray-100 dark:border-zinc-800">
+                          <button
+                            type="button"
+                            onClick={() => setIsOlderSubmissionsOpen((prev) => !prev)}
+                            disabled={submissions.length <= 2}
+                            className={`w-full flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 py-1 transition-colors ${
+                              submissions.length > 2 ? "cursor-pointer hover:text-gray-900 dark:hover:text-white" : "cursor-default opacity-80"
+                            }`}
                           >
-                            <div className="flex items-center justify-between gap-2">
-                              <span className="font-semibold text-foreground line-clamp-1">
-                                {sub.title || `Submission #${idx + 1}`}
-                              </span>
-                              <span className="text-[10px] text-text-secondary shrink-0">
-                                {formatDateTime(sub.submittedAt)}
-                              </span>
-                            </div>
+                            <span className="flex items-center gap-1">
+                              • Older Submissions ({Math.max(0, submissions.length - 2)})
+                            </span>
+                            <ChevronDownIcon
+                              className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                                isOlderSubmissionsOpen ? "rotate-180" : ""
+                              }`}
+                            />
+                          </button>
 
-                            {sub.notes && (
-                              <p className="text-text-secondary bg-surface p-2.5 rounded-lg border border-border-theme/50 line-clamp-3">
-                                {sub.notes}
-                              </p>
-                            )}
+                          {/* Expanded Older Submissions */}
+                          {isOlderSubmissionsOpen && submissions.length > 2 && (
+                            <div className="space-y-4 pt-3">
+                              {submissions.slice(2).map((sub, idx) => {
+                                const matchedDeliv = findDeliverableForSubmission(sub, deliverables);
+                                const subTitle =
+                                  sub.title ||
+                                  sub.deliverableTitle ||
+                                  matchedDeliv?.title ||
+                                  "Untitled Submission";
+                                const delivBadge = matchedDeliv
+                                  ? getDeliverableStatusBadge(matchedDeliv.status)
+                                  : getDeliverableStatusBadge("submitted");
+                                const validFileUrl = isValidExternalUrl(sub.fileUrl) ? sub.fileUrl.trim() : null;
+                                const validLink = isValidExternalUrl(sub.link) ? sub.link.trim() : null;
+                                const mediaType = validFileUrl ? detectMediaType(validFileUrl) : null;
+                                const secondaryLabel =
+                                  mediaType === "video" ? "Video" : mediaType === "image" ? "Image" : "File";
 
-                            <div className="flex flex-wrap gap-2 pt-1">
-                              {sub.link && (
-                                <a
-                                  href={sub.link}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1 text-[11px] text-secondary hover:underline font-semibold"
-                                >
-                                  <LinkIcon className="w-3 h-3" />
-                                  <span>View Content Link</span>
-                                </a>
-                              )}
-                              {sub.fileUrl && (
-                                <a
-                                  href={sub.fileUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1 text-[11px] text-secondary hover:underline font-semibold"
-                                >
-                                  <DocumentIcon className="w-3 h-3" />
-                                  <span>View Asset File</span>
-                                </a>
-                              )}
+                                return (
+                                  <div key={sub._id || idx} className="relative group">
+                                    <div className="flex items-center justify-between gap-2">
+                                      <div className="flex items-center gap-2.5">
+                                        <div className="w-2.5 h-2.5 rounded-full bg-gray-300 dark:bg-zinc-600 shrink-0 z-10 ml-0.5" />
+                                        <span className="text-gray-500 dark:text-gray-400 text-xs font-medium">
+                                          Historical Version
+                                        </span>
+                                      </div>
+                                      <span className="text-[10px] text-gray-400">
+                                        {formatDateTime(sub.submittedAt)}
+                                      </span>
+                                    </div>
+
+                                    <div className="ml-5 mt-2 bg-gray-50/70 dark:bg-zinc-800/40 border border-gray-100 dark:border-zinc-800 rounded-2xl p-2.5 flex items-center gap-3">
+                                      <div className="min-w-0 flex-1 space-y-1">
+                                        <div className="flex items-center gap-2">
+                                          <span className="font-semibold text-xs text-gray-800 dark:text-gray-200 truncate">
+                                            {subTitle}
+                                          </span>
+                                          <span className={`px-2 py-0.2 rounded-full text-[9px] font-bold border uppercase tracking-wider ${delivBadge.color}`}>
+                                            {delivBadge.label}
+                                          </span>
+                                        </div>
+                                        {sub.notes && (
+                                          <p className="text-[11px] text-gray-500 dark:text-gray-400 truncate">
+                                            {sub.notes}
+                                          </p>
+                                        )}
+                                        <div className="pt-0.5 flex flex-wrap items-center gap-2">
+                                          {validFileUrl && (
+                                            <a
+                                              href={validFileUrl}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#E11D48] dark:text-[#FB7185] hover:opacity-85"
+                                            >
+                                              <ExternalLinkIcon className="w-3 h-3" />
+                                              <span>View Asset</span>
+                                              <span className="text-[9px] font-medium px-1.5 py-0.2 rounded bg-gray-200/70 dark:bg-zinc-700 text-gray-600 ml-1">
+                                                {secondaryLabel}
+                                              </span>
+                                            </a>
+                                          )}
+                                          {validLink && (
+                                            <a
+                                              href={validLink}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#E11D48] dark:text-[#FB7185] hover:opacity-85"
+                                            >
+                                              <ExternalLinkIcon className="w-3 h-3" />
+                                              <span>View Content</span>
+                                              <span className="text-[9px] font-medium px-1.5 py-0.2 rounded bg-gray-200/70 dark:bg-zinc-700 text-gray-600 ml-1">
+                                                Open Link
+                                              </span>
+                                            </a>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              })}
                             </div>
-                          </div>
-                        ))}
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
 
-                  {/* Campaign & Service Details */}
-                  <div className="bg-surface border border-border-theme rounded-2xl p-4 sm:p-5 space-y-3.5 shadow-xs">
-                    <div className="pb-2 border-b border-border-theme">
-                      <h2 className="font-serif font-semibold text-sm sm:text-base text-foreground">
-                        Campaign & Service Brief
+                  {/* Card 2: Campaign & Service Brief with Neutral Fallbacks */}
+                  <div className="bg-white dark:bg-zinc-900 border border-gray-100/90 dark:border-zinc-800 rounded-3xl p-5 sm:p-6 shadow-xs space-y-4">
+                    <div className="pb-3 border-b border-gray-100 dark:border-zinc-800">
+                      <h2 className="font-serif text-lg sm:text-xl font-medium text-gray-900 dark:text-white tracking-tight">
+                        Campaign &amp; Service Brief
                       </h2>
                     </div>
-                    {campaign?.description && (
+
+                    {/* Campaign Overview */}
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-xl bg-pink-50 dark:bg-pink-950/40 text-[#FF4F87] flex items-center justify-center shrink-0 mt-0.5">
+                        <DocumentIcon className="w-4 h-4 text-[#FF4F87]" />
+                      </div>
                       <div className="space-y-1">
-                        <span className="text-xs font-semibold text-foreground block">
-                          Campaign Overview:
-                        </span>
-                        <p className="text-xs text-text-secondary whitespace-pre-line leading-relaxed">
-                          {campaign.description}
+                        <h4 className="font-bold text-xs sm:text-sm text-gray-900 dark:text-white">
+                          Campaign Overview
+                        </h4>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed whitespace-pre-line">
+                          {campaign?.description || workspace?.brief || "No campaign overview provided."}
                         </p>
                       </div>
-                    )}
-                    {service?.description && (
-                      <div className="space-y-1 pt-2.5 border-t border-border-theme/60">
-                        <span className="text-xs font-semibold text-foreground block">
-                          Service Package Details:
-                        </span>
-                        <p className="text-xs text-text-secondary whitespace-pre-line leading-relaxed">
-                          {service.description}
+                    </div>
+
+                    {/* Service Package Details */}
+                    <div className="flex items-start gap-3 pt-3 border-t border-gray-100 dark:border-zinc-800/80">
+                      <div className="w-8 h-8 rounded-xl bg-pink-50 dark:bg-pink-950/40 text-[#FF4F87] flex items-center justify-center shrink-0 mt-0.5">
+                        <SparklesIcon className="w-4 h-4 text-[#FF4F87]" />
+                      </div>
+                      <div className="space-y-1">
+                        <h4 className="font-bold text-xs sm:text-sm text-gray-900 dark:text-white">
+                          Service Package Details
+                        </h4>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed whitespace-pre-line">
+                          {service?.description || "No service package details provided."}
                         </p>
                       </div>
-                    )}
-                    {service?.deliveryTime && (
-                      <div className="pt-2 border-t border-border-theme/60 text-xs text-text-secondary flex items-center justify-between">
-                        <span>Delivery Time:</span>
-                        <span className="font-semibold text-foreground">{service.deliveryTime} Days</span>
-                      </div>
-                    )}
+                    </div>
+
+                    {/* Delivery Time Footer */}
+                    <div className="pt-3 border-t border-gray-100 dark:border-zinc-800 flex items-center justify-between text-xs">
+                      <span className="text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                        <ClockIcon className="w-4 h-4 text-gray-400" />
+                        <span>Delivery Time</span>
+                      </span>
+                      <span className="font-bold text-gray-900 dark:text-white">
+                        {service?.deliveryTime ? `${service.deliveryTime} Days` : "Not specified"}
+                      </span>
+                    </div>
                   </div>
 
-                  {/* Revision History Section */}
+                  {/* Card 3: Revision History (if revisions exist) */}
                   {revisions.length > 0 && (
-                    <div className="bg-surface border border-border-theme rounded-2xl p-4 sm:p-5 space-y-3 shadow-xs">
-                      <div className="flex items-center justify-between pb-2 border-b border-border-theme">
-                        <h2 className="font-serif font-semibold text-sm sm:text-base text-foreground">
+                    <div className="bg-white dark:bg-zinc-900 border border-gray-100/90 dark:border-zinc-800 rounded-3xl p-5 sm:p-6 shadow-xs space-y-3.5">
+                      <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-zinc-800">
+                        <h2 className="font-serif text-lg font-medium text-gray-900 dark:text-white">
                           Revision History
                         </h2>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-600 border border-amber-200 dark:bg-amber-950/30 dark:text-amber-300 dark:border-amber-900/40">
                           {revisions.length} Total
                         </span>
                       </div>
-                      <div className="space-y-2.5">
+                      <div className="space-y-3">
                         {revisions.map((rev, idx) => (
                           <div
                             key={rev._id || idx}
-                            className="bg-amber-500/5 border border-amber-500/20 p-3 rounded-xl space-y-1 text-xs"
+                            className="bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-900/40 p-3.5 rounded-2xl space-y-1.5 text-xs"
                           >
-                            <div className="flex items-center justify-between text-[10px] text-amber-500 font-semibold">
+                            <div className="flex items-center justify-between text-[10px] text-amber-600 dark:text-amber-400 font-bold uppercase tracking-wider">
                               <span>Revision Request #{idx + 1}</span>
-                              <span>{formatDateTime(rev.requestedAt)}</span>
+                              <span className="font-normal text-gray-400">{formatDateTime(rev.requestedAt)}</span>
                             </div>
-                            <p className="text-foreground leading-relaxed">
+                            <p className="text-gray-800 dark:text-gray-200 italic leading-relaxed">
                               &ldquo;{rev.feedback}&rdquo;
                             </p>
                           </div>

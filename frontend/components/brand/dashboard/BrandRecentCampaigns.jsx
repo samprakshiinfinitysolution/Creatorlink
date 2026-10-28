@@ -102,21 +102,22 @@ function getCampaignInitials(title) {
   return clean.slice(0, 2).toUpperCase();
 }
 
-function CampaignAvatar({ title, thumbnail }) {
+function CampaignAvatar({ title, coverImage, thumbnail }) {
   const [failedUrl, setFailedUrl] = useState(null);
   const initials = getCampaignInitials(title);
-  const hasFailed = Boolean(thumbnail && failedUrl === thumbnail);
+  const imageSrc = coverImage || thumbnail;
+  const hasFailed = Boolean(imageSrc && failedUrl === imageSrc);
 
-  if (thumbnail && !hasFailed) {
+  if (imageSrc && !hasFailed) {
     return (
       <div className="w-10 h-10 rounded-xl bg-secondary/5 border border-secondary/10 overflow-hidden shrink-0 flex items-center justify-center">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          key={thumbnail}
-          src={thumbnail}
+          key={imageSrc}
+          src={imageSrc}
           alt={title || "Campaign"}
           className="w-full h-full object-cover"
-          onError={() => setFailedUrl(thumbnail)}
+          onError={() => setFailedUrl(imageSrc)}
         />
       </div>
     );
@@ -282,21 +283,6 @@ function PencilIcon({ className = "w-4 h-4" }) {
 
 export default function BrandRecentCampaigns({ campaigns = [] }) {
   const safeCampaigns = Array.isArray(campaigns) ? campaigns : [];
-  const [selectedIds, setSelectedIds] = useState([]);
-
-  const handleSelectAll = () => {
-    if (safeCampaigns.length > 0 && safeCampaigns.every((c) => selectedIds.includes(c._id || c.id))) {
-      setSelectedIds([]);
-    } else {
-      setSelectedIds(safeCampaigns.map((c) => c._id || c.id));
-    }
-  };
-
-  const handleSelectRow = (id) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
-  };
 
   return (
     <div className="bg-surface border border-border-theme rounded-2xl p-6 shadow-xs space-y-5 transition-colors">
@@ -343,19 +329,7 @@ export default function BrandRecentCampaigns({ campaigns = [] }) {
           <table className="w-full text-left text-xs border-collapse min-w-[780px]">
             <thead>
               <tr className="border-b border-border-theme bg-surface-muted/40 text-text-secondary uppercase tracking-wider text-[10px] font-semibold">
-                <th className="py-3.5 px-4 w-10 text-center">
-                  <input
-                    type="checkbox"
-                    aria-label="Select all campaigns"
-                    checked={
-                      safeCampaigns.length > 0 &&
-                      safeCampaigns.every((c) => selectedIds.includes(c._id || c.id))
-                    }
-                    onChange={handleSelectAll}
-                    className="w-4 h-4 rounded border-border-theme text-secondary focus:ring-secondary/20 cursor-pointer accent-secondary"
-                  />
-                </th>
-                <th className="py-3.5 px-4 min-w-[220px]">Campaign</th>
+                <th className="py-3.5 px-5 min-w-[220px]">Campaign</th>
                 <th className="py-3.5 px-4 min-w-[120px]">Platform</th>
                 <th className="py-3.5 px-4 min-w-[110px]">Category</th>
                 <th className="py-3.5 px-4 min-w-[100px]">Budget</th>
@@ -368,7 +342,6 @@ export default function BrandRecentCampaigns({ campaigns = [] }) {
             <tbody className="divide-y divide-border-theme">
               {safeCampaigns.map((c, idx) => {
                 const campaignId = c._id || c.id;
-                const isSelected = selectedIds.includes(campaignId);
                 const badge = getStatusBadge(c.status);
                 const platformInfo = getPlatformBadge(c.platform);
                 const PlatformIcon = platformInfo.icon;
@@ -384,27 +357,12 @@ export default function BrandRecentCampaigns({ campaigns = [] }) {
                 return (
                   <tr
                     key={campaignId || idx}
-                    className={`transition-colors ${
-                      isSelected
-                        ? "bg-secondary/5 hover:bg-secondary/10"
-                        : "hover:bg-surface-muted/30"
-                    }`}
+                    className="hover:bg-surface-muted/30 transition-colors"
                   >
-                    {/* Checkbox */}
-                    <td className="py-4 px-4 text-center">
-                      <input
-                        type="checkbox"
-                        aria-label={`Select campaign ${c.title}`}
-                        checked={isSelected}
-                        onChange={() => handleSelectRow(campaignId)}
-                        className="w-4 h-4 rounded border-border-theme text-secondary focus:ring-secondary/20 cursor-pointer accent-secondary"
-                      />
-                    </td>
-
                     {/* Campaign Info (Avatar + Title + Category Subtitle) */}
-                    <td className="py-4 px-4">
+                    <td className="py-4 px-5">
                       <div className="flex items-center gap-3">
-                        <CampaignAvatar title={c.title} thumbnail={c.thumbnail || c.image} />
+                        <CampaignAvatar title={c.title} coverImage={c.coverImage || c.image || c.thumbnail} />
                         <div className="min-w-0">
                           <Link
                             href="/brand/campaigns"

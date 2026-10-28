@@ -94,7 +94,7 @@ export default function CreatorMetricsGrid({ metrics }) {
       secondaryNote: pendingEst > 0 ? `+${formatCurrency(pendingEst, pendingCurrency)} in pipeline` : null,
       icon: CurrencyIcon,
       accentBg: "bg-black/10 text-black dark:text-white dark:bg-white/10 border border-black/20 dark:border-white/20",
-      badgeBg: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
+      badgeBg: "bg-transparent text-emerald-600 dark:text-emerald-400 border border-emerald-500/30",
     },
     {
       id: "pending-payments",
@@ -110,7 +110,7 @@ export default function CreatorMetricsGrid({ metrics }) {
       secondaryNote: "Disbursed upon completion",
       icon: ClockIcon,
       accentBg: "bg-black/10 text-black dark:text-white dark:bg-white/10 border border-black/20 dark:border-white/20",
-      badgeBg: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
+      badgeBg: "bg-transparent text-amber-600 dark:text-amber-400 border border-amber-500/30",
     },
     {
       id: "active-collaborations",
@@ -126,7 +126,7 @@ export default function CreatorMetricsGrid({ metrics }) {
           : null,
       icon: LayersIcon,
       accentBg: "bg-black/10 text-black dark:text-white dark:bg-white/10 border border-black/20 dark:border-white/20",
-      badgeBg: "bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20",
+      badgeBg: "bg-transparent text-sky-600 dark:text-sky-400 border border-sky-500/30",
     },
     {
       id: "client-reputation",
@@ -146,7 +146,7 @@ export default function CreatorMetricsGrid({ metrics }) {
           : "Reviews appear after workspace completion",
       icon: StarIcon,
       accentBg: "bg-black/10 text-black dark:text-white dark:bg-white/10 border border-black/20 dark:border-white/20",
-      badgeBg: "bg-[#ff2d6c]/10 text-[#ff2d6c] border-[#ff2d6c]/20",
+      badgeBg: "bg-transparent text-[#ff2d6c] border border-[#ff2d6c]/30",
     },
   ];
 
@@ -161,8 +161,11 @@ export default function CreatorMetricsGrid({ metrics }) {
           >
             {/* Top row: Card Title & Badge + Accent Icon */}
             <div className="flex items-start justify-between gap-3 mb-4">
-              <div className="space-y-1 min-w-0 flex-1">
-                <h3 className="font-heading font-medium text-sm sm:text-base text-foreground tracking-tight truncate">
+              {/* Left spacer for symmetrical mobile centering */}
+              <div className="w-[42px] shrink-0 invisible sm:hidden" aria-hidden="true" />
+
+              <div className="space-y-1 min-w-0 flex-1 flex flex-col items-center sm:items-start text-center sm:text-left">
+                <h3 className="w-full font-sans font-semibold text-sm sm:text-base text-foreground tracking-tight truncate text-center sm:text-left">
                   {c.title}
                 </h3>
                 <span
@@ -176,18 +179,18 @@ export default function CreatorMetricsGrid({ metrics }) {
               </div>
             </div>
 
-            {/* Bottom block: Prominent Metric Value & Supporting Text */}
-            <div className="space-y-1.5 mt-auto pt-2">
+            {/* Bottom block: Prominent Metric Value & Supporting Text (Centered on Mobile, Left-aligned on Desktop) */}
+            <div className="space-y-1.5 mt-auto pt-2 flex flex-col items-center sm:items-start text-center sm:text-left">
               <div
-                className="font-heading font-medium text-2xl sm:text-3xl lg:text-[26px] xl:text-3xl text-foreground tracking-tight tabular-nums truncate group-hover:text-secondary transition-colors"
+                className="w-full font-sans font-bold text-2xl sm:text-3xl lg:text-[26px] xl:text-3xl text-foreground tracking-tight tabular-nums truncate group-hover:text-secondary transition-colors text-center sm:text-left"
                 title={c.value}
               >
                 {c.value}
               </div>
-              <p className="text-xs text-text-secondary font-sans font-medium leading-relaxed truncate">
+              <p className="w-full text-xs text-text-secondary font-sans font-medium leading-relaxed truncate text-center sm:text-left">
                 {c.subtitle}
               </p>
-              <p className="text-[11px] text-text-secondary/70 font-sans truncate min-h-[16px]">
+              <p className="w-full text-[11px] text-text-secondary/70 font-sans truncate min-h-[16px] text-center sm:text-left">
                 {c.secondaryNote || "\u00A0"}
               </p>
             </div>

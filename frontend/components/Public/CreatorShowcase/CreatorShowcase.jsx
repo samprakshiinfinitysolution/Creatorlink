@@ -2,6 +2,7 @@
 import Image from "next/image";
 
 import { useState } from "react";
+import ScrollReveal from "@/components/theme/ScrollReveal";
 
 const MOBILE_CATEGORIES = [
   "All Salons",
@@ -66,7 +67,9 @@ export default function CreatorShowcase() {
           Below 1024px
       ===================================================== */}
 
-      <div
+      <ScrollReveal
+        direction="scale"
+        delay={150}
         className="
           relative
           mx-auto
@@ -340,14 +343,16 @@ export default function CreatorShowcase() {
             </p>
           </div>
         </div>
-      </div>
+      </ScrollReveal>
 
       {/* =====================================================
           DESKTOP SHOWCASE
           1024px+
       ===================================================== */}
 
-      <div
+      <ScrollReveal
+        direction="scale"
+        delay={150}
         className="
           relative
           mx-auto
@@ -638,7 +643,7 @@ export default function CreatorShowcase() {
             </div>
           </div>
         </div>
-      </div>
+      </ScrollReveal>
     </section>
   );
 }

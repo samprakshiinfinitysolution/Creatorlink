@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getPortfolios,
@@ -8,6 +8,7 @@ import {
   updatePortfolioItem,
   deletePortfolioItem,
 } from "@/redux/creator/portfolio/portfolio_slice";
+import { uploadSingleImageApi } from "@/lib/upload";
 import CreatorSidebar from "@/components/creator/dashboard/CreatorSidebar";
 import CreatorHeader from "@/components/creator/dashboard/CreatorHeader";
 
@@ -96,6 +97,22 @@ function ArrowPathIcon({ className = "w-4 h-4" }) {
   );
 }
 
+function ArrowUpTrayIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+    </svg>
+  );
+}
+
+function LinkIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+    </svg>
+  );
+}
+
 function PortfolioCardCover({ coverImage, title, category, isPublic }) {
   const [loadedUrl, setLoadedUrl] = useState(null);
   const [failedUrl, setFailedUrl] = useState(null);
@@ -113,6 +130,7 @@ function PortfolioCardCover({ coverImage, title, category, isPublic }) {
               <PhotoIcon className="w-10 h-10 opacity-30" />
             </div>
           )}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             key={coverImage}
             src={coverImage}
@@ -121,14 +139,22 @@ function PortfolioCardCover({ coverImage, title, category, isPublic }) {
             decoding="async"
             onLoad={() => setLoadedUrl(coverImage)}
             onError={() => setFailedUrl(coverImage)}
-            className={`w-full h-full object-cover group-hover:scale-105 transition-all duration-300 ${
+            className={`w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-out ${
               isImgLoaded ? "opacity-100" : "opacity-0"
             }`}
           />
+          {/* Subtle Dark Gradient Overlay on hover */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
         </>
       ) : (
-        <div className="w-full h-full flex items-center justify-center text-text-secondary">
-          <PhotoIcon className="w-10 h-10 opacity-40" />
+        <div className="w-full h-full flex items-center justify-center bg-neutral-100/80 dark:bg-surface-muted relative overflow-hidden transition-colors duration-300 group-hover:bg-neutral-200/60 dark:group-hover:bg-neutral-800/60">
+          {/* Zooming Icon & Preview Label in Black / Neutral */}
+          <div className="transform transition-all duration-300 ease-out group-hover:scale-115 group-hover:-translate-y-0.5 flex flex-col items-center gap-1.5 text-text-secondary group-hover:text-neutral-950 dark:group-hover:text-white">
+            <PhotoIcon className="w-10 h-10 opacity-40 group-hover:opacity-100 transition-all duration-300" />
+            <span className="text-[10px] font-semibold tracking-wider uppercase opacity-0 group-hover:opacity-90 transition-all duration-300">
+              Preview
+            </span>
+          </div>
         </div>
       )}
 
@@ -146,8 +172,8 @@ function PortfolioCardCover({ coverImage, title, category, isPublic }) {
         <span
           className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold backdrop-blur-xs border ${
             isPublic
-              ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/30"
-              : "bg-amber-500/10 text-amber-500 border-amber-500/30"
+              ? "bg-transparent text-emerald-500 border-emerald-500/30"
+              : "bg-transparent text-amber-500 border-amber-500/30"
           }`}
         >
           {isPublic ? (
@@ -190,6 +216,12 @@ export default function CreatorPortfolio() {
   const [formError, setFormError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
+  // Cover Image Upload State
+  const fileInputRef = useRef(null);
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
+  const [isDraggingCover, setIsDraggingCover] = useState(false);
+  const [uploadError, setUploadError] = useState(null);
+
   // Delete State
   const [deleteConfirmProject, setDeleteConfirmProject] = useState(null);
   const [deleting, setDeleting] = useState(false);
@@ -231,6 +263,12 @@ export default function CreatorPortfolio() {
     setEditingPortfolioId(null);
     setFormData(initialFormState);
     setFormError(null);
+    setUploadError(null);
+    setIsUploadingCover(false);
+    setIsDraggingCover(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
     setIsModalOpen(true);
   };
 
@@ -253,14 +291,118 @@ export default function CreatorPortfolio() {
         : [],
     });
     setFormError(null);
+    setUploadError(null);
+    setIsUploadingCover(false);
+    setIsDraggingCover(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
-    if (!submitting) {
+    if (!submitting && !isUploadingCover) {
       setIsModalOpen(false);
       setEditingPortfolioId(null);
       setFormError(null);
+      setUploadError(null);
+      setIsUploadingCover(false);
+      setIsDraggingCover(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  // Helper to process and upload cover image file
+  const processCoverFile = async (file) => {
+    if (!file) return;
+
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      setUploadError("Please upload a valid image file (JPEG, PNG, or WebP).");
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setUploadError("Image size must be less than 5 MB.");
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      return;
+    }
+
+    setUploadError(null);
+    setIsUploadingCover(true);
+
+    try {
+      const uploadRes = await uploadSingleImageApi(file, "creatorlink/portfolios");
+      const uploadedUrl =
+        uploadRes?.url ||
+        uploadRes?.secure_url ||
+        uploadRes?.data?.url ||
+        uploadRes?.data?.secure_url;
+
+      if (uploadedUrl) {
+        setFormData((prev) => ({
+          ...prev,
+          coverImage: uploadedUrl,
+        }));
+      } else {
+        setUploadError("Could not retrieve uploaded image URL.");
+      }
+    } catch (err) {
+      const errMsg =
+        err?.response?.data?.message || err?.message || "Failed to upload cover image.";
+      setUploadError(errMsg);
+    } finally {
+      setIsUploadingCover(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  const handleCoverFileSelect = (e) => {
+    const file = e.target?.files?.[0];
+    if (file) {
+      processCoverFile(file);
+    }
+  };
+
+  const handleCoverDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isUploadingCover) {
+      setIsDraggingCover(true);
+    }
+  };
+
+  const handleCoverDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingCover(false);
+  };
+
+  const handleCoverDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingCover(false);
+    if (isUploadingCover) return;
+    const file = e.dataTransfer?.files?.[0];
+    if (file) {
+      processCoverFile(file);
+    }
+  };
+
+  const handleRemoveCover = () => {
+    if (isUploadingCover) return;
+    setFormData((prev) => ({ ...prev, coverImage: "" }));
+    setUploadError(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   };
 
@@ -379,6 +521,11 @@ export default function CreatorPortfolio() {
     if (isSuccess) {
       setFormData(initialFormState);
       setEditingPortfolioId(null);
+      setUploadError(null);
+      setIsUploadingCover(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
       setIsModalOpen(false);
     } else {
       setFormError(
@@ -424,7 +571,7 @@ export default function CreatorPortfolio() {
           {/* 1. PAGE HEADER */}
           <div className="bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="font-serif font-semibold text-2xl sm:text-3xl text-foreground tracking-tight">
+              <h1 className="font-serif font-medium text-2xl sm:text-3xl text-foreground tracking-tight">
                 My Portfolio
               </h1>
               <p className="text-xs sm:text-sm text-text-secondary mt-1">
@@ -461,7 +608,7 @@ export default function CreatorPortfolio() {
           )}
 
           {/* 2. SEARCH & FILTER BAR */}
-          <div className="bg-surface border border-border-theme rounded-2xl p-4 shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+          <div className="bg-surface border border-border-theme rounded-2xl p-3 sm:p-4 shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
             {/* Search Input */}
             <div className="relative flex-1 min-w-0">
               <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-text-secondary">
@@ -471,9 +618,19 @@ export default function CreatorPortfolio() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search projects by title or keyword..."
-                className="w-full text-xs pl-10 pr-4 py-2.5 rounded-xl bg-surface-muted border border-border-theme text-foreground placeholder:text-text-secondary focus:outline-none focus:border-secondary transition-colors"
+                placeholder="Search projects..."
+                className="w-full text-xs pl-10 pr-9 py-2.5 rounded-xl bg-surface-muted border border-border-theme text-foreground placeholder:text-text-secondary focus:outline-none focus:border-secondary transition-colors"
               />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-xs text-text-secondary hover:text-foreground cursor-pointer font-sans"
+                  title="Clear search"
+                >
+                  ✕
+                </button>
+              )}
             </div>
 
             {/* Filter Dropdowns */}
@@ -543,7 +700,7 @@ export default function CreatorPortfolio() {
               {filteredItems.map((project) => (
                 <div
                   key={project._id || project.id}
-                  className="bg-surface border border-border-theme rounded-2xl overflow-hidden shadow-xs hover:border-secondary/40 transition-all duration-200 flex flex-col group"
+                  className="bg-surface border border-border-theme rounded-2xl overflow-hidden shadow-xs hover:border-neutral-400 dark:hover:border-neutral-600 transition-all duration-200 flex flex-col group"
                 >
                   {/* Cover Image Container with Per-Image Skeleton */}
                   <PortfolioCardCover
@@ -556,7 +713,7 @@ export default function CreatorPortfolio() {
                   {/* Card Details */}
                   <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                     <div className="space-y-2">
-                      <h3 className="font-serif font-medium text-lg text-foreground line-clamp-1 group-hover:text-secondary transition-colors">
+                      <h3 className="font-serif font-medium text-lg text-foreground line-clamp-1 group-hover:text-neutral-950 dark:group-hover:text-white transition-colors">
                         {project.title}
                       </h3>
                       <p className="text-xs text-text-secondary line-clamp-2 leading-relaxed">
@@ -592,7 +749,7 @@ export default function CreatorPortfolio() {
                             setDeleteConfirmProject(project);
                             setDeleteError(null);
                           }}
-                          className="p-1.5 rounded-lg text-text-secondary hover:text-red-500 hover:bg-red-500/10 border border-border-theme transition-colors cursor-pointer"
+                          className="p-1.5 rounded-lg text-text-secondary hover:text-black dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-surface-muted border border-border-theme transition-colors cursor-pointer"
                         >
                           <TrashIcon />
                         </button>
@@ -653,9 +810,9 @@ export default function CreatorPortfolio() {
               </div>
               <button
                 type="button"
-                disabled={submitting}
+                disabled={submitting || isUploadingCover}
                 onClick={handleCloseModal}
-                className="p-1.5 rounded-lg text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors cursor-pointer disabled:opacity-50"
               >
                 ✕
               </button>
@@ -670,34 +827,212 @@ export default function CreatorPortfolio() {
                   </div>
                 )}
 
-                {/* Title */}
-                <div>
-                  <label className="block font-semibold text-foreground mb-1.5">
-                    Project Title <span className="text-red-500">*</span>
-                  </label>
+                {/* Cover Image Section */}
+                <div className="space-y-2.5">
+                  <div>
+                    <label className="block font-semibold text-foreground text-xs sm:text-sm">
+                      Cover Image <span className="text-[#FF4F87]">*</span>
+                    </label>
+                    <p className="text-[11px] text-text-secondary mt-0.5">
+                      Upload a high-quality image for your project (JPG, PNG, WebP, max 5MB)
+                    </p>
+                  </div>
+
                   <input
-                    type="text"
-                    name="title"
-                    maxLength={150}
-                    required
-                    value={formData.title}
-                    onChange={handleInputChange}
-                    placeholder="e.g. My First Brand Collaboration"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-surface-muted border border-border-theme text-foreground focus:outline-none focus:border-secondary transition-colors"
+                    type="file"
+                    ref={fileInputRef}
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={handleCoverFileSelect}
+                    className="hidden"
                   />
+
+                  {formData.coverImage ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4 items-stretch">
+                      {/* Left: Responsive Image Preview */}
+                      <div className="relative rounded-2xl overflow-hidden border border-border-theme bg-surface-muted h-44 sm:h-48 md:h-52 group">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          key={formData.coverImage}
+                          src={formData.coverImage}
+                          alt="Cover preview"
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                          }}
+                        />
+                        {/* Floating Top-Right Remove Button */}
+                        <button
+                          type="button"
+                          title="Remove image"
+                          disabled={isUploadingCover}
+                          onClick={handleRemoveCover}
+                          className="absolute top-2.5 right-2.5 p-2 rounded-xl bg-black/60 hover:bg-black/85 text-white transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+                        >
+                          <TrashIcon className="w-3.5 h-3.5" />
+                        </button>
+                        {isUploadingCover && (
+                          <div className="absolute inset-0 bg-black/60 backdrop-blur-2xs flex flex-col items-center justify-center gap-2 text-white p-3 text-center">
+                            <ArrowPathIcon className="w-5 h-5 animate-spin" />
+                            <span className="text-xs font-medium">Uploading cover image...</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Right: Upload Box & Action Buttons */}
+                      <div className="flex flex-col justify-between gap-2.5">
+                        <div
+                          onDragOver={handleCoverDragOver}
+                          onDragLeave={handleCoverDragLeave}
+                          onDrop={handleCoverDrop}
+                          onClick={() => {
+                            if (!isUploadingCover) fileInputRef.current?.click();
+                          }}
+                          className={`border-2 border-dashed rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center text-center cursor-pointer transition-all flex-1 min-h-[110px] ${
+                            isDraggingCover
+                              ? "border-[#FF4F87] bg-pink-50/60 dark:bg-pink-950/30 scale-[0.99]"
+                              : "border-pink-200 dark:border-pink-900/50 hover:border-[#FF4F87]/60 bg-pink-50/20 hover:bg-pink-50/40 dark:bg-pink-950/10 dark:hover:bg-pink-950/20"
+                          } ${isUploadingCover ? "pointer-events-none opacity-60" : ""}`}
+                        >
+                          <div className="w-9 h-9 rounded-xl bg-pink-50 dark:bg-pink-950/40 flex items-center justify-center text-[#FF4F87] mb-2">
+                            <ArrowUpTrayIcon className="w-5 h-5" />
+                          </div>
+                          <p className="font-bold text-xs text-foreground">Click to upload</p>
+                          <p className="text-[11px] text-text-secondary mt-0.5">or drag and drop</p>
+                          <p className="text-[10px] text-text-secondary/80 mt-1">
+                            JPG, PNG, WebP (Max 5MB)
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            disabled={isUploadingCover}
+                            onClick={() => fileInputRef.current?.click()}
+                            className="px-3 py-2 rounded-xl bg-surface hover:bg-surface-muted border border-border-theme text-foreground font-semibold text-xs flex items-center justify-center gap-1.5 flex-1 transition-colors cursor-pointer disabled:opacity-50"
+                          >
+                            <PhotoIcon className="w-3.5 h-3.5 text-text-secondary" />
+                            <span>Change Image</span>
+                          </button>
+                          <button
+                            type="button"
+                            disabled={isUploadingCover}
+                            onClick={handleRemoveCover}
+                            className="px-3 py-2 rounded-xl bg-pink-50 hover:bg-pink-100 dark:bg-pink-950/40 dark:hover:bg-pink-900/50 border border-pink-200/80 dark:border-pink-900/60 text-[#FF4F87] dark:text-pink-400 font-semibold text-xs flex items-center justify-center gap-1.5 flex-1 transition-colors cursor-pointer disabled:opacity-50"
+                          >
+                            <TrashIcon className="w-3.5 h-3.5" />
+                            <span>Remove Image</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    /* Empty State: Full-Width Upload Dropzone */
+                    <div
+                      onDragOver={handleCoverDragOver}
+                      onDragLeave={handleCoverDragLeave}
+                      onDrop={handleCoverDrop}
+                      onClick={() => {
+                        if (!isUploadingCover) fileInputRef.current?.click();
+                      }}
+                      className={`border-2 border-dashed rounded-2xl p-7 sm:p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all ${
+                        isDraggingCover
+                          ? "border-[#FF4F87] bg-pink-50/60 dark:bg-pink-950/30 scale-[0.99]"
+                          : "border-pink-200 dark:border-pink-900/50 hover:border-[#FF4F87]/60 bg-pink-50/20 hover:bg-pink-50/40 dark:bg-pink-950/10 dark:hover:bg-pink-950/20"
+                      } ${isUploadingCover ? "pointer-events-none opacity-60" : ""}`}
+                    >
+                      {isUploadingCover ? (
+                        <div className="flex flex-col items-center justify-center gap-2 text-foreground">
+                          <ArrowPathIcon className="w-7 h-7 text-[#FF4F87] animate-spin mb-1" />
+                          <span className="text-xs font-semibold">Uploading cover image...</span>
+                          <span className="text-[11px] text-text-secondary">Please wait</span>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="w-11 h-11 rounded-2xl bg-pink-50 dark:bg-pink-950/40 flex items-center justify-center text-[#FF4F87] mb-2.5">
+                            <ArrowUpTrayIcon className="w-6 h-6" />
+                          </div>
+                          <p className="font-bold text-xs sm:text-sm text-foreground">
+                            Click to upload <span className="font-normal text-text-secondary text-xs">or drag and drop</span>
+                          </p>
+                          <p className="text-[11px] text-text-secondary mt-1">
+                            JPG, PNG, WebP (Max 5MB)
+                          </p>
+                        </>
+                      )}
+                    </div>
+                  )}
+
+                  {/* OR Divider */}
+                  <div className="relative my-2 sm:my-2.5 flex items-center justify-center">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-border-theme/70" />
+                    </div>
+                    <div className="relative bg-surface px-3">
+                      <span className="text-[10px] sm:text-[11px] font-semibold text-text-secondary tracking-wider uppercase">
+                        OR
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Manual Image URL Input */}
+                  <div>
+                    <label className="block font-semibold text-foreground mb-1.5 text-xs">
+                      Image URL
+                    </label>
+                    <div className="relative flex items-center">
+                      <LinkIcon className="w-3.5 h-3.5 text-text-secondary absolute left-3.5 pointer-events-none" />
+                      <input
+                        type="url"
+                        name="coverImage"
+                        disabled={isUploadingCover}
+                        value={formData.coverImage}
+                        onChange={(e) => {
+                          handleInputChange(e);
+                          setUploadError(null);
+                        }}
+                        placeholder="https://images.unsplash.com/photo-1539109126782-8b01035bbbb0"
+                        className="w-full pl-9 pr-3.5 py-2.5 text-xs rounded-xl bg-surface-muted/60 border border-border-theme text-foreground placeholder:text-text-secondary/50 focus:outline-none focus:border-secondary transition-colors disabled:opacity-50"
+                      />
+                    </div>
+                    <p className="text-[11px] text-text-secondary mt-1">
+                      Paste a valid image URL instead of uploading
+                    </p>
+                  </div>
+
+                  {uploadError && (
+                    <p className="text-xs text-red-500 font-medium">
+                      {uploadError}
+                    </p>
+                  )}
                 </div>
 
-                {/* Category & Cover Image URL Grid */}
+                {/* Project Title & Category Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block font-semibold text-foreground mb-1.5">
+                    <label className="block font-semibold text-foreground mb-1.5 text-xs">
+                      Project Title <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="title"
+                      maxLength={150}
+                      required
+                      value={formData.title}
+                      onChange={handleInputChange}
+                      placeholder="Instagram Fashion Content..."
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-surface-muted/60 border border-border-theme text-foreground placeholder:text-text-secondary/50 focus:outline-none focus:border-secondary transition-colors text-xs"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-semibold text-foreground mb-1.5 text-xs">
                       Category
                     </label>
                     <select
                       name="category"
                       value={formData.category}
                       onChange={handleInputChange}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-surface-muted border border-border-theme text-foreground focus:outline-none focus:border-secondary transition-colors"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-surface-muted/60 border border-border-theme text-foreground focus:outline-none focus:border-secondary transition-colors text-xs"
                     >
                       <option value="Fashion & Luxury">Fashion & Luxury</option>
                       <option value="Beauty & Skincare">Beauty & Skincare</option>
@@ -707,25 +1042,11 @@ export default function CreatorPortfolio() {
                       <option value="Other">Other</option>
                     </select>
                   </div>
-
-                  <div>
-                    <label className="block font-semibold text-foreground mb-1.5">
-                      Cover Image URL
-                    </label>
-                    <input
-                      type="url"
-                      name="coverImage"
-                      value={formData.coverImage}
-                      onChange={handleInputChange}
-                      placeholder="https://images.unsplash.com/..."
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-surface-muted border border-border-theme text-foreground focus:outline-none focus:border-secondary transition-colors"
-                    />
-                  </div>
                 </div>
 
                 {/* Description */}
                 <div>
-                  <label className="block font-semibold text-foreground mb-1.5">
+                  <label className="block font-semibold text-foreground mb-1.5 text-xs">
                     Description
                   </label>
                   <textarea
@@ -734,8 +1055,8 @@ export default function CreatorPortfolio() {
                     maxLength={2000}
                     value={formData.description}
                     onChange={handleInputChange}
-                    placeholder="Provide context or highlights about this project..."
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-surface-muted border border-border-theme text-foreground focus:outline-none focus:border-secondary transition-colors resize-none"
+                    placeholder="Created fashion-focused social media content for showcasing products and creative styling.."
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-surface-muted/60 border border-border-theme text-foreground placeholder:text-text-secondary/50 focus:outline-none focus:border-secondary transition-colors resize-none text-xs"
                   />
                 </div>
 
@@ -893,16 +1214,16 @@ export default function CreatorPortfolio() {
               <div className="p-4 sm:p-5 border-t border-border-theme bg-surface-muted/20 flex items-center justify-end gap-3">
                 <button
                   type="button"
-                  disabled={submitting}
+                  disabled={submitting || isUploadingCover}
                   onClick={handleCloseModal}
-                  className="px-4 py-2 rounded-xl bg-surface-muted hover:bg-surface border border-border-theme text-foreground font-semibold text-xs transition-colors cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-surface hover:bg-surface-muted border border-border-theme text-foreground font-semibold text-xs transition-colors cursor-pointer disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  disabled={submitting}
-                  className="px-5 py-2 rounded-xl bg-secondary hover:bg-secondary-dark text-white font-semibold text-xs tracking-wide transition-all shadow-xs cursor-pointer disabled:opacity-50"
+                  disabled={submitting || isUploadingCover}
+                  className="px-5 py-2.5 rounded-xl bg-neutral-950 hover:bg-neutral-800 text-white dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-100 font-semibold text-xs tracking-wide transition-all shadow-xs cursor-pointer disabled:opacity-50"
                 >
                   {submitting
                     ? editingPortfolioId

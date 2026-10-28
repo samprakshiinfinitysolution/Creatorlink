@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import ScrollReveal from "@/components/theme/ScrollReveal";
 
 // =========================================================
 // CENTRALIZED MOCK DATA (UI ONLY - READY FOR API REPLACEMENT)
@@ -35,7 +36,7 @@ export default function TrustedBrands() {
         {/* =========================================================
             DESKTOP LAYOUT (6 BRANDS - VISIBLE ON MD+)
         ========================================================= */}
-        <div className="hidden md:block text-center">
+        <ScrollReveal direction="up" className="hidden md:block text-center">
           <span className="text-[11px] font-semibold tracking-[0.25em] uppercase text-text-secondary block mb-6 lg:mb-7">
             TRUSTED BY GLOBAL CREATIVE DIRECTORS
           </span>
@@ -50,12 +51,12 @@ export default function TrustedBrands() {
               </span>
             ))}
           </div>
-        </div>
+        </ScrollReveal>
 
         {/* =========================================================
             MOBILE LAYOUT (5 BRANDS - MATCHES MOBILE SCREENSHOT)
         ========================================================= */}
-        <div className="block md:hidden text-center">
+        <ScrollReveal direction="up" className="block md:hidden text-center">
           <span className="text-[10px] font-semibold tracking-[0.2em] uppercase text-text-secondary block mb-4">
             TRUSTED BY LUXURY INNOVATORS
           </span>
@@ -70,7 +71,7 @@ export default function TrustedBrands() {
               </span>
             ))}
           </div>
-        </div>
+        </ScrollReveal>
       </div>
     </section>
   );

@@ -1,6 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  allowedDevOrigins: ["192.168.1.4:3005", "192.168.1.4", "localhost:3005"],
+  allowedDevOrigins: [
+    "192.168.1.10",
+    "192.168.1.10:3005",
+     "192.168.1.23",
+    "192.168.1.23:3005",
+    "localhost",
+    "localhost:3005",
+    "127.0.0.1",
+    "127.0.0.1:3005",
+  ],
   images: {
     minimumCacheTTL: 2592000, // 30 days
     formats: ["image/webp"],

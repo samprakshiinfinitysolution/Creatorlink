@@ -3,11 +3,13 @@ import express from "express";
 import authenticateUser from "../../middleware/auth.middleware.js";
 import {
     uploadSingleImage,
-    uploadMultipleImages
+    uploadMultipleImages,
+    uploadSingleVideo
 } from "../../middleware/upload.middleware.js";
 import {
     uploadSingleImageHandler,
-    uploadMultipleImagesHandler
+    uploadMultipleImagesHandler,
+    uploadSingleVideoHandler
 } from "./upload.controller.js";
 
 const router = express.Router();
@@ -27,6 +29,13 @@ router.post(
     "/images",
     uploadMultipleImages,
     uploadMultipleImagesHandler
+);
+
+// Upload a single video (form field 'video').
+router.post(
+    "/video",
+    uploadSingleVideo,
+    uploadSingleVideoHandler
 );
 
 export default router;

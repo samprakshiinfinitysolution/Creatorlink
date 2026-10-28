@@ -35,17 +35,20 @@ const formatDateTime = (dateString) => {
 };
 
 const getStatusBadge = (status) => {
-  switch (status) {
+  const norm = (status || "").toLowerCase();
+  switch (norm) {
     case "paid":
-      return { label: "Paid", color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" };
+      return { label: "Paid", color: "bg-transparent text-emerald-500 border border-emerald-500/30" };
+    case "completed":
+      return { label: "Completed", color: "bg-transparent text-emerald-500 border border-emerald-500/30" };
     case "pending":
-      return { label: "Pending", color: "bg-amber-500/10 text-amber-500 border-amber-500/20" };
+      return { label: "Pending", color: "bg-transparent text-amber-500 border border-amber-500/30" };
     case "processing":
-      return { label: "Processing", color: "bg-purple-500/10 text-purple-500 border-purple-500/20" };
+      return { label: "Processing", color: "bg-transparent text-purple-500 border border-purple-500/30" };
     case "failed":
-      return { label: "Failed", color: "bg-red-500/10 text-red-500 border-red-500/20" };
+      return { label: "Failed", color: "bg-transparent text-red-500 border border-red-500/30" };
     default:
-      return { label: status || "Unknown", color: "bg-surface-muted text-text-secondary border-border-theme" };
+      return { label: status || "Unknown", color: "bg-transparent text-text-secondary border border-border-theme" };
   }
 };
 
@@ -88,7 +91,7 @@ export default function CreatorPaymentDetailModal({ isOpen, onClose, payment }) 
             <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wide ${badge.color}`}>
               {badge.label}
             </span>
-            <h2 className="font-sans font-semibold text-xl text-foreground tracking-tight mt-1">
+            <h2 className="font-serif font-semibold text-xl text-foreground tracking-tight mt-1">
               Payment Receipt Details
             </h2>
           </div>
@@ -106,7 +109,7 @@ export default function CreatorPaymentDetailModal({ isOpen, onClose, payment }) 
           <div className="bg-surface-muted/60 p-4 rounded-xl border border-border-theme/60 space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-text-secondary font-medium">
-                {payment.status === "paid" ? "Amount Received" : "Payment Amount"}
+                {payment.status === "paid" || payment.status === "completed" ? "Amount Received" : "Payment Amount"}
               </span>
               <span className="font-sans font-semibold text-lg text-foreground">
                 {formatPrice(payment.amount, payment.currency)}

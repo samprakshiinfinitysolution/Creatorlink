@@ -5,12 +5,74 @@ import Message from "./message.model.js";
 import Booking from "../booking/booking.model.js";
 import Workspace from "../workspace/workspace.model.js";
 import Auth from "../auth/auth.model.js";
+import BrandProfile from "../brand/profile/profile.model.js";
+import CreatorProfile from "../creator/profile/profile.model.js";
 import { createNotificationSafe } from "../notifications/notification.service.js";
 import createApiError from "../../utils/ApiError.js";
 import {
     getPagination,
     getPaginationData
 } from "../../utils/pagination.js";
+
+// Helper to enrich conversation participants with profile photo / brand logo
+const attachConversationProfiles = async (conversations) => {
+    if (!conversations) return conversations;
+    const isSingle = !Array.isArray(conversations);
+    const list = isSingle ? [conversations] : conversations;
+    if (list.length === 0) return conversations;
+
+    const participantIds = new Set();
+    list.forEach((conv) => {
+        const participants = conv.participants || [];
+        participants.forEach((p) => {
+            const pId = p?._id || (typeof p === "string" ? p : null);
+            if (pId) participantIds.add(pId.toString());
+        });
+    });
+
+    const idList = Array.from(participantIds).map((id) => new mongoose.Types.ObjectId(id));
+    if (idList.length === 0) return conversations;
+
+    const [brandProfiles, creatorProfiles] = await Promise.all([
+        BrandProfile.find({ user: { $in: idList } }).select("user logo").lean(),
+        CreatorProfile.find({ user: { $in: idList } }).select("user profileImage").lean()
+    ]);
+
+    const brandMap = new Map();
+    brandProfiles.forEach((bp) => {
+        if (bp.user) brandMap.set(bp.user.toString(), bp.logo || "");
+    });
+
+    const creatorMap = new Map();
+    creatorProfiles.forEach((cp) => {
+        if (cp.user) creatorMap.set(cp.user.toString(), cp.profileImage || "");
+    });
+
+    const enriched = list.map((conv) => {
+        const convObj = conv.toObject ? conv.toObject() : { ...conv };
+        if (Array.isArray(convObj.participants)) {
+            convObj.participants = convObj.participants.map((p) => {
+                if (!p || typeof p !== "object") return p;
+                const pObj = p.toObject ? p.toObject() : { ...p };
+                const pId = pObj._id?.toString();
+                const brandLogo = pId ? brandMap.get(pId) : null;
+                const creatorImage = pId ? creatorMap.get(pId) : null;
+                const image = creatorImage || brandLogo || "";
+
+                return {
+                    ...pObj,
+                    profileImage: image,
+                    avatar: image,
+                    logo: brandLogo || "",
+                    image: image
+                };
+            });
+        }
+        return convObj;
+    });
+
+    return isSingle ? enriched[0] : enriched;
+};
 
 // Helper function to verify booking ownership, accepted status, workspace existence, and participant eligibility
 const verifyBookingAccess = async (userId, bookingId, recipientId, campaignId) => {
@@ -229,8 +291,10 @@ const getConversationsService = async (userId, query = {}) => {
         Conversation.countDocuments(filter)
     ]);
 
+    const enrichedConversations = await attachConversationProfiles(conversations);
+
     return {
-        conversations,
+        conversations: enrichedConversations,
         pagination: getPaginationData(currentPage, itemsPerPage, totalItems)
     };
 };
@@ -253,6 +317,8 @@ const getConversationByIdService = async (userId, conversationId) => {
         throw createApiError(404, "Conversation not found or access denied");
     }
 
+    const enrichedConversation = await attachConversationProfiles(conversation);
+
     const messages = await Message.find({
         conversation: conversationId
     })
@@ -261,7 +327,7 @@ const getConversationByIdService = async (userId, conversationId) => {
         .sort({ createdAt: 1 });
 
     return {
-        conversation,
+        conversation: enrichedConversation,
         messages
     };
 };

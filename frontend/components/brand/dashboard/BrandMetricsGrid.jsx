@@ -115,27 +115,30 @@ export default function BrandMetricsGrid({ metrics }) {
         return (
           <div
             key={c.title}
-            className="bg-white dark:bg-surface border border-border-theme rounded-xl p-3.5 sm:p-4 shadow-xs hover:shadow-md hover:border-secondary/40 transition-all duration-200 flex items-center gap-3 sm:gap-3.5 h-full"
+            className="bg-white dark:bg-surface border border-border-theme rounded-xl p-3.5 sm:p-4 shadow-xs hover:shadow-md hover:border-secondary/40 transition-all duration-200 flex items-center justify-between sm:justify-start gap-2.5 sm:gap-3.5 h-full"
           >
-            {/* Left Pink Icon Container */}
-            <div className="w-11 h-11 sm:w-12 sm:h-12 lg:w-[50px] lg:h-[50px] rounded-xl bg-[#fff0f4]/50 dark:bg-[#2a171f]/50 text-[#ff2d6c] dark:text-[#ff4f87] flex items-center justify-center shrink-0 transition-transform duration-200 hover:scale-105">
+            {/* Left Icon Container */}
+            <div className="w-11 h-11 sm:w-12 sm:h-12 lg:w-[50px] lg:h-[50px] rounded-xl bg-[#fff0f4]/50 dark:bg-[#2a171f]/50 text-black dark:text-white flex items-center justify-center shrink-0 transition-transform duration-200 hover:scale-105">
               <Icon className="w-5 h-5 sm:w-5.5 sm:h-5.5" />
             </div>
 
-            {/* Right Metric Content */}
-            <div className="flex-1 min-w-0 flex flex-col justify-center">
-              <span className="text-[10px] sm:text-[10.5px] font-semibold text-slate-400 dark:text-neutral-400 tracking-wider uppercase font-sans truncate">
+            {/* Metric Content (Centered on Mobile, Left-aligned on Desktop) */}
+            <div className="flex-1 min-w-0 flex flex-col items-center sm:items-start justify-center text-center sm:text-left">
+              <span className="text-[10px] sm:text-[10.5px] font-semibold text-slate-400 dark:text-neutral-400 tracking-wider uppercase font-sans truncate w-full">
                 {c.title}
               </span>
-              <span className="text-[19px] sm:text-[23px] lg:text-[24px] font-semibold text-slate-900 dark:text-foreground font-sans tracking-tight block mt-0.5 leading-none truncate">
+              <span className="text-[19px] sm:text-[23px] lg:text-[24px] font-semibold text-slate-900 dark:text-foreground font-sans tracking-tight block mt-0.5 leading-none truncate w-full">
                 {c.value}
               </span>
               {c.subtitle && (
-                <span className="text-[10.5px] sm:text-[11px] text-text-secondary mt-1 block truncate font-medium">
+                <span className="text-[10.5px] sm:text-[11px] text-text-secondary mt-1 block truncate font-medium w-full">
                   {c.subtitle}
                 </span>
               )}
             </div>
+
+            {/* Right Invisible Spacer for Symmetrical Mobile Centering */}
+            <div className="w-11 h-11 shrink-0 invisible sm:hidden" aria-hidden="true" />
           </div>
         );
       })}

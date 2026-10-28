@@ -34,6 +34,13 @@ const creatorServiceSchema = new mongoose.Schema(
             required: true
         },
 
+        // Main cover image used for service preview.
+        coverImage: {
+            type: String,
+            trim: true,
+            default: ""
+        },
+
         // Platform on which the service is delivered.
         platform: {
             type: String,

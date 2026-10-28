@@ -143,6 +143,7 @@ export default function CreatorCampaignDetail({ campaignId }) {
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
+  const [failedCoverUrl, setFailedCoverUrl] = useState(null);
 
   useEffect(() => {
     if (campaignId) {
@@ -288,20 +289,21 @@ export default function CreatorCampaignDetail({ campaignId }) {
           ) : (
             /* MAIN CAMPAIGN DETAIL DISPLAY */
             <div className="bg-surface border border-border-theme rounded-2xl p-6 sm:p-8 shadow-xs space-y-8">
-              {/* Top Row Badges & Status */}
+              {/* Top Row Badges & Status - Clean Text Without Pill Outlines */}
               <div className="flex items-center justify-between gap-3 flex-wrap sm:flex-nowrap border-b border-border-theme pb-5">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="px-3 py-1 rounded-full text-xs font-semibold bg-secondary/10 text-secondary border border-secondary/20 uppercase tracking-wide">
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  <span className="text-xs font-sans font-bold tracking-wider uppercase text-pink-500 dark:text-pink-400">
                     {campaign.category || "General"}
                   </span>
-                  <span className="px-3 py-1 rounded-full text-xs font-semibold bg-surface-muted text-foreground border border-border-theme uppercase tracking-wide">
+                  <span className="text-border-theme">|</span>
+                  <span className="text-xs font-sans font-bold tracking-wider uppercase text-neutral-600 dark:text-neutral-400">
                     {formatPlatform(campaign.platform)}
                   </span>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   {isApplied ? (
-                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/30 uppercase tracking-wide">
+                    <span className="text-xs font-bold text-emerald-500 uppercase tracking-wide">
                       Already Applied
                     </span>
                   ) : (
@@ -314,16 +316,28 @@ export default function CreatorCampaignDetail({ campaignId }) {
                       <ArrowRightIcon className="w-3.5 h-3.5" />
                     </button>
                   )}
-                  <span className="px-3 py-1 rounded-full text-xs font-semibold bg-surface-muted text-text-secondary border border-border-theme uppercase tracking-wide">
+                  <span className="text-xs font-semibold text-text-secondary uppercase tracking-wide">
                     Status: {campaign.status || "Published"}
                   </span>
                 </div>
 
               </div>
+              {/* Campaign Cover Banner (if present) */}
+              {(campaign.coverImage || campaign.image) && failedCoverUrl !== (campaign.coverImage || campaign.image) && (
+                <div className="relative h-48 sm:h-64 lg:h-72 w-full rounded-2xl overflow-hidden border border-border-theme bg-surface-muted/60 shrink-0">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={campaign.coverImage || campaign.image}
+                    alt={campaign.title || "Campaign banner"}
+                    className="w-full h-full object-cover"
+                    onError={() => setFailedCoverUrl(campaign.coverImage || campaign.image)}
+                  />
+                </div>
+              )}
 
               {/* Campaign Header & Brand Info */}
               <div className="space-y-2">
-                <h1 className="font-serif font-semibold text-2xl sm:text-3xl text-foreground tracking-tight">
+                <h1 className="font-serif font-medium text-2xl sm:text-3xl text-foreground tracking-tight">
                   {campaign.title}
                 </h1>
                 {campaign.brand?.name && (
@@ -342,7 +356,7 @@ export default function CreatorCampaignDetail({ campaignId }) {
                     <CurrencyIcon className="w-4 h-4 text-secondary shrink-0" />
                     <span className="font-medium">Budget</span>
                   </div>
-                  <span className="font-serif font-semibold text-xl text-foreground block">
+                  <span className="font-sans font-semibold text-xl text-foreground block">
                     {formatBudget(campaign.budget)}
                   </span>
                 </div>

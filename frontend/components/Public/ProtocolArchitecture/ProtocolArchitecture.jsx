@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import ScrollReveal from "@/components/theme/ScrollReveal";
 
 // =========================================================
 // CENTRALIZED MOCK DATA (UI ONLY - READY FOR API REPLACEMENT)
@@ -83,48 +84,54 @@ export default function ProtocolArchitecture() {
         {/* =========================================================
             DESKTOP HEADER (VISIBLE ON MD+)
         ========================================================= */}
-        <div className="hidden md:block text-center max-w-3xl mx-auto mb-12 lg:mb-16">
+        <ScrollReveal direction="up" className="hidden md:block text-center max-w-3xl mx-auto mb-12 lg:mb-16">
           <span className="text-[11px] font-bold tracking-[0.25em] uppercase text-secondary block mb-3">
             PROTOCOL ARCHITECTURE
           </span>
           <h2 className="text-3xl md:text-4xl lg:text-[40px] font-serif font-medium tracking-tight text-foreground leading-[1.2]">
             Collaboration distilled down to four refined movements.
           </h2>
-        </div>
+        </ScrollReveal>
 
         {/* =========================================================
             DESKTOP LAYOUT (4 EQUAL CARDS IN ONE ROW - VISIBLE ON MD+)
         ========================================================= */}
         <div className="hidden md:grid grid-cols-4 gap-4 lg:gap-6 items-stretch">
-          {DESKTOP_CARDS.map((card) => (
-            <div
+          {DESKTOP_CARDS.map((card, index) => (
+            <ScrollReveal
               key={card.id}
-              className="bg-surface text-foreground rounded-[28px] p-6 lg:p-7 border border-border-theme shadow-sm transition-all duration-350 ease-out flex flex-col justify-between lg:hover:-translate-y-1 lg:hover:scale-[1.01] lg:hover:border-secondary/50 lg:hover:shadow-[0_12px_30px_rgba(255,79,135,0.18)] dark:lg:hover:shadow-[0_12px_30px_rgba(255,107,157,0.22)]"
+              direction="up"
+              delay={index * 100}
+              className="h-full"
             >
-              <div>
-                {/* Large Pink Number */}
-                <span className="text-3xl lg:text-4xl font-serif font-medium text-secondary/80 block mb-3 leading-none">
-                  {card.number}
-                </span>
+              <div
+                className="bg-surface text-foreground rounded-[28px] p-6 lg:p-7 border border-border-theme shadow-sm transition-all duration-350 ease-out flex flex-col justify-between h-full lg:hover:-translate-y-1 lg:hover:scale-[1.01] lg:hover:border-secondary/50 lg:hover:shadow-[0_12px_30px_rgba(255,79,135,0.18)] dark:lg:hover:shadow-[0_12px_30px_rgba(255,107,157,0.22)]"
+              >
+                <div>
+                  {/* Large Pink Number */}
+                  <span className="text-3xl lg:text-4xl font-serif font-medium text-secondary/80 block mb-3 leading-none">
+                    {card.number}
+                  </span>
 
-                {/* Card Title */}
-                <h3 className="font-serif font-medium text-lg lg:text-xl text-foreground mb-3 leading-snug">
-                  {card.title}
-                </h3>
+                  {/* Card Title */}
+                  <h3 className="font-serif font-medium text-lg lg:text-xl text-foreground mb-3 leading-snug">
+                    {card.title}
+                  </h3>
 
-                {/* Card Description */}
-                <p className="text-xs lg:text-[13px] text-text-secondary font-sans leading-relaxed mb-6">
-                  {card.description}
-                </p>
+                  {/* Card Description */}
+                  <p className="text-xs lg:text-[13px] text-text-secondary font-sans leading-relaxed mb-6">
+                    {card.description}
+                  </p>
+                </div>
+
+                {/* Bottom Tag */}
+                <div className="mt-auto">
+                  <span className="inline-block px-3 py-1 text-[10px] lg:text-[11px] font-semibold text-secondary bg-secondary/10 dark:bg-secondary/20 rounded-full">
+                    {card.tag}
+                  </span>
+                </div>
               </div>
-
-              {/* Bottom Tag */}
-              <div className="mt-auto">
-                <span className="inline-block px-3 py-1 text-[10px] lg:text-[11px] font-semibold text-secondary bg-secondary/10 dark:bg-secondary/20 rounded-full">
-                  {card.tag}
-                </span>
-              </div>
-            </div>
+            </ScrollReveal>
           ))}
         </div>
 
@@ -132,28 +139,36 @@ export default function ProtocolArchitecture() {
             MOBILE HEADER & 2-COLUMN GRID (VISIBLE ON MOBILE)
         ========================================================= */}
         <div className="block md:hidden">
-          <h2 className="text-2xl font-serif font-medium tracking-tight text-foreground mb-6">
-            How Maison Operates
-          </h2>
+          <ScrollReveal direction="up">
+            <h2 className="text-2xl font-serif font-medium tracking-tight text-foreground mb-6">
+              How Maison Operates
+            </h2>
+          </ScrollReveal>
 
           <div className="grid grid-cols-2 gap-3 sm:gap-4">
-            {MOBILE_CARDS.map((card) => (
-              <div
+            {MOBILE_CARDS.map((card, index) => (
+              <ScrollReveal
                 key={card.id}
-                className="bg-surface text-foreground rounded-2xl p-4 sm:p-5 border border-border-theme shadow-sm flex flex-col justify-between"
+                direction="up"
+                delay={index * 70}
+                className="h-full"
               >
-                <div>
-                  <span className="text-[11px] sm:text-xs font-bold tracking-wider uppercase text-secondary block mb-2 leading-none">
-                    {card.numberHeader}
-                  </span>
-                  <h3 className="font-sans font-bold text-sm sm:text-base text-foreground mb-1.5 leading-snug">
-                    {card.title}
-                  </h3>
-                  <p className="text-xs text-text-secondary font-sans leading-snug">
-                    {card.description}
-                  </p>
+                <div
+                  className="bg-surface text-foreground rounded-2xl p-4 sm:p-5 border border-border-theme shadow-sm flex flex-col justify-between h-full"
+                >
+                  <div>
+                    <span className="text-[11px] sm:text-xs font-bold tracking-wider uppercase text-secondary block mb-2 leading-none">
+                      {card.numberHeader}
+                    </span>
+                    <h3 className="font-sans font-bold text-sm sm:text-base text-foreground mb-1.5 leading-snug">
+                      {card.title}
+                    </h3>
+                    <p className="text-xs text-text-secondary font-sans leading-snug">
+                      {card.description}
+                    </p>
+                  </div>
                 </div>
-              </div>
+              </ScrollReveal>
             ))}
           </div>
         </div>

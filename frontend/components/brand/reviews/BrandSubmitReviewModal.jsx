@@ -138,6 +138,13 @@ export default function BrandSubmitReviewModal({
       return;
     }
 
+    // Guard against duplicate review if workspace already has review data from backend
+    const matchedWorkspace = workspaces.find((ws) => String(ws._id) === String(targetWsId));
+    if (matchedWorkspace?.review) {
+      setFormValidationError("You have already submitted a review for this workspace.");
+      return;
+    }
+
     const ratingNum = Number(selectedRating);
     if (!Number.isInteger(ratingNum) || ratingNum < 1 || ratingNum > 5) {
       setFormValidationError("Please select a rating between 1 and 5 stars.");
@@ -262,7 +269,7 @@ export default function BrandSubmitReviewModal({
                   value={selectedWorkspaceId}
                   onChange={(e) => setSelectedWorkspaceId(e.target.value)}
                   disabled={submitting}
-                  className="w-full px-3 py-2.5 rounded-xl bg-surface border border-border-theme text-foreground text-xs focus:outline-none focus:ring-2 focus:ring-secondary/50 cursor-pointer disabled:opacity-50"
+                  className="w-full px-3 py-2.5 rounded-xl bg-surface border border-border-theme text-foreground text-xs focus:outline-none focus:border-neutral-950 dark:focus:border-neutral-300 focus:ring-1 focus:ring-neutral-950/20 dark:focus:ring-white/20 cursor-pointer disabled:opacity-50"
                 >
                   {workspaces.map((ws) => {
                     const cName = ws.creator?.name || "Creator Partner";
@@ -340,7 +347,7 @@ export default function BrandSubmitReviewModal({
               onChange={(e) => setCommentText(e.target.value)}
               disabled={submitting}
               placeholder="Share details about the creator's communication, content delivery quality, turnaround time, and professionalism..."
-              className="w-full px-3 py-2.5 rounded-xl bg-surface border border-border-theme text-foreground text-xs placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-secondary/50 resize-none disabled:opacity-50"
+              className="w-full px-3 py-2.5 rounded-xl bg-surface border border-border-theme text-foreground text-xs placeholder:text-text-secondary focus:outline-none focus:border-neutral-950 dark:focus:border-neutral-300 focus:ring-1 focus:ring-neutral-950/20 dark:focus:ring-white/20 resize-none disabled:opacity-50"
             />
           </div>
 
@@ -360,7 +367,7 @@ export default function BrandSubmitReviewModal({
                 submitting ||
                 (!workspaceId && workspaces.length === 0)
               }
-              className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-[#252525] hover:bg-[#111111] text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-neutral-950 hover:bg-neutral-800 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed dark:bg-white dark:text-black dark:hover:bg-neutral-200"
             >
               {submitting ? (
                 <>

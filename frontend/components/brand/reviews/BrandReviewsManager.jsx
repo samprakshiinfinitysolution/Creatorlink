@@ -52,24 +52,6 @@ function RefreshIcon({ className = "w-4 h-4" }) {
   );
 }
 
-function ReviewFeedbackIcon({ className = "w-7 h-7" }) {
-  return (
-    <svg
-      className={className}
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={1.75}
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"
-      />
-    </svg>
-  );
-}
-
 function PlusIcon({ className = "w-4 h-4" }) {
   return (
     <svg
@@ -130,44 +112,25 @@ function CalendarIcon({ className = "w-3.5 h-3.5" }) {
   );
 }
 
-function TagIcon({ className = "w-3.5 h-3.5" }) {
+function ExternalLinkIcon({ className = "w-3.5 h-3.5" }) {
   return (
     <svg
       className={className}
       fill="none"
       viewBox="0 0 24 24"
       stroke="currentColor"
-      strokeWidth={1.75}
+      strokeWidth={2}
     >
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
-        d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.386a8.97 8.97 0 003.585-3.585c.486-.827.313-1.908-.386-2.607l-9.581-9.581A2.25 2.25 0 009.568 3z"
-      />
-      <path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6z" />
-    </svg>
-  );
-}
-
-function BuildingOfficeIcon({ className = "w-3.5 h-3.5" }) {
-  return (
-    <svg
-      className={className}
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={1.75}
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21"
+        d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
       />
     </svg>
   );
 }
 
-function CheckCircleIcon({ className = "w-5 h-5" }) {
+function FolderIcon({ className = "w-3.5 h-3.5" }) {
   return (
     <svg
       className={className}
@@ -179,8 +142,58 @@ function CheckCircleIcon({ className = "w-5 h-5" }) {
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
-        d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h3.379c.464 0 .91.184 1.238.513l1.414 1.414a1.5 1.5 0 001.06.44h6.909A2.25 2.25 0 0121.75 14.37v4.88a2.25 2.25 0 01-2.25 2.25H4.5A2.25 2.25 0 012.25 19.25v-6.5z"
       />
+    </svg>
+  );
+}
+
+function CashIcon({ className = "w-3.5 h-3.5" }) {
+  return (
+    <svg
+      className={className}
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.75}
+    >
+      <rect x="2.5" y="6" width="19" height="12" rx="2" strokeWidth={1.75} />
+      <circle cx="12" cy="12" r="2.75" strokeWidth={1.75} />
+      <path strokeLinecap="round" d="M6 12h.01M18 12h.01" strokeWidth={2} />
+    </svg>
+  );
+}
+
+function QuoteIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+      <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+    </svg>
+  );
+}
+
+function CheckCircleIcon({ className = "w-3.5 h-3.5" }) {
+  return (
+    <svg className={className} fill="currentColor" viewBox="0 0 20 20">
+      <path
+        fillRule="evenodd"
+        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+}
+
+function ArrowRightIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg
+      className={className}
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
     </svg>
   );
 }
@@ -190,7 +203,7 @@ function CheckCircleIcon({ className = "w-5 h-5" }) {
 // =========================================================
 const formatPrice = (amount, currency = "INR") => {
   const numericAmount = Number(amount);
-  if (!Number.isFinite(numericAmount) || numericAmount < 0) return "N/A";
+  if (!Number.isFinite(numericAmount) || numericAmount < 0) return null;
   const symbol = currency === "INR" ? "₹" : `${currency} `;
   return `${symbol}${new Intl.NumberFormat("en-IN").format(numericAmount)}`;
 };
@@ -200,11 +213,23 @@ const formatDate = (dateString) => {
   try {
     const d = new Date(dateString);
     if (isNaN(d.getTime())) return "N/A";
-    return d.toLocaleDateString("en-IN", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = d.toLocaleDateString("en-IN", { month: "short" });
+    const year = d.getFullYear();
+    return `${day} ${month} ${year}`;
+  } catch {
+    return "N/A";
+  }
+};
+
+const formatMonthYear = (dateString) => {
+  if (!dateString) return "N/A";
+  try {
+    const d = new Date(dateString);
+    if (isNaN(d.getTime())) return "N/A";
+    const month = d.toLocaleDateString("en-IN", { month: "short" });
+    const year = d.getFullYear();
+    return `${month} ${year}`;
   } catch {
     return "N/A";
   }
@@ -242,6 +267,7 @@ export default function BrandReviewsManager() {
 
   // "Write Review" Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [failedCoverUrls, setFailedCoverUrls] = useState({});
 
   // Fetch reviews on mount or page change
   useEffect(() => {
@@ -255,7 +281,7 @@ export default function BrandReviewsManager() {
     }
   }, [dispatch, isModalOpen]);
 
-  // Identify eligible completed workspaces and filter out already-reviewed ones
+  // Identify eligible completed workspaces and filter out already-reviewed ones across pagination
   const completedWorkspaces = useMemo(() => {
     return (workspaces || []).filter((ws) => ws.status === "completed");
   }, [workspaces]);
@@ -273,9 +299,13 @@ export default function BrandReviewsManager() {
   }, [reviews]);
 
   const unreviewedCompletedWorkspaces = useMemo(() => {
-    return completedWorkspaces.filter(
-      (ws) => !reviewedWorkspaceIdSet.has(ws._id.toString())
-    );
+    return completedWorkspaces.filter((ws) => {
+      // Backend getBrandWorkspacesService reliably attaches ws.review across pagination
+      if (ws.review) return false;
+      const wsId = ws._id ? ws._id.toString() : "";
+      if (reviewedWorkspaceIdSet.has(wsId)) return false;
+      return true;
+    });
   }, [completedWorkspaces, reviewedWorkspaceIdSet]);
 
   const handleRefresh = () => {
@@ -323,42 +353,66 @@ export default function BrandReviewsManager() {
         <BrandHeader setMobileOpen={setMobileOpen} />
 
         {/* Main Content Area */}
-        <main className="px-3 sm:px-5 lg:px-6 py-5 sm:py-6 space-y-5 sm:space-y-6 flex-1 max-w-[1536px] w-full mx-auto min-w-0">
-          {/* Top Title Section & Action CTAs */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <div className="mb-2">
-                <span className="font-bold text-[11px] tracking-wider uppercase text-[#ff2d6c] dark:text-[#ff4f87] font-sans">
-                  BRAND CREATOR FEEDBACK
+        <main className="p-4 sm:p-6 lg:p-8 space-y-6 flex-1 max-w-7xl w-full mx-auto min-w-0">
+          {/* Header Section */}
+          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="space-y-2">
+              {/* Verification Badge */}
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white dark:bg-surface-muted border border-neutral-200/80 dark:border-border-theme text-xs font-semibold text-neutral-900 dark:text-white shadow-2xs">
+                <span className="w-3.5 h-3.5 rounded-full bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 flex items-center justify-center shrink-0">
+                  <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
                 </span>
+                <span>Submitted Creator Evaluations</span>
               </div>
-              <h1 className="font-serif font-medium text-2xl sm:text-3xl text-foreground mt-1">
+
+              <h1 className="font-serif font-medium text-3xl sm:text-4xl text-neutral-950 dark:text-white tracking-tight">
                 Reviews And Creator Evaluations
               </h1>
-              <p className="text-xs text-text-secondary mt-1">
-                Manage performance reviews, star ratings, and testimonials submitted for completed campaign collaborations.
+              <p className="text-xs sm:text-sm text-text-secondary max-w-xl">
+                Manage performance reviews, star ratings, and feedback submitted for completed campaign collaborations.
               </p>
             </div>
 
-            <div className="flex items-center gap-2.5 flex-wrap self-start sm:self-auto">
-              <button
-                type="button"
-                onClick={handleRefresh}
-                disabled={loading}
-                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-border-theme bg-surface hover:bg-surface-muted text-foreground text-xs font-semibold transition-colors cursor-pointer disabled:opacity-50"
-              >
-                <RefreshIcon className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-                <span>Refresh</span>
-              </button>
+            <div className="flex flex-col sm:items-end gap-3 self-start md:self-auto shrink-0">
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <button
+                  type="button"
+                  onClick={handleRefresh}
+                  disabled={loading}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-neutral-950 hover:bg-neutral-800 text-white text-xs font-semibold shadow-xs transition-all cursor-pointer disabled:opacity-50 dark:bg-white dark:text-black dark:hover:bg-neutral-100"
+                >
+                  <RefreshIcon className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+                  <span>Refresh</span>
+                </button>
 
-              <button
-                type="button"
-                onClick={handleOpenModal}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#252525] hover:bg-[#111111] text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
-              >
-                <PlusIcon className="w-4 h-4" />
-                <span>Write Review</span>
-              </button>
+                <button
+                  type="button"
+                  onClick={handleOpenModal}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-neutral-950 hover:bg-neutral-800 text-white text-xs font-semibold shadow-xs transition-all cursor-pointer dark:bg-white dark:text-black dark:hover:bg-neutral-100"
+                >
+                  <PlusIcon className="w-4 h-4" />
+                  <span>Write Review</span>
+                </button>
+              </div>
+
+              {totalReviewsCount > 0 && (
+                <div className="flex items-center gap-2 text-xs">
+                  <div className="flex items-center gap-0.5 text-amber-400">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <StarIcon
+                        key={star}
+                        className="w-3 h-3 text-amber-400 fill-amber-400"
+                        filled={star <= Math.round(Number(averageRatingGiven) || 5)}
+                      />
+                    ))}
+                  </div>
+                  <span className="font-semibold text-neutral-900 dark:text-white text-[11px]">
+                    {Number(averageRatingGiven) > 0 ? averageRatingGiven : "0.0"} average rating (current page)
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -366,7 +420,7 @@ export default function BrandReviewsManager() {
           {successMessage && (
             <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 p-4 rounded-2xl text-xs font-medium flex items-center justify-between gap-4 shadow-xs">
               <div className="flex items-center gap-2">
-                <CheckCircleIcon className="w-4 h-4 shrink-0" />
+                <CheckCircleIcon className="w-4 h-4 shrink-0 text-emerald-500" />
                 <span>{successMessage}</span>
               </div>
               <button
@@ -402,25 +456,12 @@ export default function BrandReviewsManager() {
             </div>
           )}
 
-          {/* Summary Metric Cards */}
+          {/* Stats Summary Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {/* 1. Total Reviews Submitted */}
+            {/* 1. Average Rating */}
             <div className="bg-surface border border-border-theme p-4 sm:p-5 rounded-2xl shadow-xs space-y-1">
               <span className="text-[11px] font-semibold text-text-secondary uppercase tracking-wider block">
-                Total Reviews Submitted
-              </span>
-              <span className="font-sans font-semibold text-[22px] sm:text-[28px] text-foreground tracking-tight block pt-0.5">
-                {totalReviewsCount}
-              </span>
-              <span className="text-[10px] text-text-secondary block">
-                Completed collaboration evaluations
-              </span>
-            </div>
-
-            {/* 2. Page Average Rating */}
-            <div className="bg-surface border border-border-theme p-4 sm:p-5 rounded-2xl shadow-xs space-y-1">
-              <span className="text-[11px] font-semibold text-text-secondary uppercase tracking-wider block">
-                Page Average Rating
+                Average Rating (Current Page)
               </span>
               <div className="flex items-baseline gap-2 pt-0.5">
                 <span className="font-sans font-semibold text-[22px] sm:text-[28px] text-amber-500 tracking-tight">
@@ -436,12 +477,33 @@ export default function BrandReviewsManager() {
                   ))}
                 </div>
               </div>
+
+              {/* Decorative mini bar graphic on right */}
+              <div className="hidden xl:flex items-end gap-1 h-8 shrink-0 opacity-60" aria-hidden="true">
+                <span className="w-1.5 h-3 rounded-full bg-neutral-200 dark:bg-neutral-700" />
+                <span className="w-1.5 h-5 rounded-full bg-neutral-200 dark:bg-neutral-700" />
+                <span className="w-1.5 h-7 rounded-full bg-neutral-200 dark:bg-neutral-700" />
+                <span className="w-1.5 h-9 rounded-full bg-neutral-300 dark:bg-neutral-600" />
+              </div>
               <span className="text-[10px] text-text-secondary block">
                 Average across reviews on this page
               </span>
             </div>
 
-            {/* 3. 5-Star Share */}
+            {/* 2. Total Reviews Submitted */}
+            <div className="bg-surface border border-border-theme p-4 sm:p-5 rounded-2xl shadow-xs space-y-1">
+              <span className="text-[11px] font-semibold text-text-secondary uppercase tracking-wider block">
+                Total Reviews Submitted
+              </span>
+              <span className="font-sans font-semibold text-[22px] sm:text-[28px] text-foreground tracking-tight block pt-0.5">
+                {totalReviewsCount}
+              </span>
+              <span className="text-[10px] text-text-secondary block">
+                Completed collaboration evaluations
+              </span>
+            </div>
+
+            {/* 3. Page 5-Star Share */}
             <div className="bg-surface border border-border-theme p-4 sm:p-5 rounded-2xl shadow-xs space-y-1">
               <span className="text-[11px] font-semibold text-text-secondary uppercase tracking-wider block">
                 Page 5-Star Share
@@ -456,47 +518,76 @@ export default function BrandReviewsManager() {
           </div>
 
           {/* Rating Filter Tabs */}
-          <div className="bg-surface border border-border-theme rounded-2xl p-2 flex items-center gap-1.5 overflow-x-auto no-scrollbar min-w-0 w-full max-w-full">
-            {[
-              { id: "all", label: "All Reviews" },
-              { id: "5", label: "5 Stars Only" },
-              { id: "4", label: "4 Stars Only" },
-              { id: "3_below", label: "3 Stars & Below" },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setRatingFilter(tab.id)}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
-                  ratingFilter === tab.id
-                    ? "bg-[#252525] text-white shadow-xs"
-                    : "text-text-secondary hover:text-foreground hover:bg-surface-muted"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs text-text-secondary px-1">
+              <span className="text-[11px] font-medium text-text-secondary">
+                Filter reviews on current page:
+              </span>
+              <span className="text-[10px] text-text-secondary">
+                Showing {filteredReviews.length} of {reviews.length} reviews on page
+              </span>
+            </div>
+            <div className="bg-white dark:bg-surface border border-neutral-200/80 dark:border-border-theme rounded-2xl p-2 sm:p-2.5 shadow-xs flex items-center gap-2 sm:gap-2.5 overflow-x-auto no-scrollbar py-3">
+              {[
+                { id: "all", label: "All (Current Page)" },
+                { id: "5", label: "5 Stars Only" },
+                { id: "4", label: "4 Stars Only" },
+                { id: "3_below", label: "3 Stars & Below" },
+              ].map((tab) => {
+                const isActive = ratingFilter === tab.id;
+                const count =
+                  tab.id === "all"
+                    ? (reviews || []).length
+                    : tab.id === "3_below"
+                    ? (reviews || []).filter((r) => Number(r.rating) <= 3).length
+                    : (reviews || []).filter((r) => Number(r.rating) === Number(tab.id)).length;
+
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setRatingFilter(tab.id)}
+                    className={`inline-flex items-center gap-2.5 px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shadow-2xs ${
+                      isActive
+                        ? "bg-neutral-950 text-white shadow-xs dark:bg-white dark:text-neutral-950"
+                        : "bg-neutral-100/90 dark:bg-surface-muted text-neutral-800 dark:text-neutral-200 hover:bg-neutral-200/70 hover:text-neutral-950 dark:hover:text-white"
+                    }`}
+                  >
+                    <span>{tab.label}</span>
+                    <span
+                      className={`inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-bold tabular-nums leading-none ${
+                        isActive
+                          ? "bg-neutral-700/70 text-white dark:bg-neutral-200 dark:text-neutral-950"
+                          : "bg-white dark:bg-surface text-neutral-700 dark:text-neutral-300 border border-neutral-200/70 dark:border-border-theme shadow-2xs"
+                      }`}
+                    >
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {/* Reviews Content Area */}
           {loading && reviews.length === 0 ? (
             /* Loading Skeleton */
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 animate-pulse">
-              {[1, 2, 3, 4].map((i) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 animate-pulse">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
                 <div
                   key={i}
-                  className="h-48 bg-surface-muted/60 rounded-2xl border border-border-theme/40"
+                  className="h-80 bg-surface-muted/60 rounded-2xl sm:rounded-3xl border border-border-theme/40"
                 />
               ))}
             </div>
           ) : filteredReviews.length === 0 ? (
             /* Empty State */
             <div className="bg-surface border border-border-theme rounded-2xl p-12 text-center space-y-3 shadow-xs">
-              <div className="w-14 h-14 rounded-2xl bg-secondary/8 text-[#252525] dark:text-white flex items-center justify-center mx-auto border border-secondary/15">
-                <ReviewFeedbackIcon className="w-7 h-7 text-[#252525] dark:text-white" />
+              <div className="w-14 h-14 rounded-2xl bg-surface-muted text-foreground flex items-center justify-center mx-auto border border-border-theme">
+                <StarIcon className="w-7 h-7 text-amber-500" filled={true} />
               </div>
               <div className="space-y-1">
-                <h3 className="font-serif font-semibold text-lg text-foreground">
+                <h3 className="font-sans font-semibold text-lg text-foreground tracking-tight">
                   No Submitted Reviews Found
                 </h3>
                 <p className="text-xs text-text-secondary max-w-sm mx-auto leading-relaxed">
@@ -509,7 +600,7 @@ export default function BrandReviewsManager() {
                 <button
                   type="button"
                   onClick={handleOpenModal}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#252525] hover:bg-[#111111] text-white text-xs font-semibold shadow-xs transition-all cursor-pointer"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-neutral-950 hover:bg-neutral-800 text-white text-xs font-semibold shadow-xs transition-all cursor-pointer dark:bg-white dark:text-black dark:hover:bg-neutral-100"
                 >
                   <PlusIcon className="w-4 h-4" />
                   <span>Write a Review</span>
@@ -524,11 +615,11 @@ export default function BrandReviewsManager() {
             </div>
           ) : (
             /* Reviews Card Grid */
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
               {filteredReviews.map((review) => {
                 const creatorName =
                   typeof review.reviewee === "object" && review.reviewee !== null
-                    ? review.reviewee.name
+                    ? (review.reviewee.name || "Creator Partner")
                     : "Creator Partner";
                 const initials = getInitials(creatorName);
                 const rawRating = Number(review.rating);
@@ -538,62 +629,138 @@ export default function BrandReviewsManager() {
 
                 const campaignTitle =
                   typeof review.campaign === "object" && review.campaign !== null
-                    ? review.campaign.title
-                    : "Campaign Workspace";
+                    ? (review.campaign.title || "Campaign Collaboration")
+                    : "Campaign Collaboration";
 
-                const agreedPrice =
-                  typeof review.workspace === "object" && review.workspace !== null
-                    ? review.workspace.agreedPrice
-                    : undefined;
+                const coverImage =
+                  review.campaign?.coverImage ||
+                  review.campaign?.image ||
+                  review.workspace?.coverImage ||
+                  review.coverImage ||
+                  null;
 
-                const currency =
-                  typeof review.workspace === "object" && review.workspace !== null
-                    ? review.workspace.currency
-                    : "INR";
+                const creatorAvatar =
+                  review.reviewee?.avatar ||
+                  review.reviewee?.profileImage ||
+                  review.reviewee?.image ||
+                  null;
+
+                const agreedPriceFormatted = formatPrice(
+                  review.workspace?.agreedPrice,
+                  review.workspace?.currency
+                );
 
                 const reviewDate = formatDate(review.createdAt);
+                const monthYearDate = formatMonthYear(
+                  review.workspace?.createdAt || review.createdAt
+                );
+
+                const targetWorkspaceId =
+                  review.workspace?._id ||
+                  (typeof review.workspace === "string" ? review.workspace : null);
+
+                const workspaceHref = targetWorkspaceId
+                  ? `/brand/workspace/${targetWorkspaceId}`
+                  : "/brand/workspace";
 
                 return (
                   <div
                     key={review._id}
-                    className="bg-surface border border-border-theme rounded-2xl p-5 hover:border-secondary/40 transition-all flex flex-col justify-between space-y-4 shadow-xs"
+                    className="bg-white dark:bg-surface border border-neutral-200/90 dark:border-border-theme rounded-2xl sm:rounded-3xl p-4 sm:p-5 flex flex-col justify-between shadow-2xs hover:shadow-md transition-all duration-200"
                   >
-                    <div className="space-y-3">
-                      {/* Card Header: Creator info, Star rating, and Date */}
-                      <div className="flex items-start justify-between gap-3">
+                    <div className="space-y-3.5">
+                      {/* Top Cover-Image Banner */}
+                      <div className="h-28 sm:h-32 rounded-xl sm:rounded-2xl overflow-hidden relative border border-neutral-200/70 dark:border-border-theme/40 bg-neutral-100 dark:bg-surface-muted group/banner">
+                        {coverImage && !failedCoverUrls[review._id] ? (
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img
+                            src={coverImage}
+                            alt={campaignTitle}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover/banner:scale-105"
+                            onError={() =>
+                              setFailedCoverUrls((prev) => ({
+                                ...prev,
+                                [review._id]: true,
+                              }))
+                            }
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-neutral-100 via-neutral-50 to-neutral-200 dark:from-neutral-900/60 dark:via-neutral-800/40 dark:to-surface flex items-center justify-between px-4 sm:px-5 relative overflow-hidden">
+                            <div className="absolute -right-8 -bottom-8 w-28 h-28 rounded-full bg-neutral-300/30 dark:bg-white/5 blur-xl pointer-events-none" />
+                            <div className="min-w-0 pr-8">
+                              <span className="font-serif font-bold tracking-wider text-base sm:text-lg text-neutral-900 dark:text-neutral-100 uppercase truncate block">
+                                {creatorName}
+                              </span>
+                              <span className="text-[10px] text-neutral-600 dark:text-neutral-400 tracking-wider font-sans uppercase mt-0.5 block truncate">
+                                {campaignTitle}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Top-Right Open/External Link Icon */}
+                        {targetWorkspaceId && (
+                          <Link
+                            href={workspaceHref}
+                            title="Open workspace"
+                            className="absolute top-2.5 right-2.5 w-7 h-7 rounded-lg bg-black/45 hover:bg-black/75 backdrop-blur-xs text-white/90 hover:text-white flex items-center justify-center transition-colors shadow-2xs cursor-pointer z-10"
+                          >
+                            <ExternalLinkIcon className="w-3.5 h-3.5" />
+                          </Link>
+                        )}
+                      </div>
+
+                      {/* Creator Info & Rating Row */}
+                      <div className="flex items-center justify-between gap-2.5 pt-0.5">
                         <div className="flex items-center gap-3 min-w-0">
-                          {/* Creator Avatar Initials */}
-                          <div className="w-10 h-10 rounded-full bg-secondary/15 text-secondary font-semibold font-sans text-xs flex items-center justify-center border border-secondary/30 shrink-0 uppercase">
+                          {/* Creator Avatar */}
+                          {creatorAvatar ? (
+                            /* eslint-disable-next-line @next/next/no-img-element */
+                            <img
+                              src={creatorAvatar}
+                              alt={creatorName}
+                              onError={(e) => {
+                                e.currentTarget.style.display = "none";
+                                const fallback = e.currentTarget.parentElement?.querySelector(".avatar-fallback");
+                                if (fallback) fallback.classList.remove("hidden");
+                              }}
+                              className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover border border-neutral-200 dark:border-neutral-700 shrink-0 shadow-2xs"
+                            />
+                          ) : null}
+                          <div
+                            className={`avatar-fallback w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-neutral-950 dark:bg-neutral-800 text-white font-sans font-bold text-xs sm:text-sm flex items-center justify-center border border-neutral-200 dark:border-neutral-700 shrink-0 shadow-2xs uppercase tracking-wider ${
+                              creatorAvatar ? "hidden" : ""
+                            }`}
+                          >
                             {initials}
                           </div>
+
                           <div className="min-w-0">
-                            <div className="flex items-center gap-2">
-                              <h3 className="font-semibold text-sm text-foreground truncate">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <h3 className="font-semibold text-sm sm:text-base text-neutral-900 dark:text-white truncate">
                                 {creatorName}
                               </h3>
-                              <span className="px-2 py-0.2 rounded-full text-[9px] font-bold bg-surface-muted text-text-secondary border border-border-theme uppercase">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-neutral-100 dark:bg-surface-muted text-neutral-700 dark:text-neutral-300 border border-neutral-200 dark:border-border-theme uppercase leading-none">
                                 Creator
                               </span>
                             </div>
-                            {reviewDate && reviewDate !== "N/A" && (
-                              <span className="text-[11px] text-text-secondary flex items-center gap-1 mt-0.5">
-                                <CalendarIcon className="w-3 h-3 text-text-secondary" />
-                                {reviewDate}
-                              </span>
-                            )}
+                            <span className="text-xs text-neutral-500 dark:text-neutral-400 flex items-center gap-1 mt-0.5">
+                              <CalendarIcon className="w-3 h-3 text-neutral-400 dark:text-neutral-500 shrink-0" />
+                              <span>{reviewDate}</span>
+                            </span>
                           </div>
                         </div>
 
                         {/* Star Rating Badge */}
-                        <div className="flex items-center gap-1 bg-amber-400/10 px-2.5 py-1 rounded-xl border border-amber-400/20 shrink-0">
-                          <span className="font-bold text-xs text-amber-500">
+                        <div className="flex items-center gap-1.5 bg-transparent px-2.5 py-1 sm:py-1.5 rounded-xl border border-amber-500/30 dark:border-amber-500/30 shrink-0">
+                          <span className="font-bold text-xs sm:text-sm text-amber-700 dark:text-amber-400 tabular-nums">
                             {hasValidRating ? ratingNum.toFixed(1) : "N/A"}
                           </span>
-                          <div className="flex items-center text-amber-400">
+                          <div className="flex items-center gap-0.5 text-amber-400 dark:text-amber-300">
                             {[1, 2, 3, 4, 5].map((star) => (
                               <StarIcon
                                 key={star}
-                                className="w-3.5 h-3.5 text-amber-400"
+                                className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-400 dark:text-amber-300"
                                 filled={hasValidRating && star <= Math.round(ratingNum)}
                               />
                             ))}
@@ -601,30 +768,52 @@ export default function BrandReviewsManager() {
                         </div>
                       </div>
 
-                      {/* Campaign & Workspace Context Tags */}
-                      <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-muted text-text-secondary border border-border-theme text-[11px] font-medium">
-                          <TagIcon className="w-3 h-3 text-text-secondary" />
-                          <span className="truncate max-w-[220px]">{campaignTitle}</span>
-                        </span>
-                        {agreedPrice !== undefined && (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-surface-muted text-text-secondary border border-border-theme text-[11px] font-medium">
-                            <BuildingOfficeIcon className="w-3 h-3 text-text-secondary" />
-                            <span>{formatPrice(agreedPrice, currency)}</span>
-                          </span>
-                        )}
+                      {/* Quotation Panel with Review Comment */}
+                      <div className="bg-neutral-50/90 dark:bg-surface-muted/50 border border-neutral-200/60 dark:border-border-theme/60 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 flex items-start gap-2.5">
+                        <QuoteIcon className="w-4 h-4 text-neutral-400 dark:text-neutral-500 shrink-0 mt-0.5" />
+                        <p className="text-xs sm:text-[13px] leading-relaxed text-neutral-700 dark:text-neutral-300 italic line-clamp-3">
+                          {review.comment && review.comment.trim() ? `“${review.comment}”` : "“No written feedback comment provided.”"}
+                        </p>
                       </div>
 
-                      {/* Qualitative Comment Quote */}
-                      {review.comment && review.comment.trim() ? (
-                        <div className="bg-surface-muted/60 p-3.5 rounded-xl border border-border-theme/60 text-xs text-foreground/90 leading-relaxed italic">
-                          &ldquo;{review.comment}&rdquo;
+                      {/* Compact Metadata Row */}
+                      <div className="flex flex-wrap items-center gap-2 pt-0.5">
+                        {/* Campaign Name */}
+                        <div
+                          title={campaignTitle}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-neutral-200/70 dark:border-border-theme/70 bg-neutral-50/80 dark:bg-surface-muted/40 text-[11px] sm:text-xs font-medium text-neutral-700 dark:text-neutral-300 shadow-2xs"
+                        >
+                          <FolderIcon className="w-3.5 h-3.5 text-neutral-500 dark:text-neutral-400 shrink-0" />
+                          <span className="truncate max-w-[130px] sm:max-w-[150px]">
+                            {campaignTitle}
+                          </span>
                         </div>
-                      ) : (
-                        <div className="text-xs text-text-secondary italic">
-                          No written feedback comment provided.
+
+                        {/* Agreed Price / Currency */}
+                        {agreedPriceFormatted && (
+                          <div className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-neutral-200/70 dark:border-border-theme/70 bg-neutral-50/80 dark:bg-surface-muted/40 text-[11px] sm:text-xs font-medium text-neutral-700 dark:text-neutral-300 shadow-2xs">
+                            <CashIcon className="w-3.5 h-3.5 text-neutral-500 dark:text-neutral-400 shrink-0" />
+                            <span>{agreedPriceFormatted}</span>
+                          </div>
+                        )}
+
+                        {/* Relevant Date (Month & Year) */}
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-neutral-200/70 dark:border-border-theme/70 bg-neutral-50/80 dark:bg-surface-muted/40 text-[11px] sm:text-xs font-medium text-neutral-700 dark:text-neutral-300 shadow-2xs">
+                          <CalendarIcon className="w-3.5 h-3.5 text-neutral-500 dark:text-neutral-400 shrink-0" />
+                          <span>{monthYearDate}</span>
                         </div>
-                      )}
+                      </div>
+                    </div>
+
+                    {/* Bottom Action Row: View workspace link */}
+                    <div className="mt-4 pt-3.5 border-t border-neutral-100 dark:border-border-theme/60 flex items-center justify-between relative">
+                      <Link
+                        href={workspaceHref}
+                        className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-neutral-900 dark:text-white hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors group/link"
+                      >
+                        <span>View workspace</span>
+                        <ArrowRightIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-neutral-900 dark:text-white transition-transform group-hover/link:translate-x-1" />
+                      </Link>
                     </div>
                   </div>
                 );
@@ -633,7 +822,7 @@ export default function BrandReviewsManager() {
           )}
 
           {/* Pagination Controls */}
-          {pagination && totalPages > 1 && (
+          {pagination && (totalPages > 1 || totalReviewsCount > 0) && (
             <div className="bg-surface border border-border-theme rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-text-secondary shadow-xs">
               <span>
                 Showing page <strong className="text-foreground">{pagination.page || currentPage}</strong> of{" "}

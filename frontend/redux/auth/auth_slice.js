@@ -4,7 +4,9 @@ import {
     loginUser,
     registerUser,
     refreshAccessToken,
-    logoutUser, getCurrentUser
+    logoutUser,
+    getCurrentUser,
+    changePassword as changePasswordApi
 } from "./auth_api";
 
 
@@ -112,6 +114,26 @@ const getMe = createAsyncThunk(
                 error.response?.data?.message ||
                 "Unable to fetch user",
                 { isAuthFailure }
+            );
+        }
+    }
+);
+
+
+// Handles password change.
+const changePassword = createAsyncThunk(
+    "auth/changePassword",
+    async (passwords, { rejectWithValue }) => {
+
+        try {
+
+            return await changePasswordApi(passwords);
+
+        } catch (error) {
+
+            return rejectWithValue(
+                error.response?.data?.message ||
+                "Failed to change password"
             );
         }
     }
@@ -284,7 +306,8 @@ export {
     register,
     refreshToken,
     logout,
-    getMe
+    getMe,
+    changePassword
 };
 
 

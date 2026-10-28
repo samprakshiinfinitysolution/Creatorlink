@@ -122,44 +122,51 @@ const getStatusBadge = (status) => {
   const norm = (status || "").toLowerCase();
   switch (norm) {
     case "paid":
+      return {
+        label: "PAID",
+        bg: "bg-transparent",
+        text: "text-emerald-700 dark:text-emerald-400",
+        border: "border-emerald-500/30 dark:border-emerald-500/30",
+        iconType: "check",
+      };
     case "completed":
       return {
         label: "COMPLETED",
-        bg: "bg-emerald-50 dark:bg-emerald-950/40",
+        bg: "bg-transparent",
         text: "text-emerald-700 dark:text-emerald-400",
-        border: "border-emerald-200/80 dark:border-emerald-800/50",
+        border: "border-emerald-500/30 dark:border-emerald-500/30",
         iconType: "check",
       };
     case "pending":
       return {
         label: "PENDING",
-        bg: "bg-amber-50 dark:bg-amber-950/40",
+        bg: "bg-transparent",
         text: "text-amber-700 dark:text-amber-400",
-        border: "border-amber-200/80 dark:border-amber-800/50",
+        border: "border-amber-500/30 dark:border-amber-500/30",
         iconType: "pending",
       };
     case "processing":
       return {
         label: "PROCESSING",
-        bg: "bg-purple-50 dark:bg-purple-950/40",
+        bg: "bg-transparent",
         text: "text-purple-700 dark:text-purple-400",
-        border: "border-purple-200/80 dark:border-purple-800/50",
+        border: "border-purple-500/30 dark:border-purple-500/30",
         iconType: "processing",
       };
     case "failed":
       return {
         label: "FAILED",
-        bg: "bg-red-50 dark:bg-red-950/40",
+        bg: "bg-transparent",
         text: "text-red-700 dark:text-red-400",
-        border: "border-red-200/80 dark:border-red-800/50",
+        border: "border-red-500/30 dark:border-red-500/30",
         iconType: "failed",
       };
     default:
       return {
         label: (status || "UNKNOWN").toUpperCase(),
-        bg: "bg-neutral-100 dark:bg-surface-muted",
+        bg: "bg-transparent",
         text: "text-neutral-700 dark:text-neutral-300",
-        border: "border-neutral-200 dark:border-border-theme",
+        border: "border-neutral-400/30 dark:border-neutral-500/30",
         iconType: "default",
       };
   }
@@ -190,7 +197,7 @@ function CampaignAvatar({ image, title }) {
           src={image}
           alt={title || "Campaign"}
           onError={() => setFailedUrl(image)}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover transition-transform duration-300 ease-out hover:scale-[1.08] motion-reduce:transform-none motion-reduce:transition-none"
         />
       </div>
     );
@@ -257,7 +264,7 @@ export default function CreatorPaymentsManager() {
 
   // Calculate summary stats from current payments list
   const totalPaidAmount = payments
-    .filter((p) => p.status === "paid")
+    .filter((p) => p.status === "paid" || p.status === "completed")
     .reduce((acc, p) => acc + (Number(p.amount) || 0), 0);
 
   const pendingCount = payments.filter((p) => p.status === "pending" || p.status === "processing").length;
@@ -285,8 +292,8 @@ export default function CreatorPaymentsManager() {
                   </span>
                 </div>
               )}
-              <h1 className="font-sans font-bold text-2xl sm:text-3xl text-foreground tracking-tight mt-1">
-                Received Payments & Earnings
+              <h1 className="font-serif font-medium text-2xl sm:text-3xl text-foreground tracking-tight mt-1">
+                Received Payments And Earnings
               </h1>
               <p className="text-xs text-text-secondary mt-1">
                 View verified payment records and escrow receipts for your campaign collaborations.
@@ -358,7 +365,7 @@ export default function CreatorPaymentsManager() {
           )}
 
           {/* Filter Tabs */}
-          <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar py-1">
+          <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar py-3 ">
             {[
               { id: "all", label: "All Payments" },
               { id: "paid", label: "Paid Only" },
@@ -397,7 +404,7 @@ export default function CreatorPaymentsManager() {
                   <CreditCardIcon className="w-7 h-7" />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="font-sans font-semibold text-lg text-foreground tracking-tight">
+                  <h3 className="font-serif font-semibold text-lg text-foreground tracking-tight">
                     No Received Payments Found
                   </h3>
                   <p className="text-xs text-text-secondary max-w-sm mx-auto leading-relaxed">

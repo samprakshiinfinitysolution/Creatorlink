@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import ScrollReveal from "@/components/theme/ScrollReveal";
 
 // =========================================================
 // CENTRALIZED MOCK DATA (UI ONLY - READY FOR API REPLACEMENT)
@@ -258,7 +259,7 @@ export default function CuratedCatalog() {
         {/* =========================================================
             MOBILE HEADER (< 768px)
         ========================================================= */}
-        <div className="flex md:hidden items-center justify-between mb-6">
+        <ScrollReveal direction="up" className="flex md:hidden items-center justify-between mb-6">
           <div>
             <h2 className="text-xl font-bold font-serif tracking-tight text-foreground">
               Curated Tastemakers
@@ -273,12 +274,12 @@ export default function CuratedCatalog() {
           >
             VIEW ALL (184)
           </button>
-        </div>
+        </ScrollReveal>
 
         {/* =========================================================
             DESKTOP HEADER (>= 768px)
         ========================================================= */}
-        <div className="hidden md:flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+        <ScrollReveal direction="up" className="hidden md:flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
           <div className="max-w-xl">
             <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-secondary block mb-2">
               CURATED CATALOG
@@ -293,21 +294,28 @@ export default function CuratedCatalog() {
               metrics, and transparent deliverables.
             </p>
           </div>
-        </div>
+        </ScrollReveal>
 
         {/* =========================================================
             CREATORS GRID / LIST
         ========================================================= */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
-          {CREATORS.map((creator) => (
-            <CreatorCard key={creator.id} creator={creator} />
+          {CREATORS.map((creator, index) => (
+            <ScrollReveal
+              key={creator.id}
+              direction="up"
+              delay={index * 100}
+              className="h-full"
+            >
+              <CreatorCard creator={creator} />
+            </ScrollReveal>
           ))}
         </div>
 
         {/* =========================================================
             CENTERED CTA BUTTON (DESKTOP ONLY)
         ========================================================= */}
-        <div className="hidden md:flex mt-12 md:mt-14 justify-center">
+        <ScrollReveal direction="up" delay={200} className="hidden md:flex mt-12 md:mt-14 justify-center">
           <button
             type="button"
             className="inline-flex items-center gap-2 rounded-full border border-border-theme bg-surface text-foreground text-xs md:text-sm font-semibold px-7 py-3.5 shadow-sm hover:border-secondary dark:hover:border-secondary hover:shadow-[0_0_25px_rgba(255,79,135,0.35)] dark:hover:shadow-[0_0_25px_rgba(255,79,135,0.25)] transition-all duration-300 transform hover:scale-[1.02] cursor-pointer"
@@ -315,7 +323,7 @@ export default function CuratedCatalog() {
             <span>View All 1,480 Curated Creators</span>
             <ArrowRightIcon className="w-4 h-4 ml-0.5 text-foreground" />
           </button>
-        </div>
+        </ScrollReveal>
       </div>
     </section>
   );

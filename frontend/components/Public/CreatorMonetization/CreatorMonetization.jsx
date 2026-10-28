@@ -2,6 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
+import ScrollReveal from "@/components/theme/ScrollReveal";
 
 // =========================================================
 // CENTRALIZED MOCK DATA (UI ONLY - READY FOR API REPLACEMENT)
@@ -253,7 +254,7 @@ export default function CreatorMonetization() {
         ========================================================= */}
         <div className="hidden md:grid md:grid-cols-12 gap-10 lg:gap-16 items-center">
           {/* LEFT COLUMN: CONTENT & FEATURES */}
-          <div className="md:col-span-6 flex flex-col justify-center">
+          <ScrollReveal direction="up" className="md:col-span-6 flex flex-col justify-center">
             <span className="text-xs font-bold tracking-[0.2em] uppercase text-secondary block mb-3">
               {eyebrow}
             </span>
@@ -301,10 +302,10 @@ export default function CreatorMonetization() {
                 </span>
               </button>
             </div>
-          </div>
+          </ScrollReveal>
 
           {/* RIGHT COLUMN: PAYOUT DASHBOARD CARD */}
-          <div className="md:col-span-6">
+          <ScrollReveal direction="left" delay={150} className="md:col-span-6">
             <div className="rounded-3xl border border-border-theme bg-surface p-6 lg:p-8 shadow-sm transition-all duration-300">
               {/* TOP CREATOR HEADER */}
               <div className="flex items-center justify-between pb-6 border-b border-border-theme">
@@ -397,13 +398,13 @@ export default function CreatorMonetization() {
                 </div>
               </div>
             </div>
-          </div>
+          </ScrollReveal>
         </div>
 
         {/* =========================================================
             MOBILE COMPOSITION (MATCHES MOBILE REFERENCE SCREENSHOT)
         ========================================================= */}
-        <div className="block md:hidden">
+        <ScrollReveal direction="up" className="block md:hidden">
           {/* MOBILE SECTION HEADER WITH INSTANT PAYOUTS BADGE */}
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-serif font-medium text-foreground tracking-tight">
@@ -450,7 +451,7 @@ export default function CreatorMonetization() {
               ))}
             </div>
           </div>
-        </div>
+        </ScrollReveal>
       </div>
     </section>
   );

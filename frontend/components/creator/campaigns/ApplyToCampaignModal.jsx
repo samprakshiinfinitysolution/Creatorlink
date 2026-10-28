@@ -290,7 +290,7 @@ export default function ApplyToCampaignModal({
                           </div>
                         </div>
                         <div className="text-right shrink-0">
-                          <span className="font-serif font-semibold text-sm text-foreground block">
+                          <span className="font-sans font-semibold text-sm text-foreground block">
                             {service.currency === "INR" || !service.currency ? "₹" : `${service.currency} `}
                             {new Intl.NumberFormat("en-IN").format(service.price || 0)}
                           </span>

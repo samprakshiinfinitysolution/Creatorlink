@@ -72,8 +72,13 @@
   --font-serif: var(--font-playfair);
 }
 
-.font-serif {
+.font-serif,
+.font-heading {
   font-family: var(--font-playfair), Georgia, serif;
+}
+
+.font-sans {
+  font-family: var(--font-jakarta), sans-serif;
 }
 
 /* =========================
@@ -83,7 +88,9 @@
 html,
 body {
   max-width: 100%;
-  overflow-x: hidden;
+  overflow-x: clip;
+  scroll-behavior: smooth;
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -182,8 +189,32 @@ body {
   /* Chrome, Safari, Opera */
 }
 
+/* Sleek custom scrollbar */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(150, 150, 150, 0.25) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(150, 150, 150, 0.25);
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(150, 150, 150, 0.45);
+}
+
 /* =========================
-   BRAND SIDEBAR COLLAPSED
+   SIDEBAR COLLAPSED (BRAND & CREATOR)
 ========================= */
 
 @media (min-width: 1024px) {
@@ -191,14 +222,79 @@ body {
     transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  body.brand-sidebar-collapsed .lg\:ml-64 {
+  body.brand-sidebar-collapsed .lg\:ml-64,
+  body.creator-sidebar-collapsed .lg\:ml-64 {
     margin-left: 4.5rem !important;
     /* 72px */
   }
 }
 
 @media (max-width: 1023px) {
-  body.brand-sidebar-collapsed .lg\:ml-64 {
+  body.brand-sidebar-collapsed .lg\:ml-64,
+  body.creator-sidebar-collapsed .lg\:ml-64 {
     margin-left: 0 !important;
   }
 }
+
+/* =========================
+   SCROLL REVEAL ANIMATIONS
+========================= */
+
+.reveal-fade-up,
+.reveal-fade-left,
+.reveal-fade-right,
+.reveal-scale {
+  opacity: 0;
+  transition-property: opacity, transform;
+  transition-duration: 0.8s;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.reveal-fade-up {
+  transform: translateY(28px);
+}
+
+.reveal-fade-left {
+  transform: translateX(28px);
+}
+
+.reveal-fade-right {
+  transform: translateX(-28px);
+}
+
+.reveal-scale {
+  transform: scale(0.92);
+}
+
+.reveal-fade-up.is-revealed,
+.reveal-fade-left.is-revealed,
+.reveal-fade-right.is-revealed,
+.reveal-scale.is-revealed {
+  opacity: 1;
+  transform: translate(0, 0) scale(1);
+}
+
+/* Accessibility: respect user prefers-reduced-motion settings */
+@media (prefers-reduced-motion: reduce) {
+  .reveal-fade-up,
+  .reveal-fade-left,
+  .reveal-fade-right,
+  .reveal-scale {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Fallback for environments with JavaScript disabled */
+@media (scripting: none) {
+  .reveal-fade-up,
+  .reveal-fade-left,
+  .reveal-fade-right,
+  .reveal-scale {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

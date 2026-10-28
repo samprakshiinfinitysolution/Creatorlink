@@ -108,6 +108,47 @@ const getStatusBadge = (status) => {
   }
 };
 
+const getCampaignInitials = (title) => {
+  if (title && typeof title === "string" && title.trim()) {
+    const words = title.trim().split(/\s+/);
+    if (words.length >= 2) {
+      return (words[0][0] + words[1][0]).toUpperCase();
+    }
+    return words[0].slice(0, 2).toUpperCase();
+  }
+  return "CP";
+};
+
+function CampaignAvatar({ image, title }) {
+  const [failedUrl, setFailedUrl] = useState(null);
+
+  const initials = getCampaignInitials(title);
+  const isImageValid = Boolean(image && typeof image === "string" && image.trim() && failedUrl !== image);
+
+  if (isImageValid) {
+    return (
+      <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl overflow-hidden bg-secondary/10 dark:bg-secondary/15 shrink-0 border border-neutral-200/60 dark:border-border-theme">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={image}
+          alt={title || "Campaign"}
+          onError={() => setFailedUrl(image)}
+          className="w-full h-full object-cover transition-transform duration-300 ease-out hover:scale-[1.08] motion-reduce:transform-none motion-reduce:transition-none"
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      aria-label={title || "Campaign avatar"}
+      className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-secondary/10 dark:bg-secondary/15 text-neutral-950 dark:text-white flex items-center justify-center shrink-0 border border-neutral-200/60 dark:border-border-theme font-bold text-xs sm:text-sm tracking-wide select-none"
+    >
+      {initials}
+    </div>
+  );
+}
+
 export default function BrandPaymentsManager() {
   const dispatch = useDispatch();
   const { payments, pagination, loading, error } = useSelector(
@@ -317,10 +358,10 @@ export default function BrandPaymentsManager() {
             ) : (
               /* Payments Data Table */
               <div className="overflow-x-auto no-scrollbar">
-                <table className="w-full text-left text-xs">
+                <table className="w-full text-left text-xs min-w-[720px]">
                   <thead className="bg-surface-muted/60 text-text-secondary font-semibold uppercase tracking-wider text-[10px] border-b border-border-theme">
                     <tr>
-                      <th className="py-3.5 px-4">Campaign & Creator</th>
+                      <th className="py-3.5 px-4">Campaign &amp; Creator</th>
                       <th className="py-3.5 px-4">Amount</th>
                       <th className="py-3.5 px-4">Status</th>
                       <th className="py-3.5 px-4">Payment Method</th>
@@ -333,13 +374,23 @@ export default function BrandPaymentsManager() {
                     {payments.map((payment) => {
                       const badge = getStatusBadge(payment.status);
                       const campaignTitle =
-                        typeof payment.campaign === "object" && payment.campaign !== null
+                        typeof payment.campaign === "object" && payment.campaign !== null && payment.campaign.title
                           ? payment.campaign.title
                           : "Campaign Workspace";
                       const creatorName =
-                        typeof payment.creator === "object" && payment.creator !== null
+                        typeof payment.creator === "object" && payment.creator !== null && payment.creator.name
                           ? payment.creator.name
+                          : typeof payment.creator === "object" && payment.creator !== null && payment.creator.displayName
+                          ? payment.creator.displayName
                           : "Creator Partner";
+                      const campaignImage =
+                        typeof payment.campaign === "object" && payment.campaign !== null
+                          ? (typeof payment.campaign.coverImage === "string" ? payment.campaign.coverImage : payment.campaign.coverImage?.url) ||
+                            (typeof payment.campaign.image === "string" ? payment.campaign.image : payment.campaign.image?.url) ||
+                            (Array.isArray(payment.campaign.images) && payment.campaign.images.length > 0
+                              ? (typeof payment.campaign.images[0] === "string" ? payment.campaign.images[0] : payment.campaign.images[0]?.url)
+                              : null)
+                          : null;
 
                       return (
                         <tr
@@ -348,13 +399,30 @@ export default function BrandPaymentsManager() {
                         >
                           {/* Campaign & Creator */}
                           <td className="py-3.5 px-4">
-                            <div className="space-y-0.5">
-                              <span className="font-semibold text-foreground block line-clamp-1">
-                                {campaignTitle}
-                              </span>
-                              <span className="text-[11px] text-text-secondary block">
-                                Creator: {creatorName}
-                              </span>
+                            <div className="flex items-center gap-3">
+                              <CampaignAvatar image={campaignImage} title={campaignTitle} />
+                              <div className="space-y-0.5 min-w-0">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="font-semibold text-foreground text-xs sm:text-sm line-clamp-1">
+                                    {campaignTitle}
+                                  </span>
+                                  <svg
+                                    className="w-3.5 h-3.5 text-text-secondary/60 shrink-0"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth={2}
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    aria-hidden="true"
+                                  >
+                                    <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" />
+                                  </svg>
+                                </div>
+                                <span className="text-[11px] text-text-secondary block truncate">
+                                  Creator: {creatorName}
+                                </span>
+                              </div>
                             </div>
                           </td>
 

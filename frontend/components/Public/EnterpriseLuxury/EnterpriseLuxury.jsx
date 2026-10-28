@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import ScrollReveal from "@/components/theme/ScrollReveal";
 
 // =========================================================
 // CENTRALIZED MOCK DATA (UI ONLY - READY FOR API REPLACEMENT)
@@ -66,7 +67,7 @@ export default function EnterpriseLuxury() {
         ========================================================= */}
         <div className="hidden md:block">
           {/* HEADER AREA */}
-          <div className="mb-10 max-w-3xl">
+          <ScrollReveal direction="up" className="mb-10 max-w-3xl">
             <span className="text-xs font-bold tracking-[0.2em] uppercase text-secondary block mb-3">
               {eyebrow}
             </span>
@@ -76,13 +77,15 @@ export default function EnterpriseLuxury() {
             <p className="text-base text-zinc-400 leading-relaxed max-w-2xl">
               {description}
             </p>
-          </div>
+          </ScrollReveal>
 
           {/* 4 METRIC CARDS IN ONE HORIZONTAL ROW */}
           <div className="grid grid-cols-4 gap-5 lg:gap-6 mb-8">
-            {metrics.map((metric) => (
-              <div
+            {metrics.map((metric, index) => (
+              <ScrollReveal
                 key={metric.id}
+                direction="up"
+                delay={index * 100}
                 className="relative group overflow-hidden rounded-2xl border border-zinc-800/90 bg-zinc-900/60 p-5 lg:p-6 transition-all duration-300 hover:border-secondary/60 hover:shadow-[0_0_25px_rgba(255,79,135,0.22)] hover:bg-zinc-900/80"
               >
                 {/* Accent / Status Indicator */}
@@ -110,12 +113,12 @@ export default function EnterpriseLuxury() {
                 <div className="text-xs lg:text-sm text-zinc-400 font-medium">
                   {metric.label}
                 </div>
-              </div>
+              </ScrollReveal>
             ))}
           </div>
 
           {/* WIDE DARK BOTTOM CTA PANEL */}
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6 lg:p-8 flex flex-row items-center justify-between gap-6 shadow-xl backdrop-blur-xs">
+          <ScrollReveal direction="up" delay={200} className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6 lg:p-8 flex flex-row items-center justify-between gap-6 shadow-xl backdrop-blur-xs">
             <div className="max-w-2xl">
               <h3 className="text-lg lg:text-xl font-serif font-medium text-white">
                 {cta.heading}
@@ -135,7 +138,7 @@ export default function EnterpriseLuxury() {
                 →
               </span>
             </button>
-          </div>
+          </ScrollReveal>
         </div>
 
         {/* =========================================================

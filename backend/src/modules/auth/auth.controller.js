@@ -7,7 +7,8 @@ import {
     loginUser,
     refreshAccessToken,
     logoutUser,
-    getCurrentUser
+    getCurrentUser,
+    changeUserPassword
 } from "./auth.service.js";
 
 
@@ -144,10 +145,54 @@ const logout = asyncHandler(async (req, res) => {
 });
 
 
+// Changes password for currently authenticated user.
+
+const changePassword = asyncHandler(async (req, res) => {
+
+    const userId = req.user.userId;
+    const { currentPassword, newPassword } = req.body;
+
+    const tokenData = await changeUserPassword(userId, {
+        currentPassword,
+        newPassword
+    });
+
+    res.cookie(
+        "accessToken",
+        tokenData.accessToken,
+        {
+            ...cookieOptions,
+            maxAge: getMilliseconds(
+                process.env.ACCESS_TOKEN_EXPIRES_IN
+            )
+        }
+    );
+
+    res.cookie(
+        "refreshToken",
+        tokenData.refreshToken,
+        {
+            ...cookieOptions,
+            maxAge: getMilliseconds(
+                process.env.REFRESH_TOKEN_EXPIRES_IN
+            )
+        }
+    );
+
+    return sendResponse(
+        res,
+        200,
+        "Password changed successfully",
+        null
+    );
+});
+
+
 export {
     register,
     login,
     refreshToken,
     logout,
-    getMe
+    getMe,
+    changePassword
 };

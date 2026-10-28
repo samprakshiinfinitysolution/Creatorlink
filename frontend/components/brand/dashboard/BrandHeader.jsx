@@ -109,13 +109,13 @@ export default function BrandHeader({ setMobileOpen = () => { } }) {
   const userObj = profile?.user || (authUser?.user ? authUser.user : authUser);
 
   const displayName =
-    profile?.contactInformation?.name ||
-    userObj?.name ||
-    authUser?.name ||
     profile?.companyName ||
     profile?.brandName ||
+    userObj?.name ||
+    authUser?.name ||
+    profile?.contactInformation?.name ||
     profile?.name ||
-    "Emma Hoyer";
+    "Brand User";
 
   const displayRole =
     profile?.contactInformation?.designation ||
@@ -194,7 +194,7 @@ export default function BrandHeader({ setMobileOpen = () => { } }) {
   }, []);
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-surface/95 backdrop-blur-md text-foreground border-b border-border-theme px-2.5 sm:px-6 py-2 sm:py-3 flex items-center justify-between gap-1.5 sm:gap-6 transition-colors duration-200 min-w-0 max-w-full">
+    <header className="sticky top-0 z-40 w-full bg-surface/95 backdrop-blur-md text-foreground border-b border-border-theme shadow-xs px-2.5 sm:px-6 py-2 sm:py-3 flex items-center justify-between gap-1.5 sm:gap-6 transition-colors duration-200 min-w-0 max-w-full">
       {/* Left Section: Mobile Menu Toggle + Modern White Searchbar */}
       <div className="flex items-center gap-1.5 sm:gap-3 flex-1 min-w-0 max-w-xl">
         {/* Mobile Hamburger Button */}
@@ -253,8 +253,8 @@ export default function BrandHeader({ setMobileOpen = () => { } }) {
 
         {/* 3. Settings Gear Icon */}
         <Link
-          href="/brand/profile"
-          title="Settings & Profile"
+          href="/brand/settings"
+          title="Settings"
           className="hidden sm:flex p-1.5 sm:p-2 rounded-xl text-slate-500 dark:text-text-secondary hover:text-[#ff2d6c] hover:bg-slate-100 dark:hover:bg-surface-muted transition-colors cursor-pointer"
         >
           <SettingsIcon className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -352,7 +352,7 @@ export default function BrandHeader({ setMobileOpen = () => { } }) {
 
               {/* Settings Link */}
               <Link
-                href="/brand/profile"
+                href="/brand/settings"
                 onClick={() => setDropdownOpen(false)}
                 className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors"
               >

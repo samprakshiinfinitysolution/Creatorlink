@@ -105,6 +105,7 @@ const initialState = {
     workspaces: [],
     selectedWorkspace: null,
     pagination: null,
+    summary: null,
     loading: false,
     submitting: false,
     error: null,
@@ -128,6 +129,7 @@ const brandWorkspaceSlice = createSlice({
             state.workspaces = [];
             state.selectedWorkspace = null;
             state.pagination = null;
+            state.summary = null;
             state.loading = false;
             state.submitting = false;
             state.error = null;
@@ -156,6 +158,7 @@ const brandWorkspaceSlice = createSlice({
                 state.loading = false;
                 state.workspaces = action.payload?.data?.workspaces || [];
                 state.pagination = action.payload?.data?.pagination || null;
+                state.summary = action.payload?.data?.summary || state.summary || null;
                 state.error = null;
             })
 
@@ -323,6 +326,7 @@ const brandWorkspaceSlice = createSlice({
                 state.workspaces = [];
                 state.selectedWorkspace = null;
                 state.pagination = null;
+                state.summary = null;
                 state.loading = false;
                 state.submitting = false;
                 state.error = null;
@@ -334,6 +338,7 @@ const brandWorkspaceSlice = createSlice({
                 state.workspaces = [];
                 state.selectedWorkspace = null;
                 state.pagination = null;
+                state.summary = null;
                 state.loading = false;
                 state.submitting = false;
                 state.error = null;
@@ -345,6 +350,7 @@ const brandWorkspaceSlice = createSlice({
                 state.workspaces = [];
                 state.selectedWorkspace = null;
                 state.pagination = null;
+                state.summary = null;
                 state.loading = false;
                 state.submitting = false;
                 state.error = null;

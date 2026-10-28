@@ -156,7 +156,7 @@ const getCreatorBookingsService = async (creatorId, query = {}) => {
     const [bookings, totalItems] = await Promise.all([
         Booking.find(filter)
             .populate("brand", "name email")
-            .populate("campaign", "title category budget deadline platform")
+            .populate("campaign", "title category budget deadline platform coverImage")
             .populate("service", "title price deliveryTime")
             .sort({ createdAt: -1 })
             .skip(skip)
@@ -299,6 +299,94 @@ const cancelCreatorBookingService = async (creatorId, bookingId) => {
 };
 
 
+// Helper to enrich bookings with CreatorProfile (profileImage)
+const isMongooseObjectId = (val) =>
+    Boolean(val && (val instanceof mongoose.Types.ObjectId || val?._bsontype === "ObjectID"));
+
+const attachBookingCreatorProfiles = async (bookings) => {
+    if (!bookings) return bookings;
+    const isSingle = !Array.isArray(bookings);
+    const bookingList = isSingle ? [bookings] : bookings;
+    if (bookingList.length === 0) return bookings;
+
+    const creatorIds = new Set();
+    const extractCreatorId = (creator) => {
+        if (!creator) return null;
+        if (typeof creator === "object" && !isMongooseObjectId(creator)) {
+            const rawId = creator._id || creator.id;
+            if (rawId) {
+                return rawId.toString ? rawId.toString() : String(rawId);
+            }
+            return null;
+        }
+        if (isMongooseObjectId(creator)) {
+            return creator.toString();
+        }
+        if (typeof creator === "string") {
+            const trimmed = creator.trim();
+            if (mongoose.Types.ObjectId.isValid(trimmed)) {
+                return trimmed;
+            }
+        }
+        if (mongoose.Types.ObjectId.isValid(creator)) {
+            return creator.toString ? creator.toString() : String(creator);
+        }
+        return null;
+    };
+
+    bookingList.forEach((b) => {
+        const bObj = b?.toObject ? b.toObject() : b;
+        if (!bObj) return;
+        const cId = extractCreatorId(bObj.creator);
+        if (cId) creatorIds.add(cId);
+    });
+
+    const isDbConnected = mongoose.connection?.readyState === 1;
+    const creatorProfiles = creatorIds.size > 0 && isDbConnected
+        ? await CreatorProfile.find({
+            user: { $in: Array.from(creatorIds).map((id) => new mongoose.Types.ObjectId(id)) }
+        })
+            .select("user profileImage")
+            .lean()
+        : [];
+
+    const creatorMap = new Map();
+    creatorProfiles.forEach((cp) => {
+        if (cp?.user) creatorMap.set(cp.user.toString(), cp.profileImage || "");
+    });
+
+    const enriched = bookingList.map((b) => {
+        const bObj = b?.toObject ? b.toObject() : { ...b };
+        const cId = extractCreatorId(bObj.creator);
+        const profileImage = cId ? (creatorMap.get(cId) || "") : "";
+
+        if (bObj.creator) {
+            const isPopulated = typeof bObj.creator === "object" && !isMongooseObjectId(bObj.creator);
+            if (isPopulated) {
+                const creatorBase = bObj.creator.toObject ? bObj.creator.toObject() : { ...bObj.creator };
+                bObj.creator = {
+                    ...creatorBase,
+                    profileImage: profileImage || creatorBase.profileImage || "",
+                    avatar: profileImage || creatorBase.avatar || "",
+                    image: profileImage || creatorBase.image || ""
+                };
+            } else if (cId) {
+                bObj.creator = {
+                    _id: bObj.creator,
+                    profileImage,
+                    avatar: profileImage,
+                    image: profileImage
+                };
+            }
+        }
+
+        return bObj;
+    });
+
+    return isSingle ? enriched[0] : enriched;
+};
+
+
 // Gets bookings received by the authenticated brand for their campaigns.
 const getBrandBookingsService = async (brandId, query = {}) => {
 
@@ -335,7 +423,7 @@ const getBrandBookingsService = async (brandId, query = {}) => {
     const [bookings, totalItems] = await Promise.all([
         Booking.find(filter)
             .populate("creator", "name email")
-            .populate("campaign", "title category budget deadline platform")
+            .populate("campaign", "title category budget deadline platform coverImage")
             .populate("service", "title price deliveryTime")
             .sort({ createdAt: -1 })
             .skip(skip)
@@ -344,9 +432,10 @@ const getBrandBookingsService = async (brandId, query = {}) => {
         Booking.countDocuments(filter)
     ]);
 
+    const enrichedBookings = await attachBookingCreatorProfiles(bookings);
 
     return {
-        bookings,
+        bookings: enrichedBookings,
         pagination: getPaginationData(
             currentPage,
             itemsPerPage,
@@ -383,8 +472,8 @@ const getBrandBookingByIdService = async (brandId, bookingId) => {
         );
     }
 
-
-    return booking;
+    const bObj = booking.toObject ? booking.toObject() : { ...booking };
+    return await attachBookingCreatorProfiles(bObj);
 };
 
 

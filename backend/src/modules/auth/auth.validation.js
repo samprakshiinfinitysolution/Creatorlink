@@ -79,8 +79,59 @@ const validateRefreshToken = (req, res, next) => {
 };
 
 
+// Validates change-password data.
+
+const validateChangePassword = (req, res, next) => {
+
+    const {
+        currentPassword,
+        newPassword,
+        confirmPassword
+    } = req.body;
+
+    if (!currentPassword || !newPassword) {
+        return res.status(400).json({
+            success: false,
+            statusCode: 400,
+            message: "Current password and new password are required",
+            data: null
+        });
+    }
+
+    if (newPassword.length < 6) {
+        return res.status(400).json({
+            success: false,
+            statusCode: 400,
+            message: "New password must be at least 6 characters",
+            data: null
+        });
+    }
+
+    if (confirmPassword !== undefined && newPassword !== confirmPassword) {
+        return res.status(400).json({
+            success: false,
+            statusCode: 400,
+            message: "New password and confirmation password do not match",
+            data: null
+        });
+    }
+
+    if (currentPassword === newPassword) {
+        return res.status(400).json({
+            success: false,
+            statusCode: 400,
+            message: "New password must be different from current password",
+            data: null
+        });
+    }
+
+    next();
+};
+
+
 export {
     validateRegister,
     validateLogin,
-    validateRefreshToken
+    validateRefreshToken,
+    validateChangePassword
 };

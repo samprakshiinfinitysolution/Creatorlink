@@ -264,6 +264,7 @@ export default function CreatorDiscoverCampaignsManager() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [showcaseImgErrors, setShowcaseImgErrors] = useState({});
+  const [failedCampaignImgUrls, setFailedCampaignImgUrls] = useState({});
 
   // Fetch discover campaigns and applied campaigns on mount and when filters/page change
   useEffect(() => {
@@ -383,7 +384,7 @@ export default function CreatorDiscoverCampaignsManager() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-8 items-center relative z-10">
               {/* LEFT COLUMN: Heading, Subtitle & 3 Compact Highlight Cards */}
               <div className="lg:col-span-6 xl:col-span-6 space-y-2 sm:space-y-2.5">
-                <h1 className="font-heading font-normal text-2xl min-[360px]:text-3xl sm:text-3xl lg:text-[34px] xl:text-[36px] text-neutral-900 dark:text-white tracking-tight leading-[1.1] break-words">
+                <h1 className="font-serif font-medium text-2xl min-[360px]:text-3xl sm:text-3xl lg:text-[34px] xl:text-[36px] text-neutral-900 dark:text-white tracking-tight leading-[1.1] break-words">
                   Discover Campaigns
                 </h1>
                 <p className="text-xs sm:text-xs lg:text-sm text-neutral-600 dark:text-neutral-300 font-sans max-w-lg leading-relaxed">
@@ -557,9 +558,9 @@ export default function CreatorDiscoverCampaignsManager() {
           </div>
 
           {/* 2. SEARCH & CATEGORY FILTERS SECTION */}
-          <div className="bg-surface border border-border-theme rounded-2xl p-4 shadow-xs space-y-4">
+          <div className="bg-surface border border-border-theme rounded-2xl p-3 sm:p-4 shadow-xs space-y-3 sm:space-y-4">
             {/* Category Navigation Tabs */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 custom-scrollbar">
+            <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto custom-scrollbar py-3">
               {categoryOptions.map((cat) => {
                 const isActive = selectedCategory === cat;
                 return (
@@ -588,7 +589,7 @@ export default function CreatorDiscoverCampaignsManager() {
                 type="text"
                 value={searchQuery}
                 onChange={handleSearchChange}
-                placeholder="Search briefs by title or category..."
+                placeholder="Search briefs..."
                 className="w-full text-xs pl-10 pr-9 py-2.5 rounded-xl bg-surface-muted border border-border-theme text-foreground placeholder:text-text-secondary focus:outline-none focus:border-secondary transition-colors"
               />
               {searchQuery && (
@@ -662,41 +663,47 @@ export default function CreatorDiscoverCampaignsManager() {
                     className="bg-white dark:bg-surface border border-neutral-200/80 dark:border-border-theme hover:border-pink-200/90 dark:hover:border-pink-500/30 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 shadow-[0_2px_12px_rgba(255,45,108,0.03)] hover:shadow-md transition-all duration-200 flex flex-col justify-between group"
                   >
                     <div className="space-y-2.5">
-                      {/* Top Row: Category & Platform Badges (Understated) */}
+                      {/* Top Row: Category (Pink Text) & Applied Badge (Left), Platform (Right) - Clean Text Without Pill Outlines */}
                       <div className="flex items-center justify-between gap-1.5 flex-wrap">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-sans font-bold tracking-wider uppercase bg-pink-50 text-pink-500 border border-pink-100 dark:bg-pink-950/40 dark:text-pink-400 dark:border-pink-900/50 truncate max-w-[110px] min-[360px]:max-w-[130px]">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-[10px] sm:text-[11px] font-sans font-bold tracking-wider uppercase text-pink-500 dark:text-pink-400 truncate max-w-[130px]">
                             {campaign.category || "General"}
                           </span>
 
                           {isApplied && (
-                            <span className="px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-sans font-bold tracking-wider uppercase bg-emerald-50 text-emerald-600 border border-emerald-200/70 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/40">
+                            <span className="text-[10px] sm:text-[11px] font-sans font-bold tracking-wider uppercase text-emerald-600 dark:text-emerald-400">
                               Applied
                             </span>
                           )}
                         </div>
 
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-sans font-bold tracking-wider uppercase flex items-center gap-1 bg-neutral-100 text-neutral-600 border border-neutral-200/80 dark:bg-surface-muted dark:text-text-secondary dark:border-border-theme shrink-0">
-                          <PlatformIcon platform={campaign.platform} className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
+                        <span className="text-[10px] sm:text-[11px] font-sans font-bold tracking-wider uppercase flex items-center gap-1 text-neutral-600 dark:text-neutral-300 shrink-0">
+                          <PlatformIcon platform={campaign.platform} className="w-3.5 h-3.5 shrink-0" />
                           <span>{formatPlatform(campaign.platform)}</span>
                         </span>
                       </div>
 
                       {/* Campaign Visual Banner with Subtle Ambient Fallback */}
                       <div className="h-28 sm:h-32 rounded-xl sm:rounded-2xl overflow-hidden relative border border-neutral-100 dark:border-border-theme/40 bg-surface-muted/60 dark:bg-surface-muted/20">
-                        {campaign.coverImage || campaign.image ? (
+                        {(campaign.coverImage || campaign.image) && !failedCampaignImgUrls[campaign._id || campaign.id] ? (
                           /* eslint-disable-next-line @next/next/no-img-element */
                           <img
                             src={campaign.coverImage || campaign.image}
                             alt={campaign.title || "Campaign brief banner"}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            onError={() =>
+                              setFailedCampaignImgUrls((prev) => ({
+                                ...prev,
+                                [campaign._id || campaign.id]: true,
+                              }))
+                            }
                           />
                         ) : (
                           <div className="w-full h-full relative overflow-hidden bg-gradient-to-br from-pink-100/70 via-rose-50/50 to-amber-50/40 dark:from-pink-950/40 dark:via-purple-950/20 dark:to-surface-muted/40 flex items-center justify-center">
                             <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-pink-200/40 dark:bg-pink-600/10 blur-xl pointer-events-none" />
                             <div className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full bg-rose-200/30 dark:bg-rose-600/10 blur-xl pointer-events-none" />
                             <div className="text-center px-3 relative z-10 opacity-70">
-                              <span className="font-heading font-medium italic text-xs sm:text-sm text-foreground/80 tracking-wide line-clamp-1">
+                              <span className="font-sans font-medium text-xs sm:text-sm text-foreground/80 tracking-wide line-clamp-1">
                                 {campaign.title || "Brand Brief"}
                               </span>
                             </div>
@@ -705,7 +712,7 @@ export default function CreatorDiscoverCampaignsManager() {
 
                         {/* Floating Brand Badge Bottom-Left */}
                         <div className="absolute bottom-2 left-2 bg-white/95 dark:bg-surface/95 backdrop-blur-xs px-2 py-0.5 rounded-lg shadow-xs border border-border-theme/60 flex items-center gap-1.5 max-w-[85%]">
-                          <div className="w-3.5 h-3.5 rounded-full bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 flex items-center justify-center text-[8px] font-heading font-bold shrink-0">
+                          <div className="w-3.5 h-3.5 rounded-full bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 flex items-center justify-center text-[8px] font-sans font-semibold shrink-0">
                             {brandInitial}
                           </div>
                           <span className="text-[10px] sm:text-[11px] font-sans font-semibold text-foreground truncate">
@@ -716,11 +723,11 @@ export default function CreatorDiscoverCampaignsManager() {
 
                       {/* Campaign Title & Brand */}
                       <div>
-                        <h2 className="font-heading font-medium text-base sm:text-lg text-black dark:text-white line-clamp-2 sm:line-clamp-1 group-hover:text-black dark:group-hover:text-white transition-colors tracking-tight break-words">
+                        <h2 className="font-sans font-semibold text-base sm:text-lg text-black dark:text-white line-clamp-2 sm:line-clamp-1 group-hover:text-black dark:group-hover:text-white transition-colors tracking-tight break-words">
                           {campaign.title}
                         </h2>
                         <div className="flex items-center gap-1.5 mt-0.5">
-                          <div className="w-3.5 h-3.5 rounded-full bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 flex items-center justify-center text-[8px] font-heading font-semibold shrink-0">
+                          <div className="w-3.5 h-3.5 rounded-full bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 flex items-center justify-center text-[8px] font-sans font-semibold shrink-0">
                             {brandInitial}
                           </div>
                           <span className="text-xs font-sans text-text-secondary truncate">
@@ -743,7 +750,7 @@ export default function CreatorDiscoverCampaignsManager() {
                           <span className="text-[10px] sm:text-[11px] font-sans font-medium text-text-secondary block leading-none mb-0.5">
                             Campaign Budget
                           </span>
-                          <span className="font-heading font-medium text-lg min-[360px]:text-xl sm:text-2xl text-foreground tabular-nums tracking-tight leading-none block truncate">
+                          <span className="font-sans font-bold text-lg min-[360px]:text-xl sm:text-2xl text-foreground tabular-nums tracking-tight leading-none block truncate">
                             {formatBudget(campaign.budget, campaign.currency || "INR")}
                           </span>
                         </div>
@@ -828,7 +835,7 @@ export default function CreatorDiscoverCampaignsManager() {
                 <MegaphoneIcon className="w-7 h-7" />
               </div>
               <div className="space-y-1">
-                <h3 className="font-heading font-medium text-xl text-foreground">
+                <h3 className="font-serif font-medium text-xl text-foreground">
                   {selectedCategory === "All" && !searchQuery
                     ? "No campaigns available"
                     : "No matching campaigns found"}

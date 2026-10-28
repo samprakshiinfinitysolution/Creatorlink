@@ -302,7 +302,12 @@ const getBrandPaymentsService = async (brandId, query = {}) => {
 
     const filter = { brand: brandId };
     if (status && status.trim()) {
-        filter.status = status.trim();
+        const normStatus = status.trim().toLowerCase();
+        if (normStatus === "paid" || normStatus === "completed") {
+            filter.status = { $in: ["paid", "completed"] };
+        } else {
+            filter.status = status.trim();
+        }
     }
     if (workspace && mongoose.Types.ObjectId.isValid(workspace.toString().trim())) {
         filter.workspace = workspace.toString().trim();
@@ -311,7 +316,7 @@ const getBrandPaymentsService = async (brandId, query = {}) => {
     const [payments, totalItems] = await Promise.all([
         Payment.find(filter)
             .populate("creator", "name email")
-            .populate("campaign", "title category budget platform")
+            .populate("campaign", "title category budget platform coverImage")
             .populate("workspace", "status agreedPrice deadline")
             .sort({ createdAt: -1 })
             .skip(skip)
@@ -354,13 +359,18 @@ const getCreatorPaymentsService = async (creatorId, query = {}) => {
 
     const filter = { creator: creatorId };
     if (status && status.trim()) {
-        filter.status = status.trim();
+        const normStatus = status.trim().toLowerCase();
+        if (normStatus === "paid" || normStatus === "completed") {
+            filter.status = { $in: ["paid", "completed"] };
+        } else {
+            filter.status = status.trim();
+        }
     }
 
     const [payments, totalItems] = await Promise.all([
         Payment.find(filter)
             .populate("brand", "name email")
-            .populate("campaign", "title category budget platform")
+            .populate("campaign", "title category budget platform coverImage")
             .populate("workspace", "status agreedPrice deadline")
             .sort({ createdAt: -1 })
             .skip(skip)

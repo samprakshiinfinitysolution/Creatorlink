@@ -153,7 +153,7 @@ export default function CreatorWelcomeBanner({ user, creator, profile, metrics }
 
         {/* Heading & Subtitle */}
         <div className="space-y-2">
-          <h1 className="font-heading font-medium text-3xl sm:text-4xl lg:text-[42px] text-foreground tracking-tight leading-tight">
+          <h1 className="font-serif font-medium text-3xl sm:text-4xl lg:text-[42px] text-foreground tracking-tight leading-tight">
             Welcome back, {welcomeName} ✦
           </h1>
           <p className="text-xs sm:text-sm text-text-secondary font-sans leading-relaxed">
@@ -263,7 +263,7 @@ export default function CreatorWelcomeBanner({ user, creator, profile, metrics }
             />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center select-none text-secondary dark:text-pink-300">
-              <span className="font-heading font-medium text-4xl lg:text-5xl tracking-wider">
+              <span className="font-serif font-medium text-4xl lg:text-5xl tracking-wider">
                 {initials}
               </span>
               <span className="text-[10px] font-sans font-medium text-text-secondary mt-1 tracking-wide">

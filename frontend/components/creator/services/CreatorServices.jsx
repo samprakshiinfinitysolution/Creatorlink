@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getServices,
@@ -8,6 +8,7 @@ import {
   updateCreatorService,
   deleteCreatorService,
 } from "@/redux/creator/services/services_slice";
+import { uploadSingleImageApi } from "@/lib/upload";
 import CreatorSidebar from "@/components/creator/dashboard/CreatorSidebar";
 import CreatorHeader from "@/components/creator/dashboard/CreatorHeader";
 
@@ -18,6 +19,30 @@ function PlusIcon({ className = "w-4 h-4" }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+    </svg>
+  );
+}
+
+function PhotoIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+    </svg>
+  );
+}
+
+function ArrowUpTrayIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+    </svg>
+  );
+}
+
+function LinkIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
     </svg>
   );
 }
@@ -140,14 +165,6 @@ function ChevronRightIcon({ className = "w-4 h-4" }) {
   );
 }
 
-function ArrowRightIcon({ className = "w-3.5 h-3.5" }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-    </svg>
-  );
-}
-
 function EllipsisVerticalIcon({ className = "w-4 h-4" }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -175,27 +192,54 @@ function PlaySquareIcon({ className = "w-3.5 h-3.5" }) {
   );
 }
 
-function InstagramCameraIcon({ className = "w-3.5 h-3.5" }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-      <rect x="3" y="3" width="18" height="18" rx="5" />
-      <circle cx="12" cy="12" r="4" />
-      <circle cx="17.5" cy="6.5" r="1" fill="currentColor" />
-    </svg>
-  );
-}
-
 function PlatformBadgeIcon({ platform, className = "w-3.5 h-3.5" }) {
   const norm = typeof platform === "string" ? platform.toLowerCase() : "";
   if (norm.includes("youtube")) {
     return (
-      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-        <rect x="2.5" y="4.5" width="19" height="15" rx="4" />
-        <polygon points="10 9 15.5 12 10 15 10 9" fill="currentColor" />
+      <svg className={className} viewBox="0 0 24 24" fill="none">
+        <rect x="2" y="5" width="20" height="14" rx="4" fill="#FF0000" />
+        <polygon points="10,8.5 16,12 10,15.5" fill="#FFFFFF" />
       </svg>
     );
   }
-  return <InstagramCameraIcon className={className} />;
+  if (norm.includes("instagram")) {
+    return (
+      <svg className={className} viewBox="0 0 24 24" fill="none">
+        <rect x="2.5" y="2.5" width="19" height="19" rx="5.5" stroke="url(#ig-grad)" strokeWidth="2" />
+        <circle cx="12" cy="12" r="4.2" stroke="url(#ig-grad)" strokeWidth="2" />
+        <circle cx="17.2" cy="6.8" r="1.2" fill="url(#ig-grad)" />
+        <defs>
+          <linearGradient id="ig-grad" x1="2" y1="22" x2="22" y2="2" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#F58529" />
+            <stop offset="0.5" stopColor="#DD2A7B" />
+            <stop offset="1" stopColor="#8134AF" />
+          </linearGradient>
+        </defs>
+      </svg>
+    );
+  }
+  if (norm.includes("tiktok")) {
+    return (
+      <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+        <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.298-.002.595.042.88.13V9.4a6.33 6.33 0 0 0-1-.08A6.34 6.34 0 0 0 3 15.66a6.34 6.34 0 0 0 10.82 4.47 6.27 6.27 0 0 0 1.88-4.47V8.84a8.27 8.27 0 0 0 4.89 1.57V6.96a4.83 4.83 0 0 1-1-.27z" />
+      </svg>
+    );
+  }
+  if (norm.includes("facebook")) {
+    return (
+      <svg className={className} viewBox="0 0 24 24" fill="#1877F2">
+        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+      </svg>
+    );
+  }
+  if (norm.includes("website")) {
+    return (
+      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-.778.099-1.533.284-2.253" />
+      </svg>
+    );
+  }
+  return <LayersIcon className={className} />;
 }
 
 // =========================================================
@@ -217,10 +261,46 @@ const PRICING_TYPE_OPTIONS = [
   { value: "custom", label: "Custom Quote" },
 ];
 
+function ServiceCardCover({ coverImage, title, children }) {
+  const [prevCoverImage, setPrevCoverImage] = useState(coverImage);
+  const [failedUrl, setFailedUrl] = useState(null);
+
+  if (coverImage !== prevCoverImage) {
+    setPrevCoverImage(coverImage);
+    setFailedUrl(null);
+  }
+
+  const isImgError = Boolean(coverImage) && failedUrl === coverImage;
+
+  return (
+    <div className="relative h-48 sm:h-52 w-full overflow-hidden bg-surface-muted">
+      {coverImage && !isImgError ? (
+        /* eslint-disable-next-line @next/next/no-img-element */
+        <img
+          key={coverImage}
+          src={coverImage}
+          alt={title}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+          onError={() => setFailedUrl(coverImage)}
+        />
+      ) : (
+        <div className="w-full h-full flex flex-col items-center justify-center bg-neutral-100/90 dark:bg-surface-muted text-text-secondary p-4 text-center">
+          <PhotoIcon className="w-9 h-9 opacity-30 mb-1" />
+          <span className="text-[11px] font-medium opacity-70">
+            {coverImage ? "Image unavailable" : "No cover image"}
+          </span>
+        </div>
+      )}
+      {children}
+    </div>
+  );
+}
+
 const initialFormState = {
   title: "",
   description: "",
   category: "Social Media Campaign",
+  coverImage: "",
   platform: "instagram",
   pricingType: "fixed",
   price: 0,
@@ -323,6 +403,13 @@ export default function CreatorServices() {
   const [deliverableInput, setDeliverableInput] = useState("");
   const [formError, setFormError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+
+  // Cover Image Upload State
+  const fileInputRef = useRef(null);
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
+  const [isDraggingCover, setIsDraggingCover] = useState(false);
+  const [uploadError, setUploadError] = useState(null);
+  const [previewErrorUrl, setPreviewErrorUrl] = useState(null);
 
   // Delete State
   const [deleteConfirmService, setDeleteConfirmService] = useState(null);
@@ -430,6 +517,13 @@ export default function CreatorServices() {
     setFormData(initialFormState);
     setDeliverableInput("");
     setFormError(null);
+    setUploadError(null);
+    setPreviewErrorUrl(null);
+    setIsUploadingCover(false);
+    setIsDraggingCover(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
     setIsModalOpen(true);
   };
 
@@ -439,6 +533,7 @@ export default function CreatorServices() {
       title: service.title || "",
       description: service.description || "",
       category: service.category || "Social Media Campaign",
+      coverImage: service.coverImage || "",
       platform: service.platform || "instagram",
       pricingType: service.pricingType || "fixed",
       price: typeof service.price === "number" ? service.price : 0,
@@ -450,14 +545,122 @@ export default function CreatorServices() {
     });
     setDeliverableInput("");
     setFormError(null);
+    setUploadError(null);
+    setPreviewErrorUrl(null);
+    setIsUploadingCover(false);
+    setIsDraggingCover(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
-    if (!submitting) {
+    if (!submitting && !isUploadingCover) {
       setIsModalOpen(false);
       setEditingServiceId(null);
       setFormError(null);
+      setUploadError(null);
+      setPreviewErrorUrl(null);
+      setIsUploadingCover(false);
+      setIsDraggingCover(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  // Helper to process and upload cover image file
+  const processCoverFile = async (file) => {
+    if (!file) return;
+
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      setUploadError("Please upload a valid image file (JPEG, PNG, or WebP).");
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setUploadError("Image size must be less than 5 MB.");
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      return;
+    }
+
+    setUploadError(null);
+    setPreviewErrorUrl(null);
+    setIsUploadingCover(true);
+
+    try {
+      const uploadRes = await uploadSingleImageApi(file, "creatorlink/services");
+      const uploadedUrl =
+        uploadRes?.url ||
+        uploadRes?.secure_url ||
+        uploadRes?.data?.url ||
+        uploadRes?.data?.secure_url;
+
+      if (uploadedUrl) {
+        setFormData((prev) => ({
+          ...prev,
+          coverImage: uploadedUrl,
+        }));
+      } else {
+        setUploadError("Could not retrieve uploaded image URL.");
+      }
+    } catch (err) {
+      const errMsg =
+        err?.response?.data?.message || err?.message || "Failed to upload cover image.";
+      setUploadError(errMsg);
+    } finally {
+      setIsUploadingCover(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  const handleCoverFileSelect = (e) => {
+    const file = e.target?.files?.[0];
+    if (file) {
+      processCoverFile(file);
+    }
+  };
+
+  const handleCoverDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isUploadingCover) {
+      setIsDraggingCover(true);
+    }
+  };
+
+  const handleCoverDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingCover(false);
+  };
+
+  const handleCoverDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingCover(false);
+    if (isUploadingCover) return;
+    const file = e.dataTransfer?.files?.[0];
+    if (file) {
+      processCoverFile(file);
+    }
+  };
+
+  const handleRemoveCover = () => {
+    if (isUploadingCover) return;
+    setFormData((prev) => ({ ...prev, coverImage: "" }));
+    setUploadError(null);
+    setPreviewErrorUrl(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   };
 
@@ -547,6 +750,7 @@ export default function CreatorServices() {
       title: formData.title.trim(),
       description: formData.description ? formData.description.trim() : "",
       category: formData.category.trim(),
+      coverImage: formData.coverImage ? formData.coverImage.trim() : "",
       platform: formData.platform,
       pricingType: formData.pricingType,
       price: Number(formData.price) || 0,
@@ -578,9 +782,17 @@ export default function CreatorServices() {
       : createCreatorService.fulfilled.match(resultAction);
 
     if (isSuccess) {
-      setIsModalOpen(false);
-      setEditingServiceId(null);
       setFormData(initialFormState);
+      setEditingServiceId(null);
+      setUploadError(null);
+      setPreviewErrorUrl(null);
+      setIsUploadingCover(false);
+      setIsDraggingCover(false);
+      setDeliverableInput("");
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      setIsModalOpen(false);
     } else {
       setFormError(
         resultAction.payload ||
@@ -632,17 +844,14 @@ export default function CreatorServices() {
       return "Custom Quote";
     }
     const formattedNum = new Intl.NumberFormat("en-IN").format(price || 0);
-    const symbol = currency === "INR" ? "₹" : `${currency} `;
-    if (pricingType === "starting_from") {
-      return `Starting at ${symbol}${formattedNum}`;
-    }
+    const symbol = currency === "INR" || !currency ? "₹" : `${currency} `;
     return `${symbol}${formattedNum}`;
   };
 
   // Helper for Formatting Platform Label
   const getPlatformLabel = (val) => {
-    const match = PLATFORM_OPTIONS.find((p) => p.value === val);
-    return match ? match.label : val;
+    const match = PLATFORM_OPTIONS.find((p) => p.value === (val || "").toLowerCase());
+    return match ? match.label : val || "Other";
   };
 
   return (
@@ -658,95 +867,69 @@ export default function CreatorServices() {
         {/* Main Content Area */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl w-full mx-auto">
           {/* 1. PAGE HEADER */}
-          <div className="bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="font-sans font-bold text-2xl sm:text-3xl text-foreground tracking-tight">
-                My Services
-              </h1>
-              <p className="text-xs sm:text-sm text-text-secondary mt-1">
-                Manage your service packages, pricing, and deliverables.
-              </p>
-            </div>
+          <div className="bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5 sm:gap-6">
+            <div className="space-y-3 sm:space-y-3.5 max-w-xl">
+              <div>
+                <div className="mb-2">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-secondary/10 text-secondary border border-secondary/20 uppercase tracking-wider inline-flex items-center">
+                    Creator Services
+                  </span>
+                </div>
+                <h1 className="font-serif font-medium text-2xl sm:text-3xl text-foreground tracking-tight">
+                  My Services
+                </h1>
+                <p className="text-xs sm:text-sm text-text-secondary mt-1">
+                  Manage your service packages, pricing, and deliverables.
+                </p>
+              </div>
 
-            {/* Bottom Row: 4 Statistics Cards & Decorative Service Illustration */}
-            <div className="relative z-10 flex flex-col 2xl:flex-row items-stretch 2xl:items-center justify-between gap-4 2xl:gap-6">
-              {/* Four Compact Statistic Cards */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5 flex-1 min-w-0">
+              {/* Two Compact Statistic Cards Shifted Below Text */}
+              <div className="grid grid-cols-2 gap-2.5 sm:gap-3 max-w-sm pt-0.5">
                 {/* 1. Total Services */}
-                <div className="bg-white/95 dark:bg-surface/90 backdrop-blur-xs rounded-2xl p-3 sm:p-3.5 border border-pink-100/90 dark:border-border-theme/70 shadow-xs flex items-center gap-2.5 sm:gap-3 min-w-0 transition-transform duration-200 hover:-translate-y-0.5">
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-pink-50 dark:bg-pink-950/40 text-black dark:text-white flex items-center justify-center shrink-0">
-                    <LayersIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+                <div className="bg-white/95 dark:bg-surface/90 backdrop-blur-xs rounded-xl py-2 px-3 sm:py-2.5 sm:px-3.5 border border-pink-100/90 dark:border-border-theme/70 shadow-2xs flex items-center gap-2.5 min-w-0 transition-transform duration-200 hover:-translate-y-0.5">
+                  <div className="w-8 h-8 rounded-full bg-pink-50 dark:bg-pink-950/40 text-black dark:text-white flex items-center justify-center shrink-0">
+                    <LayersIcon className="w-4 h-4" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <span className="text-[11px] sm:text-xs font-semibold text-text-secondary block leading-tight truncate">
+                    <span className="text-[10px] sm:text-[11px] font-medium text-text-secondary block leading-tight truncate">
                       Total Services
                     </span>
-                    <span className="font-sans font-bold text-lg sm:text-2xl text-foreground tracking-tight leading-tight block mt-0.5 truncate">
+                    <span className="font-sans font-bold text-base sm:text-lg text-foreground tracking-tight leading-none block mt-0.5 truncate">
                       {totalServicesCount}
-                    </span>
-                    <span className="text-[10px] sm:text-[11px] text-text-secondary block leading-tight mt-0.5 truncate">
-                      Your listed packages
                     </span>
                   </div>
                 </div>
 
                 {/* 2. Active Services */}
-                <div className="bg-white/95 dark:bg-surface/90 backdrop-blur-xs rounded-2xl p-3 sm:p-3.5 border border-pink-100/90 dark:border-border-theme/70 shadow-xs flex items-center gap-2.5 sm:gap-3 min-w-0 transition-transform duration-200 hover:-translate-y-0.5">
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-black dark:text-white flex items-center justify-center shrink-0">
-                    <CheckIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-black dark:text-white" />
+                <div className="bg-white/95 dark:bg-surface/90 backdrop-blur-xs rounded-xl py-2 px-3 sm:py-2.5 sm:px-3.5 border border-pink-100/90 dark:border-border-theme/70 shadow-2xs flex items-center gap-2.5 min-w-0 transition-transform duration-200 hover:-translate-y-0.5">
+                  <div className="w-8 h-8 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-black dark:text-white flex items-center justify-center shrink-0">
+                    <CheckIcon className="w-4 h-4 text-black dark:text-white" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <span className="text-[11px] sm:text-xs font-semibold text-text-secondary block leading-tight truncate">
+                    <span className="text-[10px] sm:text-[11px] font-medium text-text-secondary block leading-tight truncate">
                       Active Services
                     </span>
-                    <span className="font-sans font-bold text-lg sm:text-2xl text-foreground tracking-tight leading-tight block mt-0.5 truncate">
+                    <span className="font-sans font-bold text-base sm:text-lg text-foreground tracking-tight leading-none block mt-0.5 truncate">
                       {activeServicesCount}
-                    </span>
-                    <span className="text-[10px] sm:text-[11px] text-text-secondary block leading-tight mt-0.5 truncate">
-                      Currently available
-                    </span>
-                  </div>
-                </div>
-
-                {/* 3. Starting Price */}
-                <div className="bg-white/95 dark:bg-surface/90 backdrop-blur-xs rounded-2xl p-3 sm:p-3.5 border border-pink-100/90 dark:border-border-theme/70 shadow-xs flex items-center gap-2.5 sm:gap-3 min-w-0 transition-transform duration-200 hover:-translate-y-0.5">
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-pink-50 dark:bg-pink-950/40 text-black dark:text-white flex items-center justify-center shrink-0">
-                    <RupeeIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <span className="text-[11px] sm:text-xs font-semibold text-text-secondary block leading-tight truncate">
-                      Starting Price
-                    </span>
-                    <span className="font-sans font-bold text-lg sm:text-2xl text-foreground tracking-tight leading-tight block mt-0.5 truncate">
-                      {startingPriceFormatted}
-                    </span>
-                    <span className="text-[10px] sm:text-[11px] text-text-secondary block leading-tight mt-0.5 truncate">
-                      From your lowest-priced service
-                    </span>
-                  </div>
-                </div>
-
-                {/* 4. Average Delivery Time */}
-                <div className="bg-white/95 dark:bg-surface/90 backdrop-blur-xs rounded-2xl p-3 sm:p-3.5 border border-pink-100/90 dark:border-border-theme/70 shadow-xs flex items-center gap-2.5 sm:gap-3 min-w-0 transition-transform duration-200 hover:-translate-y-0.5">
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-pink-50 dark:bg-pink-950/40 text-black dark:text-white flex items-center justify-center shrink-0">
-                    <ClockIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <span className="text-[11px] sm:text-xs font-semibold text-text-secondary block leading-tight truncate">
-                      Avg. Delivery Time
-                    </span>
-                    <span className="font-sans font-bold text-lg sm:text-2xl text-foreground tracking-tight leading-tight block mt-0.5 truncate">
-                      {avgDeliveryFormatted}
-                    </span>
-                    <span className="text-[10px] sm:text-[11px] text-text-secondary block leading-tight mt-0.5 truncate">
-                      Across your services
                     </span>
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Decorative Service Card Illustration (Extra-Wide Screens) */}
-              <div className="hidden 2xl:flex items-center gap-3 shrink-0 pl-2">
+            {/* Header Right Actions & Illustration */}
+            <div className="flex items-center gap-4 lg:gap-6 shrink-0 self-start lg:self-center">
+              <button
+                type="button"
+                onClick={handleOpenAddModal}
+                className="inline-flex items-center justify-center gap-2 px-4.5 py-2.5 rounded-xl bg-neutral-950 hover:bg-neutral-800 text-white text-xs font-semibold tracking-wide transition-all shadow-xs cursor-pointer shrink-0 dark:bg-white dark:text-black dark:hover:bg-neutral-100"
+              >
+                <PlusIcon className="w-4 h-4" />
+                <span>Add Service</span>
+              </button>
+
+              {/* Decorative Service Card Illustration */}
+              <div className="hidden lg:flex items-center gap-3 shrink-0 pl-2 self-center">
                 <div className="flex flex-col items-center select-none pointer-events-none">
                   <span className="text-[10px] 2xl:text-[11px] font-medium italic text-pink-500 dark:text-pink-400 text-center leading-tight max-w-[85px]">
                     Turn your skills into opportunities
@@ -759,8 +942,8 @@ export default function CreatorServices() {
 
                 <div className="relative w-44 sm:w-48 bg-white dark:bg-surface rounded-2xl p-3 sm:p-3.5 shadow-md shadow-pink-500/10 border border-pink-200/80 dark:border-pink-900/50 rotate-[2.5deg] select-none pointer-events-none shrink-0 transition-transform hover:rotate-0 duration-300">
                   {/* Floating Instagram Badge */}
-                  <div className="absolute -top-3 -right-3 w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gradient-to-tr from-black-500 via-black-500 to-black-600 text-black flex items-center justify-center shadow-md bg-grey" >
-                    <InstagramCameraIcon className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-black" />
+                  <div className="absolute -top-3 -right-3 w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gradient-to-tr from-black-500 via-black-500 to-black-600 text-black flex items-center justify-center shadow-md bg-grey">
+                    <PlatformBadgeIcon platform="instagram" className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-black" />
                   </div>
 
                   {/* Thumbnail */}
@@ -781,7 +964,7 @@ export default function CreatorServices() {
                     <span className="text-xs sm:text-sm font-bold text-foreground font-sans">
                       ₹12,000
                     </span>
-                    <span className="inline-flex items-center gap-1 text-[9px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200/60 dark:border-emerald-900/40">
+                    <span className="inline-flex items-center gap-1 text-[9px] font-semibold text-emerald-600 dark:text-emerald-400 bg-transparent px-2 py-0.5 rounded-full border border-emerald-500/30 dark:border-emerald-500/30">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                       Active
                     </span>
@@ -915,253 +1098,221 @@ export default function CreatorServices() {
                 const isToggling = togglingStatusId === serviceId;
                 const validDeliverables = getDeliverablesList(service.deliverables);
 
+                const normPlatform = (service.platform || "").toLowerCase();
+
                 return (
                   <div
                     key={serviceId}
-                    className="bg-white dark:bg-surface border border-pink-100/90 dark:border-pink-900/40 hover:border-pink-200/90 dark:hover:border-pink-500/30 rounded-3xl p-5 sm:p-6 shadow-[0_2px_12px_rgba(255,45,108,0.04)] hover:shadow-md transition-all duration-200 flex flex-col justify-between group relative"
+                    className="bg-white dark:bg-surface border border-pink-100/90 dark:border-pink-900/40 hover:border-pink-200/90 dark:hover:border-pink-500/30 rounded-3xl overflow-hidden shadow-[0_2px_12px_rgba(255,45,108,0.04)] hover:shadow-md transition-all duration-200 flex flex-col justify-between group relative"
                   >
                     <div>
-                      {/* Top Badges: Platform (left) & Active Pill + 3-Dot Menu (right) */}
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-sans font-semibold tracking-wider uppercase text-black dark:text-white bg-pink-50/80 dark:bg-pink-950/40 border border-black/20 dark:border-white/20">
-                          <PlatformBadgeIcon
-                            platform={service.platform}
-                            className="w-3.5 h-3.5 text-black dark:text-white shrink-0"
-                          />
-                          <span>
-                            {service.platform ? getPlatformLabel(service.platform).toUpperCase() : "INSTAGRAM"}
+                      {/* Cover Image with Overlaid Badges */}
+                      <ServiceCardCover coverImage={service.coverImage} title={service.title}>
+                        {/* Top-Left Platform Badge */}
+                        <div className="absolute top-3.5 left-3.5 z-10 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/95 dark:bg-neutral-900/90 backdrop-blur-xs shadow-xs border border-white/20">
+                          <PlatformBadgeIcon platform={service.platform} className="w-3.5 h-3.5 shrink-0" />
+                          <span className="text-[11px] font-bold tracking-wider uppercase text-foreground">
+                            {getPlatformLabel(service.platform).toUpperCase()}
                           </span>
-                        </span>
+                        </div>
 
-                        <div className="flex items-center gap-2 relative">
+                        {/* Top-Right Active Status & 3-Dot Menu */}
+                        <div className="absolute top-3.5 right-3.5 z-10 flex items-center gap-1.5">
                           <button
                             type="button"
                             disabled={isToggling}
                             onClick={() => handleToggleActive(service)}
-                            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-sans font-medium border transition-colors cursor-pointer ${
-                              service.isActive
-                                ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400 border-emerald-200/60 dark:border-emerald-800/40 hover:bg-emerald-100/60"
-                                : "bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400 border-amber-200/60 dark:border-amber-800/40 hover:bg-amber-100/60"
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/95 dark:bg-neutral-900/90 backdrop-blur-xs shadow-xs border border-white/20 text-xs font-semibold cursor-pointer transition-all hover:scale-105 ${
+                              isToggling ? "opacity-60 cursor-not-allowed" : ""
                             }`}
                             title="Click to toggle active status"
                           >
                             <span
-                              className={`w-2 h-2 rounded-full ${
+                              className={`w-2 h-2 rounded-full shrink-0 ${
                                 service.isActive ? "bg-emerald-500" : "bg-amber-500"
                               }`}
                             />
-                            <span>{service.isActive ? "Active" : "Inactive"}</span>
+                            <span
+                              className={
+                                service.isActive
+                                  ? "text-emerald-600 dark:text-emerald-400 font-semibold text-xs"
+                                  : "text-amber-600 dark:text-amber-400 font-semibold text-xs"
+                              }
+                            >
+                              {service.isActive ? "Active" : "Inactive"}
+                            </span>
                           </button>
 
-                          <button
-                            type="button"
-                            aria-label="Service actions"
-                            aria-haspopup="true"
-                            aria-expanded={openMenuId === serviceId}
-                            onClick={() =>
-                              setOpenMenuId((prev) => (prev === serviceId ? null : serviceId))
-                            }
-                            className="w-8 h-8 rounded-xl border border-border-theme/70 bg-surface hover:bg-surface-muted text-text-secondary hover:text-foreground flex items-center justify-center transition-colors cursor-pointer"
-                          >
-                            <EllipsisVerticalIcon className="w-4 h-4" />
-                          </button>
+                          <div className="relative">
+                            <button
+                              type="button"
+                              aria-label="Service actions"
+                              aria-haspopup="true"
+                              aria-expanded={openMenuId === serviceId}
+                              onClick={() =>
+                                setOpenMenuId((prev) => (prev === serviceId ? null : serviceId))
+                              }
+                              className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/95 dark:bg-neutral-900/90 backdrop-blur-xs shadow-xs border border-white/20 text-text-secondary hover:text-foreground flex items-center justify-center transition-all hover:scale-105 cursor-pointer"
+                            >
+                              <EllipsisVerticalIcon className="w-3.5 h-3.5" />
+                            </button>
 
-                          {openMenuId === serviceId && (
-                            <>
-                              <div
-                                className="fixed inset-0 z-20"
-                                onClick={() => setOpenMenuId(null)}
-                              />
-                              <div className="absolute right-0 top-10 w-44 bg-surface border border-border-theme rounded-2xl shadow-lg p-1.5 z-30 font-sans text-xs space-y-0.5 animate-in fade-in slide-in-from-top-1 duration-150">
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setOpenMenuId(null);
-                                    handleOpenEditModal(service);
-                                  }}
-                                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors text-left cursor-pointer"
-                                >
-                                  <PencilIcon className="w-3.5 h-3.5" />
-                                  <span>Edit Service</span>
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setOpenMenuId(null);
-                                    handleToggleActive(service);
-                                  }}
-                                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors text-left cursor-pointer"
-                                >
-                                  {service.isActive ? (
-                                    <>
-                                      <LockClosedIcon className="w-3.5 h-3.5" />
-                                      <span>Mark as Inactive</span>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <EyeIcon className="w-3.5 h-3.5" />
-                                      <span>Mark as Active</span>
-                                    </>
-                                  )}
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setOpenMenuId(null);
-                                    setDeleteConfirmService(service);
-                                    setDeleteError(null);
-                                  }}
-                                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-rose-500 hover:bg-rose-500/10 transition-colors text-left cursor-pointer"
-                                >
-                                  <TrashIcon className="w-3.5 h-3.5" />
-                                  <span>Delete Service</span>
-                                </button>
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Title & Category */}
-                      <div>
-                        <h3 className="font-sans font-semibold text-lg text-foreground line-clamp-1 group-hover:text-secondary transition-colors tracking-tight">
-                          {service.title}
-                        </h3>
-                        <p className="text-xs font-sans font-medium text-text-secondary">
-                          {service.category || "Social Media Campaign"}
-                        </p>
-                        <p className="text-xs font-sans text-text-secondary/80 line-clamp-2 leading-relaxed pt-0.5">
-                          {service.description || "No description provided."}
-                        </p>
-                      </div>
-
-                      {/* Description */}
-                      <p className="text-xs text-text-secondary line-clamp-2 leading-relaxed">
-                        {service.description || "No description provided."}
-                      </p>
-
-                      {/* Pricing Display Banner */}
-                      <div className="p-3 rounded-xl bg-surface-muted/60 border border-border-theme flex items-baseline justify-between">
-                        <span className="text-[10px] font-semibold text-text-secondary uppercase tracking-wider">
-                          Pricing
-                        </span>
-                        <span className="font-sans font-semibold text-base text-foreground">
-                          {formatPrice(service)}
-                        </span>
-                      </div>
-
-                      {/* Two Aligned Info Panels: Delivery Time & Included Revisions */}
-                      <div className="grid grid-cols-2 gap-3 mt-3">
-                        <div className="p-3 rounded-2xl bg-surface-muted/40 dark:bg-surface-muted/20 border border-border-theme/60 flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-pink-100/80 dark:bg-pink-900/40 text-black dark:text-white flex items-center justify-center shrink-0">
-                            <ClockIcon className="w-4 h-4" />
-                          </div>
-                          <div className="min-w-0">
-                            <span className="block font-sans font-semibold text-xs sm:text-sm text-foreground truncate">
-                              {service.deliveryTime || 7} Days
-                            </span>
-                            <span className="block text-[11px] font-sans text-text-secondary mt-0.5 truncate">
-                              Delivery Time
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="p-3 rounded-2xl bg-surface-muted/40 dark:bg-surface-muted/20 border border-border-theme/60 flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-pink-100/80 dark:bg-pink-900/40 text-black dark:text-white flex items-center justify-center shrink-0">
-                            <RefreshIcon className="w-4 h-4" />
-                          </div>
-                          <div className="min-w-0">
-                            <span className="block font-sans font-semibold text-xs sm:text-sm text-foreground truncate">
-                              {service.revisions === 0
-                                ? "No Revisions"
-                                : `${service.revisions} Revision${service.revisions > 1 ? "s" : ""}`}
-                            </span>
-                            <span className="block text-[11px] font-sans text-text-secondary mt-0.5 truncate">
-                              Included Revisions
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Divider followed by Deliverables Section */}
-                      <div className="border-t border-border-theme/60 my-4" />
-
-                      <div>
-                        <div className="flex items-center justify-between gap-2 mb-2.5">
-                          <span className="font-sans font-semibold text-xs sm:text-sm text-foreground">
-                            Deliverables ({validDeliverables.length})
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => handleOpenEditModal(service)}
-                            className="inline-flex items-center gap-1 text-xs font-sans font-semibold text-black dark:text-white hover:underline cursor-pointer"
-                          >
-                            <span>View Details</span>
-                            <ArrowRightIcon className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-
-                        {validDeliverables.length === 0 ? (
-                          <p className="text-xs text-text-secondary font-sans italic py-1">
-                            No specific deliverables listed.
-                          </p>
-                        ) : (
-                          <div className="space-y-1.5">
-                            {validDeliverables.slice(0, 3).map((itemText, idx) => (
-                              <div
-                                key={idx}
-                                className="bg-surface-muted/40 dark:bg-surface-muted/20 border border-border-theme/60 rounded-xl p-2.5 px-3 flex items-center justify-between gap-2"
-                              >
-                                <div className="flex items-center gap-2.5 min-w-0">
-                                  <div className="w-5 h-5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center shrink-0">
-                                    <CheckIcon className="text-emerald-500 w-3 h-3" />
-                                  </div>
-                                  <span className="font-sans font-medium text-xs text-foreground truncate">
-                                    {itemText}
-                                  </span>
+                            {openMenuId === serviceId && (
+                              <>
+                                <div
+                                  className="fixed inset-0 z-20"
+                                  onClick={() => setOpenMenuId(null)}
+                                />
+                                <div className="absolute right-0 top-9 w-44 bg-surface border border-border-theme rounded-2xl shadow-xl p-1.5 z-30 font-sans text-xs space-y-0.5 animate-in fade-in slide-in-from-top-1 duration-150">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setOpenMenuId(null);
+                                      handleOpenEditModal(service);
+                                    }}
+                                    className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors text-left cursor-pointer"
+                                  >
+                                    <PencilIcon className="w-3.5 h-3.5" />
+                                    <span>Edit Service</span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setOpenMenuId(null);
+                                      handleToggleActive(service);
+                                    }}
+                                    className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors text-left cursor-pointer"
+                                  >
+                                    {service.isActive ? (
+                                      <>
+                                        <LockClosedIcon className="w-3.5 h-3.5" />
+                                        <span>Mark as Inactive</span>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <EyeIcon className="w-3.5 h-3.5" />
+                                        <span>Mark as Active</span>
+                                      </>
+                                    )}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setOpenMenuId(null);
+                                      setDeleteConfirmService(service);
+                                      setDeleteError(null);
+                                    }}
+                                    className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-rose-500 hover:bg-rose-500/10 transition-colors text-left cursor-pointer"
+                                  >
+                                    <TrashIcon className="w-3.5 h-3.5" />
+                                    <span>Delete Service</span>
+                                  </button>
                                 </div>
-                                <div className="w-6 h-6 rounded-md bg-surface border border-border-theme/70 flex items-center justify-center text-text-secondary shrink-0">
-                                  <PlaySquareIcon className="w-3.5 h-3.5" />
-                                </div>
-                              </div>
-                            ))}
-                            {validDeliverables.length > 3 && (
-                              <p className="text-[11px] font-sans font-medium text-text-secondary pt-0.5">
-                                +{validDeliverables.length - 3} more deliverable{validDeliverables.length - 3 > 1 ? "s" : ""}
-                              </p>
+                              </>
                             )}
                           </div>
-                        )}
-                      </div>
-                    </div>
+                        </div>
+                      </ServiceCardCover>
 
-                    {/* Bottom Divider, Service ID & Edit / Delete Icon Buttons */}
-                    <div className="pt-3.5 mt-4 border-t border-border-theme/60 flex items-center justify-between">
-                      <span className="text-xs font-sans font-medium text-text-secondary">
-                        ID: {serviceId ? serviceId.slice(-6) : ""}
-                      </span>
+                      {/* Card Content */}
+                      <div className="p-5 sm:p-5 flex-1 flex flex-col justify-between gap-3.5">
+                        {/* Title, Category & Description */}
+                        <div className="space-y-1">
+                          <h3 className="font-sans font-bold text-base sm:text-lg text-foreground line-clamp-1 tracking-tight">
+                            {service.title}
+                          </h3>
+                          <p className="text-xs font-normal text-text-secondary line-clamp-1">
+                            {service.category || "Social Media Campaign"}
+                          </p>
+                          <p className="text-xs text-text-secondary leading-relaxed line-clamp-2 pt-1 min-h-[2.25rem]">
+                            {service.description || "No description provided."}
+                          </p>
+                        </div>
 
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          title="Edit Service"
-                          onClick={() => handleOpenEditModal(service)}
-                          className="w-9 h-9 rounded-xl border border-border-theme/70 bg-surface hover:bg-surface-muted text-black dark:text-white flex items-center justify-center transition-colors cursor-pointer"
-                        >
-                          <PencilIcon className="w-4 h-4" />
-                        </button>
+                        {/* Highlighted Pricing Row */}
+                        <div className="bg-pink-50/70 dark:bg-pink-950/20 border border-pink-100/60 dark:border-pink-900/30 rounded-xl px-4 py-2.5 flex items-center justify-between">
+                          <span className="text-xs font-medium text-text-secondary">
+                            {service.pricingType === "custom" ? "Custom Quote" : "Starting at"}
+                          </span>
+                          <span className="font-bold text-base sm:text-lg text-foreground tracking-tight">
+                            {formatPrice(service)}
+                          </span>
+                        </div>
 
-                        <button
-                          type="button"
-                          title="Delete Service"
-                          onClick={() => {
-                            setDeleteConfirmService(service);
-                            setDeleteError(null);
-                          }}
-                          className="w-9 h-9 rounded-xl border border-rose-200/80 dark:border-rose-900/40 bg-rose-50/60 dark:bg-rose-950/30 text-black dark:text-white hover:bg-rose-100/80 dark:hover:bg-rose-900/50 transition-colors cursor-pointer flex items-center justify-center"
-                        >
-                          <TrashIcon className="w-4 h-4" />
-                        </button>
+                        {/* Delivery Time & Included Revisions Row */}
+                        <div className="grid grid-cols-2 gap-3 py-1 items-center">
+                          <div className="flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-full border border-border-theme bg-surface-muted/30 text-foreground flex items-center justify-center shrink-0">
+                              <ClockIcon className="w-3.5 h-3.5 text-foreground" />
+                            </div>
+                            <div className="min-w-0">
+                              <span className="block font-bold text-xs text-foreground truncate leading-none">
+                                {service.deliveryTime || 7} Days
+                              </span>
+                              <span className="block text-[10px] text-text-secondary leading-none mt-1 truncate">
+                                Delivery Time
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-full border border-border-theme bg-surface-muted/30 text-foreground flex items-center justify-center shrink-0">
+                              <RefreshIcon className="w-3.5 h-3.5 text-foreground" />
+                            </div>
+                            <div className="min-w-0">
+                              <span className="block font-bold text-xs text-foreground truncate leading-none">
+                                {service.revisions === 0
+                                  ? "No Revisions"
+                                  : `${service.revisions || 1} Revision${(service.revisions || 1) > 1 ? "s" : ""}`}
+                              </span>
+                              <span className="block text-[10px] text-text-secondary leading-none mt-1 truncate">
+                                Included
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Deliverables Section & Action Buttons */}
+                        <div className="flex items-center justify-between gap-2.5 pt-1">
+                          <div className="flex-1 min-w-0 flex items-center gap-2.5 px-3 py-2 rounded-2xl bg-surface-muted/50 dark:bg-surface-muted/20 border border-border-theme/60">
+                            <div className="w-7 h-7 rounded-xl bg-surface border border-border-theme/70 flex items-center justify-center text-foreground shrink-0">
+                              {normPlatform.includes("youtube") || normPlatform.includes("instagram") || normPlatform.includes("tiktok") ? (
+                                <PlaySquareIcon className="w-3.5 h-3.5 text-foreground" />
+                              ) : (
+                                <LayersIcon className="w-3.5 h-3.5 text-foreground" />
+                              )}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <span className="block font-bold text-[11px] text-foreground leading-none truncate">
+                                Deliverables ({validDeliverables.length})
+                              </span>
+                              <span className="block text-[10px] text-text-secondary leading-none mt-1 truncate">
+                                {validDeliverables.length > 0 ? validDeliverables.join(", ") : "No deliverables listed"}
+                              </span>
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            title="Edit Service"
+                            onClick={() => handleOpenEditModal(service)}
+                            className="w-10 h-10 rounded-2xl bg-surface hover:bg-surface-muted border border-border-theme text-foreground flex items-center justify-center transition-all cursor-pointer shadow-2xs hover:scale-105 shrink-0"
+                          >
+                            <PencilIcon className="w-4 h-4" />
+                          </button>
+
+                          <button
+                            type="button"
+                            title="Delete Service"
+                            onClick={() => {
+                              setDeleteConfirmService(service);
+                              setDeleteError(null);
+                            }}
+                            className="w-10 h-10 rounded-2xl bg-pink-50 hover:bg-pink-100 dark:bg-pink-950/40 dark:hover:bg-pink-900/50 border border-pink-200/80 dark:border-pink-900/60 text-[#FF4F87] dark:text-pink-400 flex items-center justify-center transition-all cursor-pointer shadow-2xs hover:scale-105 shrink-0"
+                          >
+                            <TrashIcon className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1234,7 +1385,7 @@ export default function CreatorServices() {
             {/* Modal Header */}
             <div className="p-5 sm:p-6 border-b border-border-theme flex items-center justify-between">
               <div>
-                <h2 className="font-sans font-semibold text-xl text-foreground tracking-tight">
+                <h2 className="font-serif font-semibold text-xl text-foreground tracking-tight">
                   {editingServiceId ? "Edit Service" : "Add Service"}
                 </h2>
                 <p className="text-xs text-text-secondary mt-0.5">
@@ -1245,9 +1396,9 @@ export default function CreatorServices() {
               </div>
               <button
                 type="button"
-                disabled={submitting}
+                disabled={submitting || isUploadingCover}
                 onClick={handleCloseModal}
-                className="p-1.5 rounded-lg text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors cursor-pointer disabled:opacity-50"
               >
                 ✕
               </button>
@@ -1261,6 +1412,198 @@ export default function CreatorServices() {
                     <span>{formError}</span>
                   </div>
                 )}
+
+                {/* Cover Image Section */}
+                <div className="space-y-2.5">
+                  <div>
+                    <label className="block font-semibold text-foreground text-xs sm:text-sm">
+                      Cover Image
+                    </label>
+                    <p className="text-[11px] text-text-secondary mt-0.5">
+                      Upload a high-quality image for your service package (JPG, PNG, WebP, max 5MB)
+                    </p>
+                  </div>
+
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={handleCoverFileSelect}
+                    className="hidden"
+                  />
+
+                  {formData.coverImage ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4 items-stretch">
+                      {/* Left: Responsive Image Preview */}
+                      <div className="relative rounded-2xl overflow-hidden border border-border-theme bg-surface-muted h-44 sm:h-48 md:h-52 group">
+                        {previewErrorUrl === formData.coverImage ? (
+                          <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center bg-surface-muted text-text-secondary">
+                            <div className="w-10 h-10 rounded-2xl bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-2">
+                              <PhotoIcon className="w-5 h-5" />
+                            </div>
+                            <span className="text-xs font-semibold text-foreground">
+                              Failed to load preview
+                            </span>
+                            <span className="text-[11px] text-text-secondary mt-0.5 max-w-[200px] leading-tight">
+                              Please check the image URL or upload a new file.
+                            </span>
+                          </div>
+                        ) : (
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img
+                            key={formData.coverImage}
+                            src={formData.coverImage}
+                            alt="Service cover preview"
+                            className="w-full h-full object-cover"
+                            onError={() => setPreviewErrorUrl(formData.coverImage)}
+                          />
+                        )}
+                        {/* Floating Top-Right Remove Button */}
+                        <button
+                          type="button"
+                          title="Remove image"
+                          disabled={isUploadingCover}
+                          onClick={handleRemoveCover}
+                          className="absolute top-2.5 right-2.5 p-2 rounded-xl bg-black/60 hover:bg-black/85 text-white transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+                        >
+                          <TrashIcon className="w-3.5 h-3.5" />
+                        </button>
+                        {isUploadingCover && (
+                          <div className="absolute inset-0 bg-black/60 backdrop-blur-2xs flex flex-col items-center justify-center gap-2 text-white p-3 text-center">
+                            <RefreshIcon className="w-5 h-5 animate-spin" />
+                            <span className="text-xs font-medium">Uploading cover image...</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Right: Upload Box & Action Buttons */}
+                      <div className="flex flex-col justify-between gap-2.5">
+                        <div
+                          onDragOver={handleCoverDragOver}
+                          onDragLeave={handleCoverDragLeave}
+                          onDrop={handleCoverDrop}
+                          onClick={() => {
+                            if (!isUploadingCover) fileInputRef.current?.click();
+                          }}
+                          className={`border-2 border-dashed rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center text-center cursor-pointer transition-all flex-1 min-h-[110px] ${
+                            isDraggingCover
+                              ? "border-[#FF4F87] bg-pink-50/60 dark:bg-pink-950/30 scale-[0.99]"
+                              : "border-pink-200 dark:border-pink-900/50 hover:border-[#FF4F87]/60 bg-pink-50/20 hover:bg-pink-50/40 dark:bg-pink-950/10 dark:hover:bg-pink-950/20"
+                          } ${isUploadingCover ? "pointer-events-none opacity-60" : ""}`}
+                        >
+                          <div className="w-9 h-9 rounded-xl bg-pink-50 dark:bg-pink-950/40 flex items-center justify-center text-[#FF4F87] mb-2">
+                            <ArrowUpTrayIcon className="w-5 h-5" />
+                          </div>
+                          <p className="font-bold text-xs text-foreground">Click to upload</p>
+                          <p className="text-[11px] text-text-secondary mt-0.5">or drag and drop</p>
+                          <p className="text-[10px] text-text-secondary/80 mt-1">
+                            JPG, PNG, WebP (Max 5MB)
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            disabled={isUploadingCover}
+                            onClick={() => fileInputRef.current?.click()}
+                            className="px-3 py-2 rounded-xl bg-surface hover:bg-surface-muted border border-border-theme text-foreground font-semibold text-xs flex items-center justify-center gap-1.5 flex-1 transition-colors cursor-pointer disabled:opacity-50"
+                          >
+                            <PhotoIcon className="w-3.5 h-3.5 text-text-secondary" />
+                            <span>Change Image</span>
+                          </button>
+                          <button
+                            type="button"
+                            disabled={isUploadingCover}
+                            onClick={handleRemoveCover}
+                            className="px-3 py-2 rounded-xl bg-pink-50 hover:bg-pink-100 dark:bg-pink-950/40 dark:hover:bg-pink-900/50 border border-pink-200/80 dark:border-pink-900/60 text-[#FF4F87] dark:text-pink-400 font-semibold text-xs flex items-center justify-center gap-1.5 flex-1 transition-colors cursor-pointer disabled:opacity-50"
+                          >
+                            <TrashIcon className="w-3.5 h-3.5" />
+                            <span>Remove Image</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    /* Empty State: Full-Width Upload Dropzone */
+                    <div
+                      onDragOver={handleCoverDragOver}
+                      onDragLeave={handleCoverDragLeave}
+                      onDrop={handleCoverDrop}
+                      onClick={() => {
+                        if (!isUploadingCover) fileInputRef.current?.click();
+                      }}
+                      className={`border-2 border-dashed rounded-2xl p-7 sm:p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all ${
+                        isDraggingCover
+                          ? "border-[#FF4F87] bg-pink-50/60 dark:bg-pink-950/30 scale-[0.99]"
+                          : "border-pink-200 dark:border-pink-900/50 hover:border-[#FF4F87]/60 bg-pink-50/20 hover:bg-pink-50/40 dark:bg-pink-950/10 dark:hover:bg-pink-950/20"
+                      } ${isUploadingCover ? "pointer-events-none opacity-60" : ""}`}
+                    >
+                      {isUploadingCover ? (
+                        <div className="flex flex-col items-center justify-center gap-2 text-foreground">
+                          <RefreshIcon className="w-7 h-7 text-[#FF4F87] animate-spin mb-1" />
+                          <span className="text-xs font-semibold">Uploading cover image...</span>
+                          <span className="text-[11px] text-text-secondary">Please wait</span>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="w-11 h-11 rounded-2xl bg-pink-50 dark:bg-pink-950/40 flex items-center justify-center text-[#FF4F87] mb-2.5">
+                            <ArrowUpTrayIcon className="w-6 h-6" />
+                          </div>
+                          <p className="font-bold text-xs sm:text-sm text-foreground">
+                            Click to upload <span className="font-normal text-text-secondary text-xs">or drag and drop</span>
+                          </p>
+                          <p className="text-[11px] text-text-secondary mt-1">
+                            JPG, PNG, WebP (Max 5MB)
+                          </p>
+                        </>
+                      )}
+                    </div>
+                  )}
+
+                  {/* OR Divider */}
+                  <div className="relative my-2 sm:my-2.5 flex items-center justify-center">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-border-theme/70" />
+                    </div>
+                    <div className="relative bg-surface px-3">
+                      <span className="text-[10px] sm:text-[11px] font-semibold text-text-secondary tracking-wider uppercase">
+                        OR
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Manual Image URL Input */}
+                  <div>
+                    <label className="block font-semibold text-foreground mb-1.5 text-xs">
+                      Image URL
+                    </label>
+                    <div className="relative flex items-center">
+                      <LinkIcon className="w-3.5 h-3.5 text-text-secondary absolute left-3.5 pointer-events-none" />
+                      <input
+                        type="url"
+                        name="coverImage"
+                        disabled={isUploadingCover}
+                        value={formData.coverImage}
+                        onChange={(e) => {
+                          handleInputChange(e);
+                          setUploadError(null);
+                          setPreviewErrorUrl(null);
+                        }}
+                        placeholder="https://images.unsplash.com/photo-1539109126782-8b01035bbbb0"
+                        className="w-full pl-9 pr-3.5 py-2.5 text-xs rounded-xl bg-surface-muted/60 border border-border-theme text-foreground placeholder:text-text-secondary/50 focus:outline-none focus:border-secondary transition-colors disabled:opacity-50"
+                      />
+                    </div>
+                    <p className="text-[11px] text-text-secondary mt-1">
+                      Paste a valid image URL instead of uploading
+                    </p>
+                  </div>
+
+                  {uploadError && (
+                    <p className="text-xs text-red-500 font-medium">
+                      {uploadError}
+                    </p>
+                  )}
+                </div>
 
                 {/* Title */}
                 <div>
@@ -1499,15 +1842,15 @@ export default function CreatorServices() {
               <div className="p-4 sm:p-5 border-t border-border-theme bg-surface-muted/30 flex items-center justify-end gap-3">
                 <button
                   type="button"
-                  disabled={submitting}
+                  disabled={submitting || isUploadingCover}
                   onClick={handleCloseModal}
-                  className="px-4 py-2 rounded-xl text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors cursor-pointer disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  disabled={submitting}
+                  disabled={submitting || isUploadingCover}
                   className="px-5 py-2 rounded-xl bg-neutral-950 text-white font-semibold border border-neutral-900 shadow-xs hover:bg-neutral-900 hover:border-neutral-800 hover:shadow-xs hover:shadow-pink-500/10 active:scale-[0.99] disabled:opacity-50 transition-all duration-200 ease-out cursor-pointer dark:bg-neutral-100 dark:text-neutral-950 dark:border-neutral-200 dark:hover:bg-neutral-200"
                 >
                   {submitting ? "Saving..." : editingServiceId ? "Update Service" : "Create Service"}

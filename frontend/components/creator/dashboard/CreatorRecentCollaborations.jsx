@@ -1,5 +1,35 @@
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
+
+function WorkspaceCoverBadge({ title, coverImage, fallbackText }) {
+  const [hasError, setHasError] = useState(false);
+  const rawSrc = typeof coverImage === "string" ? coverImage.trim() : null;
+  const showImage = Boolean(rawSrc && !hasError);
+
+  if (showImage) {
+    return (
+      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-surface-muted/60 border border-border-theme overflow-hidden shrink-0 flex items-center justify-center mt-0.5 sm:mt-0">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          key={rawSrc}
+          src={rawSrc}
+          alt={title || "Campaign"}
+          className="w-full h-full object-cover"
+          onError={() => setHasError(true)}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-surface-muted text-foreground/90 border border-border-theme/70 flex items-center justify-center font-sans font-semibold text-xs sm:text-sm shrink-0 group-hover:border-pink-200/80 dark:group-hover:border-pink-500/30 transition-colors mt-0.5 sm:mt-0 select-none"
+      aria-hidden="true"
+    >
+      {fallbackText}
+    </div>
+  );
+}
 
 function formatCurrency(amount, currency = "INR") {
   const numericAmount =
@@ -44,29 +74,29 @@ function getWorkspaceStatusBadge(status) {
     case "submitted":
       return {
         label: "Under Review",
-        color: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20",
+        color: "bg-transparent text-purple-600 dark:text-purple-400 border border-purple-500/30",
       };
     case "in_progress":
       return {
         label: "In Production",
-        color: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
+        color: "bg-transparent text-blue-600 dark:text-blue-400 border border-blue-500/30",
       };
     case "revision_requested":
       return {
         label: "Revision Requested",
-        color: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20",
+        color: "bg-transparent text-rose-600 dark:text-rose-400 border border-rose-500/30",
       };
     case "completed":
       return {
         label: "Completed",
-        color: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
+        color: "bg-transparent text-emerald-600 dark:text-emerald-400 border border-emerald-500/30",
       };
     default:
       return {
         label: status
           ? String(status).replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (l) => l.toUpperCase())
           : "Active",
-        color: "bg-surface-muted text-text-secondary border-border-theme",
+        color: "bg-transparent text-text-secondary border border-border-theme",
       };
   }
 }
@@ -95,7 +125,7 @@ export default function CreatorRecentCollaborations({ collaborations = [] }) {
       {/* Header */}
       <div className="flex items-center justify-between gap-3 shrink-0">
         <div>
-          <h2 className="font-heading font-medium text-lg sm:text-xl text-foreground tracking-tight">
+          <h2 className="font-serif font-medium text-lg sm:text-xl text-foreground tracking-tight">
             Recent Collaborations
           </h2>
           <p className="text-xs text-text-secondary font-sans mt-0.5">
@@ -117,7 +147,7 @@ export default function CreatorRecentCollaborations({ collaborations = [] }) {
           <div className="w-8 h-8 rounded-full bg-secondary/10 text-secondary flex items-center justify-center">
             <WorkspaceFolderIcon className="w-3.5 h-3.5" />
           </div>
-          <h3 className="font-heading font-medium text-sm sm:text-base text-foreground">
+          <h3 className="font-serif font-medium text-sm sm:text-base text-foreground">
             No active collaborations
           </h3>
           <p className="text-xs text-text-secondary font-sans max-w-xs leading-relaxed">
@@ -143,8 +173,14 @@ export default function CreatorRecentCollaborations({ collaborations = [] }) {
             const workspaceHref = targetId ? `/creator/workspace/${targetId}` : "/creator/workspace";
             const price = collab.compensation ?? collab.agreedPrice;
 
-            // Restrained brand initial
+            // Restrained brand initial fallback
             const brandInitial = brandName.charAt(0).toUpperCase() || "B";
+            const coverImage =
+              collab.coverImage ||
+              collab.campaign?.coverImage ||
+              collab.thumbnail ||
+              collab.image ||
+              "";
 
             return (
               <Link
@@ -153,10 +189,12 @@ export default function CreatorRecentCollaborations({ collaborations = [] }) {
                 className="group flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 sm:p-4 rounded-2xl border border-border-theme/60 bg-surface hover:bg-surface-muted/40 hover:border-pink-200/80 dark:hover:border-pink-500/30 transition-all duration-200"
               >
                 <div className="flex items-start gap-3 min-w-0 flex-1">
-                  {/* Restrained Brand Initial Chip */}
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-surface-muted text-foreground/90 border border-border-theme/70 flex items-center justify-center font-heading font-medium text-xs sm:text-sm shrink-0 group-hover:border-pink-200/80 dark:group-hover:border-pink-500/30 transition-colors mt-0.5 sm:mt-0">
-                    {brandInitial}
-                  </div>
+                  {/* Campaign Cover Badge with graceful fallback */}
+                  <WorkspaceCoverBadge
+                    title={collab.title || collab.campaign?.title || serviceTitle}
+                    coverImage={coverImage}
+                    fallbackText={brandInitial}
+                  />
 
                   <div className="space-y-1 min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-1.5">
@@ -187,7 +225,7 @@ export default function CreatorRecentCollaborations({ collaborations = [] }) {
 
                 <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-border-theme/40 pl-0 sm:pl-3">
                   {price !== undefined && price !== null && (
-                    <span className="font-heading font-medium text-xs sm:text-sm text-foreground tabular-nums">
+                    <span className="font-sans font-semibold text-xs sm:text-sm text-foreground tabular-nums">
                       {formatCurrency(price, collab.currency || "INR")}
                     </span>
                   )}

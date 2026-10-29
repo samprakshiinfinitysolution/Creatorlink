@@ -8,7 +8,12 @@ import {
     refreshAccessToken,
     logoutUser,
     getCurrentUser,
-    changeUserPassword
+    changeUserPassword,
+    forgotPassword as forgotPasswordService,
+    resetPassword as resetPasswordService,
+    googleAuthUser,
+    verifyEmailOtp as verifyEmailOtpService,
+    resendVerificationOtp as resendVerificationOtpService
 } from "./auth.service.js";
 
 
@@ -23,17 +28,73 @@ const cookieOptions = {
 };
 
 
-// Handles user registration request.
+// Handles user registration request (initiates email OTP verification).
 
 const register = asyncHandler(async (req, res) => {
 
-    const user = await registerUser(req.body);
+    const result = await registerUser(req.body);
 
     return sendResponse(
         res,
-        201,
-        "User registered successfully",
-        user
+        200,
+        result.message,
+        {
+            email: result.email
+        }
+    );
+});
+
+
+// Handles email OTP verification and activates account.
+
+const verifyEmailOtp = asyncHandler(async (req, res) => {
+
+    const result = await verifyEmailOtpService(req.body);
+
+    res.cookie(
+        "accessToken",
+        result.accessToken,
+        {
+            ...cookieOptions,
+            maxAge: getMilliseconds(
+                process.env.ACCESS_TOKEN_EXPIRES_IN
+            )
+        }
+    );
+
+    res.cookie(
+        "refreshToken",
+        result.refreshToken,
+        {
+            ...cookieOptions,
+            maxAge: getMilliseconds(
+                process.env.REFRESH_TOKEN_EXPIRES_IN
+            )
+        }
+    );
+
+    return sendResponse(
+        res,
+        200,
+        result.message,
+        {
+            user: result.user
+        }
+    );
+});
+
+
+// Handles resending email verification OTP.
+
+const resendVerificationOtp = asyncHandler(async (req, res) => {
+
+    const result = await resendVerificationOtpService(req.body.email);
+
+    return sendResponse(
+        res,
+        200,
+        result.message,
+        null
     );
 });
 
@@ -188,11 +249,108 @@ const changePassword = asyncHandler(async (req, res) => {
 });
 
 
+// Handles forgot-password request.
+
+const forgotPassword = asyncHandler(async (req, res) => {
+
+    const result = await forgotPasswordService(req.body.email);
+
+    return sendResponse(
+        res,
+        200,
+        result.message,
+        null
+    );
+});
+
+
+// Handles reset-password request.
+
+const resetPassword = asyncHandler(async (req, res) => {
+
+    const token = req.body?.token || req.query?.token;
+    const { newPassword } = req.body;
+
+    const result = await resetPasswordService({
+        token,
+        newPassword
+    });
+
+    return sendResponse(
+        res,
+        200,
+        result.message,
+        null
+    );
+});
+
+
+// Handles Google authentication request (login or signup).
+
+const googleAuth = asyncHandler(async (req, res) => {
+
+    const authData = await googleAuthUser(req.body);
+
+    res.cookie(
+        "accessToken",
+        authData.accessToken,
+        {
+            ...cookieOptions,
+            maxAge: getMilliseconds(
+                process.env.ACCESS_TOKEN_EXPIRES_IN
+            )
+        }
+    );
+
+    res.cookie(
+        "refreshToken",
+        authData.refreshToken,
+        {
+            ...cookieOptions,
+            maxAge: getMilliseconds(
+                process.env.REFRESH_TOKEN_EXPIRES_IN
+            )
+        }
+    );
+
+    return sendResponse(
+        res,
+        200,
+        "Google authentication successful",
+        {
+            user: authData.user
+        }
+    );
+});
+
+
+// Returns the public Google Client ID configuration for frontend clients.
+
+const getGoogleClientId = asyncHandler(async (req, res) => {
+
+    return sendResponse(
+        res,
+        200,
+        "Google Client ID fetched successfully",
+        {
+            clientId: process.env.GOOGLE_CLIENT_ID || null
+        }
+    );
+});
+
+
 export {
     register,
     login,
     refreshToken,
     logout,
     getMe,
-    changePassword
+    changePassword,
+    forgotPassword,
+    resetPassword,
+    googleAuth,
+    getGoogleClientId,
+    verifyEmailOtp,
+    resendVerificationOtp
 };
+

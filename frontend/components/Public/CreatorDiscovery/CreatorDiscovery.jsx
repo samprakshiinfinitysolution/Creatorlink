@@ -97,8 +97,8 @@ function FilterDropdown({
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         className={`
-          group flex w-full flex-col justify-center rounded-[18px] sm:rounded-[20px]
-          border bg-background/60 px-4 py-3 sm:py-3.5 text-left
+          group flex w-full flex-col justify-center rounded-[16px] min-[400px]:rounded-[18px] sm:rounded-[20px]
+          border bg-background/60 px-3.5 py-2.5 min-[400px]:px-4 min-[400px]:py-3 sm:py-3.5 text-left
           transition-all duration-200 outline-none
           hover:border-secondary/40 hover:bg-background
           dark:bg-[#161616]/70 dark:hover:bg-[#191919]
@@ -124,8 +124,8 @@ function FilterDropdown({
         <div
           role="listbox"
           className="
-            absolute left-0 top-[calc(100%+8px)] z-50 w-full min-w-[210px]
-            rounded-[20px] border border-border-theme bg-surface p-1.5
+            absolute left-0 top-[calc(100%+8px)] z-50 w-full min-w-full sm:min-w-[210px]
+            rounded-[18px] sm:rounded-[20px] border border-border-theme bg-surface p-1.5
             shadow-[0_18px_45px_rgba(0,0,0,0.12)] backdrop-blur-xl
             dark:bg-[#1c1c1c] dark:shadow-[0_18px_45px_rgba(0,0,0,0.6)]
             animate-in fade-in zoom-in-95 duration-150
@@ -205,7 +205,7 @@ export default function CreatorDiscovery() {
   return (
     <section
       id="creator-discovery"
-      className="hidden lg:block relative bg-background px-4 py-12 text-foreground sm:px-6 md:px-8 lg:px-10 lg:py-20"
+      className="relative bg-background px-3.5 py-8 min-[400px]:px-4 sm:px-6 md:px-8 lg:px-10 lg:py-20 text-foreground"
     >
       {/* ================= AMBIENT PINK GLOW ================= */}
       <div
@@ -222,40 +222,43 @@ export default function CreatorDiscovery() {
         ref={containerRef}
         className="
           relative mx-auto w-full max-w-[1360px]
-          rounded-[28px] border border-border-theme bg-surface
-          p-6 sm:p-8 lg:p-11
+          rounded-[22px] min-[400px]:rounded-[26px] sm:rounded-[28px]
+          border border-border-theme bg-surface
+          p-4 min-[400px]:p-5 sm:p-8 lg:p-11
           shadow-[0_20px_50px_rgba(0,0,0,0.03)]
           transition-colors duration-300
           dark:bg-[#1a1a1a] dark:shadow-[0_24px_60px_rgba(0,0,0,0.4)]
-          sm:rounded-[px]
         "
       >
         {/* ================= CARD HEADER ================= */}
-        <ScrollReveal direction="up" className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+        <ScrollReveal
+          direction="up"
+          className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end sm:gap-5"
+        >
           <div className="max-w-[760px]">
             <h2
               className="
-                text-[26px] leading-[1.08] tracking-[-0.035em] text-foreground
-                min-[400px]:text-[30px] sm:text-[36px] lg:text-[42px] xl:text-[46px]
+                text-[22px] leading-[1.12] tracking-[-0.035em] text-foreground
+                min-[360px]:text-[25px] min-[420px]:text-[30px] sm:text-[36px] lg:text-[42px] xl:text-[46px]
               "
               style={{ fontFamily: "var(--font-playfair), serif" }}
             >
               Find creators who fit your brand.
             </h2>
 
-            <p className="mt-2.5 text-[14px] leading-relaxed text-text-secondary sm:text-[15px] lg:text-[16px]">
+            <p className="mt-2 text-[13px] leading-relaxed text-text-secondary min-[400px]:text-[14px] sm:mt-2.5 sm:text-[15px] lg:text-[16px]">
               Filter instantly across 12,000+ vetted tastemakers with audited engagement.
             </p>
           </div>
 
           {/* ACTIVE STATUS PILL */}
-          <div className="shrink-0 self-start sm:self-end">
+          <div className="shrink-0 self-start sm:self-end mt-1 sm:mt-0">
             <div
               className="
                 inline-flex items-center gap-2 rounded-full
-                border border-border-theme bg-background/80 px-3.5 py-1.5
-                text-[11px] font-medium tracking-[0.08em] text-text-secondary
-                backdrop-blur-sm dark:border-white/10 dark:bg-surface/90
+                border border-border-theme bg-background/80 px-3 py-1.5 min-[400px]:px-3.5
+                text-[10.5px] font-medium tracking-[0.08em] text-text-secondary
+                backdrop-blur-sm dark:border-white/10 dark:bg-surface/90 sm:text-[11px]
               "
             >
               <span className="relative flex h-2 w-2">
@@ -270,7 +273,7 @@ export default function CreatorDiscovery() {
         </ScrollReveal>
 
         {/* ================= THIN DIVIDER ================= */}
-        <div className="my-6 h-px w-full bg-border-theme sm:my-8" />
+        <div className="my-5 h-px w-full bg-border-theme sm:my-7 lg:my-8" />
 
         {/* ================= 4 FILTERS + EXPLORE CTA ================= */}
         <ScrollReveal
@@ -278,7 +281,7 @@ export default function CreatorDiscovery() {
           delay={100}
           className="
             grid grid-cols-1 gap-2.5
-            sm:grid-cols-2
+            sm:grid-cols-2 sm:gap-3
             lg:grid-cols-[1fr_1fr_1fr_1fr_auto]
             lg:items-stretch lg:gap-3
           "
@@ -343,12 +346,13 @@ export default function CreatorDiscovery() {
           <button
             type="button"
             className="
-              group flex h-[58px] min-h-[58px] w-full items-center justify-center gap-2.5
-              rounded-[18px] bg-primary px-6 text-[14px] font-semibold text-white
+              group flex h-[52px] min-h-[52px] w-full items-center justify-center gap-2.5
+              rounded-[16px] min-[400px]:rounded-[18px] bg-primary px-6 text-[14px] font-semibold text-white
               shadow-sm transition-all duration-200
               hover:scale-[1.02] hover:bg-theme-hover
               dark:bg-primary dark:text-black dark:hover:bg-theme-hover
-              sm:rounded-[20px] lg:h-auto lg:w-auto lg:px-7 lg:text-[15px]
+              sm:col-span-2 sm:h-[58px] sm:min-h-[58px] sm:rounded-[20px]
+              lg:col-span-1 lg:h-auto lg:w-auto lg:px-7 lg:text-[15px]
             "
           >
             <span className="whitespace-nowrap">Explore 12k+</span>
@@ -359,11 +363,12 @@ export default function CreatorDiscovery() {
         </ScrollReveal>
 
         {/* ================= CATEGORY CHIPS ================= */}
-        <ScrollReveal direction="up" delay={180} className="mt-7 sm:mt-8">
+        <ScrollReveal direction="up" delay={180} className="mt-6 sm:mt-8">
           <div
             className="
-              flex items-center gap-2 overflow-x-auto pb-1.5 pt-0.5
+              flex items-center gap-2 overflow-x-auto pb-2 pt-0.5
               [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden
+              touch-pan-x scroll-smooth
               sm:flex-wrap sm:gap-2.5
             "
           >
@@ -375,8 +380,8 @@ export default function CreatorDiscovery() {
                   type="button"
                   onClick={() => setActiveCategory(cat.name)}
                   className={`
-                    inline-flex shrink-0 items-center rounded-full px-4 py-2 sm:py-2.5
-                    text-[12px] sm:text-[13px] transition-all duration-200
+                    inline-flex shrink-0 items-center rounded-full px-3 py-1.5 min-[400px]:px-3.5 min-[400px]:py-2 sm:px-4 sm:py-2.5
+                    text-[11.5px] min-[400px]:text-[12px] sm:text-[13px] transition-all duration-200
                     ${isActive
                       ? "bg-primary font-semibold text-white shadow-[0_4px_16px_rgba(0,0,0,0.12)] dark:bg-primary dark:text-black"
                       : "border border-border-theme bg-background/50 font-medium text-text-secondary hover:border-secondary/40 hover:text-primary hover:shadow-[0_2px_12px_rgba(255,79,135,0.08)] dark:bg-[#161616]/60 dark:hover:text-white"
@@ -386,7 +391,7 @@ export default function CreatorDiscovery() {
                   <span className="whitespace-nowrap">{cat.name}</span>
                   <span
                     className={`
-                      ml-2 rounded-full px-2 py-0.5 text-[10px] sm:text-[11px] font-bold
+                      ml-1.5 min-[400px]:ml-2 rounded-full px-1.5 min-[400px]:px-2 py-0.5 text-[9.5px] min-[400px]:text-[10px] sm:text-[11px] font-bold
                       ${isActive
                         ? "bg-white/20 text-white dark:bg-black/15 dark:text-black"
                         : "bg-black/[0.04] text-text-secondary dark:bg-white/[0.08] dark:text-[#b0b0b0]"

@@ -1,11 +1,12 @@
-﻿"use client";
+"use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
-import store from "@/redux/store";
-import { register } from "@/redux/auth/auth_slice";
+import { register, loginWithGoogle, verifyOtp } from "@/redux/auth/auth_slice";
+import { getGoogleClientId, resendVerificationOtp } from "@/redux/auth/auth_api";
+import { requestGoogleAuthCode } from "@/lib/googleAuth";
 
 // =========================================================
 // SVG ICONS
@@ -82,23 +83,81 @@ function AppleIcon({ className = "w-5 h-5" }) {
 // =========================================================
 export default function SignupForm() {
   const router = useRouter();
+  const dispatch = useDispatch();
 
-  let reduxDispatch;
-  try {
-    reduxDispatch = useDispatch();
-  } catch (e) {
-    reduxDispatch = null;
-  }
-  const dispatch = reduxDispatch || store.dispatch;
-
+  const [step, setStep] = useState("form"); // "form" | "otp"
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("creator");
 
+  const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+
   const [errorMsg, setErrorMsg] = useState(null);
   const [successMsg, setSuccessMsg] = useState(null);
+
+  // Countdown timer for OTP resend cooldown
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setInterval(() => {
+      setResendCooldown((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
+
+  const handleGoogleSignup = async () => {
+    if (isLoading || isGoogleLoading) return;
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    setIsGoogleLoading(true);
+
+    try {
+      let clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+      if (!clientId) {
+        const config = await getGoogleClientId();
+        clientId = config?.data?.clientId;
+      }
+
+      if (!clientId) {
+        setErrorMsg("Google Client ID is not configured. Please contact support.");
+        setIsGoogleLoading(false);
+        return;
+      }
+
+      const code = await requestGoogleAuthCode(clientId);
+      const resultAction = await dispatch(loginWithGoogle({ code, role }));
+
+      if (loginWithGoogle.fulfilled.match(resultAction)) {
+        const user = resultAction.payload?.data?.user;
+        const userRole = user?.role;
+
+        if (userRole === "creator") {
+          router.push("/creator/dashboard");
+        } else if (userRole === "brand") {
+          router.push("/brand/dashboard");
+        } else if (userRole === "admin") {
+          router.push("/admin/dashboard");
+        } else {
+          router.push("/login");
+        }
+      } else {
+        const message =
+          resultAction.payload ||
+          resultAction.error?.message ||
+          "Google sign-up failed. Please try again.";
+        setErrorMsg(message);
+      }
+    } catch (err) {
+      setErrorMsg(err.message || "Google sign-up was interrupted. Please try again.");
+    } finally {
+      setIsGoogleLoading(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -107,7 +166,10 @@ export default function SignupForm() {
     setErrorMsg(null);
     setSuccessMsg(null);
 
-    if (!name.trim() || !email.trim() || !password) {
+    const cleanName = name.trim();
+    const cleanEmail = email.trim();
+
+    if (!cleanName || !cleanEmail || !password) {
       setErrorMsg("All fields are required");
       return;
     }
@@ -121,8 +183,8 @@ export default function SignupForm() {
 
     try {
       const userData = {
-        name: name.trim(),
-        email: email.trim(),
+        name: cleanName,
+        email: cleanEmail,
         password,
         role
       };
@@ -130,10 +192,15 @@ export default function SignupForm() {
       const resultAction = await dispatch(register(userData));
 
       if (register.fulfilled.match(resultAction)) {
-        setSuccessMsg("Account registered successfully! Redirecting to login...");
-        setTimeout(() => {
-          router.push("/login");
-        }, 1500);
+        // Clear sensitive password from component state
+        setPassword("");
+        setOtp("");
+        setStep("otp");
+        setResendCooldown(60);
+        setSuccessMsg(
+          resultAction.payload?.message ||
+          `Verification code sent to ${cleanEmail}. Please enter the 6-digit code.`
+        );
       } else {
         const message =
           resultAction.payload ||
@@ -145,6 +212,83 @@ export default function SignupForm() {
       setErrorMsg("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault();
+    if (isVerifying) return;
+
+    setErrorMsg(null);
+    setSuccessMsg(null);
+
+    const cleanOtp = otp.trim();
+    if (!cleanOtp || cleanOtp.length !== 6) {
+      setErrorMsg("Please enter a valid 6-digit verification code");
+      return;
+    }
+
+    setIsVerifying(true);
+
+    try {
+      const resultAction = await dispatch(
+        verifyOtp({
+          email: email.trim(),
+          otp: cleanOtp
+        })
+      );
+
+      if (verifyOtp.fulfilled.match(resultAction)) {
+        setSuccessMsg("Email verified successfully! Welcome to CreatorLink.");
+        const user = resultAction.payload?.data?.user;
+        const userRole = user?.role || role;
+
+        setTimeout(() => {
+          if (userRole === "creator") {
+            router.push("/creator/dashboard");
+          } else if (userRole === "brand") {
+            router.push("/brand/dashboard");
+          } else if (userRole === "admin") {
+            router.push("/admin/dashboard");
+          } else {
+            router.push("/login");
+          }
+        }, 1200);
+      } else {
+        const message =
+          resultAction.payload ||
+          resultAction.error?.message ||
+          "Verification failed. Please check the code and try again.";
+        setErrorMsg(message);
+      }
+    } catch (err) {
+      setErrorMsg("An unexpected error occurred. Please try again.");
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    if (isResending || resendCooldown > 0) return;
+
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    setIsResending(true);
+
+    try {
+      const response = await resendVerificationOtp(email.trim());
+      setResendCooldown(60);
+      setSuccessMsg(
+        response?.message || "A new verification code has been sent to your email."
+      );
+    } catch (err) {
+      const message =
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to resend verification code. Please try again.";
+      setErrorMsg(message);
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -169,9 +313,32 @@ export default function SignupForm() {
       <div className="my-auto max-w-md w-full mx-auto lg:-translate-x-[72px]">
         <div className="bg-surface text-foreground rounded-2xl sm:rounded-3xl p-6 sm:p-10 border border-border-theme shadow-sm transition-colors duration-300">
           {/* Card Header */}
-          <h1 className="text-2xl sm:text-3xl font-serif font-medium tracking-tight text-foreground mb-6">
-            Join CreatorLink
-          </h1>
+          {step === "form" ? (
+            <h1 className="text-2xl sm:text-3xl font-serif font-medium tracking-tight text-foreground mb-6">
+              Join CreatorLink
+            </h1>
+          ) : (
+            <div className="mb-6">
+              <h1 className="text-2xl sm:text-3xl font-serif font-medium tracking-tight text-foreground mb-2">
+                Verify Your Email
+              </h1>
+              <p className="text-xs sm:text-sm text-text-secondary font-sans leading-relaxed">
+                We sent a 6-digit verification code to{" "}
+                <span className="font-semibold text-foreground">{email}</span>.{" "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStep("form");
+                    setErrorMsg(null);
+                    setSuccessMsg(null);
+                  }}
+                  className="text-secondary hover:underline cursor-pointer font-medium"
+                >
+                  Change
+                </button>
+              </p>
+            </div>
+          )}
 
           {/* Error & Success Feedback Alerts */}
           {errorMsg && (
@@ -186,8 +353,10 @@ export default function SignupForm() {
             </div>
           )}
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Step 1: Registration Form */}
+          {step === "form" && (
+            <>
+              <form onSubmit={handleSubmit} className="space-y-4">
             {/* Name Field */}
             <div className="space-y-2">
               <label
@@ -335,10 +504,24 @@ export default function SignupForm() {
             {/* Google Button */}
             <button
               type="button"
-              className="w-full inline-flex items-center justify-center gap-3 px-6 py-3 rounded-xl bg-background hover:bg-surface-muted border border-border-theme text-foreground font-sans font-semibold text-xs sm:text-sm transition-all duration-200 cursor-pointer"
+              onClick={handleGoogleSignup}
+              disabled={isLoading || isGoogleLoading}
+              className="w-full inline-flex items-center justify-center gap-3 px-6 py-3 rounded-xl bg-background hover:bg-surface-muted disabled:opacity-60 disabled:cursor-not-allowed border border-border-theme text-foreground font-sans font-semibold text-xs sm:text-sm transition-all duration-200 cursor-pointer"
             >
-              <GoogleIcon />
-              <span>Sign up with Google</span>
+              {isGoogleLoading ? (
+                <span className="inline-flex items-center gap-2">
+                  <svg className="animate-spin h-4 w-4 text-secondary" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  <span>Connecting to Google...</span>
+                </span>
+              ) : (
+                <>
+                  <GoogleIcon />
+                  <span>Sign up with Google</span>
+                </>
+              )}
             </button>
 
             {/* Apple Button */}
@@ -361,6 +544,101 @@ export default function SignupForm() {
               Log in here
             </Link>
           </div>
+            </>
+          )}
+
+          {/* =========================================================
+              STEP 2: EMAIL OTP VERIFICATION
+          ========================================================= */}
+          {step === "otp" && (
+            <div className="space-y-5">
+              <form onSubmit={handleVerifyOtp} className="space-y-4">
+                <div className="space-y-2">
+                  <label
+                    htmlFor="otp"
+                    className="text-xs font-semibold uppercase tracking-wider text-foreground block font-sans"
+                  >
+                    6-Digit Verification Code
+                  </label>
+
+                  <div className="relative flex items-center">
+                    <input
+                      id="otp"
+                      name="otp"
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      maxLength={6}
+                      autoComplete="one-time-code"
+                      autoFocus
+                      value={otp}
+                      onChange={(e) =>
+                        setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
+                      }
+                      placeholder="••••••"
+                      required
+                      className="w-full text-center text-2xl tracking-[0.45em] font-mono py-3.5 px-4 rounded-xl bg-background border border-border-theme text-foreground placeholder:text-text-secondary/30 focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all"
+                    />
+                  </div>
+                  <p className="text-[11px] text-text-secondary font-sans">
+                    The code is valid for 10 minutes. Check your spam folder if you do not see it in your inbox.
+                  </p>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isVerifying || otp.trim().length !== 6}
+                  className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-secondary hover:bg-secondary-dark disabled:opacity-60 disabled:cursor-not-allowed text-white font-sans font-semibold text-sm tracking-wide shadow-xs hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 cursor-pointer mt-2"
+                >
+                  {isVerifying ? (
+                    <span className="inline-flex items-center gap-2">
+                      <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                      <span>Verifying...</span>
+                    </span>
+                  ) : (
+                    <span>Verify & Complete Registration</span>
+                  )}
+                </button>
+              </form>
+
+              {/* Resend Section */}
+              <div className="pt-4 border-t border-border-theme flex flex-col sm:flex-row items-center justify-between text-xs text-text-secondary font-sans gap-2">
+                <span>Didn&apos;t receive the code?</span>
+                <button
+                  type="button"
+                  onClick={handleResendOtp}
+                  disabled={isResending || resendCooldown > 0}
+                  className="text-secondary font-semibold hover:underline disabled:opacity-50 disabled:no-underline disabled:cursor-not-allowed cursor-pointer transition-all"
+                >
+                  {isResending ? (
+                    "Sending..."
+                  ) : resendCooldown > 0 ? (
+                    `Resend code in ${resendCooldown}s`
+                  ) : (
+                    "Resend Code"
+                  )}
+                </button>
+              </div>
+
+              {/* Back to Form link */}
+              <div className="pt-2 text-center text-xs text-text-secondary font-sans">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStep("form");
+                    setErrorMsg(null);
+                    setSuccessMsg(null);
+                  }}
+                  className="text-secondary hover:underline cursor-pointer font-medium"
+                >
+                  ← Back to registration form
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

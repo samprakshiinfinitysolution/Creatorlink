@@ -73,11 +73,97 @@ const changePassword = async ({ currentPassword, newPassword, confirmPassword })
 };
 
 
+// Requests a password reset link for the given email.
+const forgotPassword = async (email) => {
+
+    const response = await axiosInstance.post(
+        "/auth/forgot-password",
+        { email }
+    );
+
+    return response.data;
+};
+
+
+// Resets user password using a valid reset token.
+const resetPassword = async ({ token, newPassword, confirmPassword }) => {
+
+    const response = await axiosInstance.post(
+        "/auth/reset-password",
+        {
+            token,
+            newPassword,
+            confirmPassword
+        }
+    );
+
+    return response.data;
+};
+
+
+// Authenticates user with verified Google credentials or authorization code.
+const googleAuth = async ({ idToken, credential, code, role }) => {
+
+    const response = await axiosInstance.post(
+        "/auth/google",
+        {
+            idToken,
+            credential,
+            code,
+            role
+        }
+    );
+
+    return response.data;
+};
+
+
+// Fetches the public Google Client ID configuration from the server.
+const getGoogleClientId = async () => {
+
+    const response = await axiosInstance.get(
+        "/auth/google/client-id"
+    );
+
+    return response.data;
+};
+
+
+// Verifies email OTP and activates user account.
+const verifyEmailOtp = async ({ email, otp }) => {
+
+    const response = await axiosInstance.post(
+        "/auth/verify-email-otp",
+        { email, otp }
+    );
+
+    return response.data;
+};
+
+
+// Resends a fresh email verification OTP.
+const resendVerificationOtp = async (email) => {
+
+    const response = await axiosInstance.post(
+        "/auth/resend-email-otp",
+        { email }
+    );
+
+    return response.data;
+};
+
+
 export {
     loginUser,
     registerUser,
     refreshAccessToken,
     logoutUser,
     getCurrentUser,
-    changePassword
+    changePassword,
+    forgotPassword,
+    resetPassword,
+    googleAuth,
+    getGoogleClientId,
+    verifyEmailOtp,
+    resendVerificationOtp
 };

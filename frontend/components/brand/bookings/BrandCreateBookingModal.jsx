@@ -120,8 +120,8 @@ export default function BrandCreateBookingModal({
   const eligibleCampaigns = useMemo(() => {
     return Array.isArray(campaigns)
       ? campaigns.filter(
-          (c) => c.status === "published" || c.status === "in_progress"
-        )
+        (c) => c.status === "published" || c.status === "in_progress"
+      )
       : [];
   }, [campaigns]);
 
@@ -193,7 +193,7 @@ export default function BrandCreateBookingModal({
     } else if (createBrandBooking.rejected.match(actionResult)) {
       setApiError(
         actionResult.payload ||
-          "Unable to submit booking proposal. Please check your campaign details and try again."
+        "Unable to submit booking proposal. Please check your campaign details and try again."
       );
     }
   };
@@ -443,7 +443,7 @@ export default function BrandCreateBookingModal({
                 <button
                   type="submit"
                   disabled={submitting || eligibleCampaigns.length === 0}
-                  className="px-5 py-2.5 rounded-xl bg-secondary text-surface font-semibold text-xs hover:bg-secondary/90 transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-5 py-2.5 rounded-xl bg-black text-surface font-semibold hover:text-white/80 transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {submitting ? (
                     <>

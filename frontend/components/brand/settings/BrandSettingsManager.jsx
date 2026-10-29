@@ -122,7 +122,7 @@ export default function BrandSettingsManager() {
               <section className="bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 shadow-xs space-y-5">
                 <div className="flex items-start justify-between gap-4 pb-4 border-b border-border-theme">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#fff0f4] dark:bg-[#2a171f] text-[#ff2d6c] flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-[#fff0f4] dark:bg-[#2a171f] text-black dark:text-white flex items-center justify-center shrink-0">
                       <ShieldLockIcon className="w-5 h-5" />
                     </div>
                     <div>

@@ -12,8 +12,10 @@ const SPOTLIGHT_CASES = [
     id: "seraphina-raw",
     creatorName: "Seraphina Raw",
     handle: "@seraphinaraw",
-    image:
+    avatar:
       "https://res.cloudinary.com/atr5osne/image/upload/v1792054698/creatorlink/public/avatars/gye9m9prpdv81gc9ipkp.webp",
+    image:
+      "https://res.cloudinary.com/atr5osne/image/upload/v1792054721/creatorlink/public/creators/lyhqi3si95n8so90e1gl.webp",
     desktopImage:
       "https://res.cloudinary.com/atr5osne/image/upload/v1792054721/creatorlink/public/creators/lyhqi3si95n8so90e1gl.webp",
     collaboratedWith: "Collaborated with Jacquemus",
@@ -28,8 +30,10 @@ const SPOTLIGHT_CASES = [
     id: "julian-sound",
     creatorName: "Julian Sound",
     handle: "@juliansound",
-    image:
+    avatar:
       "https://res.cloudinary.com/atr5osne/image/upload/v1792054706/creatorlink/public/avatars/qvmu4uqdqpexdchfnvys.webp",
+    image:
+      "https://res.cloudinary.com/atr5osne/image/upload/v1792056046/creatorlink/public/campaigns/iebvsjfwmravzz4u6jjc.webp",
     desktopImage:
       "https://res.cloudinary.com/atr5osne/image/upload/v1792056046/creatorlink/public/campaigns/iebvsjfwmravzz4u6jjc.webp",
     collaboratedWith: "Collaborated with B&O Audio",
@@ -44,8 +48,10 @@ const SPOTLIGHT_CASES = [
     id: "mara-hideaways",
     creatorName: "Mara Hideaways",
     handle: "@marahideaways",
-    image:
+    avatar:
       "https://res.cloudinary.com/atr5osne/image/upload/v1792054701/creatorlink/public/avatars/qooau1mzc4okikpsrqri.webp",
+    image:
+      "https://res.cloudinary.com/atr5osne/image/upload/v1792054758/creatorlink/public/editorial/avjxgors8karuxcb8p43.webp",
     desktopImage:
       "https://res.cloudinary.com/atr5osne/image/upload/v1792054758/creatorlink/public/editorial/avjxgors8karuxcb8p43.webp",
     collaboratedWith: "Collaborated with Aman Resorts",
@@ -107,15 +113,25 @@ export default function SpotlightCarousel() {
       </ScrollReveal>
 
       {/* =========================================================
-          MOBILE HEADER (< 768px) - UNCHANGED
+          MOBILE HEADER (< 768px)
       ========================================================= */}
-      <ScrollReveal direction="up" className="flex md:hidden flex-col mb-6">
-        <span className="text-[11px] font-bold tracking-[0.18em] uppercase text-secondary block mb-1">
-          HIGH-IMPACT CONVERSIONS
-        </span>
-        <h2 className="text-2xl font-bold font-serif tracking-tight text-foreground">
-          Creators Everyone Is Talking About
-        </h2>
+      <ScrollReveal direction="up" className="flex md:hidden flex-col min-[560px]:flex-row min-[560px]:items-end min-[560px]:justify-between gap-3.5 min-[400px]:gap-4 mb-6">
+        <div>
+          <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-secondary block mb-1.5">
+            SPOTLIGHT CAROUSEL
+          </span>
+          <h2 className="text-[22px] min-[360px]:text-[25px] min-[420px]:text-[28px] font-serif font-medium tracking-tight text-foreground leading-[1.18]">
+            Creators everyone is talking about
+          </h2>
+        </div>
+
+        <button
+          type="button"
+          className="group inline-flex items-center justify-between gap-3 h-[42px] min-[380px]:h-[46px] px-4.5 min-[380px]:px-5 rounded-full border border-secondary/40 dark:border-secondary/50 bg-surface text-foreground shadow-[0_0_16px_rgba(255,79,135,0.12)] dark:shadow-[0_0_16px_rgba(255,79,135,0.18)] hover:border-secondary dark:hover:border-secondary transition-all duration-300 cursor-pointer self-start min-[560px]:self-auto shrink-0"
+        >
+          <span className="text-xs font-semibold whitespace-nowrap">View All Case Studies</span>
+          <ArrowRightIcon className="text-secondary group-hover:translate-x-1 transition-transform duration-300 shrink-0 w-3.5 h-3.5" />
+        </button>
       </ScrollReveal>
 
       {/* =========================================================
@@ -172,42 +188,53 @@ export default function SpotlightCarousel() {
       </div>
 
       {/* =========================================================
-          MOBILE CAROUSEL LIST (< 768px) - UNCHANGED
+          MOBILE CAROUSEL LIST (< 768px)
       ========================================================= */}
-      <div className="flex md:hidden gap-4 overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory -mx-4 px-4">
+      <div className="flex md:hidden gap-3.5 min-[380px]:gap-4 overflow-x-auto pb-4 pt-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden snap-x snap-mandatory -mx-4 px-4 scroll-smooth touch-pan-x">
         {SPOTLIGHT_CASES.map((item) => (
           <div
             key={item.id}
-            className="w-[285px] shrink-0 snap-start rounded-2xl bg-surface border border-border-theme p-4 shadow-xs flex flex-col justify-between"
+            className="group relative flex flex-col h-full w-[275px] min-[360px]:w-[290px] min-[400px]:w-[310px] shrink-0 snap-start overflow-hidden rounded-2xl border border-border-theme bg-surface shadow-xs transition-all duration-300"
           >
-            {/* Top Row: Thumbnail + Creator Info + ROI */}
-            <div className="flex items-start gap-3">
-              <Image src={item.image} alt={item.creatorName} width={56} height={56} className="w-14 h-14 rounded-2xl object-cover shrink-0" />
-              <div className="flex-1 min-w-0">
-                <h3 className="text-base font-bold text-foreground tracking-tight truncate">
-                  {item.creatorName}
-                </h3>
-                <p className="text-xs text-text-secondary truncate mt-0.5">
-                  {item.collabShort}
-                </p>
-                <div className="flex items-center gap-1 text-xs font-bold text-secondary mt-1">
-                  <TrendUpIcon />
-                  <span>{item.roi}</span>
-                </div>
-              </div>
+            {/* IMAGE + COLLAB BADGE (ASPECT 1.5/1) */}
+            <div className="relative w-full aspect-[1.5/1] shrink-0 overflow-hidden bg-black/5 dark:bg-white/5">
+              <Image
+                src={item.desktopImage || item.image}
+                alt={item.creatorName}
+                fill
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                sizes="(max-width: 640px) 310px, 340px"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-75" />
+
+              {/* Collab Badge */}
+              <span className="absolute bottom-2.5 left-2.5 min-[380px]:bottom-3 min-[380px]:left-3 max-w-[calc(100%-20px)] truncate px-2.5 py-1 rounded-full text-[10.5px] min-[380px]:text-[11px] font-semibold text-white bg-black/70 backdrop-blur-md border border-white/20 shadow-xs">
+                {item.collaboratedWith}
+              </span>
             </div>
 
-            {/* Divider */}
-            <div className="w-full h-[1px] bg-border-theme my-3" />
+            {/* CARD WHITE BODY */}
+            <div className="p-4 min-[380px]:p-4.5 flex flex-col flex-1 justify-between gap-2.5 min-[380px]:gap-3 bg-surface">
+              <div>
+                <h3 className="text-[15px] min-[380px]:text-base font-bold font-serif text-foreground group-hover:text-secondary transition-colors leading-snug">
+                  {item.title}
+                </h3>
+                <p className="text-[11.5px] min-[380px]:text-xs text-text-secondary leading-relaxed line-clamp-2 mt-1">
+                  {item.description}
+                </p>
+              </div>
 
-            {/* Bottom Row: Impressions + CASE STUDY button */}
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-text-secondary">
-                {item.impressions}
-              </span>
-              <span className="text-xs font-bold tracking-wider text-secondary uppercase">
-                CASE STUDY
-              </span>
+              <div className="w-full h-[1px] bg-border-theme my-0.5 min-[380px]:my-1" />
+
+              <div className="flex items-center justify-between">
+                <span className="text-[11.5px] min-[380px]:text-xs font-medium text-text-secondary">
+                  {item.handle}
+                </span>
+                <span className="text-[11.5px] min-[380px]:text-xs font-bold text-secondary flex items-center gap-1 shrink-0">
+                  <TrendUpIcon />
+                  {item.roi}
+                </span>
+              </div>
             </div>
           </div>
         ))}

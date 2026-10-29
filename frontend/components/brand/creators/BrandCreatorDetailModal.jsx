@@ -829,7 +829,7 @@ export default function BrandCreatorDetailModal({
                                 <button
                                   type="button"
                                   onClick={() => handleOpenBooking(service)}
-                                  className="w-full py-2.5 px-3 rounded-xl bg-secondary text-surface font-semibold text-xs hover:bg-secondary/90 transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
+                                  className="w-full py-2.5 px-3 rounded-xl bg-black text-surface font-semibold text-xs hovegreondary/90 transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
                                 >
                                   <SparklesIcon className="w-3.5 h-3.5" />
                                   <span>Book Service</span>

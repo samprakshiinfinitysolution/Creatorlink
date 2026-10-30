@@ -14,7 +14,7 @@ const getSocketURL = () => {
             return `${window.location.protocol}//${host}:5005`;
         }
     }
-    return process.env.NEXT_PUBLIC_SOCKET_URL || "http://192.168.1.23:5005";
+    return process.env.NEXT_PUBLIC_SOCKET_URL || "http://192.168.1.21:5005";
 };
 
 export const socket = io(getSocketURL(), {

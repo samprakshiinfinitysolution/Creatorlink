@@ -24,10 +24,12 @@ export default function CreatorShowcase() {
         relative
         overflow-hidden
         bg-background
-        px-5
+        px-3.5
         pb-4
         pt-8
         text-foreground
+
+        min-[380px]:px-5
 
         sm:px-6
 
@@ -73,8 +75,9 @@ export default function CreatorShowcase() {
         className="
           relative
           mx-auto
-          
           w-full
+          max-w-[390px]
+          sm:max-w-[420px]
           lg:hidden
         "
       >
@@ -85,26 +88,36 @@ export default function CreatorShowcase() {
             creator-float
             relative
             z-20
-            ml-[28px]
-            w-[min(356px,calc(100vw-56px))]
+            w-full
+            max-w-[316px]
+            mr-auto
+            min-[390px]:max-w-[336px]
+            sm:max-w-[356px]
           "
         >
           <div
             className="
               flex
-              h-[100px]
+              h-[86px]
               w-full
               items-center
-              gap-3
-              rounded-[26px]
+              gap-2
+              rounded-[22px]
               border
               border-border-theme
               bg-surface
-              px-3
+              px-2.5
               shadow-[0_12px_35px_rgba(0,0,0,0.06)]
               transition-all
               duration-500
               hover:-translate-y-1
+              min-[390px]:h-[92px]
+              min-[390px]:gap-2.5
+              min-[390px]:px-3
+              sm:h-[100px]
+              sm:gap-3
+              sm:rounded-[26px]
+              sm:px-3.5
             "
           >
             {/* IMAGE */}
@@ -112,27 +125,37 @@ export default function CreatorShowcase() {
             <div
               className="
                 relative
-                h-[64px]
-                w-[64px]
+                h-[50px]
+                w-[50px]
                 shrink-0
                 overflow-hidden
                 rounded-full
                 border
                 border-secondary/20
+                min-[390px]:h-[56px]
+                min-[390px]:w-[56px]
+                sm:h-[64px]
+                sm:w-[64px]
               "
             >
-              <Image src="https://res.cloudinary.com/atr5osne/image/upload/v1792054762/creatorlink/public/creators/i4nwvw8gvyq69fy8to1e.webp" alt="Maya creator" fill className="h-full w-full object-cover" sizes="33vw" />
+              <Image
+                src="https://res.cloudinary.com/atr5osne/image/upload/v1792054762/creatorlink/public/creators/i4nwvw8gvyq69fy8to1e.webp"
+                alt="Maya creator"
+                fill
+                className="h-full w-full object-cover"
+                sizes="(max-width: 640px) 56px, 64px"
+              />
             </div>
 
             {/* NAME + STATS */}
 
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1">
-                <p className="truncate text-[14px] font-semibold text-primary">
+                <p className="truncate text-[12.5px] font-semibold text-primary min-[390px]:text-[13px] sm:text-[14px]">
                   @maya.studio
                 </p>
 
-                <span className="shrink-0 text-[12px] text-secondary-dark">
+                <span className="shrink-0 text-[11px] text-secondary-dark sm:text-[12px]">
                   ✦
                 </span>
               </div>
@@ -142,16 +165,19 @@ export default function CreatorShowcase() {
                   mt-1
                   flex
                   items-center
-                  gap-2
-                  text-[12px]
+                  gap-1.5
+                  text-[10.5px]
                   text-text-secondary
+                  min-[390px]:text-[11px]
+                  sm:gap-2
+                  sm:text-[12px]
                 "
               >
-                <span>128K reach</span>
+                <span className="whitespace-nowrap">128K reach</span>
 
                 <span className="text-border-theme">•</span>
 
-                <span className="font-medium text-secondary-dark">
+                <span className="whitespace-nowrap font-medium text-secondary-dark">
                   4.8% Eng
                 </span>
               </div>
@@ -166,30 +192,36 @@ export default function CreatorShowcase() {
                 flex-col
                 items-end
                 justify-center
-                gap-2
+                gap-1
                 pr-1
+                min-[390px]:gap-1.5
+                sm:gap-2
               "
             >
               <span
                 className="
                   rounded-full
                   bg-secondary/[0.12]
-                  px-2.5
-                  py-1
-                  text-[10px]
+                  px-2
+                  py-0.5
+                  text-[9px]
                   font-semibold
                   text-secondary-dark
+                  min-[390px]:text-[9.5px]
+                  sm:px-2.5
+                  sm:py-1
+                  sm:text-[10px]
                 "
               >
                 Fashion
               </span>
 
               <div className="text-right leading-none">
-                <p className="text-[10px] text-text-secondary">
+                <p className="text-[9px] text-text-secondary min-[390px]:text-[9.5px] sm:text-[10px]">
                   From
                 </p>
 
-                <p className="mt-0.5 text-[13px] font-bold text-primary">
+                <p className="mt-0.5 text-[11.5px] font-bold text-primary min-[390px]:text-[12px] sm:text-[13px]">
                   $250
                 </p>
               </div>
@@ -197,18 +229,23 @@ export default function CreatorShowcase() {
           </div>
         </div>
 
-        {/* ================= CONNECTOR ================= */}
+        {/* ================= CONNECTOR LINE ================= */}
 
-        <div
-          className="
-            ml-[68px]
-            h-[20px]
-            w-px
-            border-l
-            border-dashed
-            border-secondary/50
-          "
-        />
+        <div className="relative my-1 flex h-[22px] w-full items-center sm:my-1.5 sm:h-[26px]">
+          <svg
+            className="pointer-events-none h-full w-[120px] ml-5 min-[390px]:ml-7 overflow-visible"
+            viewBox="0 0 60 24"
+            fill="none"
+          >
+            <path
+              d="M 8 0 C 8 16, 46 8, 46 24"
+              stroke="var(--theme-secondary)"
+              strokeWidth="1.5"
+              strokeDasharray="3 4"
+              className="opacity-60"
+            />
+          </svg>
+        </div>
 
         {/* ================= LUCIAN MOBILE ================= */}
 
@@ -217,26 +254,36 @@ export default function CreatorShowcase() {
             creator-float-slow
             relative
             z-20
-            ml-[clamp(80px,21vw,108px)]
-            w-[min(356px,calc(100vw-56px))]
+            w-full
+            max-w-[316px]
+            ml-auto
+            min-[390px]:max-w-[336px]
+            sm:max-w-[356px]
           "
         >
           <div
             className="
               flex
-              h-[92px]
+              h-[84px]
               w-full
               items-center
-              gap-3
-              rounded-[26px]
+              gap-2
+              rounded-[22px]
               border
               border-border-theme
               bg-surface
-              px-3
+              px-2.5
               shadow-[0_12px_35px_rgba(0,0,0,0.06)]
               transition-all
               duration-500
               hover:-translate-y-1
+              min-[390px]:h-[88px]
+              min-[390px]:gap-2.5
+              min-[390px]:px-3
+              sm:h-[92px]
+              sm:gap-3
+              sm:rounded-[26px]
+              sm:px-3.5
             "
           >
             {/* IMAGE */}
@@ -244,27 +291,37 @@ export default function CreatorShowcase() {
             <div
               className="
                 relative
-                h-[60px]
-                w-[60px]
+                h-[48px]
+                w-[48px]
                 shrink-0
                 overflow-hidden
                 rounded-full
                 border
                 border-secondary/20
+                min-[390px]:h-[54px]
+                min-[390px]:w-[54px]
+                sm:h-[60px]
+                sm:w-[60px]
               "
             >
-              <Image src="https://res.cloudinary.com/atr5osne/image/upload/v1792054721/creatorlink/public/creators/lyhqi3si95n8so90e1gl.webp" alt="Lucian creator" fill className="h-full w-full object-cover" sizes="33vw" />
+              <Image
+                src="https://res.cloudinary.com/atr5osne/image/upload/v1792054721/creatorlink/public/creators/lyhqi3si95n8so90e1gl.webp"
+                alt="Lucian creator"
+                fill
+                className="h-full w-full object-cover"
+                sizes="(max-width: 640px) 54px, 60px"
+              />
             </div>
 
             {/* NAME + STATS */}
 
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1">
-                <p className="truncate text-[14px] font-semibold text-primary">
+                <p className="truncate text-[12.5px] font-semibold text-primary min-[390px]:text-[13px] sm:text-[14px]">
                   @lucian.atelier
                 </p>
 
-                <span className="shrink-0 text-[12px] text-secondary-dark">
+                <span className="shrink-0 text-[11px] text-secondary-dark sm:text-[12px]">
                   ✦
                 </span>
               </div>
@@ -274,17 +331,19 @@ export default function CreatorShowcase() {
                   mt-1
                   flex
                   items-center
-                  gap-2
-                  whitespace-nowrap
-                  text-[12px]
+                  gap-1.5
+                  text-[10.5px]
                   text-text-secondary
+                  min-[390px]:text-[11px]
+                  sm:gap-2
+                  sm:text-[12px]
                 "
               >
-                <span>340K reach</span>
+                <span className="whitespace-nowrap">340K reach</span>
 
                 <span className="text-border-theme">•</span>
 
-                <span className="font-medium text-secondary-dark">
+                <span className="whitespace-nowrap font-medium text-secondary-dark">
                   6.2% Eng
                 </span>
               </div>
@@ -297,11 +356,15 @@ export default function CreatorShowcase() {
                 shrink-0
                 rounded-full
                 bg-secondary/[0.08]
-                px-2.5
-                py-1
-                text-[10px]
+                px-2
+                py-0.5
+                text-[9px]
                 font-semibold
                 text-primary
+                min-[390px]:text-[9.5px]
+                sm:px-2.5
+                sm:py-1
+                sm:text-[10px]
               "
             >
               Editorial
@@ -315,31 +378,52 @@ export default function CreatorShowcase() {
           className="
             relative
             z-30
-            ml-[48px]
-            -mt-[14px]
-            w-fit
+            mt-3.5
+            flex
+            justify-center
+            min-[380px]:justify-start
+            min-[380px]:ml-6
+            sm:ml-10
+            sm:mt-4
           "
         >
           <div
             className="
+              inline-flex
+              items-center
+              gap-2
               rounded-full
               border
-              border-secondary
+              border-secondary/60
               bg-primary
-              px-5
-              py-2
+              px-3.5
+              py-1.5
               shadow-[0_8px_25px_rgba(255,79,135,0.18)]
+              dark:bg-surface
+              dark:border-secondary/50
+              sm:px-4.5
+              sm:py-2
             "
           >
+            <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-secondary text-[9px] font-bold text-white">
+              ✓
+            </span>
+
             <p
               className="
                 whitespace-nowrap
-                text-[11px]
+                text-[10.5px]
                 font-medium
                 text-white
+                dark:text-primary
+                min-[380px]:text-[11px]
               "
             >
-              Offer Received: $1,200 • LVMH Group
+              Offer Received:{" "}
+              <span className="font-semibold text-secondary-dark dark:text-secondary">
+                $1,200
+              </span>{" "}
+              • LVMH Group
             </p>
           </div>
         </div>

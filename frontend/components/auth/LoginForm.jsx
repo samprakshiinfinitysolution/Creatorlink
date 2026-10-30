@@ -1,11 +1,13 @@
-﻿"use client";
+"use client";
 
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import store from "@/redux/store";
-import { login } from "@/redux/auth/auth_slice";
+import { login, loginWithGoogle } from "@/redux/auth/auth_slice";
+import { getGoogleClientId } from "@/redux/auth/auth_api";
+import { requestGoogleAuthCode } from "@/lib/googleAuth";
 
 // =========================================================
 // SVG ICONS
@@ -82,7 +84,56 @@ export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
+
+  const handleGoogleLogin = async () => {
+    if (isLoading || isGoogleLoading) return;
+    setErrorMsg(null);
+    setIsGoogleLoading(true);
+
+    try {
+      let clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+      if (!clientId) {
+        const config = await getGoogleClientId();
+        clientId = config?.data?.clientId;
+      }
+
+      if (!clientId) {
+        setErrorMsg("Google Client ID is not configured. Please contact support.");
+        setIsGoogleLoading(false);
+        return;
+      }
+
+      const code = await requestGoogleAuthCode(clientId);
+      const resultAction = await dispatch(loginWithGoogle({ code }));
+
+      if (loginWithGoogle.fulfilled.match(resultAction)) {
+        const user = resultAction.payload?.data?.user;
+        const role = user?.role;
+
+        if (role === "creator") {
+          router.push("/creator/dashboard");
+        } else if (role === "brand") {
+          router.push("/brand/dashboard");
+        } else if (role === "admin") {
+          router.push("/admin/dashboard");
+        } else {
+          setErrorMsg("Account role not recognized. Please contact support.");
+        }
+      } else {
+        const message =
+          resultAction.payload ||
+          resultAction.error?.message ||
+          "Google login failed. Please try again.";
+        setErrorMsg(message);
+      }
+    } catch (err) {
+      setErrorMsg(err.message || "Google sign-in was interrupted. Please try again.");
+    } finally {
+      setIsGoogleLoading(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -202,12 +253,20 @@ export default function LoginForm() {
 
             {/* Password Field */}
             <div className="space-y-2">
-              <label
-                htmlFor="password"
-                className="text-xs font-semibold uppercase tracking-wider text-foreground block font-sans"
-              >
-                Password
-              </label>
+              <div className="flex items-center justify-between">
+                <label
+                  htmlFor="password"
+                  className="text-xs font-semibold uppercase tracking-wider text-foreground block font-sans"
+                >
+                  Password
+                </label>
+                <Link
+                  href="/forgot-password"
+                  className="text-xs text-secondary hover:underline font-sans font-medium transition-all"
+                >
+                  Forgot password?
+                </Link>
+              </div>
 
               <div className="relative flex items-center">
                 <span className="absolute left-3.5 text-text-secondary pointer-events-none">
@@ -260,10 +319,24 @@ export default function LoginForm() {
             {/* Google Button */}
             <button
               type="button"
-              className="w-full inline-flex items-center justify-center gap-3 px-6 py-3 rounded-xl bg-background hover:bg-surface-muted border border-border-theme text-foreground font-sans font-semibold text-xs sm:text-sm transition-all duration-200 cursor-pointer"
+              onClick={handleGoogleLogin}
+              disabled={isLoading || isGoogleLoading}
+              className="w-full inline-flex items-center justify-center gap-3 px-6 py-3 rounded-xl bg-background hover:bg-surface-muted disabled:opacity-60 disabled:cursor-not-allowed border border-border-theme text-foreground font-sans font-semibold text-xs sm:text-sm transition-all duration-200 cursor-pointer"
             >
-              <GoogleIcon />
-              <span>Log in with Google</span>
+              {isGoogleLoading ? (
+                <span className="inline-flex items-center gap-2">
+                  <svg className="animate-spin h-4 w-4 text-secondary" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  <span>Connecting to Google...</span>
+                </span>
+              ) : (
+                <>
+                  <GoogleIcon />
+                  <span>Log in with Google</span>
+                </>
+              )}
             </button>
 
             {/* Apple Button */}

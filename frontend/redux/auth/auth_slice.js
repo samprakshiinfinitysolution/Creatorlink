@@ -6,8 +6,10 @@ import {
     refreshAccessToken,
     logoutUser,
     getCurrentUser,
-    changePassword as changePasswordApi
-} from "./auth_api";
+    changePassword as changePasswordApi,
+    googleAuth,
+    verifyEmailOtp
+} from "./auth_api.js";
 
 
 // Handles user login.
@@ -99,7 +101,7 @@ const logout = createAsyncThunk(
 // Handles get current user.
 const getMe = createAsyncThunk(
     "auth/getMe",
-    async (_, thunkAPI) => {
+    async (_, { rejectWithValue }) => {
 
         try {
 
@@ -110,7 +112,7 @@ const getMe = createAsyncThunk(
                 error.response?.status === 401 ||
                 error.response?.status === 403;
 
-            return thunkAPI.rejectWithValue(
+            return rejectWithValue(
                 error.response?.data?.message ||
                 "Unable to fetch user",
                 { isAuthFailure }
@@ -134,6 +136,46 @@ const changePassword = createAsyncThunk(
             return rejectWithValue(
                 error.response?.data?.message ||
                 "Failed to change password"
+            );
+        }
+    }
+);
+
+
+// Handles Google authentication (login or signup).
+const loginWithGoogle = createAsyncThunk(
+    "auth/loginWithGoogle",
+    async (googleData, { rejectWithValue }) => {
+
+        try {
+
+            return await googleAuth(googleData);
+
+        } catch (error) {
+
+            return rejectWithValue(
+                error.response?.data?.message ||
+                "Google authentication failed"
+            );
+        }
+    }
+);
+
+
+// Handles email OTP verification upon signup.
+const verifyOtp = createAsyncThunk(
+    "auth/verifyOtp",
+    async ({ email, otp }, { rejectWithValue }) => {
+
+        try {
+
+            return await verifyEmailOtp({ email, otp });
+
+        } catch (error) {
+
+            return rejectWithValue(
+                error.response?.data?.message ||
+                "OTP verification failed"
             );
         }
     }
@@ -176,13 +218,36 @@ const authSlice = createSlice({
             .addCase(login.fulfilled, (state, action) => {
 
                 state.loading = false;
-                state.user = action.payload.data.user;
-                state.isAuthenticated = true;
+                state.user = action.payload?.data?.user || action.payload?.user || null;
+                state.isAuthenticated = !!state.user;
                 state.error = null;
             })
 
             // Login failed.
             .addCase(login.rejected, (state, action) => {
+
+                state.loading = false;
+                state.error = action.payload;
+            })
+
+            // Google Login started.
+            .addCase(loginWithGoogle.pending, (state) => {
+
+                state.loading = true;
+                state.error = null;
+            })
+
+            // Google Login successful.
+            .addCase(loginWithGoogle.fulfilled, (state, action) => {
+
+                state.loading = false;
+                state.user = action.payload?.data?.user || action.payload?.user || null;
+                state.isAuthenticated = !!state.user;
+                state.error = null;
+            })
+
+            // Google Login failed.
+            .addCase(loginWithGoogle.rejected, (state, action) => {
 
                 state.loading = false;
                 state.error = action.payload;
@@ -205,6 +270,50 @@ const authSlice = createSlice({
 
             // Registration failed.
             .addCase(register.rejected, (state, action) => {
+
+                state.loading = false;
+                state.error = action.payload;
+            })
+
+            // OTP Verification started.
+            .addCase(verifyOtp.pending, (state) => {
+
+                state.loading = true;
+                state.error = null;
+            })
+
+            // OTP Verification successful.
+            .addCase(verifyOtp.fulfilled, (state, action) => {
+
+                state.loading = false;
+                state.user = action.payload?.data?.user || action.payload?.user || null;
+                state.isAuthenticated = !!state.user;
+                state.error = null;
+            })
+
+            // OTP Verification failed.
+            .addCase(verifyOtp.rejected, (state, action) => {
+
+                state.loading = false;
+                state.error = action.payload;
+            })
+
+            // Change Password started.
+            .addCase(changePassword.pending, (state) => {
+
+                state.loading = true;
+                state.error = null;
+            })
+
+            // Change Password successful.
+            .addCase(changePassword.fulfilled, (state) => {
+
+                state.loading = false;
+                state.error = null;
+            })
+
+            // Change Password failed.
+            .addCase(changePassword.rejected, (state, action) => {
 
                 state.loading = false;
                 state.error = action.payload;
@@ -250,8 +359,8 @@ const authSlice = createSlice({
                 state.loading = false;
                 state.error = null;
 
-                state.user = action.payload.data;
-                state.isAuthenticated = true;
+                state.user = action.payload?.data?.user || action.payload?.data || action.payload?.user || null;
+                state.isAuthenticated = !!state.user;
             })
 
             .addCase(getMe.rejected, (state, action) => {
@@ -307,7 +416,9 @@ export {
     refreshToken,
     logout,
     getMe,
-    changePassword
+    changePassword,
+    loginWithGoogle,
+    verifyOtp
 };
 
 

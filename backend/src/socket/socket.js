@@ -22,7 +22,7 @@ const initializeSocket = (httpServer) => {
     const allowedOrigins = [
         ...new Set([
             process.env.FRONTEND_URL,
-            "http://192.168.1.23:3005",
+            "http://192.168.1.21:3005",
             "http://localhost:3005",
             "http://127.0.0.1:3005"
         ].filter(Boolean))
@@ -167,10 +167,10 @@ const initializeSocket = (httpServer) => {
         } catch (error) {
             const errorCategory =
                 error?.name === "CastError" ? "DATABASE_CAST_ERROR"
-                : (error?.name === "MongooseServerSelectionError" || error?.name === "MongoNetworkError" || error?.name === "MongoTimeoutError") ? "DATABASE_CONNECTION_ERROR"
-                : error?.name === "MongooseError" ? "DATABASE_OPERATION_ERROR"
-                : error instanceof TypeError ? "RUNTIME_TYPE_ERROR"
-                : "UNEXPECTED_MIDDLEWARE_ERROR";
+                    : (error?.name === "MongooseServerSelectionError" || error?.name === "MongoNetworkError" || error?.name === "MongoTimeoutError") ? "DATABASE_CONNECTION_ERROR"
+                        : error?.name === "MongooseError" ? "DATABASE_OPERATION_ERROR"
+                            : error instanceof TypeError ? "RUNTIME_TYPE_ERROR"
+                                : "UNEXPECTED_MIDDLEWARE_ERROR";
 
             console.error(`[SocketAuth Diagnostic] ${errorCategory}: ${error?.name}: ${error?.message}`);
 

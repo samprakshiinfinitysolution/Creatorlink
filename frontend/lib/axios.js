@@ -14,7 +14,7 @@ const getBaseURL = () => {
             return `${window.location.protocol}//${host}:5005/api`;
         }
     }
-    return process.env.NEXT_PUBLIC_API_URL || "http://192.168.1.23:5005/api";
+    return process.env.NEXT_PUBLIC_API_URL || "http://192.168.1.21:5005/api";
 };
 
 const axiosInstance = axios.create({

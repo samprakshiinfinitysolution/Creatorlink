@@ -177,7 +177,7 @@ export default function ChangePasswordForm() {
     <div className="bg-surface border border-border-theme rounded-xl p-5 sm:p-6 shadow-xs space-y-5">
       <div className="flex items-center justify-between pb-3 border-b border-border-theme">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-[#fff0f4] dark:bg-[#2a171f] text-[#ff2d6c] flex items-center justify-center shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-[#fff0f4] dark:bg-[#2a171f] text-black dark:text-white flex items-center justify-center shrink-0">
             <KeyIcon className="w-4 h-4" />
           </div>
           <div>

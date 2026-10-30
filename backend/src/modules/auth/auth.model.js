@@ -35,6 +35,16 @@ const authSchema = new mongoose.Schema(
             type: Date
         },
 
+        // Hashed reset token for forgotten password recovery.
+        resetPasswordToken: {
+            type: String
+        },
+
+        // Expiration timestamp for the password reset token.
+        resetPasswordExpire: {
+            type: Date
+        },
+
         // User role.
         role: {
             type: String,
@@ -46,6 +56,34 @@ const authSchema = new mongoose.Schema(
         isVerified: {
             type: Boolean,
             default: false
+        },
+
+        // Google OAuth subject identifier.
+        googleId: {
+            type: String,
+            unique: true,
+            sparse: true
+        },
+
+        // Hashed OTP for email verification upon signup.
+        emailVerificationOtp: {
+            type: String
+        },
+
+        // Expiration timestamp for email verification OTP.
+        emailVerificationOtpExpire: {
+            type: Date
+        },
+
+        // Failed attempts counter for email verification OTP.
+        emailVerificationOtpAttempts: {
+            type: Number,
+            default: 0
+        },
+
+        // Cooldown timestamp before next resend is allowed.
+        emailVerificationOtpResendAvailableAt: {
+            type: Date
         },
 
         // Stores active refresh-token sessions.

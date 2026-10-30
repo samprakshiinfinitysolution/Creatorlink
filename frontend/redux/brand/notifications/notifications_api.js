@@ -30,6 +30,19 @@ const markBrandNotificationRead = async (notificationId) => {
     return response.data;
 };
 
+// Brand marks all unread notifications in a specific category as read.
+const markBrandCategoryNotificationsRead = async (category) => {
+    const response = await axiosInstance.patch(
+        "/brand/notifications/read-all",
+        {},
+        {
+            params: { category }
+        }
+    );
+
+    return response.data;
+};
+
 // Brand marks all unread notifications as read.
 const markAllBrandNotificationsRead = async () => {
     const response = await axiosInstance.patch(
@@ -43,5 +56,6 @@ export {
     getBrandNotifications,
     getBrandUnreadNotificationCount,
     markBrandNotificationRead,
+    markBrandCategoryNotificationsRead,
     markAllBrandNotificationsRead
 };

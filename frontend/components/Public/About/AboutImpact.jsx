@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import ScrollReveal from '@/components/theme/ScrollReveal';
 
 const IMPACT_CARDS = [
   {
@@ -72,23 +73,25 @@ export default function AboutImpact() {
         {/* ====================================================
             1. SECTION HEADER CONTENT
         ==================================================== */}
-        <div className="flex flex-col items-start mb-10 sm:mb-14 lg:mb-16">
-          {/* Eyebrow Pill */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface border border-border-theme text-[10px] sm:text-xs font-mono font-bold tracking-wider text-secondary uppercase mb-4 sm:mb-6 shadow-sm">
-            <span className="text-secondary text-xs sm:text-sm">⊕</span>
-            <span>MEASURED IMPACT</span>
+        <ScrollReveal direction="up" delay={0}>
+          <div className="flex flex-col items-start mb-10 sm:mb-14 lg:mb-16">
+            {/* Eyebrow Pill */}
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface border border-border-theme text-[10px] sm:text-xs font-mono font-bold tracking-wider text-secondary uppercase mb-4 sm:mb-6 shadow-sm">
+              <span className="text-secondary text-xs sm:text-sm">⊕</span>
+              <span>MEASURED IMPACT</span>
+            </div>
+
+            {/* Main Heading */}
+            <h2 className="text-3xl sm:text-5xl lg:text-6xl font-serif font-medium tracking-tight text-foreground leading-[1.15] max-w-2xl mb-4 sm:mb-6">
+              Built around creative longevity, not fleeting impressions.
+            </h2>
+
+            {/* Supporting Paragraph */}
+            <p className="text-sm sm:text-base lg:text-lg font-sans text-text-secondary leading-relaxed max-w-xl">
+              True community value is measured by artistic trust, verified metrics, and long-term brand equity.
+            </p>
           </div>
-
-          {/* Main Heading */}
-          <h2 className="text-3xl sm:text-5xl lg:text-6xl font-serif font-medium tracking-tight text-foreground leading-[1.15] max-w-2xl mb-4 sm:mb-6">
-            Built around creative longevity, not fleeting impressions.
-          </h2>
-
-          {/* Supporting Paragraph */}
-          <p className="text-sm sm:text-base lg:text-lg font-sans text-text-secondary leading-relaxed max-w-xl">
-            True community value is measured by artistic trust, verified metrics, and long-term brand equity.
-          </p>
-        </div>
+        </ScrollReveal>
 
         {/* ====================================================
             2. FOUR IMPACT CARDS GRID
@@ -97,37 +100,43 @@ export default function AboutImpact() {
             Mobile: 1 column
         ==================================================== */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          {IMPACT_CARDS.map((card) => (
-            <div
+          {IMPACT_CARDS.map((card, index) => (
+            <ScrollReveal
               key={card.id}
-              className={`group relative flex flex-col justify-between p-6 sm:p-7 rounded-[22px] sm:rounded-[28px] border border-border-theme shadow-md ${card.bgStyle} transition-all duration-300 ease-out hover:-translate-y-2 hover:scale-[1.015] hover:border-secondary hover:shadow-2xl hover:shadow-secondary/15 cursor-pointer min-h-[260px] sm:min-h-[280px]`}
+              direction="up"
+              delay={index * 60}
+              className="h-full"
             >
-              {/* TOP: ICON CIRCLE */}
-              <div className="mb-5 sm:mb-6">
-                <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform duration-300 ${card.iconBg}`}>
-                  {card.icon}
-                </div>
-              </div>
-
-              {/* MIDDLE & BOTTOM: TITLE, DESCRIPTION & EDITORIAL LABEL */}
-              <div className="flex flex-col justify-between flex-1">
-                <div>
-                  <h3 className="font-serif text-lg sm:text-xl font-bold tracking-tight text-foreground group-hover:text-secondary transition-colors mb-2 leading-snug">
-                    {card.title}
-                  </h3>
-                  <p className="font-sans text-xs sm:text-sm text-text-secondary leading-relaxed mb-6">
-                    {card.description}
-                  </p>
+              <div
+                className={`group relative flex flex-col justify-between p-6 sm:p-7 rounded-[22px] sm:rounded-[28px] border border-border-theme shadow-md ${card.bgStyle} transition-all duration-300 ease-out hover:-translate-y-2 hover:scale-[1.015] hover:border-secondary hover:shadow-2xl hover:shadow-secondary/15 cursor-pointer min-h-[260px] sm:min-h-[280px] h-full`}
+              >
+                {/* TOP: ICON CIRCLE */}
+                <div className="mb-5 sm:mb-6">
+                  <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform duration-300 ${card.iconBg}`}>
+                    {card.icon}
+                  </div>
                 </div>
 
-                {/* Bottom Editorial Handwritten Label */}
-                <div className="pt-3 border-t border-border-theme/40">
-                  <span className="font-serif italic text-xs sm:text-sm text-secondary block transition-transform duration-300 group-hover:-translate-y-0.5">
-                    {card.bottomLabel}
-                  </span>
+                {/* MIDDLE & BOTTOM: TITLE, DESCRIPTION & EDITORIAL LABEL */}
+                <div className="flex flex-col justify-between flex-1">
+                  <div>
+                    <h3 className="font-serif text-lg sm:text-xl font-bold tracking-tight text-foreground group-hover:text-secondary transition-colors mb-2 leading-snug">
+                      {card.title}
+                    </h3>
+                    <p className="font-sans text-xs sm:text-sm text-text-secondary leading-relaxed mb-6">
+                      {card.description}
+                    </p>
+                  </div>
+
+                  {/* Bottom Editorial Handwritten Label */}
+                  <div className="pt-3 border-t border-border-theme/40">
+                    <span className="font-serif italic text-xs sm:text-sm text-secondary block transition-transform duration-300 group-hover:-translate-y-0.5">
+                      {card.bottomLabel}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
+            </ScrollReveal>
           ))}
         </div>
 

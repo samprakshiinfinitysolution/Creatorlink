@@ -86,8 +86,8 @@ function BellIcon() {
 function HeartIcon() {
   return (
     <svg
-      width="24"
-      height="24"
+      width="22"
+      height="22"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -112,6 +112,7 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
+  // Handle background scroll locking when mobile menu is active
   useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
@@ -122,6 +123,37 @@ export default function Navbar() {
     return () => {
       document.body.style.overflow = "";
     };
+  }, [open]);
+
+  // Close menu automatically upon route transition
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (prevPathname !== pathname) {
+    setPrevPathname(pathname);
+    setOpen(false);
+  }
+
+  // Close menu if viewport expands to desktop breakpoint (>= 768px)
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setOpen(false);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Close menu when Escape key is pressed
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+      }
+    };
+    if (open) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [open]);
 
   return (
@@ -161,40 +193,63 @@ export default function Navbar() {
         .dark .mobile-menu [class*="bg-black/10"] {
           background: rgba(255, 255, 255, 0.12) !important;
         }
+
+        @keyframes mobileMenuSlideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-8px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .mobile-menu-animate {
+          animation: mobileMenuSlideDown 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .mobile-menu-animate {
+            animation: none !important;
+          }
+        }
       `}</style>
+
       {/* =====================================================
-          DESKTOP NAVBAR
-          1024px+
+          DESKTOP & TABLET PILL NAVBAR
+          768px+ (md and above)
+          (Seamless responsive scaling across md, lg, xl, and 2xl)
       ===================================================== */}
 
-      <header className="fixed left-1/2 top-4 z-50 hidden w-[94%] -translate-x-1/2 lg:block xl:top-5 xl:w-[88%] 2xl:w-[84%]">
+      <header className="fixed left-1/2 top-3 md:top-4 z-50 hidden w-[96%] md:w-[94%] max-w-[1536px] -translate-x-1/2 md:block xl:top-5 xl:w-[88%] 2xl:w-[84%]">
         <nav
           className="
-            grid grid-cols-[1fr_auto_1fr] h-[70px] items-center
+            flex h-[66px] md:h-[70px] xl:h-[82px] items-center justify-between
             rounded-full
             border border-border-theme
             bg-surface/95
-            px-5
+            px-3.5 md:px-5 lg:px-6 xl:px-10
             shadow-[0_8px_30px_rgba(0,0,0,0.04)]
             backdrop-blur-md
             transition-colors duration-300
-            xl:h-[82px]
-            xl:px-10
           "
         >
           {/* LOGO */}
 
-          <div className="flex items-center justify-start">
+          <div className="flex items-center justify-start shrink-0">
             <Link
               href="/"
               className="
                 shrink-0
-                text-[19px]
+                text-[16px]
+                md:text-[18px]
+                lg:text-[19px]
+                xl:text-[25px]
                 tracking-[-0.04em]
                 text-primary
                 transition-colors
                 duration-300
-                xl:text-[25px]
               "
               style={{ fontFamily: "var(--font-playfair), serif" }}
             >
@@ -205,7 +260,7 @@ export default function Navbar() {
 
           {/* NAVIGATION LINKS */}
 
-          <div className="flex items-center justify-center gap-4 xl:gap-6 2xl:gap-7">
+          <div className="flex items-center justify-center gap-2 md:gap-3 lg:gap-4 xl:gap-6 2xl:gap-7 shrink-0">
             {navItems.map((item) => {
               const isActive = pathname === item.href;
               return (
@@ -215,14 +270,17 @@ export default function Navbar() {
                   className={`
                     relative
                     py-2
-                    text-[13px]
+                    text-[12px]
+                    md:text-[12.5px]
+                    lg:text-[13px]
+                    xl:text-[15px]
                     font-medium
                     text-primary
+                    whitespace-nowrap
                     transition-all
                     duration-200
                     hover:-translate-y-[3px]
                     hover:text-secondary
-                    xl:text-[15px]
 
                     ${isActive
                       ? "after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-secondary"
@@ -238,7 +296,7 @@ export default function Navbar() {
 
           {/* RIGHT ACTIONS */}
 
-          <div className="flex items-center justify-end gap-4 xl:gap-6 2xl:gap-7">
+          <div className="flex items-center justify-end gap-2 md:gap-2.5 lg:gap-3.5 xl:gap-6 2xl:gap-7 shrink-0">
             {/* SEARCH */}
 
             <button
@@ -259,13 +317,14 @@ export default function Navbar() {
               <SearchIcon />
             </button>
 
-            {/* HEART */}
+            {/* HEART (Wishlist: clean on xl 1280px+) */}
 
             <button
               type="button"
               aria-label="Favorites"
               className="
-                flex
+                hidden
+                xl:flex
                 shrink-0
                 items-center
                 justify-center
@@ -285,14 +344,16 @@ export default function Navbar() {
               href="/signup"
               className="
                 shrink-0
-                text-[13px]
+                text-[12px]
+                md:text-[12.5px]
+                lg:text-[13px]
+                xl:text-[15px]
                 font-medium
                 text-primary
                 transition-all
                 duration-200
                 hover:-translate-y-1
                 hover:text-secondary
-                xl:text-[15px]
               "
             >
               Sign Up
@@ -304,14 +365,23 @@ export default function Navbar() {
               href="/login"
               className="
                 flex
-                h-[50px]
+                h-[40px]
+                md:h-[44px]
+                lg:h-[48px]
+                xl:h-[48px]
                 shrink-0
                 items-center
                 justify-center
                 rounded-full
                 bg-primary
-                px-5
-                text-[13px]
+                px-3.5
+                md:px-4
+                lg:px-5
+                xl:px-7
+                text-[12px]
+                md:text-[12.5px]
+                lg:text-[13px]
+                xl:text-[15px]
                 font-semibold
                 text-white
                 transition-all
@@ -320,9 +390,6 @@ export default function Navbar() {
                 hover:bg-theme-hover
                 dark:bg-primary
                 dark:text-black
-                xl:h-[48px]
-                xl:px-7
-                xl:text-[15px]
               "
             >
               Log in
@@ -336,15 +403,15 @@ export default function Navbar() {
       </header>
 
       {/* =====================================================
-          MOBILE + TABLET NAVBAR
-          Below 1024px
+          MOBILE NAVBAR
+          Below 768px (md)
       ===================================================== */}
 
-      <header className="fixed left-0 top-0 z-50 w-full lg:hidden">
+      <header className="fixed left-0 top-0 z-50 w-full md:hidden">
         <nav
           className="
             relative
-            h-[92px]
+            h-[90px]
             border-b
             border-border-theme
             bg-surface/95
@@ -354,57 +421,72 @@ export default function Navbar() {
             sm:h-[104px]
           "
         >
-          {/* HAMBURGER */}
+          {/* HAMBURGER BUTTON (Comfortable touch target min 44x44px) */}
 
           <button
             type="button"
-            onClick={() => setOpen(!open)}
+            onClick={() => setOpen((prev) => !prev)}
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
             className="
               absolute
-              left-5
+              left-2
               top-1/2
-              flex
               -translate-y-1/2
+              flex
+              h-11
+              w-11
               items-center
               justify-center
+              rounded-full
               text-primary
               transition-colors
               hover:text-secondary
-              sm:left-7
+              hover:bg-black/5
+              dark:hover:bg-white/5
+              active:scale-95
+              cursor-pointer
+              min-[360px]:left-2.5
+              min-[400px]:left-3.5
+              sm:left-6
             "
           >
             <MenuIcon open={open} />
           </button>
 
-          {/* CENTER LOGO */}
+          {/* CENTER LOGO (True mathematical center alignment with adaptive scaling) */}
 
           <Link
             href="/"
+            onClick={() => setOpen(false)}
             className="
               absolute
-              left-[68px]
-              right-[125px]
+              left-1/2
               top-1/2
+              -translate-x-1/2
               -translate-y-1/2
+              flex
+              flex-col
+              items-center
+              justify-center
               text-center
               text-primary
-
-              min-[400px]:left-[78px]
-              min-[400px]:right-[135px]
-
-              sm:left-[90px]
-              sm:right-[145px]
+              transition-opacity
+              hover:opacity-85
+              max-w-[calc(100%-145px)]
+              min-[375px]:max-w-[calc(100%-175px)]
+              min-[430px]:max-w-[calc(100%-215px)]
+              sm:max-w-[calc(100%-250px)]
             "
           >
             <div
               className="
-                whitespace-nowrap
-                text-[15px]
-                tracking-[-0.04em]
-
-                min-[375px]:text-[17px]
+                truncate
+                text-[13.5px]
+                tracking-[-0.03em]
+                leading-tight
+                min-[340px]:text-[14.5px]
+                min-[360px]:text-[16px]
                 min-[400px]:text-[18px]
                 sm:text-[21px]
               "
@@ -416,13 +498,15 @@ export default function Navbar() {
 
             <div
               className="
-                mt-1
-                whitespace-nowrap
-                text-[8px]
+                mt-0.5
+                truncate
+                text-[7px]
                 font-medium
-                tracking-[0.12em]
+                tracking-[0.14em]
                 text-secondary
-
+                leading-tight
+                min-[340px]:text-[7.5px]
+                min-[360px]:text-[8.5px]
                 min-[400px]:text-[9px]
                 sm:text-[10px]
               "
@@ -431,49 +515,83 @@ export default function Navbar() {
             </div>
           </Link>
 
-          {/* RIGHT ACTIONS */}
+          {/* RIGHT ACTIONS (Responsively balanced across device widths) */}
 
           <div
             className="
               absolute
-              right-3
+              right-2
               top-1/2
-              flex
               -translate-y-1/2
+              flex
               items-center
               gap-1
-
-              min-[400px]:right-4
-              min-[400px]:gap-2
-
+              min-[360px]:right-2.5
+              min-[400px]:right-3.5
+              min-[400px]:gap-1.5
               sm:right-6
-              sm:gap-3
+              sm:gap-2.5
             "
           >
-            {/* BELL */}
+            {/* WISHLIST / FAVORITES (Shown on tablet and landscape phablets >= 540px) */}
+
+            <button
+              type="button"
+              aria-label="Favorites"
+              className="
+                hidden
+                min-[540px]:flex
+                h-9
+                w-9
+                shrink-0
+                items-center
+                justify-center
+                rounded-full
+                text-primary
+                transition-all
+                hover:bg-black/5
+                hover:text-secondary
+                dark:hover:bg-white/5
+                active:scale-95
+                cursor-pointer
+                sm:h-10
+                sm:w-10
+              "
+            >
+              <HeartIcon />
+            </button>
+
+            {/* NOTIFICATIONS (Shown on large mobile >= 430px) */}
 
             <button
               type="button"
               aria-label="Notifications"
               className="
                 relative
-                flex
+                hidden
+                min-[430px]:flex
                 h-9
                 w-9
                 shrink-0
                 items-center
                 justify-center
+                rounded-full
                 text-primary
-                transition-colors
+                transition-all
+                hover:bg-black/5
                 hover:text-secondary
+                dark:hover:bg-white/5
+                active:scale-95
+                cursor-pointer
+                sm:h-10
+                sm:w-10
               "
             >
               <BellIcon />
-
-              <span className="absolute right-[5px] top-[6px] h-[5px] w-[5px] rounded-full bg-secondary" />
+              <span className="absolute right-[6px] top-[7px] h-[5px] w-[5px] rounded-full bg-secondary" />
             </button>
 
-            {/* SEARCH */}
+            {/* SEARCH (Always accessible across all mobile devices) */}
 
             <button
               type="button"
@@ -485,44 +603,57 @@ export default function Navbar() {
                 shrink-0
                 items-center
                 justify-center
+                rounded-full
                 text-primary
-                transition-colors
+                transition-all
+                hover:bg-black/5
                 hover:text-secondary
+                dark:hover:bg-white/5
+                active:scale-95
+                cursor-pointer
+                sm:h-10
+                sm:w-10
               "
             >
               <SearchIcon />
             </button>
 
-            {/* THEME */}
+            {/* THEME TOGGLE (Always accessible across all mobile devices) */}
 
             <ThemeToggle />
           </div>
         </nav>
 
         {/* =====================================================
-            MOBILE MENU
+            MOBILE MENU DRAWER
         ===================================================== */}
 
         {open && (
           <div
             className="
               mobile-menu
-              h-[calc(100dvh-92px)]
+              mobile-menu-animate
+              fixed
+              inset-x-0
+              top-[90px]
+              sm:top-[104px]
+              h-[calc(100dvh-90px)]
               sm:h-[calc(100dvh-104px)]
               w-full
               overflow-y-auto
               border-b
               border-border-theme
               bg-surface
-              px-6
+              px-5
               pt-4
-              pb-8
-              shadow-xl
+              pb-10
+              shadow-2xl
               transition-colors
               duration-300
+              sm:px-8
             "
           >
-            <div className="flex flex-col gap-1">
+            <div className="mx-auto flex max-w-md flex-col gap-1">
               {/* MAIN NAVIGATION LINKS */}
               {navItems.map((item) => {
                 const isActive = pathname === item.href;
@@ -534,21 +665,55 @@ export default function Navbar() {
                     className={`
                       flex
                       items-center
-                      py-2.5
-                      text-[15px]
+                      justify-between
+                      rounded-xl
+                      px-3.5
+                      py-3
+                      text-[16px]
                       font-medium
-                      transition-colors
+                      transition-all
                       duration-200
-                      ${isActive ? "text-secondary font-semibold" : "text-primary hover:text-secondary"}
+                      hover:bg-black/5
+                      dark:hover:bg-white/5
+                      ${isActive
+                        ? "text-secondary font-semibold bg-secondary/10 dark:bg-secondary/15"
+                        : "text-primary hover:text-secondary"
+                      }
                     `}
                   >
-                    {item.label}
+                    <span>{item.label}</span>
+                    {isActive && (
+                      <span className="text-xs font-mono text-secondary">✦</span>
+                    )}
                   </Link>
                 );
               })}
 
               {/* HORIZONTAL DIVIDER AFTER ABOUT */}
-              <div className="my-2.5 h-px w-full bg-border-theme" />
+              <div className="my-3 h-px w-full bg-border-theme" />
+
+              {/* QUICK SHORTCUTS FOR SMALL MOBILE (<430px) */}
+              <div className="flex items-center justify-around py-2 min-[430px]:hidden border-b border-border-theme/60 mb-2">
+                <button
+                  type="button"
+                  aria-label="Favorites"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-primary hover:text-secondary text-xs font-medium cursor-pointer"
+                >
+                  <HeartIcon />
+                  <span>Wishlist</span>
+                </button>
+                <button
+                  type="button"
+                  aria-label="Notifications"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-primary hover:text-secondary text-xs font-medium cursor-pointer"
+                >
+                  <span className="relative">
+                    <BellIcon />
+                    <span className="absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full bg-secondary" />
+                  </span>
+                  <span>Alerts</span>
+                </button>
+              </div>
 
               {/* AUTHENTICATION AREA */}
               <div className="flex flex-col gap-3 pt-1">
@@ -559,12 +724,19 @@ export default function Navbar() {
                   className={`
                     flex
                     items-center
-                    py-2
-                    text-[15px]
+                    rounded-xl
+                    px-3.5
+                    py-2.5
+                    text-[16px]
                     font-medium
                     transition-colors
                     duration-200
-                    ${pathname === "/signup" ? "text-secondary font-semibold" : "text-primary hover:text-secondary"}
+                    hover:bg-black/5
+                    dark:hover:bg-white/5
+                    ${pathname === "/signup"
+                      ? "text-secondary font-semibold bg-secondary/10 dark:bg-secondary/15"
+                      : "text-primary hover:text-secondary"
+                    }
                   `}
                 >
                   Sign Up
@@ -575,23 +747,23 @@ export default function Navbar() {
                   href="/login"
                   onClick={() => setOpen(false)}
                   className="
-                    mt-1
+                    mt-2
                     flex
-                    h-[46px]
+                    h-[48px]
                     w-full
-                    max-w-[200px]
                     items-center
                     justify-center
                     rounded-full
                     bg-primary
-                    text-[14px]
+                    text-[15px]
                     font-semibold
                     text-white
-                    shadow-xs
+                    shadow-sm
                     transition-all
                     duration-200
-                    hover:scale-[1.02]
+                    hover:scale-[1.01]
                     hover:bg-theme-hover
+                    active:scale-[0.99]
                     dark:bg-primary
                     dark:text-black
                     dark:hover:bg-theme-hover

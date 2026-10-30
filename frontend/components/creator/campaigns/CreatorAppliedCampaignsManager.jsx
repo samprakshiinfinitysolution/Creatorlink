@@ -379,7 +379,7 @@ export default function CreatorAppliedCampaignsManager() {
             {/* Left Content Area */}
             <div className="relative z-10 max-w-xl space-y-3">
               <div className="flex items-center gap-2">
-                <span className="inline-block px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase bg-secondary/15 text-black dark:text-white border border-secondary/20">
+                <span className="font-bold text-[11px] tracking-wider uppercase text-[#ff2d6c] dark:text-[#ff4f87] font-sans">
                   Collaborations
                 </span>
                 {appliedPagination?.totalItems !== undefined && (

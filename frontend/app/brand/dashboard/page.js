@@ -50,7 +50,7 @@ function BrandDashboardContent() {
         <BrandHeader setMobileOpen={setMobileOpen} />
 
         {/* Main Dashboard Container */}
-        <main className="flex-1 w-full px-3 sm:px-5 lg:px-6 py-4 sm:py-5 space-y-4 sm:space-y-5 max-w-[1536px] mx-auto min-w-0">
+        <main className="flex-1 w-full px-3 sm:px-5 lg:px-4 pt-4 sm:pt-6 lg:pt-8 pb-4 sm:pb-5 space-y-4 sm:space-y-5 max-w-[1536px] mx-auto min-w-0">
           {/* 1. Welcome Banner with soft pink styling and 3D pop-out girl illustration */}
           <BrandWelcomeBanner
             user={activeUser}

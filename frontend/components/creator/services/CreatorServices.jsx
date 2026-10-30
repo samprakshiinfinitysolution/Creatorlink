@@ -871,7 +871,7 @@ export default function CreatorServices() {
             <div className="space-y-3 sm:space-y-3.5 max-w-xl">
               <div>
                 <div className="mb-2">
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-secondary/10 text-secondary border border-secondary/20 uppercase tracking-wider inline-flex items-center">
+                  <span className="font-bold text-[11px] tracking-wider uppercase text-[#ff2d6c] dark:text-[#ff4f87] font-sans">
                     Creator Services
                   </span>
                 </div>

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import ScrollReveal from "@/components/theme/ScrollReveal";
 
 export default function CreatorVisualGallery() {
   // Clean static gallery data ready for future backend integration
@@ -102,7 +103,7 @@ export default function CreatorVisualGallery() {
         {/* =========================================================
             1. TOP CONTENT: CENTERED INTRO & DESIGNED HEADING
         ========================================================= */}
-        <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
+        <ScrollReveal direction="up" delay={0} className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
           <span className="text-[11px] font-bold tracking-[0.22em] uppercase text-secondary font-sans block mb-3">
             10 / VISUAL GALLERY
           </span>
@@ -119,7 +120,7 @@ export default function CreatorVisualGallery() {
           <p className="text-sm sm:text-base text-slate-600 dark:text-text-secondary font-sans leading-relaxed max-w-xl mx-auto">
             Join over 12,000 discerning creators showcasing authentic work across beauty, architecture, travel, and quiet luxury.
           </p>
-        </div>
+        </ScrollReveal>
 
         {/* =========================================================
             2. VISUAL GALLERY GRID (EDITORIAL STAGGERED LAYOUT)
@@ -130,9 +131,12 @@ export default function CreatorVisualGallery() {
             - Very small mobile: 1 column
         ========================================================= */}
         <div className="grid grid-cols-1 max-[400px]:grid-cols-1 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-5 lg:gap-5 items-start">
-          {galleryItems.map((item) => (
-            <article
+          {galleryItems.map((item, idx) => (
+            <ScrollReveal
               key={item.id}
+              as="article"
+              direction="up"
+              delay={(idx % 5) * 60}
               className="group relative bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 hover:border-secondary/60 rounded-[24px] sm:rounded-[28px] overflow-hidden shadow-sm hover:shadow-[0_16px_36px_-8px_rgba(255,79,135,0.22)] hover:-translate-y-1.5 transition-all duration-300 ease-out w-full"
             >
               <div className={`relative w-full ${item.aspectRatio} overflow-hidden bg-slate-100 dark:bg-white/5`}>
@@ -151,7 +155,7 @@ export default function CreatorVisualGallery() {
                   </span>
                 </div>
               </div>
-            </article>
+            </ScrollReveal>
           ))}
         </div>
 

@@ -1,11 +1,15 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@/redux/auth/auth_slice";
 import { clearProfile } from "@/redux/creator/profile/profile_slice";
+import {
+  fetchCreatorUnreadNotificationCount,
+  markCreatorCategoryNotificationsRead
+} from "@/redux/creator/notifications/notifications_slice";
 
 // =========================================================
 // SVG ICONS
@@ -121,16 +125,23 @@ const navItems = [
   { name: "Dashboard", href: "/creator/dashboard", icon: DashboardIcon },
   { name: "Portfolio", href: "/creator/portfolio", icon: PortfolioIcon },
   { name: "Services", href: "/creator/services", icon: ServicesIcon },
-  { name: "Campaigns", href: "/creator/campaigns", icon: CampaignsIcon },
+  { name: "Campaigns", href: "/creator/campaigns", icon: CampaignsIcon, categories: ["campaign", "booking"] },
   { name: "Discover Campaigns", href: "/creator/campaigns/discover", icon: DiscoverIcon },
-  { name: "Workspace", href: "/creator/workspace", icon: WorkspaceIcon },
-  { name: "Messages", href: "/creator/messages", icon: MessagesIcon },
-  { name: "Payments", href: "/creator/payments", icon: PaymentsIcon },
-  { name: "Reviews", href: "/creator/reviews", icon: ReviewsIcon },
+  { name: "Workspace", href: "/creator/workspace", icon: WorkspaceIcon, categories: ["workspace"] },
+  { name: "Messages", href: "/creator/messages", icon: MessagesIcon, categories: ["message"] },
+  { name: "Payments", href: "/creator/payments", icon: PaymentsIcon, categories: ["payment"] },
+  { name: "Reviews", href: "/creator/reviews", icon: ReviewsIcon, categories: ["review"] },
   { name: "Notifications", href: "/creator/notifications", icon: NotificationsIcon },
 ];
 
-function SidebarContent({ pathname, setMobileOpen, handleLogout, collapsed = false, toggleCollapsed = () => {} }) {
+function SidebarContent({
+  pathname,
+  setMobileOpen,
+  handleLogout,
+  collapsed = false,
+  toggleCollapsed = () => {},
+  countsByCategory = {}
+}) {
   return (
     <div
       className={`flex flex-col h-full bg-surface text-foreground border-r border-border-theme select-none transition-all duration-300 ease-in-out ${
@@ -205,6 +216,11 @@ function SidebarContent({ pathname, setMobileOpen, handleLogout, collapsed = fal
               pathname?.startsWith("/creator/campaigns/") &&
               !pathname?.startsWith("/creator/campaigns/discover"));
 
+          const badgeCount = (item.categories || []).reduce(
+            (sum, cat) => sum + (countsByCategory[cat] || 0),
+            0
+          );
+
           return (
             <Link
               key={item.name}
@@ -225,12 +241,28 @@ function SidebarContent({ pathname, setMobileOpen, handleLogout, collapsed = fal
                     }`
               }`}
             >
-              <Icon
-                className={`w-[18px] h-[18px] shrink-0 transition-colors ${
-                  isActive ? "text-[#ff2d6c]" : "text-text-secondary group-hover:text-foreground"
-                }`}
-              />
-              {!collapsed && <span className="truncate">{item.name}</span>}
+              <div className="relative flex items-center justify-center shrink-0">
+                <Icon
+                  className={`w-[18px] h-[18px] shrink-0 transition-colors ${
+                    isActive ? "text-[#ff2d6c]" : "text-text-secondary group-hover:text-foreground"
+                  }`}
+                />
+                {collapsed && badgeCount > 0 && (
+                  <span className="absolute -top-1.5 -right-2 px-1 min-w-[14px] h-[14px] flex items-center justify-center rounded-full text-[9px] font-bold bg-[#ff2d6c] text-white leading-none shrink-0 shadow-2xs">
+                    {badgeCount > 99 ? "99+" : badgeCount}
+                  </span>
+                )}
+              </div>
+              {!collapsed && (
+                <>
+                  <span className="truncate flex-1">{item.name}</span>
+                  {badgeCount > 0 && (
+                    <span className="ml-auto px-1.5 py-0.5 min-w-[18px] h-[18px] flex items-center justify-center rounded-full text-[10px] font-bold bg-[#ff2d6c] text-white leading-none shrink-0 shadow-2xs">
+                      {badgeCount > 99 ? "99+" : badgeCount}
+                    </span>
+                  )}
+                </>
+              )}
             </Link>
           );
         })}
@@ -268,6 +300,48 @@ export default function CreatorSidebar({ mobileOpen = false, setMobileOpen = () 
   const pathname = usePathname();
   const router = useRouter();
   const dispatch = useDispatch();
+
+  const countsByCategory = useSelector(
+    (state) => state.creatorNotifications?.countsByCategory || {}
+  );
+
+  // Fetch unread notification counts on mount
+  useEffect(() => {
+    dispatch(fetchCreatorUnreadNotificationCount());
+  }, [dispatch]);
+
+  // Automatically mark module notifications as read when the module is actively viewed
+  const lastMarkedRef = useRef("");
+
+  useEffect(() => {
+    if (!pathname) return;
+
+    const matchingItem = navItems.find((item) => {
+      if (!item.categories || item.categories.length === 0) return false;
+      if (pathname === item.href) return true;
+      if (item.href === "/creator/campaigns") {
+        return (
+          pathname.startsWith("/creator/campaigns/") &&
+          !pathname.startsWith("/creator/campaigns/discover")
+        );
+      }
+      return pathname.startsWith(item.href + "/");
+    });
+
+    if (!matchingItem) return;
+
+    const unreadCountForModule = matchingItem.categories.reduce(
+      (sum, cat) => sum + (countsByCategory[cat] || 0),
+      0
+    );
+
+    const markKey = `${pathname}:${matchingItem.categories.join(",")}`;
+
+    if (unreadCountForModule > 0 && lastMarkedRef.current !== markKey) {
+      lastMarkedRef.current = markKey;
+      dispatch(markCreatorCategoryNotificationsRead(matchingItem.categories.join(",")));
+    }
+  }, [pathname, countsByCategory, dispatch]);
 
   const [collapsed, setCollapsed] = useState(() => {
     if (typeof window !== "undefined") {
@@ -331,6 +405,7 @@ export default function CreatorSidebar({ mobileOpen = false, setMobileOpen = () 
           handleLogout={handleLogout}
           collapsed={collapsed}
           toggleCollapsed={toggleCollapsed}
+          countsByCategory={countsByCategory}
         />
       </aside>
 
@@ -348,6 +423,7 @@ export default function CreatorSidebar({ mobileOpen = false, setMobileOpen = () 
               handleLogout={handleLogout}
               collapsed={false}
               toggleCollapsed={() => {}}
+              countsByCategory={countsByCategory}
             />
           </div>
         </div>

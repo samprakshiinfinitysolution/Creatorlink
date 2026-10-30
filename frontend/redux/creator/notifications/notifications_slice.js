@@ -7,6 +7,7 @@ import {
     getCreatorNotifications as getCreatorNotificationsApi,
     getCreatorUnreadNotificationCount as getCreatorUnreadNotificationCountApi,
     markCreatorNotificationRead as markCreatorNotificationReadApi,
+    markCreatorCategoryNotificationsRead as markCreatorCategoryNotificationsReadApi,
     markAllCreatorNotificationsRead as markAllCreatorNotificationsReadApi
 } from "./notifications_api";
 
@@ -94,6 +95,21 @@ const markCreatorNotificationRead = createAsyncThunk(
     }
 );
 
+// Handles marking all notifications for a specific category as read for creator.
+const markCreatorCategoryNotificationsRead = createAsyncThunk(
+    "creatorNotifications/markCreatorCategoryNotificationsRead",
+    async (category, { rejectWithValue }) => {
+        try {
+            return await markCreatorCategoryNotificationsReadApi(category);
+        } catch (error) {
+            return rejectWithValue(
+                error.response?.data?.message ||
+                "Unable to mark category notifications as read"
+            );
+        }
+    }
+);
+
 // Handles marking all notifications as read for creator.
 const markAllCreatorNotificationsRead = createAsyncThunk(
     "creatorNotifications/markAllCreatorNotificationsRead",
@@ -109,16 +125,27 @@ const markAllCreatorNotificationsRead = createAsyncThunk(
     }
 );
 
+const initialCountsByCategory = {
+    booking: 0,
+    workspace: 0,
+    campaign: 0,
+    payment: 0,
+    review: 0,
+    message: 0
+};
+
 const initialState = {
     notifications: [],
     dropdownNotifications: [],
     unreadCount: 0,
+    countsByCategory: { ...initialCountsByCategory },
     pagination: null,
     loading: false,
     dropdownLoading: false,
     unreadCountLoading: false,
     markingRead: false,
     markingAllRead: false,
+    markingCategoryRead: false,
     currentRequestId: null,
     error: null,
     dropdownError: null
@@ -158,6 +185,12 @@ const creatorNotificationsSlice = createSlice({
 
             if (!notification.isRead && !inNotifications && !inDropdown) {
                 state.unreadCount += 1;
+                const cat = notification.entityType;
+                if (cat && typeof state.countsByCategory[cat] === "number") {
+                    state.countsByCategory[cat] += 1;
+                } else if (cat) {
+                    state.countsByCategory[cat] = 1;
+                }
             }
         },
 
@@ -219,6 +252,12 @@ const creatorNotificationsSlice = createSlice({
                     typeof action.payload?.data?.unreadCount === "number"
                         ? action.payload.data.unreadCount
                         : 0;
+                if (action.payload?.data?.countsByCategory) {
+                    state.countsByCategory = {
+                        ...initialCountsByCategory,
+                        ...action.payload.data.countsByCategory
+                    };
+                }
             })
             .addCase(fetchCreatorUnreadNotificationCount.rejected, (state) => {
                 state.unreadCountLoading = false;
@@ -280,6 +319,10 @@ const creatorNotificationsSlice = createSlice({
 
                     if (wasUnread) {
                         state.unreadCount = Math.max(0, (Number(state.unreadCount) || 0) - 1);
+                        const cat = updatedNotification?.entityType;
+                        if (cat && typeof state.countsByCategory[cat] === "number" && state.countsByCategory[cat] > 0) {
+                            state.countsByCategory[cat] = Math.max(0, state.countsByCategory[cat] - 1);
+                        }
                     }
                 }
                 state.error = null;
@@ -308,11 +351,141 @@ const creatorNotificationsSlice = createSlice({
                     readAt: item.readAt || nowIso
                 }));
                 state.unreadCount = 0;
+                state.countsByCategory = { ...initialCountsByCategory };
                 state.error = null;
             })
             .addCase(markAllCreatorNotificationsRead.rejected, (state, action) => {
                 state.markingAllRead = false;
                 state.error = action.payload || "Unable to mark all notifications as read";
+            })
+
+            // Mark Category Read
+            .addCase(markCreatorCategoryNotificationsRead.pending, (state) => {
+                state.markingCategoryRead = true;
+                state.error = null;
+            })
+            .addCase(markCreatorCategoryNotificationsRead.fulfilled, (state, action) => {
+                state.markingCategoryRead = false;
+                const categoryParam = action.payload?.data?.category || action.meta?.arg;
+                const markedIds = (action.payload?.data?.markedNotificationIds || []).map(String);
+                const modifiedCount = action.payload?.data?.modifiedCount || markedIds.length;
+
+                const rawList = Array.isArray(categoryParam)
+                    ? categoryParam
+                    : String(categoryParam || "").split(",").map((s) => s.trim().toLowerCase());
+
+                const aliasMap = {
+                    bookings: "booking",
+                    campaigns: "campaign",
+                    workspaces: "workspace",
+                    payments: "payment",
+                    reviews: "review",
+                    messages: "message"
+                };
+
+                const categoriesToClear = rawList.map((item) => aliasMap[item] || item);
+                const nowIso = new Date().toISOString();
+
+                state.notifications = state.notifications.map((item) => {
+                    if (
+                        !item.isRead &&
+                        (markedIds.includes(String(item._id)) || categoriesToClear.includes(item.entityType))
+                    ) {
+                        return {
+                            ...item,
+                            isRead: true,
+                            readAt: item.readAt || nowIso
+                        };
+                    }
+                    return item;
+                });
+
+                state.dropdownNotifications = state.dropdownNotifications.map((item) => {
+                    if (
+                        !item.isRead &&
+                        (markedIds.includes(String(item._id)) || categoriesToClear.includes(item.entityType))
+                    ) {
+                        return {
+                            ...item,
+                            isRead: true,
+                            readAt: item.readAt || nowIso
+                        };
+                    }
+                    return item;
+                });
+
+                categoriesToClear.forEach((cat) => {
+                    if (typeof state.countsByCategory[cat] === "number") {
+                        state.countsByCategory[cat] = 0;
+                    }
+                });
+
+                if (modifiedCount > 0) {
+                    state.unreadCount = Math.max(0, (Number(state.unreadCount) || 0) - modifiedCount);
+                }
+                state.error = null;
+            })
+            .addCase(markCreatorCategoryNotificationsRead.rejected, (state, action) => {
+                state.markingCategoryRead = false;
+                state.error = action.payload || "Unable to mark category notifications as read";
+            })
+
+            // Automatically synchronize notifications when a conversation is marked as read
+            .addCase("creatorMessages/markCreatorConversationRead/fulfilled", (state, action) => {
+                const targetConversationId = action.payload?.conversationId;
+                const markedIds =
+                    action.payload?.markedNotificationIds ||
+                    action.payload?.response?.data?.markedNotificationIds ||
+                    action.payload?.response?.markedNotificationIds ||
+                    [];
+                const markedIdStrs = markedIds.map(String);
+
+                let markedCount = 0;
+
+                state.notifications = state.notifications.map((item) => {
+                    if (
+                        !item.isRead &&
+                        item.entityType === "message" &&
+                        (markedIdStrs.includes(String(item._id)) ||
+                         (targetConversationId &&
+                          (String(item.entityId) === String(targetConversationId) ||
+                           String(item.metadata?.conversationId) === String(targetConversationId))))
+                    ) {
+                        markedCount += 1;
+                        return {
+                            ...item,
+                            isRead: true,
+                            readAt: new Date().toISOString()
+                        };
+                    }
+                    return item;
+                });
+
+                state.dropdownNotifications = state.dropdownNotifications.map((item) => {
+                    if (
+                        !item.isRead &&
+                        item.entityType === "message" &&
+                        (markedIdStrs.includes(String(item._id)) ||
+                         (targetConversationId &&
+                          (String(item.entityId) === String(targetConversationId) ||
+                           String(item.metadata?.conversationId) === String(targetConversationId))))
+                    ) {
+                        return {
+                            ...item,
+                            isRead: true,
+                            readAt: new Date().toISOString()
+                        };
+                    }
+                    return item;
+                });
+
+                if (markedIds.length > 0) {
+                    state.unreadCount = Math.max(0, (Number(state.unreadCount) || 0) - markedIds.length);
+                    state.countsByCategory.message = Math.max(0, (state.countsByCategory.message || 0) - markedIds.length);
+                } else if (markedCount > 0) {
+                    state.unreadCount = Math.max(0, (Number(state.unreadCount) || 0) - markedCount);
+                    state.countsByCategory.message = Math.max(0, (state.countsByCategory.message || 0) - markedCount);
+                }
             })
 
             // Reset state on authentication changes
@@ -333,6 +506,7 @@ export {
     fetchCreatorDropdownNotifications,
     fetchCreatorUnreadNotificationCount,
     markCreatorNotificationRead,
+    markCreatorCategoryNotificationsRead,
     markAllCreatorNotificationsRead
 };
 

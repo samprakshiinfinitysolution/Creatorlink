@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import ScrollReveal from "@/components/theme/ScrollReveal";
 
 export default function PricingPlans() {
   const [isYearly, setIsYearly] = useState(true);
@@ -113,7 +114,7 @@ export default function PricingPlans() {
         {/* =========================================================
             1. TOP CONTENT: EYEBROW, HEADING WITH HIGHLIGHT & SUBTITLE
         ========================================================= */}
-        <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
+        <ScrollReveal direction="up" delay={0} className="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
 
           {/* Eyebrow Pill */}
           <div className="inline-flex items-center gap-2 bg-secondary/15 dark:bg-secondary/20 border border-pink-200/80 dark:border-pink-500/20 rounded-full px-4 py-1.5 mb-5 shadow-xs">
@@ -135,12 +136,12 @@ export default function PricingPlans() {
           <p className="text-sm sm:text-base text-slate-600 dark:text-text-secondary font-sans leading-relaxed max-w-2xl mx-auto">
             Choose the plan that fits your campaigns, creators and growth. Transparent tiers built for digital tastemakers and forward-thinking brands.
           </p>
-        </div>
+        </ScrollReveal>
 
         {/* =========================================================
             2. BILLING TOGGLE (MONTHLY / YEARLY)
         ========================================================= */}
-        <div className="flex justify-center mb-16 sm:mb-20">
+        <ScrollReveal direction="up" delay={80} className="flex justify-center mb-16 sm:mb-20">
           <div className="bg-slate-200/70 dark:bg-surface border border-slate-200/90 dark:border-white/10 rounded-full p-1.5 inline-flex items-center gap-1 shadow-inner">
 
             {/* Monthly Button */}
@@ -170,7 +171,7 @@ export default function PricingPlans() {
               </span>
             </button>
           </div>
-        </div>
+        </ScrollReveal>
 
         {/* =========================================================
             3. PRICING CARDS GRID (4 EQUAL CARDS ON DESKTOP)
@@ -180,11 +181,16 @@ export default function PricingPlans() {
             - Mobile: 1 column
         ========================================================= */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-6 xl:gap-8 items-stretch pt-6">
-          {plansData.map((plan) => {
+          {plansData.map((plan, idx) => {
             const price = isYearly ? plan.yearlyPrice : plan.monthlyPrice;
 
             return (
-              <div key={plan.id} className="relative flex flex-col justify-end">
+              <ScrollReveal
+                key={plan.id}
+                direction="up"
+                delay={idx * 80}
+                className="relative flex flex-col justify-end"
+              >
 
                 {/* Top Floating Banner (Most Popular / Best Value) */}
                 {plan.topBanner && (
@@ -259,8 +265,8 @@ export default function PricingPlans() {
 
                     {/* Features List */}
                     <ul className="space-y-3 font-sans text-xs sm:text-sm text-slate-600 dark:text-text-secondary">
-                      {plan.features.map((feature, idx) => (
-                        <li key={idx} className="flex items-start gap-2.5">
+                      {plan.features.map((feature, fIdx) => (
+                        <li key={fIdx} className="flex items-start gap-2.5">
                           <span className="text-secondary font-bold text-xs leading-none mt-0.5">
                             ✓
                           </span>
@@ -271,7 +277,7 @@ export default function PricingPlans() {
                   </div>
                 </article>
 
-              </div>
+              </ScrollReveal>
             );
           })}
         </div>

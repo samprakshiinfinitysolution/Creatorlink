@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 
 function SunIcon({ className = "w-[18px] h-[18px]" }) {
   return (
@@ -48,32 +48,34 @@ function MoonIcon({ className = "w-[18px] h-[18px]" }) {
   );
 }
 
+const emptySubscribe = () => () => {};
+
 export default function ThemeToggle({ className = "" }) {
-  const [mounted, setMounted] = useState(false);
-  const [dark, setDark] = useState(false);
+  const mounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
 
-  useEffect(() => {
-    setMounted(true);
+  const [dark, setDark] = useState(() => {
+    if (typeof window === "undefined") return false;
     const savedTheme = localStorage.getItem("theme");
-    const isDarkMode = savedTheme === "dark" || document.documentElement.classList.contains("dark");
-
-    if (isDarkMode) {
-      document.documentElement.classList.add("dark");
-      setDark(true);
-    } else {
-      document.documentElement.classList.remove("dark");
-      setDark(false);
-    }
-  }, []);
+    return (
+      savedTheme === "dark" ||
+      document.documentElement.classList.contains("dark")
+    );
+  });
 
   const toggleTheme = () => {
     const nextDark = !dark;
 
     if (nextDark) {
       document.documentElement.classList.add("dark");
+      document.documentElement.style.colorScheme = "dark";
       localStorage.setItem("theme", "dark");
     } else {
       document.documentElement.classList.remove("dark");
+      document.documentElement.style.colorScheme = "light";
       localStorage.setItem("theme", "light");
     }
 

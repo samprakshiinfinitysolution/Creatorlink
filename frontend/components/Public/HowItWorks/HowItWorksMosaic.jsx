@@ -2,6 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
+import ScrollReveal from "@/components/theme/ScrollReveal";
 
 export default function HowItWorksMosaic() {
   return (
@@ -15,7 +16,7 @@ export default function HowItWorksMosaic() {
         {/* -------------------------------------------------------
             SECTION HEADER: EYEBROW, HEADING, DESCRIPTION
         ------------------------------------------------------- */}
-        <div className="max-w-xl mx-auto mb-10 sm:mb-14">
+        <ScrollReveal direction="up" delay={0} className="max-w-xl mx-auto mb-10 sm:mb-14">
           {/* Eyebrow */}
           <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-slate-500 dark:text-text-muted block mb-3 font-sans text-center">
             LOOKBOOK CANVAS
@@ -31,7 +32,7 @@ export default function HowItWorksMosaic() {
           <p className="text-xs sm:text-sm text-slate-600 dark:text-text-secondary font-sans leading-relaxed max-w-lg mx-auto text-center">
             Every piece of content created through Creator Hub reflects timeless craftsmanship and commercial impact.
           </p>
-        </div>
+        </ScrollReveal>
 
 
         {/* -------------------------------------------------------
@@ -40,7 +41,7 @@ export default function HowItWorksMosaic() {
         <div className="max-w-[860px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 items-start">
           
           {/* COLUMN 1: Campaign Still + Agency Directors */}
-          <div className="space-y-4 sm:space-y-5">
+          <ScrollReveal direction="up" delay={80} className="space-y-4 sm:space-y-5">
             
             {/* Card 1: Campaign Still */}
             <div className="bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 rounded-2xl overflow-hidden shadow-2xs hover:-translate-y-1 hover:scale-[1.01] hover:border-pink-200 dark:hover:border-pink-500/30 hover:shadow-md transition-all duration-300 ease-out cursor-pointer group text-left">
@@ -83,11 +84,11 @@ export default function HowItWorksMosaic() {
               </div>
             </div>
 
-          </div>
+          </ScrollReveal>
 
 
           {/* COLUMN 2: Featured Artist (Taller Center) + Trust & Governance */}
-          <div className="space-y-4 sm:space-y-5">
+          <ScrollReveal direction="up" delay={160} className="space-y-4 sm:space-y-5">
             
             {/* Card 2: Featured Artist */}
             <div className="bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 rounded-2xl overflow-hidden shadow-2xs hover:-translate-y-1 hover:scale-[1.01] hover:border-pink-200 dark:hover:border-pink-500/30 hover:shadow-md transition-all duration-300 ease-out cursor-pointer group text-left relative">
@@ -127,11 +128,11 @@ export default function HowItWorksMosaic() {
               </p>
             </div>
 
-          </div>
+          </ScrollReveal>
 
 
           {/* COLUMN 3: Verified Production */}
-          <div className="space-y-4 sm:space-y-5 md:col-span-2 lg:col-span-1">
+          <ScrollReveal direction="up" delay={240} className="space-y-4 sm:space-y-5 md:col-span-2 lg:col-span-1">
             
             {/* Card 3: Verified Production */}
             <div className="bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 rounded-2xl overflow-hidden shadow-2xs hover:-translate-y-1 hover:scale-[1.01] hover:border-pink-200 dark:hover:border-pink-500/30 hover:shadow-md transition-all duration-300 ease-out cursor-pointer group text-left">
@@ -149,7 +150,7 @@ export default function HowItWorksMosaic() {
               </div>
             </div>
 
-          </div>
+          </ScrollReveal>
 
         </div>
 

@@ -3,6 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import ScrollReveal from "@/components/theme/ScrollReveal";
 
 export default function CreatorDiscovery() {
   return (
@@ -16,7 +17,7 @@ export default function CreatorDiscovery() {
         {/* =========================================================
             1. TOP CONTENT: CENTERED INTRO
         ========================================================= */}
-        <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
+        <ScrollReveal direction="up" delay={0} className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
           <span className="text-[11px] font-bold tracking-[0.22em] uppercase text-secondary font-sans block mb-3">
             03 / DISCOVERY
           </span>
@@ -26,7 +27,7 @@ export default function CreatorDiscovery() {
           <p className="text-sm sm:text-base text-slate-600 dark:text-text-secondary font-sans leading-relaxed">
             No generic bidding boards. Opportunities are matched to your precise niche, visual palette, and audience demographics.
           </p>
-        </div>
+        </ScrollReveal>
 
         {/* =========================================================
             2. MAIN 3-COLUMN COMPOSITION
@@ -36,7 +37,7 @@ export default function CreatorDiscovery() {
           {/* -------------------------------------------------------
               LEFT COLUMN: TWO STACKED CAMPAIGN CARDS (4 COLS)
           ------------------------------------------------------- */}
-          <div className="lg:col-span-4 space-y-6">
+          <ScrollReveal direction="up" delay={80} className="lg:col-span-4 space-y-6">
             
             {/* CARD 1: FITLAB ACTIVE */}
             <div className="group bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 hover:border-secondary/60 rounded-3xl p-6 shadow-sm hover:shadow-[0_12px_32px_-8px_rgba(255,79,135,0.2)] hover:-translate-y-1 transition-all duration-300 relative text-left">
@@ -94,12 +95,12 @@ export default function CreatorDiscovery() {
               </div>
             </div>
 
-          </div>
+          </ScrollReveal>
 
           {/* -------------------------------------------------------
               CENTER COLUMN: CREATOR PORTRAIT + MATCH BADGE (4 COLS)
           ------------------------------------------------------- */}
-          <div className="lg:col-span-4 flex flex-col items-center">
+          <ScrollReveal direction="up" delay={160} className="lg:col-span-4 flex flex-col items-center">
             
             {/* Center Creator Portrait Card */}
             <div className="group bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 hover:border-secondary/60 rounded-[36px] p-3 shadow-sm hover:shadow-[0_12px_32px_-8px_rgba(255,79,135,0.2)] hover:-translate-y-1 transition-all duration-300 relative overflow-hidden w-full max-w-[340px] mb-5">
@@ -125,12 +126,12 @@ export default function CreatorDiscovery() {
               Algorithm matches your palette & follower engagement
             </p>
 
-          </div>
+          </ScrollReveal>
 
           {/* -------------------------------------------------------
               RIGHT COLUMN: TOP COMPATIBILITY CARD (4 COLS)
           ------------------------------------------------------- */}
-          <div className="lg:col-span-4">
+          <ScrollReveal direction="up" delay={240} className="lg:col-span-4">
             <div className="group bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 hover:border-secondary/60 rounded-[32px] p-7 shadow-sm hover:shadow-[0_12px_32px_-8px_rgba(255,79,135,0.2)] hover:-translate-y-1 transition-all duration-300 relative text-left">
               
               {/* Top Floating Pill */}
@@ -186,7 +187,7 @@ export default function CreatorDiscovery() {
               </Link>
 
             </div>
-          </div>
+          </ScrollReveal>
 
         </div>
 

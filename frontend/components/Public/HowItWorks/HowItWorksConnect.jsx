@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import ScrollReveal from "@/components/theme/ScrollReveal";
 
 export default function HowItWorksConnect() {
   return (
@@ -15,7 +16,7 @@ export default function HowItWorksConnect() {
           {/* -------------------------------------------------------
               LEFT COLUMN: EYEBROW, HEADING, DESCRIPTION & FEATURE PILL
           ------------------------------------------------------- */}
-          <div className="lg:col-span-5 text-left">
+          <ScrollReveal direction="up" delay={0} className="lg:col-span-5 text-left">
             
             {/* Eyebrow */}
             <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-secondary block mb-4 font-sans">
@@ -46,13 +47,13 @@ export default function HowItWorksConnect() {
               </span>
             </div>
 
-          </div>
+          </ScrollReveal>
 
 
           {/* -------------------------------------------------------
               RIGHT COLUMN: CONVERSATION WORKSPACE CARD
           ------------------------------------------------------- */}
-          <div className="lg:col-span-7">
+          <ScrollReveal direction="left" delay={120} className="lg:col-span-7">
             
             {/* Main Conversation Workspace Card */}
             <div className="bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 rounded-[28px] sm:rounded-[36px] p-6 sm:p-8 lg:p-9 shadow-sm hover:-translate-y-[5px] hover:scale-[1.01] hover:border-secondary/40 hover:shadow-[0_16px_36px_-8px_rgba(255,79,135,0.18)] transition-all duration-300 ease-out cursor-default text-left">
@@ -98,14 +99,14 @@ export default function HowItWorksConnect() {
                   </div>
                   
                   <div className="bg-[#FFF5F7] dark:bg-secondary/[0.08] border border-pink-100/90 dark:border-pink-500/20 rounded-2xl rounded-tl-xs p-4 text-xs sm:text-sm text-slate-700 dark:text-slate-200 font-sans leading-relaxed max-w-[90%] sm:max-w-[82%] hover:-translate-y-[2px] hover:shadow-xs transition-all duration-300 ease-out">
-                    We'd love to work with you on our new beauty launch. Your lighting style in your recent botanical film is exactly what we have in mind for our serum reveal.
+                    We&apos;d love to work with you on our new beauty launch. Your lighting style in your recent botanical film is exactly what we have in mind for our serum reveal.
                   </div>
                 </div>
 
                 {/* Second Message (Creator - Right Aligned) */}
                 <div className="flex items-start gap-3 justify-end">
                   <div className="bg-[#FDF2F5] dark:bg-secondary/[0.12] border border-pink-100/90 dark:border-pink-500/25 rounded-2xl rounded-tr-xs p-4 text-xs sm:text-sm text-slate-700 dark:text-slate-200 font-sans leading-relaxed max-w-[90%] sm:max-w-[82%] hover:-translate-y-[2px] hover:shadow-xs transition-all duration-300 ease-out text-left">
-                    I love the brief! I have an idea for the opening macro shot already ✨ Let's do a golden hour reflection through the bottle glass.
+                    I love the brief! I have an idea for the opening macro shot already ✨ Let&apos;s do a golden hour reflection through the bottle glass.
                   </div>
 
                   <div className="w-8 h-8 rounded-full bg-[#FCE7F3] dark:bg-secondary/30 text-secondary dark:text-pink-100 font-sans font-bold text-[11px] flex items-center justify-center flex-shrink-0 border border-pink-200/60 dark:border-pink-500/20 mt-1 shadow-2xs">
@@ -130,7 +131,7 @@ export default function HowItWorksConnect() {
 
             </div>
 
-          </div>
+          </ScrollReveal>
 
         </div>
       </div>

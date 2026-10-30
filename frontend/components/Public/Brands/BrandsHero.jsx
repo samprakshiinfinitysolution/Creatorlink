@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import ScrollReveal from "@/components/theme/ScrollReveal";
 
 export default function BrandsHero() {
   return (
@@ -66,7 +67,7 @@ export default function BrandsHero() {
           {/* =========================================================
               LEFT COLUMN: EDITORIAL CONTENT
           ========================================================= */}
-          <div className="lg:col-span-6 xl:col-span-6 text-left">
+          <ScrollReveal direction="up" delay={0} className="lg:col-span-6 xl:col-span-6 text-left">
             {/* Small Pill */}
             <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-secondary/10 border border-secondary/20 mb-6">
               <span className="text-secondary text-xs">•</span>
@@ -128,12 +129,12 @@ export default function BrandsHero() {
                 Trusted by modern luxury houses, boutique agencies & direct-to-consumer icons.
               </p>
             </div>
-          </div>
+          </ScrollReveal>
 
           {/* =========================================================
               RIGHT COLUMN: 4 CREATOR CARDS EDITORIAL COMPOSITION
           ========================================================= */}
-          <div className="lg:col-span-6 xl:col-span-6 relative">
+          <ScrollReveal direction="left" delay={120} className="lg:col-span-6 xl:col-span-6 relative">
             <div className="relative w-full max-w-[620px] mx-auto h-[500px] sm:h-[560px] flex items-center justify-center">
 
               {/* TOP CARD 1 (Camille Dupont - Top Left) */}
@@ -281,7 +282,7 @@ export default function BrandsHero() {
               </div>
 
             </div>
-          </div>
+          </ScrollReveal>
         </div>
       </div>
     </section>

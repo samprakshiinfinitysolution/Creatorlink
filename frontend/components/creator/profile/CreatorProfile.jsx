@@ -598,9 +598,11 @@ export default function CreatorProfile() {
           {/* Section Heading & Edit Toggle Button */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <span className="inline-block px-3 py-1 rounded-full text-[10px] font-semibold tracking-wider uppercase bg-[#fff0f4] dark:bg-[#2a171f] text-[#ff2d6c] border border-[#ff2d6c]/20 mb-2 font-sans">
-                ACCOUNT MANAGEMENT
-              </span>
+              <div className="mb-2">
+                <span className="font-bold text-[11px] tracking-wider uppercase text-[#ff2d6c] dark:text-[#ff4f87] font-sans">
+                  ACCOUNT MANAGEMENT
+                </span>
+              </div>
               <h1 className="font-serif font-medium text-2xl sm:text-3xl text-slate-900 dark:text-foreground tracking-wide">
                 Creator Profile
               </h1>

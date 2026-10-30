@@ -327,13 +327,10 @@ export default function CreatorReviewsManager() {
           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div className="space-y-2">
                 {/* Verification Badge */}
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white dark:bg-surface-muted border border-neutral-200/80 dark:border-border-theme text-xs font-semibold text-neutral-900 dark:text-white shadow-2xs">
-                  <span className="w-3.5 h-3.5 rounded-full bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 flex items-center justify-center shrink-0">
-                    <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-[11px] tracking-wider uppercase text-[#ff2d6c] dark:text-[#ff4f87] font-sans">
+                    Verified Brand Feedback
                   </span>
-                  <span>Verified Brand Feedback</span>
                 </div>
 
                 <h1 className="font-serif font-medium text-3xl sm:text-4xl text-neutral-950 dark:text-white tracking-tight">

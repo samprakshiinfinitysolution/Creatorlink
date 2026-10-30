@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import ScrollReveal from '@/components/theme/ScrollReveal';
 
 const WORKFLOW_STEPS = [
   {
@@ -100,25 +101,27 @@ export default function AboutWorkflow() {
         {/* ====================================================
             1. SECTION HEADER CONTENT
         ==================================================== */}
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-10 sm:mb-14 lg:mb-20 gap-6">
-          <div className="max-w-2xl">
-            {/* Eyebrow Pill */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface border border-border-theme text-[10px] sm:text-xs font-mono font-bold tracking-wider text-secondary uppercase mb-4 sm:mb-6 shadow-sm">
-              <span className="text-secondary text-xs sm:text-sm">📈</span>
-              <span>PINNED WORKFLOW</span>
+        <ScrollReveal direction="up" delay={0}>
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-10 sm:mb-14 lg:mb-20 gap-6">
+            <div className="max-w-2xl">
+              {/* Eyebrow Pill */}
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface border border-border-theme text-[10px] sm:text-xs font-mono font-bold tracking-wider text-secondary uppercase mb-4 sm:mb-6 shadow-sm">
+                <span className="text-secondary text-xs sm:text-sm">📈</span>
+                <span>PINNED WORKFLOW</span>
+              </div>
+
+              {/* Main Heading */}
+              <h2 className="text-3xl sm:text-5xl lg:text-6xl font-serif font-medium tracking-tight text-foreground leading-[1.15]">
+                From initial pin to cultural reality.
+              </h2>
             </div>
 
-            {/* Main Heading */}
-            <h2 className="text-3xl sm:text-5xl lg:text-6xl font-serif font-medium tracking-tight text-foreground leading-[1.15]">
-              From initial pin to cultural reality.
-            </h2>
+            {/* Supporting Text */}
+            <p className="text-sm sm:text-base lg:text-lg font-sans text-text-secondary leading-relaxed max-w-md">
+              A frictionless 5-step continuum designed to respect creator voice while ensuring brand clarity.
+            </p>
           </div>
-
-          {/* Supporting Text */}
-          <p className="text-sm sm:text-base lg:text-lg font-sans text-text-secondary leading-relaxed max-w-md">
-            A frictionless 5-step continuum designed to respect creator voice while ensuring brand clarity.
-          </p>
-        </div>
+        </ScrollReveal>
 
         {/* ====================================================
             2. FIVE WORKFLOW CARDS GRID
@@ -127,69 +130,75 @@ export default function AboutWorkflow() {
             Mobile: 1 column clean stacked layout
         ==================================================== */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-5 lg:gap-4 max-w-sm md:max-w-none mx-auto">
-          {WORKFLOW_STEPS.map((card) => {
+          {WORKFLOW_STEPS.map((card, index) => {
             return (
-              <div
+              <ScrollReveal
                 key={card.step}
-                className="group relative flex flex-col items-start p-6 sm:p-7 rounded-[22px] sm:rounded-[26px] bg-surface border border-border-theme shadow-md hover:shadow-2xl transition-all duration-500 ease-out hover:-translate-y-2 hover:scale-[1.02] hover:border-secondary cursor-pointer min-h-[300px] sm:min-h-[320px] justify-between"
+                direction="up"
+                delay={index * 60}
+                className="h-full"
               >
-                {/* Floating inner container wrapper for continuous non-hover motion */}
                 <div
-                  className="workflow-float-card flex flex-col items-start w-full h-full justify-between"
-                  style={{
-                    animation: `${card.animationName} ${card.floatDuration} ease-in-out ${card.floatDelay} infinite`,
-                  }}
+                  className="group relative flex flex-col items-start p-6 sm:p-7 rounded-[22px] sm:rounded-[26px] bg-surface border border-border-theme shadow-md hover:shadow-2xl transition-all duration-500 ease-out hover:-translate-y-2 hover:scale-[1.02] hover:border-secondary cursor-pointer min-h-[300px] sm:min-h-[320px] justify-between h-full"
                 >
-                  {/* TOP DECORATION & BADGE */}
-                  <div className="w-full flex flex-col items-start mb-6">
-                    {/* Pink Striped Washi Tape Element */}
-                    <div
-                      className="w-10 h-2.5 rounded-sm bg-secondary/25 border border-secondary/30 mb-5 opacity-80 group-hover:opacity-100 transition-opacity"
-                      style={{
-                        backgroundImage:
-                          'repeating-linear-gradient(135deg, rgba(236,72,153,0.4) 0px, rgba(236,72,153,0.4) 3px, transparent 3px, transparent 7px)',
-                      }}
-                      aria-hidden="true"
-                    />
+                  {/* Floating inner container wrapper for continuous non-hover motion */}
+                  <div
+                    className="workflow-float-card flex flex-col items-start w-full h-full justify-between"
+                    style={{
+                      animation: `${card.animationName} ${card.floatDuration} ease-in-out ${card.floatDelay} infinite`,
+                    }}
+                  >
+                    {/* TOP DECORATION & BADGE */}
+                    <div className="w-full flex flex-col items-start mb-6">
+                      {/* Pink Striped Washi Tape Element */}
+                      <div
+                        className="w-10 h-2.5 rounded-sm bg-secondary/25 border border-secondary/30 mb-5 opacity-80 group-hover:opacity-100 transition-opacity"
+                        style={{
+                          backgroundImage:
+                            'repeating-linear-gradient(135deg, rgba(236,72,153,0.4) 0px, rgba(236,72,153,0.4) 3px, transparent 3px, transparent 7px)',
+                        }}
+                        aria-hidden="true"
+                      />
 
-                    {/* Circular Number Badge */}
-                    {card.badgeType === 'pink' ? (
-                      /* Card 04 - Strong Pink Badge */
-                      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-secondary text-primary-foreground font-serif font-bold text-xs sm:text-sm flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
-                        {card.step}
-                      </div>
-                    ) : card.badgeType === 'dark' ? (
-                      /* Card 05 - Dark/Black Badge */
-                      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-foreground text-background font-serif font-bold text-xs sm:text-sm flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
-                        {card.step}
-                      </div>
-                    ) : (
-                      /* Cards 01-03 - Standard Light Surface Badge */
-                      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-border-theme bg-surface text-foreground font-serif font-bold text-xs sm:text-sm flex items-center justify-center shadow-sm group-hover:border-secondary group-hover:text-secondary group-hover:scale-105 transition-all">
-                        {card.step}
-                      </div>
-                    )}
-                  </div>
+                      {/* Circular Number Badge */}
+                      {card.badgeType === 'pink' ? (
+                        /* Card 04 - Strong Pink Badge */
+                        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-secondary text-primary-foreground font-serif font-bold text-xs sm:text-sm flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
+                          {card.step}
+                        </div>
+                      ) : card.badgeType === 'dark' ? (
+                        /* Card 05 - Dark/Black Badge */
+                        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-foreground text-background font-serif font-bold text-xs sm:text-sm flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
+                          {card.step}
+                        </div>
+                      ) : (
+                        /* Cards 01-03 - Standard Light Surface Badge */
+                        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-border-theme bg-surface text-foreground font-serif font-bold text-xs sm:text-sm flex items-center justify-center shadow-sm group-hover:border-secondary group-hover:text-secondary group-hover:scale-105 transition-all">
+                          {card.step}
+                        </div>
+                      )}
+                    </div>
 
-                  {/* BOTTOM CONTENT: STAGE, TITLE, DESCRIPTION */}
-                  <div className="w-full flex flex-col items-start">
-                    {/* Stage Label */}
-                    <span className="font-mono text-[10px] sm:text-[11px] font-bold text-secondary tracking-widest uppercase mb-1">
-                      {card.stage}
-                    </span>
+                    {/* BOTTOM CONTENT: STAGE, TITLE, DESCRIPTION */}
+                    <div className="w-full flex flex-col items-start">
+                      {/* Stage Label */}
+                      <span className="font-mono text-[10px] sm:text-[11px] font-bold text-secondary tracking-widest uppercase mb-1">
+                        {card.stage}
+                      </span>
 
-                    {/* Stage Title */}
-                    <h3 className="font-serif text-lg sm:text-xl font-bold tracking-tight text-foreground group-hover:text-secondary transition-colors mb-2 sm:mb-3">
-                      {card.title}
-                    </h3>
+                      {/* Stage Title */}
+                      <h3 className="font-serif text-lg sm:text-xl font-bold tracking-tight text-foreground group-hover:text-secondary transition-colors mb-2 sm:mb-3">
+                        {card.title}
+                      </h3>
 
-                    {/* Description Paragraph */}
-                    <p className="font-sans text-xs sm:text-sm text-text-secondary leading-relaxed">
-                      {card.description}
-                    </p>
+                      {/* Description Paragraph */}
+                      <p className="font-sans text-xs sm:text-sm text-text-secondary leading-relaxed">
+                        {card.description}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </ScrollReveal>
             );
           })}
         </div>

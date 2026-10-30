@@ -30,6 +30,19 @@ const markCreatorNotificationRead = async (notificationId) => {
     return response.data;
 };
 
+// Creator marks all unread notifications in a specific category as read.
+const markCreatorCategoryNotificationsRead = async (category) => {
+    const response = await axiosInstance.patch(
+        "/creator/notifications/read-all",
+        {},
+        {
+            params: { category }
+        }
+    );
+
+    return response.data;
+};
+
 // Creator marks all unread notifications as read.
 const markAllCreatorNotificationsRead = async () => {
     const response = await axiosInstance.patch(
@@ -43,5 +56,6 @@ export {
     getCreatorNotifications,
     getCreatorUnreadNotificationCount,
     markCreatorNotificationRead,
+    markCreatorCategoryNotificationsRead,
     markAllCreatorNotificationsRead
 };

@@ -3,6 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import ScrollReveal from "@/components/theme/ScrollReveal";
 
 export default function HowItWorksHero() {
   return (
@@ -17,7 +18,7 @@ export default function HowItWorksHero() {
           {/* -------------------------------------------------------
               LEFT COLUMN: EYEBROW, HEADING, DESCRIPTION, CTAS & STATS
           ------------------------------------------------------- */}
-          <div className="lg:col-span-6 text-left">
+          <ScrollReveal direction="up" delay={0} className="lg:col-span-6 text-left">
 
             {/* 1. Eyebrow Pill */}
             <div className="inline-flex items-center gap-2 bg-[#FCE7F3]/70 dark:bg-secondary/20 border border-pink-200/80 dark:border-pink-500/20 rounded-full px-4 py-1.5 mb-6 shadow-2xs">
@@ -92,12 +93,12 @@ export default function HowItWorksHero() {
               </div>
             </div>
 
-          </div>
+          </ScrollReveal>
 
           {/* -------------------------------------------------------
               RIGHT COLUMN: EDITORIAL VISUAL WITH OVERLAY CARDS & PILLS
           ------------------------------------------------------- */}
-          <div className="lg:col-span-6 relative flex flex-col items-center lg:items-end justify-center min-h-[560px] pt-8 pb-28 lg:py-6">
+          <ScrollReveal direction="left" delay={120} className="lg:col-span-6 relative flex flex-col items-center lg:items-end justify-center min-h-[560px] pt-8 pb-28 lg:py-6">
 
             {/* Outer relative visual box with max-width and right alignment on desktop */}
             <div className="relative w-full max-w-[480px] lg:w-[490px] lg:max-w-[490px]">
@@ -164,12 +165,12 @@ export default function HowItWorksHero() {
               {/* Approval Notification Pill (Centered underneath Live Brief card) */}
               <div className="absolute -bottom-24 left-3 sm:-left-4 lg:-left-10 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/80 dark:border-white/10 rounded-full px-4 py-2 text-xs font-sans text-slate-700 dark:text-text-secondary shadow-md hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-2 cursor-pointer max-w-fit">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse flex-shrink-0" />
-                <span>"Concept reel approved by creative director."</span>
+                <span>&quot;Concept reel approved by creative director.&quot;</span>
               </div>
 
             </div>
 
-          </div>
+          </ScrollReveal>
 
         </div>
       </div>

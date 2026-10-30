@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import ScrollReveal from "@/components/theme/ScrollReveal";
 
 export default function HowItWorksLifecycle() {
   const stages = [
@@ -80,7 +81,7 @@ export default function HowItWorksLifecycle() {
         {/* -------------------------------------------------------
             SECTION HEADER: EYEBROW, HEADING, DESCRIPTION
         ------------------------------------------------------- */}
-        <div className="max-w-3xl mx-auto mb-12 sm:mb-16">
+        <ScrollReveal direction="up" delay={0} className="max-w-3xl mx-auto mb-12 sm:mb-16">
           {/* Eyebrow */}
           <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-secondary block mb-4 font-sans text-center">
             END-TO-END ORCHESTRATION
@@ -96,7 +97,7 @@ export default function HowItWorksLifecycle() {
           <p className="text-sm sm:text-base text-slate-400 font-sans leading-relaxed max-w-xl mx-auto text-center">
             A coherent continuum where every stage preserves artistic integrity and transactional safety.
           </p>
-        </div>
+        </ScrollReveal>
 
 
         {/* -------------------------------------------------------
@@ -104,8 +105,10 @@ export default function HowItWorksLifecycle() {
         ------------------------------------------------------- */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-9 gap-3 sm:gap-3.5">
           {stages.map((stage, idx) => (
-            <div
+            <ScrollReveal
               key={idx}
+              direction="up"
+              delay={(idx % 9) * 40}
               className="bg-[#222226] border border-white/10 rounded-2xl p-4 sm:p-4.5 text-left transition-all duration-300 ease-out cursor-pointer hover:-translate-y-[4px] hover:scale-[1.01] hover:border-secondary hover:shadow-[0_8px_24px_-4px_rgba(255,79,135,0.25)] flex flex-col justify-between min-h-[140px] sm:min-h-[155px] group"
             >
               {/* Stage Number */}
@@ -124,7 +127,7 @@ export default function HowItWorksLifecycle() {
               <p className="font-sans text-[11px] sm:text-xs text-slate-400 leading-snug block font-medium">
                 {stage.description}
               </p>
-            </div>
+            </ScrollReveal>
           ))}
         </div>
 

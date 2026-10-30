@@ -1,11 +1,15 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@/redux/auth/auth_slice";
 import { clearBrandProfile } from "@/redux/brand/profile/profile_slice";
+import {
+  fetchBrandUnreadNotificationCount,
+  markBrandCategoryNotificationsRead
+} from "@/redux/brand/notifications/notifications_slice";
 
 // =========================================================
 // SVG ICONS
@@ -111,17 +115,24 @@ function CloseIcon({ className = "w-5 h-5" }) {
 // =========================================================
 const navItems = [
   { name: "Dashboard", href: "/brand/dashboard", icon: DashboardIcon },
-  { name: "Campaigns", href: "/brand/campaigns", icon: CampaignsIcon },
+  { name: "Campaigns", href: "/brand/campaigns", icon: CampaignsIcon, categories: ["campaign"] },
   { name: "Discover Creators", href: "/brand/creators", icon: DiscoverIcon },
-  { name: "Bookings", href: "/brand/bookings", icon: BookingsIcon },
-  { name: "Workspace", href: "/brand/workspace", icon: WorkspaceIcon },
-  { name: "Messages", href: "/brand/messages", icon: MessagesIcon },
-  { name: "Payments", href: "/brand/payments", icon: PaymentsIcon },
-  { name: "Reviews", href: "/brand/reviews", icon: ReviewsIcon },
+  { name: "Bookings", href: "/brand/bookings", icon: BookingsIcon, categories: ["booking"] },
+  { name: "Workspace", href: "/brand/workspace", icon: WorkspaceIcon, categories: ["workspace"] },
+  { name: "Messages", href: "/brand/messages", icon: MessagesIcon, categories: ["message"] },
+  { name: "Payments", href: "/brand/payments", icon: PaymentsIcon, categories: ["payment"] },
+  { name: "Reviews", href: "/brand/reviews", icon: ReviewsIcon, categories: ["review"] },
   { name: "Notifications", href: "/brand/notifications", icon: NotificationsIcon },
 ];
 
-function SidebarContent({ pathname, setMobileOpen, handleLogout, collapsed = false, toggleCollapsed = () => {} }) {
+function SidebarContent({
+  pathname,
+  setMobileOpen,
+  handleLogout,
+  collapsed = false,
+  toggleCollapsed = () => {},
+  countsByCategory = {}
+}) {
   return (
     <div
       className={`flex flex-col h-full bg-surface text-foreground border-r border-border-theme select-none transition-all duration-300 ease-in-out ${
@@ -191,6 +202,11 @@ function SidebarContent({ pathname, setMobileOpen, handleLogout, collapsed = fal
             pathname === item.href ||
             (item.href !== "/brand/dashboard" && pathname?.startsWith(item.href + "/"));
 
+          const badgeCount = (item.categories || []).reduce(
+            (sum, cat) => sum + (countsByCategory[cat] || 0),
+            0
+          );
+
           return (
             <Link
               key={item.name}
@@ -211,12 +227,28 @@ function SidebarContent({ pathname, setMobileOpen, handleLogout, collapsed = fal
                     }`
               }`}
             >
-              <Icon
-                className={`w-[18px] h-[18px] shrink-0 transition-colors ${
-                  isActive ? "text-[#ff2d6c]" : "text-text-secondary group-hover:text-foreground"
-                }`}
-              />
-              {!collapsed && <span className="truncate">{item.name}</span>}
+              <div className="relative flex items-center justify-center shrink-0">
+                <Icon
+                  className={`w-[18px] h-[18px] shrink-0 transition-colors ${
+                    isActive ? "text-[#ff2d6c]" : "text-text-secondary group-hover:text-foreground"
+                  }`}
+                />
+                {collapsed && badgeCount > 0 && (
+                  <span className="absolute -top-1.5 -right-2 px-1 min-w-[14px] h-[14px] flex items-center justify-center rounded-full text-[9px] font-bold bg-[#ff2d6c] text-white leading-none shrink-0 shadow-2xs">
+                    {badgeCount > 99 ? "99+" : badgeCount}
+                  </span>
+                )}
+              </div>
+              {!collapsed && (
+                <>
+                  <span className="truncate flex-1">{item.name}</span>
+                  {badgeCount > 0 && (
+                    <span className="ml-auto px-1.5 py-0.5 min-w-[18px] h-[18px] flex items-center justify-center rounded-full text-[10px] font-bold bg-[#ff2d6c] text-white leading-none shrink-0 shadow-2xs">
+                      {badgeCount > 99 ? "99+" : badgeCount}
+                    </span>
+                  )}
+                </>
+              )}
             </Link>
           );
         })}
@@ -254,6 +286,41 @@ export default function BrandSidebar({ mobileOpen = false, setMobileOpen = () =>
   const pathname = usePathname();
   const router = useRouter();
   const dispatch = useDispatch();
+
+  const countsByCategory = useSelector(
+    (state) => state.brandNotifications?.countsByCategory || {}
+  );
+
+  // Fetch unread notification counts on mount
+  useEffect(() => {
+    dispatch(fetchBrandUnreadNotificationCount());
+  }, [dispatch]);
+
+  // Automatically mark module notifications as read when the module is actively viewed
+  const lastMarkedRef = useRef("");
+
+  useEffect(() => {
+    if (!pathname) return;
+
+    const matchingItem = navItems.find((item) => {
+      if (!item.categories || item.categories.length === 0) return false;
+      return pathname === item.href || (item.href !== "/brand/dashboard" && pathname.startsWith(item.href + "/"));
+    });
+
+    if (!matchingItem) return;
+
+    const unreadCountForModule = matchingItem.categories.reduce(
+      (sum, cat) => sum + (countsByCategory[cat] || 0),
+      0
+    );
+
+    const markKey = `${pathname}:${matchingItem.categories.join(",")}`;
+
+    if (unreadCountForModule > 0 && lastMarkedRef.current !== markKey) {
+      lastMarkedRef.current = markKey;
+      dispatch(markBrandCategoryNotificationsRead(matchingItem.categories.join(",")));
+    }
+  }, [pathname, countsByCategory, dispatch]);
 
   const [collapsed, setCollapsed] = useState(() => {
     if (typeof window !== "undefined") {
@@ -317,6 +384,7 @@ export default function BrandSidebar({ mobileOpen = false, setMobileOpen = () =>
           handleLogout={handleLogout}
           collapsed={collapsed}
           toggleCollapsed={toggleCollapsed}
+          countsByCategory={countsByCategory}
         />
       </aside>
 
@@ -334,6 +402,7 @@ export default function BrandSidebar({ mobileOpen = false, setMobileOpen = () =>
               handleLogout={handleLogout}
               collapsed={false}
               toggleCollapsed={() => {}}
+              countsByCategory={countsByCategory}
             />
           </div>
         </div>

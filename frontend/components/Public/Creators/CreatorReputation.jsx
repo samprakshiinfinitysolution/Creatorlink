@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import ScrollReveal from "@/components/theme/ScrollReveal";
 
 export default function CreatorReputation() {
   // Clean structure ready for future backend integration
@@ -40,7 +41,7 @@ export default function CreatorReputation() {
         {/* =========================================================
             1. TOP CONTENT: CENTERED INTRO
         ========================================================= */}
-        <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
+        <ScrollReveal direction="up" delay={0} className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
           <span className="text-[11px] font-bold tracking-[0.22em] uppercase text-secondary font-sans block mb-3">
             08 / REPUTATION
           </span>
@@ -50,7 +51,7 @@ export default function CreatorReputation() {
           <p className="text-sm sm:text-base text-slate-600 dark:text-text-secondary font-sans leading-relaxed">
             Build cumulative creative capital. High ratings and authentic reviews unlock higher-tier luxury brand private invites.
           </p>
-        </div>
+        </ScrollReveal>
 
         {/* =========================================================
             2. MAIN CONTENT (TWO COLUMNS: TESTIMONIAL CARD & STATS)
@@ -60,7 +61,7 @@ export default function CreatorReputation() {
           {/* -------------------------------------------------------
               LEFT COLUMN: LARGE WHITE TESTIMONIAL CARD (Lg: 7 Cols / ~60%)
           ------------------------------------------------------- */}
-          <div className="lg:col-span-7">
+          <ScrollReveal direction="up" delay={80} className="lg:col-span-7">
             <div className="bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 hover:border-secondary/60 rounded-[32px] sm:rounded-[36px] p-6 sm:p-10 shadow-sm hover:shadow-[0_12px_36px_-8px_rgba(255,79,135,0.18)] hover:-translate-y-1 hover:scale-[1.005] transition-all duration-300 relative text-left group">
               
               {/* Star Rating */}
@@ -94,12 +95,12 @@ export default function CreatorReputation() {
               </div>
 
             </div>
-          </div>
+          </ScrollReveal>
 
           {/* -------------------------------------------------------
               RIGHT COLUMN: THREE REPUTATION STATS (Lg: 5 Cols / ~40%)
           ------------------------------------------------------- */}
-          <div className="lg:col-span-5 text-left space-y-6 sm:space-y-8">
+          <ScrollReveal direction="left" delay={160} className="lg:col-span-5 text-left space-y-6 sm:space-y-8">
             {reputationData.stats.map((stat, idx) => (
               <React.Fragment key={idx}>
                 <div>
@@ -119,7 +120,7 @@ export default function CreatorReputation() {
                 )}
               </React.Fragment>
             ))}
-          </div>
+          </ScrollReveal>
 
         </div>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import ScrollReveal from "@/components/theme/ScrollReveal";
 
 export default function HowItWorksPay() {
   const pipelineSteps = [
@@ -62,7 +63,7 @@ export default function HowItWorksPay() {
           {/* -------------------------------------------------------
               LEFT COLUMN: EYEBROW, HEADING, DESCRIPTION & RELEASED PAYOUT CARD
           ------------------------------------------------------- */}
-          <div className="lg:col-span-5 text-left">
+          <ScrollReveal direction="up" delay={0} className="lg:col-span-5 text-left">
             
             {/* Eyebrow */}
             <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-secondary block mb-4 font-sans">
@@ -87,17 +88,17 @@ export default function HowItWorksPay() {
                 ₹30,000.00 Released
               </span>
               <p className="font-sans text-xs sm:text-sm text-slate-600 dark:text-text-secondary leading-relaxed">
-                Instantly transferred to Aarohi Mehta's verified bank account via Creator Hub Escrow Rail.
+                Instantly transferred to Aarohi Mehta&apos;s verified bank account via Creator Hub Escrow Rail.
               </p>
             </div>
 
-          </div>
+          </ScrollReveal>
 
 
           {/* -------------------------------------------------------
               RIGHT COLUMN: ESCROW PIPELINE LIFECYCLE CARD
           ------------------------------------------------------- */}
-          <div className="lg:col-span-7">
+          <ScrollReveal direction="left" delay={120} className="lg:col-span-7">
             
             {/* Main Outer Escrow Pipeline Card */}
             <div className="bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 rounded-[28px] sm:rounded-[36px] p-6 sm:p-8 lg:p-9 shadow-sm hover:-translate-y-[4px] hover:scale-[1.005] hover:border-secondary/40 hover:shadow-[0_16px_36px_-8px_rgba(255,79,135,0.18)] transition-all duration-300 ease-out cursor-default text-left">
@@ -169,7 +170,7 @@ export default function HowItWorksPay() {
 
             </div>
 
-          </div>
+          </ScrollReveal>
 
         </div>
       </div>

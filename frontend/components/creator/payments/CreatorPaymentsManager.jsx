@@ -285,13 +285,11 @@ export default function CreatorPaymentsManager() {
           {/* Header Section */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              {hasTestModeRecord && (
-                <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-secondary/10 text-secondary border border-secondary/20 uppercase tracking-wider">
-                    Razorpay Test Mode Enabled
-                  </span>
-                </div>
-              )}
+              <div className="flex items-center gap-2 mb-2">
+                <span className="font-bold text-[11px] tracking-wider uppercase text-[#ff2d6c] dark:text-[#ff4f87] font-sans">
+                  {hasTestModeRecord ? "RAZORPAY TEST MODE ENABLED" : "PAYMENTS & EARNINGS"}
+                </span>
+              </div>
               <h1 className="font-serif font-medium text-2xl sm:text-3xl text-foreground tracking-tight mt-1">
                 Received Payments And Earnings
               </h1>

@@ -51,16 +51,27 @@ const markNotificationRead = asyncHandler(async (req, res) => {
     );
 });
 
-// Authenticated user marks all their unread notifications as read.
+// Authenticated user marks unread notifications as read (all or by category/module).
 const markAllNotificationsRead = asyncHandler(async (req, res) => {
+    const category =
+        req.params?.category ||
+        req.query?.category ||
+        req.query?.entityType ||
+        req.body?.category ||
+        req.body?.entityType ||
+        null;
+
     const result = await markAllNotificationsReadService(
-        req.user.userId
+        req.user.userId,
+        category
     );
 
     return sendResponse(
         res,
         200,
-        "All notifications marked as read",
+        category
+            ? `Notifications for '${category}' marked as read`
+            : "All notifications marked as read",
         result
     );
 });

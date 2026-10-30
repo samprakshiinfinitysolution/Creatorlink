@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import ScrollReveal from "@/components/theme/ScrollReveal";
 
 export default function HowItWorksGrow() {
   const stats = [
@@ -32,7 +33,7 @@ export default function HowItWorksGrow() {
         {/* -------------------------------------------------------
             SECTION HEADER: EYEBROW, HEADING, DESCRIPTION
         ------------------------------------------------------- */}
-        <div className="max-w-3xl mx-auto mb-12 sm:mb-16">
+        <ScrollReveal direction="up" delay={0} className="max-w-3xl mx-auto mb-12 sm:mb-16">
           {/* Eyebrow */}
           <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-secondary block mb-4 font-sans text-center">
             09 · GROW &amp; NURTURE
@@ -40,7 +41,7 @@ export default function HowItWorksGrow() {
 
           {/* Editorial Main Heading */}
           <h2 className="text-3xl sm:text-4xl lg:text-[44px] font-serif font-medium tracking-tight text-slate-900 dark:text-foreground leading-[1.15] mb-5 text-center">
-            Great collaborations don't end with <br className="hidden sm:inline" />
+            Great collaborations don&apos;t end with <br className="hidden sm:inline" />
             one campaign.
           </h2>
 
@@ -48,72 +49,74 @@ export default function HowItWorksGrow() {
           <p className="text-sm sm:text-base text-slate-600 dark:text-text-secondary font-sans leading-relaxed max-w-2xl mx-auto text-center">
             Transforms singular partnerships into long-term brand ambassador guilds through verifiable reputation scores and seamless re-hiring.
           </p>
-        </div>
+        </ScrollReveal>
 
 
         {/* -------------------------------------------------------
             MAIN TESTIMONIAL & STATS CARD
         ------------------------------------------------------- */}
-        <div className="max-w-[920px] mx-auto bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 rounded-[28px] sm:rounded-[36px] p-6 sm:p-10 lg:p-12 shadow-sm hover:-translate-y-[4px] hover:scale-[1.005] hover:border-secondary/40 hover:shadow-[0_16px_36px_-8px_rgba(255,79,135,0.18)] transition-all duration-300 ease-out cursor-default text-left">
-          
-          {/* Header Row: Avatar, Brand Info & Repeat Campaign Badge */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 sm:pb-8">
+        <ScrollReveal direction="scale" delay={80} className="max-w-[920px] mx-auto">
+          <div className="w-full bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 rounded-[28px] sm:rounded-[36px] p-6 sm:p-10 lg:p-12 shadow-sm hover:-translate-y-[4px] hover:scale-[1.005] hover:border-secondary/40 hover:shadow-[0_16px_36px_-8px_rgba(255,79,135,0.18)] transition-all duration-300 ease-out cursor-default text-left">
             
-            {/* Avatar & Brand Name */}
-            <div className="flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-full bg-[#FCE7F3] dark:bg-secondary/30 text-secondary dark:text-pink-100 font-sans font-bold text-xs flex items-center justify-center border border-pink-200/60 dark:border-pink-500/20 shadow-2xs flex-shrink-0">
-                GB
-              </div>
+            {/* Header Row: Avatar, Brand Info & Repeat Campaign Badge */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 sm:pb-8">
               
-              <div>
-                <h3 className="font-sans font-bold text-sm sm:text-base text-slate-900 dark:text-foreground leading-snug">
-                  Glow Beauty Official
-                </h3>
+              {/* Avatar & Brand Name */}
+              <div className="flex items-center gap-3.5">
+                <div className="w-10 h-10 rounded-full bg-[#FCE7F3] dark:bg-secondary/30 text-secondary dark:text-pink-100 font-sans font-bold text-xs flex items-center justify-center border border-pink-200/60 dark:border-pink-500/20 shadow-2xs flex-shrink-0">
+                  GB
+                </div>
                 
-                <div className="flex items-center gap-1.5 mt-0.5 text-xs font-sans">
-                  <span className="text-amber-500 tracking-wider">★★★★★</span>
-                  <span className="text-slate-500 dark:text-text-muted font-medium text-[11px] sm:text-xs">
-                    (Verified Brand Review)
-                  </span>
+                <div>
+                  <h3 className="font-sans font-bold text-sm sm:text-base text-slate-900 dark:text-foreground leading-snug">
+                    Glow Beauty Official
+                  </h3>
+                  
+                  <div className="flex items-center gap-1.5 mt-0.5 text-xs font-sans">
+                    <span className="text-amber-500 tracking-wider">★★★★★</span>
+                    <span className="text-slate-500 dark:text-text-muted font-medium text-[11px] sm:text-xs">
+                      (Verified Brand Review)
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Status Pill Top-Right */}
-            <div className="self-start sm:self-auto">
-              <span className="bg-[#FCE7F3] dark:bg-secondary/30 text-secondary dark:text-pink-100 border border-pink-200/60 dark:border-pink-500/20 text-[10px] sm:text-xs font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-full font-sans inline-block shadow-2xs">
-                REPEAT CAMPAIGN EXTENDED
-              </span>
-            </div>
-
-          </div>
-
-          {/* Divider */}
-          <div className="border-t border-slate-100 dark:border-white/10 mb-6 sm:mb-8" />
-
-          {/* Testimonial Quote */}
-          <blockquote className="font-serif text-lg sm:text-xl lg:text-[22px] italic font-medium text-slate-800 dark:text-slate-100 leading-relaxed mb-8 sm:mb-10 text-left sm:text-center">
-            “Aarohi understood our visual guidelines immediately. Engagement exceeded targets by 34%, and Creator Hub’s approval workflow saved our creative team ten hours of back-and-forth.”
-          </blockquote>
-
-          {/* 3 Statistic Cards Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
-            {stats.map((stat) => (
-              <div
-                key={stat.id}
-                className="bg-[#FFF5F7] dark:bg-secondary/[0.08] border border-pink-100/90 dark:border-pink-500/20 rounded-2xl p-5 text-center hover:-translate-y-[4px] hover:scale-[1.01] hover:border-secondary/40 hover:shadow-xs transition-all duration-300 ease-out cursor-pointer"
-              >
-                <span className="font-serif text-3xl sm:text-4xl font-bold text-slate-900 dark:text-foreground block mb-1 leading-none">
-                  {stat.value}
-                </span>
-                <span className="text-[10px] sm:text-xs font-bold tracking-widest uppercase text-slate-500 dark:text-text-muted font-sans block">
-                  {stat.label}
+              {/* Status Pill Top-Right */}
+              <div className="self-start sm:self-auto">
+                <span className="bg-[#FCE7F3] dark:bg-secondary/30 text-secondary dark:text-pink-100 border border-pink-200/60 dark:border-pink-500/20 text-[10px] sm:text-xs font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-full font-sans inline-block shadow-2xs">
+                  REPEAT CAMPAIGN EXTENDED
                 </span>
               </div>
-            ))}
-          </div>
 
-        </div>
+            </div>
+
+            {/* Divider */}
+            <div className="border-t border-slate-100 dark:border-white/10 mb-6 sm:mb-8" />
+
+            {/* Testimonial Quote */}
+            <blockquote className="font-serif text-lg sm:text-xl lg:text-[22px] italic font-medium text-slate-800 dark:text-slate-100 leading-relaxed mb-8 sm:mb-10 text-left sm:text-center">
+              “Aarohi understood our visual guidelines immediately. Engagement exceeded targets by 34%, and Creator Hub’s approval workflow saved our creative team ten hours of back-and-forth.”
+            </blockquote>
+
+            {/* 3 Statistic Cards Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
+              {stats.map((stat) => (
+                <div
+                  key={stat.id}
+                  className="bg-[#FFF5F7] dark:bg-secondary/[0.08] border border-pink-100/90 dark:border-pink-500/20 rounded-2xl p-5 text-center hover:-translate-y-[4px] hover:scale-[1.01] hover:border-secondary/40 hover:shadow-xs transition-all duration-300 ease-out cursor-pointer"
+                >
+                  <span className="font-serif text-3xl sm:text-4xl font-bold text-slate-900 dark:text-foreground block mb-1 leading-none">
+                    {stat.value}
+                  </span>
+                  <span className="text-[10px] sm:text-xs font-bold tracking-widest uppercase text-slate-500 dark:text-text-muted font-sans block">
+                    {stat.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+          </div>
+        </ScrollReveal>
 
       </div>
 

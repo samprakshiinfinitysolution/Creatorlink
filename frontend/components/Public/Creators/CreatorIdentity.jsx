@@ -2,6 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
+import ScrollReveal from "@/components/theme/ScrollReveal";
 
 export default function CreatorIdentity() {
   return (
@@ -18,7 +19,7 @@ export default function CreatorIdentity() {
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-12 sm:mb-16">
           
           {/* Left Intro Text */}
-          <div className="max-w-2xl text-left">
+          <ScrollReveal direction="up" delay={0} className="max-w-2xl text-left">
             <span className="text-[11px] font-bold tracking-[0.22em] uppercase text-secondary font-sans block mb-3">
               02 / IDENTITY
             </span>
@@ -28,10 +29,10 @@ export default function CreatorIdentity() {
             <p className="text-sm sm:text-base text-slate-600 dark:text-text-secondary font-sans leading-relaxed">
               Show brands your signature aesthetic, palette, and creative cadence before you ever send a formal pitch deck.
             </p>
-          </div>
+          </ScrollReveal>
 
           {/* Right Creator Profile Pill */}
-          <div className="flex-shrink-0">
+          <ScrollReveal direction="left" delay={100} className="flex-shrink-0">
             <div className="bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 rounded-full px-4 py-2.5 inline-flex items-center gap-3 shadow-sm">
               <div className="w-8 h-8 rounded-full bg-secondary/15 text-secondary font-sans font-bold text-xs flex items-center justify-center">
                 AM
@@ -50,7 +51,7 @@ export default function CreatorIdentity() {
                 </p>
               </div>
             </div>
-          </div>
+          </ScrollReveal>
 
         </div>
 
@@ -62,7 +63,7 @@ export default function CreatorIdentity() {
           {/* -------------------------------------------------------
               COLUMN 1 (Lg: 3 cols): BEAUTY REEL & SPACES
           ------------------------------------------------------- */}
-          <div className="lg:col-span-3 space-y-6 sm:space-y-7">
+          <ScrollReveal direction="up" delay={80} className="lg:col-span-3 space-y-6 sm:space-y-7">
             
             {/* CARD 1: BEAUTY REEL */}
             <div className="group relative w-full h-[320px] sm:h-[350px] rounded-3xl overflow-hidden bg-slate-100 dark:bg-surface border border-black/[0.06] dark:border-white/10 shadow-sm hover:shadow-xl transition-all duration-300">
@@ -114,12 +115,12 @@ export default function CreatorIdentity() {
               </div>
             </div>
 
-          </div>
+          </ScrollReveal>
 
           {/* -------------------------------------------------------
               COLUMN 2 (Lg: 3 cols): TALL LOOKBOOK CARD
           ------------------------------------------------------- */}
-          <div className="lg:col-span-3">
+          <ScrollReveal direction="up" delay={160} className="lg:col-span-3">
             {/* CARD 2: LOOKBOOK #04 */}
             <div className="group relative w-full h-[566px] sm:h-[617px] rounded-3xl overflow-hidden bg-slate-100 dark:bg-surface border border-black/[0.06] dark:border-white/10 shadow-sm hover:shadow-xl transition-all duration-300">
               <Image
@@ -150,12 +151,12 @@ export default function CreatorIdentity() {
                 </p>
               </div>
             </div>
-          </div>
+          </ScrollReveal>
 
           {/* -------------------------------------------------------
               COLUMN 3 & 4 (Lg: 6 cols): TOP UGC & GASTRONOMY, BOTTOM WIDE FEATURED TRIP
           ------------------------------------------------------- */}
-          <div className="lg:col-span-6 space-y-6 sm:space-y-7">
+          <ScrollReveal direction="up" delay={240} className="lg:col-span-6 space-y-6 sm:space-y-7">
             
             {/* TOP ROW (2 SMALLER CARDS SIDE BY SIDE) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-7">
@@ -227,7 +228,7 @@ export default function CreatorIdentity() {
               </div>
             </div>
 
-          </div>
+          </ScrollReveal>
 
         </div>
 

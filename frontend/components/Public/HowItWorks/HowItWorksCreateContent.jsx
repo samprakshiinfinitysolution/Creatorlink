@@ -2,6 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
+import ScrollReveal from "@/components/theme/ScrollReveal";
 
 export default function HowItWorksCreateContent() {
   const categoryPills = ["CAMERA", "PRODUCT", "LIGHTING", "CONCEPT", "STORY"];
@@ -18,7 +19,7 @@ export default function HowItWorksCreateContent() {
           {/* -------------------------------------------------------
               LEFT COLUMN: EYEBROW, HEADING, DESCRIPTION & PILLS
           ------------------------------------------------------- */}
-          <div className="lg:col-span-5 text-left">
+          <ScrollReveal direction="up" delay={0} className="lg:col-span-5 text-left">
             
             {/* Eyebrow */}
             <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-secondary block mb-4 font-sans">
@@ -48,13 +49,13 @@ export default function HowItWorksCreateContent() {
               ))}
             </div>
 
-          </div>
+          </ScrollReveal>
 
 
           {/* -------------------------------------------------------
               RIGHT COLUMN: TALL PORTRAIT MEDIA CARD (STATIC IMAGE)
           ------------------------------------------------------- */}
-          <div className="lg:col-span-7 flex justify-center lg:justify-end">
+          <ScrollReveal direction="right" delay={120} className="lg:col-span-7 flex justify-center lg:justify-end">
             
             {/* Media Card Wrapper (Ready for future Video/API replacement) */}
             <div className="relative w-full max-w-[380px] sm:max-w-[420px] aspect-[9/14] sm:aspect-[9/13] rounded-[28px] sm:rounded-[36px] overflow-hidden bg-slate-900 shadow-xl hover:-translate-y-[6px] hover:scale-[1.01] hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.3)] transition-all duration-300 ease-out cursor-pointer group text-left">
@@ -97,7 +98,7 @@ export default function HowItWorksCreateContent() {
 
             </div>
 
-          </div>
+          </ScrollReveal>
 
         </div>
       </div>

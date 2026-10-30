@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import ScrollReveal from "@/components/theme/ScrollReveal";
 
 export default function TrustedBrands() {
   const brands = [
@@ -32,7 +33,7 @@ export default function TrustedBrands() {
 
   return (
     <section className="w-full bg-background text-foreground py-10 sm:py-12 lg:py-14 px-4 sm:px-6 lg:px-10 border-t border-b border-border-theme/60 transition-colors duration-300">
-      <div className="mx-auto max-w-[1320px] text-center">
+      <ScrollReveal direction="up" delay={0} className="mx-auto max-w-[1320px] text-center">
         
         {/* Eyebrow */}
         <span className="text-[10px] sm:text-[11px] font-bold tracking-[0.22em] uppercase text-secondary font-sans block mb-6 sm:mb-8">
@@ -55,7 +56,7 @@ export default function TrustedBrands() {
           ))}
         </div>
 
-      </div>
+      </ScrollReveal>
     </section>
   );
 }

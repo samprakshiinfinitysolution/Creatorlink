@@ -3,7 +3,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
-import { socket } from "@/lib/socket";
+import {
+  socket,
+  registerSocketConsumer,
+  unregisterSocketConsumer,
+  confirmSocketAuthSuccess,
+  handleSocketConnectionError
+} from "@/lib/socket";
 import { refreshToken } from "@/redux/auth/auth_slice";
 import {
   fetchCreatorConversations,
@@ -17,6 +23,9 @@ import {
   clearSuccessMessage,
   clearError
 } from "@/redux/creator/messages/messages_slice";
+import {
+  fetchCreatorUnreadNotificationCount
+} from "@/redux/creator/notifications/notifications_slice";
 
 // =========================================================
 // SVG ICONS
@@ -226,12 +235,24 @@ export default function CreatorMessages() {
     dispatch(fetchCreatorConversations());
   }, [dispatch]);
 
-  // Connect Socket.IO when the Creator Messages component mounts.
+  const authenticatedUserId =
+    authUser?._id ||
+    authUser?.id ||
+    authUser?.user?._id ||
+    authUser?.user?.id ||
+    authUser?.userId ||
+    null;
+
+  // Manage Socket.IO consumer lifecycle based on authenticated user availability.
   useEffect(() => {
-    if (!socket.connected) {
-      socket.connect();
-    }
-  }, []);
+    if (!authenticatedUserId) return;
+
+    registerSocketConsumer("creator-messages", authenticatedUserId);
+
+    return () => {
+      unregisterSocketConsumer("creator-messages");
+    };
+  }, [authenticatedUserId]);
 
   // Join the selected conversation's Socket.IO room.
   useEffect(() => {
@@ -272,9 +293,6 @@ export default function CreatorMessages() {
     };
   }, [selectedConversation?._id]);
 
-  const isRefreshingSocketRef = useRef(false);
-  const authRetryCountRef = useRef(0);
-
   const selectedConversationRef = useRef(selectedConversation);
   useEffect(() => {
     selectedConversationRef.current = selectedConversation;
@@ -288,12 +306,12 @@ export default function CreatorMessages() {
   // Listen for incoming real-time socket messages, read receipts, and handle socket auth errors.
   useEffect(() => {
     const handleConnectSuccess = () => {
-      authRetryCountRef.current = 0;
+      confirmSocketAuthSuccess();
     };
 
-    const handleNewMessage = (payload) => {
+    const handleNewMessage = async (payload) => {
       if (payload && payload.conversationId && payload.message) {
-        dispatch(addNewCreatorMessage(payload));
+        dispatch(addNewCreatorMessage({ ...payload, currentUserId: currentCreatorIdRef.current }));
 
         const msgReceiverId =
           typeof payload.message.receiver === "string"
@@ -307,7 +325,15 @@ export default function CreatorMessages() {
           msgReceiverId &&
           String(msgReceiverId) === String(currentCreatorIdRef.current)
         ) {
-          dispatch(markCreatorConversationRead(payload.conversationId));
+          const readResult = await dispatch(markCreatorConversationRead(payload.conversationId));
+          const markedNotificationIds =
+            readResult?.payload?.markedNotificationIds ||
+            readResult?.payload?.response?.data?.markedNotificationIds ||
+            readResult?.payload?.response?.markedNotificationIds ||
+            [];
+          if (markedNotificationIds.length > 0) {
+            dispatch(fetchCreatorUnreadNotificationCount());
+          }
         }
       }
     };
@@ -318,38 +344,8 @@ export default function CreatorMessages() {
       }
     };
 
-    const handleConnectError = async (err) => {
-      const errorMessage = err?.message || "";
-
-      const isAuthError =
-        errorMessage === "Invalid or expired access token" ||
-        errorMessage === "Authentication required" ||
-        errorMessage === "Invalid or expired session";
-
-      if (isAuthError) {
-        if (authRetryCountRef.current >= 3) {
-          console.error("Max socket authentication retry attempts reached. Disconnecting socket.");
-          socket.disconnect();
-          return;
-        }
-
-        if (!isRefreshingSocketRef.current) {
-          isRefreshingSocketRef.current = true;
-          authRetryCountRef.current += 1;
-          try {
-            await dispatch(refreshToken()).unwrap();
-            socket.disconnect();
-            socket.connect();
-          } catch (refreshErr) {
-            console.error("Token refresh failed for Socket.IO:", refreshErr);
-            socket.disconnect();
-          } finally {
-            isRefreshingSocketRef.current = false;
-          }
-        }
-      } else {
-        console.error("Socket connection error:", errorMessage);
-      }
+    const handleConnectError = (err) => {
+      handleSocketConnectionError(err, dispatch, refreshToken);
     };
 
     socket.on("connect", handleConnectSuccess);
@@ -383,11 +379,21 @@ export default function CreatorMessages() {
   const targetConversationId = searchParams?.get("conversationId");
 
   // Handle selecting a conversation thread
-  const handleSelectConversation = (conversationId) => {
+  const handleSelectConversation = async (conversationId) => {
     if (selectedConversation?._id && String(selectedConversation._id) === String(conversationId)) return;
     dispatch(clearSelectedConversation());
     dispatch(fetchCreatorConversationById(conversationId));
-    dispatch(markCreatorConversationRead(conversationId));
+    const readResult = await dispatch(markCreatorConversationRead(conversationId));
+
+    const markedNotificationIds =
+      readResult?.payload?.markedNotificationIds ||
+      readResult?.payload?.response?.data?.markedNotificationIds ||
+      readResult?.payload?.response?.markedNotificationIds ||
+      [];
+
+    if (markedNotificationIds.length > 0) {
+      dispatch(fetchCreatorUnreadNotificationCount());
+    }
   };
 
   // Auto-select conversation matching URL query parameter (bookingId or conversationId)
@@ -583,6 +589,7 @@ export default function CreatorMessages() {
                 const brandInitials = getInitials(brandName, brand?.email);
                 const brandImage = brand?.profileImage || brand?.logo || brand?.avatar || brand?.image;
                 const isSelected = selectedConversation?._id && String(selectedConversation._id) === String(item._id);
+                const hasUnread = !isSelected && Boolean(item.unreadCount && item.unreadCount > 0);
 
                 return (
                   <button
@@ -622,10 +629,18 @@ export default function CreatorMessages() {
                         </span>
                       )}
 
-                      {/* Last Message Snippet */}
-                      <p className="text-[11px] text-text-secondary truncate mt-0.5">
-                        {item.lastMessage || "No messages yet"}
-                      </p>
+                      {/* Last Message Snippet & Unread Dot */}
+                      <div className="flex items-center justify-between gap-2 mt-0.5">
+                        <p className="text-[11px] text-text-secondary truncate flex-1 min-w-0">
+                          {item.lastMessage || "No messages yet"}
+                        </p>
+                        {hasUnread && (
+                          <span
+                            className="w-2 h-2 rounded-full bg-red-500 shrink-0"
+                            aria-label="Unread message"
+                          />
+                        )}
+                      </div>
                     </div>
                   </button>
                 );

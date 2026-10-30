@@ -3,6 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import ScrollReveal from "@/components/theme/ScrollReveal";
 
 export default function PricingAutomatedInbound() {
   const creatorApplications = [
@@ -43,7 +44,7 @@ export default function PricingAutomatedInbound() {
           {/* =========================================================
               LEFT COLUMN: CONTENT & CHECKLIST (~42%)
           ========================================================= */}
-          <div className="lg:col-span-5 text-left">
+          <ScrollReveal direction="up" delay={0} className="lg:col-span-5 text-left">
             
             {/* Eyebrow */}
             <span className="text-[11px] font-bold tracking-[0.22em] uppercase text-secondary font-sans block mb-3">
@@ -83,12 +84,12 @@ export default function PricingAutomatedInbound() {
               </span>
             </Link>
 
-          </div>
+          </ScrollReveal>
 
           {/* =========================================================
               RIGHT COLUMN: CAMPAIGN DASHBOARD CONTAINER (~58%)
           ========================================================= */}
-          <div className="lg:col-span-7">
+          <ScrollReveal direction="left" delay={120} className="lg:col-span-7">
             <div className="bg-slate-100/70 dark:bg-surface border border-slate-200/80 dark:border-white/10 rounded-[28px] sm:rounded-[36px] p-5 sm:p-7 lg:p-8 shadow-xs text-left">
               
               {/* TOP CAMPAIGN BRIEF CARD */}
@@ -170,7 +171,7 @@ export default function PricingAutomatedInbound() {
               </div>
 
             </div>
-          </div>
+          </ScrollReveal>
 
         </div>
       </div>

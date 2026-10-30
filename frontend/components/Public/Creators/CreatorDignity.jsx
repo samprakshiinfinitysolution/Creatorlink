@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import ScrollReveal from "@/components/theme/ScrollReveal";
 
 export default function CreatorDignity() {
   // Clean structure ready for future backend integration
@@ -29,7 +30,7 @@ export default function CreatorDignity() {
         {/* =========================================================
             1. TOP CONTENT: CENTERED INTRO
         ========================================================= */}
-        <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
+        <ScrollReveal direction="up" delay={0} className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
           <span className="text-[11px] font-bold tracking-[0.22em] uppercase text-secondary font-sans block mb-3">
             07 / DIGNITY
           </span>
@@ -39,72 +40,74 @@ export default function CreatorDignity() {
           <p className="text-sm sm:text-base text-slate-600 dark:text-text-secondary font-sans leading-relaxed">
             No chasing invoices, net-90 payment delays, or ambiguous commission deductions. Guaranteed payouts released immediately upon milestone signoff.
           </p>
-        </div>
+        </ScrollReveal>
 
         {/* =========================================================
             2. MAIN SETTLED PAYMENT CARD
         ========================================================= */}
-        <div className="max-w-[880px] mx-auto bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 hover:border-secondary/60 rounded-[32px] sm:rounded-[36px] p-6 sm:p-10 shadow-sm hover:shadow-[0_12px_36px_-8px_rgba(255,79,135,0.18)] hover:-translate-y-1 hover:scale-[1.005] transition-all duration-300 relative text-left group">
-          
-          {/* Card Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <span className="text-[10px] font-bold tracking-widest uppercase text-slate-500 dark:text-text-muted font-sans block mb-1">
-                {payoutData.campaignLabel}
-              </span>
-              <h3 className="font-serif text-xl sm:text-2xl font-medium text-slate-900 dark:text-foreground">
-                {payoutData.campaignTitle}
-              </h3>
-            </div>
-
-            <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/40 text-emerald-700 dark:text-emerald-400 text-xs font-bold px-3.5 py-1.5 rounded-full flex items-center gap-1.5 flex-shrink-0 self-start sm:self-auto">
-              <span className="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-[10px] font-bold">
-                ✓
-              </span>
-              <span>{payoutData.payoutStatus}</span>
-            </div>
-          </div>
-
-          <div className="border-t border-slate-100 dark:border-white/10 my-6 sm:my-8" />
-
-          {/* Earnings Area */}
-          <div className="text-center py-2 sm:py-4">
-            <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-slate-500 dark:text-text-muted font-sans block mb-2">
-              NET CREATOR EARNINGS
-            </span>
-            <span className="font-serif text-5xl sm:text-6xl lg:text-7xl font-medium tracking-tight text-slate-900 dark:text-foreground mb-3 block">
-              {payoutData.netEarnings}
-            </span>
-            <p className="text-xs font-sans text-emerald-600 dark:text-emerald-400 font-medium flex items-center justify-center gap-1.5">
-              <span>✦</span>
-              <span>{payoutData.deductionNote}</span>
-            </p>
-          </div>
-
-          <div className="border-t border-slate-100 dark:border-white/10 my-6 sm:my-8" />
-
-          {/* 4-Stage Payment Status Tracker */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 items-center">
-            {payoutData.stages.map((stage, idx) => (
-              <div key={idx} className="flex flex-col items-center">
-                {/* Progress Segment Bar */}
-                <div className="w-full h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 shadow-xs" />
-                
-                {/* Stage Label */}
-                <span
-                  className={`text-[10px] sm:text-xs font-bold tracking-widest uppercase font-sans text-center mt-2.5 ${
-                    stage.isCurrent
-                      ? "text-slate-900 dark:text-foreground font-extrabold"
-                      : "text-slate-500 dark:text-text-muted"
-                  }`}
-                >
-                  {stage.name}
+        <ScrollReveal direction="scale" delay={100} className="max-w-[880px] mx-auto">
+          <div className="w-full bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 hover:border-secondary/60 rounded-[32px] sm:rounded-[36px] p-6 sm:p-10 shadow-sm hover:shadow-[0_12px_36px_-8px_rgba(255,79,135,0.18)] hover:-translate-y-1 hover:scale-[1.005] transition-all duration-300 relative text-left group">
+            
+            {/* Card Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <span className="text-[10px] font-bold tracking-widest uppercase text-slate-500 dark:text-text-muted font-sans block mb-1">
+                  {payoutData.campaignLabel}
                 </span>
+                <h3 className="font-serif text-xl sm:text-2xl font-medium text-slate-900 dark:text-foreground">
+                  {payoutData.campaignTitle}
+                </h3>
               </div>
-            ))}
-          </div>
 
-        </div>
+              <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/40 text-emerald-700 dark:text-emerald-400 text-xs font-bold px-3.5 py-1.5 rounded-full flex items-center gap-1.5 flex-shrink-0 self-start sm:self-auto">
+                <span className="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-[10px] font-bold">
+                  ✓
+                </span>
+                <span>{payoutData.payoutStatus}</span>
+              </div>
+            </div>
+
+            <div className="border-t border-slate-100 dark:border-white/10 my-6 sm:my-8" />
+
+            {/* Earnings Area */}
+            <div className="text-center py-2 sm:py-4">
+              <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-slate-500 dark:text-text-muted font-sans block mb-2">
+                NET CREATOR EARNINGS
+              </span>
+              <span className="font-serif text-5xl sm:text-6xl lg:text-7xl font-medium tracking-tight text-slate-900 dark:text-foreground mb-3 block">
+                {payoutData.netEarnings}
+              </span>
+              <p className="text-xs font-sans text-emerald-600 dark:text-emerald-400 font-medium flex items-center justify-center gap-1.5">
+                <span>✦</span>
+                <span>{payoutData.deductionNote}</span>
+              </p>
+            </div>
+
+            <div className="border-t border-slate-100 dark:border-white/10 my-6 sm:my-8" />
+
+            {/* 4-Stage Payment Status Tracker */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 items-center">
+              {payoutData.stages.map((stage, idx) => (
+                <div key={idx} className="flex flex-col items-center">
+                  {/* Progress Segment Bar */}
+                  <div className="w-full h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 shadow-xs" />
+                  
+                  {/* Stage Label */}
+                  <span
+                    className={`text-[10px] sm:text-xs font-bold tracking-widest uppercase font-sans text-center mt-2.5 ${
+                      stage.isCurrent
+                        ? "text-slate-900 dark:text-foreground font-extrabold"
+                        : "text-slate-500 dark:text-text-muted"
+                    }`}
+                  >
+                    {stage.name}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+          </div>
+        </ScrollReveal>
 
       </div>
     </section>

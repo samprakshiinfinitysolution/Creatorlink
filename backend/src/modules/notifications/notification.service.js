@@ -189,15 +189,51 @@ const getNotificationsService = async (userId, query = {}) => {
     };
 };
 
-// Gets the count of unread notifications for the authenticated user.
+// Gets the count of unread notifications for the authenticated user (total and grouped by entityType).
 const getUnreadNotificationCountService = async (userId) => {
-    const unreadCount = await Notification.countDocuments({
-        recipient: userId,
-        isRead: false
-    });
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+
+    const [totalUnread, groupedCounts] = await Promise.all([
+        Notification.countDocuments({
+            recipient: userObjectId,
+            isRead: false
+        }),
+        Notification.aggregate([
+            {
+                $match: {
+                    recipient: userObjectId,
+                    isRead: false
+                }
+            },
+            {
+                $group: {
+                    _id: "$entityType",
+                    count: { $sum: 1 }
+                }
+            }
+        ])
+    ]);
+
+    const countsByCategory = {
+        booking: 0,
+        workspace: 0,
+        campaign: 0,
+        payment: 0,
+        review: 0,
+        message: 0
+    };
+
+    if (Array.isArray(groupedCounts)) {
+        groupedCounts.forEach((group) => {
+            if (group._id) {
+                countsByCategory[group._id] = group.count;
+            }
+        });
+    }
 
     return {
-        unreadCount
+        unreadCount: totalUnread,
+        countsByCategory
     };
 };
 
@@ -225,23 +261,76 @@ const markNotificationReadService = async (userId, notificationId) => {
     return notification;
 };
 
-// Marks all unread notifications as read for the authenticated recipient.
-const markAllNotificationsReadService = async (userId) => {
-    const result = await Notification.updateMany(
-        {
-            recipient: userId,
-            isRead: false
-        },
-        {
-            $set: {
-                isRead: true,
-                readAt: new Date()
+// Marks unread notifications as read for the authenticated recipient, optionally filtered by category/entityType.
+const markAllNotificationsReadService = async (userId, category = null) => {
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+
+    const filter = {
+        recipient: userObjectId,
+        isRead: false
+    };
+
+    const validCategories = [
+        "booking",
+        "workspace",
+        "campaign",
+        "payment",
+        "review",
+        "message"
+    ];
+
+    if (category && category !== "all") {
+        const rawList = Array.isArray(category)
+            ? category
+            : String(category).split(",").map((s) => s.trim().toLowerCase());
+
+        const aliasMap = {
+            bookings: "booking",
+            campaigns: "campaign",
+            workspaces: "workspace",
+            payments: "payment",
+            reviews: "review",
+            messages: "message"
+        };
+
+        const resolvedList = rawList.map((item) => aliasMap[item] || item);
+
+        for (const item of resolvedList) {
+            if (!validCategories.includes(item)) {
+                throw createApiError(
+                    400,
+                    `Invalid notification category '${item}'. Allowed types: ${validCategories.join(", ")}`
+                );
             }
         }
-    );
+
+        if (resolvedList.length === 1) {
+            filter.entityType = resolvedList[0];
+        } else {
+            filter.entityType = { $in: resolvedList };
+        }
+    }
+
+    // Identify matching unread notification IDs first
+    const unreadNotifs = await Notification.find(filter).select("_id entityType");
+    const markedNotificationIds = unreadNotifs.map((n) => n._id);
+
+    if (markedNotificationIds.length > 0) {
+        await Notification.updateMany(
+            { _id: { $in: markedNotificationIds } },
+            {
+                $set: {
+                    isRead: true,
+                    readAt: new Date()
+                }
+            }
+        );
+    }
 
     return {
-        modifiedCount: result.modifiedCount || 0
+        modifiedCount: markedNotificationIds.length,
+        markedNotificationIds,
+        category: category || "all"
     };
 };
 

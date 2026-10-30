@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import ScrollReveal from "@/components/theme/ScrollReveal";
 
 export default function CreatorAutonomy() {
   const [accepted, setAccepted] = useState(false);
@@ -25,7 +26,7 @@ export default function CreatorAutonomy() {
           {/* =========================================================
               LEFT COLUMN: HEADING, DESCRIPTION & 4 FEATURE ROWS
           ========================================================= */}
-          <div className="lg:col-span-6 text-left">
+          <ScrollReveal direction="up" delay={0} className="lg:col-span-6 text-left">
             {/* Eyebrow */}
             <span className="text-[11px] font-bold tracking-[0.22em] uppercase text-secondary font-sans block mb-3">
               04 / AUTONOMY
@@ -57,12 +58,12 @@ export default function CreatorAutonomy() {
                 </div>
               ))}
             </div>
-          </div>
+          </ScrollReveal>
 
           {/* =========================================================
               RIGHT COLUMN: LARGE INVITATION SHEET CARD
           ========================================================= */}
-          <div className="lg:col-span-6">
+          <ScrollReveal direction="left" delay={120} className="lg:col-span-6">
             <div className="group bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 hover:border-secondary/60 rounded-[32px] sm:rounded-[36px] p-6 sm:p-8 shadow-sm hover:shadow-[0_12px_32px_-8px_rgba(255,79,135,0.2)] hover:-translate-y-1 transition-all duration-300 relative text-left">
               
               {/* Header */}
@@ -153,7 +154,7 @@ export default function CreatorAutonomy() {
               </div>
 
             </div>
-          </div>
+          </ScrollReveal>
 
         </div>
 

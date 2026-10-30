@@ -372,7 +372,7 @@ export default function CreatorDiscoverCampaignsManager() {
 
             {/* TOP ROW: Badge + Active Briefs count */}
             <div className="flex items-center gap-2 relative z-10">
-              <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-sans font-bold tracking-wider uppercase bg-[#FFE4EE] text-black dark:text-white border border-pink-200/70 dark:border-pink-900/50 shadow-2xs">
+              <span className="font-bold text-[11px] tracking-wider uppercase text-[#ff2d6c] dark:text-[#ff4f87] font-sans">
                 Marketplace
               </span>
               <span className="text-xs sm:text-sm font-sans font-medium text-neutral-600 dark:text-text-secondary">

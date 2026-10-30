@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import ScrollReveal from "@/components/theme/ScrollReveal";
 
 export default function PricingCreatorDiscovery() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -57,70 +58,77 @@ export default function PricingCreatorDiscovery() {
         {/* =========================================================
             1. TOP INTRO CONTENT
         ========================================================= */}
-        <span className="text-[11px] font-bold tracking-[0.22em] uppercase text-secondary font-sans block mb-3 text-center">
-          CREATOR DISCOVERY
-        </span>
+        <ScrollReveal direction="up" delay={0}>
+          <span className="text-[11px] font-bold tracking-[0.22em] uppercase text-secondary font-sans block mb-3 text-center">
+            CREATOR DISCOVERY
+          </span>
 
-        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-medium tracking-tight text-slate-900 dark:text-foreground leading-tight mb-4 text-center max-w-2xl mx-auto">
-          Find creators who fit your campaign.
-        </h2>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-medium tracking-tight text-slate-900 dark:text-foreground leading-tight mb-4 text-center max-w-2xl mx-auto">
+            Find creators who fit your campaign.
+          </h2>
 
-        <p className="text-sm sm:text-base text-slate-600 dark:text-text-secondary font-sans leading-relaxed text-center max-w-xl mx-auto mb-10">
-          Filter millions of verified tastemakers by engagement velocity, aesthetic tags, and geographic impact.
-        </p>
+          <p className="text-sm sm:text-base text-slate-600 dark:text-text-secondary font-sans leading-relaxed text-center max-w-xl mx-auto mb-10">
+            Filter millions of verified tastemakers by engagement velocity, aesthetic tags, and geographic impact.
+          </p>
+        </ScrollReveal>
 
         {/* =========================================================
             2. SEARCH & FILTER BAR
         ========================================================= */}
-        <div className="bg-white dark:bg-surface border border-slate-200/90 dark:border-white/10 rounded-2xl p-4 sm:px-6 sm:py-4 shadow-sm max-w-[1020px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4 mb-12 text-left">
-          
-          {/* Search Icon & Real Input */}
-          <div className="flex items-center gap-3 flex-1 w-full min-w-0 md:min-w-[240px]">
-            <svg
-              className="w-5 h-5 text-slate-400 dark:text-text-muted flex-shrink-0"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={1.8}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-            </svg>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search creators by aesthetic, niche, location..."
-              className="w-full bg-transparent border-none outline-none focus:outline-none focus:ring-0 text-xs sm:text-sm text-slate-900 dark:text-foreground placeholder:text-slate-400 dark:placeholder:text-text-muted font-sans p-0 m-0"
-            />
+        <ScrollReveal direction="up" delay={80}>
+          <div className="bg-white dark:bg-surface border border-slate-200/90 dark:border-white/10 rounded-2xl p-4 sm:px-6 sm:py-4 shadow-sm max-w-[1020px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4 mb-12 text-left">
+            
+            {/* Search Icon & Real Input */}
+            <div className="flex items-center gap-3 flex-1 w-full min-w-0 md:min-w-[240px]">
+              <svg
+                className="w-5 h-5 text-slate-400 dark:text-text-muted flex-shrink-0"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={1.8}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+              </svg>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search creators by aesthetic, niche, location..."
+                className="w-full bg-transparent border-none outline-none focus:outline-none focus:ring-0 text-xs sm:text-sm text-slate-900 dark:text-foreground placeholder:text-slate-400 dark:placeholder:text-text-muted font-sans p-0 m-0"
+              />
+            </div>
+
+            {/* Active Filter Pills */}
+            <div className="flex items-center gap-2 flex-wrap md:flex-nowrap">
+              <span className="bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-text-secondary text-xs font-sans font-medium px-3 py-1.5 rounded-full inline-flex items-center gap-1.5 hover:bg-slate-200/70 dark:hover:bg-white/20 transition-colors cursor-pointer">
+                <span>Niche: Beauty & Wellness</span>
+                <span className="text-slate-400 dark:text-text-muted hover:text-slate-900">×</span>
+              </span>
+
+              <span className="bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-text-secondary text-xs font-sans font-medium px-3 py-1.5 rounded-full inline-flex items-center gap-1.5 hover:bg-slate-200/70 dark:hover:bg-white/20 transition-colors cursor-pointer">
+                <span>Followers: 20k–100k</span>
+                <span className="text-slate-400 dark:text-text-muted hover:text-slate-900">×</span>
+              </span>
+
+              <span className="bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-text-secondary text-xs font-sans font-medium px-3 py-1.5 rounded-full inline-flex items-center gap-1.5 hover:bg-slate-200/70 dark:hover:bg-white/20 transition-colors cursor-pointer">
+                <span>Engagement: &gt;4.5%</span>
+                <span className="text-slate-400 dark:text-text-muted hover:text-slate-900">×</span>
+              </span>
+            </div>
+
           </div>
-
-          {/* Active Filter Pills */}
-          <div className="flex items-center gap-2 flex-wrap md:flex-nowrap">
-            <span className="bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-text-secondary text-xs font-sans font-medium px-3 py-1.5 rounded-full inline-flex items-center gap-1.5 hover:bg-slate-200/70 dark:hover:bg-white/20 transition-colors cursor-pointer">
-              <span>Niche: Beauty & Wellness</span>
-              <span className="text-slate-400 dark:text-text-muted hover:text-slate-900">×</span>
-            </span>
-
-            <span className="bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-text-secondary text-xs font-sans font-medium px-3 py-1.5 rounded-full inline-flex items-center gap-1.5 hover:bg-slate-200/70 dark:hover:bg-white/20 transition-colors cursor-pointer">
-              <span>Followers: 20k–100k</span>
-              <span className="text-slate-400 dark:text-text-muted hover:text-slate-900">×</span>
-            </span>
-
-            <span className="bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-text-secondary text-xs font-sans font-medium px-3 py-1.5 rounded-full inline-flex items-center gap-1.5 hover:bg-slate-200/70 dark:hover:bg-white/20 transition-colors cursor-pointer">
-              <span>Engagement: &gt;4.5%</span>
-              <span className="text-slate-400 dark:text-text-muted hover:text-slate-900">×</span>
-            </span>
-          </div>
-
-        </div>
+        </ScrollReveal>
 
         {/* =========================================================
             3. CREATOR GRID (3 EDITORIAL CARDS)
         ========================================================= */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 max-w-[1140px] mx-auto items-stretch text-left">
-          {creators.map((creator) => (
-            <article
+          {creators.map((creator, idx) => (
+            <ScrollReveal
               key={creator.id}
+              as="article"
+              direction="up"
+              delay={idx * 80}
               className="group bg-white dark:bg-surface border border-slate-200/90 dark:border-white/10 hover:border-secondary/60 rounded-[28px] overflow-hidden shadow-sm hover:shadow-[0_16px_36px_-8px_rgba(255,79,135,0.22)] hover:-translate-y-1.5 hover:scale-[1.015] transition-all duration-300 ease-out flex flex-col justify-between h-full"
             >
               <div>
@@ -197,7 +205,7 @@ export default function PricingCreatorDiscovery() {
 
                 </div>
               </div>
-            </article>
+            </ScrollReveal>
           ))}
         </div>
 

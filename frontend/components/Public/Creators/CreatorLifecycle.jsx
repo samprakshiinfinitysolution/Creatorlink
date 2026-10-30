@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import ScrollReveal from "@/components/theme/ScrollReveal";
 
 export default function CreatorLifecycle() {
   // Clean static data structure ready for future backend integration
@@ -48,7 +49,7 @@ export default function CreatorLifecycle() {
         {/* =========================================================
             1. TOP CONTENT: CENTERED INTRO
         ========================================================= */}
-        <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
+        <ScrollReveal direction="up" delay={0} className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
           <span className="text-[11px] font-bold tracking-[0.22em] uppercase text-secondary font-sans block mb-3">
             09 / THE LIFECYCLE
           </span>
@@ -58,7 +59,7 @@ export default function CreatorLifecycle() {
           <p className="text-sm sm:text-base text-slate-600 dark:text-text-secondary font-sans leading-relaxed">
             A seamless lifelong loop for the modern independent aesthetic entrepreneur.
           </p>
-        </div>
+        </ScrollReveal>
 
         {/* =========================================================
             2. MAIN CARDS GRID: 6 EQUAL ROUNDED CARDS
@@ -69,9 +70,12 @@ export default function CreatorLifecycle() {
             - Very small mobile: 1 column
         ========================================================= */}
         <div className="grid grid-cols-1 max-[400px]:grid-cols-1 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-5 lg:gap-4 xl:gap-5 items-stretch">
-          {lifecycleSteps.map((step) => (
-            <article
+          {lifecycleSteps.map((step, idx) => (
+            <ScrollReveal
               key={step.number}
+              as="article"
+              direction="up"
+              delay={idx * 70}
               className="group bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 hover:border-secondary/60 rounded-[24px] sm:rounded-[28px] p-5 sm:p-6 shadow-sm hover:shadow-[0_12px_32px_-8px_rgba(255,79,135,0.18)] hover:-translate-y-1 hover:scale-[1.015] transition-all duration-300 ease-out flex flex-col justify-between text-left h-full"
             >
               <div>
@@ -90,7 +94,7 @@ export default function CreatorLifecycle() {
                   {step.description}
                 </p>
               </div>
-            </article>
+            </ScrollReveal>
           ))}
         </div>
 

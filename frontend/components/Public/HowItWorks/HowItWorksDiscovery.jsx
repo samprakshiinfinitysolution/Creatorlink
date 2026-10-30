@@ -2,6 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
+import ScrollReveal from "@/components/theme/ScrollReveal";
 
 export default function HowItWorksDiscovery() {
   const creators = [
@@ -46,7 +47,7 @@ export default function HowItWorksDiscovery() {
           {/* -------------------------------------------------------
               LEFT COLUMN: EYEBROW, HEADING, DESCRIPTION, VERIFICATION CARD
           ------------------------------------------------------- */}
-          <div className="lg:col-span-5 text-left">
+          <ScrollReveal direction="up" delay={0} className="lg:col-span-5 text-left">
             
             {/* Eyebrow */}
             <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-secondary block mb-4 font-sans">
@@ -72,13 +73,13 @@ export default function HowItWorksDiscovery() {
               </span>
             </div>
 
-          </div>
+          </ScrollReveal>
 
 
           {/* -------------------------------------------------------
               RIGHT COLUMN: 3 EDITORIAL CREATOR CARDS
           ------------------------------------------------------- */}
-          <div className="lg:col-span-7">
+          <ScrollReveal direction="left" delay={120} className="lg:col-span-7">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 lg:gap-6">
               {creators.map((creator) => (
                 <div
@@ -109,7 +110,7 @@ export default function HowItWorksDiscovery() {
                 </div>
               ))}
             </div>
-          </div>
+          </ScrollReveal>
 
         </div>
       </div>

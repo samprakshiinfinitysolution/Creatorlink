@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
+import ScrollReveal from "@/components/theme/ScrollReveal";
 
 const STAGES = [
   {
@@ -123,7 +124,7 @@ export default function InteractiveJourney() {
           {/* =========================================================
               LEFT SIDE: EYEBROW, HEADING & 7-STAGE NAVIGATION
           ========================================================= */}
-          <div className="lg:col-span-5 xl:col-span-4 text-left">
+          <ScrollReveal direction="up" delay={0} className="lg:col-span-5 xl:col-span-4 text-left">
             <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-secondary block mb-3 font-sans">
               INTERACTIVE JOURNEY
             </span>
@@ -198,12 +199,12 @@ export default function InteractiveJourney() {
               </button>
               <span>Step navigation auto-cycles or click to jump.</span>
             </div>
-          </div>
+          </ScrollReveal>
 
           {/* =========================================================
               RIGHT SIDE: ENLARGED WORKSPACE CARD WITH 7 STAGE PANELS
           ========================================================= */}
-          <div className="lg:col-span-7 xl:col-span-8">
+          <ScrollReveal direction="left" delay={120} className="lg:col-span-7 xl:col-span-8">
             <div className="bg-surface border border-border-theme rounded-3xl p-7 sm:p-10 lg:p-12 shadow-xl relative overflow-hidden transition-all duration-300 min-h-[440px]">
 
               {/* TOP OF CARD: BADGE, DYNAMIC TITLE & STEP COUNTER */}
@@ -556,7 +557,7 @@ export default function InteractiveJourney() {
                 )}
               </div>
             </div>
-          </div>
+          </ScrollReveal>
 
         </div>
       </div>

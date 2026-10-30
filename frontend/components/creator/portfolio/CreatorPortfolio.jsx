@@ -571,6 +571,11 @@ export default function CreatorPortfolio() {
           {/* 1. PAGE HEADER */}
           <div className="bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
+              <div className="mb-2">
+                <span className="font-bold text-[11px] tracking-wider uppercase text-[#ff2d6c] dark:text-[#ff4f87] font-sans">
+                  Creator Portfolio
+                </span>
+              </div>
               <h1 className="font-serif font-medium text-2xl sm:text-3xl text-foreground tracking-tight">
                 My Portfolio
               </h1>

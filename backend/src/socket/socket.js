@@ -21,22 +21,39 @@ let ioInstance = null;
 const initializeSocket = (httpServer) => {
     const allowedOrigins = [
         ...new Set([
-            process.env.FRONTEND_URL,
+            ...((process.env.FRONTEND_URL || "").split(",").map((o) => o.trim().replace(/\/+$/, "")).filter(Boolean)),
+
             "http://192.168.1.21:3005",
             "http://localhost:3005",
             "http://127.0.0.1:3005"
         ].filter(Boolean))
     ];
 
+    const isOriginAllowed = (origin) => {
+        if (!origin) {
+            return true;
+        }
+        const normalizedOrigin = typeof origin === "string" ? origin.trim().replace(/\/+$/, "") : "";
+        return allowedOrigins.includes(normalizedOrigin);
+    };
+
     const io = new Server(httpServer, {
         cors: {
             origin: (origin, callback) => {
-                if (!origin || allowedOrigins.includes(origin)) {
+
+                if (isOriginAllowed(origin)) {
                     return callback(null, true);
                 }
-                return callback(null, true);
+                return callback(new Error("Not allowed by CORS"));
             },
             credentials: true
+        },
+        allowRequest: (req, callback) => {
+            const origin = req.headers.origin;
+            if (isOriginAllowed(origin)) {
+                return callback(null, true);
+            }
+            return callback(null, false);
         }
     });
 
@@ -247,7 +264,7 @@ const initializeSocket = (httpServer) => {
         socket.on("disconnect", () => {
             console.log(
                 "Socket disconnected:",
-                socket.data.user.userId
+                socket.data?.user?.userId || socket.id
             );
         });
     });

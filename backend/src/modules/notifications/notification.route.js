@@ -29,10 +29,16 @@ notificationRouter.get(
     getUnreadNotificationCount
 );
 
-// Mark all unread notifications as read.
+// Mark all unread notifications as read (supports ?category= query param).
 // Registered BEFORE `/:id/read` so `:id` does not match the literal `read-all`.
 notificationRouter.patch(
     "/read-all",
+    markAllNotificationsRead
+);
+
+// Mark unread notifications for a specific category as read.
+notificationRouter.patch(
+    "/category/:category/read",
     markAllNotificationsRead
 );
 

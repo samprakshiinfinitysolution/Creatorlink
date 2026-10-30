@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import ScrollReveal from "@/components/theme/ScrollReveal";
 
 export default function HowItWorksCollaborate() {
   const portalCards = [
@@ -42,7 +43,7 @@ export default function HowItWorksCollaborate() {
           {/* -------------------------------------------------------
               LEFT COLUMN: EYEBROW, HEADING, DESCRIPTION & STATUS ROW
           ------------------------------------------------------- */}
-          <div className="lg:col-span-5 text-left">
+          <ScrollReveal direction="up" delay={0} className="lg:col-span-5 text-left">
             
             {/* Eyebrow */}
             <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-secondary block mb-4 font-sans">
@@ -66,13 +67,13 @@ export default function HowItWorksCollaborate() {
               <span>Autonomous milestone synchronization active</span>
             </div>
 
-          </div>
+          </ScrollReveal>
 
 
           {/* -------------------------------------------------------
               RIGHT COLUMN: COLLABORATION PORTAL CARD
           ------------------------------------------------------- */}
-          <div className="lg:col-span-7">
+          <ScrollReveal direction="left" delay={120} className="lg:col-span-7">
             
             {/* Main Dark Collaboration Portal Card */}
             <div className="bg-[#222226] border border-white/10 rounded-[28px] sm:rounded-[36px] p-6 sm:p-8 lg:p-9 shadow-2xl hover:-translate-y-[5px] hover:scale-[1.005] hover:border-secondary/40 hover:shadow-[0_16px_36px_-8px_rgba(255,79,135,0.18)] transition-all duration-300 ease-out cursor-default text-left">
@@ -129,7 +130,7 @@ export default function HowItWorksCollaborate() {
 
             </div>
 
-          </div>
+          </ScrollReveal>
 
         </div>
       </div>

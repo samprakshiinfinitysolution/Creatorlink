@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import ScrollReveal from "@/components/theme/ScrollReveal";
 
 export default function CreatorProduction() {
   // Conceptual structure for future backend video switching
@@ -64,7 +65,7 @@ export default function CreatorProduction() {
         {/* =========================================================
             1. TOP CONTENT: LEFT ALIGNED INTRO
         ========================================================= */}
-        <div className="max-w-2xl text-left mb-12 sm:mb-16">
+        <ScrollReveal direction="up" delay={0} className="max-w-2xl text-left mb-12 sm:mb-16">
           <span className="text-[11px] font-bold tracking-[0.22em] uppercase text-secondary font-sans block mb-3">
             06 / PRODUCTION
           </span>
@@ -74,7 +75,7 @@ export default function CreatorProduction() {
           <p className="text-sm sm:text-base text-slate-600 dark:text-text-secondary font-sans leading-relaxed">
             Focus entirely on lighting, grading, and authentic expression. Creator Hub manages preview approvals, frame-accurate notes, and rights clearance.
           </p>
-        </div>
+        </ScrollReveal>
 
         {/* =========================================================
             2. MAIN 2-COLUMN LAYOUT
@@ -84,7 +85,7 @@ export default function CreatorProduction() {
           {/* -------------------------------------------------------
               LEFT COLUMN: TALL MEDIA PREVIEW CARD (Lg: 5 Cols)
           ------------------------------------------------------- */}
-          <div className="lg:col-span-5 flex justify-center lg:justify-start">
+          <ScrollReveal direction="right" delay={120} className="lg:col-span-5 flex justify-center lg:justify-start">
             <div className="group relative w-full max-w-[340px] sm:max-w-[360px] h-[520px] sm:h-[560px] rounded-[36px] overflow-hidden bg-slate-900 border-4 border-[#1C1917] shadow-2xl hover:shadow-[0_20px_45px_-10px_rgba(255,79,135,0.25)] hover:-translate-y-1 transition-all duration-300">
 
               {/* Media Content (Structure ready for Image / Video switching) */}
@@ -148,7 +149,7 @@ export default function CreatorProduction() {
               </div>
 
             </div>
-          </div>
+          </ScrollReveal>
 
           {/* -------------------------------------------------------
               RIGHT COLUMN: STEP CARDS & FINAL SUBMISSION CARD (Lg: 7 Cols)
@@ -156,73 +157,77 @@ export default function CreatorProduction() {
           <div className="lg:col-span-7 space-y-6 sm:space-y-7">
 
             {/* 4 HORIZONTAL STEP CARDS */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
-              {steps.map((step, idx) => (
-                <div
-                  key={idx}
-                  className="p-4 rounded-2xl border text-left transition-all duration-300 bg-white dark:bg-surface border-slate-200/80 dark:border-white/10 hover:border-secondary/60 hover:shadow-[0_8px_20px_-6px_rgba(255,79,135,0.18)] hover:-translate-y-0.5"
-                >
-                  <span className="text-[10px] font-bold tracking-widest uppercase text-slate-500 dark:text-text-muted font-sans block mb-1">
-                    {step.num}
-                  </span>
-                  <h4 className="font-serif font-semibold text-sm text-slate-900 dark:text-foreground mb-1">
-                    {step.title}
-                  </h4>
-                  <p className="text-[11px] font-sans text-slate-500 dark:text-text-muted leading-tight">
-                    {step.desc}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            {/* WHITE FINAL SUBMISSION CARD */}
-            <div className="group bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 hover:border-secondary/60 rounded-[32px] p-6 sm:p-8 shadow-sm hover:shadow-[0_12px_32px_-8px_rgba(255,79,135,0.2)] hover:-translate-y-1 transition-all duration-300 relative text-left">
-
-              {/* Card Header */}
-              <div className="flex flex-wrap items-start justify-between gap-3 mb-6">
-                <div>
-                  <span className="text-[10px] font-bold tracking-widest uppercase text-slate-500 dark:text-text-muted font-sans block mb-1">
-                    FINAL CONTENT SUBMISSION
-                  </span>
-                  <h3 className="font-serif text-xl sm:text-2xl font-medium text-slate-900 dark:text-foreground">
-                    Aarohi Mehta → Glow Beauty
-                  </h3>
-                </div>
-
-                <span className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40 text-emerald-700 dark:text-emerald-400 text-xs font-bold px-3 py-1 rounded-full inline-flex items-center gap-1.5 flex-shrink-0">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  Status: In Review
-                </span>
-              </div>
-
-              {/* Deliverable List */}
-              <div className="space-y-3 mb-6">
-                {deliverables.map((item, idx) => (
+            <ScrollReveal direction="up" delay={160}>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+                {steps.map((step, idx) => (
                   <div
                     key={idx}
-                    className="border-t border-slate-100 dark:border-white/10 pt-3 flex items-center justify-between text-xs font-sans"
+                    className="p-4 rounded-2xl border text-left transition-all duration-300 bg-white dark:bg-surface border-slate-200/80 dark:border-white/10 hover:border-secondary/60 hover:shadow-[0_8px_20px_-6px_rgba(255,79,135,0.18)] hover:-translate-y-0.5"
                   >
-                    <span className="text-slate-800 dark:text-foreground font-medium truncate max-w-[280px] sm:max-w-md">
-                      {item.filename}
+                    <span className="text-[10px] font-bold tracking-widest uppercase text-slate-500 dark:text-text-muted font-sans block mb-1">
+                      {step.num}
                     </span>
-                    <span className="text-emerald-600 dark:text-emerald-400 font-bold flex-shrink-0">
-                      {item.status}
-                    </span>
+                    <h4 className="font-serif font-semibold text-sm text-slate-900 dark:text-foreground mb-1">
+                      {step.title}
+                    </h4>
+                    <p className="text-[11px] font-sans text-slate-500 dark:text-text-muted leading-tight">
+                      {step.desc}
+                    </p>
                   </div>
                 ))}
               </div>
+            </ScrollReveal>
 
-              {/* Bottom Info Panel (Brand Review Window) */}
-              <div className="bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-800/30 rounded-2xl p-4 flex items-start gap-3 text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
-                <span className="text-amber-600 dark:text-amber-400 font-bold flex-shrink-0 mt-0.5">
-                  🔒
-                </span>
-                <p>
-                  <strong className="font-bold text-slate-900 dark:text-white">Brand Review Window:</strong> Glow Beauty has 48 hours to request minor audio or cut edits. If no revision is requested, earnings automatically release.
-                </p>
+            {/* WHITE FINAL SUBMISSION CARD */}
+            <ScrollReveal direction="up" delay={220}>
+              <div className="group bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 hover:border-secondary/60 rounded-[32px] p-6 sm:p-8 shadow-sm hover:shadow-[0_12px_32px_-8px_rgba(255,79,135,0.2)] hover:-translate-y-1 transition-all duration-300 relative text-left">
+
+                {/* Card Header */}
+                <div className="flex flex-wrap items-start justify-between gap-3 mb-6">
+                  <div>
+                    <span className="text-[10px] font-bold tracking-widest uppercase text-slate-500 dark:text-text-muted font-sans block mb-1">
+                      FINAL CONTENT SUBMISSION
+                    </span>
+                    <h3 className="font-serif text-xl sm:text-2xl font-medium text-slate-900 dark:text-foreground">
+                      Aarohi Mehta → Glow Beauty
+                    </h3>
+                  </div>
+
+                  <span className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40 text-emerald-700 dark:text-emerald-400 text-xs font-bold px-3 py-1 rounded-full inline-flex items-center gap-1.5 flex-shrink-0">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    Status: In Review
+                  </span>
+                </div>
+
+                {/* Deliverable List */}
+                <div className="space-y-3 mb-6">
+                  {deliverables.map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="border-t border-slate-100 dark:border-white/10 pt-3 flex items-center justify-between text-xs font-sans"
+                    >
+                      <span className="text-slate-800 dark:text-foreground font-medium truncate max-w-[280px] sm:max-w-md">
+                        {item.filename}
+                      </span>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-bold flex-shrink-0">
+                        {item.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Bottom Info Panel (Brand Review Window) */}
+                <div className="bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-800/30 rounded-2xl p-4 flex items-start gap-3 text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+                  <span className="text-amber-600 dark:text-amber-400 font-bold flex-shrink-0 mt-0.5">
+                    🔒
+                  </span>
+                  <p>
+                    <strong className="font-bold text-slate-900 dark:text-white">Brand Review Window:</strong> Glow Beauty has 48 hours to request minor audio or cut edits. If no revision is requested, earnings automatically release.
+                  </p>
+                </div>
+
               </div>
-
-            </div>
+            </ScrollReveal>
 
           </div>
 

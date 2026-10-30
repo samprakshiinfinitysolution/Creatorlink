@@ -78,7 +78,8 @@ const markCreatorConversationRead = createAsyncThunk(
             return {
                 response,
                 conversationId,
-                currentUserId: user?._id || user?.id || null
+                currentUserId: user?._id || user?.id || null,
+                markedNotificationIds: response?.data?.markedNotificationIds || response?.markedNotificationIds || []
             };
         } catch (error) {
             return rejectWithValue(
@@ -120,7 +121,7 @@ const creatorMessagesSlice = createSlice({
         },
 
         addNewCreatorMessage: (state, action) => {
-            const { conversationId, message } = action.payload || {};
+            const { conversationId, message, currentUserId } = action.payload || {};
 
             if (!conversationId || !message?._id) return;
 
@@ -146,6 +147,19 @@ const creatorMessagesSlice = createSlice({
                 state.conversations[index].lastMessageAt =
                     message.createdAt || message.updatedAt || new Date().toISOString();
 
+                const isCurrentConvSelected = selectedId && String(selectedId) === convIdStr;
+                const msgSenderId =
+                    typeof message.sender === "string"
+                        ? message.sender
+                        : (message.sender?._id || message.sender?.id);
+                const isSentBySelf =
+                    Boolean(currentUserId && msgSenderId && String(msgSenderId) === String(currentUserId));
+
+                if (!isCurrentConvSelected && !isSentBySelf) {
+                    state.conversations[index].unreadCount =
+                        (Number(state.conversations[index].unreadCount) || 0) + 1;
+                }
+
                 const [updatedConv] = state.conversations.splice(index, 1);
                 state.conversations.unshift(updatedConv);
             } else {
@@ -160,6 +174,13 @@ const creatorMessagesSlice = createSlice({
 
             const convIdStr = String(conversationId);
             const selectedId = state.selectedConversation?._id;
+
+            const convIdx = state.conversations.findIndex(
+                (c) => String(c._id) === convIdStr
+            );
+            if (convIdx !== -1) {
+                state.conversations[convIdx].unreadCount = 0;
+            }
 
             if (selectedId && String(selectedId) === convIdStr) {
                 state.messages = state.messages.map((message) => {
@@ -233,6 +254,13 @@ const creatorMessagesSlice = createSlice({
                 state.conversationLoading = true;
                 state.activeConversationId = action.meta.arg;
                 state.error = null;
+
+                const convIdx = state.conversations.findIndex(
+                    (c) => String(c._id) === String(action.meta.arg)
+                );
+                if (convIdx !== -1) {
+                    state.conversations[convIdx].unreadCount = 0;
+                }
             })
 
             .addCase(fetchCreatorConversationById.fulfilled, (state, action) => {
@@ -381,6 +409,15 @@ const creatorMessagesSlice = createSlice({
 
                         return message;
                     });
+                }
+
+                if (reqConversationId) {
+                    const convIdx = state.conversations.findIndex(
+                        (c) => String(c._id) === String(reqConversationId)
+                    );
+                    if (convIdx !== -1) {
+                        state.conversations[convIdx].unreadCount = 0;
+                    }
                 }
 
                 state.error = null;

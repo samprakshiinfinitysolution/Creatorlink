@@ -9,6 +9,7 @@
 :root {
   --background: #fff7f8;
   --foreground: #111111;
+  color-scheme: light;
 
   --theme-primary: #111111;
   --theme-secondary: #ff4f87;
@@ -31,6 +32,7 @@
 .dark {
   --background: #111111;
   --foreground: #ffffff;
+  color-scheme: dark;
 
   --theme-primary: #ffffff;
   --theme-secondary: #ff6b9d;
@@ -91,6 +93,16 @@ body {
   overflow-x: clip;
   scroll-behavior: smooth;
   scrollbar-gutter: stable;
+}
+
+html {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+html.dark {
+  background-color: #111111;
+  color: #ffffff;
 }
 
 body {

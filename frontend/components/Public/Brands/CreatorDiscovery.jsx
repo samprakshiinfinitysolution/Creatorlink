@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import ScrollReveal from "@/components/theme/ScrollReveal";
 
 const allCreators = [
   // COLUMN 1 CREATORS
@@ -154,42 +155,44 @@ export default function CreatorDiscovery() {
         {/* =========================================================
             HEADER & CATEGORY FILTERS
         ========================================================= */}
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10 sm:mb-12">
-          
-          {/* Left Text Intro */}
-          <div className="max-w-2xl">
-            <span className="text-[11px] font-bold tracking-[0.22em] uppercase text-[#947870] dark:text-secondary font-sans block mb-3">
-              CURATED ROSTER
-            </span>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-normal tracking-tight text-slate-900 dark:text-foreground leading-[1.15] mb-4">
-              Your next collaboration could be here.
-            </h2>
-            <p className="text-sm sm:text-base text-slate-600 dark:text-text-secondary font-sans leading-relaxed">
-              Discover vetted, high-engagement tastemakers across fashion, beauty, architecture, travel, and culinary lifestyle.
-            </p>
-          </div>
+        <ScrollReveal direction="up" delay={0}>
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10 sm:mb-12">
+            
+            {/* Left Text Intro */}
+            <div className="max-w-2xl">
+              <span className="text-[11px] font-bold tracking-[0.22em] uppercase text-[#947870] dark:text-secondary font-sans block mb-3">
+                CURATED ROSTER
+              </span>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-normal tracking-tight text-slate-900 dark:text-foreground leading-[1.15] mb-4">
+                Your next collaboration could be here.
+              </h2>
+              <p className="text-sm sm:text-base text-slate-600 dark:text-text-secondary font-sans leading-relaxed">
+                Discover vetted, high-engagement tastemakers across fashion, beauty, architecture, travel, and culinary lifestyle.
+              </p>
+            </div>
 
-          {/* Right Category Filter Pills */}
-          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 pt-2 lg:pt-0">
-            {filters.map((filter) => {
-              const isActive = activeFilter === filter;
-              return (
-                <button
-                  key={filter}
-                  onClick={() => setActiveFilter(filter)}
-                  className={`px-4 py-2 rounded-full text-xs font-sans font-medium transition-all duration-300 ${
-                    isActive
-                      ? "bg-[#F5D8CE] dark:bg-secondary text-slate-900 dark:text-white font-semibold shadow-sm"
-                      : "bg-white dark:bg-surface text-slate-700 dark:text-text-secondary border border-slate-200 dark:border-white/10 hover:border-slate-300 hover:bg-slate-50 dark:hover:bg-surface-muted"
-                  }`}
-                >
-                  {filter}
-                </button>
-              );
-            })}
-          </div>
+            {/* Right Category Filter Pills */}
+            <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 pt-2 lg:pt-0">
+              {filters.map((filter) => {
+                const isActive = activeFilter === filter;
+                return (
+                  <button
+                    key={filter}
+                    onClick={() => setActiveFilter(filter)}
+                    className={`px-4 py-2 rounded-full text-xs font-sans font-medium transition-all duration-300 ${
+                      isActive
+                        ? "bg-[#F5D8CE] dark:bg-secondary text-slate-900 dark:text-white font-semibold shadow-sm"
+                        : "bg-white dark:bg-surface text-slate-700 dark:text-text-secondary border border-slate-200 dark:border-white/10 hover:border-slate-300 hover:bg-slate-50 dark:hover:bg-surface-muted"
+                    }`}
+                  >
+                    {filter}
+                  </button>
+                );
+              })}
+            </div>
 
-        </div>
+          </div>
+        </ScrollReveal>
 
         {/* =========================================================
             4-COLUMN MASONRY / EDITORIAL ROSTER GRID
@@ -199,34 +202,34 @@ export default function CreatorDiscovery() {
           {/* -------------------------------------------------------
               COLUMN 1
           ------------------------------------------------------- */}
-          <div className="space-y-6 sm:space-y-7">
+          <ScrollReveal direction="up" delay={70} className="space-y-6 sm:space-y-7">
             {col1.map((creator) => (
               <CreatorCard key={creator.id} creator={creator} />
             ))}
-          </div>
+          </ScrollReveal>
 
           {/* -------------------------------------------------------
               COLUMN 2 (Offset downward for editorial stagger)
           ------------------------------------------------------- */}
-          <div className="space-y-6 sm:space-y-7 lg:pt-8">
+          <ScrollReveal direction="up" delay={140} className="space-y-6 sm:space-y-7 lg:pt-8">
             {col2.map((creator) => (
               <CreatorCard key={creator.id} creator={creator} />
             ))}
-          </div>
+          </ScrollReveal>
 
           {/* -------------------------------------------------------
               COLUMN 3
           ------------------------------------------------------- */}
-          <div className="space-y-6 sm:space-y-7">
+          <ScrollReveal direction="up" delay={210} className="space-y-6 sm:space-y-7">
             {col3.map((creator) => (
               <CreatorCard key={creator.id} creator={creator} />
             ))}
-          </div>
+          </ScrollReveal>
 
           {/* -------------------------------------------------------
               COLUMN 4 + EXCLUSIVE ACCESS PANEL
           ------------------------------------------------------- */}
-          <div className="space-y-6 sm:space-y-7 lg:pt-4">
+          <ScrollReveal direction="up" delay={280} className="space-y-6 sm:space-y-7 lg:pt-4">
             {col4.map((creator) => (
               <CreatorCard key={creator.id} creator={creator} />
             ))}
@@ -267,7 +270,7 @@ export default function CreatorDiscovery() {
               </Link>
             </div>
 
-          </div>
+          </ScrollReveal>
 
         </div>
 

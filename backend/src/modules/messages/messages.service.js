@@ -7,6 +7,7 @@ import Workspace from "../workspace/workspace.model.js";
 import Auth from "../auth/auth.model.js";
 import BrandProfile from "../brand/profile/profile.model.js";
 import CreatorProfile from "../creator/profile/profile.model.js";
+import Notification from "../notifications/notification.model.js";
 import { createNotificationSafe } from "../notifications/notification.service.js";
 import createApiError from "../../utils/ApiError.js";
 import {
@@ -293,8 +294,47 @@ const getConversationsService = async (userId, query = {}) => {
 
     const enrichedConversations = await attachConversationProfiles(conversations);
 
+    const convIds = (conversations || []).map((c) => c._id);
+    const unreadMap = new Map();
+
+    if (convIds.length > 0) {
+        const userObjId = mongoose.Types.ObjectId.isValid(userId)
+            ? new mongoose.Types.ObjectId(userId)
+            : userId;
+
+        const unreadCounts = await Message.aggregate([
+            {
+                $match: {
+                    conversation: { $in: convIds },
+                    receiver: userObjId,
+                    isRead: false
+                }
+            },
+            {
+                $group: {
+                    _id: "$conversation",
+                    count: { $sum: 1 }
+                }
+            }
+        ]);
+
+        unreadCounts.forEach((item) => {
+            if (item._id) {
+                unreadMap.set(item._id.toString(), item.count);
+            }
+        });
+    }
+
+    const conversationsWithUnread = enrichedConversations.map((conv) => {
+        const idStr = (conv._id || conv.id)?.toString();
+        return {
+            ...conv,
+            unreadCount: idStr ? (unreadMap.get(idStr) || 0) : 0
+        };
+    });
+
     return {
-        conversations: enrichedConversations,
+        conversations: conversationsWithUnread,
         pagination: getPaginationData(currentPage, itemsPerPage, totalItems)
     };
 };
@@ -358,8 +398,39 @@ const markConversationReadService = async (userId, conversationId) => {
         }
     );
 
+    // Identify and mark associated unread message notifications as read
+    const conversationObjId = new mongoose.Types.ObjectId(conversationId);
+    const conversationIdStr = conversationId.toString();
+
+    const unreadMessageNotifications = await Notification.find({
+        recipient: userId,
+        entityType: "message",
+        $or: [
+            { entityId: conversationObjId },
+            { entityId: conversationIdStr },
+            { "metadata.conversationId": conversationObjId },
+            { "metadata.conversationId": conversationIdStr }
+        ],
+        isRead: false
+    }).select("_id");
+
+    const markedNotificationIds = unreadMessageNotifications.map((n) => n._id);
+
+    if (markedNotificationIds.length > 0) {
+        await Notification.updateMany(
+            { _id: { $in: markedNotificationIds } },
+            {
+                $set: {
+                    isRead: true,
+                    readAt: new Date()
+                }
+            }
+        );
+    }
+
     return {
-        modifiedCount: result.modifiedCount
+        modifiedCount: result.modifiedCount,
+        markedNotificationIds
     };
 };
 

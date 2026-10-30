@@ -3,7 +3,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
-import { socket } from "@/lib/socket";
+import {
+  socket,
+  registerSocketConsumer,
+  unregisterSocketConsumer,
+  confirmSocketAuthSuccess,
+  handleSocketConnectionError
+} from "@/lib/socket";
 import { refreshToken } from "@/redux/auth/auth_slice";
 import {
   fetchBrandConversations,
@@ -17,6 +23,9 @@ import {
   clearSuccessMessage,
   clearError
 } from "@/redux/brand/messages/messages_slice";
+import {
+  fetchBrandUnreadNotificationCount
+} from "@/redux/brand/notifications/notifications_slice";
 
 // =========================================================
 // SVG ICONS
@@ -227,58 +236,63 @@ export default function BrandMessages() {
     dispatch(fetchBrandConversations());
   }, [dispatch]);
 
+  const authenticatedUserId =
+    authUser?._id ||
+    authUser?.id ||
+    authUser?.user?._id ||
+    authUser?.user?.id ||
+    authUser?.userId ||
+    null;
 
-  
-  // Connect Socket.IO when the Brand Messages component mounts.
+  // Manage Socket.IO consumer lifecycle based on authenticated user availability.
   useEffect(() => {
-    if (!socket.connected) {
-      socket.connect();
-    }
-  }, []);
+    if (!authenticatedUserId) return;
 
+    registerSocketConsumer("brand-messages", authenticatedUserId);
 
+    return () => {
+      unregisterSocketConsumer("brand-messages");
+    };
+  }, [authenticatedUserId]);
 
-// Join the selected conversation's Socket.IO room.
-useEffect(() => {
+  // Join the selected conversation's Socket.IO room.
+  useEffect(() => {
     const conversationId = selectedConversation?._id;
 
     if (!conversationId) return;
 
     const joinConversation = () => {
-        socket.emit(
-            "conversation:join",
-            String(conversationId),
-            (result) => {
-                if (!result?.success) {
-                    console.error(
-                        "Failed to join conversation:",
-                        result?.message
-                    );
-                }
-            }
-        );
+      socket.emit(
+        "conversation:join",
+        String(conversationId),
+        (result) => {
+          if (!result?.success) {
+            console.error(
+              "Failed to join conversation:",
+              result?.message
+            );
+          }
+        }
+      );
     };
 
     if (socket.connected) {
-        joinConversation();
+      joinConversation();
     }
 
     socket.on("connect", joinConversation);
 
     return () => {
-        socket.off("connect", joinConversation);
+      socket.off("connect", joinConversation);
 
-        if (socket.connected) {
-            socket.emit(
-                "conversation:leave",
-                String(conversationId)
-            );
-        }
+      if (socket.connected) {
+        socket.emit(
+          "conversation:leave",
+          String(conversationId)
+        );
+      }
     };
-}, [selectedConversation?._id]);
-
-  const isRefreshingSocketRef = useRef(false);
-  const authRetryCountRef = useRef(0);
+  }, [selectedConversation?._id]);
 
   const selectedConversationRef = useRef(selectedConversation);
   useEffect(() => {
@@ -293,12 +307,12 @@ useEffect(() => {
   // Listen for incoming real-time socket messages, read receipts, and handle socket auth errors.
   useEffect(() => {
     const handleConnectSuccess = () => {
-      authRetryCountRef.current = 0;
+      confirmSocketAuthSuccess();
     };
 
-    const handleNewMessage = (payload) => {
+    const handleNewMessage = async (payload) => {
       if (payload && payload.conversationId && payload.message) {
-        dispatch(addNewBrandMessage(payload));
+        dispatch(addNewBrandMessage({ ...payload, currentUserId: currentBrandIdRef.current }));
 
         const msgReceiverId =
           typeof payload.message.receiver === "string"
@@ -312,7 +326,15 @@ useEffect(() => {
           msgReceiverId &&
           String(msgReceiverId) === String(currentBrandIdRef.current)
         ) {
-          dispatch(markBrandConversationRead(payload.conversationId));
+          const readResult = await dispatch(markBrandConversationRead(payload.conversationId));
+          const markedNotificationIds =
+            readResult?.payload?.markedNotificationIds ||
+            readResult?.payload?.response?.data?.markedNotificationIds ||
+            readResult?.payload?.response?.markedNotificationIds ||
+            [];
+          if (markedNotificationIds.length > 0) {
+            dispatch(fetchBrandUnreadNotificationCount());
+          }
         }
       }
     };
@@ -323,38 +345,8 @@ useEffect(() => {
       }
     };
 
-    const handleConnectError = async (err) => {
-      const errorMessage = err?.message || "";
-
-      const isAuthError =
-        errorMessage === "Invalid or expired access token" ||
-        errorMessage === "Authentication required" ||
-        errorMessage === "Invalid or expired session";
-
-      if (isAuthError) {
-        if (authRetryCountRef.current >= 3) {
-          console.error("Max socket authentication retry attempts reached. Disconnecting socket.");
-          socket.disconnect();
-          return;
-        }
-
-        if (!isRefreshingSocketRef.current) {
-          isRefreshingSocketRef.current = true;
-          authRetryCountRef.current += 1;
-          try {
-            await dispatch(refreshToken()).unwrap();
-            socket.disconnect();
-            socket.connect();
-          } catch (refreshErr) {
-            console.error("Token refresh failed for Socket.IO:", refreshErr);
-            socket.disconnect();
-          } finally {
-            isRefreshingSocketRef.current = false;
-          }
-        }
-      } else {
-        console.error("Socket connection error:", errorMessage);
-      }
+    const handleConnectError = (err) => {
+      handleSocketConnectionError(err, dispatch, refreshToken);
     };
 
     socket.on("connect", handleConnectSuccess);
@@ -369,7 +361,6 @@ useEffect(() => {
       socket.off("connect_error", handleConnectError);
     };
   }, [dispatch]);
-
 
   // Refetch conversations list if a new message was sent to a brand-new conversation
   useEffect(() => {
@@ -389,11 +380,21 @@ useEffect(() => {
   const targetConversationId = searchParams?.get("conversationId");
 
   // Handle selecting a conversation thread
-  const handleSelectConversation = (conversationId) => {
+  const handleSelectConversation = async (conversationId) => {
     if (selectedConversation?._id && String(selectedConversation._id) === String(conversationId)) return;
     dispatch(clearSelectedConversation());
     dispatch(fetchBrandConversationById(conversationId));
-    dispatch(markBrandConversationRead(conversationId));
+    const readResult = await dispatch(markBrandConversationRead(conversationId));
+
+    const markedNotificationIds =
+      readResult?.payload?.markedNotificationIds ||
+      readResult?.payload?.response?.data?.markedNotificationIds ||
+      readResult?.payload?.response?.markedNotificationIds ||
+      [];
+
+    if (markedNotificationIds.length > 0) {
+      dispatch(fetchBrandUnreadNotificationCount());
+    }
   };
 
   // Auto-select conversation matching URL query parameter (bookingId or conversationId)
@@ -591,6 +592,7 @@ useEffect(() => {
                 const creatorInitials = getInitials(creatorName, creator?.email);
                 const creatorImage = creator?.profileImage || creator?.avatar || creator?.image;
                 const isSelected = selectedConversation?._id && String(selectedConversation._id) === String(item._id);
+                const hasUnread = !isSelected && Boolean(item.unreadCount && item.unreadCount > 0);
 
                 return (
                   <button
@@ -630,10 +632,18 @@ useEffect(() => {
                         </span>
                       )}
 
-                      {/* Last Message Snippet */}
-                      <p className="text-[11px] text-text-secondary truncate mt-0.5">
-                        {item.lastMessage || "No messages yet"}
-                      </p>
+                      {/* Last Message Snippet & Unread Dot */}
+                      <div className="flex items-center justify-between gap-2 mt-0.5">
+                        <p className="text-[11px] text-text-secondary truncate flex-1 min-w-0">
+                          {item.lastMessage || "No messages yet"}
+                        </p>
+                        {hasUnread && (
+                          <span
+                            className="w-2 h-2 rounded-full bg-red-500 shrink-0"
+                            aria-label="Unread message"
+                          />
+                        )}
+                      </div>
                     </div>
                   </button>
                 );

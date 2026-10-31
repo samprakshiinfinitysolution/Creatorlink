@@ -10,7 +10,16 @@ const createProfileValidation = (req, res, next) => {
         location,
         profileImage,
         isPublic,
-        socialLinks
+        isOnboarded,
+        startingRate,
+        socialLinks,
+        title,
+        keywords,
+        niches,
+        dob,
+        gender,
+        languages,
+        ethnicity
     } = req.body;
 
 
@@ -95,6 +104,39 @@ const createProfileValidation = (req, res, next) => {
     }
 
 
+    // Validate isOnboarded status flag.
+    if (isOnboarded !== undefined) {
+
+        if (typeof isOnboarded !== "boolean") {
+            throw createApiError(
+                400,
+                "isOnboarded must be a boolean"
+            );
+        }
+    }
+
+
+    // Validate startingRate.
+    if (startingRate !== undefined) {
+
+        const parsedRate = Number(startingRate);
+
+        if (
+            startingRate === null ||
+            startingRate === "" ||
+            typeof startingRate === "boolean" ||
+            Number.isNaN(parsedRate) ||
+            !Number.isFinite(parsedRate) ||
+            parsedRate < 0
+        ) {
+            throw createApiError(
+                400,
+                "startingRate must be a non-negative number"
+            );
+        }
+    }
+
+
     // socialLinks must be an object.
     if (socialLinks !== undefined) {
 
@@ -164,6 +206,136 @@ const createProfileValidation = (req, res, next) => {
     }
 
 
+    // Validate title.
+    if (title !== undefined) {
+
+        if (typeof title !== "string") {
+            throw createApiError(
+                400,
+                "Title must be a string"
+            );
+        }
+
+        if (title.length > 150) {
+            throw createApiError(
+                400,
+                "Title must not exceed 150 characters"
+            );
+        }
+    }
+
+
+    // Validate keywords.
+    if (keywords !== undefined) {
+
+        if (!Array.isArray(keywords)) {
+            throw createApiError(
+                400,
+                "Keywords must be an array"
+            );
+        }
+
+        if (keywords.some((keyword) => typeof keyword !== "string")) {
+            throw createApiError(
+                400,
+                "Each keyword must be a string"
+            );
+        }
+    }
+
+
+    // Validate niches.
+    if (niches !== undefined) {
+
+        if (!Array.isArray(niches)) {
+            throw createApiError(
+                400,
+                "Niches must be an array"
+            );
+        }
+
+        if (niches.length > 3) {
+            throw createApiError(
+                400,
+                "Niches cannot exceed 3 items"
+            );
+        }
+
+        if (niches.some((niche) => typeof niche !== "string")) {
+            throw createApiError(
+                400,
+                "Each niche must be a string"
+            );
+        }
+    }
+
+
+    // Validate dob (date of birth).
+    if (dob !== undefined) {
+
+        if (
+            (typeof dob !== "string" && !(dob instanceof Date)) ||
+            Number.isNaN(new Date(dob).getTime())
+        ) {
+            throw createApiError(
+                400,
+                "Date of birth must be a valid date"
+            );
+        }
+    }
+
+
+    // Validate gender.
+    if (gender !== undefined) {
+
+        const allowedGenders = [
+            "male",
+            "female",
+            "non-binary",
+            "other",
+            "prefer_not_to_say"
+        ];
+
+        if (typeof gender !== "string" || !allowedGenders.includes(gender)) {
+            throw createApiError(
+                400,
+                `Gender must be one of: ${allowedGenders.join(", ")}`
+            );
+        }
+    }
+
+
+    // Validate languages.
+    if (languages !== undefined) {
+
+        if (!Array.isArray(languages)) {
+            throw createApiError(
+                400,
+                "Languages must be an array"
+            );
+        }
+
+        if (languages.some((language) => typeof language !== "string")) {
+            throw createApiError(
+                400,
+                "Each language must be a string"
+            );
+        }
+    }
+
+
+    // Validate ethnicity.
+    if (ethnicity !== undefined) {
+
+        if (typeof ethnicity !== "string") {
+            throw createApiError(
+                400,
+                "Ethnicity must be a string"
+            );
+        }
+    }
+
+
     next();
 };
 
@@ -177,7 +349,16 @@ const updateProfileValidation = (req, res, next) => {
         "location",
         "profileImage",
         "isPublic",
-        "socialLinks"
+        "isOnboarded",
+        "startingRate",
+        "socialLinks",
+        "title",
+        "keywords",
+        "niches",
+        "dob",
+        "gender",
+        "languages",
+        "ethnicity"
     ];
 
 

@@ -137,7 +137,7 @@ export default function SignupForm() {
         const userRole = user?.role;
 
         if (userRole === "creator") {
-          router.push("/creator/dashboard");
+          router.push("/creator/onboarding");
         } else if (userRole === "brand") {
           router.push("/brand/dashboard");
         } else if (userRole === "admin") {
@@ -245,7 +245,7 @@ export default function SignupForm() {
 
         setTimeout(() => {
           if (userRole === "creator") {
-            router.push("/creator/dashboard");
+            router.push("/creator/onboarding");
           } else if (userRole === "brand") {
             router.push("/brand/dashboard");
           } else if (userRole === "admin") {

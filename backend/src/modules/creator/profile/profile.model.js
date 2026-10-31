@@ -12,6 +12,14 @@ const profileSchema = new mongoose.Schema(
             unique: true
         },
 
+        // Professional title / headline of the creator.
+        title: {
+            type: String,
+            trim: true,
+            maxlength: 150,
+            default: ""
+        },
+
         // Creator's public display information.
         bio: {
             type: String,
@@ -27,6 +35,26 @@ const profileSchema = new mongoose.Schema(
             default: ""
         },
 
+        // Multiple creator niches (maximum 3 items).
+        niches: {
+            type: [String],
+            default: [],
+            validate: [
+                {
+                    validator: function (val) {
+                        return !val || val.length <= 3;
+                    },
+                    message: "Niches cannot exceed 3 items"
+                }
+            ]
+        },
+
+        // Searchable keywords representing the creator's content.
+        keywords: {
+            type: [String],
+            default: []
+        },
+
         location: {
             type: String,
             trim: true,
@@ -35,6 +63,37 @@ const profileSchema = new mongoose.Schema(
         },
 
         profileImage: {
+            type: String,
+            trim: true,
+            default: ""
+        },
+
+        // Date of birth for creator verification / demographics.
+        dob: {
+            type: Date
+        },
+
+        // Creator gender identity.
+        gender: {
+            type: String,
+            trim: true,
+            enum: [
+                "male",
+                "female",
+                "non-binary",
+                "other",
+                "prefer_not_to_say"
+            ]
+        },
+
+        // Languages the creator creates content in or speaks.
+        languages: {
+            type: [String],
+            default: []
+        },
+
+        // Optional creator ethnicity demographic information.
+        ethnicity: {
             type: String,
             trim: true,
             default: ""
@@ -92,6 +151,19 @@ const profileSchema = new mongoose.Schema(
         isPublic: {
             type: Boolean,
             default: true
+        },
+
+        // Indicates whether the creator has completed the guided onboarding flow.
+        isOnboarded: {
+            type: Boolean,
+            default: false
+        },
+
+        // Starting collaboration rate / base price (INR).
+        startingRate: {
+            type: Number,
+            min: 0,
+            default: 0
         }
     },
     {

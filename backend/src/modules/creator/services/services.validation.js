@@ -28,6 +28,8 @@ const validateCreateService = (req, res, next) => {
         category,
         coverImage,
         platform,
+        contentType,
+        quantity,
         deliverables,
         pricingType,
         price,
@@ -113,6 +115,36 @@ const validateCreateService = (req, res, next) => {
             res,
             400,
             "Invalid service platform",
+            null
+        );
+    }
+
+
+    if (
+        contentType !== undefined &&
+        typeof contentType !== "string"
+    ) {
+        return sendResponse(
+            res,
+            400,
+            "Content type must be a string",
+            null
+        );
+    }
+
+
+    if (
+        quantity !== undefined &&
+        (
+            typeof quantity !== "number" ||
+            !Number.isInteger(quantity) ||
+            quantity < 1
+        )
+    ) {
+        return sendResponse(
+            res,
+            400,
+            "Quantity must be an integer of at least 1",
             null
         );
     }
@@ -260,6 +292,8 @@ const validateUpdateService = (req, res, next) => {
         category,
         coverImage,
         platform,
+        contentType,
+        quantity,
         deliverables,
         pricingType,
         price,
@@ -340,6 +374,36 @@ const validateUpdateService = (req, res, next) => {
             res,
             400,
             "Invalid service platform",
+            null
+        );
+    }
+
+
+    if (
+        contentType !== undefined &&
+        typeof contentType !== "string"
+    ) {
+        return sendResponse(
+            res,
+            400,
+            "Content type must be a string",
+            null
+        );
+    }
+
+
+    if (
+        quantity !== undefined &&
+        (
+            typeof quantity !== "number" ||
+            !Number.isInteger(quantity) ||
+            quantity < 1
+        )
+    ) {
+        return sendResponse(
+            res,
+            400,
+            "Quantity must be an integer of at least 1",
             null
         );
     }

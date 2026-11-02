@@ -382,7 +382,22 @@ export default function BrandCreatorDetailModal({
                   <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-secondary/10 text-secondary border border-secondary/20">
                     {category}
                   </span>
+                  {Array.isArray(creator?.niches) && creator.niches.length > 0 && (
+                    creator.niches.map((niche, idx) => (
+                      <span
+                        key={idx}
+                        className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-surface-muted text-text-secondary border border-border-theme"
+                      >
+                        #{niche}
+                      </span>
+                    ))
+                  )}
                 </div>
+                {creator?.title && (
+                  <p className="text-xs text-secondary font-medium mt-0.5 truncate" title={creator.title}>
+                    {creator.title}
+                  </p>
+                )}
 
                 <div className="flex items-center gap-3 text-xs text-text-secondary mt-1 flex-wrap">
                   <span className="flex items-center gap-1">
@@ -547,6 +562,49 @@ export default function BrandCreatorDetailModal({
                     <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">
                       {bio}
                     </p>
+                  </div>
+
+                  {/* Specialization & Focus */}
+                  <div className="bg-surface-muted/30 border border-border-theme rounded-2xl p-5 space-y-3">
+                    <h3 className="text-xs font-bold text-text-secondary uppercase tracking-wider">
+                      Specialization & Focus
+                    </h3>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs text-text-secondary font-medium">Primary Category:</span>
+                      <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-secondary/10 text-secondary border border-secondary/20">
+                        {category}
+                      </span>
+                    </div>
+                    {Array.isArray(creator?.niches) && creator.niches.length > 0 && (
+                      <div className="space-y-1.5 pt-1">
+                        <span className="text-xs text-text-secondary font-medium block">Niches:</span>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {creator.niches.map((niche, idx) => (
+                            <span
+                              key={idx}
+                              className="px-2.5 py-1 rounded-lg text-xs font-medium bg-surface border border-border-theme text-foreground"
+                            >
+                              #{niche}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {Array.isArray(creator?.keywords) && creator.keywords.length > 0 && (
+                      <div className="space-y-1.5 pt-1">
+                        <span className="text-xs text-text-secondary font-medium block">Keywords:</span>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {creator.keywords.map((kw, idx) => (
+                            <span
+                              key={idx}
+                              className="px-2 py-0.5 rounded-md text-[11px] text-text-secondary bg-surface-muted border border-border-theme"
+                            >
+                              {kw}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Social Links */}

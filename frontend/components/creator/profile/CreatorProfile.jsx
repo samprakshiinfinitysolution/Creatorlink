@@ -188,6 +188,434 @@ function TiktokIcon({ className = "w-4 h-4" }) {
   );
 }
 
+function CalendarIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 9v7.5" />
+    </svg>
+  );
+}
+
+function CheckIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+    </svg>
+  );
+}
+
+function PlusIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+    </svg>
+  );
+}
+
+function XMarkIcon({ className = "w-3.5 h-3.5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  );
+}
+
+function SearchIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+    </svg>
+  );
+}
+
+function SparklesIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
+    </svg>
+  );
+}
+
+function HeartIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+    </svg>
+  );
+}
+
+function DeviceIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
+    </svg>
+  );
+}
+
+function BoltIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+    </svg>
+  );
+}
+
+function UtensilsIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+    </svg>
+  );
+}
+
+function TagIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.386l5.411-3.188c.826-.487 1.07-1.523.582-2.35l-7.69-13.06A2.25 2.25 0 0012.39 3H9.568z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6z" />
+    </svg>
+  );
+}
+
+function VideoCameraIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+    </svg>
+  );
+}
+
+function PaletteIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402M6.75 21A3.75 3.75 0 013 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 003.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.433-.432 1.09-.537 1.62-.252l2.365 1.272a1.875 1.875 0 01.99 1.65v.213" />
+    </svg>
+  );
+}
+
+function SquaresIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+    </svg>
+  );
+}
+
+function LockClosedIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+    </svg>
+  );
+}
+
+function ShieldCheckIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+    </svg>
+  );
+}
+
+function CheckBadgeIcon({ className = "w-5 h-5 text-secondary" }) {
+  return (
+    <svg className={className} fill="currentColor" viewBox="0 0 20 20">
+      <path
+        fillRule="evenodd"
+        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+}
+
+function LayersIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6.429 9.75L2.25 12l9.75 5.25 9.75-5.25-4.179-2.25m-11.321 4.5L2.25 16.5l9.75 5.25 9.75-5.25-4.179-2.25M12 2.25L2.25 7.5l9.75 5.25 9.75-5.25L12 2.25z" />
+    </svg>
+  );
+}
+
+function ChartBarIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+    </svg>
+  );
+}
+
+function HandshakeIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0112 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 013 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 013.413-.387m7.5 0V5.25A2.25 2.25 0 0013.5 3h-3a2.25 2.25 0 00-2.25 2.25v.894m7.5 0a48.667 48.667 0 00-7.5 0" />
+    </svg>
+  );
+}
+
+function GenderIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M16 3h5v5m0-5l-6 6m1 4a5 5 0 11-7.07-7.07 5 5 0 017.07 7.07z" />
+    </svg>
+  );
+}
+
+function UsersIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+    </svg>
+  );
+}
+
+function ArrowLeftIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+    </svg>
+  );
+}
+
+function UploadIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+    </svg>
+  );
+}
+
+function LinkIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+    </svg>
+  );
+}
+
+function ShareIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
+    </svg>
+  );
+}
+
+function EyeIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+    </svg>
+  );
+}
+
+function GenderFemaleIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4a5 5 0 100 10 5 5 0 000-10zm0 10v6m-3-3h6" />
+    </svg>
+  );
+}
+
+function GenderMaleIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M10 14a5 5 0 100-10 5 5 0 000 10zm4-10h6m0 0v6m0-6L14 10" />
+    </svg>
+  );
+}
+
+function GenderNonBinaryIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M18.178 8c5.096 0 5.096 8 0 8-5.095 0-7.267-8-12.356-8-5.096 0-5.096 8 0 8 5.095 0 7.261-8 12.356-8z" />
+    </svg>
+  );
+}
+
+function GenderOtherIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+      <circle cx="5" cy="12" r="2" />
+      <circle cx="12" cy="12" r="2" />
+      <circle cx="19" cy="12" r="2" />
+    </svg>
+  );
+}
+
+function GenderPrivateIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 3l18 18" />
+    </svg>
+  );
+}
+
+// =========================================================
+// ONBOARDING & PROFILE CONSTANTS (SHARED TAXONOMY)
+// =========================================================
+const CATEGORIES = [
+  {
+    id: "fashion-luxury",
+    name: "Fashion & Luxury",
+    desc: "Haute couture, streetwear, designer styling & luxury goods",
+    icon: SparklesIcon,
+  },
+  {
+    id: "beauty-skincare",
+    name: "Beauty & Skincare",
+    desc: "Cosmetics, dermatology, routines, makeup & glam",
+    icon: HeartIcon,
+  },
+  {
+    id: "travel-lifestyle",
+    name: "Travel & Lifestyle",
+    desc: "Destinations, stays, city guides & aesthetic living",
+    icon: GlobeIcon,
+  },
+  {
+    id: "tech-gaming",
+    name: "Tech & Gaming",
+    desc: "Gadgets, PC setups, consoles, apps, AI & gameplay",
+    icon: DeviceIcon,
+  },
+  {
+    id: "fitness-wellness",
+    name: "Fitness & Wellness",
+    desc: "Workouts, nutrition, mindfulness & healthy lifestyle",
+    icon: BoltIcon,
+  },
+  {
+    id: "food-culinary",
+    name: "Food & Culinary",
+    desc: "Recipes, cafes, food reviews, cooking & baking",
+    icon: UtensilsIcon,
+  },
+  {
+    id: "apparel-lifestyle",
+    name: "Apparel & Lifestyle",
+    desc: "Everyday fits, activewear, capsule closets & accessories",
+    icon: TagIcon,
+  },
+  {
+    id: "photography",
+    name: "Photography",
+    desc: "Portraits, landscapes, editorial shoots & camera gear",
+    icon: CameraIcon,
+  },
+  {
+    id: "video-reels",
+    name: "Video & Reels",
+    desc: "Short-form video, TikToks, Reels, cinematics & vlogs",
+    icon: VideoCameraIcon,
+  },
+  {
+    id: "art-design",
+    name: "Art & Design",
+    desc: "Digital art, illustrations, UX/UI, pottery & creative works",
+    icon: PaletteIcon,
+  },
+  {
+    id: "other",
+    name: "Other",
+    desc: "Education, business, comedy, music & creative niches",
+    icon: SquaresIcon,
+  },
+];
+
+const SUGGESTED_KEYWORDS = [
+  "fashion",
+  "styling",
+  "streetwear",
+  "beauty",
+  "skincare",
+  "lifestyle",
+  "tech reviews",
+  "gaming",
+  "fitness",
+  "travel",
+  "foodie",
+  "ugc",
+  "reels",
+  "cinematic",
+];
+
+const GENDER_OPTIONS = [
+  { id: "female", label: "Female", desc: "She / Her", icon: GenderFemaleIcon },
+  { id: "male", label: "Male", desc: "He / Him", icon: GenderMaleIcon },
+  { id: "non-binary", label: "Non-binary", desc: "They / Them / Enby", icon: GenderNonBinaryIcon },
+  { id: "other", label: "Other", desc: "Self-described identity", icon: GenderOtherIcon },
+  { id: "prefer_not_to_say", label: "Prefer not to say", desc: "Keep private", icon: GenderPrivateIcon },
+];
+
+const POPULAR_LANGUAGES = [
+  "English",
+  "Hindi",
+  "Spanish",
+  "French",
+  "German",
+  "Arabic",
+  "Bengali",
+  "Portuguese",
+  "Russian",
+  "Japanese",
+  "Korean",
+  "Italian",
+  "Punjabi",
+  "Marathi",
+  "Telugu",
+  "Tamil",
+  "Gujarati",
+  "Urdu",
+  "Kannada",
+  "Malayalam",
+];
+
+const ETHNICITY_OPTIONS = [
+  "Asian / South Asian",
+  "Asian / East Asian",
+  "Asian / Southeast Asian",
+  "Black / African descent",
+  "Hispanic / Latino",
+  "Middle Eastern / North African",
+  "White / Caucasian",
+  "Indigenous / Native",
+  "Mixed / Multiracial",
+];
+
+function formatDobForInput(dobVal) {
+  if (!dobVal) return "";
+  const d = new Date(dobVal);
+  if (isNaN(d.getTime())) return "";
+  return d.toISOString().split("T")[0];
+}
+
+function formatDobForDisplay(dobVal) {
+  if (!dobVal) return "Not specified";
+  const d = new Date(dobVal);
+  if (isNaN(d.getTime())) return "Not specified";
+  const formatted = d.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+  const today = new Date();
+  let age = today.getFullYear() - d.getFullYear();
+  const m = today.getMonth() - d.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < d.getDate())) {
+    age--;
+  }
+  return age > 0 ? `${formatted} (${age} years)` : formatted;
+}
+
+function getGenderDisplay(genderVal) {
+  if (!genderVal) return "Not specified";
+  const found = GENDER_OPTIONS.find((g) => g.id === genderVal);
+  return found ? found.label : genderVal;
+}
+
 // =========================================================
 // SHARED AVATAR PREVIEW COMPONENT (EXACT BRAND LOGO PREVIEW SYNTAX)
 // =========================================================
@@ -208,7 +636,7 @@ function CreatorAvatarPreview({
 
   return (
     <div
-      className={`relative ${className} rounded-2xl overflow-hidden shadow-sm shrink-0 flex items-center justify-center bg-gradient-to-br from-[#ff5388] via-[#ff3b77] to-[#ff2d6c] text-white`}
+      className={`relative ${className} rounded-2xl overflow-hidden shadow-sm shrink-0 flex items-center justify-center bg-[#111111] dark:bg-[#16161e] border border-border-theme dark:border-[#262632] text-white`}
     >
       {cleanUrl && !isFailed ? (
         <>
@@ -294,8 +722,11 @@ export default function CreatorProfile() {
   const authUser = useSelector((state) => state.auth?.user);
 
   const [formData, setFormData] = useState({
+    title: "",
     bio: "",
     category: "Fashion & Luxury",
+    niches: [],
+    keywords: [],
     location: "",
     profileImage: "",
     isPublic: true,
@@ -306,7 +737,15 @@ export default function CreatorProfile() {
       tiktok: "",
       website: "",
     },
+    dob: "",
+    gender: "",
+    languages: [],
+    ethnicity: "",
   });
+
+  const [keywordInput, setKeywordInput] = useState("");
+  const [languageInput, setLanguageInput] = useState("");
+  const [nicheSearch, setNicheSearch] = useState("");
 
   // Fetch creator profile on mount
   useEffect(() => {
@@ -324,10 +763,20 @@ export default function CreatorProfile() {
   // Sync form data whenever profile in Redux updates, unless the user is actively editing
   useEffect(() => {
     if (profile && !isEditing) {
+      const initialNiches =
+        Array.isArray(profile.niches) && profile.niches.length > 0
+          ? profile.niches
+          : profile.category
+          ? [profile.category]
+          : [];
+
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({
+        title: profile.title || "",
         bio: profile.bio || "",
         category: profile.category || "Fashion & Luxury",
+        niches: initialNiches,
+        keywords: Array.isArray(profile.keywords) ? profile.keywords : [],
         location: profile.location || "",
         profileImage: profile.profileImage || "",
         isPublic: profile.isPublic ?? true,
@@ -338,6 +787,10 @@ export default function CreatorProfile() {
           tiktok: profile.socialLinks?.tiktok || "",
           website: profile.socialLinks?.website || "",
         },
+        dob: formatDobForInput(profile.dob),
+        gender: profile.gender || "",
+        languages: Array.isArray(profile.languages) ? profile.languages : [],
+        ethnicity: profile.ethnicity || "",
       });
     }
   }, [profile, isEditing]);
@@ -348,6 +801,74 @@ export default function CreatorProfile() {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
+    }));
+  };
+
+  // Niches toggle handler (max 3) - independent of category
+  const handleNicheToggle = (nicheName) => {
+    setFormData((prev) => {
+      const exists = prev.niches.includes(nicheName);
+      if (exists) {
+        const nextNiches = prev.niches.filter((n) => n !== nicheName);
+        return {
+          ...prev,
+          niches: nextNiches,
+        };
+      }
+      if (prev.niches.length >= 3) {
+        return prev;
+      }
+      const nextNiches = [...prev.niches, nicheName];
+      return {
+        ...prev,
+        niches: nextNiches,
+      };
+    });
+  };
+
+  // Keyword tag handlers (max 10)
+  const handleAddKeyword = () => {
+    const clean = keywordInput.trim().replace(/^#/, "");
+    if (!clean) return;
+    if (formData.keywords.includes(clean)) {
+      setKeywordInput("");
+      return;
+    }
+    if (formData.keywords.length >= 10) return;
+    setFormData((prev) => ({
+      ...prev,
+      keywords: [...prev.keywords, clean],
+    }));
+    setKeywordInput("");
+  };
+
+  const handleRemoveKeyword = (kwToRemove) => {
+    setFormData((prev) => ({
+      ...prev,
+      keywords: prev.keywords.filter((kw) => kw !== kwToRemove),
+    }));
+  };
+
+  // Language tag handlers (max 10)
+  const handleAddLanguage = () => {
+    const clean = languageInput.trim();
+    if (!clean) return;
+    if (formData.languages.includes(clean)) {
+      setLanguageInput("");
+      return;
+    }
+    if (formData.languages.length >= 10) return;
+    setFormData((prev) => ({
+      ...prev,
+      languages: [...prev.languages, clean],
+    }));
+    setLanguageInput("");
+  };
+
+  const handleRemoveLanguage = (langToRemove) => {
+    setFormData((prev) => ({
+      ...prev,
+      languages: prev.languages.filter((l) => l !== langToRemove),
     }));
   };
 
@@ -404,18 +925,7 @@ export default function CreatorProfile() {
 
         if (profile && (profile._id || profile.id) && !isEditing) {
           const updatePayload = {
-            bio: formData.bio || profile.bio || "",
-            category: formData.category || profile.category || "Fashion & Luxury",
-            location: formData.location || profile.location || "",
             profileImage: uploadedUrl,
-            isPublic: formData.isPublic ?? profile.isPublic ?? true,
-            socialLinks: {
-              instagram: formData.socialLinks?.instagram || profile.socialLinks?.instagram || "",
-              facebook: formData.socialLinks?.facebook || profile.socialLinks?.facebook || "",
-              youtube: formData.socialLinks?.youtube || profile.socialLinks?.youtube || "",
-              tiktok: formData.socialLinks?.tiktok || profile.socialLinks?.tiktok || "",
-              website: formData.socialLinks?.website || profile.socialLinks?.website || "",
-            },
           };
           const actionResult = await dispatch(updateCreatorProfile(updatePayload));
           if (updateCreatorProfile.fulfilled.match(actionResult)) {
@@ -445,10 +955,23 @@ export default function CreatorProfile() {
     setSaveError("");
     setUploadError("");
     setSuccessMessage("");
+    setKeywordInput("");
+    setLanguageInput("");
+    setNicheSearch("");
     if (profile) {
+      const initialNiches =
+        Array.isArray(profile.niches) && profile.niches.length > 0
+          ? profile.niches
+          : profile.category
+          ? [profile.category]
+          : [];
+
       setFormData({
+        title: profile.title || "",
         bio: profile.bio || "",
         category: profile.category || "Fashion & Luxury",
+        niches: initialNiches,
+        keywords: Array.isArray(profile.keywords) ? profile.keywords : [],
         location: profile.location || "",
         profileImage: profile.profileImage || "",
         isPublic: profile.isPublic ?? true,
@@ -459,6 +982,10 @@ export default function CreatorProfile() {
           tiktok: profile.socialLinks?.tiktok || "",
           website: profile.socialLinks?.website || "",
         },
+        dob: formatDobForInput(profile.dob),
+        gender: profile.gender || "",
+        languages: Array.isArray(profile.languages) ? profile.languages : [],
+        ethnicity: profile.ethnicity || "",
       });
     }
   };
@@ -472,22 +999,89 @@ export default function CreatorProfile() {
     setSaveError("");
     setUploadError("");
 
+    if (formData.title && formData.title.length > 150) {
+      setSaveError("Professional headline must not exceed 150 characters.");
+      return;
+    }
+    if (formData.bio && formData.bio.length > 1000) {
+      setSaveError("Bio must not exceed 1000 characters.");
+      return;
+    }
+    if (!formData.category || !formData.category.trim()) {
+      setSaveError("Please select a primary category.");
+      return;
+    }
+    if (formData.category.trim().length > 100) {
+      setSaveError("Category must not exceed 100 characters.");
+      return;
+    }
+    if (formData.niches && formData.niches.length > 3) {
+      setSaveError("You can select a maximum of 3 niches.");
+      return;
+    }
+    if (formData.keywords && formData.keywords.length > 10) {
+      setSaveError("Keywords cannot exceed 10 tags.");
+      return;
+    }
+    if (formData.languages && formData.languages.length > 10) {
+      setSaveError("Languages cannot exceed 10 items.");
+      return;
+    }
+    if (formData.dob && formData.dob.trim()) {
+      const parsedDate = new Date(formData.dob);
+      if (Number.isNaN(parsedDate.getTime())) {
+        setSaveError("Please enter a valid date of birth.");
+        return;
+      }
+      if (parsedDate > new Date()) {
+        setSaveError("Date of birth cannot be in the future.");
+        return;
+      }
+    }
+
     const hasExistingProfile = Boolean(profile && (profile._id || profile.id));
 
     const payload = {
-      bio: formData.bio || "",
-      category: formData.category || "Fashion & Luxury",
-      location: formData.location || "",
+      title: formData.title ? formData.title.trim() : "",
+      bio: formData.bio ? formData.bio.trim() : "",
+      category: formData.category.trim(),
+      niches: Array.isArray(formData.niches) ? formData.niches : [],
+      keywords: Array.isArray(formData.keywords) ? formData.keywords : [],
+      location: formData.location ? formData.location.trim() : "",
       profileImage: formData.profileImage || "",
       isPublic: Boolean(formData.isPublic),
       socialLinks: {
-        instagram: formData.socialLinks?.instagram || "",
-        facebook: formData.socialLinks?.facebook || "",
-        youtube: formData.socialLinks?.youtube || "",
-        tiktok: formData.socialLinks?.tiktok || "",
-        website: formData.socialLinks?.website || "",
+        instagram: formData.socialLinks?.instagram ? formData.socialLinks.instagram.trim() : "",
+        facebook: formData.socialLinks?.facebook ? formData.socialLinks.facebook.trim() : "",
+        youtube: formData.socialLinks?.youtube ? formData.socialLinks.youtube.trim() : "",
+        tiktok: formData.socialLinks?.tiktok ? formData.socialLinks.tiktok.trim() : "",
+        website: formData.socialLinks?.website ? formData.socialLinks.website.trim() : "",
       },
+      languages: Array.isArray(formData.languages) ? formData.languages : [],
+      ethnicity: formData.ethnicity ? formData.ethnicity.trim() : "",
     };
+
+    // Persist or clear optional DOB
+    if (formData.dob && formData.dob.trim()) {
+      const parsedDate = new Date(formData.dob);
+      if (!Number.isNaN(parsedDate.getTime())) {
+        payload.dob = formData.dob.trim();
+      } else {
+        payload.dob = null;
+      }
+    } else {
+      payload.dob = null;
+    }
+
+    // Persist or clear optional Gender
+    if (
+      formData.gender &&
+      ["male", "female", "non-binary", "other", "prefer_not_to_say"].includes(formData.gender)
+    ) {
+      payload.gender = formData.gender;
+    } else {
+      payload.gender = null;
+    }
 
     try {
       setIsSubmitting(true);
@@ -566,7 +1160,31 @@ export default function CreatorProfile() {
 
   // Dynamic values falling back to reference defaults
   const creatorName = profile?.user?.name || authUser?.name || "Aarav Sharma";
+  const title = profile?.title || formData.title || "";
   const category = profile?.category || formData.category || "Fashion & Luxury";
+  const niches =
+    Array.isArray(profile?.niches) && profile.niches.length > 0
+      ? profile.niches
+      : Array.isArray(formData.niches) && formData.niches.length > 0
+      ? formData.niches
+      : category
+      ? [category]
+      : [];
+  const keywords =
+    Array.isArray(profile?.keywords) && profile.keywords.length > 0
+      ? profile.keywords
+      : Array.isArray(formData.keywords)
+      ? formData.keywords
+      : [];
+  const dob = profile?.dob || formData.dob || "";
+  const gender = profile?.gender || formData.gender || "";
+  const languages =
+    Array.isArray(profile?.languages) && profile.languages.length > 0
+      ? profile.languages
+      : Array.isArray(formData.languages)
+      ? formData.languages
+      : [];
+  const ethnicity = profile?.ethnicity || formData.ethnicity || "";
   const location = profile?.location || formData.location || "Mumbai, India";
   const displayEmail = profile?.user?.email || authUser?.email || "creator@creatorlink.io";
   const websiteUrl = profile?.socialLinks?.website || formData.socialLinks?.website || "https://aaravsharma.me";
@@ -581,6 +1199,7 @@ export default function CreatorProfile() {
   const facebookUrl = profile?.socialLinks?.facebook || formData.socialLinks?.facebook || "https://facebook.com/aaravsharma";
   const followerCount = profile?.followerCount || 128000;
   const engagementRate = profile?.engagementRate ? `${profile.engagementRate}%` : "4.8%";
+  const collaborationsCount = profile?.collaborationsCount || profile?.completedCampaignsCount || 24;
   const isPublic = profile?.isPublic ?? formData.isPublic ?? true;
   const joinedOn = formatJoinedDate(profile?.createdAt || authUser?.createdAt);
 
@@ -607,12 +1226,64 @@ export default function CreatorProfile() {
         {/* Profile Main Container */}
         <main className="flex-1 px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6 max-w-[1400px] w-full mx-auto min-w-0">
 
-          {/* Section Heading & Edit Toggle Button */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          {/* Section Heading */}
+          {isEditing ? (
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-border-theme/60">
+              <div className="flex items-start sm:items-center gap-3">
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  className="p-2 -ml-2 rounded-xl text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer shrink-0"
+                  title="Back to profile"
+                  aria-label="Back to profile"
+                >
+                  <ArrowLeftIcon className="w-5 h-5" />
+                </button>
+                <div>
+                  <h1 className="font-serif font-semibold text-2xl sm:text-3xl text-slate-900 dark:text-foreground tracking-wide">
+                    Creator Profile
+                  </h1>
+                  <p className="text-xs sm:text-sm text-text-secondary mt-0.5 font-sans">
+                    Update your public creator identity, social channels, and marketplace visibility.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2.5 self-end sm:self-center shrink-0 font-sans">
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  disabled={isSubmitting || isUploadingImage}
+                  className="px-5 py-2.5 rounded-xl border border-slate-300 dark:border-border-theme bg-white dark:bg-[#16161e] hover:bg-slate-50 dark:hover:bg-surface-muted text-slate-900 dark:text-white text-xs sm:text-sm font-semibold transition-all shadow-xs cursor-pointer disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSubmit}
+                  disabled={isSubmitting || isUploadingImage}
+                  className="inline-flex items-center gap-1.5 px-6 py-2.5 rounded-xl bg-black hover:bg-neutral-900 text-white text-xs sm:text-sm font-semibold transition-all shadow-xs hover:shadow-md cursor-pointer disabled:opacity-50"
+                >
+                  {isSubmitting ? (
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span>Saving...</span>
+                    </span>
+                  ) : (
+                    <>
+                      <CheckIcon className="w-4 h-4 text-white" />
+                      <span>Save Changes</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          ) : (
             <div>
               <div className="mb-2">
-                <span className="font-bold text-[11px] tracking-wider uppercase text-[#ff2d6c] dark:text-[#ff4f87] font-sans">
-                  ACCOUNT MANAGEMENT
+                <span className="font-semibold text-[11px] tracking-wider uppercase text-text-secondary font-sans inline-flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                  <span>ACCOUNT MANAGEMENT</span>
                 </span>
               </div>
               <h1 className="font-serif font-medium text-2xl sm:text-3xl text-slate-900 dark:text-foreground tracking-wide">
@@ -622,22 +1293,7 @@ export default function CreatorProfile() {
                 Manage your public creator identity, social channels, and marketplace visibility.
               </p>
             </div>
-
-            {/* Edit / View Profile Button (Brand Syntax Pure Black Button) */}
-            <button
-              type="button"
-              onClick={() => {
-                setSuccessMessage("");
-                setSaveError("");
-                setUploadError("");
-                setIsEditing(!isEditing);
-              }}
-              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#252525] hover:bg-[#111111] text-white text-xs font-semibold tracking-wide transition-all shadow-xs hover:shadow-md cursor-pointer shrink-0"
-            >
-              <PencilIcon className="w-4 h-4" />
-              <span>{isEditing ? "View Profile" : "Edit Profile"}</span>
-            </button>
-          </div>
+          )}
 
           {/* Success Message Alert */}
           {successMessage && (
@@ -695,7 +1351,7 @@ export default function CreatorProfile() {
                 type="button"
                 onClick={handleRetry}
                 disabled={isRetrying || loading}
-                className="inline-flex items-center justify-center px-4 py-1.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-500 text-xs font-semibold transition-colors cursor-pointer self-start sm:self-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center justify-center px-4 py-1.5 rounded-xl bg-[#111111] hover:bg-black text-red-400 border border-red-500/30 hover:border-red-500/50 text-xs font-semibold transition-all cursor-pointer self-start sm:self-auto disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isRetrying || loading ? (
                   <span className="flex items-center gap-1.5">
@@ -723,39 +1379,27 @@ export default function CreatorProfile() {
           )}
 
           {/* ========================================================= */}
-          {/* VIEW MODE: EXACT BRAND PROFILE SYNTAX FOR CREATOR */}
+          {/* VIEW MODE: EXACT REFERENCE SYNTAX (PINK ACCENTS & CLEAN CARDS) */}
           {/* ========================================================= */}
           {!isEditing && (
             <div className="space-y-6">
 
               {/* 1. HERO BANNER CARD */}
-              <div className="bg-white dark:bg-surface border border-border-theme rounded-2xl p-6 sm:p-7 relative overflow-hidden shadow-xs">
-                {/* Dreamy subtle pastel wave accent in corner */}
-                <div className="absolute right-0 top-0 bottom-0 w-full sm:w-1/2 pointer-events-none opacity-40 dark:opacity-10 overflow-hidden select-none">
-                  <svg
-                    viewBox="0 0 400 200"
-                    preserveAspectRatio="none"
-                    className="w-full h-full text-pink-100 dark:text-pink-950"
-                  >
-                    <path
-                      d="M100,0 C220,130 180,180 400,200 L400,0 Z"
-                      fill="currentColor"
-                      fillOpacity="0.5"
-                    />
-                  </svg>
-                </div>
+              <div className="bg-white dark:bg-[#131318] border border-border-theme dark:border-[#22222e] rounded-3xl p-6 sm:p-7 relative overflow-hidden shadow-xs">
+                {/* Ambient pink accent glow in top right corner */}
+                <div className="pointer-events-none absolute -top-16 -right-16 w-80 h-80 bg-gradient-to-br from-secondary/20 via-secondary/5 to-transparent blur-3xl rounded-full" />
 
-                <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                  {/* Left: Avatar + Title + Category + Location + Email + Website */}
-                  <div className="flex items-start sm:items-center gap-4 sm:gap-5 min-w-0">
-                    {/* Creator Avatar */}
-                    <div className="relative shrink-0">
+                <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                  {/* Left: Avatar + Details */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-5 min-w-0">
+                    {/* Creator Avatar with Camera Button */}
+                    <div className="relative shrink-0 self-start sm:self-auto">
                       <CreatorAvatarPreview
                         url={profile?.profileImage}
                         alt={creatorName}
                         initials={displayInitial}
                         isUploading={isUploadingImage}
-                        className="w-20 h-20 sm:w-22 sm:h-22"
+                        className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl"
                       />
                       <button
                         type="button"
@@ -763,11 +1407,11 @@ export default function CreatorProfile() {
                         disabled={isUploadingImage}
                         aria-label="Change profile picture"
                         title="Change profile picture"
-                        className={`absolute -bottom-1 -right-1 p-1.5 rounded-lg bg-surface border border-border-theme text-text-secondary hover:text-foreground hover:bg-surface-muted shadow-xs transition-colors cursor-pointer ${
+                        className={`absolute -bottom-1 -right-1 p-2 rounded-xl bg-[#111111] hover:bg-black text-white border border-[#2a2a36] hover:border-secondary/50 shadow-md transition-all cursor-pointer ${
                           isUploadingImage ? "opacity-50 cursor-not-allowed" : ""
                         }`}
                       >
-                        <CameraIcon className="w-3.5 h-3.5 text-secondary" />
+                        <CameraIcon className="w-4 h-4 text-white" />
                       </button>
                     </div>
 
@@ -791,336 +1435,364 @@ export default function CreatorProfile() {
                           {category}
                         </span>
                       </div>
-                      <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 text-xs font-sans text-text-secondary pt-1">
-                        <span className="inline-flex items-center gap-1.5 text-text-secondary">
-                          <MapPinIcon className="w-3.5 h-3.5 text-[#ff2d6c] shrink-0" />
+
+                      {title && (
+                        <p className="text-sm sm:text-base font-normal text-text-secondary font-sans leading-snug">
+                          {title}
+                        </p>
+                      )}
+
+                      <div className="flex flex-wrap items-center gap-3 text-xs font-sans text-text-secondary pt-0.5">
+                        <span className="inline-flex items-center gap-1.5">
+                          <MapPinIcon className="w-3.5 h-3.5 text-black dark:text-white shrink-0" />
                           <span>{location}</span>
                         </span>
-                        <span className="text-border-theme hidden sm:inline">|</span>
-                        <span className="inline-flex items-center gap-1.5 text-text-secondary">
-                          <MailIcon className="w-3.5 h-3.5 text-[#ff2d6c] shrink-0" />
-                          <span className="truncate max-w-[200px]">{displayEmail}</span>
+                        <span className="text-border-theme">•</span>
+                        <span className="inline-flex items-center gap-1.5">
+                          <CalendarIcon className="w-3.5 h-3.5 text-black dark:text-white shrink-0" />
+                          <span>Joined {joinedOn}</span>
                         </span>
-                        {websiteUrl && (
-                          <>
-                            <span className="text-border-theme hidden sm:inline">|</span>
-                            <a
-                              href={websiteUrl.startsWith("http") ? websiteUrl : `https://${websiteUrl}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 text-[#ff2d6c] hover:underline font-medium truncate max-w-[220px]"
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-2 pt-1">
+                        {/* Status Badge */}
+                        <span
+                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
+                            isPublic
+                              ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
+                              : "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30"
+                          }`}
+                        >
+                          <CheckIcon className="w-3 h-3 shrink-0" />
+                          <span>{isPublic ? "Profile Active" : "Profile Private"}</span>
+                        </span>
+
+                        {/* Role / Category Badge */}
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-secondary/15 text-secondary border border-secondary/30">
+                          <SparklesIcon className="w-3.5 h-3.5 shrink-0" />
+                          <span>{category || "Creator"}</span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right: Edit Profile Button */}
+                  <div className="shrink-0 self-start md:self-center">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSuccessMessage("");
+                        setSaveError("");
+                        setUploadError("");
+                        setIsEditing(!isEditing);
+                      }}
+                      className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#111111] hover:bg-black text-white border border-[#2a2a36] hover:border-secondary/50 text-xs font-semibold tracking-wide transition-all shadow-xs hover:shadow-md cursor-pointer"
+                    >
+                      <PencilIcon className="w-4 h-4 text-white" />
+                      <span>Edit Profile</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* 2. TWO-COLUMN MAIN CONTENT GRID */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-start">
+
+                {/* LEFT COLUMN: 7 COLS on lg */}
+                <div className="lg:col-span-7 space-y-5 sm:space-y-6">
+
+                  {/* Card 1: About Me */}
+                  <div className="bg-white dark:bg-[#131318] border border-border-theme dark:border-[#22222e] rounded-3xl p-6 sm:p-7 shadow-xs space-y-5">
+                    {/* Header */}
+                    <div className="flex items-center gap-2.5">
+                      <UserIcon className="w-4 h-4 text-black dark:text-white" />
+                      <h3 className="font-semibold text-base text-slate-900 dark:text-foreground font-sans tracking-wide">
+                        About Me
+                      </h3>
+                    </div>
+
+                    {/* Bio paragraph */}
+                    <p className="text-xs sm:text-sm text-text-secondary leading-relaxed font-sans whitespace-pre-line">
+                      {bio}
+                    </p>
+
+                    {/* Niches Subsection */}
+                    <div className="pt-3 border-t border-border-theme/60 space-y-2.5">
+                      <div className="flex items-center gap-2">
+                        <LayersIcon className="w-4 h-4 text-black dark:text-white" />
+                        <span className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-foreground font-sans">
+                          Niches
+                        </span>
+                        {niches.length > 0 && (
+                          <span className="text-xs text-text-secondary font-sans">({niches.length})</span>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {niches.length > 0 ? (
+                          niches.map((niche) => (
+                            <span
+                              key={niche}
+                              className="px-3.5 py-1 rounded-xl text-xs font-medium bg-secondary/15 text-secondary border border-secondary/30 font-sans"
                             >
-                              <GlobeIcon className="w-3.5 h-3.5 text-[#ff2d6c] shrink-0" />
-                              <span className="truncate">{websiteUrl}</span>
-                              <ExternalLinkIcon className="w-3 h-3 text-[#ff2d6c] shrink-0" />
-                            </a>
-                          </>
+                              {niche}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-xs text-text-secondary font-sans">No niches selected</span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Keywords Subsection */}
+                    <div className="pt-3 border-t border-border-theme/60 space-y-2.5">
+                      <div className="flex items-center gap-2">
+                        <TagIcon className="w-4 h-4 text-black dark:text-white" />
+                        <span className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-foreground font-sans">
+                          Keywords
+                        </span>
+                        {keywords.length > 0 && (
+                          <span className="text-xs text-text-secondary font-sans">({keywords.length})</span>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {keywords.length > 0 ? (
+                          keywords.map((kw) => (
+                            <span
+                              key={kw}
+                              className="px-3 py-1 rounded-lg text-xs font-medium bg-surface-muted text-text-secondary border border-border-theme hover:border-secondary/30 transition-colors font-sans"
+                            >
+                              #{kw.replace(/^#/, "")}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-xs text-text-secondary font-sans">No keywords specified</span>
                         )}
                       </div>
                     </div>
                   </div>
 
-                  {/* Right: 3 Stats Columns Matching Brand Layout */}
-                  <div className="flex items-center justify-around sm:justify-end gap-6 sm:gap-8 shrink-0 pt-4 lg:pt-0 border-t lg:border-t-0 border-border-theme/60">
-                    <div className="text-center sm:text-left">
-                      <span className="block text-[22px] sm:text-[24px] font-semibold font-sans text-slate-900 dark:text-foreground leading-none">
-                        {formatNumber(followerCount)}
-                      </span>
-                      <span className="block text-[10px] sm:text-[11px] text-text-secondary mt-1.5 font-sans leading-tight">
-                        Total<br className="hidden sm:inline" /> Followers
-                      </span>
-                    </div>
-                    <div className="h-10 w-px bg-border-theme" />
-                    <div className="text-center sm:text-left">
-                      <span className="block text-[22px] sm:text-[24px] font-semibold font-sans text-slate-900 dark:text-foreground leading-none">
-                        {engagementRate}
-                      </span>
-                      <span className="block text-[10px] sm:text-[11px] text-text-secondary mt-1.5 font-sans leading-tight">
-                        Engagement<br className="hidden sm:inline" /> Rate
-                      </span>
-                    </div>
-                    <div className="h-10 w-px bg-border-theme" />
-                    <div className="text-center sm:text-left">
-                      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-900 dark:text-foreground leading-none">
-                        <span
-                          className={`w-2 h-2 rounded-full ${
-                            isPublic ? "bg-emerald-500 animate-pulse" : "bg-amber-500"
-                          }`}
-                        />
-                        <span>{isPublic ? "Public" : "Private"}</span>
-                      </span>
-                      <span className="block text-[10px] sm:text-[11px] text-text-secondary mt-1.5 font-sans leading-tight">
-                        Profile<br className="hidden sm:inline" /> Visibility
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* 2. TWO-COLUMN MAIN CONTENT GRID (8 / 4 LAYOUT) */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-start">
-
-                {/* LEFT COLUMN: 8 COLS */}
-                <div className="lg:col-span-8 space-y-5 sm:space-y-6">
-
-                  {/* Card 1: Creator Overview / Bio */}
-                  <div className="bg-white dark:bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 shadow-xs space-y-3">
-                    <h3 className="font-serif font-semibold text-lg text-slate-900 dark:text-foreground tracking-wide">
-                      About Creator
-                    </h3>
-                    <p className="text-xs sm:text-sm text-text-secondary leading-relaxed font-sans whitespace-pre-line">
-                      {bio}
-                    </p>
-                  </div>
-
-                  {/* Card 2: Social Presence (Identical 2x2 Brand Grid) */}
-                  <div className="bg-white dark:bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 shadow-xs space-y-4">
-                    <h3 className="font-serif font-semibold text-lg text-slate-900 dark:text-foreground tracking-wide">
-                      Social Presence
-                    </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5">
-                      {/* Instagram */}
-                      <a
-                        href={
-                          instagramUrl.startsWith("http")
-                            ? instagramUrl
-                            : `https://instagram.com/${instagramUrl.replace(/^@/, "")}`
-                        }
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-3 sm:p-3.5 rounded-xl border border-border-theme bg-white dark:bg-surface-muted/30 hover:border-secondary/40 hover:bg-surface-muted/50 transition-all flex items-center justify-between group"
-                      >
-                        <div className="flex items-center gap-3 min-w-0 pr-2">
-                          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] flex items-center justify-center text-white shrink-0 shadow-xs">
-                            <InstagramIcon className="w-5 h-5" />
-                          </div>
-                          <div className="min-w-0">
-                            <span className="block text-xs font-semibold text-slate-900 dark:text-foreground group-hover:text-secondary transition-colors font-sans">
-                              Instagram
-                            </span>
-                            <span className="block text-[11px] text-text-secondary truncate mt-0.5 font-sans">
-                              {instagramUrl}
-                            </span>
-                          </div>
+                  {/* Card 2: Stats Grid Card */}
+                  <div className="bg-white dark:bg-[#131318] border border-border-theme dark:border-[#22222e] rounded-3xl p-5 sm:p-6 shadow-xs">
+                    <div className="grid grid-cols-3 divide-x divide-border-theme">
+                      {/* Followers */}
+                      <div className="text-center px-2">
+                        <div className="w-8 h-8 mx-auto mb-2 rounded-xl bg-secondary/10 flex items-center justify-center text-black dark:text-white">
+                          <UsersIcon className="w-4 h-4" />
                         </div>
-                        <ExternalLinkIcon className="w-3.5 h-3.5 text-text-secondary/60 group-hover:text-secondary shrink-0 transition-colors" />
-                      </a>
-
-                      {/* YouTube */}
-                      <a
-                        href={
-                          youtubeUrl.startsWith("http")
-                            ? youtubeUrl
-                            : `https://youtube.com/@${youtubeUrl.replace(/^@/, "")}`
-                        }
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-3 sm:p-3.5 rounded-xl border border-border-theme bg-white dark:bg-surface-muted/30 hover:border-secondary/40 hover:bg-surface-muted/50 transition-all flex items-center justify-between group"
-                      >
-                        <div className="flex items-center gap-3 min-w-0 pr-2">
-                          <div className="w-9 h-9 rounded-xl bg-[#ff0000] flex items-center justify-center text-white shrink-0 shadow-xs">
-                            <YoutubeIcon className="w-5 h-5" />
-                          </div>
-                          <div className="min-w-0">
-                            <span className="block text-xs font-semibold text-slate-900 dark:text-foreground group-hover:text-secondary transition-colors font-sans">
-                              YouTube
-                            </span>
-                            <span className="block text-[11px] text-text-secondary truncate mt-0.5 font-sans">
-                              {youtubeUrl}
-                            </span>
-                          </div>
-                        </div>
-                        <ExternalLinkIcon className="w-3.5 h-3.5 text-text-secondary/60 group-hover:text-secondary shrink-0 transition-colors" />
-                      </a>
-
-                      {/* TikTok */}
-                      <a
-                        href={
-                          tiktokUrl.startsWith("http")
-                            ? tiktokUrl
-                            : `https://tiktok.com/@${tiktokUrl.replace(/^@/, "")}`
-                        }
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-3 sm:p-3.5 rounded-xl border border-border-theme bg-white dark:bg-surface-muted/30 hover:border-secondary/40 hover:bg-surface-muted/50 transition-all flex items-center justify-between group"
-                      >
-                        <div className="flex items-center gap-3 min-w-0 pr-2">
-                          <div className="w-9 h-9 rounded-xl bg-black dark:bg-white text-white dark:text-black flex items-center justify-center shrink-0 shadow-xs">
-                            <TiktokIcon className="w-4.5 h-4.5" />
-                          </div>
-                          <div className="min-w-0">
-                            <span className="block text-xs font-semibold text-slate-900 dark:text-foreground group-hover:text-secondary transition-colors font-sans">
-                              TikTok
-                            </span>
-                            <span className="block text-[11px] text-text-secondary truncate mt-0.5 font-sans">
-                              {tiktokUrl}
-                            </span>
-                          </div>
-                        </div>
-                        <ExternalLinkIcon className="w-3.5 h-3.5 text-text-secondary/60 group-hover:text-secondary shrink-0 transition-colors" />
-                      </a>
-
-                      {/* Facebook */}
-                      <a
-                        href={
-                          facebookUrl.startsWith("http")
-                            ? facebookUrl
-                            : `https://facebook.com/${facebookUrl.replace(/^@/, "")}`
-                        }
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-3 sm:p-3.5 rounded-xl border border-border-theme bg-white dark:bg-surface-muted/30 hover:border-secondary/40 hover:bg-surface-muted/50 transition-all flex items-center justify-between group"
-                      >
-                        <div className="flex items-center gap-3 min-w-0 pr-2">
-                          <div className="w-9 h-9 rounded-xl bg-[#1877f2] flex items-center justify-center text-white shrink-0 shadow-xs">
-                            <FacebookIcon className="w-5 h-5" />
-                          </div>
-                          <div className="min-w-0">
-                            <span className="block text-xs font-semibold text-slate-900 dark:text-foreground group-hover:text-secondary transition-colors font-sans">
-                              Facebook
-                            </span>
-                            <span className="block text-[11px] text-text-secondary truncate mt-0.5 font-sans">
-                              {facebookUrl}
-                            </span>
-                          </div>
-                        </div>
-                        <ExternalLinkIcon className="w-3.5 h-3.5 text-text-secondary/60 group-hover:text-secondary shrink-0 transition-colors" />
-                      </a>
-                    </div>
-                  </div>
-
-                  {/* Card 3: Account & Representation Information */}
-                  <div className="bg-white dark:bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 shadow-xs space-y-4">
-                    <h3 className="font-serif font-semibold text-lg text-slate-900 dark:text-foreground tracking-wide">
-                      Account & Contact Information
-                    </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-sans">
-                      <div>
-                        <span className="block text-text-secondary uppercase tracking-wider text-[10px] font-semibold mb-1">
-                          Full Name
+                        <span className="block text-xl sm:text-2xl font-bold font-sans text-slate-900 dark:text-foreground">
+                          {formatNumber(followerCount)}
                         </span>
-                        <span className="font-medium text-slate-900 dark:text-foreground text-xs">
-                          {creatorName}
+                        <span className="block text-xs text-text-secondary mt-1 font-sans">Followers</span>
+                      </div>
+
+                      {/* Engagement */}
+                      <div className="text-center px-2">
+                        <div className="w-8 h-8 mx-auto mb-2 rounded-xl bg-secondary/10 flex items-center justify-center text-black dark:text-white">
+                          <ChartBarIcon className="w-4 h-4" />
+                        </div>
+                        <span className="block text-xl sm:text-2xl font-bold font-sans text-slate-900 dark:text-foreground">
+                          {engagementRate}
+                        </span>
+                        <span className="block text-xs text-text-secondary mt-1 font-sans">Engagement</span>
+                      </div>
+
+                      {/* Collaborations */}
+                      <div className="text-center px-2">
+                        <div className="w-8 h-8 mx-auto mb-2 rounded-xl bg-secondary/10 flex items-center justify-center text-black dark:text-white">
+                          <HandshakeIcon className="w-4 h-4" />
+                        </div>
+                        <span className="block text-xl sm:text-2xl font-bold font-sans text-slate-900 dark:text-foreground">
+                          {collaborationsCount || 24}
+                        </span>
+                        <span className="block text-xs text-text-secondary mt-1 font-sans">Collaborations</span>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* RIGHT COLUMN: 5 COLS on lg */}
+                <div className="lg:col-span-5 space-y-5 sm:space-y-6">
+
+                  {/* Card 3: Identity & Demographics */}
+                  <div className="bg-white dark:bg-[#131318] border border-border-theme dark:border-[#22222e] rounded-3xl p-6 sm:p-7 shadow-xs space-y-4">
+                    {/* Header */}
+                    <div className="flex items-start justify-between gap-3 flex-wrap">
+                      <div className="flex items-center gap-2.5">
+                        <LockClosedIcon className="w-4 h-4 text-black dark:text-white" />
+                        <h3 className="font-semibold text-base text-slate-900 dark:text-foreground font-sans tracking-wide">
+                          Identity & Demographics
+                        </h3>
+                      </div>
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-secondary/15 text-secondary border border-secondary/30 font-sans">
+                        <ShieldCheckIcon className="w-3.5 h-3.5 shrink-0" />
+                        <span>Private & Confidential</span>
+                      </span>
+                    </div>
+
+                    <p className="text-xs text-text-secondary leading-relaxed font-sans">
+                      This information is only used for campaign matching and is never shown on your public profile.
+                    </p>
+
+                    {/* Rows */}
+                    <div className="space-y-3.5 pt-2 font-sans text-xs">
+                      {/* Date of Birth */}
+                      <div className="flex items-center justify-between gap-3 py-1.5 border-b border-border-theme/40">
+                        <div className="flex items-center gap-2 text-text-secondary">
+                          <CalendarIcon className="w-4 h-4 text-black dark:text-white" />
+                          <span className="font-medium">Date of Birth</span>
+                        </div>
+                        <span className="font-medium text-slate-900 dark:text-foreground text-right">
+                          {formatDobForDisplay(dob)}
                         </span>
                       </div>
-                      <div>
-                        <span className="block text-text-secondary uppercase tracking-wider text-[10px] font-semibold mb-1">
-                          Registered Email
+
+                      {/* Gender */}
+                      <div className="flex items-center justify-between gap-3 py-1.5 border-b border-border-theme/40">
+                        <div className="flex items-center gap-2 text-text-secondary">
+                          <GenderIcon className="w-4 h-4 text-black dark:text-white" />
+                          <span className="font-medium">Gender</span>
+                        </div>
+                        <span className="font-medium text-slate-900 dark:text-foreground capitalize text-right">
+                          {gender ? getGenderDisplay(gender) : "Not specified"}
                         </span>
-                        <span className="font-medium text-slate-900 dark:text-foreground text-xs truncate block">
+                      </div>
+
+                      {/* Languages */}
+                      <div className="flex items-center justify-between gap-3 py-1.5 border-b border-border-theme/40 flex-wrap">
+                        <div className="flex items-center gap-2 text-text-secondary">
+                          <GlobeIcon className="w-4 h-4 text-black dark:text-white" />
+                          <span className="font-medium">Languages</span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5 justify-end">
+                          {languages.length > 0 ? (
+                            languages.map((lang) => (
+                              <span
+                                key={lang}
+                                className="px-2.5 py-0.5 rounded-lg text-xs font-medium bg-surface-muted text-text-secondary border border-border-theme"
+                              >
+                                {lang}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="font-medium text-slate-900 dark:text-foreground">Not specified</span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Ethnicity */}
+                      <div className="flex items-center justify-between gap-3 py-1.5">
+                        <div className="flex items-center gap-2 text-text-secondary">
+                          <UserGroupIcon className="w-4 h-4 text-black dark:text-white" />
+                          <span className="font-medium">Ethnicity / Cultural Background</span>
+                        </div>
+                        <span className="font-medium text-slate-900 dark:text-foreground text-right">
+                          {ethnicity || "Not specified"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Card 4: Contact & Location */}
+                  <div className="bg-white dark:bg-[#131318] border border-border-theme dark:border-[#22222e] rounded-3xl p-6 sm:p-7 shadow-xs space-y-4">
+                    {/* Header */}
+                    <div className="flex items-center gap-2.5">
+                      <MapPinIcon className="w-4 h-4 text-black dark:text-white" />
+                      <h3 className="font-semibold text-base text-slate-900 dark:text-foreground font-sans tracking-wide">
+                        Contact & Location
+                      </h3>
+                    </div>
+
+                    {/* Rows */}
+                    <div className="space-y-3.5 font-sans text-xs">
+                      <div className="flex items-center justify-between gap-3 py-1.5 border-b border-border-theme/40">
+                        <div className="flex items-center gap-2 text-text-secondary">
+                          <MapPinIcon className="w-4 h-4 text-black dark:text-white" />
+                          <span className="font-medium">Location</span>
+                        </div>
+                        <span className="font-medium text-slate-900 dark:text-foreground text-right">{location}</span>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-3 py-1.5 border-b border-border-theme/40">
+                        <div className="flex items-center gap-2 text-text-secondary">
+                          <MailIcon className="w-4 h-4 text-black dark:text-white" />
+                          <span className="font-medium">Email</span>
+                        </div>
+                        <span className="font-medium text-slate-900 dark:text-foreground text-right truncate max-w-[220px]">
                           {displayEmail}
                         </span>
                       </div>
-                      <div>
-                        <span className="block text-text-secondary uppercase tracking-wider text-[10px] font-semibold mb-1">
-                          Primary Location
-                        </span>
-                        <span className="font-medium text-slate-900 dark:text-foreground text-xs">
-                          {location}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
 
-                </div>
-
-                {/* RIGHT COLUMN: 4 COLS */}
-                <div className="lg:col-span-4 space-y-5 sm:space-y-6">
-
-                  {/* Card 1: Creator Details (Matching Brand Details) */}
-                  <div className="bg-white dark:bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 shadow-xs space-y-3.5">
-                    <h3 className="font-serif font-semibold text-lg text-slate-900 dark:text-foreground pb-2 border-b border-border-theme tracking-wide">
-                      Creator Details
-                    </h3>
-                    <div className="space-y-3 text-xs font-sans">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-text-secondary font-medium">Category</span>
-                        <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#fff0f4] dark:bg-[#ff2d6c]/10 text-[#ff2d6c] border border-[#ff2d6c]/20">
-                          {category}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-text-secondary font-medium">Website</span>
-                        <a
-                          href={websiteUrl.startsWith("http") ? websiteUrl : `https://${websiteUrl}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-[#ff2d6c] hover:underline font-medium inline-flex items-center gap-1 truncate max-w-[170px]"
-                        >
-                          <span className="truncate">{websiteUrl}</span>
-                          <ExternalLinkIcon className="w-3 h-3 shrink-0" />
-                        </a>
-                      </div>
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-text-secondary font-medium">Visibility</span>
-                        <span
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border ${
-                            isPublic
-                              ? "bg-transparent text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
-                              : "bg-transparent text-amber-600 dark:text-amber-400 border-amber-500/30"
-                          }`}
-                        >
-                          <span
-                            className={`w-1.5 h-1.5 rounded-full ${
-                              isPublic ? "bg-emerald-500" : "bg-amber-500"
-                            }`}
-                          />
-                          {isPublic ? "Public Profile" : "Private Profile"}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-text-secondary font-medium">Location</span>
-                        <span className="font-medium text-slate-900 dark:text-foreground">
-                          {location}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-text-secondary font-medium">Joined On</span>
-                        <span className="font-medium text-slate-900 dark:text-foreground">
-                          {joinedOn}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Card 2: Creator Highlights (Matching Brand Highlights) */}
-                  <div className="bg-white dark:bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 shadow-xs space-y-4">
-                    <h3 className="font-serif font-semibold text-lg text-slate-900 dark:text-foreground tracking-wide">
-                      Creator Highlights
-                    </h3>
-                    <div className="grid grid-cols-2 gap-4 font-sans">
-                      <div>
-                        <span className="block text-[17px] font-semibold text-slate-900 dark:text-foreground leading-tight">
-                          {formatNumber(followerCount)}
-                        </span>
-                        <span className="block text-[10px] text-text-secondary mt-0.5 leading-snug">
-                          Total Followers
-                        </span>
-                      </div>
-                      <div>
-                        <span className="block text-[17px] font-semibold text-slate-900 dark:text-foreground leading-tight">
-                          {engagementRate}
-                        </span>
-                        <span className="block text-[10px] text-text-secondary mt-0.5 leading-snug">
-                          Engagement Rate
-                        </span>
-                      </div>
-                      <div>
-                        <span className="block text-[17px] font-semibold text-slate-900 dark:text-foreground leading-tight">
-                          100%
-                        </span>
-                        <span className="block text-[10px] text-text-secondary mt-0.5 leading-snug">
-                          Collaboration Rate
-                        </span>
-                      </div>
-                      <div>
-                        <span className="block text-[17px] font-semibold text-slate-900 dark:text-foreground leading-tight">
-                          5.0 ★
-                        </span>
-                        <span className="block text-[10px] text-text-secondary mt-0.5 leading-snug">
-                          Quality Rating
-                        </span>
-                      </div>
+                      {/* Connected Socials / Website (if available) */}
+                      {(websiteUrl || instagramUrl || youtubeUrl || tiktokUrl || facebookUrl) && (
+                        <div className="pt-2 space-y-2">
+                          <span className="text-[11px] uppercase tracking-wider font-semibold text-text-secondary block">
+                            Connected Channels
+                          </span>
+                          <div className="flex flex-wrap gap-2">
+                            {websiteUrl && (
+                              <a
+                                href={websiteUrl.startsWith("http") ? websiteUrl : `https://${websiteUrl}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-muted hover:bg-secondary/10 text-text-secondary hover:text-secondary border border-border-theme hover:border-secondary/30 transition-all text-xs"
+                              >
+                                <GlobeIcon className="w-3.5 h-3.5" />
+                                <span className="truncate max-w-[140px]">{websiteUrl.replace(/^https?:\/\//, "")}</span>
+                                <ExternalLinkIcon className="w-3 h-3 opacity-60" />
+                              </a>
+                            )}
+                            {instagramUrl && (
+                              <a
+                                href={instagramUrl.startsWith("http") ? instagramUrl : `https://instagram.com/${instagramUrl.replace(/^@/, "")}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-muted hover:bg-secondary/10 text-text-secondary hover:text-secondary border border-border-theme hover:border-secondary/30 transition-all text-xs"
+                              >
+                                <InstagramIcon className="w-3.5 h-3.5" />
+                                <span>Instagram</span>
+                                <ExternalLinkIcon className="w-3 h-3 opacity-60" />
+                              </a>
+                            )}
+                            {youtubeUrl && (
+                              <a
+                                href={youtubeUrl.startsWith("http") ? youtubeUrl : `https://youtube.com/@${youtubeUrl.replace(/^@/, "")}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-muted hover:bg-secondary/10 text-text-secondary hover:text-secondary border border-border-theme hover:border-secondary/30 transition-all text-xs"
+                              >
+                                <YoutubeIcon className="w-3.5 h-3.5" />
+                                <span>YouTube</span>
+                                <ExternalLinkIcon className="w-3 h-3 opacity-60" />
+                              </a>
+                            )}
+                            {tiktokUrl && (
+                              <a
+                                href={tiktokUrl.startsWith("http") ? tiktokUrl : `https://tiktok.com/@${tiktokUrl.replace(/^@/, "")}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-muted hover:bg-secondary/10 text-text-secondary hover:text-secondary border border-border-theme hover:border-secondary/30 transition-all text-xs"
+                              >
+                                <TiktokIcon className="w-3.5 h-3.5" />
+                                <span>TikTok</span>
+                                <ExternalLinkIcon className="w-3 h-3 opacity-60" />
+                              </a>
+                            )}
+                            {facebookUrl && (
+                              <a
+                                href={facebookUrl.startsWith("http") ? facebookUrl : `https://facebook.com/${facebookUrl.replace(/^@/, "")}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-muted hover:bg-secondary/10 text-text-secondary hover:text-secondary border border-border-theme hover:border-secondary/30 transition-all text-xs"
+                              >
+                                <FacebookIcon className="w-3.5 h-3.5" />
+                                <span>Facebook</span>
+                                <ExternalLinkIcon className="w-3 h-3 opacity-60" />
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -1131,56 +1803,165 @@ export default function CreatorProfile() {
             </div>
           )}
 
-          {/* ========================================================= */}
-          {/* EDIT MODE: FULL CREATOR PROFILE FORM (EXACT BRAND SYNTAX) */}
+          {/* EDIT MODE: FULL CREATOR PROFILE FORM (MATCHING REFERENCE UI) */}
           {/* ========================================================= */}
           {isEditing && (
             <form onSubmit={handleSubmit} className="space-y-6">
 
-              {/* 1. Creator Details Card */}
-              <div className="bg-white dark:bg-surface border border-border-theme rounded-2xl p-6 sm:p-7 shadow-xs space-y-6">
-                <div className="flex items-center gap-3 border-b border-border-theme pb-4">
-                  <div className="p-2.5 rounded-xl bg-secondary/10 text-secondary">
-                    <UserIcon />
+              {/* CARD 1: Creator Identity & Bio */}
+              <div className="bg-white dark:bg-[#131318] border border-slate-200/90 dark:border-[#22222e] rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-xs space-y-6">
+                
+                {/* Header */}
+                <div className="flex items-center gap-3 border-b border-border-theme/60 pb-4">
+                  <div className="w-8 h-8 rounded-lg bg-surface-muted dark:bg-[#1f1f28] flex items-center justify-center text-black dark:text-white shrink-0">
+                    <UserIcon className="w-4 h-4" />
                   </div>
                   <div>
-                    <h2 className="font-serif font-semibold text-lg text-slate-900 dark:text-foreground tracking-wide">
+                    <h2 className="font-semibold text-base sm:text-lg text-slate-900 dark:text-foreground font-sans tracking-wide">
                       Creator Identity & Bio
                     </h2>
-                    <p className="text-xs text-text-secondary font-sans">
-                      Basic information about your creator identity, niche, and profile photo
+                    <p className="text-xs text-text-secondary font-sans mt-0.5">
+                      Basic information about your creator identity, niche, and profile photo.
                     </p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 font-sans">
-                  {/* Category / Niche */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
-                      Primary Niche / Category *
-                    </label>
-                    <select
-                      name="category"
-                      value={formData.category}
-                      onChange={handleInputChange}
-                      className="w-full bg-surface border border-border-theme text-foreground text-xs sm:text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-secondary transition-colors cursor-pointer"
-                    >
-                      <option value="Fashion & Luxury">Fashion & Luxury</option>
-                      <option value="Beauty & Skincare">Beauty & Skincare</option>
-                      <option value="Travel & Lifestyle">Travel & Lifestyle</option>
-                      <option value="Tech & Gaming">Tech & Gaming</option>
-                      <option value="Fitness & Wellness">Fitness & Wellness</option>
-                      <option value="Food & Culinary">Food & Culinary</option>
-                      <option value="Apparel & Lifestyle">Apparel & Lifestyle</option>
-                      <option value="Photography">Photography</option>
-                      <option value="Video & Reels">Video & Reels</option>
-                      <option value="Art & Design">Art & Design</option>
-                      <option value="Other">Other</option>
-                    </select>
+                {/* Top Section: Avatar + Headline & Category */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start font-sans">
+                  
+                  {/* Left: Avatar with Camera button + Upload & URL */}
+                  <div className="lg:col-span-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    <div className="relative shrink-0">
+                      <CreatorAvatarPreview
+                        url={formData.profileImage}
+                        alt={creatorName}
+                        initials={displayInitial}
+                        isUploading={isUploadingImage}
+                        className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isUploadingImage}
+                        aria-label="Upload profile image"
+                        title="Upload profile image"
+                        className="absolute -bottom-1 -right-1 p-1.5 rounded-lg bg-black text-white hover:bg-neutral-800 transition-colors shadow-xs cursor-pointer disabled:opacity-50"
+                      >
+                        <CameraIcon className="w-3.5 h-3.5 text-white" />
+                      </button>
+                    </div>
+
+                    <div className="flex-1 w-full space-y-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={isUploadingImage}
+                          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-black hover:bg-neutral-900 text-white text-xs font-semibold transition-all shadow-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+                        >
+                          <UploadIcon className="w-3.5 h-3.5 text-white" />
+                          <span>{isUploadingImage ? "Uploading..." : "Upload Profile Photo"}</span>
+                        </button>
+
+                        <span className="text-xs text-text-secondary">or</span>
+
+                        <div className="relative flex-1 min-w-[170px]">
+                          <LinkIcon className="w-3.5 h-3.5 text-text-secondary absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                          <input
+                            type="url"
+                            name="profileImage"
+                            value={formData.profileImage}
+                            onChange={handleInputChange}
+                            placeholder="Paste image URL"
+                            disabled={isUploadingImage}
+                            className="w-full pl-8 pr-3 py-2 rounded-xl bg-white dark:bg-surface border border-slate-300 dark:border-border-theme text-foreground text-xs focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/40 transition-colors"
+                          />
+                        </div>
+
+                        {formData.profileImage ? (
+                          <button
+                            type="button"
+                            onClick={() => setFormData((prev) => ({ ...prev, profileImage: "" }))}
+                            disabled={isUploadingImage}
+                            className="px-2.5 py-1.5 rounded-lg text-red-500 hover:bg-red-500/10 text-xs font-medium transition-colors cursor-pointer"
+                          >
+                            Remove
+                          </button>
+                        ) : null}
+                      </div>
+
+                      <p className="text-[11px] text-text-secondary">
+                        JPEG, PNG or WebP (max 5 MB)
+                      </p>
+                    </div>
                   </div>
 
-                  {/* Location */}
-                  <div className="space-y-1.5">
+                  {/* Right: Headline and Primary Category */}
+                  <div className="lg:col-span-6 space-y-3.5">
+                    
+                    {/* Professional Headline */}
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <label
+                          htmlFor="profile-title"
+                          className="block text-xs font-semibold text-foreground uppercase tracking-wider"
+                        >
+                          Professional Headline / Title
+                        </label>
+                        <span className="text-[11px] text-text-secondary">
+                          {formData.title ? formData.title.length : 0}/150
+                        </span>
+                      </div>
+                      <input
+                        id="profile-title"
+                        type="text"
+                        name="title"
+                        maxLength={150}
+                        disabled={isSubmitting}
+                        value={formData.title}
+                        onChange={handleInputChange}
+                        placeholder="e.g. Luxury Fashion & Editorial Visual Creator"
+                        className="w-full bg-white dark:bg-surface border border-slate-300 dark:border-border-theme text-foreground placeholder:text-text-secondary/50 text-xs sm:text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/40 transition-colors"
+                      />
+                    </div>
+
+                    {/* Primary Category */}
+                    <div className="space-y-1">
+                      <label
+                        htmlFor="profile-category"
+                        className="block text-xs font-semibold text-foreground uppercase tracking-wider"
+                      >
+                        Primary Category *
+                      </label>
+                      <select
+                        id="profile-category"
+                        name="category"
+                        disabled={isSubmitting}
+                        value={formData.category}
+                        onChange={handleInputChange}
+                        className="w-full bg-white dark:bg-surface border border-secondary/60 text-foreground text-xs sm:text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/40 transition-colors cursor-pointer"
+                      >
+                        <option value="">Select Primary Category</option>
+                        {CATEGORIES.map((cat) => (
+                          <option key={cat.id} value={cat.name}>
+                            {cat.name}
+                          </option>
+                        ))}
+                        {formData.category &&
+                          !CATEGORIES.some((c) => c.name === formData.category) && (
+                            <option value={formData.category}>
+                              {formData.category}
+                            </option>
+                          )}
+                      </select>
+                    </div>
+
+                  </div>
+                </div>
+
+                {/* Location and Bio row (preserving full data and functionality) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-border-theme/60 font-sans">
+                  <div className="space-y-1">
                     <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
                       Location
                     </label>
@@ -1190,213 +1971,615 @@ export default function CreatorProfile() {
                       value={formData.location}
                       onChange={handleInputChange}
                       placeholder="e.g. Mumbai, India"
-                      className="w-full bg-surface border border-border-theme text-foreground text-xs sm:text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-secondary transition-colors"
+                      className="w-full bg-white dark:bg-surface border border-slate-300 dark:border-border-theme text-foreground text-xs sm:text-sm rounded-xl px-3.5 py-2 focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/40 transition-colors"
                     />
                   </div>
-
-                  {/* Profile Picture Upload & Preview */}
-                  <div className="space-y-1.5 sm:col-span-2">
-                    <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
-                      Profile Picture
-                    </label>
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 rounded-xl bg-surface-muted/30 border border-border-theme">
-                      {/* Avatar Preview with Camera Button */}
-                      <div className="relative shrink-0">
-                        <CreatorAvatarPreview
-                          url={formData.profileImage}
-                          alt={creatorName}
-                          initials={displayInitial}
-                          isUploading={isUploadingImage}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => fileInputRef.current?.click()}
-                          disabled={isUploadingImage}
-                          aria-label="Upload profile image"
-                          title="Upload profile image"
-                          className={`absolute -bottom-1 -right-1 p-1.5 rounded-lg bg-surface border border-border-theme text-text-secondary hover:text-foreground hover:bg-surface-muted shadow-xs transition-colors cursor-pointer ${
-                            isUploadingImage ? "opacity-50 cursor-not-allowed" : ""
-                          }`}
-                        >
-                          <CameraIcon className="w-3.5 h-3.5 text-secondary" />
-                        </button>
-                      </div>
-
-                      <div className="flex-1 w-full space-y-2.5">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={() => fileInputRef.current?.click()}
-                            disabled={isUploadingImage}
-                            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface border border-border-theme hover:bg-surface-muted text-foreground text-xs font-semibold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            <CameraIcon className="w-3.5 h-3.5 text-secondary" />
-                            <span>{isUploadingImage ? "Uploading..." : "Upload Profile Photo"}</span>
-                          </button>
-
-                          {formData.profileImage ? (
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setFormData((prev) => ({ ...prev, profileImage: "" }))
-                              }
-                              disabled={isUploadingImage}
-                              className="px-2.5 py-1.5 rounded-lg border border-border-theme hover:bg-red-500/10 text-red-500 text-xs font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              Remove Photo
-                            </button>
-                          ) : null}
-
-                          <span className="text-[11px] text-text-secondary">
-                            JPEG, PNG or WebP (max 5 MB)
-                          </span>
-                        </div>
-
-                        <div>
-                          <label
-                            htmlFor="profile-avatar-url"
-                            className="block text-[11px] font-medium text-text-secondary mb-1"
-                          >
-                            Or enter Profile Image URL:
-                          </label>
-                          <input
-                            id="profile-avatar-url"
-                            type="url"
-                            name="profileImage"
-                            value={formData.profileImage}
-                            onChange={handleInputChange}
-                            placeholder="https://example.com/photo.jpg"
-                            disabled={isUploadingImage}
-                            className="w-full bg-surface border border-border-theme text-foreground text-xs sm:text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-secondary transition-colors disabled:opacity-60"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Bio / Description */}
-                  <div className="space-y-1.5 sm:col-span-2">
+                  <div className="space-y-1 sm:col-span-1">
                     <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
                       Creator Bio / Story
                     </label>
                     <textarea
                       name="bio"
-                      rows={4}
+                      rows={2}
                       value={formData.bio}
                       onChange={handleInputChange}
-                      placeholder="Brief description of your content aesthetic, audience niche, and collaboration style..."
-                      className="w-full bg-surface border border-border-theme text-foreground text-xs sm:text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-secondary transition-colors resize-y"
+                      placeholder="Brief description of your content aesthetic and niche..."
+                      className="w-full bg-white dark:bg-surface border border-slate-300 dark:border-border-theme text-foreground text-xs sm:text-sm rounded-xl px-3.5 py-2 focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/40 transition-colors resize-y"
                     />
                   </div>
                 </div>
+
+                {/* Section: Niches (Select up to 3) */}
+                <div className="space-y-3 pt-3 border-t border-border-theme/60 font-sans">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
+                      Niches (Select up to 3) *
+                    </label>
+                    <span className="text-xs font-semibold text-secondary">
+                      {formData.niches.length}/3 selected
+                    </span>
+                  </div>
+
+                  {/* Taxonomy Filter Bar */}
+                  <div className="relative">
+                    <SearchIcon className="w-4 h-4 text-text-secondary absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <input
+                      type="text"
+                      disabled={isSubmitting}
+                      value={nicheSearch}
+                      onChange={(e) => setNicheSearch(e.target.value)}
+                      placeholder="Filter niche options by name or description..."
+                      className="w-full bg-white dark:bg-surface border border-slate-300 dark:border-border-theme text-foreground placeholder:text-text-secondary/50 text-xs rounded-xl pl-9 pr-8 py-2.5 focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/40 transition-colors"
+                    />
+                    {nicheSearch && (
+                      <button
+                        type="button"
+                        onClick={() => setNicheSearch("")}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-foreground text-xs p-0.5 cursor-pointer"
+                        aria-label="Clear niche search"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Niche Grid (3 columns on desktop matching reference image) */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 max-h-[340px] overflow-y-auto pr-1">
+                    {CATEGORIES.filter((cat) => {
+                      if (!nicheSearch.trim()) return true;
+                      const term = nicheSearch.toLowerCase();
+                      return (
+                        cat.name.toLowerCase().includes(term) ||
+                        cat.desc.toLowerCase().includes(term)
+                      );
+                    }).map((cat) => {
+                      const isSelected = formData.niches.includes(cat.name);
+                      const Icon = cat.icon;
+
+                      return (
+                        <button
+                          key={cat.id}
+                          type="button"
+                          disabled={isSubmitting}
+                          onClick={() => handleNicheToggle(cat.name)}
+                          className={`group relative text-left p-3.5 rounded-xl border transition-all duration-200 cursor-pointer flex items-center justify-between gap-3 ${
+                            isSelected
+                              ? "bg-[#ffeef3] dark:bg-secondary/15 border-secondary/60 text-foreground shadow-xs ring-1 ring-secondary/30"
+                              : "bg-white dark:bg-surface border-border-theme hover:bg-slate-50 dark:hover:bg-surface-muted hover:border-secondary/40 text-foreground"
+                          } ${isSubmitting ? "opacity-60 cursor-not-allowed" : ""}`}
+                        >
+                          <div className="flex items-start gap-3 min-w-0">
+                            <div className="p-1 rounded-lg text-black dark:text-white shrink-0 mt-0.5">
+                              <Icon className="w-4 h-4" />
+                            </div>
+
+                            <div className="min-w-0">
+                              <h3 className="text-xs sm:text-sm font-semibold truncate text-foreground">
+                                {cat.name}
+                              </h3>
+                              <p className="text-[11px] text-text-secondary line-clamp-1 mt-0.5 leading-snug">
+                                {cat.desc}
+                              </p>
+                            </div>
+                          </div>
+
+                          {isSelected && (
+                            <span className="w-4 h-4 rounded-full bg-black text-white flex items-center justify-center shrink-0">
+                              <CheckIcon className="w-2.5 h-2.5 stroke-[3]" />
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Section: Content Keywords & Search Tags */}
+                <div className="space-y-3 pt-3 border-t border-border-theme/60 font-sans">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
+                      Content Keywords & Search Tags
+                    </label>
+                    <span className="text-[11px] text-text-secondary">
+                      {formData.keywords.length}/10 tags
+                    </span>
+                  </div>
+
+                  {/* Active Tag Chips */}
+                  {formData.keywords.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {formData.keywords.map((kw) => (
+                        <span
+                          key={kw}
+                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#ffeef3] dark:bg-secondary/20 border border-secondary/40 text-secondary text-xs font-semibold"
+                        >
+                          <span>#{kw}</span>
+                          <button
+                            type="button"
+                            disabled={isSubmitting}
+                            onClick={() => handleRemoveKeyword(kw)}
+                            className="hover:opacity-70 cursor-pointer ml-0.5"
+                            aria-label={`Remove keyword ${kw}`}
+                          >
+                            <XMarkIcon className="w-3.5 h-3.5" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Tag Input Form */}
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <TagIcon className="w-4 h-4 text-black dark:text-white absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      <input
+                        type="text"
+                        disabled={isSubmitting}
+                        value={keywordInput}
+                        onChange={(e) => setKeywordInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            handleAddKeyword();
+                          }
+                        }}
+                        placeholder="Type a tag (e.g. streetwear, luxury, ootd) and press Enter"
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white dark:bg-surface border border-slate-300 dark:border-border-theme text-foreground placeholder:text-text-secondary/50 text-xs sm:text-sm focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/40 transition-colors disabled:opacity-60"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleAddKeyword}
+                      disabled={isSubmitting || !keywordInput.trim() || formData.keywords.length >= 10}
+                      className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-black hover:bg-neutral-900 text-white text-xs sm:text-sm font-semibold transition-all shadow-xs cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+                    >
+                      <PlusIcon className="w-4 h-4 text-white" />
+                      <span>Add</span>
+                    </button>
+                  </div>
+
+                  {/* Suggested Keyword Chips */}
+                  <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                    <span className="text-[11px] text-text-secondary mr-1">
+                      Popular suggestions:
+                    </span>
+                    {SUGGESTED_KEYWORDS.map((sug) => {
+                      const isAdded = formData.keywords.includes(sug);
+                      return (
+                        <button
+                          key={sug}
+                          type="button"
+                          disabled={isSubmitting || isAdded || formData.keywords.length >= 10}
+                          onClick={() => {
+                            if (!isAdded && formData.keywords.length < 10) {
+                              setFormData((prev) => ({
+                                ...prev,
+                                keywords: [...prev.keywords, sug],
+                              }));
+                            }
+                          }}
+                          className={`text-[11px] px-2.5 py-1 rounded-lg border transition-all ${
+                            isAdded
+                              ? "bg-[#ffeef3] dark:bg-secondary/10 border-secondary/30 text-secondary cursor-default opacity-60"
+                              : "bg-white dark:bg-surface border-border-theme text-text-secondary hover:text-foreground hover:border-secondary/40 cursor-pointer"
+                          }`}
+                        >
+                          + {sug}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
               </div>
 
-              {/* 2. Social Links Card */}
-              <div className="bg-white dark:bg-surface border border-border-theme rounded-2xl p-6 sm:p-7 shadow-xs space-y-6">
-                <div className="flex items-center gap-3 border-b border-border-theme pb-4">
-                  <div className="p-2.5 rounded-xl bg-tertiary/10 text-tertiary">
-                    <GlobeIcon className="w-5 h-5" />
+              {/* TWO-COLUMN GRID: Cards 2 & 3 */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 items-start font-sans">
+                
+                {/* CARD 2: Identity & Demographics */}
+                <div className="bg-white dark:bg-[#131318] border border-slate-200/90 dark:border-[#22222e] rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-xs space-y-5">
+                  <div className="flex items-center justify-between gap-3 border-b border-border-theme/60 pb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-surface-muted dark:bg-[#1f1f28] flex items-center justify-center text-black dark:text-white shrink-0">
+                        <UserGroupIcon className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h2 className="font-semibold text-base sm:text-lg text-slate-900 dark:text-foreground font-sans tracking-wide">
+                          Identity & Demographics
+                        </h2>
+                        <p className="text-xs text-text-secondary font-sans mt-0.5">
+                          Provide demographic background and language proficiencies for brand campaign matching.
+                        </p>
+                      </div>
+                    </div>
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-white dark:bg-surface border border-slate-300 dark:border-border-theme text-slate-900 dark:text-foreground font-sans shrink-0">
+                      <LockClosedIcon className="w-3 h-3 text-black dark:text-white shrink-0" />
+                      <span>Kept Confidential</span>
+                    </span>
+                  </div>
+
+                  <div className="space-y-4">
+                    {/* DATE OF BIRTH */}
+                    <div className="space-y-1.5">
+                      <label
+                        htmlFor="dob"
+                        className="block text-xs font-semibold text-foreground uppercase tracking-wider"
+                      >
+                        Date of Birth
+                      </label>
+                      <div className="relative flex items-center">
+                        <span className="absolute left-3.5 text-black dark:text-white pointer-events-none">
+                          <CalendarIcon className="w-4 h-4" />
+                        </span>
+                        <input
+                          id="dob"
+                          name="dob"
+                          type="date"
+                          disabled={isSubmitting}
+                          max={new Date().toISOString().split("T")[0]}
+                          value={formData.dob}
+                          onChange={handleInputChange}
+                          className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white dark:bg-surface border border-slate-300 dark:border-border-theme text-foreground text-xs sm:text-sm font-sans focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/40 transition-all cursor-pointer disabled:opacity-60"
+                        />
+                      </div>
+                    </div>
+
+                    {/* GENDER IDENTITY */}
+                    <div className="space-y-2">
+                      <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
+                        Gender Identity
+                      </label>
+
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        {GENDER_OPTIONS.map((g) => {
+                          const isSelected = formData.gender === g.id;
+                          const Icon = g.icon;
+                          return (
+                            <button
+                              key={g.id}
+                              type="button"
+                              disabled={isSubmitting}
+                              onClick={() => {
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  gender: prev.gender === g.id ? "" : g.id,
+                                }));
+                              }}
+                              className={`px-3 py-2.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-2 ${
+                                isSelected
+                                  ? "bg-[#ffeef3] dark:bg-secondary/15 border-secondary/60 text-foreground ring-1 ring-secondary/30"
+                                  : "bg-white dark:bg-surface border-border-theme hover:border-secondary/40 text-foreground"
+                              } ${isSubmitting ? "opacity-60 cursor-not-allowed" : ""}`}
+                            >
+                              <div className="flex items-center gap-2 min-w-0">
+                                <Icon className="w-4 h-4 text-black dark:text-white shrink-0" />
+                                <span className="text-xs sm:text-sm font-semibold truncate text-foreground">
+                                  {g.label}
+                                </span>
+                              </div>
+                              {isSelected && (
+                                <span className="w-4 h-4 rounded-full bg-black text-white flex items-center justify-center shrink-0">
+                                  <CheckIcon className="w-2.5 h-2.5 stroke-[3]" />
+                                </span>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* CARD 3: Languages & Ethnicity */}
+                <div className="bg-white dark:bg-[#131318] border border-slate-200/90 dark:border-[#22222e] rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-xs space-y-5">
+                  <div className="flex items-center justify-between gap-3 border-b border-border-theme/60 pb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-surface-muted dark:bg-[#1f1f28] flex items-center justify-center text-black dark:text-white shrink-0">
+                        <GlobeIcon className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h2 className="font-semibold text-base sm:text-lg text-slate-900 dark:text-foreground font-sans tracking-wide">
+                          Languages (Spoken & Content)
+                        </h2>
+                      </div>
+                    </div>
+                    <span className="text-xs text-text-secondary font-medium shrink-0">
+                      {formData.languages.length}/10 selected
+                    </span>
+                  </div>
+
+                  <div className="space-y-4">
+                    {/* Active Language Chips */}
+                    {formData.languages.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {formData.languages.map((lang) => (
+                          <span
+                            key={lang}
+                            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#ffeef3] dark:bg-secondary/20 border border-secondary/40 text-secondary text-xs font-semibold"
+                          >
+                            <span>{lang}</span>
+                            <button
+                              type="button"
+                              disabled={isSubmitting}
+                              onClick={() => handleRemoveLanguage(lang)}
+                              className="hover:opacity-70 cursor-pointer ml-0.5"
+                              aria-label={`Remove language ${lang}`}
+                            >
+                              <XMarkIcon className="w-3.5 h-3.5" />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Language Input Form */}
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <SearchIcon className="w-4 h-4 text-black dark:text-white absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        <input
+                          type="text"
+                          disabled={isSubmitting}
+                          value={languageInput}
+                          onChange={(e) => setLanguageInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              handleAddLanguage();
+                            }
+                          }}
+                          placeholder="Type a language (e.g. English, Hindi, Spanish) and press Enter"
+                          className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white dark:bg-surface border border-slate-300 dark:border-border-theme text-foreground placeholder:text-text-secondary/50 text-xs sm:text-sm focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/40 transition-colors disabled:opacity-60"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleAddLanguage}
+                        disabled={isSubmitting || !languageInput.trim() || formData.languages.length >= 10}
+                        className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-black hover:bg-neutral-900 text-white text-xs sm:text-sm font-semibold transition-all shadow-xs cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+                      >
+                        <PlusIcon className="w-4 h-4 text-white" />
+                        <span>Add</span>
+                      </button>
+                    </div>
+
+                    {/* Suggested Language Chips */}
+                    <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                      <span className="text-[11px] text-text-secondary mr-1">
+                        Popular suggestions:
+                      </span>
+                      {POPULAR_LANGUAGES.map((lang) => {
+                        const isAdded = formData.languages.includes(lang);
+                        return (
+                          <button
+                            key={lang}
+                            type="button"
+                            disabled={isSubmitting || isAdded || formData.languages.length >= 10}
+                            onClick={() => {
+                              if (!isAdded && formData.languages.length < 10) {
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  languages: [...prev.languages, lang],
+                                }));
+                              }
+                            }}
+                            className={`text-[11px] px-2.5 py-1 rounded-lg border transition-all ${
+                              isAdded
+                                ? "bg-[#ffeef3] dark:bg-secondary/10 border-secondary/30 text-secondary cursor-default opacity-60"
+                                : "bg-white dark:bg-surface border-border-theme text-text-secondary hover:text-foreground hover:border-secondary/40 cursor-pointer"
+                            }`}
+                          >
+                            + {lang}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* ETHNICITY / CULTURAL BACKGROUND (OPTIONAL) */}
+                    <div className="space-y-1.5 pt-3 border-t border-border-theme/60">
+                      <label
+                        htmlFor="ethnicity"
+                        className="block text-xs font-semibold text-foreground uppercase tracking-wider"
+                      >
+                        Ethnicity / Cultural Background (Optional)
+                      </label>
+
+                      <select
+                        id="ethnicity"
+                        disabled={isSubmitting}
+                        value={
+                          ETHNICITY_OPTIONS.includes(formData.ethnicity)
+                            ? formData.ethnicity
+                            : formData.ethnicity
+                            ? "Other"
+                            : ""
+                        }
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === "Other") {
+                            setFormData((prev) => ({
+                              ...prev,
+                              ethnicity:
+                                prev.ethnicity && !ETHNICITY_OPTIONS.includes(prev.ethnicity)
+                                  ? prev.ethnicity
+                                  : "Other",
+                            }));
+                          } else {
+                            setFormData((prev) => ({ ...prev, ethnicity: val }));
+                          }
+                        }}
+                        className="w-full bg-white dark:bg-surface border border-slate-300 dark:border-border-theme text-foreground text-xs sm:text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/40 transition-colors cursor-pointer disabled:opacity-60"
+                      >
+                        <option value="">Select ethnicity (optional) / Prefer not to disclose</option>
+                        {ETHNICITY_OPTIONS.map((eth) => (
+                          <option key={eth} value={eth}>
+                            {eth}
+                          </option>
+                        ))}
+                        <option value="Other">Other / Self-described</option>
+                      </select>
+
+                      {/* If Other or custom */}
+                      {(formData.ethnicity === "Other" ||
+                        (formData.ethnicity && !ETHNICITY_OPTIONS.includes(formData.ethnicity))) && (
+                        <input
+                          type="text"
+                          disabled={isSubmitting}
+                          value={formData.ethnicity === "Other" ? "" : formData.ethnicity}
+                          onChange={(e) =>
+                            setFormData((prev) => ({ ...prev, ethnicity: e.target.value }))
+                          }
+                          placeholder="Please describe your cultural background or identity"
+                          className="w-full mt-2 bg-white dark:bg-surface border border-slate-300 dark:border-border-theme text-foreground text-xs sm:text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/40 transition-colors"
+                        />
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* CARD 4: Social Channels & Links */}
+              <div className="bg-white dark:bg-[#131318] border border-slate-200/90 dark:border-[#22222e] rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-xs space-y-5">
+                <div className="flex items-center gap-3 border-b border-border-theme/60 pb-4">
+                  <div className="w-8 h-8 rounded-lg bg-surface-muted dark:bg-[#1f1f28] flex items-center justify-center text-black dark:text-white shrink-0">
+                    <ShareIcon className="w-4 h-4" />
                   </div>
                   <div>
-                    <h2 className="font-serif font-semibold text-lg text-slate-900 dark:text-foreground tracking-wide">
+                    <h2 className="font-semibold text-base sm:text-lg text-slate-900 dark:text-foreground font-sans tracking-wide">
                       Social Channels & Links
                     </h2>
-                    <p className="text-xs text-text-secondary font-sans">
+                    <p className="text-xs text-text-secondary font-sans mt-0.5">
                       Connect your social media handles and online portfolio
                     </p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 font-sans">
-                  {/* Instagram */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
-                      Instagram
-                    </label>
-                    <input
-                      type="text"
-                      name="instagram"
-                      value={formData.socialLinks.instagram}
-                      onChange={handleSocialChange}
-                      placeholder="https://instagram.com/yourhandle"
-                      className="w-full bg-surface border border-border-theme text-foreground text-xs sm:text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-secondary transition-colors"
-                    />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 font-sans">
+                  {/* Left Column */}
+                  <div className="space-y-4">
+                    {/* Instagram */}
+                    <div className="space-y-1.5">
+                      <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
+                        Instagram
+                      </label>
+                      <div className="relative flex items-center">
+                        <span className="absolute left-3.5 text-black dark:text-white pointer-events-none">
+                          <InstagramIcon className="w-4 h-4" />
+                        </span>
+                        <input
+                          type="text"
+                          name="instagram"
+                          value={formData.socialLinks.instagram}
+                          onChange={handleSocialChange}
+                          placeholder="https://www.instagram.com/yourhandle"
+                          className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-surface border border-slate-300 dark:border-border-theme text-foreground text-xs sm:text-sm rounded-xl focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/40 transition-colors"
+                        />
+                      </div>
+                    </div>
+
+                    {/* TikTok */}
+                    <div className="space-y-1.5">
+                      <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
+                        TikTok
+                      </label>
+                      <div className="relative flex items-center">
+                        <span className="absolute left-3.5 text-black dark:text-white pointer-events-none">
+                          <TiktokIcon className="w-4 h-4" />
+                        </span>
+                        <input
+                          type="text"
+                          name="tiktok"
+                          value={formData.socialLinks.tiktok}
+                          onChange={handleSocialChange}
+                          placeholder="https://tiktok.com/@yourhandle"
+                          className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-surface border border-slate-300 dark:border-border-theme text-foreground text-xs sm:text-sm rounded-xl focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/40 transition-colors"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Website / Media Kit URL */}
+                    <div className="space-y-1.5">
+                      <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
+                        Website / Media Kit URL
+                      </label>
+                      <div className="relative flex items-center">
+                        <span className="absolute left-3.5 text-black dark:text-white pointer-events-none">
+                          <LinkIcon className="w-4 h-4" />
+                        </span>
+                        <input
+                          type="url"
+                          name="website"
+                          value={formData.socialLinks.website}
+                          onChange={handleSocialChange}
+                          placeholder="https://yourportfolio.com or linktr.ee/..."
+                          className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-surface border border-slate-300 dark:border-border-theme text-foreground text-xs sm:text-sm rounded-xl focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/40 transition-colors"
+                        />
+                      </div>
+                    </div>
                   </div>
 
-                  {/* YouTube */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
-                      YouTube
-                    </label>
-                    <input
-                      type="text"
-                      name="youtube"
-                      value={formData.socialLinks.youtube}
-                      onChange={handleSocialChange}
-                      placeholder="https://youtube.com/@yourchannel"
-                      className="w-full bg-surface border border-border-theme text-foreground text-xs sm:text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-secondary transition-colors"
-                    />
-                  </div>
+                  {/* Right Column */}
+                  <div className="space-y-4">
+                    {/* YouTube */}
+                    <div className="space-y-1.5">
+                      <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
+                        YouTube
+                      </label>
+                      <div className="relative flex items-center">
+                        <span className="absolute left-3.5 text-black dark:text-white pointer-events-none">
+                          <YoutubeIcon className="w-4 h-4" />
+                        </span>
+                        <input
+                          type="text"
+                          name="youtube"
+                          value={formData.socialLinks.youtube}
+                          onChange={handleSocialChange}
+                          placeholder="https://youtube.com/@yourchannel"
+                          className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-surface border border-slate-300 dark:border-border-theme text-foreground text-xs sm:text-sm rounded-xl focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/40 transition-colors"
+                        />
+                      </div>
+                    </div>
 
-                  {/* TikTok */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
-                      TikTok
-                    </label>
-                    <input
-                      type="text"
-                      name="tiktok"
-                      value={formData.socialLinks.tiktok}
-                      onChange={handleSocialChange}
-                      placeholder="https://tiktok.com/@yourhandle"
-                      className="w-full bg-surface border border-border-theme text-foreground text-xs sm:text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-secondary transition-colors"
-                    />
-                  </div>
-
-                  {/* Facebook */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
-                      Facebook
-                    </label>
-                    <input
-                      type="text"
-                      name="facebook"
-                      value={formData.socialLinks.facebook}
-                      onChange={handleSocialChange}
-                      placeholder="https://facebook.com/yourprofile"
-                      className="w-full bg-surface border border-border-theme text-foreground text-xs sm:text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-secondary transition-colors"
-                    />
-                  </div>
-
-                  {/* Website / Portfolio */}
-                  <div className="space-y-1.5 sm:col-span-2">
-                    <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
-                      Website / Media Kit URL
-                    </label>
-                    <input
-                      type="url"
-                      name="website"
-                      value={formData.socialLinks.website}
-                      onChange={handleSocialChange}
-                      placeholder="https://yourportfolio.com or linktr.ee/..."
-                      className="w-full bg-surface border border-border-theme text-foreground text-xs sm:text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-secondary transition-colors"
-                    />
+                    {/* Facebook */}
+                    <div className="space-y-1.5">
+                      <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
+                        Facebook
+                      </label>
+                      <div className="relative flex items-center">
+                        <span className="absolute left-3.5 text-black dark:text-white pointer-events-none">
+                          <FacebookIcon className="w-4 h-4" />
+                        </span>
+                        <input
+                          type="text"
+                          name="facebook"
+                          value={formData.socialLinks.facebook}
+                          onChange={handleSocialChange}
+                          placeholder="https://facebook.com/yourprofile"
+                          className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-surface border border-slate-300 dark:border-border-theme text-foreground text-xs sm:text-sm rounded-xl focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/40 transition-colors"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* 3. Marketplace Visibility Settings Card */}
-              <div className="bg-white dark:bg-surface border border-border-theme rounded-2xl p-6 sm:p-7 shadow-xs space-y-4">
+              {/* CARD 5: Public Profile Visibility */}
+              <div className="bg-white dark:bg-[#131318] border border-slate-200/90 dark:border-[#22222e] rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-xs">
                 <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <h3 className="font-serif font-semibold text-lg text-slate-900 dark:text-foreground tracking-wide">
-                      Public Profile Visibility
-                    </h3>
-                    <p className="text-xs text-text-secondary font-sans mt-0.5">
-                      {formData.isPublic
-                        ? "Your profile is discoverable by brands searching for creators on CreatorLink."
-                        : "Your profile is hidden from public brand discovery and search results."}
-                    </p>
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-surface-muted dark:bg-[#1f1f28] flex items-center justify-center text-black dark:text-white shrink-0">
+                      <EyeIcon className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-base sm:text-lg text-slate-900 dark:text-foreground tracking-wide font-sans">
+                        Public Profile Visibility
+                      </h3>
+                      <p className="text-xs text-text-secondary font-sans mt-0.5">
+                        {formData.isPublic
+                          ? "Your profile is discoverable by brands searching for creators on CreatorLink."
+                          : "Your profile is hidden from public brand discovery and search results."}
+                      </p>
+                    </div>
                   </div>
 
                   {/* Toggle Switch */}
@@ -1404,7 +2587,7 @@ export default function CreatorProfile() {
                     type="button"
                     onClick={handleToggleVisibility}
                     className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                      formData.isPublic ? "bg-[#ff2d6c]" : "bg-surface-muted border-border-theme"
+                      formData.isPublic ? "bg-black" : "bg-slate-300 dark:bg-neutral-700"
                     }`}
                     role="switch"
                     aria-checked={formData.isPublic}
@@ -1418,20 +2601,20 @@ export default function CreatorProfile() {
                 </div>
               </div>
 
-              {/* 4. Action Buttons (Cancel & Submit - Brand Syntax) */}
+              {/* Bottom Action Buttons (Cancel & Save Changes) */}
               <div className="flex items-center justify-end gap-3 pt-2 font-sans">
                 <button
                   type="button"
                   onClick={handleCancel}
                   disabled={isSubmitting || isUploadingImage}
-                  className="px-6 py-3 rounded-xl border border-border-theme text-foreground hover:bg-surface-muted text-xs sm:text-sm font-semibold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-2.5 rounded-xl border border-slate-300 dark:border-border-theme bg-white dark:bg-[#16161e] hover:bg-slate-50 dark:hover:bg-surface-muted text-slate-900 dark:text-white text-xs sm:text-sm font-semibold transition-all shadow-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting || isUploadingImage}
-                  className="inline-flex items-center justify-center px-8 py-3 rounded-xl bg-[#252525] hover:bg-[#111111] text-white text-xs sm:text-sm font-semibold tracking-wide transition-all shadow-xs hover:shadow-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex items-center justify-center gap-1.5 px-8 py-2.5 rounded-xl bg-black hover:bg-neutral-900 text-white text-xs sm:text-sm font-semibold tracking-wide transition-all shadow-xs hover:shadow-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? (
                     <span className="flex items-center gap-2">
@@ -1439,7 +2622,10 @@ export default function CreatorProfile() {
                       <span>Saving...</span>
                     </span>
                   ) : (
-                    <span>{profile ? "Save Changes" : "Save Profile"}</span>
+                    <>
+                      <CheckIcon className="w-4 h-4 text-white" />
+                      <span>{profile ? "Save Changes" : "Save Profile"}</span>
+                    </>
                   )}
                 </button>
               </div>

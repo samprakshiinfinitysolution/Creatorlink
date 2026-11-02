@@ -1,6 +1,7 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
@@ -25,6 +26,7 @@ import ServiceFormModal, {
   getContentTypeLabel,
   ServiceCardCover,
 } from "@/components/creator/services/ServiceFormModal";
+import { uploadSingleImageApi } from "@/lib/upload";
 
 // =========================================================
 // ERROR FORMATTER HELPER
@@ -47,7 +49,7 @@ function formatErrorMessage(err, fallback = "An unexpected error occurred.") {
 }
 
 // =========================================================
-// 11 CREATOR NICHES (MATCHING CREATORLINK TAXONOMY)
+// CREATOR TAXONOMY & CONSTANTS
 // =========================================================
 const CATEGORIES = [
   {
@@ -118,7 +120,6 @@ const CATEGORIES = [
   },
 ];
 
-// Quick suggestions for popular creative hubs
 const POPULAR_LOCATIONS = [
   "Mumbai, Maharashtra",
   "Delhi NCR, India",
@@ -129,7 +130,6 @@ const POPULAR_LOCATIONS = [
   "Remote / Worldwide",
 ];
 
-// Popular suggested keywords for creators
 const SUGGESTED_KEYWORDS = [
   "fashion",
   "styling",
@@ -147,66 +147,22 @@ const SUGGESTED_KEYWORDS = [
   "cinematic",
 ];
 
-// 4-Step Onboarding Definition
+// 4-Step Onboarding Definition matching user requirement
 const STEPS_META = [
-  { number: 1, title: "Profile Info", subtitle: "Identity & Reach" },
+  { number: 1, title: "Profile Info", subtitle: "Identity & Demographics" },
   { number: 2, title: "Portfolio", subtitle: "Visual Showcase" },
-  { number: 3, title: "Identity", subtitle: "Demographics" },
-  { number: 4, title: "Services", subtitle: "Packages & Rates" },
+  { number: 3, title: "Services", subtitle: "Packages & Rates" },
+  { number: 4, title: "Payment Details", subtitle: "Payout & Complete" },
 ];
 
-// Content Types mapped to Platforms
-const PLATFORM_CONTENT_TYPES = {
-  instagram: [
-    { value: "reel", label: "Reel" },
-    { value: "post", label: "Dedicated Post" },
-    { value: "story", label: "Story" },
-    { value: "other", label: "Other" },
-  ],
-  youtube: [
-    { value: "video", label: "Dedicated Video" },
-    { value: "short", label: "YouTube Short" },
-    { value: "other", label: "Community Post / Other" },
-  ],
-  tiktok: [
-    { value: "video", label: "TikTok Video" },
-    { value: "story", label: "TikTok Story" },
-    { value: "other", label: "Other" },
-  ],
-  facebook: [
-    { value: "post", label: "Feed Post" },
-    { value: "reel", label: "Facebook Reel" },
-    { value: "video", label: "Video" },
-    { value: "story", label: "Story" },
-    { value: "other", label: "Other" },
-  ],
-  website: [
-    { value: "article", label: "Article / Blog Review" },
-    { value: "post", label: "Banner / Post" },
-    { value: "other", label: "Other" },
-  ],
-  multiple: [
-    { value: "cross_platform_bundle", label: "Cross-Platform Bundle" },
-    { value: "campaign_package", label: "Full Campaign Package" },
-    { value: "other", label: "Other" },
-  ],
-  other: [
-    { value: "custom", label: "Custom Collaboration" },
-    { value: "consultation", label: "Consultation / Strategy" },
-    { value: "other", label: "Other" },
-  ],
-};
-
-// Gender Options matching backend enum
 const GENDER_OPTIONS = [
-  { id: "female", label: "Female", desc: "She / Her" },
   { id: "male", label: "Male", desc: "He / Him" },
+  { id: "female", label: "Female", desc: "She / Her" },
   { id: "non-binary", label: "Non-binary", desc: "They / Them / Enby" },
   { id: "other", label: "Other", desc: "Self-described identity" },
   { id: "prefer_not_to_say", label: "Prefer not to say", desc: "Keep private" },
 ];
 
-// Suggested Popular Creator Content & Spoken Languages
 const POPULAR_LANGUAGES = [
   "English",
   "Hindi",
@@ -230,7 +186,6 @@ const POPULAR_LANGUAGES = [
   "Malayalam",
 ];
 
-// Optional Ethnicity Demographic Options
 const ETHNICITY_OPTIONS = [
   "Asian / South Asian",
   "Asian / East Asian",
@@ -393,30 +348,6 @@ function XMarkIcon({ className = "w-3.5 h-3.5" }) {
   );
 }
 
-function SearchIcon({ className = "w-4 h-4" }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-    </svg>
-  );
-}
-
-function PhotoIcon({ className = "w-4 h-4" }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-    </svg>
-  );
-}
-
-function ArrowUpTrayIcon({ className = "w-4 h-4" }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-    </svg>
-  );
-}
-
 function PencilIcon({ className = "w-4 h-4" }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
@@ -429,14 +360,6 @@ function TrashIcon({ className = "w-4 h-4" }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-    </svg>
-  );
-}
-
-function ExternalLinkIcon({ className = "w-3.5 h-3.5" }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
     </svg>
   );
 }
@@ -473,13 +396,38 @@ function TiktokIcon({ className = "w-4 h-4" }) {
   );
 }
 
-function ClockIcon({ className = "w-4 h-4" }) {
+function XTwitterIcon({ className = "w-4 h-4" }) {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+    <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
     </svg>
   );
 }
+
+function UserIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+    </svg>
+  );
+}
+
+function BanknotesIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+    </svg>
+  );
+}
+
+function ShieldCheckIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+    </svg>
+  );
+}
+
 
 function getPlatformIcon(platform) {
   switch (platform) {
@@ -506,62 +454,72 @@ function getPlatformIcon(platform) {
 export default function CreatorOnboarding() {
   const router = useRouter();
   const dispatch = useDispatch();
-  const { profile } = useSelector((state) => state.profile);
-  const { portfolios } = useSelector((state) => state.portfolio);
-  const { services } = useSelector((state) => state.services);
+  const { user } = useSelector((state) => state.auth || {});
+  const { profile } = useSelector((state) => state.profile || {});
+  const { portfolios } = useSelector((state) => state.portfolio || {});
+  const { services } = useSelector((state) => state.services || {});
 
-  // Current onboarding page (1 = Profile, 2 = Portfolio, 3 = Identity, 4 = Services)
+  // Current onboarding step (1 = Profile Info, 2 = Portfolio, 3 = Services, 4 = Payment Details)
   const [currentStep, setCurrentStep] = useState(1);
 
-  // Page 1 Form state + Page 3 Identity state
+  // Consolidated Step 1 form data (Basic Info + Demographics)
   const [formData, setFormData] = useState({
+    profileImage: "",
     title: "",
     bio: "",
     category: "",
     keywords: [],
-    niches: [],
     location: "",
     socialLinks: {
       instagram: "",
       youtube: "",
       facebook: "",
       tiktok: "",
+      twitter: "",
       website: "",
     },
-    // Page 3: Identity
     dob: "",
     gender: "",
     languages: [],
     ethnicity: "",
   });
 
-  // Local state for keyword input tag entry
+  // Step 4: Payment Details form data
+  const [payoutData, setPayoutData] = useState({
+    payoutType: "upi", // 'upi' or 'bank'
+    upiId: "",
+    accountNumber: "",
+    confirmAccountNumber: "",
+    ifscCode: "",
+    accountHolderName: "",
+  });
+
+  // Profile image upload state
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [imageUploadError, setImageUploadError] = useState(null);
+  const fileInputRef = useRef(null);
+
+  // Tag inputs & search
   const [keywordInput, setKeywordInput] = useState("");
-  // Local state for language input tag entry
   const [languageInput, setLanguageInput] = useState("");
-  // Local state for niche filter/search
-  const [nicheSearch, setNicheSearch] = useState("");
 
   const [validationError, setValidationError] = useState(null);
   const [saveSuccessMessage, setSaveSuccessMessage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Page 2: Project Modal state (using shared PortfolioFormModal)
+  // Modals state
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
-  const isMountedRef = useRef(true);
-
-  // Page 4: Service Modal state (using shared ServiceFormModal)
   const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
   const [editingService, setEditingService] = useState(null);
 
-  // Dedicated loading and error states for initial fetch and deletions
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [initialLoadError, setInitialLoadError] = useState(null);
   const [deletingProjectId, setDeletingProjectId] = useState(null);
   const [deletingServiceId, setDeletingServiceId] = useState(null);
+  const isMountedRef = useRef(true);
 
-  // Step completion status derived from actual saved database / Redux data
+  // Step completion status derived from actual saved Redux data
   const hasValidSavedSocialLink = Boolean(
     profile?.socialLinks &&
       Object.values(profile.socialLinks).some(
@@ -577,29 +535,25 @@ export default function CreatorOnboarding() {
       profile.bio.trim().length > 0 &&
       typeof profile.category === "string" &&
       profile.category.trim().length > 0 &&
-      Array.isArray(profile.niches) &&
-      profile.niches.length > 0 &&
       Array.isArray(profile.keywords) &&
       profile.keywords.length > 0 &&
       typeof profile.location === "string" &&
       profile.location.trim().length > 0 &&
+      profile.dob &&
+      typeof profile.gender === "string" &&
+      profile.gender.trim().length > 0 &&
+      Array.isArray(profile.languages) &&
+      profile.languages.length > 0 &&
       hasValidSavedSocialLink
   );
 
   const isStep2Done = Array.isArray(portfolios) && portfolios.length > 0;
 
-  const isStep3Done = Boolean(
-    profile &&
-      profile.dob &&
-      typeof profile.gender === "string" &&
-      profile.gender.trim().length > 0 &&
-      Array.isArray(profile.languages) &&
-      profile.languages.length > 0
-  );
-
-  const isStep4Done =
+  const isStep3Done =
     Array.isArray(services) &&
     services.some((s) => s && (s._id || s.id) && s.isActive !== false);
+
+  const isStep4Done = Boolean(profile?.isOnboarded);
 
   const isStepCompleted = (stepNumber) => {
     switch (stepNumber) {
@@ -616,8 +570,50 @@ export default function CreatorOnboarding() {
     }
   };
 
-  // Handler to parse and apply initial data response
-  const applyInitialDataResults = React.useCallback(
+  // Image upload handler
+  const handleImageFileSelect = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      setImageUploadError("Please upload a valid image file (JPEG, PNG, or WebP).");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setImageUploadError("Image size must be less than 5 MB.");
+      return;
+    }
+
+    setImageUploadError(null);
+    setIsUploadingImage(true);
+
+    try {
+      const uploadRes = await uploadSingleImageApi(file, "creatorlink/profiles");
+      const uploadedUrl =
+        uploadRes?.url ||
+        uploadRes?.secure_url ||
+        uploadRes?.data?.url ||
+        uploadRes?.data?.secure_url;
+
+      if (uploadedUrl) {
+        setFormData((prev) => ({ ...prev, profileImage: uploadedUrl }));
+        // If profile already exists, update immediately
+        if (profile && (profile._id || profile.id)) {
+          dispatch(updateCreatorProfile({ profileImage: uploadedUrl }));
+        }
+      } else {
+        setImageUploadError("Could not retrieve uploaded image URL.");
+      }
+    } catch {
+      setImageUploadError("Failed to upload profile picture. Please try again.");
+    } finally {
+      setIsUploadingImage(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  // Populate data when loaded from backend
+  const applyInitialDataResults = useCallback(
     ([profileResult, portfoliosResult, servicesResult]) => {
       if (!isMountedRef.current) return;
 
@@ -625,24 +621,17 @@ export default function CreatorOnboarding() {
       let pStep2Done = false;
       let pStep3Done = false;
 
-      // 1. Handle Profile response
+      // 1. Profile response
       if (profileResult.status === "fulfilled") {
         const p = profileResult.value?.data || profileResult.value;
         if (p) {
-          // If creator has already completed onboarding, redirect to dashboard
           if (p.isOnboarded) {
             router.replace("/creator/dashboard");
             return;
           }
 
           setFormData((prev) => {
-            const initialNiches =
-              Array.isArray(p.niches) && p.niches.length > 0
-                ? p.niches
-                : p.category
-                ? [p.category]
-                : prev.niches;
-
+            
             let formattedDob = prev.dob || "";
             if (p.dob) {
               const d = new Date(p.dob);
@@ -652,26 +641,22 @@ export default function CreatorOnboarding() {
             }
 
             return {
+              profileImage: p.profileImage || prev.profileImage || "",
               title: p.title || prev.title || "",
               bio: p.bio || prev.bio || "",
-              category: p.category || (Array.isArray(p.niches) && p.niches[0]) || prev.category || "",
+              category: p.category || prev.category || "",
               keywords:
                 Array.isArray(p.keywords) && p.keywords.length > 0
                   ? p.keywords
                   : prev.keywords,
-              niches: initialNiches,
               location: p.location || prev.location || "",
               socialLinks: {
-                instagram:
-                  p.socialLinks?.instagram || prev.socialLinks.instagram || "",
-                youtube:
-                  p.socialLinks?.youtube || prev.socialLinks.youtube || "",
-                facebook:
-                  p.socialLinks?.facebook || prev.socialLinks.facebook || "",
-                tiktok:
-                  p.socialLinks?.tiktok || prev.socialLinks.tiktok || "",
-                website:
-                  p.socialLinks?.website || prev.socialLinks.website || "",
+                instagram: p.socialLinks?.instagram || prev.socialLinks.instagram || "",
+                youtube: p.socialLinks?.youtube || prev.socialLinks.youtube || "",
+                facebook: p.socialLinks?.facebook || prev.socialLinks.facebook || "",
+                tiktok: p.socialLinks?.tiktok || prev.socialLinks.tiktok || "",
+                twitter: p.socialLinks?.twitter || prev.socialLinks.twitter || "",
+                website: p.socialLinks?.website || prev.socialLinks.website || "",
               },
               dob: formattedDob,
               gender: p.gender || prev.gender || "",
@@ -695,29 +680,23 @@ export default function CreatorOnboarding() {
               p.title.trim().length > 0 &&
               typeof p.bio === "string" &&
               p.bio.trim().length > 0 &&
-              ((Array.isArray(p.niches) && p.niches.length > 0) ||
-                (typeof p.category === "string" &&
-                  p.category.trim().length > 0)) &&
+              typeof p.category === "string" &&
+              p.category.trim().length > 0 &&
               Array.isArray(p.keywords) &&
               p.keywords.length > 0 &&
               typeof p.location === "string" &&
               p.location.trim().length > 0 &&
-              pHasValidSocial
-          );
-
-          pStep3Done = Boolean(
-            p.dob &&
+              p.dob &&
               typeof p.gender === "string" &&
               p.gender.trim().length > 0 &&
               Array.isArray(p.languages) &&
-              p.languages.length > 0
+              p.languages.length > 0 &&
+              pHasValidSocial
           );
         }
       } else {
         const errMsg = formatErrorMessage(profileResult.reason);
-        const isNotFound =
-          errMsg.toLowerCase().includes("not found") || errMsg.includes("404");
-        // Only 404 / "not found" is expected for new creators without saved profile
+        const isNotFound = errMsg.toLowerCase().includes("not found") || errMsg.includes("404");
         if (!isNotFound) {
           setInitialLoadError((prev) =>
             prev ? `${prev} | Profile: ${errMsg}` : `Failed to load profile: ${errMsg}`
@@ -725,32 +704,31 @@ export default function CreatorOnboarding() {
         }
       }
 
-      // 2. Handle Portfolios response
+      // 2. Portfolios response
       if (portfoliosResult.status === "fulfilled") {
-        const loadedPortfolios =
-          portfoliosResult.value?.data || portfoliosResult.value || [];
-        pStep2Done =
-          Array.isArray(loadedPortfolios) && loadedPortfolios.length > 0;
+        const loadedPortfolios = portfoliosResult.value?.data || portfoliosResult.value || [];
+        pStep2Done = Array.isArray(loadedPortfolios) && loadedPortfolios.length > 0;
       } else {
         const errMsg = formatErrorMessage(portfoliosResult.reason);
         setInitialLoadError((prev) =>
-          prev
-            ? `${prev} | Portfolios: ${errMsg}`
-            : `Failed to load portfolio items: ${errMsg}`
+          prev ? `${prev} | Portfolios: ${errMsg}` : `Failed to load portfolio items: ${errMsg}`
         );
       }
 
-      // 3. Handle Services response
-      if (servicesResult.status === "rejected") {
+      // 3. Services response
+      if (servicesResult.status === "fulfilled") {
+        const loadedServices = servicesResult.value?.data || servicesResult.value || [];
+        pStep3Done =
+          Array.isArray(loadedServices) &&
+          loadedServices.some((s) => s && (s._id || s.id) && s.isActive !== false);
+      } else {
         const errMsg = formatErrorMessage(servicesResult.reason);
         setInitialLoadError((prev) =>
-          prev
-            ? `${prev} | Services: ${errMsg}`
-            : `Failed to load services: ${errMsg}`
+          prev ? `${prev} | Services: ${errMsg}` : `Failed to load services: ${errMsg}`
         );
       }
 
-      // Auto-resume on earliest incomplete step upon data load
+      // Auto-resume on earliest incomplete step
       if (!pStep1Done) {
         setCurrentStep(1);
       } else if (!pStep2Done) {
@@ -766,7 +744,6 @@ export default function CreatorOnboarding() {
     [router]
   );
 
-  // Fetch existing creator profile, portfolios, and services on mount
   useEffect(() => {
     isMountedRef.current = true;
     let isCancelled = false;
@@ -802,62 +779,7 @@ export default function CreatorOnboarding() {
     });
   };
 
-  // Handle Niche selection (Toggle with maximum 3 items)
-  const handleNicheToggle = (nicheName) => {
-    setFormData((prev) => {
-      const currentNiches = prev.niches || [];
-      if (currentNiches.includes(nicheName)) {
-        return {
-          ...prev,
-          niches: currentNiches.filter((n) => n !== nicheName),
-        };
-      }
-      if (currentNiches.length >= 3) {
-        setValidationError("You can select a maximum of 3 niches.");
-        return prev;
-      }
-      setValidationError(null);
-      return {
-        ...prev,
-        niches: [...currentNiches, nicheName],
-      };
-    });
-  };
-
-  // Handle Keyword additions
-  const handleAddKeyword = (e) => {
-    e?.preventDefault();
-    const cleanWord = keywordInput.trim().toLowerCase();
-    if (!cleanWord) return;
-
-    if (formData.keywords.includes(cleanWord)) {
-      setKeywordInput("");
-      return;
-    }
-
-    if (formData.keywords.length >= 10) {
-      setValidationError("You can add up to 10 keywords.");
-      return;
-    }
-
-    setFormData((prev) => ({
-      ...prev,
-      keywords: [...prev.keywords, cleanWord],
-    }));
-    setKeywordInput("");
-    setValidationError(null);
-  };
-
-  // Handle Keyword chip removal
-  const handleRemoveKeyword = (keywordToRemove) => {
-    setFormData((prev) => ({
-      ...prev,
-      keywords: prev.keywords.filter((kw) => kw !== keywordToRemove),
-    }));
-    setValidationError(null);
-  };
-
-  // Handle Social Links input change
+  // Helper handlers
   const handleSocialChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -870,37 +792,48 @@ export default function CreatorOnboarding() {
     setValidationError(null);
   };
 
-  // =========================================================
-  // PAGE 3: IDENTITY HANDLERS
-  // =========================================================
+  const handleAddKeyword = (e) => {
+    e?.preventDefault();
+    const cleanTag = keywordInput.trim().replace(/^#+/, "").toLowerCase();
+    if (!cleanTag) return;
+    if (formData.keywords.includes(cleanTag)) {
+      setKeywordInput("");
+      return;
+    }
+    if (formData.keywords.length >= 10) {
+      setValidationError("You can add up to 10 keywords.");
+      return;
+    }
+    setFormData((prev) => ({
+      ...prev,
+      keywords: [...prev.keywords, cleanTag],
+    }));
+    setKeywordInput("");
+    setValidationError(null);
+  };
+
+  const handleRemoveKeyword = (tagToRemove) => {
+    setFormData((prev) => ({
+      ...prev,
+      keywords: prev.keywords.filter((t) => t !== tagToRemove),
+    }));
+  };
+
   const handleAddLanguage = (e) => {
     e?.preventDefault();
     const cleanLang = languageInput.trim();
     if (!cleanLang) return;
-
-    // Capitalize first letter of words
-    const formattedLang = cleanLang
-      .split(" ")
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-      .join(" ");
-
-    if (
-      formData.languages.some(
-        (l) => l.toLowerCase() === formattedLang.toLowerCase()
-      )
-    ) {
+    if (formData.languages.includes(cleanLang)) {
       setLanguageInput("");
       return;
     }
-
     if (formData.languages.length >= 10) {
       setValidationError("You can add up to 10 languages.");
       return;
     }
-
     setFormData((prev) => ({
       ...prev,
-      languages: [...prev.languages, formattedLang],
+      languages: [...prev.languages, cleanLang],
     }));
     setLanguageInput("");
     setValidationError(null);
@@ -911,55 +844,32 @@ export default function CreatorOnboarding() {
       ...prev,
       languages: prev.languages.filter((l) => l !== langToRemove),
     }));
-    setValidationError(null);
   };
 
-  // =========================================================
-  // PAGE 2: PORTFOLIO HANDLERS (USING SHARED MODAL)
-  // =========================================================
+  // Modals
   const handleOpenAddProject = () => {
     setEditingProject(null);
     setIsProjectModalOpen(true);
   };
 
-  const handleOpenEditProject = (item) => {
-    setEditingProject(item);
+  const handleOpenEditProject = (project) => {
+    setEditingProject(project);
     setIsProjectModalOpen(true);
   };
 
-  const handleCloseProjectModal = () => {
-    setIsProjectModalOpen(false);
-    setEditingProject(null);
-  };
-
-  const handleDeleteProject = async (projectId) => {
-    if (!projectId || deletingProjectId) return;
-    setDeletingProjectId(projectId);
-    setValidationError(null);
-
+  const handleDeleteProject = async (id) => {
+    if (!id || deletingProjectId) return;
+    setDeletingProjectId(id);
     try {
-      await dispatch(deletePortfolioItem(projectId)).unwrap();
-      try {
-        await dispatch(getPortfolios()).unwrap();
-      } catch (refreshErr) {
-        setValidationError(
-          `Portfolio project was deleted, but failed to refresh portfolio list: ${formatErrorMessage(refreshErr)}`
-        );
-        return;
-      }
-      setSaveSuccessMessage("Portfolio project deleted successfully.");
+      await dispatch(deletePortfolioItem(id)).unwrap();
+      dispatch(getPortfolios());
     } catch (err) {
-      setValidationError(
-        formatErrorMessage(err, "Failed to delete portfolio project.")
-      );
+      setValidationError(formatErrorMessage(err, "Failed to delete portfolio project."));
     } finally {
       setDeletingProjectId(null);
     }
   };
 
-  // =========================================================
-  // PAGE 4: SERVICES HANDLERS (USING SHARED MODAL)
-  // =========================================================
   const handleOpenAddService = () => {
     setEditingService(null);
     setIsServiceModalOpen(true);
@@ -970,57 +880,40 @@ export default function CreatorOnboarding() {
     setIsServiceModalOpen(true);
   };
 
-  const handleCloseServiceModal = () => {
-    setIsServiceModalOpen(false);
-    setEditingService(null);
-  };
-
-  const handleDeleteService = async (serviceId) => {
-    if (!serviceId || deletingServiceId) return;
-    setDeletingServiceId(serviceId);
-    setValidationError(null);
-
+  const handleDeleteService = async (id) => {
+    if (!id || deletingServiceId) return;
+    setDeletingServiceId(id);
     try {
-      await dispatch(deleteCreatorService(serviceId)).unwrap();
-      try {
-        await dispatch(getServices({ limit: 50 })).unwrap();
-      } catch (refreshErr) {
-        setValidationError(
-          `Service package was deleted, but failed to refresh services list: ${formatErrorMessage(refreshErr)}`
-        );
-        return;
-      }
-      setSaveSuccessMessage("Service package deleted successfully.");
+      await dispatch(deleteCreatorService(id)).unwrap();
+      dispatch(getServices({ limit: 50 }));
     } catch (err) {
-      setValidationError(
-        formatErrorMessage(err, "Failed to delete service.")
-      );
+      setValidationError(formatErrorMessage(err, "Failed to delete service."));
     } finally {
       setDeletingServiceId(null);
     }
   };
 
-  // Continue to Next Page
+  // Navigation & Submission
   const handleContinue = async (e) => {
     e?.preventDefault();
     if (isSubmitting) return;
     setValidationError(null);
 
     // ==========================================
-    // PAGE 1 VALIDATION & SUBMISSION
+    // STEP 1 VALIDATION & SUBMISSION
     // ==========================================
     if (currentStep === 1) {
       if (!formData.title || !formData.title.trim()) {
-        setValidationError("Please enter your profile headline / professional title.");
+        setValidationError("Please enter your professional headline / title.");
         return;
       }
       if (formData.title.trim().length > 150) {
-        setValidationError("Profile headline must not exceed 150 characters.");
+        setValidationError("Headline must not exceed 150 characters.");
         return;
       }
 
       if (!formData.bio || !formData.bio.trim()) {
-        setValidationError("Please provide a short bio or description.");
+        setValidationError("Please enter a bio or description.");
         return;
       }
       if (formData.bio.trim().length > 1000) {
@@ -1032,22 +925,9 @@ export default function CreatorOnboarding() {
         setValidationError("Please select your primary category.");
         return;
       }
-      if (formData.category.trim().length > 100) {
-        setValidationError("Category must not exceed 100 characters.");
-        return;
-      }
-
-      if (!Array.isArray(formData.niches) || formData.niches.length === 0) {
-        setValidationError("Please select at least 1 niche (maximum 3).");
-        return;
-      }
-      if (formData.niches.length > 3) {
-        setValidationError("You can select a maximum of 3 niches.");
-        return;
-      }
 
       if (!Array.isArray(formData.keywords) || formData.keywords.length === 0) {
-        setValidationError("Please add at least 1 keyword representing your content.");
+        setValidationError("Please add at least 1 content keyword or tag.");
         return;
       }
 
@@ -1055,18 +935,32 @@ export default function CreatorOnboarding() {
         setValidationError("Please enter your location or city.");
         return;
       }
-      if (formData.location.trim().length > 100) {
-        setValidationError("Location must not exceed 100 characters.");
-        return;
-      }
 
       const hasAtLeastOneSocialLink = Object.values(formData.socialLinks).some(
         (link) => typeof link === "string" && link.trim().length > 0
       );
       if (!hasAtLeastOneSocialLink) {
-        setValidationError(
-          "Please provide at least one social media link or website URL."
-        );
+        setValidationError("Please provide at least one social media handle or link.");
+        return;
+      }
+
+      if (!formData.dob || !formData.dob.trim()) {
+        setValidationError("Please enter your date of birth.");
+        return;
+      }
+      const dobDate = new Date(formData.dob);
+      if (Number.isNaN(dobDate.getTime()) || dobDate > new Date()) {
+        setValidationError("Please enter a valid date of birth.");
+        return;
+      }
+
+      if (!formData.gender) {
+        setValidationError("Please select your gender identity.");
+        return;
+      }
+
+      if (!Array.isArray(formData.languages) || formData.languages.length === 0) {
+        setValidationError("Please select or add at least one language.");
         return;
       }
 
@@ -1078,22 +972,24 @@ export default function CreatorOnboarding() {
         bio: formData.bio.trim(),
         category: formData.category.trim(),
         keywords: formData.keywords,
-        niches: formData.niches,
         location: formData.location.trim(),
         socialLinks: {
-          instagram: formData.socialLinks.instagram.trim(),
-          youtube: formData.socialLinks.youtube.trim(),
-          facebook: formData.socialLinks.facebook.trim(),
-          tiktok: formData.socialLinks.tiktok.trim(),
-          website: formData.socialLinks.website.trim(),
+          instagram: formData.socialLinks.instagram?.trim() || "",
+          youtube: formData.socialLinks.youtube?.trim() || "",
+          facebook: formData.socialLinks.facebook?.trim() || "",
+          tiktok: formData.socialLinks.tiktok?.trim() || "",
+          website: formData.socialLinks.website?.trim() || "",
         },
-        ...(profile?.profileImage ? { profileImage: profile.profileImage } : {}),
+        dob: formData.dob,
+        gender: formData.gender,
+        languages: formData.languages,
+        ethnicity: formData.ethnicity ? formData.ethnicity.trim() : "",
+        ...(formData.profileImage ? { profileImage: formData.profileImage } : {}),
         isOnboarded: false,
       };
 
       try {
         const hasExistingProfile = Boolean(profile && (profile._id || profile.id));
-
         if (hasExistingProfile) {
           await dispatch(updateCreatorProfile(profilePayload)).unwrap();
         } else {
@@ -1112,16 +1008,13 @@ export default function CreatorOnboarding() {
           }
         }
 
-        // Successfully saved Page 1 -> Proceed to Page 2
         setSaveSuccessMessage("Profile information saved successfully.");
         setValidationError(null);
         setCurrentStep(2);
       } catch (err) {
-        const errorMsg = formatErrorMessage(
-          err,
-          "Failed to save profile information. Please verify your inputs and try again."
+        setValidationError(
+          formatErrorMessage(err, "Failed to save profile. Please check your inputs.")
         );
-        setValidationError(errorMsg);
       } finally {
         setIsSubmitting(false);
       }
@@ -1129,226 +1022,89 @@ export default function CreatorOnboarding() {
     }
 
     // ==========================================
-    // PAGE 2 VALIDATION & PROCEED TO PAGE 3
+    // STEP 2: PORTFOLIO VALIDATION
     // ==========================================
     if (currentStep === 2) {
       if (!Array.isArray(portfolios) || portfolios.length === 0) {
-        setValidationError(
-          "Please add at least 1 portfolio project before continuing to Identity verification."
-        );
+        setValidationError("Please add at least 1 portfolio project before continuing.");
         return;
       }
-
-      // Validated: Proceed to Page 3
       setCurrentStep(3);
       setValidationError(null);
       return;
     }
 
     // ==========================================
-    // PAGE 3 VALIDATION & SUBMISSION
+    // STEP 3: SERVICES VALIDATION
     // ==========================================
     if (currentStep === 3) {
-      if (!formData.dob || !formData.dob.trim()) {
-        setValidationError("Please enter your date of birth.");
+      const serviceList = Array.isArray(services) ? services : [];
+      const activeServices = serviceList.filter((s) => s.isActive !== false);
+
+      if (serviceList.length === 0 || activeServices.length === 0) {
+        setValidationError("Please add at least 1 active service offering before continuing.");
         return;
       }
-
-      const dobDate = new Date(formData.dob);
-      if (Number.isNaN(dobDate.getTime())) {
-        setValidationError("Please enter a valid date of birth.");
-        return;
-      }
-
-      if (dobDate > new Date()) {
-        setValidationError("Date of birth cannot be in the future.");
-        return;
-      }
-
-      const allowedGenders = [
-        "male",
-        "female",
-        "non-binary",
-        "other",
-        "prefer_not_to_say",
-      ];
-      if (!formData.gender || !allowedGenders.includes(formData.gender)) {
-        setValidationError("Please select your gender identity.");
-        return;
-      }
-
-      if (!Array.isArray(formData.languages) || formData.languages.length === 0) {
-        setValidationError("Please select or add at least one language.");
-        return;
-      }
-
-      if (formData.ethnicity && typeof formData.ethnicity !== "string") {
-        setValidationError("Ethnicity must be a string.");
-        return;
-      }
-
-      setIsSubmitting(true);
+      setCurrentStep(4);
       setValidationError(null);
-
-      const identityPayload = {
-        dob: formData.dob,
-        gender: formData.gender,
-        languages: formData.languages,
-        ethnicity: formData.ethnicity ? formData.ethnicity.trim() : "",
-        isOnboarded: false,
-      };
-
-      try {
-        const hasExistingProfile = Boolean(profile && (profile._id || profile.id));
-
-        if (hasExistingProfile) {
-          await dispatch(updateCreatorProfile(identityPayload)).unwrap();
-        } else {
-          try {
-            await dispatch(createCreatorProfile(identityPayload)).unwrap();
-          } catch (createErr) {
-            const createErrMsg = formatErrorMessage(createErr);
-            if (
-              createErrMsg.toLowerCase().includes("already exists") ||
-              createErrMsg.includes("409")
-            ) {
-              await dispatch(updateCreatorProfile(identityPayload)).unwrap();
-            } else {
-              throw createErr;
-            }
-          }
-        }
-
-        // Successfully saved Page 3 -> Proceed to Page 4
-        setSaveSuccessMessage("Identity verification details saved successfully.");
-        setValidationError(null);
-        setCurrentStep(4);
-      } catch (err) {
-        const errorMsg = formatErrorMessage(
-          err,
-          "Failed to save identity details. Please check your inputs and try again."
-        );
-        setValidationError(errorMsg);
-      } finally {
-        setIsSubmitting(false);
-      }
       return;
     }
 
     // ==========================================
-    // PAGE 4 VALIDATION & COMPLETE ONBOARDING
+    // STEP 4: PAYMENT DETAILS & COMPLETE ONBOARDING
     // ==========================================
     if (currentStep === 4) {
-      const serviceList = Array.isArray(services) ? services : [];
-      if (serviceList.length === 0) {
-        setValidationError(
-          "Please add at least 1 service package to complete your onboarding."
-        );
+      // Cross-step verification
+      if (!isStep1Done && (!formData.title || !formData.bio || !formData.dob)) {
+        setValidationError("Profile information is incomplete. Please return to Step 1.");
         return;
       }
-
-      const activeServices = serviceList.filter((s) => s.isActive !== false);
-      if (activeServices.length === 0) {
-        setValidationError(
-          "Please make sure at least 1 service package is active to complete onboarding."
-        );
-        return;
-      }
-
-      // Cross-step data validation: Step 1 fields
-      if (!formData.title || !formData.title.trim()) {
-        setValidationError("Profile headline is missing. Please return to Step 1.");
-        return;
-      }
-      if (!formData.bio || !formData.bio.trim()) {
-        setValidationError("Profile bio is missing. Please return to Step 1.");
-        return;
-      }
-      if (!Array.isArray(formData.niches) || formData.niches.length === 0) {
-        setValidationError("Niche selection is missing. Please return to Step 1.");
-        return;
-      }
-      if (!Array.isArray(formData.keywords) || formData.keywords.length === 0) {
-        setValidationError("Content keywords are missing. Please return to Step 1.");
-        return;
-      }
-      if (!formData.location || !formData.location.trim()) {
-        setValidationError("Location is missing. Please return to Step 1.");
-        return;
-      }
-      const hasValidSocialLink = Boolean(
-        formData.socialLinks &&
-          Object.values(formData.socialLinks).some(
-            (link) => typeof link === "string" && link.trim().length > 0
-          )
-      );
-      if (!hasValidSocialLink) {
-        setValidationError(
-          "At least one social media link or website URL is required. Please return to Step 1."
-        );
-        return;
-      }
-
-      // Cross-step data validation: Step 2 fields
       if (!Array.isArray(portfolios) || portfolios.length === 0) {
-        setValidationError(
-          "At least 1 portfolio project is required. Please return to Step 2."
-        );
+        setValidationError("At least 1 portfolio project is required. Please return to Step 2.");
         return;
       }
-
-      // Cross-step data validation: Step 3 fields
-      if (
-        !formData.dob ||
-        !formData.gender ||
-        !Array.isArray(formData.languages) ||
-        formData.languages.length === 0
-      ) {
-        setValidationError(
-          "Identity verification details are incomplete. Please return to Step 3."
-        );
+      const activeServices = (Array.isArray(services) ? services : []).filter(
+        (s) => s.isActive !== false
+      );
+      if (activeServices.length === 0) {
+        setValidationError("At least 1 active service is required. Please return to Step 3.");
         return;
       }
 
       setIsSubmitting(true);
       setValidationError(null);
 
-      // Derive startingRate safely from lowest finite positive price among active services
+      // Derive starting rate safely
       const validActivePrices = activeServices
         .map((s) => Number(s?.price))
         .filter((price) => Number.isFinite(price) && price > 0);
 
-      const startingRate =
-        validActivePrices.length > 0
-          ? Math.min(...validActivePrices)
-          : 0;
+      const startingRate = validActivePrices.length > 0 ? Math.min(...validActivePrices) : 0;
 
       const completionPayload = {
         title: formData.title.trim(),
         bio: formData.bio.trim(),
+        category: formData.category.trim(),
         keywords: formData.keywords,
-        niches: formData.niches,
-        category: formData.niches[0] || "",
         location: formData.location.trim(),
         socialLinks: {
-          instagram: formData.socialLinks.instagram.trim(),
-          youtube: formData.socialLinks.youtube.trim(),
-          facebook: formData.socialLinks.facebook.trim(),
-          tiktok: formData.socialLinks.tiktok.trim(),
-          website: formData.socialLinks.website.trim(),
+          instagram: formData.socialLinks.instagram?.trim() || "",
+          youtube: formData.socialLinks.youtube?.trim() || "",
+          facebook: formData.socialLinks.facebook?.trim() || "",
+          tiktok: formData.socialLinks.tiktok?.trim() || "",
+          website: formData.socialLinks.website?.trim() || "",
         },
-        ...(profile?.profileImage ? { profileImage: profile.profileImage } : {}),
         dob: formData.dob,
         gender: formData.gender,
         languages: formData.languages,
         ethnicity: formData.ethnicity ? formData.ethnicity.trim() : "",
+        ...(formData.profileImage ? { profileImage: formData.profileImage } : {}),
         startingRate,
         isOnboarded: true,
       };
 
       try {
         const hasExistingProfile = Boolean(profile && (profile._id || profile.id));
-
         if (hasExistingProfile) {
           await dispatch(updateCreatorProfile(completionPayload)).unwrap();
         } else {
@@ -1366,14 +1122,11 @@ export default function CreatorOnboarding() {
             }
           }
         }
-        // Successful onboarding completion: redirect to Creator Dashboard
         router.replace("/creator/dashboard");
       } catch (err) {
-        const errorMsg = formatErrorMessage(
-          err,
-          "Failed to complete onboarding. Please verify your details and try again."
+        setValidationError(
+          formatErrorMessage(err, "Failed to complete onboarding. Please try again.")
         );
-        setValidationError(errorMsg);
       } finally {
         setIsSubmitting(false);
       }
@@ -1381,7 +1134,6 @@ export default function CreatorOnboarding() {
     }
   };
 
-  // Back step navigation
   const handleBack = () => {
     if (isSubmitting) return;
     setValidationError(null);
@@ -1391,151 +1143,98 @@ export default function CreatorOnboarding() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-background text-foreground flex flex-col justify-between p-4 sm:p-8 lg:p-12 transition-colors duration-300">
+    <div className="w-full min-h-screen bg-[#fff0f3] dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 flex flex-col justify-between p-4 sm:p-8 lg:p-12 transition-colors duration-300 font-sans">
       {/* =========================================================
-          TOP BAR: BRANDING & STEP BADGE (NO SKIP BUTTON)
+          TOP BAR: BRANDING & STEP BADGE
       ========================================================= */}
-      <header className="max-w-3xl w-full mx-auto flex items-center justify-between pb-6 sm:pb-8">
+      <header className="max-w-5xl w-full mx-auto flex items-center justify-between pb-6 sm:pb-8">
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 font-serif text-xl sm:text-2xl font-medium tracking-wide text-foreground"
+          className="inline-flex items-center gap-1.5 font-serif text-xl sm:text-2xl font-bold tracking-wide text-neutral-950 dark:text-white"
         >
           <span>CREATORLINK</span>
-          <span className="text-secondary text-xl sm:text-2xl leading-none">✦</span>
+          <span className="text-pink-500 text-xl sm:text-2xl leading-none">✦</span>
         </Link>
 
-        <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-secondary/10 border border-secondary/20 text-secondary">
+        <span className="text-xs font-semibold px-3.5 py-1.5 rounded-full bg-pink-500/10 border border-pink-500/20 text-pink-600 dark:text-pink-400">
           Step {currentStep} of 4
         </span>
       </header>
 
       {/* =========================================================
-          CENTERED ONBOARDING CARD
+          MAIN CONTAINER
       ========================================================= */}
-      <main className="my-auto max-w-3xl w-full mx-auto">
-        <div className="bg-surface text-foreground rounded-2xl sm:rounded-3xl p-6 sm:p-10 border border-border-theme shadow-sm transition-colors duration-300">
-          {/* Progress Indicator */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-secondary">
-                  Step {currentStep} of 4
-                </span>
-                <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-secondary/10 text-secondary border border-secondary/20">
-                  {currentStep === 1
-                    ? "25%"
-                    : currentStep === 2
-                    ? "50%"
-                    : currentStep === 3
-                    ? "75%"
-                    : "100%"}{" "}
-                  Completed
-                </span>
-              </div>
-              <span className="text-xs text-text-secondary font-medium hidden sm:inline-block">
-                {currentStep === 1 && "Profile Information"}
-                {currentStep === 2 && "Portfolio Work"}
-                {currentStep === 3 && "Identity Verification"}
-                {currentStep === 4 && "Services & Packages"}
-              </span>
-            </div>
+      <main className="my-auto max-w-5xl w-full mx-auto">
+        {/* Onboarding Heading */}
+        <div className="text-center sm:text-left mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-950 dark:text-white font-sans">
+            Creator Onboarding
+          </h1>
+          <p className="text-xs sm:text-sm text-neutral-600 dark:text-neutral-400 mt-1">
+            Set up your creator profile to get discovered by brands and start receiving opportunities.
+          </p>
+        </div>
 
-            {/* Visual Progress Bar */}
-            <div className="w-full h-2 bg-surface-muted rounded-full overflow-hidden">
-              <div
-                className="h-full bg-secondary transition-all duration-500 ease-out rounded-full"
-                style={{ width: `${currentStep * 25}%` }}
-              />
-            </div>
+        {/* 4-Step Stepper Progress Bar */}
+        <div className="flex items-center justify-between max-w-2xl mx-auto mb-8 px-2 sm:px-4">
+          {STEPS_META.map((s, idx) => {
+            const isDone = isStepCompleted(s.number);
+            const isCurrent = s.number === currentStep;
 
-            {/* Stepper Dots & Titles */}
-            <div className="grid grid-cols-4 gap-1.5 sm:gap-2 mt-4 pt-1">
-              {STEPS_META.map((s) => {
-                const isDone = isStepCompleted(s.number);
-                const isCurrent = s.number === currentStep;
-                const canNavigate =
-                  !isSubmitting &&
-                  !deletingProjectId &&
-                  !deletingServiceId &&
-                  !isInitialLoading &&
-                  (isDone || s.number <= currentStep);
-
-                return (
-                  <button
-                    key={s.number}
-                    type="button"
-                    disabled={!canNavigate}
-                    onClick={() => {
-                      if (canNavigate) {
-                        setCurrentStep(s.number);
-                        setValidationError(null);
-                      }
-                    }}
-                    className={`text-left p-1.5 sm:p-2 rounded-xl transition-all ${
+            return (
+              <div key={s.number} className="flex items-center flex-1 last:flex-none">
+                <div className="flex flex-col items-center">
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
                       isCurrent
-                        ? "bg-surface-muted border border-border-theme shadow-xs ring-1 ring-foreground/10"
+                        ? "bg-pink-500 text-white shadow-md ring-4 ring-pink-100 dark:ring-pink-950/40"
                         : isDone
-                        ? "cursor-pointer hover:bg-surface-muted/60"
-                        : "cursor-default text-text-secondary"
-                    } ${isSubmitting || deletingProjectId || deletingServiceId || isInitialLoading ? "cursor-not-allowed opacity-60" : ""}`}
+                        ? "bg-neutral-950 text-white dark:bg-neutral-100 dark:text-neutral-950"
+                        : "bg-white dark:bg-neutral-800 text-neutral-400 border border-neutral-300 dark:border-neutral-700"
+                    }`}
                   >
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <div
-                        className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 transition-colors ${
-                          isDone && !isCurrent
-                            ? "bg-emerald-600 text-white"
-                            : isCurrent
-                            ? "bg-neutral-950 text-white dark:bg-neutral-100 dark:text-neutral-950"
-                            : "border border-border-theme bg-surface-muted text-text-secondary"
-                        }`}
-                      >
-                        {isDone && !isCurrent ? (
-                          <CheckIcon className="w-3 h-3 text-white" />
-                        ) : (
-                          s.number
-                        )}
-                      </div>
-                      <span
-                        className={`text-[11px] sm:text-xs truncate ${
-                          isCurrent
-                            ? "text-foreground font-bold"
-                            : isDone
-                            ? "text-foreground font-semibold"
-                            : "text-text-secondary font-medium"
-                        }`}
-                      >
-                        {s.title}
-                      </span>
-                    </div>
-                    <p className="text-[10px] sm:text-[11px] text-text-secondary truncate hidden md:block">
-                      {s.subtitle}
-                    </p>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Initial Load Error Alert */}
-          {initialLoadError && (
-            <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs sm:text-sm font-sans font-medium flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-in fade-in duration-200">
-              <div className="flex items-center gap-2">
-                <span className="text-base leading-none">⚠</span>
-                <span>{initialLoadError}</span>
+                    {isDone && !isCurrent ? <CheckIcon className="w-3.5 h-3.5" /> : s.number}
+                  </div>
+                  <span
+                    className={`text-xs mt-1.5 font-medium whitespace-nowrap ${
+                      isCurrent
+                        ? "text-pink-600 dark:text-pink-400 font-bold"
+                        : "text-neutral-500 dark:text-neutral-400"
+                    }`}
+                  >
+                    {s.title}
+                  </span>
+                </div>
+                {idx < STEPS_META.length - 1 && (
+                  <div
+                    className={`flex-1 h-0.5 mx-2 -mt-5 transition-all ${
+                      isDone ? "bg-pink-500" : "bg-neutral-200 dark:bg-neutral-800"
+                    }`}
+                  />
+                )}
               </div>
+            );
+          })}
+        </div>
+
+        {/* Main Card Surface */}
+        <div className="bg-white dark:bg-neutral-900 border border-neutral-200/80 dark:border-neutral-800 rounded-3xl p-6 sm:p-10 shadow-sm transition-colors duration-300">
+          {/* Alerts */}
+          {initialLoadError && (
+            <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs sm:text-sm font-sans font-medium flex items-center justify-between gap-3">
+              <span>⚠ {initialLoadError}</span>
               <button
                 type="button"
                 onClick={handleRetryInitialLoad}
-                className="px-3.5 py-1.5 rounded-lg bg-neutral-950 text-white hover:bg-neutral-800 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-neutral-200 text-xs font-semibold cursor-pointer shrink-0 transition-colors"
+                className="px-3.5 py-1.5 rounded-lg bg-neutral-950 text-white text-xs font-semibold cursor-pointer shrink-0"
               >
                 Retry
               </button>
             </div>
           )}
 
-          {/* Success Feedback Alert */}
           {saveSuccessMessage && (
-            <div className="mb-6 p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs sm:text-sm font-sans font-medium flex items-center justify-between gap-2 animate-in fade-in duration-200">
+            <div className="mb-6 p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs sm:text-sm font-sans font-medium flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <CheckIcon className="w-4 h-4 shrink-0" />
                 <span>{saveSuccessMessage}</span>
@@ -1543,26 +1242,23 @@ export default function CreatorOnboarding() {
               <button
                 type="button"
                 onClick={() => setSaveSuccessMessage(null)}
-                className="text-emerald-600/70 hover:text-emerald-600 dark:text-emerald-400/70 dark:hover:text-emerald-400 p-1 cursor-pointer"
-                aria-label="Dismiss message"
+                className="text-emerald-600 hover:opacity-75 p-1 cursor-pointer"
               >
                 ✕
               </button>
             </div>
           )}
 
-          {/* Validation Error Alert */}
           {validationError && (
-            <div className="mb-6 p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs sm:text-sm font-sans font-medium flex items-center justify-between gap-2 animate-in fade-in duration-200">
+            <div className="mb-6 p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs sm:text-sm font-sans font-medium flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <span className="text-base leading-none">⚠</span>
+                <span>⚠</span>
                 <span>{validationError}</span>
               </div>
               <button
                 type="button"
                 onClick={() => setValidationError(null)}
-                className="text-red-500/70 hover:text-red-500 p-1 cursor-pointer"
-                aria-label="Dismiss error"
+                className="text-red-500 hover:opacity-75 p-1 cursor-pointer"
               >
                 ✕
               </button>
@@ -1571,1281 +1267,1067 @@ export default function CreatorOnboarding() {
 
           {isInitialLoading ? (
             <div className="py-20 flex flex-col items-center justify-center text-center">
-              <svg className="animate-spin h-8 w-8 text-secondary mb-4" fill="none" viewBox="0 0 24 24">
+              <svg className="animate-spin h-8 w-8 text-pink-500 mb-4" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
               </svg>
-              <p className="text-sm font-semibold text-foreground">Loading creator workspace...</p>
-              <p className="text-xs text-text-secondary mt-1">Retrieving your profile, portfolio, and service details.</p>
+              <p className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+                Loading your creator workspace...
+              </p>
             </div>
           ) : (
             <>
-          {/* =========================================================
-              PAGE 1: PROFILE INFORMATION
-          ========================================================= */}
-          {currentStep === 1 && (
-            <div className="space-y-6">
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-serif font-medium tracking-tight text-foreground mb-2">
-                  Profile Information
-                </h1>
-                <p className="text-xs sm:text-sm text-text-secondary leading-relaxed">
-                  Introduce yourself to prospective brands. Your headline, bio, niches, and social links form your primary presence on CreatorLink.
-                </p>
-              </div>
-
-              {/* 1. Profile Title */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label
-                    htmlFor="title"
-                    className="text-xs font-semibold uppercase tracking-wider text-foreground font-sans block"
-                  >
-                    Professional Headline / Title *
-                  </label>
-                  <span className="text-[11px] text-text-secondary">
-                    {formData.title.length}/150
-                  </span>
-                </div>
-                <input
-                  id="title"
-                  name="title"
-                  type="text"
-                  maxLength={150}
-                  disabled={isSubmitting}
-                  value={formData.title}
-                  onChange={(e) => {
-                    setFormData((prev) => ({ ...prev, title: e.target.value }));
-                    setValidationError(null);
-                  }}
-                  placeholder="e.g. Luxury Fashion & Editorial Visual Creator"
-                  className="w-full px-4 py-3 rounded-xl bg-background border border-border-theme text-foreground placeholder:text-text-secondary/50 text-sm font-sans focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all disabled:opacity-60"
-                />
-              </div>
-
-              {/* 2. Bio / Description */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label
-                    htmlFor="bio"
-                    className="text-xs font-semibold uppercase tracking-wider text-foreground font-sans block"
-                  >
-                    About You / Bio *
-                  </label>
-                  <span className="text-[11px] text-text-secondary">
-                    {formData.bio.length}/1000
-                  </span>
-                </div>
-                <textarea
-                  id="bio"
-                  name="bio"
-                  rows={4}
-                  maxLength={1000}
-                  disabled={isSubmitting}
-                  value={formData.bio}
-                  onChange={(e) => {
-                    setFormData((prev) => ({ ...prev, bio: e.target.value }));
-                    setValidationError(null);
-                  }}
-                  placeholder="Tell brands who you are, the type of content you craft, and what sets your creative voice apart..."
-                  className="w-full px-4 py-3 rounded-xl bg-background border border-border-theme text-foreground placeholder:text-text-secondary/50 text-sm font-sans focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all resize-none disabled:opacity-60"
-                />
-              </div>
-
-              {/* 3. Primary Category (Required) */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label
-                    htmlFor="category"
-                    className="text-xs font-semibold uppercase tracking-wider text-foreground font-sans block"
-                  >
-                    Primary Category *
-                  </label>
-                  <span className="text-[11px] text-secondary font-medium">
-                    {formData.category || "Required"}
-                  </span>
-                </div>
-                <select
-                  id="category"
-                  name="category"
-                  disabled={isSubmitting}
-                  value={formData.category}
-                  onChange={(e) => {
-                    setFormData((prev) => ({ ...prev, category: e.target.value }));
-                    setValidationError(null);
-                  }}
-                  className="w-full px-4 py-3 rounded-xl bg-background border border-border-theme text-foreground text-sm font-sans focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all cursor-pointer disabled:opacity-60"
-                >
-                  <option value="">Select Primary Category</option>
-                  {CATEGORIES.map((cat) => (
-                    <option key={cat.id} value={cat.name}>
-                      {cat.name}
-                    </option>
-                  ))}
-                  {formData.category &&
-                    !CATEGORIES.some((c) => c.name === formData.category) && (
-                      <option value={formData.category}>
-                        {formData.category}
-                      </option>
-                    )}
-                </select>
-                <p className="text-[11px] text-text-secondary leading-normal">
-                  Your primary creative domain used for marketplace categorization and brand discovery
-                </p>
-              </div>
-
-              {/* 4. Niches (Multi-Select, Max 3) */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between flex-wrap gap-2">
-                  <div>
-                    <label className="text-xs font-semibold uppercase tracking-wider text-foreground font-sans block">
-                      Niches (Select up to 3) *
-                    </label>
-                    <p className="text-[11px] text-text-secondary mt-0.5">
-                      Select 1 to 3 focus areas from our creative taxonomy (independent of primary category)
-                    </p>
+              {/* =========================================================
+                  STEP 1: PROFILE INFO (CONSOLIDATED 2-COLUMN VIEW)
+              ========================================================= */}
+              {currentStep === 1 && (
+                <div className="space-y-6">
+                  {/* Card Section Header */}
+                  <div className="flex items-start gap-3.5 pb-6 border-b border-neutral-100 dark:border-neutral-800">
+                    <div className="w-10 h-10 rounded-full bg-pink-50 dark:bg-pink-950/30 text-pink-600 dark:text-pink-400 flex items-center justify-center shrink-0 border border-pink-200/50 dark:border-pink-900/30">
+                      <UserIcon className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h2 className="text-lg sm:text-xl font-bold text-neutral-950 dark:text-white tracking-tight">
+                        Profile Info
+                      </h2>
+                      <p className="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400 mt-0.5">
+                        Add your profile details, social links, and background information to complete your creator profile.
+                      </p>
+                    </div>
                   </div>
-                  <span
-                    className={`text-xs font-medium ${
-                      formData.niches.length === 3
-                        ? "text-secondary font-semibold"
-                        : "text-text-secondary"
-                    }`}
-                  >
-                    {formData.niches.length}/3 selected
-                  </span>
-                </div>
 
-                {/* Taxonomy Filter Bar */}
-                <div className="relative">
-                  <input
-                    type="text"
-                    disabled={isSubmitting}
-                    value={nicheSearch}
-                    onChange={(e) => setNicheSearch(e.target.value)}
-                    placeholder="Filter niche options by name or description..."
-                    className="w-full bg-background border border-border-theme text-foreground placeholder:text-text-secondary/50 text-xs rounded-xl pl-9 pr-8 py-2.5 focus:outline-none focus:border-secondary transition-all"
-                  />
-                  <SearchIcon className="w-4 h-4 text-text-secondary absolute left-3 top-1/2 -translate-y-1/2" />
-                  {nicheSearch && (
-                    <button
-                      type="button"
-                      onClick={() => setNicheSearch("")}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-foreground text-xs p-0.5 cursor-pointer"
-                      aria-label="Clear niche search"
-                    >
-                      ✕
-                    </button>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[300px] overflow-y-auto pr-1">
-                  {CATEGORIES.filter((cat) => {
-                    if (!nicheSearch.trim()) return true;
-                    const term = nicheSearch.toLowerCase();
-                    return (
-                      cat.name.toLowerCase().includes(term) ||
-                      cat.desc.toLowerCase().includes(term)
-                    );
-                  }).map((cat) => {
-                    const isSelected = formData.niches.includes(cat.name);
-                    const Icon = cat.icon;
-
-                    return (
-                      <button
-                        key={cat.id}
-                        type="button"
-                        disabled={isSubmitting}
-                        onClick={() => handleNicheToggle(cat.name)}
-                        className={`group relative text-left p-3 rounded-xl border transition-all duration-200 cursor-pointer flex items-start gap-3 ${
-                          isSelected
-                            ? "bg-secondary/10 border-secondary text-foreground shadow-xs ring-1 ring-secondary/40"
-                            : "bg-surface-muted/40 border-border-theme hover:bg-surface-muted hover:border-secondary/50 text-foreground"
-                        } ${isSubmitting ? "opacity-60 cursor-not-allowed" : ""}`}
-                      >
-                        <div
-                          className={`p-2 rounded-lg transition-colors shrink-0 ${
-                            isSelected
-                              ? "bg-secondary text-white"
-                              : "bg-surface border border-border-theme text-text-secondary group-hover:text-secondary group-hover:border-secondary/40"
-                          }`}
-                        >
-                          <Icon className="w-4 h-4" />
-                        </div>
-
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between gap-1">
-                            <h3 className="text-xs sm:text-sm font-semibold truncate text-foreground">
-                              {cat.name}
-                            </h3>
-                            {isSelected && (
-                              <span className="w-4 h-4 rounded-full bg-secondary text-white flex items-center justify-center shrink-0">
-                                <CheckIcon className="w-2.5 h-2.5" />
-                              </span>
+                  {/* 2-Column Responsive Layout */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-start">
+                    {/* LEFT COLUMN: Identity & Bio */}
+                    <div className="space-y-5">
+                      {/* Profile Photo Upload Control (NO cover photo) */}
+                      <div className="p-4 rounded-2xl bg-neutral-50 dark:bg-neutral-800/40 border border-neutral-200/60 dark:border-neutral-800 flex items-center gap-4">
+                        <div className="relative group shrink-0">
+                          <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-pink-400/60 dark:border-pink-500/40 bg-neutral-200 dark:bg-neutral-800 flex items-center justify-center shadow-xs">
+                            {formData.profileImage ? (
+                              <img
+                                src={formData.profileImage}
+                                alt="Profile Avatar"
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-pink-500 font-bold text-xl uppercase bg-pink-50 dark:bg-pink-950/30">
+                                {(user?.name || formData.title || "C").slice(0, 2)}
+                              </div>
+                            )}
+                            {isUploadingImage && (
+                              <div className="absolute inset-0 bg-neutral-950/60 backdrop-blur-xs flex items-center justify-center">
+                                <svg className="animate-spin w-5 h-5 text-white" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                </svg>
+                              </div>
                             )}
                           </div>
-                          <p className="text-[11px] text-text-secondary line-clamp-1 mt-0.5 leading-snug">
-                            {cat.desc}
-                          </p>
+                          <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={isUploadingImage || isSubmitting}
+                            className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-neutral-950 text-white hover:bg-neutral-800 border-2 border-white dark:border-neutral-900 flex items-center justify-center shadow-xs cursor-pointer transition-transform hover:scale-105"
+                            title="Upload Profile Photo"
+                          >
+                            <PlusIcon className="w-4 h-4" />
+                          </button>
+                          <input
+                            type="file"
+                            ref={fileInputRef}
+                            accept="image/jpeg,image/png,image/webp"
+                            onChange={handleImageFileSelect}
+                            className="hidden"
+                          />
                         </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
+                        <div className="space-y-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-semibold text-neutral-900 dark:text-neutral-100">
+                              Profile Photo
+                            </span>
+                            <span className="text-[10px] text-pink-600 dark:text-pink-400 font-medium bg-pink-50 dark:bg-pink-950/40 px-2 py-0.5 rounded-full border border-pink-200/50">
+                              Recommended
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-neutral-500 leading-tight">
+                            Upload a square portrait (JPG, PNG, or WebP max 5 MB).
+                          </p>
+                          {imageUploadError && (
+                            <p className="text-[11px] text-red-500 font-medium pt-0.5">
+                              {imageUploadError}
+                            </p>
+                          )}
+                        </div>
+                      </div>
 
-              {/* 4. Content Keywords & Tags */}
-              <div className="space-y-3">
-                <label className="text-xs font-semibold uppercase tracking-wider text-foreground font-sans block">
-                  Content Keywords & Search Tags *
-                </label>
+                      {/* Name */}
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-semibold uppercase tracking-wider text-neutral-800 dark:text-neutral-200 block">
+                          Name *
+                        </label>
+                        <input
+                          type="text"
+                          readOnly
+                          value={user?.name || user?.fullName || "Creator"}
+                          className="w-full px-4 py-2.5 rounded-xl bg-neutral-50 dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-800 text-neutral-700 dark:text-neutral-300 text-sm font-medium cursor-not-allowed"
+                        />
+                      </div>
 
-                {/* Active Tag Chips */}
-                {formData.keywords.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {formData.keywords.map((kw) => (
-                      <span
-                        key={kw}
-                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary/10 border border-secondary/30 text-secondary text-xs font-medium"
-                      >
-                        <span>#{kw}</span>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveKeyword(kw)}
-                          className="hover:opacity-75 cursor-pointer"
+                      {/* Professional Title / Headline */}
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <label htmlFor="title" className="text-xs font-semibold uppercase tracking-wider text-neutral-800 dark:text-neutral-200 block">
+                            Professional Title / Headline *
+                          </label>
+                          <span className="text-[11px] text-neutral-400">{formData.title.length}/150</span>
+                        </div>
+                        <input
+                          id="title"
+                          type="text"
+                          maxLength={150}
+                          disabled={isSubmitting}
+                          value={formData.title}
+                          onChange={(e) => {
+                            setFormData((prev) => ({ ...prev, title: e.target.value }));
+                            setValidationError(null);
+                          }}
+                          placeholder="e.g. YouTube Creator or Visual Storyteller"
+                          className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 text-sm focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all"
+                        />
+                      </div>
+
+                      {/* Primary Category */}
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <label htmlFor="category" className="text-xs font-semibold uppercase tracking-wider text-neutral-800 dark:text-neutral-200 block">
+                            Primary Category *
+                          </label>
+                          <span className="text-[11px] text-pink-600 font-medium">
+                            {formData.category || "Required"}
+                          </span>
+                        </div>
+                        <select
+                          id="category"
+                          disabled={isSubmitting}
+                          value={formData.category}
+                          onChange={(e) => {
+                            setFormData((prev) => ({ ...prev, category: e.target.value }));
+                            setValidationError(null);
+                          }}
+                          className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all cursor-pointer"
                         >
-                          <XMarkIcon className="w-3.5 h-3.5" />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                )}
+                          <option value="">Select Primary Category</option>
+                          {CATEGORIES.map((cat) => (
+                            <option key={cat.id} value={cat.name}>
+                              {cat.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
 
-                {/* Tag Input Form */}
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    disabled={isSubmitting}
-                    value={keywordInput}
-                    onChange={(e) => setKeywordInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        handleAddKeyword(e);
-                      }
-                    }}
-                    placeholder="Type a tag (e.g. streetwear, luxury, ootd) and press Enter"
-                    className="flex-1 px-4 py-2.5 rounded-xl bg-background border border-border-theme text-foreground placeholder:text-text-secondary/50 text-xs sm:text-sm font-sans focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all disabled:opacity-60"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleAddKeyword}
-                    disabled={isSubmitting || !keywordInput.trim()}
-                    className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-surface-muted hover:bg-background border border-border-theme text-foreground text-xs sm:text-sm font-medium transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    <PlusIcon className="w-4 h-4" />
-                    <span>Add</span>
-                  </button>
-                </div>
 
-                {/* Suggested Keyword Chips */}
-                <div>
-                  <span className="text-[11px] text-text-secondary block mb-1.5">
-                    Popular suggestions:
-                  </span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {SUGGESTED_KEYWORDS.map((sug) => {
-                      const isAdded = formData.keywords.includes(sug);
-                      return (
-                        <button
-                          key={sug}
-                          type="button"
-                          disabled={isSubmitting || isAdded}
-                          onClick={() => {
-                            if (!isAdded) {
+
+                      {/* Content Keywords */}
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold uppercase tracking-wider text-neutral-800 dark:text-neutral-200 block">
+                          Keywords & Tags *
+                        </label>
+                        {formData.keywords.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5">
+                            {formData.keywords.map((kw) => (
+                              <span
+                                key={kw}
+                                className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-pink-50 dark:bg-pink-950/40 border border-pink-200 text-pink-700 dark:text-pink-300 text-xs font-medium"
+                              >
+                                <span>#{kw}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveKeyword(kw)}
+                                  className="hover:opacity-75 cursor-pointer"
+                                >
+                                  <XMarkIcon className="w-3 h-3" />
+                                </button>
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={keywordInput}
+                            onChange={(e) => setKeywordInput(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                handleAddKeyword(e);
+                              }
+                            }}
+                            placeholder="Add tag and press Enter"
+                            className="flex-1 px-3 py-2 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 focus:outline-none focus:border-pink-500 transition-all"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleAddKeyword}
+                            disabled={!keywordInput.trim()}
+                            className="px-3.5 py-2 rounded-xl bg-neutral-950 text-white dark:bg-neutral-100 dark:text-neutral-950 text-xs font-medium cursor-pointer disabled:opacity-40"
+                          >
+                            Add
+                          </button>
+                        </div>
+                        <div className="flex flex-wrap gap-1 pt-1">
+                          {SUGGESTED_KEYWORDS.slice(0, 6).map((kw) => (
+                            <button
+                              key={kw}
+                              type="button"
+                              onClick={() => {
+                                if (!formData.keywords.includes(kw)) {
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    keywords: [...prev.keywords, kw],
+                                  }));
+                                }
+                              }}
+                              className="text-[11px] px-2 py-0.5 rounded-md bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 cursor-pointer"
+                            >
+                              + {kw}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Bio / Description */}
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <label htmlFor="bio" className="text-xs font-semibold uppercase tracking-wider text-neutral-800 dark:text-neutral-200 block">
+                            Bio / Description *
+                          </label>
+                          <span className="text-[11px] text-neutral-400">{formData.bio.length}/500</span>
+                        </div>
+                        <textarea
+                          id="bio"
+                          rows={4}
+                          maxLength={500}
+                          disabled={isSubmitting}
+                          value={formData.bio}
+                          onChange={(e) => {
+                            setFormData((prev) => ({ ...prev, bio: e.target.value }));
+                            setValidationError(null);
+                          }}
+                          placeholder="Describe who you are, the type of content you create, and what sets your voice apart..."
+                          className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 text-sm focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all resize-none"
+                        />
+                      </div>
+                    </div>
+
+                    {/* RIGHT COLUMN: Location, Socials, Demographics */}
+                    <div className="space-y-5">
+                      {/* Location */}
+                      <div className="space-y-1.5">
+                        <label htmlFor="location" className="text-xs font-semibold uppercase tracking-wider text-neutral-800 dark:text-neutral-200 block">
+                          Location *
+                        </label>
+                        <div className="relative flex items-center">
+                          <MapPinIcon className="w-4 h-4 text-neutral-400 absolute left-3.5 pointer-events-none" />
+                          <input
+                            id="location"
+                            type="text"
+                            disabled={isSubmitting}
+                            value={formData.location}
+                            onChange={(e) => {
+                              setFormData((prev) => ({ ...prev, location: e.target.value }));
+                              setValidationError(null);
+                            }}
+                            placeholder="e.g. Bhopal, MP, India or Mumbai, India"
+                            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 text-sm focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all"
+                          />
+                        </div>
+                        <div className="flex flex-wrap gap-1.5 pt-1">
+                          {POPULAR_LOCATIONS.slice(0, 4).map((loc) => (
+                            <button
+                              key={loc}
+                              type="button"
+                              onClick={() => {
+                                setFormData((prev) => ({ ...prev, location: loc }));
+                                setValidationError(null);
+                              }}
+                              className={`text-[11px] px-2 py-0.5 rounded-lg border transition-all cursor-pointer ${
+                                formData.location === loc
+                                  ? "bg-neutral-950 text-white dark:bg-neutral-100 dark:text-neutral-950 border-neutral-950 font-medium"
+                                  : "bg-neutral-50 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900"
+                              }`}
+                            >
+                              {loc}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Social Channels & Links */}
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold uppercase tracking-wider text-neutral-800 dark:text-neutral-200 block">
+                          Social Channels & Links
+                        </label>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                          {/* Instagram */}
+                          <div className="relative flex items-center">
+                            <InstagramIcon className="w-4 h-4 text-pink-500 absolute left-3" />
+                            <input
+                              type="text"
+                              name="instagram"
+                              value={formData.socialLinks.instagram}
+                              onChange={handleSocialChange}
+                              placeholder="Instagram Username / URL"
+                              className="w-full pl-9 pr-3 py-2 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 focus:outline-none focus:border-pink-500 transition-all"
+                            />
+                          </div>
+                          {/* YouTube */}
+                          <div className="relative flex items-center">
+                            <YoutubeIcon className="w-4 h-4 text-red-500 absolute left-3" />
+                            <input
+                              type="text"
+                              name="youtube"
+                              value={formData.socialLinks.youtube}
+                              onChange={handleSocialChange}
+                              placeholder="YouTube Channel URL"
+                              className="w-full pl-9 pr-3 py-2 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 focus:outline-none focus:border-pink-500 transition-all"
+                            />
+                          </div>
+                          {/* TikTok */}
+                          <div className="relative flex items-center">
+                            <TiktokIcon className="w-4 h-4 text-neutral-900 dark:text-neutral-100 absolute left-3" />
+                            <input
+                              type="text"
+                              name="tiktok"
+                              value={formData.socialLinks.tiktok}
+                              onChange={handleSocialChange}
+                              placeholder="TikTok Username / URL"
+                              className="w-full pl-9 pr-3 py-2 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 focus:outline-none focus:border-pink-500 transition-all"
+                            />
+                          </div>
+                          {/* Facebook */}
+                          <div className="relative flex items-center">
+                            <FacebookIcon className="w-4 h-4 text-blue-600 absolute left-3" />
+                            <input
+                              type="text"
+                              name="facebook"
+                              value={formData.socialLinks.facebook}
+                              onChange={handleSocialChange}
+                              placeholder="Facebook Profile URL"
+                              className="w-full pl-9 pr-3 py-2 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 focus:outline-none focus:border-pink-500 transition-all"
+                            />
+                          </div>
+                          {/* X (Twitter) */}
+                          <div className="relative flex items-center">
+                            <XTwitterIcon className="w-3.5 h-3.5 text-neutral-900 dark:text-neutral-100 absolute left-3" />
+                            <input
+                              type="text"
+                              name="twitter"
+                              value={formData.socialLinks.twitter || ""}
+                              onChange={handleSocialChange}
+                              placeholder="X (Twitter) Username / URL"
+                              className="w-full pl-9 pr-3 py-2 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 focus:outline-none focus:border-pink-500 transition-all"
+                            />
+                          </div>
+                          {/* Website / Media Kit */}
+                          <div className="relative flex items-center">
+                            <GlobeIcon className="w-4 h-4 text-neutral-500 absolute left-3" />
+                            <input
+                              type="text"
+                              name="website"
+                              value={formData.socialLinks.website}
+                              onChange={handleSocialChange}
+                              placeholder="Website / Media Kit URL"
+                              className="w-full pl-9 pr-3 py-2 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 focus:outline-none focus:border-pink-500 transition-all"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Date of Birth & Gender Identity */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {/* Date of Birth */}
+                        <div className="space-y-1.5">
+                          <label htmlFor="dob" className="text-xs font-semibold uppercase tracking-wider text-neutral-800 dark:text-neutral-200 block">
+                            Date of Birth *
+                          </label>
+                          <div className="relative flex items-center">
+                            <CalendarIcon className="w-4 h-4 text-neutral-400 absolute left-3 pointer-events-none" />
+                            <input
+                              id="dob"
+                              type="date"
+                              max={new Date().toISOString().split("T")[0]}
+                              disabled={isSubmitting}
+                              value={formData.dob}
+                              onChange={(e) => {
+                                setFormData((prev) => ({ ...prev, dob: e.target.value }));
+                                setValidationError(null);
+                              }}
+                              className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm focus:outline-none focus:border-pink-500 transition-all cursor-pointer"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Gender Identity */}
+                        <div className="space-y-1.5">
+                          <label htmlFor="gender" className="text-xs font-semibold uppercase tracking-wider text-neutral-800 dark:text-neutral-200 block">
+                            Gender *
+                          </label>
+                          <select
+                            id="gender"
+                            disabled={isSubmitting}
+                            value={formData.gender}
+                            onChange={(e) => {
+                              setFormData((prev) => ({ ...prev, gender: e.target.value }));
+                              setValidationError(null);
+                            }}
+                            className="w-full px-3 py-2.5 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm focus:outline-none focus:border-pink-500 transition-all cursor-pointer"
+                          >
+                            <option value="">Select Gender</option>
+                            {GENDER_OPTIONS.map((g) => (
+                              <option key={g.id} value={g.id}>
+                                {g.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Languages */}
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-semibold uppercase tracking-wider text-neutral-800 dark:text-neutral-200 block">
+                          Languages (Spoken & Content) *
+                        </label>
+                        {formData.languages.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 mb-1.5">
+                            {formData.languages.map((lang) => (
+                              <span
+                                key={lang}
+                                className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-pink-50 dark:bg-pink-950/40 border border-pink-200 text-pink-700 dark:text-pink-300 text-xs font-medium"
+                              >
+                                <span>{lang}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveLanguage(lang)}
+                                  className="hover:opacity-75 cursor-pointer"
+                                >
+                                  <XMarkIcon className="w-3 h-3" />
+                                </button>
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={languageInput}
+                            onChange={(e) => setLanguageInput(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                handleAddLanguage(e);
+                              }
+                            }}
+                            placeholder="Type a language (e.g. English, Hindi) and press Enter"
+                            className="flex-1 px-3 py-2 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 focus:outline-none focus:border-pink-500 transition-all"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleAddLanguage}
+                            disabled={!languageInput.trim()}
+                            className="px-3.5 py-2 rounded-xl bg-neutral-950 text-white dark:bg-neutral-100 dark:text-neutral-950 text-xs font-medium cursor-pointer disabled:opacity-40"
+                          >
+                            Add
+                          </button>
+                        </div>
+                        <div className="flex flex-wrap gap-1 pt-1">
+                          {POPULAR_LANGUAGES.slice(0, 5).map((l) => (
+                            <button
+                              key={l}
+                              type="button"
+                              onClick={() => {
+                                if (!formData.languages.includes(l)) {
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    languages: [...prev.languages, l],
+                                  }));
+                                }
+                              }}
+                              className="text-[11px] px-2 py-0.5 rounded-md bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 cursor-pointer"
+                            >
+                              + {l}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Ethnicity */}
+                      <div className="space-y-1.5">
+                        <label htmlFor="ethnicity" className="text-xs font-semibold uppercase tracking-wider text-neutral-800 dark:text-neutral-200 block">
+                          Ethnicity / Cultural Background (Optional)
+                        </label>
+                        <select
+                          id="ethnicity"
+                          disabled={isSubmitting}
+                          value={
+                            ETHNICITY_OPTIONS.includes(formData.ethnicity)
+                              ? formData.ethnicity
+                              : formData.ethnicity
+                              ? "Other"
+                              : ""
+                          }
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (val === "Other") {
                               setFormData((prev) => ({
                                 ...prev,
-                                keywords: [...prev.keywords, sug],
+                                ethnicity: prev.ethnicity && !ETHNICITY_OPTIONS.includes(prev.ethnicity) ? prev.ethnicity : "Other",
                               }));
+                            } else {
+                              setFormData((prev) => ({ ...prev, ethnicity: val }));
                             }
+                            setValidationError(null);
                           }}
-                          className={`text-[11px] px-2.5 py-1 rounded-lg border transition-all ${
-                            isAdded
-                              ? "bg-secondary/10 border-secondary/30 text-secondary cursor-default opacity-60"
-                              : "bg-surface-muted/40 border-border-theme text-text-secondary hover:text-foreground hover:bg-surface-muted cursor-pointer"
-                          }`}
+                          className="w-full px-3 py-2.5 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm focus:outline-none focus:border-pink-500 transition-all cursor-pointer"
                         >
-                          + {sug}
-                        </button>
-                      );
-                    })}
+                          <option value="">Select ethnicity (optional) / Prefer not to disclose</option>
+                          {ETHNICITY_OPTIONS.map((eth) => (
+                            <option key={eth} value={eth}>{eth}</option>
+                          ))}
+                          <option value="Other">Other</option>
+                        </select>
+                        {(formData.ethnicity === "Other" ||
+                          (formData.ethnicity && !ETHNICITY_OPTIONS.includes(formData.ethnicity))) && (
+                          <input
+                            type="text"
+                            maxLength={100}
+                            value={formData.ethnicity === "Other" ? "" : formData.ethnicity}
+                            onChange={(e) => setFormData((prev) => ({ ...prev, ethnicity: e.target.value || "Other" }))}
+                            placeholder="Specify ethnicity (optional)"
+                            className="w-full px-3 py-2 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 text-xs mt-2"
+                          />
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
-              {/* 5. Location */}
-              <div className="space-y-3">
-                <label
-                  htmlFor="location"
-                  className="text-xs font-semibold uppercase tracking-wider text-foreground font-sans block"
-                >
-                  Location / City *
-                </label>
+              {/* =========================================================
+                  STEP 2: PORTFOLIO WORK
+              ========================================================= */}
+              {currentStep === 2 && (
+                <div className="space-y-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-neutral-100 dark:border-neutral-800">
+                    <div>
+                      <h2 className="text-lg sm:text-xl font-bold text-neutral-950 dark:text-white tracking-tight">
+                        Portfolio Work
+                      </h2>
+                      <p className="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400 mt-0.5">
+                        Showcase your top past collaborations, campaigns, or creative content. Add at least 1 project to proceed.
+                      </p>
+                    </div>
 
-                <div className="relative flex items-center">
-                  <span className="absolute left-3.5 text-text-secondary pointer-events-none">
-                    <MapPinIcon className="w-4 h-4" />
-                  </span>
-                  <input
-                    id="location"
-                    name="location"
-                    type="text"
-                    disabled={isSubmitting}
-                    value={formData.location}
-                    onChange={(e) => {
-                      setFormData((prev) => ({ ...prev, location: e.target.value }));
-                      setValidationError(null);
-                    }}
-                    placeholder="e.g. Mumbai, Maharashtra or London, UK"
-                    className="w-full pl-10 pr-4 py-3 rounded-xl bg-background border border-border-theme text-foreground placeholder:text-text-secondary/50 text-sm font-sans focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all disabled:opacity-60"
-                  />
-                </div>
-
-                {/* Quick Selection Hubs */}
-                <div className="flex flex-wrap gap-1.5 pt-1">
-                  {POPULAR_LOCATIONS.map((loc) => {
-                    const isActive = formData.location === loc;
-                    return (
-                      <button
-                        key={loc}
-                        type="button"
-                        disabled={isSubmitting}
-                        onClick={() => {
-                          setFormData((prev) => ({ ...prev, location: loc }));
-                          setValidationError(null);
-                        }}
-                        className={`text-xs px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${
-                          isActive
-                            ? "bg-secondary text-white border-secondary font-medium"
-                            : "bg-surface-muted/50 border-border-theme text-text-secondary hover:text-foreground hover:bg-surface-muted"
-                        } ${isSubmitting ? "opacity-60 cursor-not-allowed" : ""}`}
-                      >
-                        {loc}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* 6. Social Profiles & Handles */}
-              <div className="space-y-4 pt-2 border-t border-border-theme">
-                <div>
-                  <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground font-sans">
-                    Social Profiles & Links *
-                  </h3>
-                  <p className="text-xs text-text-secondary mt-0.5">
-                    Add your active platforms. Provide at least one valid profile handle or website URL.
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {/* Instagram */}
-                  <div className="space-y-1">
-                    <label
-                      htmlFor="instagram"
-                      className="text-xs font-medium text-text-secondary flex items-center gap-1.5"
+                    <button
+                      type="button"
+                      onClick={handleOpenAddProject}
+                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-neutral-950 text-white hover:bg-neutral-800 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-neutral-200 font-sans font-semibold text-xs sm:text-sm shadow-xs transition-all cursor-pointer shrink-0"
                     >
-                      <InstagramIcon className="w-3.5 h-3.5 text-pink-500" />
-                      <span>Instagram</span>
-                    </label>
-                    <input
-                      id="instagram"
-                      name="instagram"
-                      type="text"
-                      disabled={isSubmitting}
-                      value={formData.socialLinks.instagram}
-                      onChange={handleSocialChange}
-                      placeholder="https://instagram.com/yourhandle"
-                      className="w-full px-3 py-2.5 rounded-xl bg-background border border-border-theme text-foreground placeholder:text-text-secondary/40 text-xs font-sans focus:outline-none focus:border-secondary transition-all"
-                    />
+                      <PlusIcon className="w-4 h-4" />
+                      <span>Add Project</span>
+                    </button>
                   </div>
 
-                  {/* YouTube */}
-                  <div className="space-y-1">
-                    <label
-                      htmlFor="youtube"
-                      className="text-xs font-medium text-text-secondary flex items-center gap-1.5"
-                    >
-                      <YoutubeIcon className="w-3.5 h-3.5 text-red-500" />
-                      <span>YouTube</span>
-                    </label>
-                    <input
-                      id="youtube"
-                      name="youtube"
-                      type="text"
-                      disabled={isSubmitting}
-                      value={formData.socialLinks.youtube}
-                      onChange={handleSocialChange}
-                      placeholder="https://youtube.com/@yourchannel"
-                      className="w-full px-3 py-2.5 rounded-xl bg-background border border-border-theme text-foreground placeholder:text-text-secondary/40 text-xs font-sans focus:outline-none focus:border-secondary transition-all"
-                    />
-                  </div>
-
-                  {/* Facebook */}
-                  <div className="space-y-1">
-                    <label
-                      htmlFor="facebook"
-                      className="text-xs font-medium text-text-secondary flex items-center gap-1.5"
-                    >
-                      <FacebookIcon className="w-3.5 h-3.5 text-blue-600" />
-                      <span>Facebook</span>
-                    </label>
-                    <input
-                      id="facebook"
-                      name="facebook"
-                      type="text"
-                      disabled={isSubmitting}
-                      value={formData.socialLinks.facebook}
-                      onChange={handleSocialChange}
-                      placeholder="https://facebook.com/yourprofile"
-                      className="w-full px-3 py-2.5 rounded-xl bg-background border border-border-theme text-foreground placeholder:text-text-secondary/40 text-xs font-sans focus:outline-none focus:border-secondary transition-all"
-                    />
-                  </div>
-
-                  {/* TikTok */}
-                  <div className="space-y-1">
-                    <label
-                      htmlFor="tiktok"
-                      className="text-xs font-medium text-text-secondary flex items-center gap-1.5"
-                    >
-                      <TiktokIcon className="w-3.5 h-3.5 text-foreground" />
-                      <span>TikTok</span>
-                    </label>
-                    <input
-                      id="tiktok"
-                      name="tiktok"
-                      type="text"
-                      disabled={isSubmitting}
-                      value={formData.socialLinks.tiktok}
-                      onChange={handleSocialChange}
-                      placeholder="https://tiktok.com/@yourhandle"
-                      className="w-full px-3 py-2.5 rounded-xl bg-background border border-border-theme text-foreground placeholder:text-text-secondary/40 text-xs font-sans focus:outline-none focus:border-secondary transition-all"
-                    />
-                  </div>
-
-                  {/* Website */}
-                  <div className="space-y-1 sm:col-span-2">
-                    <label
-                      htmlFor="website"
-                      className="text-xs font-medium text-text-secondary flex items-center gap-1.5"
-                    >
-                      <GlobeIcon className="w-3.5 h-3.5 text-secondary" />
-                      <span>Website / Portfolio Link</span>
-                    </label>
-                    <input
-                      id="website"
-                      name="website"
-                      type="text"
-                      disabled={isSubmitting}
-                      value={formData.socialLinks.website}
-                      onChange={handleSocialChange}
-                      placeholder="https://yourdomain.com or linktr.ee/..."
-                      className="w-full px-3 py-2.5 rounded-xl bg-background border border-border-theme text-foreground placeholder:text-text-secondary/40 text-xs font-sans focus:outline-none focus:border-secondary transition-all"
-                    />
-                  </div>
-                </div>
-
-                {/* 7. Connect Social Accounts Note */}
-                <div className="p-3.5 rounded-xl bg-surface-muted/50 border border-border-theme text-xs text-text-secondary leading-relaxed flex items-start gap-2.5">
-                  <span className="text-secondary text-base leading-none select-none mt-0.5">ℹ</span>
-                  <div>
-                    <span className="font-semibold text-foreground block mb-0.5">
-                      Social Account Verification
+                  {/* Projects List Counter */}
+                  <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-neutral-500 pt-1">
+                    <span>Projects Added ({portfolios?.length || 0})</span>
+                    <span className="text-pink-600 font-medium">
+                      {portfolios && portfolios.length > 0
+                        ? "✓ Portfolio requirement satisfied"
+                        : "* At least 1 project required"}
                     </span>
-                    Official direct platform OAuth connections will be available in future releases. For now, the profile links you enter above will be showcased to brands for manual discovery and portfolio inspection.
                   </div>
-                </div>
-              </div>
-            </div>
-          )}
 
-          {/* =========================================================
-              PAGE 2: PORTFOLIO WORK
-          ========================================================= */}
-          {currentStep === 2 && (
-            <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-serif font-medium tracking-tight text-foreground mb-1">
-                    Portfolio Work
-                  </h1>
-                  <p className="text-xs sm:text-sm text-text-secondary leading-relaxed">
-                    Showcase your top past collaborations, campaigns, or creative content. Add at least 1 project to proceed.
-                  </p>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleOpenAddProject}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-neutral-950 text-white hover:bg-neutral-800 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-neutral-200 font-sans font-semibold text-xs sm:text-sm shadow-xs transition-all cursor-pointer self-start sm:self-auto shrink-0"
-                >
-                  <PlusIcon className="w-4 h-4" />
-                  <span>Add Project</span>
-                </button>
-              </div>
-
-              {/* Projects List Counter */}
-              <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-text-secondary pt-2">
-                <span>Projects Added ({portfolios?.length || 0})</span>
-                <span className="text-secondary font-medium">
-                  {portfolios?.length > 0 ? "✓ Minimum requirement met" : "* At least 1 required"}
-                </span>
-              </div>
-
-              {/* Portfolio Projects Cards */}
-              {Array.isArray(portfolios) && portfolios.length > 0 ? (
-                <div className="space-y-3 max-h-[440px] overflow-y-auto pr-1">
-                  {portfolios.map((item) => {
-                    const primaryContent =
-                      Array.isArray(item.contents) && item.contents[0]
-                        ? item.contents[0]
-                        : {};
-                    const platform = primaryContent.platform || "other";
-                    const contentType = primaryContent.contentType || "post";
-                    const projectUrl = primaryContent.url || item.coverImage;
-
-                    return (
-                      <div
-                        key={item._id || item.id}
-                        className="p-4 rounded-2xl bg-surface-muted/30 border border-border-theme hover:border-secondary/40 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
-                      >
-                        {/* Left: Thumbnail & Project Meta */}
-                        <div className="flex items-start gap-3.5 min-w-0 flex-1">
-                          {/* Media Preview Box */}
-                          <div className="w-16 h-16 rounded-xl bg-surface border border-border-theme overflow-hidden shrink-0 flex items-center justify-center relative">
-                            {item.coverImage ? (
-                              item.coverImage.endsWith(".mp4") ||
-                              item.coverImage.endsWith(".webm") ||
-                              item.coverImage.endsWith(".mov") ? (
-                                <div className="flex flex-col items-center justify-center text-secondary">
-                                  <VideoCameraIcon className="w-6 h-6" />
-                                  <span className="text-[9px] font-bold uppercase mt-0.5">Video</span>
-                                </div>
-                              ) : (
-                                /* eslint-disable-next-line @next/next/no-img-element */
+                  {/* Portfolio Projects Cards */}
+                  {Array.isArray(portfolios) && portfolios.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[500px] overflow-y-auto pr-1">
+                      {portfolios.map((item) => {
+                        const projectId = item._id || item.id;
+                        return (
+                          <div
+                            key={projectId}
+                            className="bg-neutral-50 dark:bg-neutral-800/40 border border-neutral-200/80 dark:border-neutral-800 rounded-2xl overflow-hidden flex flex-col justify-between group shadow-xs hover:border-pink-500 transition-all"
+                          >
+                            <div className="aspect-video bg-neutral-200 dark:bg-neutral-700 relative overflow-hidden">
+                              {item.coverImage ? (
                                 <img
                                   src={item.coverImage}
                                   alt={item.title}
                                   className="w-full h-full object-cover"
                                 />
-                              )
-                            ) : (
-                              <div className="text-text-secondary/60 flex flex-col items-center">
-                                <PhotoIcon className="w-6 h-6" />
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Content Details */}
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-2 mb-1 flex-wrap">
-                              {primaryContent.platform ? (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface border border-border-theme text-[11px] font-medium capitalize text-foreground">
-                                  {getPlatformIcon(platform)}
-                                  <span>{platform}</span>
-                                </span>
-                              ) : null}
-                              {primaryContent.contentType ? (
-                                <span className="px-2 py-0.5 rounded-md bg-secondary/10 border border-secondary/20 text-[10px] font-semibold uppercase text-secondary">
-                                  {contentType}
-                                </span>
-                              ) : null}
-                              {item.category ? (
-                                <span className="px-2 py-0.5 rounded-md bg-surface border border-border-theme text-[10px] font-medium text-text-secondary">
-                                  {item.category}
-                                </span>
-                              ) : null}
-                              {Array.isArray(item.contents) && item.contents.length > 1 && (
-                                <span className="text-[10px] text-text-secondary font-medium">
-                                  +{item.contents.length - 1} more
-                                </span>
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-neutral-400">
+                                  <CameraIcon className="w-8 h-8" />
+                                </div>
+                              )}
+                              <span className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-neutral-950/80 backdrop-blur-xs text-[10px] text-white font-medium">
+                                {item.category || "Creative"}
+                              </span>
+                            </div>
+                            <div className="p-3.5 space-y-1 flex-1">
+                              <h3 className="font-bold text-xs sm:text-sm text-neutral-900 dark:text-neutral-100 line-clamp-1">
+                                {item.title}
+                              </h3>
+                              {item.description && (
+                                <p className="text-[11px] text-neutral-500 line-clamp-2 leading-relaxed">
+                                  {item.description}
+                                </p>
                               )}
                             </div>
-
-                            <h3 className="text-sm font-semibold text-foreground truncate">
-                              {item.title}
-                            </h3>
-
-                            {item.description && (
-                              <p className="text-xs text-text-secondary line-clamp-1 mt-0.5">
-                                {item.description}
-                              </p>
-                            )}
-
-                            {projectUrl && (
-                              <a
-                                href={projectUrl}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="inline-flex items-center gap-1 text-[11px] text-secondary hover:underline truncate mt-1 max-w-full"
+                            <div className="px-3.5 py-2.5 border-t border-neutral-200/60 dark:border-neutral-700/60 flex items-center justify-end gap-2 bg-white/40 dark:bg-neutral-900/40">
+                              <button
+                                type="button"
+                                onClick={() => handleOpenEditProject(item)}
+                                className="px-2.5 py-1 rounded-lg border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 text-xs font-medium inline-flex items-center gap-1 cursor-pointer"
                               >
-                                <span className="truncate">{projectUrl}</span>
-                                <ExternalLinkIcon className="w-3 h-3 shrink-0" />
-                              </a>
-                            )}
+                                <PencilIcon className="w-3 h-3" />
+                                <span>Edit</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteProject(projectId)}
+                                disabled={deletingProjectId === projectId}
+                                className="px-2.5 py-1 rounded-lg border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300 hover:text-red-500 text-xs font-medium inline-flex items-center gap-1 cursor-pointer"
+                              >
+                                <TrashIcon className="w-3 h-3" />
+                                <span>Delete</span>
+                              </button>
+                            </div>
                           </div>
-                        </div>
-
-                        {/* Right: Actions */}
-                        <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
-                          <button
-                            type="button"
-                            onClick={() => handleOpenEditProject(item)}
-                            className="p-2 rounded-lg bg-surface border border-border-theme hover:border-secondary text-text-secondary hover:text-foreground transition-all cursor-pointer"
-                            title="Edit Project"
-                          >
-                            <PencilIcon className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            type="button"
-                            disabled={Boolean(deletingProjectId)}
-                            onClick={() => handleDeleteProject(item._id || item.id)}
-                            className="p-2 rounded-lg bg-surface border border-border-theme hover:border-red-500 text-text-secondary hover:text-red-500 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                            title="Delete Project"
-                          >
-                            {deletingProjectId === (item._id || item.id) ? (
-                              <svg className="animate-spin w-3.5 h-3.5 text-red-500" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                              </svg>
-                            ) : (
-                              <TrashIcon className="w-3.5 h-3.5" />
-                            )}
-                          </button>
-                        </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12 px-4 rounded-2xl border-2 border-dashed border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-800/20">
+                      <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-pink-50 dark:bg-pink-950/30 text-pink-500 flex items-center justify-center">
+                        <CameraIcon className="w-6 h-6" />
                       </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                /* Empty State */
-                <div className="text-center py-10 px-6 rounded-2xl border-2 border-dashed border-border-theme bg-surface-muted/20">
-                  <div className="w-12 h-12 mx-auto mb-3 rounded-2xl bg-surface-muted flex items-center justify-center text-text-secondary">
-                    <PhotoIcon className="w-6 h-6" />
-                  </div>
-                  <h3 className="text-sm font-semibold text-foreground mb-1">
-                    No portfolio projects added yet
-                  </h3>
-                  <p className="text-xs text-text-secondary max-w-sm mx-auto mb-5 leading-relaxed">
-                    Add your best reels, videos, dedicated reviews, or posts so brands can evaluate your content quality.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={handleOpenAddProject}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-neutral-950 text-white hover:bg-neutral-800 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-neutral-200 font-sans font-semibold text-xs sm:text-sm shadow-xs transition-all cursor-pointer"
-                  >
-                    <PlusIcon className="w-4 h-4" />
-                    <span>Add Your First Project</span>
-                  </button>
+                      <h3 className="text-sm font-bold text-neutral-900 dark:text-neutral-100 mb-1">
+                        No portfolio projects added yet
+                      </h3>
+                      <p className="text-xs text-neutral-500 max-w-sm mx-auto mb-4">
+                        Upload past content, campaign photos, or video links showcasing your creative abilities.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={handleOpenAddProject}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-neutral-950 text-white hover:bg-neutral-800 text-xs font-semibold cursor-pointer shadow-xs"
+                      >
+                        <PlusIcon className="w-4 h-4" />
+                        <span>Add Your First Project</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
-            </div>
-          )}
 
-          {/* =========================================================
-              PAGE 3: IDENTITY VERIFICATION
-          ========================================================= */}
-          {currentStep === 3 && (
-            <div className="space-y-6">
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-serif font-medium tracking-tight text-foreground mb-2">
-                  Identity & Demographics
-                </h1>
-                <p className="text-xs sm:text-sm text-text-secondary leading-relaxed">
-                  Provide your demographic background and language proficiencies. This information helps match you with brand campaigns looking for specific creator perspectives.
-                </p>
-              </div>
+              {/* =========================================================
+                  STEP 3: SERVICES & PACKAGES
+              ========================================================= */}
+              {currentStep === 3 && (
+                <div className="space-y-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-neutral-100 dark:border-neutral-800">
+                    <div>
+                      <h2 className="text-lg sm:text-xl font-bold text-neutral-950 dark:text-white tracking-tight">
+                        Services & Packages
+                      </h2>
+                      <p className="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400 mt-0.5">
+                        Set up your standard packages, deliverables, and rates. Brands can hire you directly using these offerings. Add at least 1 service to proceed.
+                      </p>
+                    </div>
 
-              {/* 1. Date of Birth */}
-              <div className="space-y-2">
-                <label
-                  htmlFor="dob"
-                  className="text-xs font-semibold uppercase tracking-wider text-foreground font-sans block"
-                >
-                  Date of Birth *
-                </label>
-                <div className="relative flex items-center">
-                  <span className="absolute left-3.5 text-text-secondary pointer-events-none">
-                    <CalendarIcon className="w-4 h-4" />
-                  </span>
-                  <input
-                    id="dob"
-                    name="dob"
-                    type="date"
-                    disabled={isSubmitting}
-                    max={new Date().toISOString().split("T")[0]}
-                    value={formData.dob}
-                    onChange={(e) => {
-                      setFormData((prev) => ({ ...prev, dob: e.target.value }));
-                      setValidationError(null);
-                    }}
-                    className="w-full pl-10 pr-4 py-3 rounded-xl bg-background border border-border-theme text-foreground text-sm font-sans focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all cursor-pointer disabled:opacity-60"
-                  />
-                </div>
-                <p className="text-[11px] text-text-secondary">
-                  Your birth date is kept private and used for demographic and campaign eligibility verification.
-                </p>
-              </div>
-
-              {/* 2. Gender Identity */}
-              <div className="space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-foreground font-sans block">
-                    Gender Identity *
-                  </label>
-                  <span className="text-[11px] text-text-secondary">
-                    {formData.gender
-                      ? GENDER_OPTIONS.find((g) => g.id === formData.gender)?.label
-                      : "Required"}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                  {GENDER_OPTIONS.map((g) => {
-                    const isSelected = formData.gender === g.id;
-                    return (
-                      <button
-                        key={g.id}
-                        type="button"
-                        disabled={isSubmitting}
-                        onClick={() => {
-                          setFormData((prev) => ({ ...prev, gender: g.id }));
-                          setValidationError(null);
-                        }}
-                        className={`text-left p-3 rounded-xl border transition-all cursor-pointer flex flex-col justify-between ${
-                          isSelected
-                            ? "bg-secondary/10 border-secondary ring-1 ring-secondary/40 text-foreground"
-                            : "bg-surface-muted/40 border-border-theme hover:bg-surface-muted hover:border-secondary/50 text-foreground"
-                        } ${isSubmitting ? "opacity-60 cursor-not-allowed" : ""}`}
-                      >
-                        <div className="flex items-center justify-between gap-1 w-full">
-                          <span className="text-xs sm:text-sm font-semibold truncate text-foreground">
-                            {g.label}
-                          </span>
-                          {isSelected && (
-                            <span className="w-4 h-4 rounded-full bg-secondary text-white flex items-center justify-center shrink-0">
-                              <CheckIcon className="w-2.5 h-2.5" />
-                            </span>
-                          )}
-                        </div>
-                        <span className="text-[11px] text-text-secondary mt-1 block">
-                          {g.desc}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* 3. Languages Spoken / Content Languages */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-foreground font-sans block">
-                    Languages (Spoken & Content) *
-                  </label>
-                  <span className="text-[11px] text-text-secondary">
-                    {formData.languages.length} selected
-                  </span>
-                </div>
-
-                {/* Selected Language Chips */}
-                {formData.languages.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {formData.languages.map((lang) => (
-                      <span
-                        key={lang}
-                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary/10 border border-secondary/30 text-secondary text-xs font-medium"
-                      >
-                        <span>{lang}</span>
-                        <button
-                          type="button"
-                          disabled={isSubmitting}
-                          onClick={() => handleRemoveLanguage(lang)}
-                          className="hover:opacity-75 cursor-pointer"
-                        >
-                          <XMarkIcon className="w-3.5 h-3.5" />
-                        </button>
-                      </span>
-                    ))}
+                    <button
+                      type="button"
+                      onClick={handleOpenAddService}
+                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-neutral-950 text-white hover:bg-neutral-800 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-neutral-200 font-sans font-semibold text-xs sm:text-sm shadow-xs transition-all cursor-pointer shrink-0"
+                    >
+                      <PlusIcon className="w-4 h-4" />
+                      <span>Add Service</span>
+                    </button>
                   </div>
-                )}
 
-                {/* Language Input Form */}
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    disabled={isSubmitting}
-                    value={languageInput}
-                    onChange={(e) => setLanguageInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        handleAddLanguage(e);
-                      }
-                    }}
-                    placeholder="Type a language (e.g. English, Hindi, Spanish) and press Enter"
-                    className="flex-1 px-4 py-2.5 rounded-xl bg-background border border-border-theme text-foreground placeholder:text-text-secondary/50 text-xs sm:text-sm font-sans focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all disabled:opacity-60"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleAddLanguage}
-                    disabled={isSubmitting || !languageInput.trim()}
-                    className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-surface-muted hover:bg-background border border-border-theme text-foreground text-xs sm:text-sm font-medium transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    <PlusIcon className="w-4 h-4" />
-                    <span>Add</span>
-                  </button>
+                  {/* Services Counter */}
+                  <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-neutral-500 pt-1">
+                    <span>Services Created ({services?.length || 0})</span>
+                    <span className="text-pink-600 font-medium">
+                      {services?.some((s) => s.isActive !== false)
+                        ? "✓ Active service requirement met"
+                        : "* At least 1 active service required"}
+                    </span>
+                  </div>
+
+                  {/* Services Cards */}
+                  {Array.isArray(services) && services.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[500px] overflow-y-auto pr-1">
+                      {services.map((service) => {
+                        const serviceId = service._id || service.id;
+                        const validDeliverables = getDeliverablesList(service.deliverables);
+                        const formattedPrice = formatPrice(service);
+
+                        return (
+                          <div
+                            key={serviceId}
+                            className="bg-neutral-50 dark:bg-neutral-800/40 border border-neutral-200/80 dark:border-neutral-800 rounded-2xl overflow-hidden shadow-xs hover:border-pink-500 transition-all flex flex-col justify-between"
+                          >
+                            <div>
+                              <ServiceCardCover coverImage={service.coverImage} title={service.title}>
+                                <div className="absolute top-2.5 left-2.5 z-10 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/95 dark:bg-neutral-900/90 shadow-xs border border-white/20">
+                                  {getPlatformIcon(service.platform)}
+                                  <span className="text-[10px] font-bold tracking-wider uppercase text-neutral-900 dark:text-neutral-100">
+                                    {getPlatformLabel(service.platform)}
+                                  </span>
+                                </div>
+                                <div className="absolute top-2.5 right-2.5 z-10 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/95 dark:bg-neutral-900/90 shadow-xs border border-white/20 text-[10px] font-semibold">
+                                  <span
+                                    className={`w-1.5 h-1.5 rounded-full ${
+                                      service.isActive !== false ? "bg-emerald-500" : "bg-amber-500"
+                                    }`}
+                                  />
+                                  <span className={service.isActive !== false ? "text-emerald-600" : "text-amber-600"}>
+                                    {service.isActive !== false ? "Active" : "Inactive"}
+                                  </span>
+                                </div>
+                              </ServiceCardCover>
+
+                              <div className="p-4 space-y-2.5">
+                                <div>
+                                  <h3 className="font-bold text-sm text-neutral-900 dark:text-neutral-100 line-clamp-1">
+                                    {service.title}
+                                  </h3>
+                                  <div className="flex items-center gap-2 mt-0.5">
+                                    <span className="text-[11px] text-neutral-500">
+                                      {service.category || "Creative Campaign"}
+                                    </span>
+                                    {service.contentType && (
+                                      <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-pink-50 dark:bg-pink-950/40 text-pink-600 text-[10px] font-semibold">
+                                        {getContentTypeLabel(service.platform, service.contentType)}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+
+                                <div className="p-2.5 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
+                                  <span className="text-[11px] text-neutral-500">Starting from</span>
+                                  <span className="font-bold text-sm text-neutral-900 dark:text-neutral-100">
+                                    {formattedPrice}
+                                  </span>
+                                </div>
+
+                                {validDeliverables.length > 0 && (
+                                  <div className="flex flex-wrap gap-1.5 pt-1">
+                                    {validDeliverables.slice(0, 3).map((deliv, idx) => (
+                                      <span
+                                        key={idx}
+                                        className="px-2 py-0.5 rounded-md bg-white dark:bg-neutral-900 text-[10px] text-neutral-600 dark:text-neutral-400 border border-neutral-200 dark:border-neutral-800"
+                                      >
+                                        ✓ {deliv}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="px-4 py-2.5 border-t border-neutral-200/60 dark:border-neutral-700/60 bg-white/40 dark:bg-neutral-900/40 flex items-center justify-end gap-2">
+                              <button
+                                type="button"
+                                onClick={() => handleOpenEditService(service)}
+                                className="px-2.5 py-1 rounded-lg border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 text-xs font-medium inline-flex items-center gap-1 cursor-pointer"
+                              >
+                                <PencilIcon className="w-3 h-3" />
+                                <span>Edit</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteService(serviceId)}
+                                disabled={deletingServiceId === serviceId}
+                                className="px-2.5 py-1 rounded-lg border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300 hover:text-red-500 text-xs font-medium inline-flex items-center gap-1 cursor-pointer"
+                              >
+                                <TrashIcon className="w-3 h-3" />
+                                <span>Delete</span>
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12 px-4 rounded-2xl border-2 border-dashed border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-800/20">
+                      <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-pink-50 dark:bg-pink-950/30 text-pink-500 flex items-center justify-center">
+                        <TagIcon className="w-6 h-6" />
+                      </div>
+                      <h3 className="text-sm font-bold text-neutral-900 dark:text-neutral-100 mb-1">
+                        No services added yet
+                      </h3>
+                      <p className="text-xs text-neutral-500 max-w-sm mx-auto mb-4">
+                        Define your collaboration packages, delivery timelines, and starting rates for brands.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={handleOpenAddService}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-neutral-950 text-white hover:bg-neutral-800 text-xs font-semibold cursor-pointer shadow-xs"
+                      >
+                        <PlusIcon className="w-4 h-4" />
+                        <span>Add Your First Service</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
+              )}
 
-                {/* Suggested Language Chips */}
-                <div>
-                  <span className="text-[11px] text-text-secondary block mb-1.5">
-                    Popular suggestions:
-                  </span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {POPULAR_LANGUAGES.map((lang) => {
-                      const isAdded = formData.languages.includes(lang);
-                      return (
+              {/* =========================================================
+                  STEP 4: PAYMENT DETAILS & PAYOUT SETUP
+              ========================================================= */}
+              {currentStep === 4 && (
+                <div className="space-y-6">
+                  <div className="flex items-start gap-3.5 pb-6 border-b border-neutral-100 dark:border-neutral-800">
+                    <div className="w-10 h-10 rounded-full bg-pink-50 dark:bg-pink-950/30 text-pink-600 dark:text-pink-400 flex items-center justify-center shrink-0 border border-pink-200/50 dark:border-pink-900/30">
+                      <BanknotesIcon className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h2 className="text-lg sm:text-xl font-bold text-neutral-950 dark:text-white tracking-tight">
+                        Payment Details & Payout Setup
+                      </h2>
+                      <p className="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400 mt-0.5">
+                        Configure your payout details to receive milestone earnings safely directly into your bank account or UPI ID.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Payout Options */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                    <div className="space-y-4">
+                      {/* Payout Type Tab */}
+                      <div className="flex p-1 rounded-xl bg-neutral-100 dark:bg-neutral-800">
                         <button
-                          key={lang}
                           type="button"
-                          disabled={isSubmitting || isAdded}
-                          onClick={() => {
-                            if (!isAdded) {
-                              if (formData.languages.length >= 10) {
-                                setValidationError("You can add up to 10 languages.");
-                                return;
-                              }
-                              setFormData((prev) => ({
-                                ...prev,
-                                languages: [...prev.languages, lang],
-                              }));
-                              setValidationError(null);
-                            }
-                          }}
-                          className={`text-[11px] px-2.5 py-1 rounded-lg border transition-all ${
-                            isAdded
-                              ? "bg-secondary/10 border-secondary/30 text-secondary cursor-default opacity-60"
-                              : "bg-surface-muted/40 border-border-theme text-text-secondary hover:text-foreground hover:bg-surface-muted cursor-pointer"
+                          onClick={() => setPayoutData((prev) => ({ ...prev, payoutType: "upi" }))}
+                          className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+                            payoutData.payoutType === "upi"
+                              ? "bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white shadow-xs"
+                              : "text-neutral-500 hover:text-neutral-900"
                           }`}
                         >
-                          + {lang}
+                          UPI / VPA ID
                         </button>
-                      );
-                    })}
+                        <button
+                          type="button"
+                          onClick={() => setPayoutData((prev) => ({ ...prev, payoutType: "bank" }))}
+                          className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+                            payoutData.payoutType === "bank"
+                              ? "bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white shadow-xs"
+                              : "text-neutral-500 hover:text-neutral-900"
+                          }`}
+                        >
+                          Direct Bank Transfer
+                        </button>
+                      </div>
+
+                      {payoutData.payoutType === "upi" ? (
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-semibold uppercase tracking-wider text-neutral-800 dark:text-neutral-200 block">
+                            UPI ID / Virtual Payment Address
+                          </label>
+                          <input
+                            type="text"
+                            value={payoutData.upiId}
+                            onChange={(e) => setPayoutData((prev) => ({ ...prev, upiId: e.target.value }))}
+                            placeholder="e.g. yourname@okhdfcbank or 9876543210@paytm"
+                            className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 text-sm focus:outline-none focus:border-pink-500"
+                          />
+                          <p className="text-[11px] text-neutral-500">
+                            Instant milestone disbursements will be processed to this verified UPI ID.
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          <div className="space-y-1">
+                            <label className="text-xs font-semibold uppercase tracking-wider text-neutral-800 dark:text-neutral-200 block">
+                              Account Holder / Beneficiary Name
+                            </label>
+                            <input
+                              type="text"
+                              value={payoutData.accountHolderName}
+                              onChange={(e) => setPayoutData((prev) => ({ ...prev, accountHolderName: e.target.value }))}
+                              placeholder="Name as printed on bank passbook / check"
+                              className="w-full px-4 py-2 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 text-xs focus:outline-none focus:border-pink-500"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-xs font-semibold uppercase tracking-wider text-neutral-800 dark:text-neutral-200 block">
+                              Bank Account Number
+                            </label>
+                            <input
+                              type="password"
+                              value={payoutData.accountNumber}
+                              onChange={(e) => setPayoutData((prev) => ({ ...prev, accountNumber: e.target.value }))}
+                              placeholder="Enter account number"
+                              className="w-full px-4 py-2 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 text-xs focus:outline-none focus:border-pink-500"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-xs font-semibold uppercase tracking-wider text-neutral-800 dark:text-neutral-200 block">
+                              Confirm Account Number
+                            </label>
+                            <input
+                              type="text"
+                              value={payoutData.confirmAccountNumber}
+                              onChange={(e) => setPayoutData((prev) => ({ ...prev, confirmAccountNumber: e.target.value }))}
+                              placeholder="Re-enter account number"
+                              className="w-full px-4 py-2 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 text-xs focus:outline-none focus:border-pink-500"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-xs font-semibold uppercase tracking-wider text-neutral-800 dark:text-neutral-200 block">
+                              Bank IFSC Code
+                            </label>
+                            <input
+                              type="text"
+                              value={payoutData.ifscCode}
+                              onChange={(e) => setPayoutData((prev) => ({ ...prev, ifscCode: e.target.value.toUpperCase() }))}
+                              placeholder="e.g. HDFC0001234"
+                              className="w-full px-4 py-2 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 text-xs uppercase focus:outline-none focus:border-pink-500"
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Escrow Trust Badge */}
+                      <div className="p-4 rounded-2xl bg-neutral-50 dark:bg-neutral-800/40 border border-neutral-200/60 dark:border-neutral-800 flex items-start gap-3">
+                        <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
+                          <ShieldCheckIcon className="w-5 h-5" />
+                        </div>
+                        <div className="space-y-0.5">
+                          <h4 className="text-xs font-bold text-neutral-900 dark:text-neutral-100">
+                            CreatorLink Escrow Protection
+                          </h4>
+                          <p className="text-[11px] text-neutral-500 leading-relaxed">
+                            Brands deposit milestone funds in advance into escrow before you begin work. Upon milestone completion and approval, earnings are directly disbursed to your verified payout account.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right column: Readiness Summary */}
+                    <div className="p-6 rounded-2xl bg-neutral-50 dark:bg-neutral-800/40 border border-neutral-200/80 dark:border-neutral-800 space-y-4">
+                      <h3 className="font-bold text-sm text-neutral-900 dark:text-neutral-100">
+                        Onboarding Readiness Summary
+                      </h3>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200/60 dark:border-neutral-800 text-xs">
+                          <span className="font-medium">1. Profile Information</span>
+                          <span className="text-emerald-600 font-semibold flex items-center gap-1">
+                            <CheckIcon className="w-3.5 h-3.5" /> Completed
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200/60 dark:border-neutral-800 text-xs">
+                          <span className="font-medium">2. Portfolio Work</span>
+                          <span className="text-emerald-600 font-semibold flex items-center gap-1">
+                            <CheckIcon className="w-3.5 h-3.5" /> {portfolios?.length || 0} Projects
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200/60 dark:border-neutral-800 text-xs">
+                          <span className="font-medium">3. Services & Packages</span>
+                          <span className="text-emerald-600 font-semibold flex items-center gap-1">
+                            <CheckIcon className="w-3.5 h-3.5" /> {services?.filter((s) => s.isActive !== false).length || 0} Active
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200/60 dark:border-neutral-800 text-xs">
+                          <span className="font-medium">4. Payment Setup</span>
+                          <span className="text-pink-600 font-semibold flex items-center gap-1">
+                            Ready to Finish
+                          </span>
+                        </div>
+                      </div>
+                      <p className="text-[11px] text-neutral-500 pt-2 leading-relaxed">
+                        Clicking Complete Onboarding finalizes your profile and activates full access to your creator dashboard, campaign discovery, and direct brand contracts.
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
-              {/* 4. Ethnicity (Optional) */}
-              <div className="space-y-2 pt-2 border-t border-border-theme">
-                <div className="flex items-center justify-between">
-                  <label
-                    htmlFor="ethnicity"
-                    className="text-xs font-semibold uppercase tracking-wider text-foreground font-sans block"
-                  >
-                    Ethnicity / Cultural Background (Optional)
-                  </label>
-                  <span className="text-[11px] text-text-secondary">Optional</span>
-                </div>
-
-                <select
-                  id="ethnicity"
+              {/* =========================================================
+                  ACTION BUTTONS (BOTTOM BAR)
+              ========================================================= */}
+              <div className="mt-8 pt-6 border-t border-neutral-100 dark:border-neutral-800 flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={currentStep > 1 ? handleBack : () => router.push("/")}
                   disabled={isSubmitting}
-                  value={
-                    ETHNICITY_OPTIONS.includes(formData.ethnicity)
-                      ? formData.ethnicity
-                      : formData.ethnicity
-                      ? "Other"
-                      : ""
-                  }
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    if (val === "Other") {
-                      setFormData((prev) => ({
-                        ...prev,
-                        ethnicity: prev.ethnicity && !ETHNICITY_OPTIONS.includes(prev.ethnicity) ? prev.ethnicity : "Other",
-                      }));
-                    } else {
-                      setFormData((prev) => ({ ...prev, ethnicity: val }));
-                    }
-                    setValidationError(null);
-                  }}
-                  className="w-full px-4 py-3 rounded-xl bg-background border border-border-theme text-foreground text-sm font-sans focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all cursor-pointer disabled:opacity-60"
+                  className="px-5 py-2.5 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 text-neutral-800 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-800 text-sm font-medium transition-colors cursor-pointer disabled:opacity-50"
                 >
-                  <option value="">Select ethnicity (optional) / Prefer not to disclose</option>
-                  {ETHNICITY_OPTIONS.map((eth) => (
-                    <option key={eth} value={eth}>
-                      {eth}
-                    </option>
-                  ))}
-                  <option value="Other">Other / Self-described</option>
-                </select>
-
-                {/* If Other or custom */}
-                {(formData.ethnicity === "Other" ||
-                  (formData.ethnicity && !ETHNICITY_OPTIONS.includes(formData.ethnicity))) && (
-                  <input
-                    type="text"
-                    maxLength={100}
-                    disabled={isSubmitting}
-                    value={formData.ethnicity === "Other" ? "" : formData.ethnicity}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        ethnicity: e.target.value || "Other",
-                      }))
-                    }
-                    placeholder="Please specify your ethnicity (optional)"
-                    className="w-full px-4 py-2.5 rounded-xl bg-background border border-border-theme text-foreground placeholder:text-text-secondary/50 text-xs sm:text-sm font-sans focus:outline-none focus:border-secondary transition-all mt-2"
-                  />
-                )}
-
-                <p className="text-[11px] text-text-secondary">
-                  Brands frequently seek diverse creator voices for inclusive storytelling. This field is completely optional.
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* =========================================================
-              PAGE 4: SERVICES & PACKAGES
-          ========================================================= */}
-          {currentStep === 4 && (
-            <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-serif font-medium tracking-tight text-foreground mb-1">
-                    Services & Packages
-                  </h1>
-                  <p className="text-xs sm:text-sm text-text-secondary leading-relaxed">
-                    Set up your standard packages, deliverables, and rates. Brands can hire you directly using these offerings. Add at least 1 service to complete onboarding.
-                  </p>
-                </div>
+                  {currentStep > 1 && <ArrowLeftIcon className="w-4 h-4 mr-1 inline-block" />}{currentStep === 1 ? "Cancel" : "Back"}
+                </button>
 
                 <button
                   type="button"
-                  onClick={handleOpenAddService}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-neutral-950 text-white hover:bg-neutral-800 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-neutral-200 font-sans font-semibold text-xs sm:text-sm shadow-xs transition-all cursor-pointer self-start sm:self-auto shrink-0"
+                  onClick={handleContinue}
+                  disabled={isSubmitting || deletingProjectId || deletingServiceId || isInitialLoading}
+                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-neutral-950 text-white hover:bg-neutral-800 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-neutral-200 text-sm font-semibold transition-all shadow-xs cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  <PlusIcon className="w-4 h-4" />
-                  <span>Add Service</span>
+                  {isSubmitting ? (
+                    <>
+                      <svg className="animate-spin w-4 h-4 text-white dark:text-neutral-950" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                      <span>Processing...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>
+                        {currentStep === 1
+                          ? "Continue"
+                          : currentStep === 2
+                          ? "Continue to Services"
+                          : currentStep === 3
+                          ? "Continue to Payment Details"
+                          : "Complete Onboarding"}
+                      </span>
+                      <ArrowRightIcon className="w-4 h-4" />
+                    </>
+                  )}
                 </button>
               </div>
-
-              {/* Services Counter */}
-              <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-text-secondary pt-2">
-                <span>Services Created ({services?.length || 0})</span>
-                <span className="text-secondary font-medium">
-                  {services?.some((s) => s.isActive !== false)
-                    ? "✓ Active service requirement met"
-                    : "* At least 1 active service required"}
-                </span>
-              </div>
-
-              {/* Services List / Cards */}
-              {Array.isArray(services) && services.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[520px] overflow-y-auto pr-1">
-                  {services.map((service) => {
-                    const serviceId = service._id || service.id;
-                    const validDeliverables = getDeliverablesList(service.deliverables);
-                    const formattedPrice = formatPrice(service);
-
-                    return (
-                      <div
-                        key={serviceId}
-                        className="bg-surface border border-border-theme hover:border-secondary/50 rounded-2xl overflow-hidden shadow-xs hover:shadow-md transition-all flex flex-col justify-between group"
-                      >
-                        <div>
-                          {/* Service Cover with Platform & Status Badges */}
-                          <ServiceCardCover coverImage={service.coverImage} title={service.title}>
-                            {/* Platform Badge */}
-                            <div className="absolute top-2.5 left-2.5 z-10 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/95 dark:bg-neutral-900/90 backdrop-blur-xs shadow-xs border border-white/20">
-                              {getPlatformIcon(service.platform)}
-                              <span className="text-[10px] font-bold tracking-wider uppercase text-foreground">
-                                {getPlatformLabel(service.platform)}
-                              </span>
-                            </div>
-
-                            {/* Active Status Badge */}
-                            <div className="absolute top-2.5 right-2.5 z-10 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/95 dark:bg-neutral-900/90 backdrop-blur-xs shadow-xs border border-white/20 text-[10px] font-semibold">
-                              <span
-                                className={`w-1.5 h-1.5 rounded-full ${
-                                  service.isActive !== false ? "bg-emerald-500" : "bg-amber-500"
-                                }`}
-                              />
-                              <span
-                                className={
-                                  service.isActive !== false
-                                    ? "text-emerald-600 dark:text-emerald-400"
-                                    : "text-amber-600 dark:text-amber-400"
-                                }
-                              >
-                                {service.isActive !== false ? "Active" : "Inactive"}
-                              </span>
-                            </div>
-                          </ServiceCardCover>
-
-                          {/* Card Content */}
-                          <div className="p-4 space-y-2.5">
-                            <div>
-                              <h3 className="font-sans font-bold text-sm sm:text-base text-foreground line-clamp-1 tracking-tight">
-                                {service.title}
-                              </h3>
-                              <div className="flex items-center gap-2 flex-wrap mt-0.5">
-                                <p className="text-[11px] text-text-secondary line-clamp-1">
-                                  {service.category || "Social Media Campaign"}
-                                </p>
-                                {service.contentType && (
-                                  <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-secondary/10 text-secondary text-[10px] font-semibold">
-                                    {service.quantity && service.quantity > 1
-                                      ? `${service.quantity}x `
-                                      : ""}
-                                    {getContentTypeLabel(
-                                      service.platform,
-                                      service.contentType
-                                    )}
-                                  </span>
-                                )}
-                              </div>
-                              {service.description && (
-                                <p className="text-xs text-text-secondary leading-relaxed line-clamp-2 mt-1">
-                                  {service.description}
-                                </p>
-                              )}
-                            </div>
-
-                            {/* Pricing Row */}
-                            <div className="p-2.5 sm:p-3 rounded-xl bg-surface-muted/50 border border-border-theme flex items-center justify-between">
-                              <span className="text-[11px] font-medium text-text-secondary">
-                                {service.pricingType === "custom"
-                                  ? "Custom Quote"
-                                  : service.pricingType === "starting_from"
-                                  ? "Starting from"
-                                  : "Fixed Rate"}
-                              </span>
-                              <span className="font-bold text-sm sm:text-base text-secondary">
-                                {formattedPrice}
-                              </span>
-                            </div>
-
-                            {/* Meta info (deliveryTime, revisions) */}
-                            <div className="flex items-center gap-3 text-[11px] text-text-secondary">
-                              <span className="inline-flex items-center gap-1">
-                                <ClockIcon className="w-3.5 h-3.5 text-text-secondary" />
-                                <span>{service.deliveryTime || 7} Days Delivery</span>
-                              </span>
-                              <span>•</span>
-                              <span>
-                                {service.revisions != null ? service.revisions : 1} Revisions
-                              </span>
-                            </div>
-
-                            {/* Deliverables tags */}
-                            {validDeliverables.length > 0 && (
-                              <div className="flex flex-wrap gap-1.5 pt-1">
-                                {validDeliverables.slice(0, 3).map((deliv, idx) => (
-                                  <span
-                                    key={idx}
-                                    className="px-2 py-0.5 rounded-md bg-surface-muted text-[10px] text-text-secondary border border-border-theme line-clamp-1"
-                                  >
-                                    ✓ {deliv}
-                                  </span>
-                                ))}
-                                {validDeliverables.length > 3 && (
-                                  <span className="text-[10px] text-text-secondary self-center">
-                                    +{validDeliverables.length - 3} more
-                                  </span>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Card Actions */}
-                        <div className="px-4 py-3 border-t border-border-theme bg-surface-muted/30 flex items-center justify-end gap-2">
-                          <button
-                            type="button"
-                            onClick={() => handleOpenEditService(service)}
-                            className="px-3 py-1.5 rounded-lg border border-border-theme bg-surface hover:bg-surface-muted text-text-secondary hover:text-foreground text-xs font-medium inline-flex items-center gap-1.5 transition-colors cursor-pointer"
-                          >
-                            <PencilIcon className="w-3.5 h-3.5" />
-                            <span>Edit</span>
-                          </button>
-                          <button
-                            type="button"
-                            disabled={Boolean(deletingServiceId)}
-                            onClick={() => handleDeleteService(serviceId)}
-                            className="px-3 py-1.5 rounded-lg border border-border-theme bg-surface hover:bg-red-500/10 hover:border-red-500/30 text-text-secondary hover:text-red-500 text-xs font-medium inline-flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            {deletingServiceId === serviceId ? (
-                              <>
-                                <svg className="animate-spin w-3.5 h-3.5 text-red-500" fill="none" viewBox="0 0 24 24">
-                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                                </svg>
-                                <span>Deleting...</span>
-                              </>
-                            ) : (
-                              <>
-                                <TrashIcon className="w-3.5 h-3.5" />
-                                <span>Delete</span>
-                              </>
-                            )}
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                /* Empty State */
-                <div className="text-center py-10 px-6 rounded-2xl border-2 border-dashed border-border-theme bg-surface-muted/20">
-                  <div className="w-12 h-12 mx-auto mb-3 rounded-2xl bg-surface-muted flex items-center justify-center text-text-secondary">
-                    <SquaresIcon className="w-6 h-6" />
-                  </div>
-                  <h3 className="text-sm font-semibold text-foreground mb-1">
-                    No services created yet
-                  </h3>
-                  <p className="text-xs text-text-secondary max-w-sm mx-auto mb-5 leading-relaxed">
-                    Add standard packages and offerings detailing your platform, deliverables, and rates so brands can collaborate with you.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={handleOpenAddService}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-neutral-950 text-white hover:bg-neutral-800 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-neutral-200 font-sans font-semibold text-xs sm:text-sm shadow-xs transition-all cursor-pointer"
-                  >
-                    <PlusIcon className="w-4 h-4" />
-                    <span>Add Your First Service</span>
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* =========================================================
-              ACTION CONTROLS (BACK & CONTINUE)
-          ========================================================= */}
-          <div className="mt-8 pt-6 border-t border-border-theme flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3">
-            {currentStep > 1 ? (
-              <button
-                type="button"
-                onClick={handleBack}
-                disabled={isSubmitting || deletingProjectId || deletingServiceId || isInitialLoading}
-                className="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-3 rounded-xl bg-surface-muted hover:bg-background border border-border-theme text-foreground font-sans font-medium text-xs sm:text-sm transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
-              >
-                <ArrowLeftIcon className="w-4 h-4" />
-                <span>
-                  {currentStep === 2
-                    ? "Back to Profile Info"
-                    : currentStep === 3
-                    ? "Back to Portfolio"
-                    : currentStep === 4
-                    ? "Back to Identity"
-                    : "Back"}
-                </span>
-              </button>
-            ) : (
-              <div />
-            )}
-
-            <button
-              type="button"
-              onClick={handleContinue}
-              disabled={isSubmitting || deletingProjectId || deletingServiceId || isInitialLoading}
-              className="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3.5 rounded-xl bg-neutral-950 text-white hover:bg-neutral-800 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-neutral-200 font-sans font-semibold text-xs sm:text-sm tracking-wide shadow-xs hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 cursor-pointer sm:ml-auto w-full sm:w-auto disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
-            >
-              {isSubmitting ? (
-                <span className="inline-flex items-center gap-2">
-                  <svg className="animate-spin h-4 w-4 text-white dark:text-neutral-950" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                  <span>
-                    {currentStep === 1
-                      ? "Saving Profile..."
-                      : currentStep === 3
-                      ? "Saving Identity..."
-                      : currentStep === 4
-                      ? "Completing Onboarding..."
-                      : "Processing..."}
-                  </span>
-                </span>
-              ) : (
-                <>
-                  <span>
-                    {currentStep === 1
-                      ? "Continue to Portfolio"
-                      : currentStep === 2
-                      ? "Continue to Identity"
-                      : currentStep === 3
-                      ? "Continue to Services"
-                      : "Complete Onboarding"}
-                  </span>
-                  <ArrowRightIcon className="w-4 h-4" />
-                </>
-              )}
-            </button>
-          </div>
             </>
           )}
         </div>
       </main>
 
       {/* =========================================================
-          MODAL: ADD / EDIT PORTFOLIO PROJECT (REUSABLE COMPONENT)
+          MODALS FOR PORTFOLIO AND SERVICES
       ========================================================= */}
       <PortfolioFormModal
         isOpen={isProjectModalOpen}
-        onClose={handleCloseProjectModal}
-        portfolio={editingProject}
-        defaultCategory={formData.category || formData.niches[0] || "Fashion & Luxury"}
-        onSuccess={async () => {
-          await dispatch(getPortfolios()).unwrap();
-          setSaveSuccessMessage(
-            editingProject
-              ? "Portfolio project updated successfully."
-              : "Portfolio project added successfully."
-          );
+        onClose={() => setIsProjectModalOpen(false)}
+        project={editingProject}
+        onSuccess={() => {
+          setIsProjectModalOpen(false);
+          dispatch(getPortfolios());
         }}
       />
 
-      {/* =========================================================
-          MODAL: ADD / EDIT SERVICE (REUSABLE COMPONENT)
-      ========================================================= */}
       <ServiceFormModal
         isOpen={isServiceModalOpen}
-        onClose={handleCloseServiceModal}
+        onClose={() => setIsServiceModalOpen(false)}
         service={editingService}
-        defaultCategory={formData.category || formData.niches[0] || "Social Media Campaign"}
-        onSuccess={async () => {
-          await dispatch(getServices({ limit: 50 }));
-          setSaveSuccessMessage(
-            editingService
-              ? "Service package updated successfully."
-              : "Service package created successfully."
-          );
+        onSuccess={() => {
+          setIsServiceModalOpen(false);
+          dispatch(getServices({ limit: 50 }));
         }}
       />
-
-
-
-      {/* =========================================================
-          FOOTER COPYRIGHT & HELP
-      ========================================================= */}
-      <footer className="max-w-3xl w-full mx-auto text-center pt-6 text-xs text-text-secondary font-sans">
-        Need assistance? You can update all profile and portfolio information anytime in your Creator Settings.
-      </footer>
     </div>
   );
 }

@@ -23,9 +23,9 @@ const initializeSocket = (httpServer) => {
         ...new Set([
             ...((process.env.FRONTEND_URL || "").split(",").map((o) => o.trim().replace(/\/+$/, "")).filter(Boolean)),
 
-            "http://192.168.1.21:3000",
-            "http://localhost:3000",
-            "http://127.0.0.1:3000"
+            "http://192.168.1.213005",
+            "http://localhost3005",
+            "http://127.0.0.13005"
         ].filter(Boolean))
     ];
 

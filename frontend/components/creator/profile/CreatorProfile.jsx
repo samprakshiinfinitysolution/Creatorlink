@@ -636,9 +636,8 @@ function CreatorAvatarPreview({
             onError={() => {
               setFailedUrl(cleanUrl);
             }}
-            className={`w-full h-full object-cover transition-opacity duration-300 ${
-              isLoaded ? "opacity-100" : "opacity-0"
-            }`}
+            className={`w-full h-full object-cover transition-opacity duration-300 ${isLoaded ? "opacity-100" : "opacity-0"
+              }`}
           />
         </>
       ) : (
@@ -1100,16 +1099,16 @@ export default function CreatorProfile() {
     Array.isArray(profile?.keywords) && profile.keywords.length > 0
       ? profile.keywords
       : Array.isArray(formData.keywords)
-      ? formData.keywords
-      : [];
+        ? formData.keywords
+        : [];
   const dob = profile?.dob || formData.dob || "";
   const gender = profile?.gender || formData.gender || "";
   const languages =
     Array.isArray(profile?.languages) && profile.languages.length > 0
       ? profile.languages
       : Array.isArray(formData.languages)
-      ? formData.languages
-      : [];
+        ? formData.languages
+        : [];
   const ethnicity = profile?.ethnicity || formData.ethnicity || "";
   const location = profile?.location || formData.location || "Mumbai, India";
   const displayEmail = profile?.user?.email || authUser?.email || "creator@creatorlink.io";
@@ -1333,9 +1332,8 @@ export default function CreatorProfile() {
                         disabled={isUploadingImage}
                         aria-label="Change profile picture"
                         title="Change profile picture"
-                        className={`absolute -bottom-1 -right-1 p-2 rounded-xl bg-[#111111] hover:bg-black text-white border border-[#2a2a36] hover:border-secondary/50 shadow-md transition-all cursor-pointer ${
-                          isUploadingImage ? "opacity-50 cursor-not-allowed" : ""
-                        }`}
+                        className={`absolute -bottom-1 -right-1 p-2 rounded-xl bg-[#111111] hover:bg-black text-white border border-[#2a2a36] hover:border-secondary/50 shadow-md transition-all cursor-pointer ${isUploadingImage ? "opacity-50 cursor-not-allowed" : ""
+                          }`}
                       >
                         <CameraIcon className="w-4 h-4 text-white" />
                       </button>
@@ -1383,11 +1381,10 @@ export default function CreatorProfile() {
                       <div className="flex flex-wrap items-center gap-2 pt-1">
                         {/* Status Badge */}
                         <span
-                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
-                            isPublic
+                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${isPublic
                               ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
                               : "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30"
-                          }`}
+                            }`}
                         >
                           <CheckIcon className="w-3 h-3 shrink-0" />
                           <span>{isPublic ? "Profile Active" : "Profile Private"}</span>
@@ -1709,7 +1706,7 @@ export default function CreatorProfile() {
 
               {/* CARD 1: Creator Identity & Bio */}
               <div className="bg-white dark:bg-[#131318] border border-slate-200/90 dark:border-[#22222e] rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-xs space-y-6">
-                
+
                 {/* Header */}
                 <div className="flex items-center gap-3 border-b border-border-theme/60 pb-4">
                   <div className="w-8 h-8 rounded-lg bg-surface-muted dark:bg-[#1f1f28] flex items-center justify-center text-black dark:text-white shrink-0">
@@ -1727,7 +1724,7 @@ export default function CreatorProfile() {
 
                 {/* Top Section: Avatar + Headline & Category */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start font-sans">
-                  
+
                   {/* Left: Avatar with Camera button + Upload & URL */}
                   <div className="lg:col-span-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
                     <div className="relative shrink-0">
@@ -1797,7 +1794,7 @@ export default function CreatorProfile() {
 
                   {/* Right: Headline and Primary Category */}
                   <div className="lg:col-span-6 space-y-3.5">
-                    
+
                     {/* Professional Headline */}
                     <div className="space-y-1">
                       <div className="flex items-center justify-between">
@@ -1972,11 +1969,10 @@ export default function CreatorProfile() {
                               }));
                             }
                           }}
-                          className={`text-[11px] px-2.5 py-1 rounded-lg border transition-all ${
-                            isAdded
+                          className={`text-[11px] px-2.5 py-1 rounded-lg border transition-all ${isAdded
                               ? "bg-[#ffeef3] dark:bg-secondary/10 border-secondary/30 text-secondary cursor-default opacity-60"
                               : "bg-white dark:bg-surface border-border-theme text-text-secondary hover:text-foreground hover:border-secondary/40 cursor-pointer"
-                          }`}
+                            }`}
                         >
                           + {sug}
                         </button>
@@ -1989,7 +1985,7 @@ export default function CreatorProfile() {
 
               {/* TWO-COLUMN GRID: Cards 2 & 3 */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 items-start font-sans">
-                
+
                 {/* CARD 2: Identity & Demographics */}
                 <div className="bg-white dark:bg-[#131318] border border-slate-200/90 dark:border-[#22222e] rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-xs space-y-5">
                   <div className="flex items-center justify-between gap-3 border-b border-border-theme/60 pb-4">
@@ -2059,11 +2055,10 @@ export default function CreatorProfile() {
                                   gender: prev.gender === g.id ? "" : g.id,
                                 }));
                               }}
-                              className={`px-3 py-2.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-2 ${
-                                isSelected
+                              className={`px-3 py-2.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-2 ${isSelected
                                   ? "bg-[#ffeef3] dark:bg-secondary/15 border-secondary/60 text-foreground ring-1 ring-secondary/30"
                                   : "bg-white dark:bg-surface border-border-theme hover:border-secondary/40 text-foreground"
-                              } ${isSubmitting ? "opacity-60 cursor-not-allowed" : ""}`}
+                                } ${isSubmitting ? "opacity-60 cursor-not-allowed" : ""}`}
                             >
                               <div className="flex items-center gap-2 min-w-0">
                                 <Icon className="w-4 h-4 text-black dark:text-white shrink-0" />
@@ -2176,11 +2171,10 @@ export default function CreatorProfile() {
                                 }));
                               }
                             }}
-                            className={`text-[11px] px-2.5 py-1 rounded-lg border transition-all ${
-                              isAdded
+                            className={`text-[11px] px-2.5 py-1 rounded-lg border transition-all ${isAdded
                                 ? "bg-[#ffeef3] dark:bg-secondary/10 border-secondary/30 text-secondary cursor-default opacity-60"
                                 : "bg-white dark:bg-surface border-border-theme text-text-secondary hover:text-foreground hover:border-secondary/40 cursor-pointer"
-                            }`}
+                              }`}
                           >
                             + {lang}
                           </button>
@@ -2204,8 +2198,8 @@ export default function CreatorProfile() {
                           ETHNICITY_OPTIONS.includes(formData.ethnicity)
                             ? formData.ethnicity
                             : formData.ethnicity
-                            ? "Other"
-                            : ""
+                              ? "Other"
+                              : ""
                         }
                         onChange={(e) => {
                           const val = e.target.value;
@@ -2235,17 +2229,17 @@ export default function CreatorProfile() {
                       {/* If Other or custom */}
                       {(formData.ethnicity === "Other" ||
                         (formData.ethnicity && !ETHNICITY_OPTIONS.includes(formData.ethnicity))) && (
-                        <input
-                          type="text"
-                          disabled={isSubmitting}
-                          value={formData.ethnicity === "Other" ? "" : formData.ethnicity}
-                          onChange={(e) =>
-                            setFormData((prev) => ({ ...prev, ethnicity: e.target.value }))
-                          }
-                          placeholder="Please describe your cultural background or identity"
-                          className="w-full mt-2 bg-white dark:bg-surface border border-slate-300 dark:border-border-theme text-foreground text-xs sm:text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/40 transition-colors"
-                        />
-                      )}
+                          <input
+                            type="text"
+                            disabled={isSubmitting}
+                            value={formData.ethnicity === "Other" ? "" : formData.ethnicity}
+                            onChange={(e) =>
+                              setFormData((prev) => ({ ...prev, ethnicity: e.target.value }))
+                            }
+                            placeholder="Please describe your cultural background or identity"
+                            className="w-full mt-2 bg-white dark:bg-surface border border-slate-300 dark:border-border-theme text-foreground text-xs sm:text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/40 transition-colors"
+                          />
+                        )}
                     </div>
                   </div>
                 </div>
@@ -2400,16 +2394,14 @@ export default function CreatorProfile() {
                   <button
                     type="button"
                     onClick={handleToggleVisibility}
-                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                      formData.isPublic ? "bg-black" : "bg-slate-300 dark:bg-neutral-700"
-                    }`}
+                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${formData.isPublic ? "bg-black" : "bg-slate-300 dark:bg-neutral-700"
+                      }`}
                     role="switch"
                     aria-checked={formData.isPublic}
                   >
                     <span
-                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
-                        formData.isPublic ? "translate-x-5" : "translate-x-0"
-                      }`}
+                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${formData.isPublic ? "translate-x-5" : "translate-x-0"
+                        }`}
                     />
                   </button>
                 </div>

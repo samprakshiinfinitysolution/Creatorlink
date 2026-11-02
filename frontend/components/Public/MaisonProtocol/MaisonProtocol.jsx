@@ -1,35 +1,36 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import ScrollReveal from "@/components/theme/ScrollReveal";
 
 // =========================================================
 // CENTRALIZED MOCK DATA (UI ONLY - READY FOR API REPLACEMENT)
 // =========================================================
 const PROTOCOL_DATA = {
-  eyebrow: "MAISON PROTOCOL",
-  title: "From Idea to Cultural Impact",
-  subtitle: "End-to-end escrow governance and pixel-level approvals.",
+  eyebrow: "COLLABORATION WORKFLOW",
+  title: "From Campaign Brief to Final Delivery",
+  subtitle: "Manage briefs, reviews, content submissions, and payments in one clear workflow.",
   features: [
     {
       id: "escrow",
-      title: "Pre-funded Escrow Assurance",
+      title: "Secure Milestone Tracking",
       description:
-        "Funds locked in smart escrow vaults until deliverables pass algorithmic and brand sign-off.",
+        "Clear budget terms and transparent milestones protect both brands and creators throughout the project.",
     },
     {
       id: "video",
-      title: "Frame-by-Frame Video Approvals",
+      title: "Seamless Content Review",
       description:
-        "Timecoded feedback, instant revision requests, and 4K master file handoffs.",
+        "Direct video and asset submissions, quick revision requests, and fast approvals in one workspace.",
     },
   ],
   campaign: {
     status: "Active Live Campaign",
     statusDesktop: "Active Campaign in Progress",
     title: "Aura Fragrance Spring 2025",
-    vaultLabel: "Escrow Vault",
-    amount: "$18,500 USD",
+    vaultLabel: "Campaign Budget",
+    amount: "₹1,25,000 INR",
     currentStageNumber: 4,
     totalStages: 6,
     activeStageName: "REVIEW",
@@ -81,8 +82,8 @@ const PROTOCOL_DATA = {
       },
     ],
     mobilePills: [
-      "100% Pre-funded Escrow",
-      "Frame-by-Frame Video Approval",
+      "Milestone Payment Tracking",
+      "Direct Content Review",
     ],
   },
 };
@@ -184,13 +185,15 @@ export default function MaisonProtocol() {
       { threshold: 0.25 }
     );
 
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
+    const currentSection = sectionRef.current;
+    if (currentSection) {
+      observer.observe(currentSection);
     }
 
     return () => {
-      if (sectionRef.current) {
-        observer.unobserve(sectionRef.current);
+
+    if (currentSection) {
+        observer.unobserve(currentSection);
       }
     };
   }, []);
@@ -305,12 +308,12 @@ export default function MaisonProtocol() {
                     </span>
                   </div>
 
-                  <button
-                    type="button"
+                  <Link
+                    href="/how-it-works"
                     className="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-primary text-white dark:bg-white dark:text-black hover:bg-secondary hover:text-white dark:hover:bg-secondary dark:hover:text-white hover:shadow-[0_0_20px_rgba(255,79,135,0.35)] text-xs font-semibold shadow-xs transition-all duration-300 cursor-pointer whitespace-nowrap"
                   >
                     Campaign Actions
-                  </button>
+                  </Link>
                 </div>
               </div>
 

@@ -1,22 +1,22 @@
 "use client";
 import Image from "next/image";
 
-import { useState } from "react";
+
 import ScrollReveal from "@/components/theme/ScrollReveal";
 
-const MOBILE_CATEGORIES = [
-  "All Salons",
-  "Haute Fashion",
-  "Beauty & Skin",
-  "UGC & Micro-Film",
-  "Travel & Hideaways",
-  "Fine Dining",
-  "Minimal Tech",
-];
+
+
+
+
+
+
+
+
+
 
 export default function CreatorShowcase() {
-  const [activeCategory, setActiveCategory] = useState("All Salons");
-  const [search, setSearch] = useState("");
+
+
 
   return (
     <section
@@ -222,7 +222,7 @@ export default function CreatorShowcase() {
                 </p>
 
                 <p className="mt-0.5 text-[11.5px] font-bold text-primary min-[390px]:text-[12px] sm:text-[13px]">
-                  $250
+                  ₹18,000
                 </p>
               </div>
             </div>
@@ -367,7 +367,7 @@ export default function CreatorShowcase() {
                 sm:text-[10px]
               "
             >
-              Editorial
+              Tech & Style
             </span>
           </div>
         </div>
@@ -419,11 +419,11 @@ export default function CreatorShowcase() {
                 min-[380px]:text-[11px]
               "
             >
-              Offer Received:{" "}
+              Campaign Offer Received:{" "}
               <span className="font-semibold text-secondary-dark dark:text-secondary">
-                $1,200
+                ₹35,000
               </span>{" "}
-              • LVMH Group
+              • Brand Collaboration
             </p>
           </div>
         </div>
@@ -532,7 +532,7 @@ export default function CreatorShowcase() {
                 </p>
 
                 <p className="mt-1 text-[12px] text-text-secondary">
-                  Fashion & Haute Beauty
+                  Fashion & Lifestyle Creator
                 </p>
               </div>
 
@@ -542,7 +542,7 @@ export default function CreatorShowcase() {
             </div>
 
             <div className="border-t border-border-theme px-1 pt-2 text-[11px] text-text-secondary">
-              Rate Index
+              Collab From ₹18,000
             </div>
           </div>
         </div>
@@ -583,7 +583,7 @@ export default function CreatorShowcase() {
                 </p>
 
                 <p className="mt-1 text-[12px] text-text-secondary">
-                  High-End Editorial
+                  Tech & Lifestyle Creator
                 </p>
               </div>
 
@@ -598,7 +598,7 @@ export default function CreatorShowcase() {
               </span>
 
               <span className="font-semibold text-primary">
-                $720
+                ₹45,000
               </span>
             </div>
           </div>
@@ -625,11 +625,11 @@ export default function CreatorShowcase() {
 
               <div className="min-w-0">
                 <p className="text-[12px] font-semibold text-primary">
-                  Offer Received: $1,200
+                  New Brand Collaboration: ₹45,000
                 </p>
 
                 <p className="mt-0.5 text-[10px] text-text-secondary">
-                  LVMH Group • 2 Reel Campaign
+                  Campaign Offer Received • 2 Reel Deliverables
                 </p>
               </div>
             </div>
@@ -659,7 +659,7 @@ export default function CreatorShowcase() {
               <Image src="https://res.cloudinary.com/atr5osne/image/upload/v1792054938/creatorlink/public/creators/hoz1pqturtg0l2cbxunp.webp" alt="Clara creator" fill className="h-full w-full object-cover transition-transform duration-700 hover:scale-105" sizes="50vw" />
 
               <div className="absolute bottom-3 left-3 rounded-full bg-[#222]/80 px-3 py-1 text-[10px] font-medium text-white">
-                ▶ TikTok Motion
+                ▶ UGC Video Creator
               </div>
             </div>
 
@@ -671,12 +671,12 @@ export default function CreatorShowcase() {
                 </p>
 
                 <p className="mt-1 text-[12px] text-text-secondary">
-                  UGC Director • 8.4% Eng
+                  UGC & Video Reels • 8.4% Eng
                 </p>
               </div>
 
               <span className="text-[14px] font-semibold text-secondary-dark">
-                From $180
+                From ₹15,000
               </span>
             </div>
           </div>
@@ -705,7 +705,7 @@ export default function CreatorShowcase() {
               <Image src="https://res.cloudinary.com/atr5osne/image/upload/v1792056004/creatorlink/public/editorial/sgcos8o3wlzt7bgczudt.webp" alt="Sora creator" fill className="h-full w-full object-cover transition-transform duration-700 hover:scale-105" sizes="50vw" />
 
               <div className="absolute bottom-3 left-3 rounded-full bg-secondary px-3 py-1 text-[10px] font-medium text-white">
-                Architectural Travel
+                Travel & Lifestyle
               </div>
             </div>
 
@@ -722,7 +722,7 @@ export default function CreatorShowcase() {
               </div>
 
               <span className="text-[14px] font-semibold text-primary">
-                From $450
+                From ₹32,000
               </span>
             </div>
           </div>

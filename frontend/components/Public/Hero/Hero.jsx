@@ -1,3 +1,4 @@
+
 import Link from "next/link";
 import ScrollReveal from "@/components/theme/ScrollReveal";
 
@@ -8,8 +9,8 @@ export default function Hero() {
         relative
         overflow-hidden
         bg-background
-        px-[18px]
-        pt-[168px]
+        px-[14px]
+        pt-[140px]
         pb-8
         text-foreground
 
@@ -60,7 +61,8 @@ export default function Hero() {
           }
         }
       `}</style>
-      {/* ================= ANIMATED BACKGROUND ================= */}
+
+      {/* ANIMATED BACKGROUND */}
 
       <div
         className="
@@ -79,9 +81,13 @@ export default function Hero() {
         "
       />
 
-      {/* ================= LOCATION ================= */}
+      {/* PLATFORM TAG */}
 
-      <ScrollReveal direction="up" delay={0} className="flex justify-start lg:justify-center">
+      <ScrollReveal
+        direction="up"
+        delay={0}
+        className="flex justify-start lg:justify-center"
+      >
         <div
           className="
             inline-flex
@@ -108,11 +114,11 @@ export default function Hero() {
         >
           <span className="h-2 w-2 rounded-full bg-secondary" />
 
-          PARIS • MILAN • TOKYO • NY
+          BRANDS • CREATORS • COLLABORATIONS
         </div>
       </ScrollReveal>
 
-      {/* ================= HEADING ================= */}
+      {/* HEADING */}
 
       <ScrollReveal
         direction="up"
@@ -131,7 +137,7 @@ export default function Hero() {
       >
         <h1
           className="
-            whitespace-nowrap
+            whitespace-normal sm:whitespace-nowrap
             text-[40px]
             leading-[0.98]
             tracking-[-0.045em]
@@ -146,7 +152,7 @@ export default function Hero() {
             fontFamily: "var(--font-playfair), serif",
           }}
         >
-          Where Brands Meet
+          Where Brands & Creators
         </h1>
 
         <h2
@@ -168,10 +174,10 @@ export default function Hero() {
             fontStyle: "italic",
           }}
         >
-          Influence.
+          Build Powerful Collaborations.
         </h2>
 
-        {/* ================= DESCRIPTION ================= */}
+        {/* DESCRIPTION */}
 
         <p
           className="
@@ -195,16 +201,18 @@ export default function Hero() {
             xl:text-[21px]
           "
         >
-          Discover hand-vetted tastemakers. Architect cinematic campaigns.
-          Create high-conversion cultural moments.
-          <span className="hidden lg:inline">
-            {" "}
-            Create high-conversion cultural moments that audiences remember.
-          </span>
+          Discover opportunities, connect with the right partners, manage campaigns,
+          create amazing content, and grow together — all in one platform.
+
+
+
+
+
+
         </p>
       </ScrollReveal>
 
-      {/* ================= BUTTONS ================= */}
+      {/* BUTTONS */}
 
       <ScrollReveal
         direction="up"
@@ -223,42 +231,42 @@ export default function Hero() {
           lg:flex-row
         "
       >
-        {/* FIND CREATOR */}
+        {/* BRAND CTA */}
 
         <Link
           href="/creators"
           className="
-    flex
-    h-[64px]
-    w-full
-    items-center
-    justify-center
-    gap-3
-    rounded-full
-    bg-primary
-    text-[16px]
-    font-medium
-    text-white
-    transition-all
-    duration-200
-    hover:scale-[1.02]
-    hover:bg-theme-hover
+            flex
+            h-[64px]
+            w-full
+            items-center
+            justify-center
+            gap-3
+            rounded-full
+            bg-primary
+            text-[16px]
+            font-medium
+            text-white
+            transition-all
+            duration-200
+            hover:scale-[1.02]
+            hover:bg-theme-hover
 
-    lg:flex-1
+            lg:flex-1
 
-    dark:bg-primary
-    dark:text-black
-    dark:hover:bg-theme-hover
-  "
+            dark:bg-primary
+            dark:text-black
+            dark:hover:bg-theme-hover
+          "
         >
-          Find Your Creator
+          Find Creators
           <span className="text-[22px]">→</span>
         </Link>
 
-        {/* JOIN CREATOR */}
+        {/* CREATOR CTA */}
 
         <Link
-          href="/signup"
+          href="/signup?role=creator"
           className="
             flex
             h-[60px]
@@ -283,19 +291,19 @@ export default function Hero() {
             dark:text-primary
           "
         >
-          Join as Creator
+          Explore Opportunities
         </Link>
       </ScrollReveal>
 
-      {/* =====================================================
-          FEATURES
-      ===================================================== */}
+      {/* FEATURES */}
 
-      <ScrollReveal direction="up" delay={240} className="mx-auto mt-7 w-full max-w-[850px] sm:mt-8 lg:mt-10">
+      <ScrollReveal
+        direction="up"
+        delay={240}
+        className="mx-auto mt-7 w-full max-w-[850px] sm:mt-8 lg:mt-10"
+      >
 
-        {/* ===================================================
-            MOBILE + TABLET FEATURES
-            =================================================== */}
+        {/* MOBILE + TABLET FEATURES */}
 
         <div
           className="
@@ -306,7 +314,8 @@ export default function Hero() {
             lg:hidden
           "
         >
-          {/* ================= ESCROW VAULT ================= */}
+
+          {/* SECURE PAYMENTS */}
 
           <div
             className="
@@ -342,16 +351,16 @@ export default function Hero() {
 
             <div className="min-w-0">
               <p className="text-[10px] font-bold text-primary sm:text-[11px]">
-                ESCROW VAULT
+                SECURE PAYMENTS
               </p>
 
               <p className="mt-0.5 whitespace-nowrap text-[10px] text-text-secondary sm:text-[11px]">
-                100% Funds Secured
+                Protected Payments
               </p>
             </div>
           </div>
 
-          {/* ================= RAPID BOOKING ================= */}
+          {/* DIRECT CHAT */}
 
           <div
             className="
@@ -387,19 +396,17 @@ export default function Hero() {
 
             <div className="min-w-0">
               <p className="text-[10px] font-bold text-primary sm:text-[11px]">
-                RAPID BOOKING
+                DIRECT CHAT
               </p>
 
               <p className="mt-0.5 whitespace-nowrap text-[10px] text-text-secondary sm:text-[11px]">
-                Avg 48h Turnaround
+                Chat with Brands
               </p>
             </div>
           </div>
         </div>
 
-        {/* ===================================================
-            DESKTOP FEATURES
-            =================================================== */}
+        {/* DESKTOP FEATURES */}
 
         <div
           className="
@@ -415,7 +422,8 @@ export default function Hero() {
             xl:gap-7
           "
         >
-          {/* ESCROW PROTECTION */}
+
+          {/* SECURE PAYMENTS */}
 
           <div className="flex items-center gap-2 whitespace-nowrap">
             <svg
@@ -433,12 +441,12 @@ export default function Hero() {
               <path d="m9 12 2 2 4-4" />
             </svg>
 
-            <span>Escrow Protection</span>
+            <span>Secure Payments</span>
           </div>
 
           <span>•</span>
 
-          {/* SMART AGREEMENTS */}
+          {/* VERIFIED CREATORS */}
 
           <div className="flex items-center gap-2 whitespace-nowrap">
             <svg
@@ -458,12 +466,12 @@ export default function Hero() {
               <path d="M9 16h4" />
             </svg>
 
-            <span>Smart Agreements</span>
+            <span>Verified Creators</span>
           </div>
 
           <span>•</span>
 
-          {/* 48H TURNAROUND */}
+          {/* DIRECT CHAT */}
 
           <div className="flex items-center gap-2 whitespace-nowrap">
             <svg
@@ -477,12 +485,12 @@ export default function Hero() {
               strokeLinejoin="round"
               className="text-secondary"
             >
-              <circle cx="12" cy="12" r="8" />
-              <path d="M12 7v5l3 2" />
+              <path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 9 9 0 0 1-4-.9L3 21l1.9-5.5a9 9 0 0 1-.9-4A8.5 8.5 0 0 1 12.5 3h.5a8.5 8.5 0 0 1 8 8v.5Z" />
             </svg>
 
-            <span>48h Turnaround</span>
+            <span>Direct Chat</span>
           </div>
+
         </div>
       </ScrollReveal>
     </section>

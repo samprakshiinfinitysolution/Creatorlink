@@ -459,7 +459,7 @@ export default function CreatorBookingDetailModal({
                     {isBrandInitiated ? "Brand Proposal Message" : "Your Application Message"}
                   </span>
                   <div className="p-3.5 rounded-2xl border border-border-theme bg-surface-muted/20 text-xs text-foreground leading-relaxed italic">
-                    "{booking.message}"
+                    &ldquo;{booking.message}&rdquo;
                   </div>
                 </div>
               )}

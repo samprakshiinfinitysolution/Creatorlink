@@ -24,7 +24,7 @@ const STATS_DATA = [
   },
   {
     id: "paid",
-    number: "$14M+",
+    number: "₹5Cr+",
     label: "PAID TO CREATORS",
   },
 ];

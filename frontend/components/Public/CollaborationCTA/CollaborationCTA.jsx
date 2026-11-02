@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import ScrollReveal from "@/components/theme/ScrollReveal";
 
 // =========================================================
@@ -22,7 +23,7 @@ export default function CollaborationCTA() {
           <div className="relative z-10 max-w-3xl mx-auto text-center flex flex-col items-center">
             {/* Eyebrow */}
             <span className="text-[11px] font-bold tracking-[0.25em] uppercase text-secondary block mb-4">
-              THE FUTURE OF INFLUENCE
+              ONE PLATFORM. ENDLESS COLLABORATIONS.
             </span>
 
             {/* Heading */}
@@ -32,28 +33,28 @@ export default function CollaborationCTA() {
 
             {/* Description */}
             <p className="text-sm sm:text-base md:text-lg text-white/70 font-sans leading-relaxed max-w-2xl mb-8 sm:mb-10">
-              Join over 10,000 elite tastemakers and 400+ world-class luxury houses
-              reshaping modern digital commerce.
+              Join thousands of forward-thinking brands and creators connecting,
+              collaborating, and growing together on one powerful platform.
             </p>
 
             {/* Buttons Row (Stacked on Mobile, Side-by-side on Desktop) */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 sm:gap-5 w-full sm:w-auto">
               {/* Button 1: Find Your Creator -> */}
-              <button
-                type="button"
+              <Link
+                href="/creators"
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full bg-secondary hover:bg-secondary-dark text-white font-sans font-semibold text-sm sm:text-base tracking-wide shadow-[0_4px_22px_rgba(255,79,135,0.35)] hover:shadow-[0_6px_28px_rgba(213,22,98,0.55)] hover:-translate-y-0.5 hover:scale-[1.02] active:translate-y-0 active:scale-100 transition-all duration-300 ease-out cursor-pointer select-none"
               >
-                <span>Find Your Creator</span>
+                <span>Find Creators</span>
                 <span className="text-base leading-none">→</span>
-              </button>
+              </Link>
 
               {/* Button 2: Join as Creator */}
-              <button
-                type="button"
+              <Link
+                href="/signup?role=creator"
                 className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3.5 rounded-full bg-white/10 hover:bg-white/20 text-white font-sans font-semibold text-sm sm:text-base tracking-wide border border-white/20 hover:border-white/40 hover:-translate-y-0.5 hover:scale-[1.02] active:translate-y-0 active:scale-100 transition-all duration-300 ease-out cursor-pointer select-none"
               >
-                <span>Join as Creator</span>
-              </button>
+                <span>Join as a Creator</span>
+              </Link>
             </div>
           </div>
         </ScrollReveal>

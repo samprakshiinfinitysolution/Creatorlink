@@ -116,7 +116,7 @@ export default function BrandRecentCollaborations({ collaborations = [] }) {
             No active collaborations
           </h3>
           <p className="text-xs text-text-secondary max-w-xs mx-auto">
-            You don't have any ongoing creator workspaces yet. Discover talent or accept applications to begin.
+            You don&apos;t have any ongoing creator workspaces yet. Discover talent or accept applications to begin.
           </p>
           <div className="pt-1">
             <Link

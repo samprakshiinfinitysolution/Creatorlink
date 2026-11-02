@@ -436,7 +436,7 @@ const forgotPassword = async (email) => {
 
     await user.save();
 
-    const frontendBaseUrl = (process.env.FRONTEND_URL || "http://localhost3005").replace(/\/+$/, "");
+    const frontendBaseUrl = (process.env.FRONTEND_URL || "http://localhost:3005").replace(/\/+$/, "");
     const resetUrl = `${frontendBaseUrl}/reset-password?token=${rawToken}`;
 
     const subject = "Reset Your CreatorLink Password";

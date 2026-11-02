@@ -348,14 +348,6 @@ function XMarkIcon({ className = "w-3.5 h-3.5" }) {
   );
 }
 
-function SearchIcon({ className = "w-4 h-4" }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-    </svg>
-  );
-}
-
 function PencilIcon({ className = "w-4 h-4" }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
@@ -477,7 +469,6 @@ export default function CreatorOnboarding() {
     bio: "",
     category: "",
     keywords: [],
-    niches: [],
     location: "",
     socialLinks: {
       instagram: "",
@@ -511,7 +502,6 @@ export default function CreatorOnboarding() {
   // Tag inputs & search
   const [keywordInput, setKeywordInput] = useState("");
   const [languageInput, setLanguageInput] = useState("");
-  const [nicheSearch, setNicheSearch] = useState("");
 
   const [validationError, setValidationError] = useState(null);
   const [saveSuccessMessage, setSaveSuccessMessage] = useState(null);
@@ -545,8 +535,6 @@ export default function CreatorOnboarding() {
       profile.bio.trim().length > 0 &&
       typeof profile.category === "string" &&
       profile.category.trim().length > 0 &&
-      Array.isArray(profile.niches) &&
-      profile.niches.length > 0 &&
       Array.isArray(profile.keywords) &&
       profile.keywords.length > 0 &&
       typeof profile.location === "string" &&
@@ -643,13 +631,7 @@ export default function CreatorOnboarding() {
           }
 
           setFormData((prev) => {
-            const initialNiches =
-              Array.isArray(p.niches) && p.niches.length > 0
-                ? p.niches
-                : p.category
-                ? [p.category]
-                : prev.niches;
-
+            
             let formattedDob = prev.dob || "";
             if (p.dob) {
               const d = new Date(p.dob);
@@ -662,12 +644,11 @@ export default function CreatorOnboarding() {
               profileImage: p.profileImage || prev.profileImage || "",
               title: p.title || prev.title || "",
               bio: p.bio || prev.bio || "",
-              category: p.category || (Array.isArray(p.niches) && p.niches[0]) || prev.category || "",
+              category: p.category || prev.category || "",
               keywords:
                 Array.isArray(p.keywords) && p.keywords.length > 0
                   ? p.keywords
                   : prev.keywords,
-              niches: initialNiches,
               location: p.location || prev.location || "",
               socialLinks: {
                 instagram: p.socialLinks?.instagram || prev.socialLinks.instagram || "",
@@ -701,8 +682,6 @@ export default function CreatorOnboarding() {
               p.bio.trim().length > 0 &&
               typeof p.category === "string" &&
               p.category.trim().length > 0 &&
-              Array.isArray(p.niches) &&
-              p.niches.length > 0 &&
               Array.isArray(p.keywords) &&
               p.keywords.length > 0 &&
               typeof p.location === "string" &&
@@ -811,27 +790,6 @@ export default function CreatorOnboarding() {
       },
     }));
     setValidationError(null);
-  };
-
-  const handleNicheToggle = (nicheName) => {
-    setFormData((prev) => {
-      const exists = prev.niches.includes(nicheName);
-      if (exists) {
-        return {
-          ...prev,
-          niches: prev.niches.filter((n) => n !== nicheName),
-        };
-      }
-      if (prev.niches.length >= 3) {
-        setValidationError("You can select up to 3 niches.");
-        return prev;
-      }
-      setValidationError(null);
-      return {
-        ...prev,
-        niches: [...prev.niches, nicheName],
-      };
-    });
   };
 
   const handleAddKeyword = (e) => {
@@ -968,11 +926,6 @@ export default function CreatorOnboarding() {
         return;
       }
 
-      if (!Array.isArray(formData.niches) || formData.niches.length === 0) {
-        setValidationError("Please select at least 1 niche (maximum 3).");
-        return;
-      }
-
       if (!Array.isArray(formData.keywords) || formData.keywords.length === 0) {
         setValidationError("Please add at least 1 content keyword or tag.");
         return;
@@ -1019,7 +972,6 @@ export default function CreatorOnboarding() {
         bio: formData.bio.trim(),
         category: formData.category.trim(),
         keywords: formData.keywords,
-        niches: formData.niches,
         location: formData.location.trim(),
         socialLinks: {
           instagram: formData.socialLinks.instagram?.trim() || "",
@@ -1134,7 +1086,6 @@ export default function CreatorOnboarding() {
         bio: formData.bio.trim(),
         category: formData.category.trim(),
         keywords: formData.keywords,
-        niches: formData.niches,
         location: formData.location.trim(),
         socialLinks: {
           instagram: formData.socialLinks.instagram?.trim() || "",
@@ -1476,51 +1427,7 @@ export default function CreatorOnboarding() {
                         </select>
                       </div>
 
-                      {/* Niches Multi-select */}
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <label className="text-xs font-semibold uppercase tracking-wider text-neutral-800 dark:text-neutral-200 block">
-                            Niches (Select up to 3) *
-                          </label>
-                          <span className="text-xs text-pink-600 font-medium">
-                            {formData.niches.length}/3 selected
-                          </span>
-                        </div>
-                        <div className="relative">
-                          <input
-                            type="text"
-                            value={nicheSearch}
-                            onChange={(e) => setNicheSearch(e.target.value)}
-                            placeholder="Filter niche options..."
-                            className="w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 text-xs rounded-xl pl-8 pr-3 py-2 text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 focus:outline-none focus:border-pink-500"
-                          />
-                          <SearchIcon className="w-3.5 h-3.5 text-neutral-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
-                        </div>
-                        <div className="grid grid-cols-2 gap-2 max-h-[160px] overflow-y-auto pr-1">
-                          {CATEGORIES.filter((cat) => {
-                            if (!nicheSearch.trim()) return true;
-                            const term = nicheSearch.toLowerCase();
-                            return cat.name.toLowerCase().includes(term);
-                          }).map((cat) => {
-                            const isSelected = formData.niches.includes(cat.name);
-                            return (
-                              <button
-                                key={cat.id}
-                                type="button"
-                                onClick={() => handleNicheToggle(cat.name)}
-                                className={`text-left p-2 rounded-xl border text-xs flex items-center justify-between transition-all cursor-pointer ${
-                                  isSelected
-                                    ? "bg-pink-50 dark:bg-pink-950/40 border-pink-500 text-pink-700 dark:text-pink-300 font-medium"
-                                    : "bg-white dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 hover:border-pink-400"
-                                }`}
-                              >
-                                <span className="truncate">{cat.name}</span>
-                                {isSelected && <CheckIcon className="w-3.5 h-3.5 text-pink-600 shrink-0 ml-1" />}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
+
 
                       {/* Content Keywords */}
                       <div className="space-y-2">

@@ -329,14 +329,6 @@ function CheckBadgeIcon({ className = "w-5 h-5 text-secondary" }) {
   );
 }
 
-function LayersIcon({ className = "w-4 h-4" }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M6.429 9.75L2.25 12l9.75 5.25 9.75-5.25-4.179-2.25m-11.321 4.5L2.25 16.5l9.75 5.25 9.75-5.25-4.179-2.25M12 2.25L2.25 7.5l9.75 5.25 9.75-5.25L12 2.25z" />
-    </svg>
-  );
-}
-
 function ChartBarIcon({ className = "w-4 h-4" }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -725,7 +717,6 @@ export default function CreatorProfile() {
     title: "",
     bio: "",
     category: "Fashion & Luxury",
-    niches: [],
     keywords: [],
     location: "",
     profileImage: "",
@@ -745,7 +736,6 @@ export default function CreatorProfile() {
 
   const [keywordInput, setKeywordInput] = useState("");
   const [languageInput, setLanguageInput] = useState("");
-  const [nicheSearch, setNicheSearch] = useState("");
 
   // Fetch creator profile on mount
   useEffect(() => {
@@ -763,19 +753,11 @@ export default function CreatorProfile() {
   // Sync form data whenever profile in Redux updates, unless the user is actively editing
   useEffect(() => {
     if (profile && !isEditing) {
-      const initialNiches =
-        Array.isArray(profile.niches) && profile.niches.length > 0
-          ? profile.niches
-          : profile.category
-          ? [profile.category]
-          : [];
-
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({
         title: profile.title || "",
         bio: profile.bio || "",
         category: profile.category || "Fashion & Luxury",
-        niches: initialNiches,
         keywords: Array.isArray(profile.keywords) ? profile.keywords : [],
         location: profile.location || "",
         profileImage: profile.profileImage || "",
@@ -802,28 +784,6 @@ export default function CreatorProfile() {
       ...prev,
       [name]: value,
     }));
-  };
-
-  // Niches toggle handler (max 3) - independent of category
-  const handleNicheToggle = (nicheName) => {
-    setFormData((prev) => {
-      const exists = prev.niches.includes(nicheName);
-      if (exists) {
-        const nextNiches = prev.niches.filter((n) => n !== nicheName);
-        return {
-          ...prev,
-          niches: nextNiches,
-        };
-      }
-      if (prev.niches.length >= 3) {
-        return prev;
-      }
-      const nextNiches = [...prev.niches, nicheName];
-      return {
-        ...prev,
-        niches: nextNiches,
-      };
-    });
   };
 
   // Keyword tag handlers (max 10)
@@ -957,20 +917,11 @@ export default function CreatorProfile() {
     setSuccessMessage("");
     setKeywordInput("");
     setLanguageInput("");
-    setNicheSearch("");
     if (profile) {
-      const initialNiches =
-        Array.isArray(profile.niches) && profile.niches.length > 0
-          ? profile.niches
-          : profile.category
-          ? [profile.category]
-          : [];
-
       setFormData({
         title: profile.title || "",
         bio: profile.bio || "",
         category: profile.category || "Fashion & Luxury",
-        niches: initialNiches,
         keywords: Array.isArray(profile.keywords) ? profile.keywords : [],
         location: profile.location || "",
         profileImage: profile.profileImage || "",
@@ -1015,10 +966,6 @@ export default function CreatorProfile() {
       setSaveError("Category must not exceed 100 characters.");
       return;
     }
-    if (formData.niches && formData.niches.length > 3) {
-      setSaveError("You can select a maximum of 3 niches.");
-      return;
-    }
     if (formData.keywords && formData.keywords.length > 10) {
       setSaveError("Keywords cannot exceed 10 tags.");
       return;
@@ -1045,7 +992,6 @@ export default function CreatorProfile() {
       title: formData.title ? formData.title.trim() : "",
       bio: formData.bio ? formData.bio.trim() : "",
       category: formData.category.trim(),
-      niches: Array.isArray(formData.niches) ? formData.niches : [],
       keywords: Array.isArray(formData.keywords) ? formData.keywords : [],
       location: formData.location ? formData.location.trim() : "",
       profileImage: formData.profileImage || "",
@@ -1162,14 +1108,6 @@ export default function CreatorProfile() {
   const creatorName = profile?.user?.name || authUser?.name || "Aarav Sharma";
   const title = profile?.title || formData.title || "";
   const category = profile?.category || formData.category || "Fashion & Luxury";
-  const niches =
-    Array.isArray(profile?.niches) && profile.niches.length > 0
-      ? profile.niches
-      : Array.isArray(formData.niches) && formData.niches.length > 0
-      ? formData.niches
-      : category
-      ? [category]
-      : [];
   const keywords =
     Array.isArray(profile?.keywords) && profile.keywords.length > 0
       ? profile.keywords
@@ -1516,33 +1454,6 @@ export default function CreatorProfile() {
                       {bio}
                     </p>
 
-                    {/* Niches Subsection */}
-                    <div className="pt-3 border-t border-border-theme/60 space-y-2.5">
-                      <div className="flex items-center gap-2">
-                        <LayersIcon className="w-4 h-4 text-black dark:text-white" />
-                        <span className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-foreground font-sans">
-                          Niches
-                        </span>
-                        {niches.length > 0 && (
-                          <span className="text-xs text-text-secondary font-sans">({niches.length})</span>
-                        )}
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {niches.length > 0 ? (
-                          niches.map((niche) => (
-                            <span
-                              key={niche}
-                              className="px-3.5 py-1 rounded-xl text-xs font-medium bg-secondary/15 text-secondary border border-secondary/30 font-sans"
-                            >
-                              {niche}
-                            </span>
-                          ))
-                        ) : (
-                          <span className="text-xs text-text-secondary font-sans">No niches selected</span>
-                        )}
-                      </div>
-                    </div>
-
                     {/* Keywords Subsection */}
                     <div className="pt-3 border-t border-border-theme/60 space-y-2.5">
                       <div className="flex items-center gap-2">
@@ -1821,7 +1732,7 @@ export default function CreatorProfile() {
                       Creator Identity & Bio
                     </h2>
                     <p className="text-xs text-text-secondary font-sans mt-0.5">
-                      Basic information about your creator identity, niche, and profile photo.
+                      Basic information about your creator identity, category, and profile photo.
                     </p>
                   </div>
                 </div>
@@ -1983,94 +1894,9 @@ export default function CreatorProfile() {
                       rows={2}
                       value={formData.bio}
                       onChange={handleInputChange}
-                      placeholder="Brief description of your content aesthetic and niche..."
+                      placeholder="Brief description of your content aesthetic and category..."
                       className="w-full bg-white dark:bg-surface border border-slate-300 dark:border-border-theme text-foreground text-xs sm:text-sm rounded-xl px-3.5 py-2 focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/40 transition-colors resize-y"
                     />
-                  </div>
-                </div>
-
-                {/* Section: Niches (Select up to 3) */}
-                <div className="space-y-3 pt-3 border-t border-border-theme/60 font-sans">
-                  <div className="flex items-center justify-between flex-wrap gap-2">
-                    <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
-                      Niches (Select up to 3) *
-                    </label>
-                    <span className="text-xs font-semibold text-secondary">
-                      {formData.niches.length}/3 selected
-                    </span>
-                  </div>
-
-                  {/* Taxonomy Filter Bar */}
-                  <div className="relative">
-                    <SearchIcon className="w-4 h-4 text-text-secondary absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                    <input
-                      type="text"
-                      disabled={isSubmitting}
-                      value={nicheSearch}
-                      onChange={(e) => setNicheSearch(e.target.value)}
-                      placeholder="Filter niche options by name or description..."
-                      className="w-full bg-white dark:bg-surface border border-slate-300 dark:border-border-theme text-foreground placeholder:text-text-secondary/50 text-xs rounded-xl pl-9 pr-8 py-2.5 focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/40 transition-colors"
-                    />
-                    {nicheSearch && (
-                      <button
-                        type="button"
-                        onClick={() => setNicheSearch("")}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-foreground text-xs p-0.5 cursor-pointer"
-                        aria-label="Clear niche search"
-                      >
-                        ✕
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Niche Grid (3 columns on desktop matching reference image) */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 max-h-[340px] overflow-y-auto pr-1">
-                    {CATEGORIES.filter((cat) => {
-                      if (!nicheSearch.trim()) return true;
-                      const term = nicheSearch.toLowerCase();
-                      return (
-                        cat.name.toLowerCase().includes(term) ||
-                        cat.desc.toLowerCase().includes(term)
-                      );
-                    }).map((cat) => {
-                      const isSelected = formData.niches.includes(cat.name);
-                      const Icon = cat.icon;
-
-                      return (
-                        <button
-                          key={cat.id}
-                          type="button"
-                          disabled={isSubmitting}
-                          onClick={() => handleNicheToggle(cat.name)}
-                          className={`group relative text-left p-3.5 rounded-xl border transition-all duration-200 cursor-pointer flex items-center justify-between gap-3 ${
-                            isSelected
-                              ? "bg-[#ffeef3] dark:bg-secondary/15 border-secondary/60 text-foreground shadow-xs ring-1 ring-secondary/30"
-                              : "bg-white dark:bg-surface border-border-theme hover:bg-slate-50 dark:hover:bg-surface-muted hover:border-secondary/40 text-foreground"
-                          } ${isSubmitting ? "opacity-60 cursor-not-allowed" : ""}`}
-                        >
-                          <div className="flex items-start gap-3 min-w-0">
-                            <div className="p-1 rounded-lg text-black dark:text-white shrink-0 mt-0.5">
-                              <Icon className="w-4 h-4" />
-                            </div>
-
-                            <div className="min-w-0">
-                              <h3 className="text-xs sm:text-sm font-semibold truncate text-foreground">
-                                {cat.name}
-                              </h3>
-                              <p className="text-[11px] text-text-secondary line-clamp-1 mt-0.5 leading-snug">
-                                {cat.desc}
-                              </p>
-                            </div>
-                          </div>
-
-                          {isSelected && (
-                            <span className="w-4 h-4 rounded-full bg-black text-white flex items-center justify-center shrink-0">
-                              <CheckIcon className="w-2.5 h-2.5 stroke-[3]" />
-                            </span>
-                          )}
-                        </button>
-                      );
-                    })}
                   </div>
                 </div>
 

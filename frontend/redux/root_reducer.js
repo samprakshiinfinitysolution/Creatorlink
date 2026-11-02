@@ -7,7 +7,6 @@ import profileReducer from "./creator/profile/profile_slice";
 import portfolioReducer from "./creator/portfolio/portfolio_slice";
 import servicesReducer from "./creator/services/services_slice";
 import creatorCampaignsReducer from "./creator/campaigns/campaigns_slice";
-import creatorBookingsReducer from "./creator/bookings/bookings_slice";
 import brandProfileReducer from "./brand/profile/profile_slice";
 import brandCampaignsReducer from "./brand/campaigns/campaigns_slice";
 import brandBookingsReducer from "./brand/bookings/bookings_slice";
@@ -24,16 +23,18 @@ import brandNotificationsReducer from "./brand/notifications/notifications_slice
 import creatorNotificationsReducer from "./creator/notifications/notifications_slice";
 import brandDashboardReducer from "./brand/dashboard/dashboard_slice";
 import creatorDashboardReducer from "./creator/dashboard/dashboard_slice";
-
+import adminAuthReducer from "./admin/auth/admin_auth_slice";
+import adminUsersReducer from "./admin/users/users_slice";
+import adminVerificationReducer from "./admin/verification/verification_slice";
+import adminCampaignsReducer from "./admin/campaigns/campaigns_slice";
+import adminCollaborationsReducer from "./admin/collaborations/collaborations_slice";
 
 const rootReducer = combineReducers({
-
     auth: authReducer,
     profile: profileReducer,
     portfolio: portfolioReducer,
     services: servicesReducer,
     creatorCampaigns: creatorCampaignsReducer,
-    creatorBookings: creatorBookingsReducer,
     brandProfile: brandProfileReducer,
     brandCampaigns: brandCampaignsReducer,
     brandBookings: brandBookingsReducer,
@@ -49,9 +50,12 @@ const rootReducer = combineReducers({
     brandNotifications: brandNotificationsReducer,
     creatorNotifications: creatorNotificationsReducer,
     brandDashboard: brandDashboardReducer,
-    creatorDashboard: creatorDashboardReducer
-
+    creatorDashboard: creatorDashboardReducer,
+    adminAuth: adminAuthReducer,
+    adminUsers: adminUsersReducer,
+    adminVerification: adminVerificationReducer,
+    adminCampaigns: adminCampaignsReducer,
+    adminCollaborations: adminCollaborationsReducer
 });
 
-
-export default rootReducer;
+export default rootReducer;

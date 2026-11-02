@@ -13,13 +13,19 @@ import {
     updateProfileValidation
 } from "./profile.validation.js";
 
+import {
+    submitUserVerification,
+    getUserVerificationStatus
+} from "../../admin/verification/verification.controller.js";
+
+import {
+    validateSubmitVerificationBody
+} from "../../admin/verification/verification.validation.js";
 
 const router = express.Router();
 
-
 // All creator profile APIs require authentication.
 router.use(authenticateUser);
-
 
 // Create creator profile.
 router.post(
@@ -28,13 +34,11 @@ router.post(
     createProfile
 );
 
-
 // Get logged-in creator profile.
 router.get(
     "/me",
     getMyProfile
 );
-
 
 // Update logged-in creator profile.
 router.patch(
@@ -43,5 +47,17 @@ router.patch(
     updateMyProfile
 );
 
+// Submit verification request for creator.
+router.post(
+    "/verification",
+    validateSubmitVerificationBody,
+    submitUserVerification
+);
+
+// Get verification status and history for creator.
+router.get(
+    "/verification",
+    getUserVerificationStatus
+);
 
 export default router;

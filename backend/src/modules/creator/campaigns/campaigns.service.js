@@ -84,9 +84,10 @@ const getDiscoverCampaignsService = async (query = {}) => {
     } = getPagination(page, limit);
 
 
-    // Only published campaigns are discoverable.
+    // Only published and non-restricted campaigns are discoverable.
     const filter = {
-        status: "published"
+        status: "published",
+        "moderation.isRestricted": { $ne: true }
     };
 
 
@@ -196,7 +197,8 @@ const getDiscoverCampaignByIdService = async (campaignId) => {
 
     const campaign = await Campaign.findOne({
         _id: campaignId,
-        status: "published"
+        status: "published",
+        "moderation.isRestricted": { $ne: true }
     });
 
 

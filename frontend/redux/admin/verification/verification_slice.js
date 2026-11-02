@@ -1,0 +1,198 @@
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import {
+    getAdminVerifications as getAdminVerificationsApi,
+    getAdminVerificationById as getAdminVerificationByIdApi,
+    approveVerification as approveVerificationApi,
+    rejectVerification as rejectVerificationApi
+} from "./verification_api";
+import { logout, clearAuth } from "../../auth/auth_slice";
+
+// Handles fetching verification requests with query parameters
+export const fetchVerifications = createAsyncThunk(
+    "adminVerification/fetchVerifications",
+    async (params = {}, { rejectWithValue }) => {
+        try {
+            return await getAdminVerificationsApi(params);
+        } catch (error) {
+            return rejectWithValue(
+                error.response?.data?.message || "Failed to fetch verification requests"
+            );
+        }
+    }
+);
+
+// Handles fetching single verification dossier by ID
+export const fetchVerificationDetails = createAsyncThunk(
+    "adminVerification/fetchVerificationDetails",
+    async (id, { rejectWithValue }) => {
+        try {
+            return await getAdminVerificationByIdApi(id);
+        } catch (error) {
+            return rejectWithValue(
+                error.response?.data?.message || "Failed to fetch verification request details"
+            );
+        }
+    }
+);
+
+// Handles approving a verification request
+export const approveVerificationRequest = createAsyncThunk(
+    "adminVerification/approveVerificationRequest",
+    async (id, { rejectWithValue }) => {
+        try {
+            return await approveVerificationApi(id);
+        } catch (error) {
+            return rejectWithValue(
+                error.response?.data?.message || "Failed to approve verification request"
+            );
+        }
+    }
+);
+
+// Handles rejecting a verification request with reason
+export const rejectVerificationRequest = createAsyncThunk(
+    "adminVerification/rejectVerificationRequest",
+    async ({ id, rejectionReason }, { rejectWithValue }) => {
+        try {
+            return await rejectVerificationApi(id, rejectionReason);
+        } catch (error) {
+            return rejectWithValue(
+                error.response?.data?.message || "Failed to reject verification request"
+            );
+        }
+    }
+);
+
+const initialState = {
+    verifications: [],
+    pagination: {
+        page: 1,
+        limit: 10,
+        totalItems: 0,
+        totalPages: 0
+    },
+    selectedVerification: null,
+    loading: false,
+    detailsLoading: false,
+    actionLoading: false,
+    error: null,
+    detailsError: null,
+    actionError: null
+};
+
+const adminVerificationSlice = createSlice({
+    name: "adminVerification",
+    initialState,
+    reducers: {
+        clearSelectedVerification: (state) => {
+            state.selectedVerification = null;
+            state.detailsError = null;
+        },
+        clearVerificationError: (state) => {
+            state.error = null;
+            state.actionError = null;
+        }
+    },
+    extraReducers: (builder) => {
+        builder
+            // List
+            .addCase(fetchVerifications.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchVerifications.fulfilled, (state, action) => {
+                state.loading = false;
+                state.verifications = action.payload.data?.verifications || [];
+                state.pagination = action.payload.data?.pagination || state.pagination;
+            })
+            .addCase(fetchVerifications.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+
+            // Details
+            .addCase(fetchVerificationDetails.pending, (state) => {
+                state.detailsLoading = true;
+                state.detailsError = null;
+            })
+            .addCase(fetchVerificationDetails.fulfilled, (state, action) => {
+                state.detailsLoading = false;
+                state.selectedVerification = action.payload.data || null;
+            })
+            .addCase(fetchVerificationDetails.rejected, (state, action) => {
+                state.detailsLoading = false;
+                state.detailsError = action.payload;
+            })
+
+            // Approve
+            .addCase(approveVerificationRequest.pending, (state) => {
+                state.actionLoading = true;
+                state.actionError = null;
+            })
+            .addCase(approveVerificationRequest.fulfilled, (state, action) => {
+                state.actionLoading = false;
+                const updated = action.payload.data;
+                if (updated) {
+                    state.verifications = state.verifications.map((item) =>
+                        item._id === updated._id
+                            ? { ...item, status: "approved", reviewedAt: updated.reviewedAt }
+                            : item
+                    );
+                    if (state.selectedVerification?._id === updated._id) {
+                        state.selectedVerification = {
+                            ...state.selectedVerification,
+                            ...updated
+                        };
+                    }
+                }
+            })
+            .addCase(approveVerificationRequest.rejected, (state, action) => {
+                state.actionLoading = false;
+                state.actionError = action.payload;
+            })
+
+            // Reject
+            .addCase(rejectVerificationRequest.pending, (state) => {
+                state.actionLoading = true;
+                state.actionError = null;
+            })
+            .addCase(rejectVerificationRequest.fulfilled, (state, action) => {
+                state.actionLoading = false;
+                const updated = action.payload.data;
+                if (updated) {
+                    state.verifications = state.verifications.map((item) =>
+                        item._id === updated._id
+                            ? {
+                                  ...item,
+                                  status: "rejected",
+                                  reviewedAt: updated.reviewedAt,
+                                  rejectionReason: updated.rejectionReason
+                              }
+                            : item
+                    );
+                    if (state.selectedVerification?._id === updated._id) {
+                        state.selectedVerification = {
+                            ...state.selectedVerification,
+                            ...updated
+                        };
+                    }
+                }
+            })
+            .addCase(rejectVerificationRequest.rejected, (state, action) => {
+                state.actionLoading = false;
+                state.actionError = action.payload;
+            })
+
+            // Reset on logout
+            .addCase(logout.fulfilled, () => initialState)
+            .addCase(clearAuth, () => initialState);
+    }
+});
+
+export const {
+    clearSelectedVerification,
+    clearVerificationError
+} = adminVerificationSlice.actions;
+
+export default adminVerificationSlice.reducer;
+

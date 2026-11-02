@@ -153,17 +153,10 @@ const profileSchema = new mongoose.Schema(
             default: true
         },
 
-        // Indicates whether the creator has completed the guided onboarding flow.
-        isOnboarded: {
+        // Verification badge activated exclusively via approved admin verification request.
+        isVerifiedBadge: {
             type: Boolean,
             default: false
-        },
-
-        // Starting collaboration rate / base price (INR).
-        startingRate: {
-            type: Number,
-            min: 0,
-            default: 0
         }
     },
     {

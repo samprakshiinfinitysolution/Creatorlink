@@ -12,25 +12,25 @@ const DESKTOP_TESTIMONIALS = [
   {
     id: "nadine-rossi",
     quote:
-      '"We replaced four fragmented agencies with Maison Synergie. Sourcing 25 high-end creators for our Milan showroom took under 48 hours. The content caliber is unmatched."',
+      '"We replaced fragmented agencies with CreatorLink. Finding the right creators for our campaign took under 48 hours. The content caliber and workflow are unmatched."',
     name: "Nadine Rossi",
-    role: "Global VP Creative, Milan Luxury House",
+    role: "Marketing VP, D2C Lifestyle Brand",
     rating: 5,
   },
   {
     id: "felix-saint-laurent",
     quote:
-      '"The escrow mechanism completely transformed my creative business. I no longer feel awkward discussing budgets or chasing Net-90 checks. It\'s pure focus on craft."',
+      '"CreatorLink completely transformed my creative business. Clear briefs, direct communication, and prompt payouts let me focus 100% on creating great content."',
     name: "Félix Saint-Laurent",
-    role: "@felix.create • 640K Followers",
+    role: "Lifestyle & UGC Creator • 640K Reach",
     rating: 5,
   },
   {
     id: "david-keller",
     quote:
-      '"The Whitelisting automation alone saved our growth team weeks of back-and-forth permissions. Direct code sync directly with Meta Ads Manager is flawless."',
+      '"Managing campaigns from brief to video submission and approvals in one place saved our team countless hours. The platform makes collaborations effortless."',
     name: "David H. Keller",
-    role: "Head of Growth, Aura Parfums",
+    role: "Head of Growth, Premium Brand",
     rating: 5,
   },
 ];
@@ -40,7 +40,7 @@ const MOBILE_TESTIMONIALS = [
   {
     id: "claire-monet",
     quote:
-      '"Maison Synergie transformed our fashion week campaign. What used to take 6 weeks of negotiations was live in 72 hours with 4.8x higher conversion."',
+      '"CreatorLink made brand collaborations seamless. Sourcing creators and getting high-converting video deliverables happened in just days."',
     name: "Claire Monet",
     role: "Global Brand Director, Aura Luxury",
     initials: "CM",
@@ -48,17 +48,17 @@ const MOBILE_TESTIMONIALS = [
   {
     id: "nadine-rossi-m",
     quote:
-      '"We replaced four fragmented agencies with Maison Synergie. Sourcing 25 high-end creators for our Milan showroom took under 48 hours. The content caliber is unmatched."',
+      '"We replaced fragmented agencies with CreatorLink. Finding the right creators for our campaign took under 48 hours. The content caliber and workflow are unmatched."',
     name: "Nadine Rossi",
-    role: "Global VP Creative, Milan Luxury House",
+    role: "Marketing VP, D2C Lifestyle Brand",
     initials: "NR",
   },
   {
     id: "felix-m",
     quote:
-      '"The escrow mechanism completely transformed my creative business. I no longer feel awkward discussing budgets or chasing Net-90 checks. It\'s pure focus on craft."',
+      '"CreatorLink completely transformed my creative business. Clear briefs, direct communication, and prompt payouts let me focus 100% on creating great content."',
     name: "Félix Saint-Laurent",
-    role: "@felix.create • 640K Followers",
+    role: "Lifestyle & UGC Creator • 640K Reach",
     initials: "FS",
   },
 ];
@@ -78,10 +78,10 @@ export default function SalonTestimonials() {
         ========================================================= */}
         <ScrollReveal direction="up" className="text-center max-w-3xl mx-auto mb-10 sm:mb-12 md:mb-16">
           <span className="text-[11px] font-bold tracking-[0.25em] uppercase text-secondary block mb-3">
-            SALON TESTIMONIALS
+            COMMUNITY STORIES
           </span>
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-[40px] font-serif font-medium tracking-tight text-foreground leading-[1.2]">
-            What happens inside the Synergie ecosystem.
+            Trusted by Brands and Creators Alike.
           </h2>
         </ScrollReveal>
 

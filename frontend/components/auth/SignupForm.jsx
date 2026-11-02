@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { register, loginWithGoogle, verifyOtp } from "@/redux/auth/auth_slice";
 import { getGoogleClientId, resendVerificationOtp } from "@/redux/auth/auth_api";
@@ -83,13 +83,23 @@ function AppleIcon({ className = "w-5 h-5" }) {
 // =========================================================
 export default function SignupForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const dispatch = useDispatch();
+
+  const paramRole = searchParams?.get("role");
+  const initialRole = paramRole === "brand" ? "brand" : "creator";
 
   const [step, setStep] = useState("form"); // "form" | "otp"
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("creator");
+  const [role, setRole] = useState(initialRole);
+
+  useEffect(() => {
+    if (paramRole === "brand" || paramRole === "creator") {
+      setRole(paramRole);
+    }
+  }, [paramRole]);
 
   const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);

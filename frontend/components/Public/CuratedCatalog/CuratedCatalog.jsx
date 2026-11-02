@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import Image from "next/image";
 import ScrollReveal from "@/components/theme/ScrollReveal";
 
@@ -12,14 +13,14 @@ const CREATORS = [
     id: "elena-vance",
     name: "Elena Vance",
     handle: "@elenavance",
-    category: "Haute Fashion",
-    location: "Paris, FR",
+    category: "Fashion & Lifestyle",
+    location: "Mumbai, IN",
     image:
       "https://res.cloudinary.com/atr5osne/image/upload/v1792054698/creatorlink/public/avatars/gye9m9prpdv81gc9ipkp.webp",
     badge: "TRENDING #1",
     badgeColor: "bg-secondary text-white",
     fit: "98% Fit",
-    baseRate: "From $650",
+    baseRate: "From ₹25,000",
     audience: "485K",
     engagement: "5.8%",
     avgDeliverable: "48h turnaround",
@@ -28,14 +29,14 @@ const CREATORS = [
     id: "camille-blanc",
     name: "Camille Blanc",
     handle: "@camille.blanc",
-    category: "Beauty & Editorial",
-    location: "Milan, IT",
+    category: "Beauty & Skincare",
+    location: "Delhi, IN",
     image:
       "https://res.cloudinary.com/atr5osne/image/upload/v1792054701/creatorlink/public/avatars/qooau1mzc4okikpsrqri.webp",
     badge: "LIVE COLLAB",
     badgeColor: "bg-emerald-500 text-white dark:bg-emerald-600",
     fit: "96% Fit",
-    baseRate: "From $1,200",
+    baseRate: "From ₹45,000",
     audience: "920K",
     engagement: "7.2%",
     avgDeliverable: "24h express",
@@ -44,14 +45,14 @@ const CREATORS = [
     id: "kenji-sato",
     name: "Kenji Sato",
     handle: "@kenjisato",
-    category: "Minimal Tech",
-    location: "Tokyo, JP",
+    category: "Tech & Gadgets",
+    location: "Bengaluru, IN",
     image:
       "https://res.cloudinary.com/atr5osne/image/upload/v1792054706/creatorlink/public/avatars/qvmu4uqdqpexdchfnvys.webp",
     badge: "VERIFIED PRO",
     badgeColor: "bg-tertiary text-white dark:bg-purple-600",
     fit: "99% Fit",
-    baseRate: "From $980",
+    baseRate: "From ₹35,000",
     audience: "310K",
     engagement: "6.4%",
     avgDeliverable: "3-day delivery",
@@ -60,14 +61,14 @@ const CREATORS = [
     id: "astrid-lind",
     name: "Astrid Lind",
     handle: "@astrid.lind",
-    category: "Fine Art & Travel",
-    location: "Stockholm, SE",
+    category: "Travel & Lifestyle",
+    location: "Goa, IN",
     image:
       "https://res.cloudinary.com/atr5osne/image/upload/v1792054710/creatorlink/public/avatars/ra9dirifievmiawd57yl.webp",
     badge: "FAST RESPONSE",
     badgeColor: "bg-amber-500 text-white dark:bg-amber-600",
     fit: "94% Fit",
-    baseRate: "From $550",
+    baseRate: "From ₹20,000",
     audience: "215K",
     engagement: "8.9%",
     avgDeliverable: "24h response",
@@ -150,18 +151,18 @@ function CreatorCard({ creator }) {
 
         {/* DESKTOP HOVER OVERLAY BUTTONS (Media Kit & Book Now) */}
         <div className="hidden md:flex absolute inset-0 z-20 items-center justify-center gap-2.5 px-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-[2px] bg-black/30">
-          <button
-            type="button"
+          <Link
+            href="/creators"
             className="inline-flex items-center justify-center bg-white text-black font-semibold text-xs py-2.5 px-4 rounded-full shadow-md hover:bg-gray-100 hover:scale-105 transition-all cursor-pointer whitespace-nowrap"
           >
             Media Kit
-          </button>
-          <button
-            type="button"
+          </Link>
+          <Link
+            href="/signup?role=brand"
             className="inline-flex items-center justify-center bg-secondary text-white font-semibold text-xs py-2.5 px-4 rounded-full shadow-md hover:bg-secondary-dark hover:scale-105 transition-all cursor-pointer whitespace-nowrap"
           >
             Book Now
-          </button>
+          </Link>
         </div>
       </div>
 
@@ -221,12 +222,12 @@ function CreatorCard({ creator }) {
 
         {/* MOBILE ONLY BOTTOM ACTIONS (Send Campaign Brief + Bookmark Button) */}
         <div className="flex md:hidden items-center gap-2 pt-1">
-          <button
-            type="button"
+          <Link
+            href="/signup?role=brand"
             className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-primary text-white dark:bg-white dark:text-black hover:bg-secondary dark:hover:bg-secondary dark:hover:text-white py-2.5 px-4 text-xs font-semibold shadow-xs transition-all cursor-pointer"
           >
             <span>Send Campaign Brief</span>
-          </button>
+          </Link>
 
           <button
             type="button"
@@ -262,18 +263,18 @@ export default function CuratedCatalog() {
         <ScrollReveal direction="up" className="flex md:hidden items-center justify-between mb-6">
           <div>
             <h2 className="text-xl font-bold font-serif tracking-tight text-foreground">
-              Curated Tastemakers
+              Featured Creators
             </h2>
             <p className="text-xs text-text-secondary mt-0.5">
-              Top-tier engagement & verified authenticity
+              Top engagement, verified profiles & high impact
             </p>
           </div>
-          <button
-            type="button"
+          <Link
+            href="/creators"
             className="text-xs font-bold tracking-wider text-secondary uppercase hover:underline cursor-pointer shrink-0 ml-2"
           >
             VIEW ALL (184)
-          </button>
+          </Link>
         </ScrollReveal>
 
         {/* =========================================================
@@ -282,7 +283,7 @@ export default function CuratedCatalog() {
         <ScrollReveal direction="up" className="hidden md:flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
           <div className="max-w-xl">
             <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-secondary block mb-2">
-              CURATED CATALOG
+              FEATURED CREATORS
             </span>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-medium tracking-tight text-foreground leading-[1.15]">
               Your next collaboration is here.
@@ -290,8 +291,8 @@ export default function CuratedCatalog() {
           </div>
           <div className="max-w-md">
             <p className="text-sm lg:text-base text-text-secondary leading-relaxed">
-              Hand-vetted tastemakers with algorithmic authenticity audits, verified audience
-              metrics, and transparent deliverables.
+              Hand-vetted creators with authentic audience metrics, clear pricing,
+              and reliable campaign deliverables.
             </p>
           </div>
         </ScrollReveal>
@@ -316,13 +317,13 @@ export default function CuratedCatalog() {
             CENTERED CTA BUTTON (DESKTOP ONLY)
         ========================================================= */}
         <ScrollReveal direction="up" delay={200} className="hidden md:flex mt-12 md:mt-14 justify-center">
-          <button
-            type="button"
+          <Link
+            href="/creators"
             className="inline-flex items-center gap-2 rounded-full border border-border-theme bg-surface text-foreground text-xs md:text-sm font-semibold px-7 py-3.5 shadow-sm hover:border-secondary dark:hover:border-secondary hover:shadow-[0_0_25px_rgba(255,79,135,0.35)] dark:hover:shadow-[0_0_25px_rgba(255,79,135,0.25)] transition-all duration-300 transform hover:scale-[1.02] cursor-pointer"
           >
             <span>View All 1,480 Curated Creators</span>
             <ArrowRightIcon className="w-4 h-4 ml-0.5 text-foreground" />
-          </button>
+          </Link>
         </ScrollReveal>
       </div>
     </section>

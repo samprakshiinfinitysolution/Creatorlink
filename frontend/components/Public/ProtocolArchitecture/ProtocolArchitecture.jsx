@@ -12,34 +12,34 @@ const DESKTOP_CARDS = [
   {
     id: "01",
     number: "01",
-    title: "Discover",
+    title: "Discover & Match",
     description:
-      "Find our exclusive roster by verified engagement, sentiment, and audience demographics.",
-    tag: "Audited Demographics",
+      "Brands find creators matching their niche, audience, and campaign needs. Creators discover genuine paid brand opportunities.",
+    tag: "Verified Matching",
   },
   {
     id: "02",
     number: "02",
-    title: "Connect & Escrow",
+    title: "Connect & Brief",
     description:
-      "Issue standardized offers. Funds lock safely in escrow upon creative deal acceptance.",
-    tag: "Smart Vault Custody",
+      "Share detailed campaign briefs, negotiate deliverables, agree on clear milestones, and communicate directly in real time.",
+    tag: "Direct Briefing",
   },
   {
     id: "03",
     number: "03",
-    title: "Review & Refine",
+    title: "Create & Review",
     description:
-      "High-definition video drafts in private viewer with timestamp feedback and click approval.",
-    tag: "Timestamp Inspector",
+      "Creators produce content according to the brief, submit drafts for brand review, and implement quick revisions seamlessly.",
+    tag: "Fast Approvals",
   },
   {
     id: "04",
     number: "04",
-    title: "Scale & Whitelist",
+    title: "Deliver & Earn",
     description:
-      "Release payment instantly. Sync high-res ad authorization directly to TikTok Ads and Meta Business Manager in real time.",
-    tag: "Instant Global Boost",
+      "Brands approve final deliverables, launch high-performing campaigns, and creators receive prompt, reliable payments.",
+    tag: "Reliable Payments",
   },
 ];
 
@@ -48,26 +48,26 @@ const MOBILE_CARDS = [
   {
     id: "m-01",
     numberHeader: "01 DISCOVER",
-    title: "Vetted Salon",
-    description: "Pre-screened metrics & aesthetic fit.",
+    title: "Find Matches",
+    description: "Search verified creators & campaigns.",
   },
   {
     id: "m-02",
     numberHeader: "02 CONNECT",
-    title: "Smart Escrow",
-    description: "Locked funds until both sides approve.",
+    title: "Brief & Chat",
+    description: "Direct communication & clear milestones.",
   },
   {
     id: "m-03",
     numberHeader: "03 REFINE",
-    title: "Frame Review",
-    description: "Interactive 4K deliverable markup.",
+    title: "Content Review",
+    description: "Submit drafts & get timely feedback.",
   },
   {
     id: "m-04",
     numberHeader: "04 SCALE",
-    title: "Ad Whitelisting",
-    description: "Push high-performing reels to ads.",
+    title: "Payout & Launch",
+    description: "Approved content & reliable payments.",
   },
 ];
 
@@ -86,10 +86,10 @@ export default function ProtocolArchitecture() {
         ========================================================= */}
         <ScrollReveal direction="up" className="hidden md:block text-center max-w-3xl mx-auto mb-12 lg:mb-16">
           <span className="text-[11px] font-bold tracking-[0.25em] uppercase text-secondary block mb-3">
-            PROTOCOL ARCHITECTURE
+            HOW IT WORKS
           </span>
           <h2 className="text-3xl md:text-4xl lg:text-[40px] font-serif font-medium tracking-tight text-foreground leading-[1.2]">
-            Collaboration distilled down to four refined movements.
+            Simple, transparent collaboration in four steps.
           </h2>
         </ScrollReveal>
 
@@ -141,7 +141,7 @@ export default function ProtocolArchitecture() {
         <div className="block md:hidden">
           <ScrollReveal direction="up">
             <h2 className="text-2xl font-serif font-medium tracking-tight text-foreground mb-6">
-              How Maison Operates
+              How Collaborations Work
             </h2>
           </ScrollReveal>
 

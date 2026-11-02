@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import Image from "next/image";
 import ScrollReveal from "@/components/theme/ScrollReveal";
 
@@ -8,85 +9,85 @@ import ScrollReveal from "@/components/theme/ScrollReveal";
 // CENTRALIZED MOCK DATA (UI ONLY - READY FOR API REPLACEMENT)
 // =========================================================
 const MONETIZATION_DATA = {
-  eyebrow: "CREATOR MONETIZATION SUITE",
-  title: "Your content deserves more than likes.",
+  eyebrow: "FOR CONTENT CREATORS",
+  title: "Turn your creativity into paid brand collaborations.",
   description:
-    "Stop waiting 90 days for brand checks. Maison Synergie gives you a bespoke, couture storefront with guaranteed upfront escrow payments, zero chasing invoices, and direct access to luxury European & American houses.",
+    "Get discovered by genuine brands, receive paid campaign offers, chat directly with decision-makers, and manage your collaborations with transparent terms and prompt payouts.",
   features: [
     {
       id: "pre-funded",
-      title: "Pre-funded contracts before you pick up the camera",
+      title: "Direct campaign offers tailored to your niche",
       description:
-        "Brands fund the full creative fee into escrow upon proposal acceptance.",
+        "Receive briefs and proposals directly from brands looking for your audience and content style.",
       icon: "banknote",
     },
     {
       id: "legally-vetted",
-      title: "Standardized legally vetted IP & usage rights agreements",
+      title: "Clear deliverables and campaign briefs",
       description:
-        "Every deal clearly outlines whitelisting duration, licensing territory, and organic rights.",
+        "Every collaboration specifies content requirements, delivery timelines, and usage rights clearly.",
       icon: "legal",
     },
     {
       id: "same-day",
-      title: "Same-day payouts via Stripe, Wise, or direct bank transfer",
+      title: "Transparent and reliable payments",
       description:
-        "Escrow unlocks immediately when content delivery milestones are checked off.",
+        "Submit your deliverables, get fast approvals, and receive payments securely.",
       icon: "lightning",
     },
   ],
-  ctaText: "Create Your Creator Profile",
+  ctaText: "Join as a Creator",
   creator: {
     name: "Juliette Moreau",
-    handleLocation: "@juliette.moreau • Paris & New York",
+    handleLocation: "@juliette.moreau • Fashion & Lifestyle",
     avatar:
       "https://res.cloudinary.com/atr5osne/image/upload/v1792054698/creatorlink/public/avatars/gye9m9prpdv81gc9ipkp.webp",
     initials: "JM",
-    pendingLabel: "PENDING ESCROW",
-    pendingAmount: "$6,420.00 USD",
-    menuLabel: "COUTURE DELIVERABLE MENU",
+    pendingLabel: "PENDING EARNINGS",
+    pendingAmount: "₹48,500 INR",
+    menuLabel: "COLLABORATION RATE CARD",
     desktopDeliverables: [
       {
         id: "tiktok",
-        title: "Dedicated TikTok Video",
+        title: "Dedicated Video Reel",
         subtext: "60s 4K UHD, 1 revision round included",
-        price: "$450",
+        price: "₹18,000",
         type: "video",
       },
       {
         id: "carousel",
         title: "Instagram Carousel",
         subtext: "6-slide editorial still story + caption craft",
-        price: "$680",
+        price: "₹12,000",
         type: "image",
       },
       {
         id: "whitelisting",
-        title: "Global Ads Whitelisting",
+        title: "Brand Whitelisting & Ads",
         subtext: "30-day direct Spark Ads & Meta token authorization",
-        price: "$220",
+        price: "₹8,000",
         type: "rocket",
       },
     ],
     mobileDeliverables: [
       {
         id: "m-tiktok",
-        title: "Dedicated TikTok Video (60s)",
-        price: "$450",
+        title: "Dedicated Video Reel (60s)",
+        price: "₹18,000",
       },
       {
         id: "m-carousel",
         title: "Instagram Carousel (3 Slides)",
-        price: "$680",
+        price: "₹12,000",
       },
       {
         id: "m-whitelisting",
         title: "Global Ads Whitelisting (30 Days)",
-        price: "$220",
+        price: "₹8,000",
       },
     ],
     mobileCardTitle: "Juliette Moreau Rate Card",
-    mobileCardSubtext: "Verified Creator Tier 1 • $6,420 Escrow Balance",
+    mobileCardSubtext: "Active Creator • ₹48,500 Earnings Tracked",
   },
 };
 
@@ -292,15 +293,15 @@ export default function CreatorMonetization() {
 
             {/* CTA BUTTON */}
             <div>
-              <button
-                type="button"
+              <Link
+                href="/signup?role=creator"
                 className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full bg-primary text-white dark:bg-white dark:text-black hover:bg-secondary hover:text-white dark:hover:bg-secondary dark:hover:text-white hover:shadow-[0_0_25px_rgba(255,79,135,0.4)] text-xs font-semibold shadow-xs transition-all duration-300 cursor-pointer group"
               >
                 <span>{ctaText}</span>
                 <span className="group-hover:translate-x-1 transition-transform duration-300 text-sm">
                   →
                 </span>
-              </button>
+              </Link>
             </div>
           </ScrollReveal>
 
@@ -388,13 +389,13 @@ export default function CreatorMonetization() {
                     <span>Stripe Verified Vault</span>
                   </div>
 
-                  <button
-                    type="button"
+                  <Link
+                    href="/how-it-works"
                     className="text-xs font-semibold text-secondary hover:underline cursor-pointer inline-flex items-center gap-1 transition-all"
                   >
                     <span>Instant Bank Transfer</span>
                     <span>→</span>
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>

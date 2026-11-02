@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Link from "next/link";
 import ScrollReveal from "@/components/theme/ScrollReveal";
 
 const PLATFORM_OPTIONS = [
@@ -27,20 +28,20 @@ const AUDIENCE_OPTIONS = [
 ];
 
 const BUDGET_OPTIONS = [
-  "$200 - $1,000",
-  "$1,000 - $5,000",
-  "$5,000 - $25,000",
-  "Custom Retainer",
+  "₹10,000 - ₹25,000",
+  "₹25,000 - ₹50,000",
+  "₹50,000 - ₹1,50,000",
+  "Custom Budget",
 ];
 
 const CATEGORIES = [
-  { name: "All Salons", count: "12.4k" },
-  { name: "Haute Fashion", count: "2.4k" },
-  { name: "Beauty & Skin", count: "1.8k" },
-  { name: "UGC & Micro-Film", count: "950" },
-  { name: "Travel & Hideaways", count: "1.2k" },
-  { name: "Fine Dining", count: "840" },
-  { name: "Minimal Tech", count: "610" },
+  { name: "All Categories", count: "12.4k" },
+  { name: "Fashion & Style", count: "2.4k" },
+  { name: "Beauty & Skincare", count: "1.8k" },
+  { name: "UGC & Video Reels", count: "950" },
+  { name: "Travel & Lifestyle", count: "1.2k" },
+  { name: "Food & Dining", count: "840" },
+  { name: "Tech & Gadgets", count: "610" },
 ];
 
 function ChevronDownIcon({ isOpen }) {
@@ -243,11 +244,11 @@ export default function CreatorDiscovery() {
               "
               style={{ fontFamily: "var(--font-playfair), serif" }}
             >
-              Find creators who fit your brand.
+              Discover verified creators for your brand.
             </h2>
 
             <p className="mt-2 text-[13px] leading-relaxed text-text-secondary min-[400px]:text-[14px] sm:mt-2.5 sm:text-[15px] lg:text-[16px]">
-              Filter instantly across 12,000+ vetted tastemakers with audited engagement.
+              Filter by niche, platform, audience size, and budget for high-impact collaborations.
             </p>
           </div>
 
@@ -343,8 +344,8 @@ export default function CreatorDiscovery() {
           />
 
           {/* 5. EXPLORE CTA */}
-          <button
-            type="button"
+          <Link
+            href="/creators"
             className="
               group flex h-[52px] min-h-[52px] w-full items-center justify-center gap-2.5
               rounded-[16px] min-[400px]:rounded-[18px] bg-primary px-6 text-[14px] font-semibold text-white
@@ -359,7 +360,7 @@ export default function CreatorDiscovery() {
             <span className="text-[17px] transition-transform duration-200 group-hover:translate-x-1">
               →
             </span>
-          </button>
+          </Link>
         </ScrollReveal>
 
         {/* ================= CATEGORY CHIPS ================= */}

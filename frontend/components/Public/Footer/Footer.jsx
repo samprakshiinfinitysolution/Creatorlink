@@ -1,49 +1,50 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 
 // =========================================================
 // FOOTER DATA
 // =========================================================
 const FOOTER_COLUMNS = [
   {
-    title: "DIRECTORY",
+    title: "EXPLORE",
     links: [
-      { label: "Editorial Index", href: "#" },
-      { label: "Lookbook", href: "#" },
-      { label: "Tastemakers", href: "#" },
-      { label: "Curation Board", href: "#" },
-      { label: "Haute Houses", href: "#" },
+      { label: "Find Creators", href: "/creators" },
+      { label: "For Brands", href: "/brands" },
+      { label: "How It Works", href: "/how-it-works" },
+      { label: "Pricing Plans", href: "/pricing" },
+      { label: "About CreatorLink", href: "/about" },
     ],
   },
   {
-    title: "PROTOCOL",
+    title: "COLLABORATE",
     links: [
-      { label: "Synergy Protocol", href: "#" },
-      { label: "Smart Escrow", href: "#" },
-      { label: "Frame Review", href: "#" },
-      { label: "Rights Whitelisting", href: "#" },
-      { label: "SLA Assurance", href: "#" },
+      { label: "Creator Onboarding", href: "/signup?role=creator" },
+      { label: "Brand Campaigns", href: "/signup?role=brand" },
+      { label: "Content Approval", href: "/how-it-works" },
+      { label: "Secure Payments", href: "/pricing" },
+      { label: "Creator Directory", href: "/creators" },
     ],
   },
   {
-    title: "CONCIERGE",
+    title: "COMPANY",
     links: [
-      { label: "Private Salon", href: "#" },
-      { label: "Campaign Desk", href: "#" },
-      { label: "Creative Directors", href: "#" },
-      { label: "Talent Advisory", href: "#" },
-      { label: "Enterprise", href: "#" },
+      { label: "About Us", href: "/about" },
+      { label: "Brand Solutions", href: "/brands" },
+      { label: "Pricing Overview", href: "/pricing" },
+      { label: "Workflow Guide", href: "/how-it-works" },
+      { label: "Contact Us", href: "/about" },
     ],
   },
   {
-    title: "CHARTER",
+    title: "GET STARTED",
     links: [
-      { label: "Legal Terms", href: "#" },
-      { label: "Privacy Charter", href: "#" },
-      { label: "Security & Escrow", href: "#" },
-      { label: "Code of Ethics", href: "#" },
-      { label: "Press Room", href: "#" },
+      { label: "Sign Up as Creator", href: "/signup?role=creator" },
+      { label: "Sign Up as Brand", href: "/signup?role=brand" },
+      { label: "Member Login", href: "/login" },
+      { label: "Explore Creators", href: "/creators" },
+      { label: "Brand Partnerships", href: "/brands" },
     ],
   },
 ];
@@ -63,20 +64,20 @@ export default function Footer() {
           <div className="lg:col-span-5 flex flex-col justify-between">
             <div>
               {/* Brand Logo Header */}
-              <a
-                href="#"
+              <Link
+                href="/"
                 className="group inline-flex items-center gap-1.5 font-serif text-xl sm:text-2xl font-medium text-white"
               >
                 <span className="tracking-wide transition-[letter-spacing] duration-300 ease-out group-hover:tracking-[0.06em]">
                   CREATORLINK
                 </span>
                 <span className="text-secondary text-2xl leading-none">•</span>
-              </a>
+              </Link>
 
               {/* Description */}
               <p className="text-xs sm:text-sm text-white/60 font-sans max-w-sm mt-4 mb-6 leading-relaxed">
-                The premier editorial collaboration exchange uniting visionary
-                creators with the world&apos;s most discerning luxury brands.
+                The all-in-one collaboration platform uniting visionary
+                creators with leading brands to connect, collaborate, and grow.
               </p>
             </div>
 
@@ -138,12 +139,12 @@ export default function Footer() {
                 <ul className="space-y-2.5 sm:space-y-3">
                   {col.links.map((link) => (
                     <li key={link.label}>
-                      <a
+                      <Link
                         href={link.href}
                         className="text-xs sm:text-[13px] text-white/60 hover:text-white transition-colors duration-200 block font-sans"
                       >
                         {link.label}
-                      </a>
+                      </Link>
                     </li>
                   ))}
                 </ul>
@@ -157,7 +158,7 @@ export default function Footer() {
         ========================================================= */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/60 font-sans">
           {/* Bottom Left Copyright */}
-          <p>© 2025 Maison Synergie Inc. All Haute Rights Reserved.</p>
+          <p>© 2025 CreatorLink. All Rights Reserved.</p>
 
           {/* Bottom Right System Status & Locations */}
           <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap justify-center sm:justify-end">
@@ -177,7 +178,7 @@ export default function Footer() {
 
             {/* Global Hubs */}
             <span className="text-white/60 text-xs whitespace-nowrap">
-              Paris • New York • Milan • Tokyo
+              Mumbai • Bengaluru • Delhi • Global
             </span>
           </div>
         </div>

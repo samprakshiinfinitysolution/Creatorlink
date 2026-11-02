@@ -1,4 +1,5 @@
 import { Playfair_Display, Plus_Jakarta_Sans } from "next/font/google";
+import ThemeProvider from "@/components/theme/ThemeProvider/ThemeProvider";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -25,15 +26,10 @@ export default function RootLayout({ children }) {
       suppressHydrationWarning
       className={`${playfair.variable} ${jakarta.variable} h-full antialiased`}
     >
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var s=localStorage.getItem('theme');var d=s==='dark'||(!s&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.classList.add('dark');document.documentElement.style.colorScheme='dark';}else{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';}}catch(e){}})();`,
-          }}
-        />
-      </head>
-      <body className="min-h-full flex flex-col">
-        {children}
+      <body suppressHydrationWarning className="min-h-full flex flex-col">
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

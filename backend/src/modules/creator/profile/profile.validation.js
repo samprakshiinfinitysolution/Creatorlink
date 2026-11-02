@@ -1,8 +1,49 @@
 import createApiError from "../../../utils/ApiError.js";
 
 
+// Supported profile fields for creation and updates.
+const ALLOWED_PROFILE_FIELDS = [
+    "bio",
+    "category",
+    "location",
+    "profileImage",
+    "isPublic",
+    "isOnboarded",
+    "startingRate",
+    "socialLinks",
+    "title",
+    "keywords",
+    "niches",
+    "dob",
+    "gender",
+    "languages",
+    "ethnicity"
+];
+
+
 // Validate data while creating a creator profile.
 const createProfileValidation = (req, res, next) => {
+
+    if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) {
+        throw createApiError(
+            400,
+            "Request body must be an object"
+        );
+    }
+
+    // Prevent protected/system or unsupported fields from being submitted.
+    const receivedFields = Object.keys(req.body);
+
+    const invalidFields = receivedFields.filter(
+        (field) => !ALLOWED_PROFILE_FIELDS.includes(field)
+    );
+
+    if (invalidFields.length > 0) {
+        throw createApiError(
+            400,
+            `These fields are not allowed: ${invalidFields.join(", ")}`
+        );
+    }
 
     const {
         bio,
@@ -152,9 +193,32 @@ const createProfileValidation = (req, res, next) => {
         }
 
 
+        // Reject unknown social link platforms.
+        const allowedSocialKeys = [
+            "instagram",
+            "facebook",
+            "youtube",
+            "tiktok",
+            "website"
+        ];
+
+        const receivedSocialKeys = Object.keys(socialLinks);
+        const invalidSocialKeys = receivedSocialKeys.filter(
+            (key) => !allowedSocialKeys.includes(key)
+        );
+
+        if (invalidSocialKeys.length > 0) {
+            throw createApiError(
+                400,
+                `These social links are not supported: ${invalidSocialKeys.join(", ")}`
+            );
+        }
+
+
         // Validate individual social links.
         const {
             instagram,
+            facebook,
             youtube,
             tiktok,
             website
@@ -168,6 +232,17 @@ const createProfileValidation = (req, res, next) => {
             throw createApiError(
                 400,
                 "Instagram link must be a string"
+            );
+        }
+
+
+        if (
+            facebook !== undefined &&
+            typeof facebook !== "string"
+        ) {
+            throw createApiError(
+                400,
+                "Facebook link must be a string"
             );
         }
 
@@ -235,6 +310,13 @@ const createProfileValidation = (req, res, next) => {
             );
         }
 
+        if (keywords.length > 10) {
+            throw createApiError(
+                400,
+                "Keywords cannot exceed 10 items"
+            );
+        }
+
         if (keywords.some((keyword) => typeof keyword !== "string")) {
             throw createApiError(
                 400,
@@ -271,7 +353,7 @@ const createProfileValidation = (req, res, next) => {
 
 
     // Validate dob (date of birth).
-    if (dob !== undefined) {
+    if (dob !== undefined && dob !== null && dob !== "") {
 
         if (
             (typeof dob !== "string" && !(dob instanceof Date)) ||
@@ -286,7 +368,7 @@ const createProfileValidation = (req, res, next) => {
 
 
     // Validate gender.
-    if (gender !== undefined) {
+    if (gender !== undefined && gender !== null && gender !== "") {
 
         const allowedGenders = [
             "male",
@@ -312,6 +394,13 @@ const createProfileValidation = (req, res, next) => {
             throw createApiError(
                 400,
                 "Languages must be an array"
+            );
+        }
+
+        if (languages.length > 10) {
+            throw createApiError(
+                400,
+                "Languages cannot exceed 10 items"
             );
         }
 
@@ -343,31 +432,19 @@ const createProfileValidation = (req, res, next) => {
 // Validate data while updating a creator profile.
 const updateProfileValidation = (req, res, next) => {
 
-    const allowedFields = [
-        "bio",
-        "category",
-        "location",
-        "profileImage",
-        "isPublic",
-        "isOnboarded",
-        "startingRate",
-        "socialLinks",
-        "title",
-        "keywords",
-        "niches",
-        "dob",
-        "gender",
-        "languages",
-        "ethnicity"
-    ];
-
+    if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) {
+        throw createApiError(
+            400,
+            "Request body must be an object"
+        );
+    }
 
     // Prevent protected/system fields from being updated
     // directly by the client.
     const receivedFields = Object.keys(req.body);
 
     const invalidFields = receivedFields.filter(
-        (field) => !allowedFields.includes(field)
+        (field) => !ALLOWED_PROFILE_FIELDS.includes(field)
     );
 
 

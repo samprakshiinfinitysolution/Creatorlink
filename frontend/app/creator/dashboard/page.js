@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import ReduxProvider from "@/components/common/ReduxProvider/ReduxProvider";
 import CreatorSidebar from "@/components/creator/dashboard/CreatorSidebar";
@@ -13,10 +14,15 @@ import CreatorRecentReviews from "@/components/creator/dashboard/CreatorRecentRe
 import CreatorQuickActions from "@/components/creator/dashboard/CreatorQuickActions";
 import CreatorDashboardSkeleton from "@/components/creator/dashboard/CreatorDashboardSkeleton";
 import { getCreatorDashboardOverview } from "@/redux/creator/dashboard/dashboard_slice";
+import { getCreatorProfile } from "@/redux/creator/profile/profile_slice";
 
 function CreatorDashboardContent() {
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const router = useRouter();
   const dispatch = useDispatch();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(true);
+  const [isOnboardedVerified, setIsOnboardedVerified] = useState(false);
+  const hasFetchedDashboardRef = useRef(false);
 
   const {
     dashboard,
@@ -36,10 +42,77 @@ function CreatorDashboardContent() {
     dispatch(getCreatorDashboardOverview({ recentLimit: 5, deadlinesLimit: 5 }));
   }, [dispatch]);
 
-  // Initial dashboard fetch on mount (independent of profile)
+  // Onboarding verification check to guard dashboard access
   useEffect(() => {
-    handleFetchDashboard();
-  }, [handleFetchDashboard]);
+    let isMounted = true;
+
+    const verifyOnboarding = async () => {
+      // 1. If profile is already populated in Redux store
+      if (profile) {
+        if (profile.isOnboarded === true) {
+          if (isMounted) {
+            setIsOnboardedVerified(true);
+            setIsVerifying(false);
+          }
+        } else {
+          router.replace("/creator/onboarding");
+        }
+        return;
+      }
+
+      // 2. Profile not yet loaded into Redux (e.g. direct URL visit or page refresh)
+      try {
+        const response = await dispatch(getCreatorProfile()).unwrap();
+        const profileData = response?.data || response;
+        if (!isMounted) return;
+
+        if (profileData?.isOnboarded === true) {
+          setIsOnboardedVerified(true);
+          setIsVerifying(false);
+        } else {
+          router.replace("/creator/onboarding");
+        }
+      } catch (err) {
+        if (!isMounted) return;
+        const errMsg = typeof err === "string" ? err.toLowerCase() : "";
+        if (
+          errMsg.includes("unauthorized") ||
+          errMsg.includes("401") ||
+          errMsg.includes("token") ||
+          errMsg.includes("log in")
+        ) {
+          router.replace("/login");
+        } else {
+          // If no profile exists (404) or onboarding incomplete, redirect to onboarding
+          router.replace("/creator/onboarding");
+        }
+      }
+    };
+
+    verifyOnboarding();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [dispatch, profile, router]);
+
+  // Fetch dashboard overview only after onboarding is verified
+  useEffect(() => {
+    if (isOnboardedVerified && !hasFetchedDashboardRef.current) {
+      hasFetchedDashboardRef.current = true;
+      handleFetchDashboard();
+    }
+  }, [isOnboardedVerified, handleFetchDashboard]);
+
+  // If dashboard overview API returns 403 or onboarding rejection, redirect immediately
+  useEffect(() => {
+    if (error) {
+      const errStr = typeof error === "string" ? error.toLowerCase() : "";
+      if (errStr.includes("onboarding") || errStr.includes("403")) {
+        router.replace("/creator/onboarding");
+      }
+    }
+  }, [error, router]);
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
@@ -53,8 +126,11 @@ function CreatorDashboardContent() {
 
         {/* Dashboard Main Container */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 max-w-7xl w-full mx-auto">
-          {/* Case 1: First request failed and no cached data exists */}
-          {error && !dashboard ? (
+          {/* While verifying onboarding status or waiting for verification, render skeleton */}
+          {isVerifying || !isOnboardedVerified ? (
+            <CreatorDashboardSkeleton />
+          ) : error && !dashboard ? (
+            /* Case 1: First request failed and no cached data exists */
             <div className="bg-surface border border-red-500/20 rounded-2xl p-8 sm:p-12 text-center space-y-4 shadow-xs">
               <div className="w-12 h-12 mx-auto rounded-full bg-red-500/10 text-red-500 flex items-center justify-center">
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>

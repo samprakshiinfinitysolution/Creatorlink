@@ -11,6 +11,7 @@ import {
 
 import {
     login,
+    loginWithGoogle,
     logout,
     clearAuth
 } from "../../auth/auth_slice";
@@ -171,6 +172,13 @@ const profileSlice = createSlice({
 
             // Clear profile state when user logs in, logs out, or clears auth state.
             .addCase(login.fulfilled, (state) => {
+
+                state.profile = null;
+                state.loading = false;
+                state.error = null;
+            })
+
+            .addCase(loginWithGoogle.fulfilled, (state) => {
 
                 state.profile = null;
                 state.loading = false;

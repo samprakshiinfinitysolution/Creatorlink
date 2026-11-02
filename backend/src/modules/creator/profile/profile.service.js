@@ -17,11 +17,22 @@ const createProfileService = async (userId, profileData) => {
         );
     }
 
+    // Defense-in-depth: strip protected/system fields and ensure authenticated userId cannot be overridden
+    const sanitizedData = { ...profileData };
+    delete sanitizedData.user;
+    delete sanitizedData.followerCount;
+    delete sanitizedData.engagementRate;
+
     // Create the profile using Auth._id.
     const profile = await CreatorProfile.create({
-        user: userId,
-        ...profileData
+        ...sanitizedData,
+        user: userId
     });
+
+    await profile.populate(
+        "user",
+        "name email role"
+    );
 
     return profile;
 };
@@ -51,12 +62,34 @@ const getMyProfileService = async (userId) => {
 // Update the creator profile of the authenticated user.
 const updateProfileService = async (userId, profileData) => {
 
+    const updateOps = { ...profileData };
+
+    // Convert empty string dob or gender to null so Mongoose clears them without schema enum errors
+    if (updateOps.dob === "") {
+        updateOps.dob = null;
+    }
+    if (updateOps.gender === "") {
+        updateOps.gender = null;
+    }
+
+    // Flatten socialLinks object to dot notation to preserve existing keys during partial updates
+    if (
+        updateOps.socialLinks &&
+        typeof updateOps.socialLinks === "object" &&
+        !Array.isArray(updateOps.socialLinks)
+    ) {
+        for (const [key, value] of Object.entries(updateOps.socialLinks)) {
+            updateOps[`socialLinks.${key}`] = value;
+        }
+        delete updateOps.socialLinks;
+    }
+
     const profile = await CreatorProfile.findOneAndUpdate(
         {
             user: userId
         },
         {
-            $set: profileData
+            $set: updateOps
         },
         {
             new: true,

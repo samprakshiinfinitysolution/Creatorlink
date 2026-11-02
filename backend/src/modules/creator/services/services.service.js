@@ -12,9 +12,12 @@ import {
 // Create a new service for the authenticated creator.
 const createService = async (creatorId, serviceData) => {
 
+    const sanitizedData = { ...serviceData };
+    delete sanitizedData.creator;
+
     const service = await CreatorService.create({
-        creator: creatorId,
-        ...serviceData
+        ...sanitizedData,
+        creator: creatorId
     });
 
     return service;
@@ -195,13 +198,16 @@ const updateService = async (
     }
 
 
+    const sanitizedData = { ...serviceData };
+    delete sanitizedData.creator;
+
     const service = await CreatorService.findOneAndUpdate(
         {
             _id: serviceId,
             creator: creatorId
         },
         {
-            $set: serviceData
+            $set: sanitizedData
         },
         {
             new: true,

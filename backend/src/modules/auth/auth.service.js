@@ -436,7 +436,7 @@ const forgotPassword = async (email) => {
 
     await user.save();
 
-    const frontendBaseUrl = (process.env.FRONTEND_URL || "http://localhost:3005").replace(/\/+$/, "");
+    const frontendBaseUrl = (process.env.FRONTEND_URL || "http://localhost:3000").replace(/\/+$/, "");
     const resetUrl = `${frontendBaseUrl}/reset-password?token=${rawToken}`;
 
     const subject = "Reset Your CreatorLink Password";
@@ -888,7 +888,7 @@ const resendVerificationOtp = async (email) => {
             html
         });
     } catch (error) {
-       
+
         // Roll back to previous OTP state so the user is not left with an undelivered code
         user.emailVerificationOtp = previousOtp;
         user.emailVerificationOtpExpire = previousExpire;

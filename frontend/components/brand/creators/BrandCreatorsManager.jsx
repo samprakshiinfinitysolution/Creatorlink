@@ -136,14 +136,17 @@ function getInitials(name) {
 // =========================================================
 const CATEGORY_OPTIONS = [
   { value: "", label: "All Categories" },
-  { value: "Fashion", label: "Fashion" },
-  { value: "Beauty", label: "Beauty" },
-  { value: "Lifestyle", label: "Lifestyle" },
-  { value: "Tech", label: "Tech" },
-  { value: "Fitness", label: "Fitness" },
-  { value: "Food & Beverage", label: "Food & Beverage" },
-  { value: "Travel", label: "Travel" },
-  { value: "Gaming", label: "Gaming" },
+  { value: "Fashion & Luxury", label: "Fashion & Luxury" },
+  { value: "Beauty & Skincare", label: "Beauty & Skincare" },
+  { value: "Travel & Lifestyle", label: "Travel & Lifestyle" },
+  { value: "Tech & Gaming", label: "Tech & Gaming" },
+  { value: "Fitness & Wellness", label: "Fitness & Wellness" },
+  { value: "Food & Culinary", label: "Food & Culinary" },
+  { value: "Apparel & Lifestyle", label: "Apparel & Lifestyle" },
+  { value: "Photography", label: "Photography" },
+  { value: "Video & Reels", label: "Video & Reels" },
+  { value: "Art & Design", label: "Art & Design" },
+  { value: "Other", label: "Other" },
 ];
 
 const PLATFORM_OPTIONS = [
@@ -233,6 +236,11 @@ function CreatorCard({ creator, onViewProfile }) {
                 </span>
               )}
             </div>
+            {creator.title && (
+              <p className="text-[11px] text-text-secondary truncate font-medium mt-0.5" title={creator.title}>
+                {creator.title}
+              </p>
+            )}
 
             <div className="flex items-center gap-2 mt-1">
               <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-semibold bg-secondary/10 text-secondary border border-secondary/20 truncate max-w-[120px]">
@@ -247,9 +255,23 @@ function CreatorCard({ creator, onViewProfile }) {
         </div>
 
         {/* Bio Snippet */}
-        <p className="text-xs text-text-secondary line-clamp-2 mb-4 leading-relaxed">
+        <p className="text-xs text-text-secondary line-clamp-2 mb-3 leading-relaxed">
           {bio}
         </p>
+
+        {/* Niches badges */}
+        {Array.isArray(creator.niches) && creator.niches.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-3.5">
+            {creator.niches.slice(0, 3).map((niche, idx) => (
+              <span
+                key={idx}
+                className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-surface-muted text-text-secondary border border-border-theme truncate max-w-[120px]"
+              >
+                #{niche}
+              </span>
+            ))}
+          </div>
+        )}
 
         {/* Core Metrics Grid */}
         <div className="grid grid-cols-3 gap-2 p-2.5 rounded-xl bg-surface-muted/60 border border-border-theme mb-4 text-center">

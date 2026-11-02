@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import Image from "next/image";
 import ScrollReveal from "@/components/theme/ScrollReveal";
 
@@ -95,21 +96,21 @@ export default function SpotlightCarousel() {
       <ScrollReveal direction="up" className="hidden md:flex items-end justify-between mb-8 w-full">
         <div>
           <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-secondary block mb-2">
-            SPOTLIGHT CAROUSEL
+            COLLABORATION SPOTLIGHT
           </span>
           <h2 className="text-3xl md:text-4xl font-serif font-medium tracking-tight text-foreground leading-[1.15]">
-            Creators everyone is talking about
+            Campaigns & Collaborations That Delivered Results
           </h2>
         </div>
 
         {/* Horizontal Outlined Pill CTA Button at Top Right */}
-        <button
-          type="button"
+        <Link
+          href="/how-it-works"
           className="group inline-flex items-center justify-between gap-4 w-[260px] sm:w-[290px] lg:w-[320px] h-[52px] px-6 rounded-full border border-secondary/40 dark:border-secondary/50 bg-surface text-foreground shadow-[0_0_20px_rgba(255,79,135,0.15)] dark:shadow-[0_0_20px_rgba(255,79,135,0.22)] hover:border-secondary dark:hover:border-secondary hover:shadow-[0_0_28px_rgba(255,79,135,0.3)] dark:hover:shadow-[0_0_28px_rgba(255,79,135,0.3)] transition-all duration-300 transform hover:scale-[1.015] cursor-pointer shrink-0"
         >
-          <span className="text-xs sm:text-sm font-semibold whitespace-nowrap">View All Case Studies</span>
+          <span className="text-xs sm:text-sm font-semibold whitespace-nowrap">View All Collaborations</span>
           <ArrowRightIcon className="text-secondary group-hover:translate-x-1.5 transition-transform duration-300 shrink-0 w-4 h-4" />
-        </button>
+        </Link>
       </ScrollReveal>
 
       {/* =========================================================
@@ -118,20 +119,20 @@ export default function SpotlightCarousel() {
       <ScrollReveal direction="up" className="flex md:hidden flex-col min-[560px]:flex-row min-[560px]:items-end min-[560px]:justify-between gap-3.5 min-[400px]:gap-4 mb-6">
         <div>
           <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-secondary block mb-1.5">
-            SPOTLIGHT CAROUSEL
+            COLLABORATION SPOTLIGHT
           </span>
           <h2 className="text-[22px] min-[360px]:text-[25px] min-[420px]:text-[28px] font-serif font-medium tracking-tight text-foreground leading-[1.18]">
-            Creators everyone is talking about
+            Campaigns & Collaborations That Delivered Results
           </h2>
         </div>
 
-        <button
-          type="button"
+        <Link
+          href="/how-it-works"
           className="group inline-flex items-center justify-between gap-3 h-[42px] min-[380px]:h-[46px] px-4.5 min-[380px]:px-5 rounded-full border border-secondary/40 dark:border-secondary/50 bg-surface text-foreground shadow-[0_0_16px_rgba(255,79,135,0.12)] dark:shadow-[0_0_16px_rgba(255,79,135,0.18)] hover:border-secondary dark:hover:border-secondary transition-all duration-300 cursor-pointer self-start min-[560px]:self-auto shrink-0"
         >
-          <span className="text-xs font-semibold whitespace-nowrap">View All Case Studies</span>
+          <span className="text-xs font-semibold whitespace-nowrap">View All Collaborations</span>
           <ArrowRightIcon className="text-secondary group-hover:translate-x-1 transition-transform duration-300 shrink-0 w-3.5 h-3.5" />
-        </button>
+        </Link>
       </ScrollReveal>
 
       {/* =========================================================

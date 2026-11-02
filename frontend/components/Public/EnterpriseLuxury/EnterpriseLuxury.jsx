@@ -1,16 +1,17 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import ScrollReveal from "@/components/theme/ScrollReveal";
 
 // =========================================================
 // CENTRALIZED MOCK DATA (UI ONLY - READY FOR API REPLACEMENT)
 // =========================================================
 const ENTERPRISE_DATA = {
-  eyebrow: "ENTERPRISE & LUXURY",
+  eyebrow: "FOR BRANDS & ENTERPRISES",
   title: "Brands, meet your creative advantage.",
   description:
-    "Eliminate weeks of messy agency email threads. Tap into vetted creators ready for rapid execution.",
+    "Eliminate weeks of messy agency emails. Discover creators, launch campaigns, review content, and manage collaborations in one place.",
   metrics: [
     {
       id: "roi",
@@ -35,18 +36,18 @@ const ENTERPRISE_DATA = {
     },
     {
       id: "escrow",
-      value: "$4.2M",
-      label: "Escrow Protected",
-      indicator: "Vault Secured",
+      value: "₹2.5Cr+",
+      label: "Campaigns Powered",
+      indicator: "Total Volume",
       indicatorColor: "zinc",
     },
   ],
   cta: {
-    heading: "Deploy an agency-tier campaign in 15 minutes.",
+    heading: "Launch high-impact brand campaigns in minutes.",
     subheading:
-      "The complete workflow from vetted creator sourcing to approved execution.",
+      "The all-in-one platform from creator discovery to content approval and delivery.",
     desktopButtonText: "Launch Your Campaign",
-    mobileButtonText: "DEPLOY CAMPAIGN IN 15M",
+    mobileButtonText: "LAUNCH CAMPAIGN NOW",
   },
 };
 
@@ -129,15 +130,15 @@ export default function EnterpriseLuxury() {
             </div>
 
             {/* Pink Button CTA */}
-            <button
-              type="button"
+            <Link
+              href="/signup?role=brand"
               className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-full bg-secondary text-white text-xs lg:text-sm font-semibold shadow-[0_0_20px_rgba(255,79,135,0.35)] hover:bg-secondary-dark hover:shadow-[0_0_30px_rgba(255,79,135,0.5)] transition-all duration-300 group cursor-pointer whitespace-nowrap shrink-0"
             >
               <span>{cta.desktopButtonText}</span>
               <span className="group-hover:translate-x-1 transition-transform duration-300 text-sm">
                 →
               </span>
-            </button>
+            </Link>
           </ScrollReveal>
         </div>
 
@@ -180,13 +181,13 @@ export default function EnterpriseLuxury() {
           </div>
 
           {/* FULL-WIDTH PINK MOBILE CTA */}
-          <button
-            type="button"
+          <Link
+            href="/signup?role=brand"
             className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-full bg-secondary text-white font-semibold text-xs tracking-wider uppercase shadow-[0_0_20px_rgba(255,79,135,0.4)] active:scale-[0.98] transition-all cursor-pointer"
           >
             <span>{cta.mobileButtonText}</span>
             <span className="text-sm">⚡</span>
-          </button>
+          </Link>
         </div>
       </div>
     </section>

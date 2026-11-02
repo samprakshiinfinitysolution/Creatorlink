@@ -38,7 +38,7 @@ export default function TrustedBrands() {
         ========================================================= */}
         <ScrollReveal direction="up" className="hidden md:block text-center">
           <span className="text-[11px] font-semibold tracking-[0.25em] uppercase text-text-secondary block mb-6 lg:mb-7">
-            TRUSTED BY GLOBAL CREATIVE DIRECTORS
+            TRUSTED BY LEADING BRANDS & AGENCIES
           </span>
 
           <div className="flex items-center justify-between lg:justify-center gap-8 lg:gap-14 xl:gap-20 max-w-[1240px] mx-auto">
@@ -58,7 +58,7 @@ export default function TrustedBrands() {
         ========================================================= */}
         <ScrollReveal direction="up" className="block md:hidden text-center">
           <span className="text-[10px] font-semibold tracking-[0.2em] uppercase text-text-secondary block mb-4">
-            TRUSTED BY LUXURY INNOVATORS
+            TRUSTED BY LEADING BRANDS
           </span>
 
           <div className="flex items-center justify-between gap-1 sm:gap-3 px-1">

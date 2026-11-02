@@ -22,27 +22,24 @@ function MenuIcon({ open }) {
         y1="6"
         x2="20"
         y2="6"
-        className={`origin-center transition-all duration-300 ${
-          open ? "rotate-45 translate-y-[6px]" : ""
-        }`}
+        className={`origin-center transition-all duration-300 ${open ? "rotate-45 translate-y-[6px]" : ""
+          }`}
       />
       <line
         x1="4"
         y1="12"
         x2="20"
         y2="12"
-        className={`origin-center transition-all duration-300 ${
-          open ? "opacity-0 scale-x-0" : ""
-        }`}
+        className={`origin-center transition-all duration-300 ${open ? "opacity-0 scale-x-0" : ""
+          }`}
       />
       <line
         x1="4"
         y1="18"
         x2="20"
         y2="18"
-        className={`origin-center transition-all duration-300 ${
-          open ? "-rotate-45 -translate-y-[6px]" : ""
-        }`}
+        className={`origin-center transition-all duration-300 ${open ? "-rotate-45 -translate-y-[6px]" : ""
+          }`}
       />
     </svg>
   );
@@ -511,7 +508,7 @@ export default function Navbar() {
                 sm:text-[10px]
               "
             >
-              TOP 1% CURATED SALON
+              BRAND & CREATOR COLLABORATIONS
             </div>
           </Link>
 

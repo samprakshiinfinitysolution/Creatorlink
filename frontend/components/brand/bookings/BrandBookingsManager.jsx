@@ -167,9 +167,10 @@ export default function BrandBookingsManager() {
 
   const dispatch = useDispatch();
 
-  const { bookings, pagination, loading, error } = useSelector(
+  const { bookings: rawBookings, pagination, loading, error } = useSelector(
     (state) => state.brandBookings || {}
   );
+  const bookings = Array.isArray(rawBookings) ? rawBookings : [];
 
   // Helper to fetch bookings with current or overridden params
   const fetchBookingsList = useCallback(

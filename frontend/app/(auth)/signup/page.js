@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import ReduxProvider from "@/components/common/ReduxProvider/ReduxProvider";
 import SignupEcosystemVisual from "@/components/auth/SignupEcosystemVisual";
 import SignupForm from "@/components/auth/SignupForm";
@@ -20,7 +20,9 @@ export default function SignupPage() {
             RIGHT COLUMN: SIGNUP FORM PANEL (52% WIDTH ON DESKTOP)
         ========================================================= */}
         <div className="w-full lg:w-[52%] flex flex-col justify-center">
-          <SignupForm />
+          <Suspense fallback={<div className="p-8 text-center text-xs text-text-secondary">Loading registration...</div>}>
+            <SignupForm />
+          </Suspense>
         </div>
       </main>
     </ReduxProvider>

@@ -49,7 +49,8 @@ const notificationSchema = new mongoose.Schema(
                 "campaign",
                 "payment",
                 "review",
-                "message"
+                "message",
+                "verification"
             ],
             required: true
         },

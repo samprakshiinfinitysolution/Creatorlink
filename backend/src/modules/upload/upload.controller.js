@@ -15,7 +15,8 @@ const ALLOWED_FOLDERS = [
     "creatorlink/brands",
     "creatorlink/deliverables",
     "creatorlink/services",
-    "creatorlink/campaigns"
+    "creatorlink/campaigns",
+    "creatorlink/verification"
 ];
 
 const DEFAULT_FOLDER = "creatorlink/general";

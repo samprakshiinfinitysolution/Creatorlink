@@ -105,19 +105,23 @@ const login = asyncHandler(async (req, res) => {
 
     const loginData = await loginUser(req.body);
 
+    const isUserAdmin = loginData.user?.role === "admin";
+    const accessCookieName = isUserAdmin ? "adminAccessToken" : "accessToken";
+    const refreshCookieName = isUserAdmin ? "adminRefreshToken" : "refreshToken";
+
     res.cookie(
-        "accessToken",
+        accessCookieName,
         loginData.accessToken,
         {
             ...cookieOptions,
-            maxAge: getMilliseconds(
-                process.env.ACCESS_TOKEN_EXPIRES_IN
-            )
+            maxAge: isUserAdmin
+                ? getMilliseconds(process.env.ADMIN_ACCESS_TOKEN_EXPIRES_IN || "24h")
+                : getMilliseconds(process.env.ACCESS_TOKEN_EXPIRES_IN || "15m")
         }
     );
 
     res.cookie(
-        "refreshToken",
+        refreshCookieName,
         loginData.refreshToken,
         {
             ...cookieOptions,

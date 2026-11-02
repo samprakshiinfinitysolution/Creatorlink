@@ -32,6 +32,12 @@ import {
 import brandCreatorsRouter from "../modules/brand/creators/creators.route.js";
 import uploadRoutes from "../modules/upload/upload.route.js";
 import notificationRouter from "../modules/notifications/notification.route.js";
+import adminAuthRoutes from "../modules/admin/auth/admin.auth.route.js";
+import adminDashboardRoutes from "../modules/admin/dashboard/dashboard.route.js";
+import adminUsersRoutes from "../modules/admin/users/users.route.js";
+import adminVerificationRoutes from "../modules/admin/verification/verification.route.js";
+import adminCampaignRoutes from "../modules/admin/campaigns/campaigns.route.js";
+import adminCollaborationRoutes from "../modules/admin/collaborations/collaborations.route.js";
 
 const router = Router();
 
@@ -65,6 +71,15 @@ router.use("/brand/workspace", brandWorkspaceRouter);
 router.use("/brand/messages", brandMessagesRouter);
 router.use("/brand/payments", brandPaymentRouter);
 router.use("/brand/reviews", brandReviewRouter);
+
+// Admin routes.
+router.use("/admin/auth", adminAuthRoutes);
+router.use("/admin/dashboard", adminDashboardRoutes);
+router.use("/admin/users", adminUsersRoutes);
+router.use("/admin/verification", adminVerificationRoutes);
+router.use("/admin/verifications", adminVerificationRoutes);
+router.use("/admin/campaigns", adminCampaignRoutes);
+router.use("/admin/collaborations", adminCollaborationRoutes);
 
 // Upload routes.
 router.use("/upload", uploadRoutes);

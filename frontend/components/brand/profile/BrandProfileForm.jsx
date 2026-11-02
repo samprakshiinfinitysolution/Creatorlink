@@ -85,6 +85,18 @@ function UserGroupIcon({ className = "w-5 h-5" }) {
   );
 }
 
+function CheckBadgeIcon({ className = "w-4 h-4 text-secondary" }) {
+  return (
+    <svg className={className} fill="currentColor" viewBox="0 0 20 20">
+      <path
+        fillRule="evenodd"
+        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+}
+
 function CheckCircleIcon({ className = "w-5 h-5" }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
@@ -731,9 +743,20 @@ export default function BrandProfileForm() {
                     </div>
 
                     <div className="min-w-0 flex-1 space-y-1">
-                      <h2 className="font-serif font-semibold text-2xl sm:text-[26px] text-slate-900 dark:text-foreground tracking-wide truncate">
-                        {brandName}
-                      </h2>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h2 className="font-serif font-semibold text-2xl sm:text-[26px] text-slate-900 dark:text-foreground tracking-wide truncate">
+                          {brandName}
+                        </h2>
+                        {Boolean(profile?.isVerifiedBusiness) && (
+                          <span
+                            className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-secondary/10 text-secondary border border-secondary/20 shadow-xs"
+                            title="Official Verified Business"
+                          >
+                            <CheckBadgeIcon className="w-3.5 h-3.5" />
+                            Verified Business
+                          </span>
+                        )}
+                      </div>
                       <div>
                         <span className="inline-block px-3 py-0.5 rounded-full text-xs font-medium bg-[#fff0f4] dark:bg-[#ff2d6c]/10 text-[#ff2d6c] border border-[#ff2d6c]/20 font-sans">
                           {category}

@@ -4,21 +4,27 @@ import {
     verifyAccessToken
 } from "../utils/helpers/token.helper.js";
 
-
 // Verifies the access token stored in the HttpOnly cookie
 // and ensures it has not been revoked by a subsequent password change.
-
+// Supports dedicated adminAccessToken isolation for administrative routes.
 const authenticateUser = async (req, res, next) => {
-
     try {
-        // Get access token from the HttpOnly cookie.
-        const token = req.cookies?.accessToken;
+        // Detect if this is an administrative route
+        const isAdminRoute =
+            req.baseUrl?.includes("/admin") ||
+            req.originalUrl?.includes("/admin");
+
+        // Admin routes prioritize dedicated adminAccessToken, falling back to accessToken.
+        // User routes (Creator, Brand, Public) strictly use standard accessToken.
+        const token = isAdminRoute
+            ? (req.cookies?.adminAccessToken || req.cookies?.accessToken)
+            : req.cookies?.accessToken;
 
         // Check if access token exists.
         if (!token) {
             throw createApiError(
                 401,
-                "Access token is required"
+                isAdminRoute ? "Admin access token is required" : "Access token is required"
             );
         }
 
@@ -63,6 +69,5 @@ const authenticateUser = async (req, res, next) => {
         next(error);
     }
 };
-
 
 export default authenticateUser;

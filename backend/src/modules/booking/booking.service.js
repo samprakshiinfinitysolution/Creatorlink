@@ -44,16 +44,20 @@ const createBookingService = async (creatorId, bookingData) => {
     }
 
 
-    // 2. Verify campaign exists and is published.
-    const campaign = await Campaign.findOne({
-        _id: campaignId,
-        status: "published"
-    });
+    // 2. Verify campaign exists, is published, and not restricted.
+    const campaign = await Campaign.findById(campaignId);
 
     if (!campaign) {
         throw createApiError(
             404,
-            "Campaign not found or is not open for applications"
+            "Campaign not found"
+        );
+    }
+
+    if (campaign.status !== "published" || campaign.moderation?.isRestricted) {
+        throw createApiError(
+            400,
+            `Cannot apply: Campaign is ${campaign.status}${campaign.moderation?.isRestricted ? " and under administrative moderation" : ""} and is not accepting new applications`
         );
     }
 

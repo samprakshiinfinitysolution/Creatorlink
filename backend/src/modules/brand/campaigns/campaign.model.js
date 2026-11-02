@@ -1,5 +1,36 @@
 import mongoose from "mongoose";
 
+const moderationHistorySchema = new mongoose.Schema(
+    {
+        action: {
+            type: String,
+            enum: ["restricted", "resolved", "closed", "deleted"],
+            required: true
+        },
+        admin: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Auth",
+            required: true
+        },
+        reason: {
+            type: String,
+            trim: true,
+            default: ""
+        },
+        previousStatus: {
+            type: String
+        },
+        newStatus: {
+            type: String
+        },
+        timestamp: {
+            type: Date,
+            default: Date.now
+        }
+    },
+    { _id: true }
+);
+
 const campaignSchema = new mongoose.Schema(
     {
         brand: {
@@ -93,12 +124,51 @@ const campaignSchema = new mongoose.Schema(
                 "closed"
             ],
             default: "draft"
+        },
+
+        // Dedicated administrative moderation and restriction tracking
+        moderation: {
+            isRestricted: {
+                type: Boolean,
+                default: false,
+                index: true
+            },
+            restrictedBy: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Auth",
+                default: null
+            },
+            restrictionReason: {
+                type: String,
+                trim: true,
+                default: ""
+            },
+            restrictedAt: {
+                type: Date,
+                default: null
+            },
+            previousStatus: {
+                type: String,
+                default: null
+            },
+            resolvedAt: {
+                type: Date,
+                default: null
+            },
+            resolvedBy: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Auth",
+                default: null
+            },
+            history: [moderationHistorySchema]
         }
     },
     {
         timestamps: true
     }
 );
+
+campaignSchema.index({ status: 1, "moderation.isRestricted": 1, createdAt: -1 });
 
 const Campaign = mongoose.model(
     "Campaign",

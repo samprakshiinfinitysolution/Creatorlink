@@ -92,6 +92,12 @@ const profileSchema = new mongoose.Schema(
         isPublic: {
             type: Boolean,
             default: true
+        },
+
+        // Verification badge activated exclusively via approved admin verification request.
+        isVerifiedBadge: {
+            type: Boolean,
+            default: false
         }
     },
     {

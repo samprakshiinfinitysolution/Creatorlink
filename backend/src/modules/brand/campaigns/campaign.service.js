@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 import Campaign from "./campaign.model.js";
+import Workspace from "../../workspace/workspace.model.js";
 import createApiError from "../../../utils/ApiError.js";
 
 import {
@@ -154,12 +155,7 @@ const getCampaignByIdService = async (
         );
     }
 
-
-    const campaign = await Campaign.findOne({
-        _id: campaignId,
-        brand: brandId
-    });
-
+    const campaign = await Campaign.findById(campaignId);
 
     if (!campaign) {
         throw createApiError(
@@ -168,6 +164,12 @@ const getCampaignByIdService = async (
         );
     }
 
+    if (campaign.brand.toString() !== brandId.toString()) {
+        throw createApiError(
+            403,
+            "Access forbidden: You cannot access another brand's campaign"
+        );
+    }
 
     return campaign;
 };
@@ -187,12 +189,7 @@ const updateCampaignService = async (
         );
     }
 
-
-    const campaign = await Campaign.findOne({
-        _id: campaignId,
-        brand: brandId
-    });
-
+    const campaign = await Campaign.findById(campaignId);
 
     if (!campaign) {
         throw createApiError(
@@ -201,6 +198,44 @@ const updateCampaignService = async (
         );
     }
 
+    // Business Rule 7: Brand cannot modify another Brand's campaign
+    if (campaign.brand.toString() !== brandId.toString()) {
+        throw createApiError(
+            403,
+            "Access forbidden: You cannot modify another brand's campaign"
+        );
+    }
+
+    // Business Rule 3: An Admin moderation restriction must prevent the Brand from bypassing the restriction by resuming the campaign.
+    if (campaign.moderation?.isRestricted) {
+        throw createApiError(
+            403,
+            `This campaign is currently restricted by platform administration for moderation (Reason: "${campaign.moderation.restrictionReason || "Administrative review"}"). You cannot modify or resume this campaign until the restriction is resolved.`
+        );
+    }
+
+    // Business Rule 5: Do not mark a campaign completed merely because a Brand manually changes its status.
+    // Inspect deliverable approval and workspace completion before allowing transition to completed.
+    if (updateData.status === "completed") {
+        if (campaign.status !== "in_progress") {
+            throw createApiError(
+                400,
+                `Campaign cannot move from ${campaign.status} to completed`
+            );
+        }
+
+        const activeWorkspaces = await Workspace.countDocuments({
+            campaign: campaignId,
+            status: { $in: ["in_progress", "submitted", "revision_requested"] }
+        });
+
+        if (activeWorkspaces > 0) {
+            throw createApiError(
+                400,
+                `Cannot mark campaign as completed: ${activeWorkspaces} active workspace collaboration(s) are still in progress.`
+            );
+        }
+    }
 
     // Prevent invalid campaign status transitions.
     if (

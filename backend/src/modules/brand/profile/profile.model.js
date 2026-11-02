@@ -60,6 +60,12 @@ const profileSchema = new mongoose.Schema(
         contactInformation: {
             type: Object,
             default: {}
+        },
+
+        // Verification business status activated exclusively via approved admin verification request.
+        isVerifiedBusiness: {
+            type: Boolean,
+            default: false
         }
     },
     {

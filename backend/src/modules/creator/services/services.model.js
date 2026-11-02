@@ -56,6 +56,20 @@ const creatorServiceSchema = new mongoose.Schema(
             required: true
         },
 
+        // Content type delivered by the service (e.g. Reel, Post, Story, Dedicated Video, etc.).
+        contentType: {
+            type: String,
+            trim: true,
+            default: ""
+        },
+
+        // Number of deliverables / content units included.
+        quantity: {
+            type: Number,
+            min: 1,
+            default: 1
+        },
+
         // What the brand actually receives.
         deliverables: {
             type: [String],

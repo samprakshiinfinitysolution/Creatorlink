@@ -11,10 +11,9 @@ import {
 } from "@/redux/creator/profile/profile_slice";
 import {
   getPortfolios,
-  createPortfolioItem,
-  updatePortfolioItem,
   deletePortfolioItem,
 } from "@/redux/creator/portfolio/portfolio_slice";
+import PortfolioFormModal from "@/components/creator/portfolio/PortfolioFormModal";
 import {
   getServices,
   deleteCreatorService,
@@ -26,10 +25,6 @@ import ServiceFormModal, {
   getContentTypeLabel,
   ServiceCardCover,
 } from "@/components/creator/services/ServiceFormModal";
-import {
-  uploadSingleImageApi,
-  uploadSingleVideoApi,
-} from "@/lib/upload";
 
 // =========================================================
 // ERROR FORMATTER HELPER
@@ -398,6 +393,14 @@ function XMarkIcon({ className = "w-3.5 h-3.5" }) {
   );
 }
 
+function SearchIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+    </svg>
+  );
+}
+
 function PhotoIcon({ className = "w-4 h-4" }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
@@ -514,6 +517,7 @@ export default function CreatorOnboarding() {
   const [formData, setFormData] = useState({
     title: "",
     bio: "",
+    category: "",
     keywords: [],
     niches: [],
     location: "",
@@ -535,29 +539,17 @@ export default function CreatorOnboarding() {
   const [keywordInput, setKeywordInput] = useState("");
   // Local state for language input tag entry
   const [languageInput, setLanguageInput] = useState("");
+  // Local state for niche filter/search
+  const [nicheSearch, setNicheSearch] = useState("");
 
   const [validationError, setValidationError] = useState(null);
   const [saveSuccessMessage, setSaveSuccessMessage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Page 2: Project Modal & Form state
+  // Page 2: Project Modal state (using shared PortfolioFormModal)
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
-  const [editingProjectId, setEditingProjectId] = useState(null);
-  const [isSubmittingProject, setIsSubmittingProject] = useState(false);
-  const [isUploadingMedia, setIsUploadingMedia] = useState(false);
-  const [modalError, setModalError] = useState(null);
-
-  const initialProjectState = {
-    title: "",
-    description: "",
-    platform: "instagram",
-    contentType: "reel",
-    url: "",
-    coverImage: "",
-    mediaType: "image",
-  };
-  const [projectForm, setProjectForm] = useState(initialProjectState);
-  const fileInputRef = useRef(null);
+  const [editingProject, setEditingProject] = useState(null);
+  const isMountedRef = useRef(true);
 
   // Page 4: Service Modal state (using shared ServiceFormModal)
   const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
@@ -583,9 +575,10 @@ export default function CreatorOnboarding() {
       profile.title.trim().length > 0 &&
       typeof profile.bio === "string" &&
       profile.bio.trim().length > 0 &&
-      ((Array.isArray(profile.niches) && profile.niches.length > 0) ||
-        (typeof profile.category === "string" &&
-          profile.category.trim().length > 0)) &&
+      typeof profile.category === "string" &&
+      profile.category.trim().length > 0 &&
+      Array.isArray(profile.niches) &&
+      profile.niches.length > 0 &&
       Array.isArray(profile.keywords) &&
       profile.keywords.length > 0 &&
       typeof profile.location === "string" &&
@@ -626,6 +619,12 @@ export default function CreatorOnboarding() {
   // Handler to parse and apply initial data response
   const applyInitialDataResults = React.useCallback(
     ([profileResult, portfoliosResult, servicesResult]) => {
+      if (!isMountedRef.current) return;
+
+      let pStep1Done = false;
+      let pStep2Done = false;
+      let pStep3Done = false;
+
       // 1. Handle Profile response
       if (profileResult.status === "fulfilled") {
         const p = profileResult.value?.data || profileResult.value;
@@ -655,6 +654,7 @@ export default function CreatorOnboarding() {
             return {
               title: p.title || prev.title || "",
               bio: p.bio || prev.bio || "",
+              category: p.category || (Array.isArray(p.niches) && p.niches[0]) || prev.category || "",
               keywords:
                 Array.isArray(p.keywords) && p.keywords.length > 0
                   ? p.keywords
@@ -682,6 +682,36 @@ export default function CreatorOnboarding() {
               ethnicity: p.ethnicity || prev.ethnicity || "",
             };
           });
+
+          const pHasValidSocial = Boolean(
+            p.socialLinks &&
+              Object.values(p.socialLinks).some(
+                (link) => typeof link === "string" && link.trim().length > 0
+              )
+          );
+
+          pStep1Done = Boolean(
+            typeof p.title === "string" &&
+              p.title.trim().length > 0 &&
+              typeof p.bio === "string" &&
+              p.bio.trim().length > 0 &&
+              ((Array.isArray(p.niches) && p.niches.length > 0) ||
+                (typeof p.category === "string" &&
+                  p.category.trim().length > 0)) &&
+              Array.isArray(p.keywords) &&
+              p.keywords.length > 0 &&
+              typeof p.location === "string" &&
+              p.location.trim().length > 0 &&
+              pHasValidSocial
+          );
+
+          pStep3Done = Boolean(
+            p.dob &&
+              typeof p.gender === "string" &&
+              p.gender.trim().length > 0 &&
+              Array.isArray(p.languages) &&
+              p.languages.length > 0
+          );
         }
       } else {
         const errMsg = formatErrorMessage(profileResult.reason);
@@ -696,7 +726,12 @@ export default function CreatorOnboarding() {
       }
 
       // 2. Handle Portfolios response
-      if (portfoliosResult.status === "rejected") {
+      if (portfoliosResult.status === "fulfilled") {
+        const loadedPortfolios =
+          portfoliosResult.value?.data || portfoliosResult.value || [];
+        pStep2Done =
+          Array.isArray(loadedPortfolios) && loadedPortfolios.length > 0;
+      } else {
         const errMsg = formatErrorMessage(portfoliosResult.reason);
         setInitialLoadError((prev) =>
           prev
@@ -715,6 +750,17 @@ export default function CreatorOnboarding() {
         );
       }
 
+      // Auto-resume on earliest incomplete step upon data load
+      if (!pStep1Done) {
+        setCurrentStep(1);
+      } else if (!pStep2Done) {
+        setCurrentStep(2);
+      } else if (!pStep3Done) {
+        setCurrentStep(3);
+      } else {
+        setCurrentStep(4);
+      }
+
       setIsInitialLoading(false);
     },
     [router]
@@ -722,6 +768,7 @@ export default function CreatorOnboarding() {
 
   // Fetch existing creator profile, portfolios, and services on mount
   useEffect(() => {
+    isMountedRef.current = true;
     let isCancelled = false;
 
     Promise.allSettled([
@@ -729,24 +776,30 @@ export default function CreatorOnboarding() {
       dispatch(getPortfolios()).unwrap(),
       dispatch(getServices({ limit: 50 })).unwrap(),
     ]).then((results) => {
-      if (!isCancelled) {
+      if (!isCancelled && isMountedRef.current) {
         applyInitialDataResults(results);
       }
     });
 
     return () => {
       isCancelled = true;
+      isMountedRef.current = false;
     };
   }, [dispatch, applyInitialDataResults]);
 
   const handleRetryInitialLoad = () => {
+    if (!isMountedRef.current) return;
     setIsInitialLoading(true);
     setInitialLoadError(null);
     Promise.allSettled([
       dispatch(getCreatorProfile()).unwrap(),
       dispatch(getPortfolios()).unwrap(),
       dispatch(getServices({ limit: 50 })).unwrap(),
-    ]).then(applyInitialDataResults);
+    ]).then((results) => {
+      if (isMountedRef.current) {
+        applyInitialDataResults(results);
+      }
+    });
   };
 
   // Handle Niche selection (Toggle with maximum 3 items)
@@ -862,182 +915,21 @@ export default function CreatorOnboarding() {
   };
 
   // =========================================================
-  // PAGE 2: PORTFOLIO HANDLERS
+  // PAGE 2: PORTFOLIO HANDLERS (USING SHARED MODAL)
   // =========================================================
   const handleOpenAddProject = () => {
-    setEditingProjectId(null);
-    setProjectForm(initialProjectState);
-    setModalError(null);
+    setEditingProject(null);
     setIsProjectModalOpen(true);
   };
 
   const handleOpenEditProject = (item) => {
-    const primaryContent =
-      Array.isArray(item.contents) && item.contents[0]
-        ? item.contents[0]
-        : {};
-
-    const isVid =
-      item.coverImage &&
-      (item.coverImage.endsWith(".mp4") ||
-        item.coverImage.endsWith(".webm") ||
-        item.coverImage.endsWith(".mov"));
-
-    setEditingProjectId(item._id || item.id);
-    setProjectForm({
-      title: item.title || "",
-      description: item.description || "",
-      platform: primaryContent.platform || "instagram",
-      contentType: primaryContent.contentType || "reel",
-      url: primaryContent.url || item.coverImage || "",
-      coverImage: item.coverImage || primaryContent.previewImage || "",
-      mediaType: isVid ? "video" : "image",
-    });
-    setModalError(null);
+    setEditingProject(item);
     setIsProjectModalOpen(true);
   };
 
-  const handleFileUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const isVideo = file.type.startsWith("video/");
-    const isImage = file.type.startsWith("image/");
-
-    if (!isImage && !isVideo) {
-      setModalError(
-        "Please select a valid image (JPEG, PNG, WEBP) or video (MP4, WebM, MOV)."
-      );
-      return;
-    }
-
-    if (isImage && file.size > 5 * 1024 * 1024) {
-      setModalError("Image file size must not exceed 5 MB.");
-      return;
-    }
-
-    if (isVideo && file.size > 50 * 1024 * 1024) {
-      setModalError("Video file size must not exceed 50 MB.");
-      return;
-    }
-
-    setIsUploadingMedia(true);
-    setModalError(null);
-
-    try {
-      let uploadRes;
-      if (isVideo) {
-        uploadRes = await uploadSingleVideoApi(file, "creatorlink/portfolios");
-      } else {
-        uploadRes = await uploadSingleImageApi(file, "creatorlink/portfolios");
-      }
-
-      const uploadedUrl =
-        uploadRes?.url ||
-        uploadRes?.secure_url ||
-        uploadRes?.data?.url ||
-        uploadRes?.data?.secure_url;
-
-      if (uploadedUrl) {
-        setProjectForm((prev) => ({
-          ...prev,
-          coverImage: uploadedUrl,
-          mediaType: isVideo ? "video" : "image",
-          // Suggest uploaded URL if project link is currently empty
-          url: prev.url || uploadedUrl,
-        }));
-      } else {
-        throw new Error("Media uploaded successfully but no URL was returned.");
-      }
-    } catch (err) {
-      setModalError(
-        formatErrorMessage(err, "Failed to upload media. Please try again.")
-      );
-    } finally {
-      setIsUploadingMedia(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-    }
-  };
-
-  const handleSaveProject = async (e) => {
-    e?.preventDefault();
-    if (isSubmittingProject || isUploadingMedia) return;
-    setModalError(null);
-
-    if (!projectForm.title || !projectForm.title.trim()) {
-      setModalError("Please enter a project title.");
-      return;
-    }
-    if (projectForm.title.trim().length > 150) {
-      setModalError("Project title must not exceed 150 characters.");
-      return;
-    }
-
-    if (!projectForm.platform) {
-      setModalError("Please select a platform.");
-      return;
-    }
-
-    if (!projectForm.contentType) {
-      setModalError("Please select a content type.");
-      return;
-    }
-
-    if (!projectForm.url || !projectForm.url.trim()) {
-      setModalError("Please enter a project link or upload media.");
-      return;
-    }
-
-    setIsSubmittingProject(true);
-
-    const portfolioPayload = {
-      title: projectForm.title.trim(),
-      description: projectForm.description ? projectForm.description.trim() : "",
-      category: formData.niches[0] || "General",
-      coverImage: projectForm.coverImage || "",
-      contents: [
-        {
-          platform: projectForm.platform,
-          contentType: projectForm.contentType,
-          url: projectForm.url.trim(),
-          previewImage: projectForm.coverImage || "",
-          title: projectForm.title.trim(),
-        },
-      ],
-      isPublic: true,
-    };
-
-    try {
-      if (editingProjectId) {
-        await dispatch(
-          updatePortfolioItem({
-            portfolioId: editingProjectId,
-            portfolioData: portfolioPayload,
-          })
-        ).unwrap();
-      } else {
-        await dispatch(createPortfolioItem(portfolioPayload)).unwrap();
-      }
-
-      await dispatch(getPortfolios()).unwrap();
-      setIsProjectModalOpen(false);
-      setEditingProjectId(null);
-      setProjectForm(initialProjectState);
-      setValidationError(null);
-      setSaveSuccessMessage(
-        editingProjectId
-          ? "Portfolio project updated successfully."
-          : "Portfolio project added successfully."
-      );
-    } catch (err) {
-      setModalError(
-        formatErrorMessage(err, "Failed to save portfolio project.")
-      );
-    } finally {
-      setIsSubmittingProject(false);
-    }
+  const handleCloseProjectModal = () => {
+    setIsProjectModalOpen(false);
+    setEditingProject(null);
   };
 
   const handleDeleteProject = async (projectId) => {
@@ -1136,6 +1028,15 @@ export default function CreatorOnboarding() {
         return;
       }
 
+      if (!formData.category || !formData.category.trim()) {
+        setValidationError("Please select your primary category.");
+        return;
+      }
+      if (formData.category.trim().length > 100) {
+        setValidationError("Category must not exceed 100 characters.");
+        return;
+      }
+
       if (!Array.isArray(formData.niches) || formData.niches.length === 0) {
         setValidationError("Please select at least 1 niche (maximum 3).");
         return;
@@ -1175,9 +1076,9 @@ export default function CreatorOnboarding() {
       const profilePayload = {
         title: formData.title.trim(),
         bio: formData.bio.trim(),
+        category: formData.category.trim(),
         keywords: formData.keywords,
         niches: formData.niches,
-        category: formData.niches[0] || "",
         location: formData.location.trim(),
         socialLinks: {
           instagram: formData.socialLinks.instagram.trim(),
@@ -1186,6 +1087,7 @@ export default function CreatorOnboarding() {
           tiktok: formData.socialLinks.tiktok.trim(),
           website: formData.socialLinks.website.trim(),
         },
+        ...(profile?.profileImage ? { profileImage: profile.profileImage } : {}),
         isOnboarded: false,
       };
 
@@ -1353,7 +1255,7 @@ export default function CreatorOnboarding() {
         return;
       }
 
-      // Cross-step data validation
+      // Cross-step data validation: Step 1 fields
       if (!formData.title || !formData.title.trim()) {
         setValidationError("Profile headline is missing. Please return to Step 1.");
         return;
@@ -1366,12 +1268,36 @@ export default function CreatorOnboarding() {
         setValidationError("Niche selection is missing. Please return to Step 1.");
         return;
       }
+      if (!Array.isArray(formData.keywords) || formData.keywords.length === 0) {
+        setValidationError("Content keywords are missing. Please return to Step 1.");
+        return;
+      }
+      if (!formData.location || !formData.location.trim()) {
+        setValidationError("Location is missing. Please return to Step 1.");
+        return;
+      }
+      const hasValidSocialLink = Boolean(
+        formData.socialLinks &&
+          Object.values(formData.socialLinks).some(
+            (link) => typeof link === "string" && link.trim().length > 0
+          )
+      );
+      if (!hasValidSocialLink) {
+        setValidationError(
+          "At least one social media link or website URL is required. Please return to Step 1."
+        );
+        return;
+      }
+
+      // Cross-step data validation: Step 2 fields
       if (!Array.isArray(portfolios) || portfolios.length === 0) {
         setValidationError(
           "At least 1 portfolio project is required. Please return to Step 2."
         );
         return;
       }
+
+      // Cross-step data validation: Step 3 fields
       if (
         !formData.dob ||
         !formData.gender ||
@@ -1387,13 +1313,14 @@ export default function CreatorOnboarding() {
       setIsSubmitting(true);
       setValidationError(null);
 
-      // Derive startingRate strictly from lowest price among active services with price > 0
-      const pricedActiveServices = activeServices.filter(
-        (s) => typeof s.price === "number" && s.price > 0
-      );
+      // Derive startingRate safely from lowest finite positive price among active services
+      const validActivePrices = activeServices
+        .map((s) => Number(s?.price))
+        .filter((price) => Number.isFinite(price) && price > 0);
+
       const startingRate =
-        pricedActiveServices.length > 0
-          ? Math.min(...pricedActiveServices.map((s) => s.price))
+        validActivePrices.length > 0
+          ? Math.min(...validActivePrices)
           : 0;
 
       const completionPayload = {
@@ -1410,6 +1337,7 @@ export default function CreatorOnboarding() {
           tiktok: formData.socialLinks.tiktok.trim(),
           website: formData.socialLinks.website.trim(),
         },
+        ...(profile?.profileImage ? { profileImage: profile.profileImage } : {}),
         dob: formData.dob,
         gender: formData.gender,
         languages: formData.languages,
@@ -1419,7 +1347,25 @@ export default function CreatorOnboarding() {
       };
 
       try {
-        await dispatch(updateCreatorProfile(completionPayload)).unwrap();
+        const hasExistingProfile = Boolean(profile && (profile._id || profile.id));
+
+        if (hasExistingProfile) {
+          await dispatch(updateCreatorProfile(completionPayload)).unwrap();
+        } else {
+          try {
+            await dispatch(createCreatorProfile(completionPayload)).unwrap();
+          } catch (createErr) {
+            const createErrMsg = formatErrorMessage(createErr);
+            if (
+              createErrMsg.toLowerCase().includes("already exists") ||
+              createErrMsg.includes("409")
+            ) {
+              await dispatch(updateCreatorProfile(completionPayload)).unwrap();
+            } else {
+              throw createErr;
+            }
+          }
+        }
         // Successful onboarding completion: redirect to Creator Dashboard
         router.replace("/creator/dashboard");
       } catch (err) {
@@ -1706,12 +1652,59 @@ export default function CreatorOnboarding() {
                 />
               </div>
 
-              {/* 3. Niches (Multi-Select, Max 3) */}
-              <div className="space-y-3">
+              {/* 3. Primary Category (Required) */}
+              <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-foreground font-sans block">
-                    Niches (Select up to 3) *
+                  <label
+                    htmlFor="category"
+                    className="text-xs font-semibold uppercase tracking-wider text-foreground font-sans block"
+                  >
+                    Primary Category *
                   </label>
+                  <span className="text-[11px] text-secondary font-medium">
+                    {formData.category || "Required"}
+                  </span>
+                </div>
+                <select
+                  id="category"
+                  name="category"
+                  disabled={isSubmitting}
+                  value={formData.category}
+                  onChange={(e) => {
+                    setFormData((prev) => ({ ...prev, category: e.target.value }));
+                    setValidationError(null);
+                  }}
+                  className="w-full px-4 py-3 rounded-xl bg-background border border-border-theme text-foreground text-sm font-sans focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all cursor-pointer disabled:opacity-60"
+                >
+                  <option value="">Select Primary Category</option>
+                  {CATEGORIES.map((cat) => (
+                    <option key={cat.id} value={cat.name}>
+                      {cat.name}
+                    </option>
+                  ))}
+                  {formData.category &&
+                    !CATEGORIES.some((c) => c.name === formData.category) && (
+                      <option value={formData.category}>
+                        {formData.category}
+                      </option>
+                    )}
+                </select>
+                <p className="text-[11px] text-text-secondary leading-normal">
+                  Your primary creative domain used for marketplace categorization and brand discovery
+                </p>
+              </div>
+
+              {/* 4. Niches (Multi-Select, Max 3) */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div>
+                    <label className="text-xs font-semibold uppercase tracking-wider text-foreground font-sans block">
+                      Niches (Select up to 3) *
+                    </label>
+                    <p className="text-[11px] text-text-secondary mt-0.5">
+                      Select 1 to 3 focus areas from our creative taxonomy (independent of primary category)
+                    </p>
+                  </div>
                   <span
                     className={`text-xs font-medium ${
                       formData.niches.length === 3
@@ -1723,8 +1716,38 @@ export default function CreatorOnboarding() {
                   </span>
                 </div>
 
+                {/* Taxonomy Filter Bar */}
+                <div className="relative">
+                  <input
+                    type="text"
+                    disabled={isSubmitting}
+                    value={nicheSearch}
+                    onChange={(e) => setNicheSearch(e.target.value)}
+                    placeholder="Filter niche options by name or description..."
+                    className="w-full bg-background border border-border-theme text-foreground placeholder:text-text-secondary/50 text-xs rounded-xl pl-9 pr-8 py-2.5 focus:outline-none focus:border-secondary transition-all"
+                  />
+                  <SearchIcon className="w-4 h-4 text-text-secondary absolute left-3 top-1/2 -translate-y-1/2" />
+                  {nicheSearch && (
+                    <button
+                      type="button"
+                      onClick={() => setNicheSearch("")}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-foreground text-xs p-0.5 cursor-pointer"
+                      aria-label="Clear niche search"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[300px] overflow-y-auto pr-1">
-                  {CATEGORIES.map((cat) => {
+                  {CATEGORIES.filter((cat) => {
+                    if (!nicheSearch.trim()) return true;
+                    const term = nicheSearch.toLowerCase();
+                    return (
+                      cat.name.toLowerCase().includes(term) ||
+                      cat.desc.toLowerCase().includes(term)
+                    );
+                  }).map((cat) => {
                     const isSelected = formData.niches.includes(cat.name);
                     const Icon = cat.icon;
 
@@ -2125,14 +2148,28 @@ export default function CreatorOnboarding() {
 
                           {/* Content Details */}
                           <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface border border-border-theme text-[11px] font-medium capitalize text-foreground">
-                                {getPlatformIcon(platform)}
-                                <span>{platform}</span>
-                              </span>
-                              <span className="px-2 py-0.5 rounded-md bg-secondary/10 border border-secondary/20 text-[10px] font-semibold uppercase text-secondary">
-                                {contentType}
-                              </span>
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              {primaryContent.platform ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface border border-border-theme text-[11px] font-medium capitalize text-foreground">
+                                  {getPlatformIcon(platform)}
+                                  <span>{platform}</span>
+                                </span>
+                              ) : null}
+                              {primaryContent.contentType ? (
+                                <span className="px-2 py-0.5 rounded-md bg-secondary/10 border border-secondary/20 text-[10px] font-semibold uppercase text-secondary">
+                                  {contentType}
+                                </span>
+                              ) : null}
+                              {item.category ? (
+                                <span className="px-2 py-0.5 rounded-md bg-surface border border-border-theme text-[10px] font-medium text-text-secondary">
+                                  {item.category}
+                                </span>
+                              ) : null}
+                              {Array.isArray(item.contents) && item.contents.length > 1 && (
+                                <span className="text-[10px] text-text-secondary font-medium">
+                                  +{item.contents.length - 1} more
+                                </span>
+                              )}
                             </div>
 
                             <h3 className="text-sm font-semibold text-foreground truncate">
@@ -2766,279 +2803,22 @@ export default function CreatorOnboarding() {
       </main>
 
       {/* =========================================================
-          MODAL: ADD / EDIT PORTFOLIO PROJECT
+          MODAL: ADD / EDIT PORTFOLIO PROJECT (REUSABLE COMPONENT)
       ========================================================= */}
-      {isProjectModalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="max-w-lg w-full bg-surface text-foreground rounded-2xl border border-border-theme shadow-2xl p-6 sm:p-7 max-h-[90vh] overflow-y-auto space-y-5">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between pb-3 border-b border-border-theme">
-              <h2 className="text-lg font-serif font-medium text-foreground">
-                {editingProjectId ? "Edit Portfolio Project" : "Add Portfolio Project"}
-              </h2>
-              <button
-                type="button"
-                onClick={() => setIsProjectModalOpen(false)}
-                className="p-1 rounded-lg text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors cursor-pointer"
-              >
-                <XMarkIcon className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Modal Error Alert */}
-            {modalError && (
-              <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-medium flex items-center gap-2">
-                <span>⚠</span>
-                <span>{modalError}</span>
-              </div>
-            )}
-
-            <form onSubmit={handleSaveProject} className="space-y-4">
-              {/* 1. Project Title */}
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="projTitle"
-                  className="text-xs font-semibold uppercase tracking-wider text-foreground font-sans block"
-                >
-                  Project Title *
-                </label>
-                <input
-                  id="projTitle"
-                  type="text"
-                  maxLength={150}
-                  disabled={isSubmittingProject}
-                  value={projectForm.title}
-                  onChange={(e) =>
-                    setProjectForm((prev) => ({ ...prev, title: e.target.value }))
-                  }
-                  placeholder="e.g. Summer Haute Couture Reel Campaign"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-background border border-border-theme text-foreground placeholder:text-text-secondary/50 text-xs sm:text-sm font-sans focus:outline-none focus:border-secondary transition-all"
-                />
-              </div>
-
-              {/* 2. Platform & Content Type */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <label
-                    htmlFor="projPlatform"
-                    className="text-xs font-semibold uppercase tracking-wider text-foreground font-sans block"
-                  >
-                    Platform *
-                  </label>
-                  <select
-                    id="projPlatform"
-                    disabled={isSubmittingProject}
-                    value={projectForm.platform}
-                    onChange={(e) => {
-                      const newPlat = e.target.value;
-                      const defaultType =
-                        PLATFORM_CONTENT_TYPES[newPlat]?.[0]?.value || "other";
-                      setProjectForm((prev) => ({
-                        ...prev,
-                        platform: newPlat,
-                        contentType: defaultType,
-                      }));
-                    }}
-                    className="w-full px-3 py-2.5 rounded-xl bg-background border border-border-theme text-foreground text-xs font-sans focus:outline-none focus:border-secondary transition-all cursor-pointer"
-                  >
-                    <option value="instagram">Instagram</option>
-                    <option value="youtube">YouTube</option>
-                    <option value="tiktok">TikTok</option>
-                    <option value="facebook">Facebook</option>
-                    <option value="website">Website / Blog</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label
-                    htmlFor="projContentType"
-                    className="text-xs font-semibold uppercase tracking-wider text-foreground font-sans block"
-                  >
-                    Content Type *
-                  </label>
-                  <select
-                    id="projContentType"
-                    disabled={isSubmittingProject}
-                    value={projectForm.contentType}
-                    onChange={(e) =>
-                      setProjectForm((prev) => ({
-                        ...prev,
-                        contentType: e.target.value,
-                      }))
-                    }
-                    className="w-full px-3 py-2.5 rounded-xl bg-background border border-border-theme text-foreground text-xs font-sans focus:outline-none focus:border-secondary transition-all cursor-pointer"
-                  >
-                    {(PLATFORM_CONTENT_TYPES[projectForm.platform] || [
-                      { value: "other", label: "Other" },
-                    ]).map((type) => (
-                      <option key={type.value} value={type.value}>
-                        {type.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* 3. Project URL / Link */}
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="projUrl"
-                  className="text-xs font-semibold uppercase tracking-wider text-foreground font-sans block"
-                >
-                  Project Link / Published URL *
-                </label>
-                <input
-                  id="projUrl"
-                  type="text"
-                  disabled={isSubmittingProject}
-                  value={projectForm.url}
-                  onChange={(e) =>
-                    setProjectForm((prev) => ({ ...prev, url: e.target.value }))
-                  }
-                  placeholder="https://instagram.com/reel/... or https://youtube.com/watch?v=..."
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-background border border-border-theme text-foreground placeholder:text-text-secondary/50 text-xs sm:text-sm font-sans focus:outline-none focus:border-secondary transition-all"
-                />
-              </div>
-
-              {/* 4. Media Upload (Image or Video to Cloudinary) */}
-              <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase tracking-wider text-foreground font-sans block">
-                  Project Media (Image or Video)
-                </label>
-
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileUpload}
-                  accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime"
-                  className="hidden"
-                />
-
-                {projectForm.coverImage ? (
-                  <div className="relative p-3 rounded-xl border border-secondary/30 bg-secondary/5 flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-12 h-12 rounded-lg bg-surface border border-border-theme overflow-hidden shrink-0 flex items-center justify-center">
-                        {projectForm.mediaType === "video" ? (
-                          <VideoCameraIcon className="w-6 h-6 text-secondary" />
-                        ) : (
-                          /* eslint-disable-next-line @next/next/no-img-element */
-                          <img
-                            src={projectForm.coverImage}
-                            alt="Preview"
-                            className="w-full h-full object-cover"
-                          />
-                        )}
-                      </div>
-                      <div className="min-w-0">
-                        <span className="text-xs font-semibold text-foreground block truncate">
-                          {projectForm.mediaType === "video" ? "Video uploaded" : "Image uploaded"}
-                        </span>
-                        <span className="text-[11px] text-text-secondary block truncate max-w-[200px]">
-                          {projectForm.coverImage}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="px-2.5 py-1 text-xs font-medium rounded-lg bg-surface border border-border-theme text-foreground hover:bg-surface-muted transition-all cursor-pointer"
-                      >
-                        Replace
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setProjectForm((prev) => ({
-                            ...prev,
-                            coverImage: "",
-                          }))
-                        }
-                        className="p-1 rounded-lg text-red-500 hover:bg-red-500/10 transition-all cursor-pointer"
-                        title="Remove Media"
-                      >
-                        <TrashIcon className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={isUploadingMedia || isSubmittingProject}
-                    className="w-full p-4 rounded-xl border-2 border-dashed border-border-theme hover:border-secondary bg-background hover:bg-surface-muted/30 transition-all cursor-pointer flex flex-col items-center justify-center text-center gap-1.5 disabled:opacity-50"
-                  >
-                    {isUploadingMedia ? (
-                      <div className="flex items-center gap-2 text-xs font-medium text-secondary">
-                        <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                        </svg>
-                        <span>Uploading to Cloudinary...</span>
-                      </div>
-                    ) : (
-                      <>
-                        <ArrowUpTrayIcon className="w-5 h-5 text-secondary" />
-                        <span className="text-xs font-semibold text-foreground">
-                          Upload project cover or sample media
-                        </span>
-                        <span className="text-[11px] text-text-secondary">
-                          Images up to 5MB (PNG, JPG, WebP) or Videos up to 50MB (MP4, WebM)
-                        </span>
-                      </>
-                    )}
-                  </button>
-                )}
-              </div>
-
-              {/* 5. Project Description */}
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="projDesc"
-                  className="text-xs font-semibold uppercase tracking-wider text-foreground font-sans block"
-                >
-                  Description (Optional)
-                </label>
-                <textarea
-                  id="projDesc"
-                  rows={3}
-                  maxLength={2000}
-                  disabled={isSubmittingProject}
-                  value={projectForm.description}
-                  onChange={(e) =>
-                    setProjectForm((prev) => ({
-                      ...prev,
-                      description: e.target.value,
-                    }))
-                  }
-                  placeholder="Outline what you created, results achieved, brand collaborated with, or creative styling..."
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-background border border-border-theme text-foreground placeholder:text-text-secondary/50 text-xs sm:text-sm font-sans focus:outline-none focus:border-secondary transition-all resize-none"
-                />
-              </div>
-
-              {/* Modal Actions */}
-              <div className="pt-3 border-t border-border-theme flex items-center justify-end gap-2.5">
-                <button
-                  type="button"
-                  onClick={() => setIsProjectModalOpen(false)}
-                  disabled={isSubmittingProject || isUploadingMedia}
-                  className="px-4 py-2.5 rounded-xl border border-border-theme bg-surface-muted hover:bg-background text-foreground text-xs sm:text-sm font-medium transition-all cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmittingProject || isUploadingMedia}
-                  className="px-5 py-2.5 rounded-xl bg-neutral-950 text-white hover:bg-neutral-800 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-neutral-200 text-xs sm:text-sm font-semibold shadow-xs transition-all cursor-pointer disabled:opacity-50"
-                >
-                  {isSubmittingProject ? "Saving Project..." : editingProjectId ? "Update Project" : "Add Project"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <PortfolioFormModal
+        isOpen={isProjectModalOpen}
+        onClose={handleCloseProjectModal}
+        portfolio={editingProject}
+        defaultCategory={formData.category || formData.niches[0] || "Fashion & Luxury"}
+        onSuccess={async () => {
+          await dispatch(getPortfolios()).unwrap();
+          setSaveSuccessMessage(
+            editingProject
+              ? "Portfolio project updated successfully."
+              : "Portfolio project added successfully."
+          );
+        }}
+      />
 
       {/* =========================================================
           MODAL: ADD / EDIT SERVICE (REUSABLE COMPONENT)
@@ -3047,7 +2827,7 @@ export default function CreatorOnboarding() {
         isOpen={isServiceModalOpen}
         onClose={handleCloseServiceModal}
         service={editingService}
-        defaultCategory={formData.niches[0] || "Social Media Campaign"}
+        defaultCategory={formData.category || formData.niches[0] || "Social Media Campaign"}
         onSuccess={async () => {
           await dispatch(getServices({ limit: 50 }));
           setSaveSuccessMessage(

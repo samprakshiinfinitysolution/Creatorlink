@@ -221,6 +221,7 @@ const getDiscoverCreatorsService = async (query = {}) => {
                     { "user.name": { $regex: safeSearch, $options: "i" } },
                     { bio: { $regex: safeSearch, $options: "i" } },
                     { category: { $regex: safeSearch, $options: "i" } },
+                    { niches: { $regex: safeSearch, $options: "i" } },
                     { location: { $regex: safeSearch, $options: "i" } },
                     { "services.title": { $regex: safeSearch, $options: "i" } }
                 ]
@@ -232,11 +233,7 @@ const getDiscoverCreatorsService = async (query = {}) => {
         const safeCategory = escapeRegex(category.trim());
         pipeline.push({
             $match: {
-                $or: [
-                    { category: { $regex: safeCategory, $options: "i" } },
-                    { "services.category": { $regex: safeCategory, $options: "i" } },
-                    { "portfolio.category": { $regex: safeCategory, $options: "i" } }
-                ]
+                category: { $regex: `^${safeCategory}$`, $options: "i" }
             }
         });
     }
@@ -330,7 +327,10 @@ const getDiscoverCreatorsService = async (query = {}) => {
                 isVerified: "$user.isVerified"
             },
             bio: 1,
+            title: 1,
             category: 1,
+            niches: 1,
+            keywords: 1,
             location: 1,
             profileImage: 1,
             socialLinks: 1,
@@ -509,7 +509,10 @@ const getDiscoverCreatorByIdService = async (creatorId) => {
                     isVerified: "$user.isVerified"
                 },
                 bio: 1,
+                title: 1,
                 category: 1,
+                niches: 1,
+                keywords: 1,
                 location: 1,
                 profileImage: 1,
                 socialLinks: 1,

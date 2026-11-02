@@ -24,6 +24,12 @@ const getCreatorDashboardOverviewService = async (creatorId, query = {}) => {
     const deadlinesLimit = Math.min(Math.max(Number(query.deadlinesLimit) || 5, 1), 50);
     const now = new Date();
 
+    // Verify creator profile exists and has completed onboarding
+    const creatorProfile = await Profile.findOne({ user: creatorObjectId }).select("isOnboarded").lean();
+    if (!creatorProfile || !creatorProfile.isOnboarded) {
+        throw createApiError(403, "Please complete onboarding before accessing the creator dashboard");
+    }
+
     // Execute first wave of independent queries in parallel
     const [
         earningsAgg,

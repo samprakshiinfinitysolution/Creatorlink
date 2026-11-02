@@ -8,9 +8,12 @@ const createPortfolioService = async (
     portfolioData
 ) => {
 
+    const sanitizedData = { ...portfolioData };
+    delete sanitizedData.creator;
+
     const portfolio = await Portfolio.create({
-        creator: creatorId,
-        ...portfolioData
+        ...sanitizedData,
+        creator: creatorId
     });
 
 
@@ -72,13 +75,16 @@ const updatePortfolioService = async (
     portfolioData
 ) => {
 
+    const sanitizedData = { ...portfolioData };
+    delete sanitizedData.creator;
+
     const portfolio = await Portfolio.findOneAndUpdate(
         {
             _id: portfolioId,
             creator: creatorId
         },
         {
-            $set: portfolioData
+            $set: sanitizedData
         },
         {
             new: true,

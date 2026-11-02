@@ -82,6 +82,24 @@ const validateContent = (contents) => {
 // Validate portfolio creation.
 const validateCreatePortfolio = (req, res, next) => {
 
+    if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) {
+        return sendResponse(
+            res,
+            400,
+            "Request body must be an object",
+            null
+        );
+    }
+
+    if ("creator" in req.body || req.body.creator !== undefined) {
+        return sendResponse(
+            res,
+            400,
+            "Creator ownership cannot be specified in payload",
+            null
+        );
+    }
+
     const {
         title,
         description,
@@ -196,6 +214,15 @@ const validateCreatePortfolio = (req, res, next) => {
 // Validate portfolio update.
 const validateUpdatePortfolio = (req, res, next) => {
 
+    if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) {
+        return sendResponse(
+            res,
+            400,
+            "Request body must be an object",
+            null
+        );
+    }
+
     if (Object.keys(req.body).length === 0) {
         return sendResponse(
             res,
@@ -205,6 +232,14 @@ const validateUpdatePortfolio = (req, res, next) => {
         );
     }
 
+    if ("creator" in req.body || req.body.creator !== undefined) {
+        return sendResponse(
+            res,
+            400,
+            "Creator ownership cannot be updated",
+            null
+        );
+    }
 
     const {
         title,

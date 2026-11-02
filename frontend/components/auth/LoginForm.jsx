@@ -4,8 +4,8 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
-import store from "@/redux/store";
 import { login, loginWithGoogle } from "@/redux/auth/auth_slice";
+import { getCreatorProfile } from "@/redux/creator/profile/profile_slice";
 import { getGoogleClientId } from "@/redux/auth/auth_api";
 import { requestGoogleAuthCode } from "@/lib/googleAuth";
 
@@ -73,13 +73,7 @@ function AppleIcon({ className = "w-5 h-5" }) {
 export default function LoginForm() {
   const router = useRouter();
 
-  let reduxDispatch;
-  try {
-    reduxDispatch = useDispatch();
-  } catch (e) {
-    reduxDispatch = null;
-  }
-  const dispatch = reduxDispatch || store.dispatch;
+  const dispatch = useDispatch();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -113,7 +107,21 @@ export default function LoginForm() {
         const role = user?.role;
 
         if (role === "creator") {
-          router.push("/creator/dashboard");
+          try {
+            const profileAction = await dispatch(getCreatorProfile());
+            if (getCreatorProfile.fulfilled.match(profileAction)) {
+              const profile = profileAction.payload?.data;
+              if (profile?.isOnboarded) {
+                router.push("/creator/dashboard");
+              } else {
+                router.push("/creator/onboarding");
+              }
+            } else {
+              router.push("/creator/onboarding");
+            }
+          } catch {
+            router.push("/creator/onboarding");
+          }
         } else if (role === "brand") {
           router.push("/brand/dashboard");
         } else if (role === "admin") {
@@ -166,7 +174,21 @@ export default function LoginForm() {
         const role = user?.role;
 
         if (role === "creator") {
-          router.push("/creator/dashboard");
+          try {
+            const profileAction = await dispatch(getCreatorProfile());
+            if (getCreatorProfile.fulfilled.match(profileAction)) {
+              const profile = profileAction.payload?.data;
+              if (profile?.isOnboarded) {
+                router.push("/creator/dashboard");
+              } else {
+                router.push("/creator/onboarding");
+              }
+            } else {
+              router.push("/creator/onboarding");
+            }
+          } catch {
+            router.push("/creator/onboarding");
+          }
         } else if (role === "brand") {
           router.push("/brand/dashboard");
         } else if (role === "admin") {
@@ -181,7 +203,7 @@ export default function LoginForm() {
           "Invalid email or password";
         setErrorMsg(message);
       }
-    } catch (err) {
+    } catch {
       setErrorMsg("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);

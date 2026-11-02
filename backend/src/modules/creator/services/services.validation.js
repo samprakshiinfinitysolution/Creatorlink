@@ -22,6 +22,24 @@ const allowedPricingTypes = [
 // Create service validation.
 const validateCreateService = (req, res, next) => {
 
+    if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) {
+        return sendResponse(
+            res,
+            400,
+            "Request body must be an object",
+            null
+        );
+    }
+
+    if ("creator" in req.body || req.body.creator !== undefined) {
+        return sendResponse(
+            res,
+            400,
+            "Creator ownership cannot be specified in payload",
+            null
+        );
+    }
+
     const {
         title,
         description,
@@ -276,6 +294,15 @@ const validateCreateService = (req, res, next) => {
 // Update validation.
 const validateUpdateService = (req, res, next) => {
 
+    if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) {
+        return sendResponse(
+            res,
+            400,
+            "Request body must be an object",
+            null
+        );
+    }
+
     if (Object.keys(req.body).length === 0) {
         return sendResponse(
             res,
@@ -285,6 +312,14 @@ const validateUpdateService = (req, res, next) => {
         );
     }
 
+    if ("creator" in req.body || req.body.creator !== undefined) {
+        return sendResponse(
+            res,
+            400,
+            "Creator ownership cannot be updated",
+            null
+        );
+    }
 
     const {
         title,

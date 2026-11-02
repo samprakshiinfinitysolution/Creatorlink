@@ -200,7 +200,7 @@ export default function CreatorBookingsManager() {
 
   const dispatch = useDispatch();
 
-  const { bookings, pagination, loading, error, successMessage } = useSelector(
+  const { bookings = [], pagination, loading, error, successMessage } = useSelector(
     (state) => state.creatorBookings || {}
   );
 
@@ -341,7 +341,7 @@ export default function CreatorBookingsManager() {
 
   const currentPage = pagination?.page || page;
   const totalPages = pagination?.totalPages || pagination?.pages || 1;
-  const totalItems = pagination?.totalItems ?? pagination?.total ?? bookings.length;
+  const totalItems = pagination?.totalItems ?? pagination?.total ?? (Array.isArray(bookings) ? bookings.length : 0);
   const hasPrevPage = currentPage > 1;
   const hasNextPage = currentPage < totalPages;
 

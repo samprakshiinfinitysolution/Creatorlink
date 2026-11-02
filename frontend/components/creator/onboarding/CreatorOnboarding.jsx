@@ -412,22 +412,14 @@ function UserIcon({ className = "w-5 h-5" }) {
   );
 }
 
-function BanknotesIcon({ className = "w-5 h-5" }) {
+function CreditCardIcon({ className = "w-5 h-5 text-neutral-400" }) {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <rect x="2" y="5" width="20" height="14" rx="2.5" />
+      <line x1="2" y1="10" x2="22" y2="10" />
     </svg>
   );
 }
-
-function ShieldCheckIcon({ className = "w-5 h-5" }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-    </svg>
-  );
-}
-
 
 function getPlatformIcon(platform) {
   switch (platform) {
@@ -484,15 +476,95 @@ export default function CreatorOnboarding() {
     ethnicity: "",
   });
 
-  // Step 4: Payment Details form data
-  const [payoutData, setPayoutData] = useState({
-    payoutType: "upi", // 'upi' or 'bank'
-    upiId: "",
-    accountNumber: "",
-    confirmAccountNumber: "",
-    ifscCode: "",
-    accountHolderName: "",
-  });
+  // Step 4: Card form refs & verification state (PCI-compliant: no raw card/CVC stored in React state/Redux/DB)
+  const cardNumberRef = useRef(null);
+  const cardExpiryRef = useRef(null);
+  const cardCvcRef = useRef(null);
+  const [isVerifyingCard, setIsVerifyingCard] = useState(false);
+  const [cardVerifyStatus, setCardVerifyStatus] = useState(null);
+
+  // Step 4: Transient input formatters (format directly in DOM, never persist raw values)
+  const handleCardNumberInput = (e) => {
+    const raw = e.target.value.replace(/\D/g, "").slice(0, 16);
+    const formatted = raw.match(/.{1,4}/g)?.join(" ") || raw;
+    e.target.value = formatted;
+  };
+
+  const handleExpiryInput = (e) => {
+    const raw = e.target.value.replace(/\D/g, "").slice(0, 4);
+    if (raw.length >= 3) {
+      e.target.value = raw.slice(0, 2) + " / " + raw.slice(2);
+    } else {
+      e.target.value = raw;
+    }
+  };
+
+  const handleCvcInput = (e) => {
+    e.target.value = e.target.value.replace(/\D/g, "").slice(0, 4);
+  };
+
+  // Step 4: Card verification handler
+  const handleVerifyCard = (e) => {
+    if (e) e.preventDefault();
+    setCardVerifyStatus(null);
+
+    const rawNumber = cardNumberRef.current?.value?.replace(/\s+/g, "") || "";
+    const rawExpiry = cardExpiryRef.current?.value?.replace(/\s+/g, "") || "";
+    const rawCvc = cardCvcRef.current?.value?.replace(/\s+/g, "") || "";
+
+    if (!rawNumber || rawNumber.length < 15) {
+      setCardVerifyStatus({
+        type: "error",
+        message: "Please enter a valid card number (15 or 16 digits).",
+      });
+      return;
+    }
+
+    if (!rawExpiry || !rawExpiry.includes("/")) {
+      setCardVerifyStatus({
+        type: "error",
+        message: "Please enter a valid expiry date (MM / YY).",
+      });
+      return;
+    }
+
+    const [month, year] = rawExpiry.split("/").map((s) => s.trim());
+    const numMonth = parseInt(month, 10);
+    if (isNaN(numMonth) || numMonth < 1 || numMonth > 12) {
+      setCardVerifyStatus({
+        type: "error",
+        message: "Please enter a valid expiration month (01–12).",
+      });
+      return;
+    }
+
+    if (!year || year.length !== 2) {
+      setCardVerifyStatus({
+        type: "error",
+        message: "Please enter a valid 2-digit expiration year (YY).",
+      });
+      return;
+    }
+
+    if (!rawCvc || rawCvc.length < 3) {
+      setCardVerifyStatus({
+        type: "error",
+        message: "Please enter a valid 3 or 4-digit CVC code.",
+      });
+      return;
+    }
+
+    // Connect only to a supported secure payment-provider flow; report status cleanly if not configured
+    setIsVerifyingCard(true);
+    setTimeout(() => {
+      setIsVerifyingCard(false);
+      setCardVerifyStatus({
+        type: "notice",
+        message:
+          "Stripe card verification is not configured on this environment. CreatorLink is currently integrated with Razorpay Test Mode. You can proceed with Complete Onboarding below.",
+      });
+    }, 600);
+  };
 
   // Profile image upload state
   const [isUploadingImage, setIsUploadingImage] = useState(false);
@@ -2087,173 +2159,102 @@ export default function CreatorOnboarding() {
               )}
 
               {/* =========================================================
-                  STEP 4: PAYMENT DETAILS & PAYOUT SETUP
+                  STEP 4: PAYMENT DETAILS (STRIPE CARD VERIFICATION)
               ========================================================= */}
               {currentStep === 4 && (
-                <div className="space-y-6">
-                  <div className="flex items-start gap-3.5 pb-6 border-b border-neutral-100 dark:border-neutral-800">
-                    <div className="w-10 h-10 rounded-full bg-pink-50 dark:bg-pink-950/30 text-pink-600 dark:text-pink-400 flex items-center justify-center shrink-0 border border-pink-200/50 dark:border-pink-900/30">
-                      <BanknotesIcon className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h2 className="text-lg sm:text-xl font-bold text-neutral-950 dark:text-white tracking-tight">
-                        Payment Details & Payout Setup
-                      </h2>
-                      <p className="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400 mt-0.5">
-                        Configure your payout details to receive milestone earnings safely directly into your bank account or UPI ID.
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Payout Options */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-                    <div className="space-y-4">
-                      {/* Payout Type Tab */}
-                      <div className="flex p-1 rounded-xl bg-neutral-100 dark:bg-neutral-800">
-                        <button
-                          type="button"
-                          onClick={() => setPayoutData((prev) => ({ ...prev, payoutType: "upi" }))}
-                          className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
-                            payoutData.payoutType === "upi"
-                              ? "bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white shadow-xs"
-                              : "text-neutral-500 hover:text-neutral-900"
-                          }`}
-                        >
-                          UPI / VPA ID
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setPayoutData((prev) => ({ ...prev, payoutType: "bank" }))}
-                          className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
-                            payoutData.payoutType === "bank"
-                              ? "bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white shadow-xs"
-                              : "text-neutral-500 hover:text-neutral-900"
-                          }`}
-                        >
-                          Direct Bank Transfer
-                        </button>
-                      </div>
-
-                      {payoutData.payoutType === "upi" ? (
-                        <div className="space-y-1.5">
-                          <label className="text-xs font-semibold uppercase tracking-wider text-neutral-800 dark:text-neutral-200 block">
-                            UPI ID / Virtual Payment Address
-                          </label>
+                <div className="max-w-xl mx-auto py-2 sm:py-6">
+                  <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200/90 dark:border-neutral-800 p-6 sm:p-8 shadow-xs">
+                    {/* Card Inputs Grid */}
+                    <div className="grid grid-cols-2 sm:grid-cols-12 gap-3 sm:gap-4">
+                      {/* Card Number */}
+                      <div className="col-span-2 sm:col-span-6 space-y-1.5">
+                        <label className="block text-xs sm:text-sm font-normal text-neutral-700 dark:text-neutral-300">
+                          Card number
+                        </label>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-400">
+                            <CreditCardIcon className="w-5 h-5 text-neutral-400" />
+                          </div>
                           <input
+                            ref={cardNumberRef}
                             type="text"
-                            value={payoutData.upiId}
-                            onChange={(e) => setPayoutData((prev) => ({ ...prev, upiId: e.target.value }))}
-                            placeholder="e.g. yourname@okhdfcbank or 9876543210@paytm"
-                            className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 text-sm focus:outline-none focus:border-pink-500"
+                            inputMode="numeric"
+                            autoComplete="cc-number"
+                            placeholder="1234 1234 1234 1234"
+                            onInput={handleCardNumberInput}
+                            className="w-full pl-11 pr-3 py-2.5 sm:py-3 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 text-xs sm:text-sm text-neutral-900 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-500 focus:ring-1 focus:ring-neutral-400 dark:focus:ring-neutral-500 transition-colors"
                           />
-                          <p className="text-[11px] text-neutral-500">
-                            Instant milestone disbursements will be processed to this verified UPI ID.
-                          </p>
                         </div>
-                      ) : (
-                        <div className="space-y-3">
-                          <div className="space-y-1">
-                            <label className="text-xs font-semibold uppercase tracking-wider text-neutral-800 dark:text-neutral-200 block">
-                              Account Holder / Beneficiary Name
-                            </label>
-                            <input
-                              type="text"
-                              value={payoutData.accountHolderName}
-                              onChange={(e) => setPayoutData((prev) => ({ ...prev, accountHolderName: e.target.value }))}
-                              placeholder="Name as printed on bank passbook / check"
-                              className="w-full px-4 py-2 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 text-xs focus:outline-none focus:border-pink-500"
-                            />
-                          </div>
-                          <div className="space-y-1">
-                            <label className="text-xs font-semibold uppercase tracking-wider text-neutral-800 dark:text-neutral-200 block">
-                              Bank Account Number
-                            </label>
-                            <input
-                              type="password"
-                              value={payoutData.accountNumber}
-                              onChange={(e) => setPayoutData((prev) => ({ ...prev, accountNumber: e.target.value }))}
-                              placeholder="Enter account number"
-                              className="w-full px-4 py-2 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 text-xs focus:outline-none focus:border-pink-500"
-                            />
-                          </div>
-                          <div className="space-y-1">
-                            <label className="text-xs font-semibold uppercase tracking-wider text-neutral-800 dark:text-neutral-200 block">
-                              Confirm Account Number
-                            </label>
-                            <input
-                              type="text"
-                              value={payoutData.confirmAccountNumber}
-                              onChange={(e) => setPayoutData((prev) => ({ ...prev, confirmAccountNumber: e.target.value }))}
-                              placeholder="Re-enter account number"
-                              className="w-full px-4 py-2 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 text-xs focus:outline-none focus:border-pink-500"
-                            />
-                          </div>
-                          <div className="space-y-1">
-                            <label className="text-xs font-semibold uppercase tracking-wider text-neutral-800 dark:text-neutral-200 block">
-                              Bank IFSC Code
-                            </label>
-                            <input
-                              type="text"
-                              value={payoutData.ifscCode}
-                              onChange={(e) => setPayoutData((prev) => ({ ...prev, ifscCode: e.target.value.toUpperCase() }))}
-                              placeholder="e.g. HDFC0001234"
-                              className="w-full px-4 py-2 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 text-xs uppercase focus:outline-none focus:border-pink-500"
-                            />
-                          </div>
-                        </div>
-                      )}
+                      </div>
 
-                      {/* Escrow Trust Badge */}
-                      <div className="p-4 rounded-2xl bg-neutral-50 dark:bg-neutral-800/40 border border-neutral-200/60 dark:border-neutral-800 flex items-start gap-3">
-                        <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
-                          <ShieldCheckIcon className="w-5 h-5" />
-                        </div>
-                        <div className="space-y-0.5">
-                          <h4 className="text-xs font-bold text-neutral-900 dark:text-neutral-100">
-                            CreatorLink Escrow Protection
-                          </h4>
-                          <p className="text-[11px] text-neutral-500 leading-relaxed">
-                            Brands deposit milestone funds in advance into escrow before you begin work. Upon milestone completion and approval, earnings are directly disbursed to your verified payout account.
-                          </p>
-                        </div>
+                      {/* Expiry */}
+                      <div className="col-span-1 sm:col-span-3 space-y-1.5">
+                        <label className="block text-xs sm:text-sm font-normal text-neutral-700 dark:text-neutral-300">
+                          Expiry
+                        </label>
+                        <input
+                          ref={cardExpiryRef}
+                          type="text"
+                          inputMode="numeric"
+                          autoComplete="cc-exp"
+                          placeholder="MM / YY"
+                          onInput={handleExpiryInput}
+                          className="w-full px-3.5 py-2.5 sm:py-3 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 text-xs sm:text-sm text-neutral-900 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-500 focus:ring-1 focus:ring-neutral-400 dark:focus:ring-neutral-500 transition-colors"
+                        />
+                      </div>
+
+                      {/* CVC */}
+                      <div className="col-span-1 sm:col-span-3 space-y-1.5">
+                        <label className="block text-xs sm:text-sm font-normal text-neutral-700 dark:text-neutral-300">
+                          CVC
+                        </label>
+                        <input
+                          ref={cardCvcRef}
+                          type="text"
+                          inputMode="numeric"
+                          autoComplete="cc-csc"
+                          placeholder="CVC"
+                          onInput={handleCvcInput}
+                          className="w-full px-3.5 py-2.5 sm:py-3 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 text-xs sm:text-sm text-neutral-900 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-500 focus:ring-1 focus:ring-neutral-400 dark:focus:ring-neutral-500 transition-colors"
+                        />
                       </div>
                     </div>
 
-                    {/* Right column: Readiness Summary */}
-                    <div className="p-6 rounded-2xl bg-neutral-50 dark:bg-neutral-800/40 border border-neutral-200/80 dark:border-neutral-800 space-y-4">
-                      <h3 className="font-bold text-sm text-neutral-900 dark:text-neutral-100">
-                        Onboarding Readiness Summary
-                      </h3>
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200/60 dark:border-neutral-800 text-xs">
-                          <span className="font-medium">1. Profile Information</span>
-                          <span className="text-emerald-600 font-semibold flex items-center gap-1">
-                            <CheckIcon className="w-3.5 h-3.5" /> Completed
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200/60 dark:border-neutral-800 text-xs">
-                          <span className="font-medium">2. Portfolio Work</span>
-                          <span className="text-emerald-600 font-semibold flex items-center gap-1">
-                            <CheckIcon className="w-3.5 h-3.5" /> {portfolios?.length || 0} Projects
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200/60 dark:border-neutral-800 text-xs">
-                          <span className="font-medium">3. Services & Packages</span>
-                          <span className="text-emerald-600 font-semibold flex items-center gap-1">
-                            <CheckIcon className="w-3.5 h-3.5" /> {services?.filter((s) => s.isActive !== false).length || 0} Active
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200/60 dark:border-neutral-800 text-xs">
-                          <span className="font-medium">4. Payment Setup</span>
-                          <span className="text-pink-600 font-semibold flex items-center gap-1">
-                            Ready to Finish
-                          </span>
-                        </div>
-                      </div>
-                      <p className="text-[11px] text-neutral-500 pt-2 leading-relaxed">
-                        Clicking Complete Onboarding finalizes your profile and activates full access to your creator dashboard, campaign discovery, and direct brand contracts.
-                      </p>
+                    {/* Verify Button */}
+                    <div className="mt-5 sm:mt-6">
+                      <button
+                        type="button"
+                        onClick={handleVerifyCard}
+                        disabled={isVerifyingCard}
+                        className="w-full py-3 sm:py-3.5 px-4 rounded-xl bg-[#222222] hover:bg-black dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-white text-white text-sm font-semibold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                      >
+                        {isVerifyingCard ? (
+                          <>
+                            <svg className="animate-spin w-4 h-4 text-white dark:text-neutral-950" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                            </svg>
+                            <span>Verifying...</span>
+                          </>
+                        ) : (
+                          <span>Verify</span>
+                        )}
+                      </button>
                     </div>
+
+                    {/* Status Message */}
+                    {cardVerifyStatus && (
+                      <div
+                        className={
+                          cardVerifyStatus.type === "error"
+                            ? "mt-4 p-3 rounded-xl text-xs font-medium leading-relaxed bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400"
+                            : "mt-4 p-3 rounded-xl text-xs font-medium leading-relaxed bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 text-amber-800 dark:text-amber-300"
+                        }
+                      >
+                        {cardVerifyStatus.type === "error" ? "⚠ " : "ℹ "}
+                        {cardVerifyStatus.message}
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

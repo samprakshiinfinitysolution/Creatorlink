@@ -83,11 +83,11 @@ const createBrandPaymentOrderService = async (brandId, payload = {}) => {
         );
     }
 
-    // 2. Enforce business rule: Payment is allowed ONLY when workspace is completed (all deliverables approved)
-    if (workspace.status !== "completed") {
+    // 2. Enforce business rule: Payment is allowed ONLY when workspace is approved (all deliverables approved) or completed
+    if (workspace.status !== "approved" && workspace.status !== "completed") {
         throw createApiError(
             400,
-            "Payment is allowed only after all workspace deliverables are approved and the workspace is completed"
+            "Payment is allowed only after all workspace deliverables are approved"
         );
     }
 
@@ -625,6 +625,11 @@ const verifyBrandPaymentService = async (brandId, payload = {}) => {
 
         throw createApiError(400, "Failed to update payment status");
     }
+
+    // Transition workspace to 'completed' upon successful payment verification
+    await Workspace.findByIdAndUpdate(payment.workspace, {
+        status: "completed"
+    });
 
     await createNotificationSafe({
         recipient: updatedPayment.creator,

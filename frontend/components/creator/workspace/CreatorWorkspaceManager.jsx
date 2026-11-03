@@ -174,6 +174,7 @@ const STATUS_TABS = [
   { id: "in_progress", label: "In Progress" },
   { id: "submitted", label: "Submitted" },
   { id: "revision_requested", label: "Revision Requested" },
+  { id: "approved", label: "Approved" },
   { id: "completed", label: "Completed" },
   { id: "cancelled", label: "Cancelled" },
 ];
@@ -228,6 +229,11 @@ const getStatusBadge = (status) => {
       return {
         label: "Revision Requested",
         color: "text-rose-600 dark:text-rose-400",
+      };
+    case "approved":
+      return {
+        label: "Approved (Payment Pending)",
+        color: "text-blue-600 dark:text-blue-400",
       };
     case "completed":
       return {
@@ -318,7 +324,7 @@ export default function CreatorWorkspaceManager() {
   const summarySource = allWorkspacesSummary.length > 0 ? allWorkspacesSummary : workspaces;
   const totalCount = pagination?.totalItems ?? (allWorkspacesSummary.length > 0 ? allWorkspacesSummary.length : workspaces.length);
   const inProgressCount = summarySource.filter(
-    (w) => w.status === "in_progress" || w.status === "submitted" || w.status === "revision_requested"
+    (w) => w.status === "in_progress" || w.status === "submitted" || w.status === "revision_requested" || w.status === "approved"
   ).length;
   const completedCount = summarySource.filter((w) => w.status === "completed").length;
   const cancelledCount = summarySource.filter((w) => w.status === "cancelled").length;
@@ -613,7 +619,7 @@ export default function CreatorWorkspaceManager() {
 
           {/* 5. LOADING SKELETON STATE */}
           {loading && workspaces.length === 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-6">
               {[1, 2, 3, 4, 5, 6].map((idx) => (
                 <div
                   key={idx}
@@ -676,7 +682,7 @@ export default function CreatorWorkspaceManager() {
             </div>
           ) : (
             /* 7. WORKSPACE CARDS GRID (3 cols desktop, 2 cols tablet, 1 col mobile) */
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-6">
               {displayedWorkspaces.map((ws) => {
                 const badge = getStatusBadge(ws.status);
                 const campaignTitle = ws.campaign?.title || ws.service?.title || "Campaign Workspace";
@@ -758,7 +764,7 @@ export default function CreatorWorkspaceManager() {
                       </div>
 
                       {/* Campaign Title */}
-                      <h3 className="font-sans font-semibold text-base text-foreground line-clamp-1 mt-2.5 tracking-tight">
+                      <h3 className="font-sans font-semibold text-base text-foreground line-clamp-2 break-words mt-2.5 tracking-tight">
                         {campaignTitle}
                       </h3>
 
@@ -797,7 +803,7 @@ export default function CreatorWorkspaceManager() {
                             <span className="text-[10px] sm:text-[11px] font-sans text-text-secondary block leading-tight">
                               Agreed Price
                             </span>
-                            <span className="font-sans font-semibold text-sm sm:text-base text-foreground block truncate tracking-tight mt-0.5">
+                            <span className="font-sans font-semibold text-sm sm:text-base text-foreground block break-words tracking-tight mt-0.5">
                               {agreedPriceFormatted}
                             </span>
                           </div>
@@ -812,7 +818,7 @@ export default function CreatorWorkspaceManager() {
                             <span className="text-[10px] sm:text-[11px] font-sans text-text-secondary block leading-tight">
                               Deadline
                             </span>
-                            <span className="font-sans font-semibold text-xs sm:text-sm text-foreground block truncate mt-0.5">
+                            <span className="font-sans font-semibold text-xs sm:text-sm text-foreground block break-words mt-0.5">
                               {deadlineFormatted}
                             </span>
                           </div>
@@ -846,7 +852,7 @@ export default function CreatorWorkspaceManager() {
                                   <div className="w-4 h-4 rounded-full bg-transparent text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center justify-center shrink-0">
                                     <CheckIcon className="w-2.5 h-2.5" />
                                   </div>
-                                  <span className="line-clamp-1">{title}</span>
+                                  <span className="line-clamp-2 break-words">{title}</span>
                                 </div>
                               );
                             })}

@@ -62,7 +62,7 @@ const getAdminDashboardOverviewService = async (query = {}) => {
         // 3. Collaborations metrics
         Booking.countDocuments(),
         Workspace.countDocuments(),
-        Workspace.countDocuments({ status: { $in: ["in_progress", "submitted", "revision_requested"] } }),
+        Workspace.countDocuments({ status: { $in: ["in_progress", "submitted", "revision_requested", "approved"] } }),
         Workspace.countDocuments({ status: "completed" }),
 
         // 4. Financial metrics: GMV and payments volume

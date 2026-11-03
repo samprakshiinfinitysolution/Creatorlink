@@ -40,11 +40,11 @@ export default function CreatorWelcomeBanner({ user, creator, profile, metrics }
   const [imgError, setImgError] = useState(false);
 
   const welcomeName =
+    profile?.user?.name ||
+    user?.name ||
     profile?.displayName ||
     profile?.name ||
     creator?.name ||
-    user?.name ||
-    profile?.user?.name ||
     "Creator";
 
   const rawAvatar = profile?.profileImage || creator?.profileImage || user?.avatar || null;
@@ -69,7 +69,7 @@ export default function CreatorWelcomeBanner({ user, creator, profile, metrics }
   const activeCount = metrics?.activeCollaborations?.total || 0;
 
   return (
-    <div className="relative overflow-hidden bg-gradient-to-r from-pink-50/70 via-pink-50/40 to-[#ffe4ec]/80 dark:from-[#1e151a] dark:via-surface dark:to-[#1a1418] border border-pink-100/80 dark:border-border-theme rounded-3xl p-6 sm:p-8 lg:p-10 shadow-xs flex flex-col md:flex-row md:items-center md:justify-between gap-8 transition-colors">
+    <div className="relative overflow-hidden bg-gradient-to-r from-pink-50/70 via-pink-50/40 to-[#ffe4ec]/80 dark:from-[#1e151a] dark:via-surface dark:to-[#1a1418] border border-pink-100/80 dark:border-border-theme rounded-3xl p-5 sm:p-7 lg:p-10 shadow-xs flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 sm:gap-8 transition-colors">
       {/* Keyframe animations for gentle floating and staggered bar pulse */}
       <style>{`
         @keyframes floatGrowCard {
@@ -223,7 +223,7 @@ export default function CreatorWelcomeBanner({ user, creator, profile, metrics }
       </div>
 
       {/* Right Decorative Composition Matching Brand Dashboard Quality */}
-      <div className="relative hidden md:flex items-center justify-end w-[350px] lg:w-[420px] h-[190px] lg:h-[210px] shrink-0 select-none">
+      <div className="relative hidden lg:flex items-center justify-end w-[340px] xl:w-[420px] h-[190px] lg:h-[210px] shrink-0 select-none">
         {/* 1. Decorative Studio Visual Card */}
         <div
           aria-hidden="true"

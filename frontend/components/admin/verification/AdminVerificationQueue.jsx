@@ -98,42 +98,42 @@ export default function AdminVerificationQueue() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight text-white">
+            <h1 className="text-2xl sm:text-3xl font-serif font-bold tracking-tight text-foreground">
               Verification Requests
             </h1>
-            <span className="flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <span className="flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
               <ShieldCheckIcon className="w-3.5 h-3.5" />
               Verified Badges
             </span>
           </div>
-          <p className="text-sm text-neutral-400 mt-1">
+          <p className="text-xs sm:text-sm text-text-secondary mt-1">
             Review identity proofs and business credentials to grant official verified status.
           </p>
         </div>
       </div>
 
       {/* Filter & Control Bar */}
-      <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 space-y-4">
+      <div className="bg-surface border border-border-theme rounded-2xl p-4 shadow-xs space-y-4">
         <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
           {/* Search Input */}
           <form
             onSubmit={handleSearchSubmit}
             className="relative flex-1 max-w-md"
           >
-            <SearchIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-500 w-4 h-4" />
+            <SearchIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-secondary w-4 h-4" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name, email, or doc number..."
-              className="w-full pl-10 pr-4 py-2 text-xs bg-neutral-950 border border-neutral-800 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-emerald-500 transition"
+              className="w-full pl-10 pr-4 py-2 text-xs bg-surface-muted/60 border border-border-theme rounded-xl text-foreground placeholder:text-text-secondary focus:outline-hidden focus:border-secondary transition"
             />
           </form>
 
           {/* Quick Filters */}
           <div className="flex flex-wrap items-center gap-2.5">
             {/* Status Tabs */}
-            <div className="flex items-center bg-neutral-950 p-1 rounded-xl border border-neutral-800 text-xs">
+            <div className="flex items-center bg-surface-muted/60 p-1 rounded-xl border border-border-theme text-xs">
               {["all", "pending", "approved", "rejected"].map((st) => (
                 <button
                   key={st}
@@ -142,10 +142,10 @@ export default function AdminVerificationQueue() {
                     setStatusFilter(st);
                     setPage(1);
                   }}
-                  className={`px-3 py-1.5 rounded-lg capitalize transition font-medium ${
+                  className={`px-3 py-1.5 rounded-lg capitalize transition font-medium cursor-pointer ${
                     statusFilter === st
-                      ? "bg-neutral-800 text-white shadow-sm"
-                      : "text-neutral-400 hover:text-white"
+                      ? "bg-foreground text-background shadow-xs font-semibold"
+                      : "text-text-secondary hover:text-foreground hover:bg-surface-muted"
                   }`}
                 >
                   {st}
@@ -160,7 +160,7 @@ export default function AdminVerificationQueue() {
                 setRoleFilter(e.target.value);
                 setPage(1);
               }}
-              className="text-xs bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-neutral-300 focus:outline-none focus:border-emerald-500"
+              className="text-xs bg-surface-muted/60 border border-border-theme rounded-xl px-3 py-2 text-foreground focus:outline-hidden focus:border-secondary cursor-pointer"
             >
               <option value="all">All Roles</option>
               <option value="creator">Creators</option>
@@ -174,7 +174,7 @@ export default function AdminVerificationQueue() {
                 setSortBy(e.target.value);
                 setPage(1);
               }}
-              className="text-xs bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-neutral-300 focus:outline-none focus:border-emerald-500"
+              className="text-xs bg-surface-muted/60 border border-border-theme rounded-xl px-3 py-2 text-foreground focus:outline-hidden focus:border-secondary cursor-pointer"
             >
               <option value="newest">Newest First</option>
               <option value="oldest">Oldest First</option>
@@ -185,16 +185,16 @@ export default function AdminVerificationQueue() {
 
       {/* Error Alert */}
       {error && (
-        <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-400 text-sm">
+        <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-600 dark:text-rose-400 text-sm">
           {error}
         </div>
       )}
 
       {/* Verification Requests Table */}
-      <div className="bg-neutral-900 border border-neutral-800 rounded-2xl overflow-hidden">
+      <div className="bg-surface border border-border-theme rounded-2xl overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-neutral-950/60 border-b border-neutral-800 text-neutral-400 font-medium">
+            <thead className="bg-surface-muted/50 border-b border-border-theme text-text-secondary uppercase tracking-wider text-[11px] font-semibold">
               <tr>
                 <th className="px-5 py-3.5">Applicant</th>
                 <th className="px-5 py-3.5">Role</th>
@@ -204,45 +204,45 @@ export default function AdminVerificationQueue() {
                 <th className="px-5 py-3.5 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-800/60 text-neutral-300">
+            <tbody className="divide-y divide-border-theme text-foreground">
               {loading ? (
                 // Skeleton loading rows
                 [...Array(5)].map((_, i) => (
                   <tr key={i} className="animate-pulse">
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-neutral-800" />
+                        <div className="w-8 h-8 rounded-full bg-surface-muted" />
                         <div className="space-y-1.5">
-                          <div className="h-3 w-28 bg-neutral-800 rounded" />
-                          <div className="h-2 w-36 bg-neutral-800 rounded" />
+                          <div className="h-3 w-28 bg-surface-muted rounded" />
+                          <div className="h-2 w-36 bg-surface-muted rounded" />
                         </div>
                       </div>
                     </td>
                     <td className="px-5 py-4">
-                      <div className="h-4 w-16 bg-neutral-800 rounded" />
+                      <div className="h-4 w-16 bg-surface-muted rounded" />
                     </td>
                     <td className="px-5 py-4">
-                      <div className="h-4 w-24 bg-neutral-800 rounded" />
+                      <div className="h-4 w-24 bg-surface-muted rounded" />
                     </td>
                     <td className="px-5 py-4">
-                      <div className="h-3 w-20 bg-neutral-800 rounded" />
+                      <div className="h-3 w-20 bg-surface-muted rounded" />
                     </td>
                     <td className="px-5 py-4">
-                      <div className="h-4 w-16 bg-neutral-800 rounded" />
+                      <div className="h-4 w-16 bg-surface-muted rounded" />
                     </td>
                     <td className="px-5 py-4 text-right">
-                      <div className="h-6 w-16 bg-neutral-800 rounded ml-auto" />
+                      <div className="h-6 w-16 bg-surface-muted rounded ml-auto" />
                     </td>
                   </tr>
                 ))
               ) : verifications.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-5 py-12 text-center">
-                    <ShieldCheckIcon className="w-8 h-8 text-neutral-600 mx-auto mb-2" />
-                    <p className="text-sm font-medium text-white">
+                    <ShieldCheckIcon className="w-8 h-8 text-text-secondary mx-auto mb-2 opacity-50" />
+                    <p className="text-sm font-medium text-foreground">
                       No verification requests found
                     </p>
-                    <p className="text-xs text-neutral-500 mt-1">
+                    <p className="text-xs text-text-secondary mt-1">
                       Try adjusting filters or check back when new applications arrive.
                     </p>
                   </td>
@@ -256,12 +256,12 @@ export default function AdminVerificationQueue() {
                   return (
                     <tr
                       key={item._id}
-                      className="hover:bg-neutral-800/30 transition group"
+                      className="hover:bg-surface-muted/30 transition group"
                     >
                       {/* Applicant */}
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center text-xs font-semibold text-white overflow-hidden border border-neutral-700">
+                          <div className="w-8 h-8 rounded-full bg-surface-muted flex items-center justify-center text-xs font-semibold text-foreground overflow-hidden border border-border-theme">
                             {item.user?.avatar ? (
                               <img
                                 src={item.user.avatar}
@@ -273,10 +273,10 @@ export default function AdminVerificationQueue() {
                             )}
                           </div>
                           <div>
-                            <p className="font-medium text-white group-hover:text-emerald-400 transition">
+                            <p className="font-medium text-foreground group-hover:text-secondary transition">
                               {applicantName}
                             </p>
-                            <p className="text-[11px] text-neutral-500">
+                            <p className="text-[11px] text-text-secondary">
                               {item.user?.email}
                             </p>
                           </div>
@@ -288,8 +288,8 @@ export default function AdminVerificationQueue() {
                         <span
                           className={`text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full ${
                             item.role === "creator"
-                              ? "bg-purple-500/10 text-purple-400 border border-purple-500/20"
-                              : "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                              ? "bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20"
+                              : "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20"
                           }`}
                         >
                           {item.role}
@@ -298,18 +298,18 @@ export default function AdminVerificationQueue() {
 
                       {/* Document Type */}
                       <td className="px-5 py-4">
-                        <p className="font-medium text-neutral-200 capitalize">
+                        <p className="font-medium text-foreground capitalize">
                           {item.documentType
                             ? item.documentType.replace(/_/g, " ")
                             : "General"}
                         </p>
-                        <p className="text-[11px] text-neutral-500">
+                        <p className="text-[11px] text-text-secondary">
                           {item.documentUrls?.length || 0} file(s) attached
                         </p>
                       </td>
 
                       {/* Submitted */}
-                      <td className="px-5 py-4 text-neutral-400">
+                      <td className="px-5 py-4 text-text-secondary">
                         {new Date(item.createdAt).toLocaleDateString()}
                       </td>
 
@@ -318,10 +318,10 @@ export default function AdminVerificationQueue() {
                         <span
                           className={`text-[11px] px-2.5 py-0.5 rounded-full font-medium ${
                             item.status === "approved"
-                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
                               : item.status === "rejected"
-                              ? "bg-rose-500/10 text-rose-400 border border-rose-500/20"
-                              : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                              ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20"
+                              : "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
                           }`}
                         >
                           {item.status.toUpperCase()}
@@ -333,7 +333,7 @@ export default function AdminVerificationQueue() {
                         <button
                           type="button"
                           onClick={() => handleOpenReview(item)}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-emerald-400 hover:text-white bg-emerald-500/10 hover:bg-emerald-600 rounded-lg border border-emerald-500/20 transition"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-secondary hover:text-white bg-secondary/10 hover:bg-secondary rounded-xl border border-secondary/20 transition cursor-pointer"
                         >
                           <EyeIcon className="w-3.5 h-3.5" />
                           Review
@@ -349,7 +349,7 @@ export default function AdminVerificationQueue() {
 
         {/* Pagination Footer */}
         {pagination && pagination.totalPages > 1 && (
-          <div className="flex items-center justify-between px-5 py-3.5 bg-neutral-950/60 border-t border-neutral-800 text-xs text-neutral-400">
+          <div className="flex items-center justify-between px-5 py-3.5 bg-surface-muted/40 border-t border-border-theme text-xs text-text-secondary">
             <div>
               Showing page {pagination.page} of {pagination.totalPages} ({pagination.totalItems} requests)
             </div>
@@ -358,7 +358,7 @@ export default function AdminVerificationQueue() {
                 type="button"
                 disabled={!pagination.hasPrev}
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
-                className="p-1.5 rounded-lg border border-neutral-800 hover:bg-neutral-800 disabled:opacity-40 disabled:hover:bg-transparent text-neutral-300"
+                className="p-1.5 rounded-lg border border-border-theme hover:bg-surface-muted disabled:opacity-40 disabled:hover:bg-transparent text-foreground cursor-pointer"
               >
                 <ChevronLeftIcon className="w-4 h-4" />
               </button>
@@ -366,7 +366,7 @@ export default function AdminVerificationQueue() {
                 type="button"
                 disabled={!pagination.hasNext}
                 onClick={() => setPage((p) => p + 1)}
-                className="p-1.5 rounded-lg border border-neutral-800 hover:bg-neutral-800 disabled:opacity-40 disabled:hover:bg-transparent text-neutral-300"
+                className="p-1.5 rounded-lg border border-border-theme hover:bg-surface-muted disabled:opacity-40 disabled:hover:bg-transparent text-foreground cursor-pointer"
               >
                 <ChevronRightIcon className="w-4 h-4" />
               </button>

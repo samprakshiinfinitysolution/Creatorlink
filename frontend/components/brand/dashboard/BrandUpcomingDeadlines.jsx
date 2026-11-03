@@ -191,14 +191,14 @@ export default function BrandUpcomingDeadlines({ deadlines = [] }) {
                   />
                   <div className="min-w-0 flex-1">
                     <h4
-                      className="font-semibold text-foreground text-[13px] font-sans truncate group-hover:text-secondary transition-colors"
+                      className="font-semibold text-foreground text-[13px] font-sans line-clamp-2 break-words group-hover:text-secondary transition-colors"
                       title={item.title}
                     >
                       {item.title}
                     </h4>
 
                     {/* Platform & Creator Count on same line */}
-                    <p className="text-xs text-text-secondary truncate mt-0.5 font-sans">
+                    <p className="text-xs text-text-secondary break-words mt-0.5 font-sans">
                       {subline}
                     </p>
 

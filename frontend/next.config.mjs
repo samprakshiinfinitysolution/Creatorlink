@@ -2,6 +2,13 @@ import os from "os";
 
 function getLocalDevOrigins() {
   const origins = [
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  allowedDevOrigins: [
+    "192.168.1.20",
+    "192.168.1.20:3005",
+    "192.168.1.21",
+    "192.168.1.21:3005",
     "localhost",
     "localhost:3005",
     "127.0.0.1",

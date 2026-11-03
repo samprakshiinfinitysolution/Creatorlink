@@ -7,10 +7,29 @@ import { fetchCreatorWorkspaceById } from "@/redux/creator/workspace/workspace_s
 import CreatorSidebar from "@/components/creator/dashboard/CreatorSidebar";
 import CreatorHeader from "@/components/creator/dashboard/CreatorHeader";
 import CreatorSubmitWorkModal from "./CreatorSubmitWorkModal";
+import CreatorSubmitReviewModal from "@/components/creator/reviews/CreatorSubmitReviewModal";
 
 // =========================================================
 // SVG ICONS
 // =========================================================
+function StarIcon({ className = "w-4 h-4", filled = true }) {
+  return (
+    <svg
+      className={className}
+      fill={filled ? "currentColor" : "none"}
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+      />
+    </svg>
+  );
+}
+
 function ChevronLeftIcon({ className = "w-4 h-4" }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -425,6 +444,11 @@ const getStatusBadge = (status) => {
         label: "REVISION REQUESTED",
         color: "bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800",
       };
+    case "approved":
+      return {
+        label: "APPROVED (PAYMENT PENDING)",
+        color: "bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800",
+      };
     case "completed":
       return {
         label: "COMPLETED",
@@ -475,6 +499,17 @@ const getDeliverableStatusBadge = (status) => {
   }
 };
 
+const getInitials = (name) => {
+  if (name && typeof name === "string" && name.trim()) {
+    const parts = name.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+    return parts[0][0].toUpperCase();
+  }
+  return "BP";
+};
+
 export default function CreatorWorkspaceDetail({ workspaceId }) {
   const dispatch = useDispatch();
   const { selectedWorkspace, loading, error } = useSelector(
@@ -486,6 +521,7 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
   const [selectedDeliverable, setSelectedDeliverable] = useState(null);
   const [deliverableFilter, setDeliverableFilter] = useState("all"); // 'all' | 'submitted' | 'pending'
   const [isOlderSubmissionsOpen, setIsOlderSubmissionsOpen] = useState(false);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
   useEffect(() => {
     if (workspaceId) {
@@ -1072,6 +1108,17 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                       <span>Message Brand</span>
                     </Link>
 
+                    {workspace?.status === "completed" && !(workspace?.myReview || workspace?.review) && (
+                      <button
+                        type="button"
+                        onClick={() => setIsReviewModalOpen(true)}
+                        className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs sm:text-sm font-semibold shadow-xs transition-all cursor-pointer"
+                      >
+                        <StarIcon className="w-4 h-4 fill-white" />
+                        <span>Review Brand</span>
+                      </button>
+                    )}
+
                     {canSubmitWork && (
                       <button
                         type="button"
@@ -1086,7 +1133,7 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                 </div>
 
                 {/* 4 Stat Cards in 4-Column Responsive Grid (Matching Reference) */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 pt-4 border-t border-gray-100 dark:border-zinc-800">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-3.5 pt-4 border-t border-gray-100 dark:border-zinc-800">
                   {/* Stat 1: AGREED PRICE */}
                   <div className="bg-white dark:bg-zinc-850 border border-gray-100 dark:border-zinc-800 rounded-2xl p-4 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
                     <span className="text-[10px] font-bold text-gray-400 dark:text-zinc-400 uppercase tracking-wider block">
@@ -1106,7 +1153,7 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                       <span className="text-[10px] font-bold text-gray-400 dark:text-zinc-400 uppercase tracking-wider block">
                         Deadline
                       </span>
-                      <span className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white mt-0.5 block truncate">
+                      <span className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white mt-0.5 block break-words">
                         {deadlineFormatted}
                       </span>
                     </div>
@@ -1121,7 +1168,7 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                       <span className="text-[10px] font-bold text-gray-400 dark:text-zinc-400 uppercase tracking-wider block">
                         Platform
                       </span>
-                      <span className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white mt-0.5 capitalize block truncate">
+                      <span className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white mt-0.5 capitalize block break-words">
                         {platformLabel}
                       </span>
                     </div>
@@ -1137,7 +1184,7 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                         Selected Service
                       </span>
                       <span
-                        className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white mt-0.5 block truncate"
+                        className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white mt-0.5 block break-words"
                         title={service?.title || "Custom Package"}
                       >
                         {service?.title || "Custom Package"}
@@ -1146,6 +1193,220 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                   </div>
                 </div>
               </div>
+
+              {/* Collaboration Approved & Awaiting Payment Banner */}
+              {workspace?.status === "approved" && (
+                <div className="bg-white dark:bg-zinc-900 border border-blue-100 dark:border-blue-900/40 rounded-3xl p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="flex items-start sm:items-center gap-3.5">
+                    <div className="w-11 h-11 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-500 shrink-0">
+                      <CheckIcon className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white">
+                          Deliverables Approved by Brand
+                        </h3>
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/30">
+                          Awaiting Payment
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        Great work! All campaign deliverables have been approved. Once the brand completes payment, the collaboration will be finalized and reviews will be enabled.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Collaboration Completion & Reviews Section */}
+              {workspace?.status === "completed" && (
+                <div className="bg-white dark:bg-zinc-900 border border-emerald-100 dark:border-emerald-900/40 rounded-3xl p-5 sm:p-6 shadow-xs space-y-4">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-3 border-b border-gray-100 dark:border-zinc-800">
+                    <div className="flex items-center gap-3.5">
+                      <div className="w-11 h-11 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 shrink-0">
+                        <CheckIcon className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white">
+                            Collaboration Completed & Finalized
+                          </h3>
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                            Completed
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                          Deliverables have been approved and payment has been processed. Performance reviews for both participants are active.
+                        </p>
+                      </div>
+                    </div>
+
+                    {!workspace?.myReview && !workspace?.review && (
+                      <button
+                        type="button"
+                        onClick={() => setIsReviewModalOpen(true)}
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold tracking-wide transition-all shadow-xs cursor-pointer shrink-0"
+                      >
+                        <StarIcon className="w-4 h-4 fill-white" />
+                        <span>Review Brand Partner</span>
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Reviews Grid: Brand Partner's Review of You + Your Review of Brand */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* 1. Brand Partner's Review of You */}
+                    <div className="bg-gray-50 dark:bg-zinc-800/60 border border-gray-200/80 dark:border-zinc-700/80 rounded-2xl p-4 flex flex-col justify-between">
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                            Brand Partner&apos;s Review of You
+                          </span>
+                          {workspace?.brandReview || workspace?.partnerReview ? (
+                            <span className="text-[10px] uppercase font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md">
+                              Submitted
+                            </span>
+                          ) : (
+                            <span className="text-[10px] uppercase font-medium text-gray-400 dark:text-zinc-500 bg-gray-100 dark:bg-zinc-800 px-2 py-0.5 rounded-md">
+                              Pending Brand
+                            </span>
+                          )}
+                        </div>
+
+                        {workspace?.brandReview || workspace?.partnerReview ? (
+                          (() => {
+                            const bRev = workspace?.brandReview || workspace?.partnerReview;
+                            return (
+                              <div className="space-y-2 pt-1">
+                                <div className="flex items-center gap-3">
+                                  {bRev.reviewer?.logo || bRev.reviewer?.avatar || bRev.reviewer?.profileImage ? (
+                                    <img
+                                      src={bRev.reviewer.logo || bRev.reviewer.avatar || bRev.reviewer.profileImage}
+                                      alt={bRev.reviewer?.companyName || bRev.reviewer?.name || brandName}
+                                      className="w-9 h-9 rounded-xl object-cover border border-gray-200 dark:border-zinc-700"
+                                    />
+                                  ) : (
+                                    <div className="w-9 h-9 rounded-xl bg-amber-500/15 text-amber-700 dark:text-amber-300 font-bold text-xs flex items-center justify-center">
+                                      {getInitials(bRev.reviewer?.companyName || bRev.reviewer?.name || brandName)}
+                                    </div>
+                                  )}
+                                  <div>
+                                    <span className="font-semibold text-xs text-gray-900 dark:text-white block">
+                                      {bRev.reviewer?.companyName || bRev.reviewer?.name || brandName}
+                                    </span>
+                                    <div className="flex items-center gap-1.5 mt-0.5">
+                                      <div className="flex items-center text-amber-500">
+                                        {[1, 2, 3, 4, 5].map((s) => (
+                                          <StarIcon
+                                            key={s}
+                                            className="w-3 h-3 fill-amber-400 text-amber-400"
+                                            filled={s <= Number(bRev.rating)}
+                                          />
+                                        ))}
+                                      </div>
+                                      <span className="text-xs font-bold text-gray-700 dark:text-gray-300">
+                                        {bRev.rating}.0
+                                      </span>
+                                      <span className="text-gray-400 text-xs">•</span>
+                                      <span className="text-[11px] text-gray-500 dark:text-gray-400">
+                                        {formatDate(bRev.createdAt)}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                                {bRev.comment ? (
+                                  <p className="text-xs text-gray-700 dark:text-gray-300 italic bg-white dark:bg-zinc-900 p-3 rounded-xl border border-gray-100 dark:border-zinc-800">
+                                    &ldquo;{bRev.comment}&rdquo;
+                                  </p>
+                                ) : (
+                                  <p className="text-xs text-gray-500 dark:text-gray-400 italic">
+                                    Rated without written comments.
+                                  </p>
+                                )}
+                              </div>
+                            );
+                          })()
+                        ) : (
+                          <p className="text-xs text-gray-400 dark:text-zinc-500 italic pt-1">
+                            The brand partner hasn&apos;t submitted a performance review for this collaboration yet.
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* 2. Your Review of Brand */}
+                    <div className="bg-gray-50 dark:bg-zinc-800/60 border border-gray-200/80 dark:border-zinc-700/80 rounded-2xl p-4 flex flex-col justify-between">
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                            Your Review of Brand Partner
+                          </span>
+                          {workspace?.myReview || workspace?.review ? (
+                            <span className="text-[10px] uppercase font-bold text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-950/60 px-2 py-0.5 rounded-md">
+                              Submitted
+                            </span>
+                          ) : (
+                            <span className="text-[10px] uppercase font-medium text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded-md">
+                              Action Required
+                            </span>
+                          )}
+                        </div>
+
+                        {workspace?.myReview || workspace?.review ? (
+                          (() => {
+                            const myRev = workspace.myReview || workspace.review;
+                            return (
+                              <div className="space-y-2 pt-1">
+                                <div className="flex items-center gap-1.5">
+                                  <div className="flex items-center text-amber-500">
+                                    {[1, 2, 3, 4, 5].map((s) => (
+                                      <StarIcon
+                                        key={s}
+                                        className="w-3.5 h-3.5 fill-amber-400 text-amber-400"
+                                        filled={s <= Number(myRev.rating)}
+                                      />
+                                    ))}
+                                  </div>
+                                  <span className="text-xs font-bold text-gray-700 dark:text-gray-300">
+                                    {myRev.rating}.0
+                                  </span>
+                                  <span className="text-gray-400 text-xs">•</span>
+                                  <span className="text-[11px] text-gray-500 dark:text-gray-400">
+                                    {formatDate(myRev.createdAt)}
+                                  </span>
+                                </div>
+                                {myRev.comment ? (
+                                  <p className="text-xs text-gray-700 dark:text-gray-300 italic bg-white dark:bg-zinc-900 p-3 rounded-xl border border-gray-100 dark:border-zinc-800">
+                                    &ldquo;{myRev.comment}&rdquo;
+                                  </p>
+                                ) : (
+                                  <p className="text-xs text-gray-500 dark:text-gray-400 italic">
+                                    Rated without written comments.
+                                  </p>
+                                )}
+                              </div>
+                            );
+                          })()
+                        ) : (
+                          <div className="pt-1 space-y-2">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              Please share your experience collaborating with {brandName}.
+                            </p>
+                            <button
+                              type="button"
+                              onClick={() => setIsReviewModalOpen(true)}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold cursor-pointer"
+                            >
+                              <StarIcon className="w-3.5 h-3.5 fill-white" />
+                              <span>Submit Rating & Review</span>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Main Two-Column Layout */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -1276,7 +1537,7 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                                   <div className="w-3 h-3 rounded-full bg-[#E11D48] ring-4 ring-pink-100 dark:ring-pink-950/60 shrink-0 z-10" />
                                   <div className="flex items-center gap-1.5 text-[#E11D48] dark:text-[#FB7185] text-xs font-bold">
                                     <FolderIcon className="w-3.5 h-3.5" />
-                                    <span>Latest Submission</span>
+                                    <span>{sub.version ? `Version ${sub.version} (Latest)` : "Latest Submission"}</span>
                                   </div>
                                 </div>
                                 <span className="text-[11px] text-gray-400 dark:text-zinc-500 font-medium">
@@ -1334,7 +1595,7 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                                 {/* Details */}
                                 <div className="min-w-0 flex-1 space-y-1">
                                   <div className="flex items-center gap-2 flex-wrap">
-                                    <span className="font-bold text-xs sm:text-sm text-gray-900 dark:text-white truncate block">
+                                    <span className="font-bold text-xs sm:text-sm text-gray-900 dark:text-white break-words line-clamp-2 block">
                                       {subTitle}
                                     </span>
                                     <span
@@ -1345,7 +1606,7 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                                   </div>
 
                                   {sub.notes && (
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate block">
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 break-words line-clamp-2 block">
                                       {sub.notes}
                                     </p>
                                   )}
@@ -1412,7 +1673,7 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                                   <div className="w-3 h-3 rounded-full bg-gray-400 dark:bg-zinc-600 ring-4 ring-gray-100 dark:ring-zinc-800 shrink-0 z-10" />
                                   <div className="flex items-center gap-1.5 text-gray-600 dark:text-gray-400 text-xs font-semibold">
                                     <HistoryIcon className="w-3.5 h-3.5" />
-                                    <span>Previous Version</span>
+                                    <span>{sub.version ? `Version ${sub.version}` : "Previous Version"}</span>
                                   </div>
                                 </div>
                                 <span className="text-[11px] text-gray-400 dark:text-zinc-500 font-medium">
@@ -1470,7 +1731,7 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                                 {/* Details */}
                                 <div className="min-w-0 flex-1 space-y-1">
                                   <div className="flex items-center gap-2 flex-wrap">
-                                    <span className="font-bold text-xs sm:text-sm text-gray-900 dark:text-white truncate block">
+                                    <span className="font-bold text-xs sm:text-sm text-gray-900 dark:text-white break-words line-clamp-2 block">
                                       {subTitle}
                                     </span>
                                     <span
@@ -1481,7 +1742,7 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                                   </div>
 
                                   {sub.notes && (
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate block">
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 break-words line-clamp-2 block">
                                       {sub.notes}
                                     </p>
                                   )}
@@ -1577,7 +1838,7 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                                     <div className="ml-5 mt-2 bg-gray-50/70 dark:bg-zinc-800/40 border border-gray-100 dark:border-zinc-800 rounded-2xl p-2.5 flex items-center gap-3">
                                       <div className="min-w-0 flex-1 space-y-1">
                                         <div className="flex items-center gap-2">
-                                          <span className="font-semibold text-xs text-gray-800 dark:text-gray-200 truncate">
+                                          <span className="font-semibold text-xs text-gray-800 dark:text-gray-200 break-words">
                                             {subTitle}
                                           </span>
                                           <span className={`px-2 py-0.2 rounded-full text-[9px] font-bold border uppercase tracking-wider ${delivBadge.color}`}>
@@ -1585,7 +1846,7 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                                           </span>
                                         </div>
                                         {sub.notes && (
-                                          <p className="text-[11px] text-gray-500 dark:text-gray-400 truncate">
+                                          <p className="text-[11px] text-gray-500 dark:text-gray-400 break-words">
                                             {sub.notes}
                                           </p>
                                         )}
@@ -1716,6 +1977,20 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
           )}
         </main>
       </div>
+
+      {/* Review Brand Modal */}
+      <CreatorSubmitReviewModal
+        isOpen={isReviewModalOpen}
+        onClose={() => setIsReviewModalOpen(false)}
+        workspaceId={workspace?._id}
+        brandName={brandName}
+        campaignTitle={campaign?.title}
+        onSuccess={() => {
+          if (workspaceId) {
+            dispatch(fetchCreatorWorkspaceById(workspaceId));
+          }
+        }}
+      />
 
       {/* Submit Work Modal */}
       <CreatorSubmitWorkModal

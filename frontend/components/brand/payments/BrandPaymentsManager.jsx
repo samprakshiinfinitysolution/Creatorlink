@@ -403,7 +403,7 @@ export default function BrandPaymentsManager() {
                               <CampaignAvatar image={campaignImage} title={campaignTitle} />
                               <div className="space-y-0.5 min-w-0">
                                 <div className="flex items-center gap-1.5">
-                                  <span className="font-semibold text-foreground text-xs sm:text-sm line-clamp-1">
+                                  <span className="font-semibold text-foreground text-xs sm:text-sm line-clamp-2 break-words">
                                     {campaignTitle}
                                   </span>
                                   <svg
@@ -419,7 +419,7 @@ export default function BrandPaymentsManager() {
                                     <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" />
                                   </svg>
                                 </div>
-                                <span className="text-[11px] text-text-secondary block truncate">
+                                <span className="text-[11px] text-text-secondary block break-words">
                                   Creator: {creatorName}
                                 </span>
                               </div>

@@ -164,6 +164,7 @@ const STATUS_TABS = [
   { id: "in_progress", label: "In Progress" },
   { id: "submitted", label: "Submitted" },
   { id: "revision_requested", label: "Revision Requested" },
+  { id: "approved", label: "Approved" },
   { id: "completed", label: "Completed" },
   { id: "cancelled", label: "Cancelled" },
 ];
@@ -218,6 +219,11 @@ const getStatusBadge = (status) => {
       return {
         label: "Revision Requested",
         color: "text-rose-600 dark:text-rose-400",
+      };
+    case "approved":
+      return {
+        label: "Approved (Awaiting Payment)",
+        color: "text-blue-600 dark:text-blue-400",
       };
     case "completed":
       return {
@@ -303,7 +309,8 @@ export default function BrandWorkspaceManager() {
           (w) =>
             w.status === "in_progress" ||
             w.status === "submitted" ||
-            w.status === "revision_requested"
+            w.status === "revision_requested" ||
+            w.status === "approved"
         ).length;
 
   const completedCount =
@@ -764,7 +771,7 @@ export default function BrandWorkspaceManager() {
                       </div>
 
                       {/* Campaign Title */}
-                      <h3 className="font-sans font-semibold text-base text-foreground line-clamp-1 mt-2.5 tracking-tight">
+                      <h3 className="font-sans font-semibold text-base text-foreground line-clamp-2 break-words mt-2.5 tracking-tight">
                         {campaignTitle}
                       </h3>
 
@@ -803,7 +810,7 @@ export default function BrandWorkspaceManager() {
                             <span className="text-[10px] sm:text-[11px] font-sans text-text-secondary block leading-tight">
                               Agreed Price
                             </span>
-                            <span className="font-sans font-semibold text-sm sm:text-base text-foreground block truncate tracking-tight mt-0.5">
+                            <span className="font-sans font-semibold text-sm sm:text-base text-foreground block break-words tracking-tight mt-0.5">
                               {agreedPriceFormatted}
                             </span>
                           </div>
@@ -818,7 +825,7 @@ export default function BrandWorkspaceManager() {
                             <span className="text-[10px] sm:text-[11px] font-sans text-text-secondary block leading-tight">
                               Deadline
                             </span>
-                            <span className="font-sans font-semibold text-xs sm:text-sm text-foreground block truncate mt-0.5">
+                            <span className="font-sans font-semibold text-xs sm:text-sm text-foreground block break-words mt-0.5">
                               {deadlineFormatted}
                             </span>
                           </div>
@@ -852,7 +859,7 @@ export default function BrandWorkspaceManager() {
                                   <div className="w-4 h-4 rounded-full bg-transparent text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center justify-center shrink-0">
                                     <CheckIcon className="w-2.5 h-2.5" />
                                   </div>
-                                  <span className="line-clamp-1">{title}</span>
+                                  <span className="line-clamp-2 break-words">{title}</span>
                                 </div>
                               );
                             })}

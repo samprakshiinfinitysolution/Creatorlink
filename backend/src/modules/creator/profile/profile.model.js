@@ -162,9 +162,50 @@ const profileSchema = new mongoose.Schema(
         },
 
         // Verification badge activated exclusively via approved admin verification request.
+        isOnboarded: {
+            type: Boolean,
+            default: false
+        },
         isVerifiedBadge: {
             type: Boolean,
             default: false
+        },
+
+        // Creator contact-sharing consent controls (Strict opt-in: all defaults false)
+        contactPrivacy: {
+            isConsentGiven: {
+                type: Boolean,
+                default: false,
+                index: true
+            },
+            allowWhatsApp: {
+                type: Boolean,
+                default: false
+            },
+            allowPhoneCall: {
+                type: Boolean,
+                default: false
+            },
+            allowBusinessEmail: {
+                type: Boolean,
+                default: false
+            },
+            whatsappNumber: {
+                type: String,
+                trim: true,
+                default: ""
+            },
+            businessPhone: {
+                type: String,
+                trim: true,
+                default: ""
+            },
+            businessEmail: {
+                type: String,
+                trim: true,
+                lowercase: true,
+                default: ""
+            }
         }
     },
     {

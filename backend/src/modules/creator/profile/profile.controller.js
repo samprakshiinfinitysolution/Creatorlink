@@ -6,6 +6,10 @@ import {
     getMyProfileService,
     updateProfileService
 } from "./profile.service.js";
+import {
+    getCreatorContactConsentService,
+    updateCreatorContactConsentService
+} from "../../subscriptions/contactUnlock.service.js";
 
 
 // Create creator profile
@@ -58,8 +62,39 @@ const updateMyProfile = asyncHandler(async (req, res) => {
 });
 
 
+// Get creator's own contact privacy and sharing consent settings
+const getContactPrivacy = asyncHandler(async (req, res) => {
+    const privacy = await getCreatorContactConsentService(req.user.userId);
+
+    return sendResponse(
+        res,
+        200,
+        "Creator contact privacy settings fetched successfully",
+        privacy
+    );
+});
+
+
+// Update creator's contact privacy and sharing consent settings
+const updateContactPrivacy = asyncHandler(async (req, res) => {
+    const updated = await updateCreatorContactConsentService(
+        req.user.userId,
+        req.body
+    );
+
+    return sendResponse(
+        res,
+        200,
+        "Creator contact privacy settings updated successfully",
+        updated
+    );
+});
+
+
 export {
     createProfile,
     getMyProfile,
-    updateMyProfile
+    updateMyProfile,
+    getContactPrivacy,
+    updateContactPrivacy
 };

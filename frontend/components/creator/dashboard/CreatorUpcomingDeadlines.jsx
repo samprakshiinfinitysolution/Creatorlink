@@ -267,12 +267,12 @@ export default function CreatorUpcomingDeadlines({ deadlines = [] }) {
                       )}
                     </div>
                     <h4
-                      className="font-sans font-semibold text-xs sm:text-sm text-foreground truncate group-hover:text-secondary transition-colors"
+                      className="font-sans font-semibold text-xs sm:text-sm text-foreground line-clamp-2 break-words group-hover:text-secondary transition-colors leading-snug"
                       title={title}
                     >
                       {title}
                     </h4>
-                    <p className="text-[11px] text-text-secondary font-sans truncate">
+                    <p className="text-[11px] text-text-secondary font-sans flex flex-wrap items-center gap-x-1.5 gap-y-0.5 break-words">
                       {brandName ? <span className="font-medium text-foreground">{brandName}</span> : ""}
                       {brandName && (platform || item.deadline) ? " · " : ""}
                       {platform ? `${platform} · ` : ""}

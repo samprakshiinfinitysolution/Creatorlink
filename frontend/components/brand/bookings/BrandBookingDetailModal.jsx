@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import axiosInstance from "@/lib/axios";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchBrandBookingById,
@@ -139,14 +140,32 @@ export default function BrandBookingDetailModal({
 
   const [confirmAction, setConfirmAction] = useState(null); // 'accept' | 'reject' | null
   const [localFeedback, setLocalFeedback] = useState(null);
+  const [subStatus, setSubStatus] = useState(null);
 
   // Fetch full details when modal opens with bookingId
   useEffect(() => {
     if (isOpen && bookingId) {
       dispatch(fetchBrandBookingById(bookingId));
+      axiosInstance
+        .get("/api/subscriptions/status")
+        .then((res) => {
+          if (res.data?.data) {
+            setSubStatus(res.data.data);
+          }
+        })
+        .catch(() => {});
       queueMicrotask(() => {
         setConfirmAction(null);
-        setLocalFeedback(null);
+        if (confirmAction === "accept" && subStatus && subStatus.hasEntitlement === false) {
+      setLocalFeedback({
+        type: "error",
+        message: "An active subscription or free trial is required to accept booking applications and launch new collaborations. Please upgrade your plan.",
+      });
+      setConfirmAction(null);
+      return;
+    }
+
+    setLocalFeedback(null);
       });
     }
   }, [dispatch, isOpen, bookingId]);
@@ -154,6 +173,15 @@ export default function BrandBookingDetailModal({
   const handleClose = () => {
     if (submitting) return;
     setConfirmAction(null);
+    if (confirmAction === "accept" && subStatus && subStatus.hasEntitlement === false) {
+      setLocalFeedback({
+        type: "error",
+        message: "An active subscription or free trial is required to accept booking applications and launch new collaborations. Please upgrade your plan.",
+      });
+      setConfirmAction(null);
+      return;
+    }
+
     setLocalFeedback(null);
     dispatch(clearSelectedBooking());
     onClose();
@@ -162,11 +190,28 @@ export default function BrandBookingDetailModal({
   const handleRetryDetail = () => {
     if (bookingId) {
       dispatch(fetchBrandBookingById(bookingId));
+      axiosInstance
+        .get("/api/subscriptions/status")
+        .then((res) => {
+          if (res.data?.data) {
+            setSubStatus(res.data.data);
+          }
+        })
+        .catch(() => {});
     }
   };
 
   const handleConfirmStatusChange = async () => {
     if (!confirmAction || !bookingId || submitting) return;
+
+    if (confirmAction === "accept" && subStatus && subStatus.hasEntitlement === false) {
+      setLocalFeedback({
+        type: "error",
+        message: "An active subscription or free trial is required to accept booking applications and launch new collaborations. Please upgrade your plan.",
+      });
+      setConfirmAction(null);
+      return;
+    }
 
     setLocalFeedback(null);
     const targetStatus = confirmAction === "accept" ? "accepted" : "rejected";
@@ -326,11 +371,11 @@ export default function BrandBookingDetailModal({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <span className="text-xs text-text-secondary block">Creator Name</span>
-                    <span className="text-sm font-semibold text-foreground block mt-0.5">{creatorName}</span>
+                    <span className="text-sm font-semibold text-foreground block mt-0.5 break-words">{creatorName}</span>
                   </div>
                   <div>
                     <span className="text-xs text-text-secondary block">Creator Email</span>
-                    <span className="text-sm font-semibold text-foreground block mt-0.5">{creatorEmail}</span>
+                    <span className="text-sm font-semibold text-foreground block mt-0.5 break-all">{creatorEmail}</span>
                   </div>
                   <div>
                     <span className="text-xs text-text-secondary block">Agreed Price</span>
@@ -367,7 +412,7 @@ export default function BrandBookingDetailModal({
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
                   <div>
                     <span className="text-text-secondary block">Campaign Title</span>
-                    <span className="font-semibold text-foreground block mt-0.5">{campaignTitle}</span>
+                    <span className="font-semibold text-foreground block mt-0.5 break-words">{campaignTitle}</span>
                   </div>
                   <div>
                     <span className="text-text-secondary block">Category</span>
@@ -521,7 +566,16 @@ export default function BrandBookingDetailModal({
                   </button>
                   <button
                     type="button"
-                    onClick={() => setConfirmAction("accept")}
+                    onClick={() => {
+                      if (subStatus && subStatus.hasEntitlement === false) {
+                        setLocalFeedback({
+                          type: "error",
+                          message: "An active subscription or free trial is required to accept booking applications and launch new collaborations. Please upgrade your plan.",
+                        });
+                        return;
+                      }
+                      setConfirmAction("accept");
+                    }}
                     disabled={submitting}
                     className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition-all shadow-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >

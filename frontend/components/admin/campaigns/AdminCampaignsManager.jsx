@@ -64,12 +64,12 @@ function PlayIcon({ className = "w-3.5 h-3.5" }) {
 }
 
 const statusBadgeStyles = {
-  published: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
-  draft: "bg-zinc-500/10 text-zinc-400 border border-zinc-500/20",
-  paused: "bg-amber-500/10 text-amber-400 border border-amber-500/20",
-  in_progress: "bg-blue-500/10 text-blue-400 border border-blue-500/20",
-  completed: "bg-purple-500/10 text-purple-400 border border-purple-500/20",
-  closed: "bg-red-500/10 text-red-400 border border-red-500/20"
+  published: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20",
+  draft: "bg-zinc-500/10 text-zinc-600 dark:text-zinc-400 border border-zinc-500/20",
+  paused: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20",
+  in_progress: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20",
+  completed: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20",
+  closed: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20"
 };
 
 export default function AdminCampaignsManager() {
@@ -152,71 +152,71 @@ export default function AdminCampaignsManager() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-300">
       {/* HEADER SECTION */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Campaign Moderation</h1>
-          <p className="text-xs text-[#9CA3AF] mt-1">
+          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-foreground tracking-tight">Campaign Moderation</h1>
+          <p className="text-xs sm:text-sm text-text-secondary mt-1">
             Monitor, audit, and moderate all platform influencer campaigns and deliverables.
           </p>
         </div>
       </div>
 
       {/* METRICS OVERVIEW CARDS */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-        <div className="bg-[#111827] border border-[#1F2937] rounded-xl p-4">
-          <span className="text-[11px] font-semibold text-[#9CA3AF] uppercase tracking-wider block">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
+        <div className="bg-surface border border-border-theme rounded-2xl p-4 shadow-xs hover:border-secondary/30 transition-all">
+          <span className="text-[10px] font-bold text-text-secondary uppercase tracking-wider block">
             Total Campaigns
           </span>
-          <span className="text-2xl font-bold text-white mt-1 block">
+          <span className="text-2xl sm:text-3xl font-bold font-serif text-foreground mt-1.5 block">
             {stats.totalCampaigns || 0}
           </span>
         </div>
 
-        <div className="bg-[#111827] border border-[#1F2937] rounded-xl p-4">
-          <span className="text-[11px] font-semibold text-emerald-400 uppercase tracking-wider block">
+        <div className="bg-surface border border-border-theme rounded-2xl p-4 shadow-xs hover:border-emerald-500/30 transition-all">
+          <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider block">
             Published Active
           </span>
-          <span className="text-2xl font-bold text-emerald-400 mt-1 block">
+          <span className="text-2xl sm:text-3xl font-bold font-serif text-emerald-600 dark:text-emerald-400 mt-1.5 block">
             {stats.statusCounts?.published || 0}
           </span>
         </div>
 
-        <div className="bg-[#111827] border border-[#1F2937] rounded-xl p-4">
-          <span className="text-[11px] font-semibold text-blue-400 uppercase tracking-wider block">
+        <div className="bg-surface border border-border-theme rounded-2xl p-4 shadow-xs hover:border-blue-500/30 transition-all">
+          <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider block">
             In Progress
           </span>
-          <span className="text-2xl font-bold text-blue-400 mt-1 block">
+          <span className="text-2xl sm:text-3xl font-bold font-serif text-blue-600 dark:text-blue-400 mt-1.5 block">
             {stats.statusCounts?.in_progress || 0}
           </span>
         </div>
 
-        <div className="bg-[#111827] border border-[#1F2937] rounded-xl p-4">
-          <span className="text-[11px] font-semibold text-amber-400 uppercase tracking-wider block">
+        <div className="bg-surface border border-border-theme rounded-2xl p-4 shadow-xs hover:border-amber-500/30 transition-all">
+          <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider block">
             Paused / Moderated
           </span>
-          <span className="text-2xl font-bold text-amber-400 mt-1 block">
+          <span className="text-2xl sm:text-3xl font-bold font-serif text-amber-600 dark:text-amber-400 mt-1.5 block">
             {stats.statusCounts?.paused || 0}
           </span>
         </div>
 
-        <div className="bg-[#111827] border border-[#1F2937] rounded-xl p-4 col-span-2 sm:col-span-1">
-          <span className="text-[11px] font-semibold text-[#9CA3AF] uppercase tracking-wider block">
+        <div className="bg-surface border border-border-theme rounded-2xl p-4 shadow-xs col-span-2 sm:col-span-1 hover:border-secondary/30 transition-all">
+          <span className="text-[10px] font-bold text-text-secondary uppercase tracking-wider block">
             Gross Budget
           </span>
-          <span className="text-xl font-bold text-zinc-100 mt-1 block truncate">
+          <span className="text-xl sm:text-2xl font-bold font-serif text-foreground mt-1.5 block truncate">
             {formatCurrency(stats.totalBudget)}
           </span>
         </div>
       </div>
 
       {/* FILTERS & SEARCH BAR */}
-      <div className="bg-[#111827] border border-[#1F2937] rounded-xl p-4 space-y-4">
+      <div className="bg-surface border border-border-theme rounded-2xl p-4 shadow-xs space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {/* SEARCH INPUT */}
           <div>
-            <label className="text-[11px] font-semibold text-[#9CA3AF] uppercase tracking-wider block mb-1.5">
+            <label className="text-[11px] font-semibold text-text-secondary uppercase tracking-wider block mb-1.5">
               Search
             </label>
             <input
@@ -227,13 +227,13 @@ export default function AdminCampaignsManager() {
                 setPage(1);
               }}
               placeholder="Title, brand name, email..."
-              className="w-full bg-[#0B0F17] border border-[#1F2937] rounded-lg px-3.5 py-2 text-xs text-white placeholder-[#6B7280] focus:outline-none focus:border-blue-500/50"
+              className="w-full bg-surface-muted/60 border border-border-theme rounded-xl px-3.5 py-2 text-xs text-foreground placeholder:text-text-secondary focus:outline-hidden focus:border-secondary"
             />
           </div>
 
           {/* STATUS FILTER */}
           <div>
-            <label className="text-[11px] font-semibold text-[#9CA3AF] uppercase tracking-wider block mb-1.5">
+            <label className="text-[11px] font-semibold text-text-secondary uppercase tracking-wider block mb-1.5">
               Status
             </label>
             <select
@@ -242,7 +242,7 @@ export default function AdminCampaignsManager() {
                 setSelectedStatus(e.target.value);
                 setPage(1);
               }}
-              className="w-full bg-[#0B0F17] border border-[#1F2937] rounded-lg px-3.5 py-2 text-xs text-white focus:outline-none focus:border-blue-500/50"
+              className="w-full bg-surface-muted/60 border border-border-theme rounded-xl px-3.5 py-2 text-xs text-foreground focus:outline-hidden focus:border-secondary cursor-pointer"
             >
               <option value="all">All Statuses</option>
               <option value="published">Published</option>
@@ -256,7 +256,7 @@ export default function AdminCampaignsManager() {
 
           {/* PLATFORM FILTER */}
           <div>
-            <label className="text-[11px] font-semibold text-[#9CA3AF] uppercase tracking-wider block mb-1.5">
+            <label className="text-[11px] font-semibold text-text-secondary uppercase tracking-wider block mb-1.5">
               Platform
             </label>
             <select
@@ -265,7 +265,7 @@ export default function AdminCampaignsManager() {
                 setSelectedPlatform(e.target.value);
                 setPage(1);
               }}
-              className="w-full bg-[#0B0F17] border border-[#1F2937] rounded-lg px-3.5 py-2 text-xs text-white focus:outline-none focus:border-blue-500/50 capitalize"
+              className="w-full bg-surface-muted/60 border border-border-theme rounded-xl px-3.5 py-2 text-xs text-foreground focus:outline-hidden focus:border-secondary capitalize cursor-pointer"
             >
               <option value="all">All Platforms</option>
               <option value="instagram">Instagram</option>
@@ -278,7 +278,7 @@ export default function AdminCampaignsManager() {
 
           {/* SORT FILTER */}
           <div>
-            <label className="text-[11px] font-semibold text-[#9CA3AF] uppercase tracking-wider block mb-1.5">
+            <label className="text-[11px] font-semibold text-text-secondary uppercase tracking-wider block mb-1.5">
               Sort By
             </label>
             <select
@@ -287,7 +287,7 @@ export default function AdminCampaignsManager() {
                 setSortBy(e.target.value);
                 setPage(1);
               }}
-              className="w-full bg-[#0B0F17] border border-[#1F2937] rounded-lg px-3.5 py-2 text-xs text-white focus:outline-none focus:border-blue-500/50"
+              className="w-full bg-surface-muted/60 border border-border-theme rounded-xl px-3.5 py-2 text-xs text-foreground focus:outline-hidden focus:border-secondary cursor-pointer"
             >
               <option value="newest">Newest First</option>
               <option value="oldest">Oldest First</option>
@@ -301,65 +301,65 @@ export default function AdminCampaignsManager() {
 
       {/* ERROR BANNER */}
       {error && (
-        <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-xs text-red-400">
+        <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl text-xs sm:text-sm text-rose-600 dark:text-rose-400 font-medium">
           {error}
         </div>
       )}
 
       {/* CAMPAIGNS TABLE */}
-      <div className="bg-[#111827] border border-[#1F2937] rounded-xl overflow-hidden shadow-xl">
+      <div className="bg-surface border border-border-theme rounded-2xl overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-[#0B0F17] text-[#9CA3AF] uppercase text-[10px] tracking-wider border-b border-[#1F2937]">
+            <thead className="bg-surface-muted/50 text-text-secondary uppercase text-[11px] tracking-wider border-b border-border-theme font-semibold">
               <tr>
-                <th className="px-5 py-3">Campaign</th>
-                <th className="px-5 py-3">Brand</th>
-                <th className="px-5 py-3">Budget</th>
-                <th className="px-5 py-3">Applications</th>
-                <th className="px-5 py-3">Status</th>
-                <th className="px-5 py-3">Deadline</th>
-                <th className="px-5 py-3 text-right">Actions</th>
+                <th className="px-5 py-3.5">Campaign</th>
+                <th className="px-5 py-3.5">Brand</th>
+                <th className="px-5 py-3.5">Budget</th>
+                <th className="px-5 py-3.5">Applications</th>
+                <th className="px-5 py-3.5">Status</th>
+                <th className="px-5 py-3.5">Deadline</th>
+                <th className="px-5 py-3.5 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#1F2937]">
+            <tbody className="divide-y divide-border-theme text-foreground">
               {loading ? (
                 Array.from({ length: 5 }).map((_, idx) => (
                   <tr key={idx} className="animate-pulse">
                     <td className="px-5 py-4">
-                      <div className="h-4 bg-[#1F2937] rounded w-36 mb-1.5" />
-                      <div className="h-3 bg-[#1F2937] rounded w-20" />
+                      <div className="h-4 bg-surface-muted rounded w-36 mb-1.5" />
+                      <div className="h-3 bg-surface-muted rounded w-20" />
                     </td>
                     <td className="px-5 py-4">
-                      <div className="h-4 bg-[#1F2937] rounded w-28 mb-1.5" />
-                      <div className="h-3 bg-[#1F2937] rounded w-32" />
+                      <div className="h-4 bg-surface-muted rounded w-28 mb-1.5" />
+                      <div className="h-3 bg-surface-muted rounded w-32" />
                     </td>
                     <td className="px-5 py-4">
-                      <div className="h-4 bg-[#1F2937] rounded w-16" />
+                      <div className="h-4 bg-surface-muted rounded w-16" />
                     </td>
                     <td className="px-5 py-4">
-                      <div className="h-4 bg-[#1F2937] rounded w-12" />
+                      <div className="h-4 bg-surface-muted rounded w-12" />
                     </td>
                     <td className="px-5 py-4">
-                      <div className="h-4 bg-[#1F2937] rounded w-16" />
+                      <div className="h-4 bg-surface-muted rounded w-16" />
                     </td>
                     <td className="px-5 py-4">
-                      <div className="h-4 bg-[#1F2937] rounded w-20" />
+                      <div className="h-4 bg-surface-muted rounded w-20" />
                     </td>
                     <td className="px-5 py-4 text-right">
-                      <div className="h-7 bg-[#1F2937] rounded w-20 ml-auto" />
+                      <div className="h-7 bg-surface-muted rounded w-20 ml-auto" />
                     </td>
                   </tr>
                 ))
               ) : campaigns.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-5 py-12 text-center text-[#9CA3AF]">
-                    <p className="text-sm font-semibold text-zinc-300">No campaigns found</p>
-                    <p className="text-xs text-[#6B7280] mt-1">
+                  <td colSpan={7} className="px-5 py-12 text-center text-text-secondary">
+                    <p className="text-sm font-semibold text-foreground">No campaigns found</p>
+                    <p className="text-xs text-text-secondary mt-1">
                       No campaigns match your current search and filter criteria.
                     </p>
                     <button
                       onClick={resetFilters}
-                      className="mt-3 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-medium transition-colors"
+                      className="mt-3 px-3.5 py-1.5 bg-foreground text-background rounded-xl text-xs font-semibold cursor-pointer shadow-xs"
                     >
                       Reset All Filters
                     </button>
@@ -367,20 +367,20 @@ export default function AdminCampaignsManager() {
                 </tr>
               ) : (
                 campaigns.map((c) => (
-                  <tr key={c._id} className="hover:bg-[#1F2937]/30 transition-colors">
+                  <tr key={c._id} className="hover:bg-surface-muted/30 transition-colors">
                     {/* CAMPAIGN TITLE & CATEGORY */}
                     <td className="px-5 py-3.5">
-                      <div className="font-semibold text-white truncate max-w-xs">{c.title}</div>
+                      <div className="font-semibold text-foreground truncate max-w-xs">{c.title}</div>
                       <div className="flex items-center gap-1.5 mt-0.5">
-                        <span className="text-[10px] text-[#9CA3AF] capitalize">{c.category}</span>
-                        <span className="text-[#6B7280]">•</span>
-                        <span className="text-[10px] text-blue-400 capitalize">{c.platform}</span>
+                        <span className="text-[10px] text-text-secondary capitalize">{c.category}</span>
+                        <span className="text-text-secondary">•</span>
+                        <span className="text-[10px] text-blue-600 dark:text-blue-400 capitalize">{c.platform}</span>
                       </div>
                     </td>
 
                     {/* BRAND INFO */}
                     <td className="px-5 py-3.5">
-                      <div className="flex items-center gap-1 text-zinc-200 font-medium truncate max-w-[180px]">
+                      <div className="flex items-center gap-1 text-foreground font-medium truncate max-w-[180px]">
                         <span className="truncate">
                           {c.brandProfile?.companyName || c.brand?.name || "Brand User"}
                         </span>
@@ -388,20 +388,20 @@ export default function AdminCampaignsManager() {
                           <CheckBadgeIcon className="w-3.5 h-3.5 shrink-0" />
                         )}
                       </div>
-                      <div className="text-[10px] text-[#6B7280] truncate max-w-[180px]">
+                      <div className="text-[10px] text-text-secondary truncate max-w-[180px]">
                         {c.brand?.email}
                       </div>
                     </td>
 
                     {/* BUDGET */}
-                    <td className="px-5 py-3.5 font-mono text-zinc-100 font-medium">
+                    <td className="px-5 py-3.5 font-mono text-foreground font-medium">
                       {formatCurrency(c.budget)}
                     </td>
 
                     {/* APPLICATIONS */}
-                    <td className="px-5 py-3.5 text-zinc-300">
+                    <td className="px-5 py-3.5 text-foreground">
                       <div className="font-semibold">{c.totalApplications || 0}</div>
-                      <div className="text-[10px] text-[#6B7280]">
+                      <div className="text-[10px] text-text-secondary">
                         {c.acceptedApplications || 0} accepted
                       </div>
                     </td>
@@ -409,7 +409,7 @@ export default function AdminCampaignsManager() {
                     {/* STATUS */}
                     <td className="px-5 py-3.5">
                       <span
-                        className={`px-2.5 py-0.5 text-[10px] font-medium rounded-full uppercase ${
+                        className={`px-2.5 py-0.5 text-[10px] font-semibold rounded-full uppercase ${
                           statusBadgeStyles[c.status] || statusBadgeStyles.draft
                         }`}
                       >
@@ -418,7 +418,7 @@ export default function AdminCampaignsManager() {
                     </td>
 
                     {/* DEADLINE */}
-                    <td className="px-5 py-3.5 text-zinc-300 text-[11px]">
+                    <td className="px-5 py-3.5 text-text-secondary text-[11px]">
                       {c.deadline ? new Date(c.deadline).toLocaleDateString() : "N/A"}
                     </td>
 
@@ -430,7 +430,7 @@ export default function AdminCampaignsManager() {
                           <button
                             title="Resume Campaign"
                             onClick={() => handleQuickToggleStatus(c)}
-                            className="p-1.5 rounded-lg bg-emerald-600/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-600/20 transition-colors"
+                            className="p-1.5 rounded-lg bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 hover:bg-emerald-600/20 transition-colors cursor-pointer"
                           >
                             <PlayIcon className="w-3.5 h-3.5" />
                           </button>
@@ -438,7 +438,7 @@ export default function AdminCampaignsManager() {
                           <button
                             title="Pause Campaign"
                             onClick={() => handleQuickToggleStatus(c)}
-                            className="p-1.5 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 hover:bg-amber-500/20 transition-colors"
+                            className="p-1.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 hover:bg-amber-500/20 transition-colors cursor-pointer"
                           >
                             <PauseIcon className="w-3.5 h-3.5" />
                           </button>
@@ -447,7 +447,7 @@ export default function AdminCampaignsManager() {
                         {/* View Dossier Button */}
                         <button
                           onClick={() => handleOpenModal(c._id)}
-                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#1F2937] hover:bg-blue-600/20 text-zinc-200 hover:text-blue-400 border border-zinc-700/50 hover:border-blue-500/30 transition-colors text-xs font-medium"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-surface border border-border-theme hover:bg-surface-muted text-foreground transition-colors text-xs font-semibold cursor-pointer shadow-xs"
                         >
                           <EyeIcon className="w-3.5 h-3.5" />
                           <span>Dossier</span>
@@ -462,37 +462,37 @@ export default function AdminCampaignsManager() {
         </div>
 
         {/* PAGINATION CONTROLS */}
-        <div className="px-5 py-3.5 bg-[#0B0F17] border-t border-[#1F2937] flex flex-col sm:flex-row items-center justify-between gap-3">
-          <span className="text-xs text-[#9CA3AF]">
+        <div className="px-5 py-3.5 bg-surface-muted/40 border-t border-border-theme flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-text-secondary">
+          <span>
             Showing{" "}
-            <strong className="text-white">
+            <strong className="text-foreground">
               {campaigns.length > 0 ? (page - 1) * 10 + 1 : 0}
             </strong>{" "}
             to{" "}
-            <strong className="text-white">
+            <strong className="text-foreground">
               {Math.min(page * 10, pagination.totalItems || 0)}
             </strong>{" "}
-            of <strong className="text-white">{pagination.totalItems || 0}</strong> campaigns
+            of <strong className="text-foreground">{pagination.totalItems || 0}</strong> campaigns
           </span>
 
           <div className="flex items-center gap-2">
             <button
               disabled={!pagination.hasPrevPage || loading}
               onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-              className="px-3 py-1.5 rounded-lg bg-[#111827] border border-[#1F2937] text-xs text-[#9CA3AF] hover:text-white hover:bg-[#1F2937] transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1"
+              className="px-3 py-1.5 rounded-xl bg-surface border border-border-theme text-xs text-foreground hover:bg-surface-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 cursor-pointer"
             >
               <ChevronLeftIcon className="w-3.5 h-3.5" />
               <span>Previous</span>
             </button>
 
-            <span className="text-xs text-[#9CA3AF] px-2 font-mono">
+            <span className="text-xs text-text-secondary px-2 font-mono">
               Page {page} of {pagination.totalPages || 1}
             </span>
 
             <button
               disabled={!pagination.hasNextPage || loading}
               onClick={() => setPage((prev) => prev + 1)}
-              className="px-3 py-1.5 rounded-lg bg-[#111827] border border-[#1F2937] text-xs text-[#9CA3AF] hover:text-white hover:bg-[#1F2937] transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1"
+              className="px-3 py-1.5 rounded-xl bg-surface border border-border-theme text-xs text-foreground hover:bg-surface-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 cursor-pointer"
             >
               <span>Next</span>
               <ChevronRightIcon className="w-3.5 h-3.5" />

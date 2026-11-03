@@ -3,13 +3,13 @@ import createApiError from "../../../utils/ApiError.js";
 
 // Supported profile fields for creation and updates.
 const ALLOWED_PROFILE_FIELDS = [
+    "name",
     "bio",
     "category",
     "location",
     "profileImage",
     "isPublic",
     "isOnboarded",
-    "startingRate",
     "socialLinks",
     "title",
     "keywords",
@@ -48,13 +48,13 @@ const createProfileValidation = (req, res, next) => {
     }
 
     const {
+        name,
         bio,
         category,
         location,
         profileImage,
         isPublic,
         isOnboarded,
-        startingRate,
         socialLinks,
         title,
         keywords,
@@ -66,6 +66,27 @@ const createProfileValidation = (req, res, next) => {
         followerCount,
         engagementRate
     } = req.body;
+
+
+    // Validate name.
+    if (name !== undefined) {
+
+        if (typeof name !== "string") {
+            throw createApiError(
+                400,
+                "Name must be a string"
+            );
+        }
+
+        const trimmedName = name.trim();
+
+        if (trimmedName.length < 2 || trimmedName.length > 70) {
+            throw createApiError(
+                400,
+                "Full Name must be between 2 and 70 characters"
+            );
+        }
+    }
 
 
     // Validate bio.
@@ -156,27 +177,6 @@ const createProfileValidation = (req, res, next) => {
             throw createApiError(
                 400,
                 "isOnboarded must be a boolean"
-            );
-        }
-    }
-
-
-    // Validate startingRate.
-    if (startingRate !== undefined) {
-
-        const parsedRate = Number(startingRate);
-
-        if (
-            startingRate === null ||
-            startingRate === "" ||
-            typeof startingRate === "boolean" ||
-            Number.isNaN(parsedRate) ||
-            !Number.isFinite(parsedRate) ||
-            parsedRate < 0
-        ) {
-            throw createApiError(
-                400,
-                "startingRate must be a non-negative number"
             );
         }
     }

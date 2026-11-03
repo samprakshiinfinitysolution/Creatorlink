@@ -363,7 +363,7 @@ export default function CreatorDiscoverCampaignsManager() {
         <CreatorHeader setMobileOpen={setMobileOpen} />
 
         {/* Main Content Area */}
-        <main className="flex-1 p-3.5 sm:p-6 lg:p-8 space-y-4 sm:space-y-5 max-w-7xl w-full mx-auto min-w-0 overflow-x-hidden">
+        <main className="flex-1 p-3.5 sm:p-6 lg:p-8 space-y-4 sm:space-y-5 max-w-7xl w-full mx-auto min-w-0">
           {/* 1. DISCOVER CAMPAIGNS HERO SECTION (PREMIUM CAMPAIGN-FOCUSED 2-COLUMN HERO) */}
           <div className="bg-gradient-to-br from-[#FFF0F4] via-[#FFF5F8] to-[#FFEBF2] dark:from-pink-950/25 dark:via-surface dark:to-pink-950/15 border border-[#FCE7F0] dark:border-pink-900/30 rounded-2xl sm:rounded-3xl p-3 sm:p-4.5 lg:p-5 shadow-xs relative overflow-hidden space-y-2.5 sm:space-y-3">
             {/* Ambient Background Accents */}
@@ -522,12 +522,12 @@ export default function CreatorDiscoverCampaignsManager() {
                       </div>
 
                       {/* Campaign Title */}
-                      <h4 className="text-[11px] sm:text-xs font-bold text-neutral-900 dark:text-white truncate leading-snug">
+                      <h4 className="text-[11px] sm:text-xs font-bold text-neutral-900 dark:text-white line-clamp-2 break-words leading-snug">
                         {card.title}
                       </h4>
 
                       {/* Deliverables Meta */}
-                      <p className="text-[9px] sm:text-[10px] text-neutral-500 dark:text-neutral-400 font-sans truncate mt-0.5 mb-1.5">
+                      <p className="text-[9px] sm:text-[10px] text-neutral-500 dark:text-neutral-400 font-sans line-clamp-2 break-words mt-0.5 mb-1.5">
                         {card.deliverables}
                       </p>
 
@@ -646,7 +646,7 @@ export default function CreatorDiscoverCampaignsManager() {
             </div>
           ) : campaignsList.length > 0 ? (
             /* 5. CAMPAIGNS GRID (3 columns desktop, 2 tablet, 1 mobile) */
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
               {campaignsList.map((campaign) => {
                 const campaignId = String(campaign._id || campaign.id);
                 const isApplied = appliedCampaignIds.has(campaignId);
@@ -666,7 +666,7 @@ export default function CreatorDiscoverCampaignsManager() {
                       {/* Top Row: Category (Pink Text) & Applied Badge (Left), Platform (Right) - Clean Text Without Pill Outlines */}
                       <div className="flex items-center justify-between gap-1.5 flex-wrap">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-[10px] sm:text-[11px] font-sans font-bold tracking-wider uppercase text-pink-500 dark:text-pink-400 truncate max-w-[130px]">
+                          <span className="text-[10px] sm:text-[11px] font-sans font-bold tracking-wider uppercase text-pink-500 dark:text-pink-400 break-words">
                             {campaign.category || "General"}
                           </span>
 
@@ -723,7 +723,7 @@ export default function CreatorDiscoverCampaignsManager() {
 
                       {/* Campaign Title & Brand */}
                       <div>
-                        <h2 className="font-sans font-semibold text-base sm:text-lg text-black dark:text-white line-clamp-2 sm:line-clamp-1 group-hover:text-black dark:group-hover:text-white transition-colors tracking-tight break-words">
+                        <h2 className="font-sans font-semibold text-base sm:text-lg text-black dark:text-white line-clamp-2 group-hover:text-black dark:group-hover:text-white transition-colors tracking-tight break-words">
                           {campaign.title}
                         </h2>
                         <div className="flex items-center gap-1.5 mt-0.5">
@@ -766,7 +766,7 @@ export default function CreatorDiscoverCampaignsManager() {
                             <span className="text-[9px] sm:text-[10px] text-text-secondary font-medium block leading-tight">
                               End Date
                             </span>
-                            <span className="text-[10px] min-[360px]:text-[11px] sm:text-xs font-semibold text-foreground block truncate leading-tight mt-0.5">
+                            <span className="text-[10px] min-[360px]:text-[11px] sm:text-xs font-semibold text-foreground block break-words leading-tight mt-0.5">
                               {formatDate(campaign.deadline)}
                             </span>
                           </div>
@@ -780,7 +780,7 @@ export default function CreatorDiscoverCampaignsManager() {
                             <span className="text-[9px] sm:text-[10px] text-text-secondary font-medium block leading-tight">
                               Creators
                             </span>
-                            <span className="text-[10px] min-[360px]:text-[11px] sm:text-xs font-semibold text-foreground block truncate leading-tight mt-0.5">
+                            <span className="text-[10px] min-[360px]:text-[11px] sm:text-xs font-semibold text-foreground block break-words leading-tight mt-0.5">
                               {campaign.requiredCreators || 1} Needed
                             </span>
                           </div>
@@ -800,7 +800,7 @@ export default function CreatorDiscoverCampaignsManager() {
                                 className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[11px] font-sans font-medium bg-neutral-50 dark:bg-surface-muted/40 text-foreground border border-neutral-200/70 dark:border-border-theme"
                               >
                                 <CheckIcon className="text-emerald-500 shrink-0 w-3 h-3" />
-                                <span className="truncate max-w-[130px] min-[360px]:max-w-[190px]">{itemText}</span>
+                                <span className="break-words line-clamp-2">{itemText}</span>
                               </span>
                             ))}
                           </div>

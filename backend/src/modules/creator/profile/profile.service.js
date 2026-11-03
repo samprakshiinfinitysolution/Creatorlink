@@ -1,4 +1,5 @@
 import CreatorProfile from "./profile.model.js";
+import Auth from "../../auth/auth.model.js";
 import createApiError from "../../../utils/ApiError.js";
 
 
@@ -35,6 +36,15 @@ const createProfileService = async (userId, profileData) => {
         sanitizedData.engagementRate = null;
     }
 
+
+    // Synchronize Auth user full name if provided
+    if (sanitizedData.name !== undefined) {
+        const trimmedName = typeof sanitizedData.name === "string" ? sanitizedData.name.trim() : "";
+        if (trimmedName.length >= 2 && trimmedName.length <= 70) {
+            await Auth.findByIdAndUpdate(userId, { name: trimmedName });
+        }
+        delete sanitizedData.name;
+    }
 
     // Create the profile using Auth._id.
     const profile = await CreatorProfile.create({
@@ -73,15 +83,17 @@ const getMyProfileService = async (userId) => {
 
 
 // Update the creator profile of the authenticated user.
+// Update the creator profile of the authenticated user.
 const updateProfileService = async (userId, profileData) => {
 
     const updateOps = { ...profileData };
 
-    // Defense-in-depth: never allow client to override userId, isDemo, or isVerifiedBadge
+    // Protected fields cannot be overridden by client
     delete updateOps.user;
     delete updateOps.isDemo;
     delete updateOps.isVerifiedBadge;
 
+    // Update follower count
     if (updateOps.followerCount !== undefined) {
         if (updateOps.followerCount === null || updateOps.followerCount === "") {
             updateOps.followerCount = null;
@@ -90,6 +102,7 @@ const updateProfileService = async (userId, profileData) => {
         }
     }
 
+    // Update engagement rate
     if (updateOps.engagementRate !== undefined) {
         if (updateOps.engagementRate === null || updateOps.engagementRate === "") {
             updateOps.engagementRate = null;
@@ -98,6 +111,14 @@ const updateProfileService = async (userId, profileData) => {
         }
     }
 
+    // Synchronize Auth user full name if provided
+    if (updateOps.name !== undefined) {
+        const trimmedName = typeof updateOps.name === "string" ? updateOps.name.trim() : "";
+        if (trimmedName.length >= 2 && trimmedName.length <= 70) {
+            await Auth.findByIdAndUpdate(userId, { name: trimmedName });
+        }
+        delete updateOps.name;
+    }
     // Convert empty string dob or gender to null so Mongoose clears them without schema enum errors
     if (updateOps.dob === "") {
         updateOps.dob = null;

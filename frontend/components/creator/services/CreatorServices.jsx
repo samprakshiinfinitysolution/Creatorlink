@@ -498,7 +498,7 @@ export default function CreatorServices() {
                   </div>
 
                   {/* Mini Service Details */}
-                  <p className="text-[11px] sm:text-xs font-bold text-foreground leading-tight mt-2 line-clamp-1">
+                  <p className="text-[11px] sm:text-xs font-bold text-foreground leading-tight mt-2 line-clamp-2 break-words">
                     Social Media Content Creation
                   </p>
 
@@ -634,7 +634,7 @@ export default function CreatorServices() {
             </div>
           ) : serviceItems.length > 0 ? (
             /* SERVICES GRID */
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {serviceItems.map((service) => {
                 const serviceId = service._id || service.id;
                 const isToggling = togglingStatusId === serviceId;
@@ -760,11 +760,11 @@ export default function CreatorServices() {
                       <div className="p-5 sm:p-5 flex-1 flex flex-col justify-between gap-3.5">
                         {/* Title, Category & Description */}
                         <div className="space-y-1">
-                          <h3 className="font-sans font-bold text-base sm:text-lg text-foreground line-clamp-1 tracking-tight">
+                          <h3 className="font-sans font-bold text-base sm:text-lg text-foreground line-clamp-2 break-words tracking-tight">
                             {service.title}
                           </h3>
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-xs font-normal text-text-secondary line-clamp-1">
+                            <span className="text-xs font-normal text-text-secondary break-words">
                               {service.category || "Social Media Campaign"}
                             </span>
                             {service.contentType && (
@@ -799,7 +799,7 @@ export default function CreatorServices() {
                               <span className="block font-bold text-xs text-foreground truncate leading-none">
                                 {service.deliveryTime || 7} Days
                               </span>
-                              <span className="block text-[10px] text-text-secondary leading-none mt-1 truncate">
+                              <span className="block text-[10px] text-text-secondary leading-none mt-1 break-words">
                                 Delivery Time
                               </span>
                             </div>
@@ -815,7 +815,7 @@ export default function CreatorServices() {
                                   ? "No Revisions"
                                   : `${service.revisions || 1} Revision${(service.revisions || 1) > 1 ? "s" : ""}`}
                               </span>
-                              <span className="block text-[10px] text-text-secondary leading-none mt-1 truncate">
+                              <span className="block text-[10px] text-text-secondary leading-none mt-1 break-words">
                                 Included
                               </span>
                             </div>

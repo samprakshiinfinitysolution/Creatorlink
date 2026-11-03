@@ -685,9 +685,9 @@ export default function CreatorMessages() {
                     <h3 className="text-xs sm:text-sm font-sans font-semibold text-foreground truncate">
                       {activeBrandName}
                     </h3>
-                    <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-[11px] text-text-secondary min-w-0 truncate">
+                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[10px] sm:text-[11px] text-text-secondary min-w-0">
                       {activeCampaignTitle && (
-                        <span className="truncate">{activeCampaignTitle}</span>
+                        <span className="break-words line-clamp-1">{activeCampaignTitle}</span>
                       )}
                       {activeBookingPrice && (
                         <span className="text-emerald-500 font-medium shrink-0">

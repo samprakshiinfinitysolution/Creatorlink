@@ -862,7 +862,7 @@ export default function CreatorBookingsManager() {
                           />
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-1.5 flex-wrap">
-                              <span className="font-semibold text-foreground text-sm font-sans truncate max-w-[125px] min-[360px]:max-w-[170px] sm:max-w-none" title={brandName}>
+                              <span className="font-semibold text-foreground text-sm font-sans break-words" title={brandName}>
                                 {brandName}
                               </span>
                               {isBrandProposal ? (
@@ -905,7 +905,7 @@ export default function CreatorBookingsManager() {
                           </div>
                         )}
                         <div>
-                          <div className="font-semibold text-foreground text-xs sm:text-sm line-clamp-1" title={campaignTitle}>
+                          <div className="font-semibold text-foreground text-xs sm:text-sm line-clamp-2 break-words" title={campaignTitle}>
                             {campaignTitle}
                           </div>
                           <div className="text-[11px] text-text-secondary mt-0.5 flex items-center gap-1.5 capitalize">
@@ -916,7 +916,7 @@ export default function CreatorBookingsManager() {
                         </div>
 
                         <div className="pt-2 border-t border-border-theme flex items-center justify-between gap-2 text-[11px]">
-                          <div className="text-text-secondary truncate">
+                          <div className="text-text-secondary break-words">
                             <span className="font-medium text-foreground">Service:</span> {serviceTitle}
                             {booking.service?.deliveryTime && (
                               <span className="ml-1 text-text-secondary/70">

@@ -1319,12 +1319,12 @@ export default function BrandCampaignsManager() {
                                 <button
                                   type="button"
                                   onClick={() => handleViewClick(c)}
-                                  className="font-semibold text-foreground text-[13px] font-sans hover:text-secondary transition-colors text-left truncate block max-w-[240px] cursor-pointer"
+                                  className="font-semibold text-foreground text-[13px] font-sans hover:text-secondary transition-colors text-left line-clamp-2 break-words max-w-[360px] block cursor-pointer"
                                   title={c.title}
                                 >
                                   {c.title}
                                 </button>
-                                <span className="text-[11px] text-text-secondary truncate block max-w-[240px]">
+                                <span className="text-[11px] text-text-secondary line-clamp-1 break-words block max-w-[360px]">
                                   {c.category || "General"}
                                 </span>
                               </div>
@@ -1701,7 +1701,7 @@ export default function BrandCampaignsManager() {
                 <span className="text-[10px] font-bold uppercase tracking-wider text-secondary">
                   Campaign Details
                 </span>
-                <h3 className="font-serif font-medium text-lg text-foreground truncate max-w-md">
+                <h3 className="font-serif font-medium text-lg text-foreground break-words line-clamp-2">
                   {selectedCampaign?.title || "Campaign"}
                 </h3>
               </div>

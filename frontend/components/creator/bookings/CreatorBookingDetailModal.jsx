@@ -396,7 +396,7 @@ export default function CreatorBookingDetailModal({
                     <span className="text-[10px] uppercase font-bold tracking-wider text-text-secondary">
                       Brand Client
                     </span>
-                    <h3 className="font-semibold text-foreground text-sm sm:text-base font-sans break-words line-clamp-1">
+                    <h3 className="font-semibold text-foreground text-sm sm:text-base font-sans break-words line-clamp-2">
                       {brandName}
                     </h3>
                     <p className="text-xs text-text-secondary truncate mt-0.5">
@@ -437,7 +437,7 @@ export default function CreatorBookingDetailModal({
                   <span className="text-[10px] font-bold text-text-secondary uppercase tracking-wider block">
                     Category
                   </span>
-                  <span className="text-xs sm:text-sm font-semibold text-foreground capitalize mt-1 block truncate">
+                  <span className="text-xs sm:text-sm font-semibold text-foreground capitalize mt-1 block break-words">
                     {campaignCategory}
                   </span>
                 </div>
@@ -446,7 +446,7 @@ export default function CreatorBookingDetailModal({
                   <span className="text-[10px] font-bold text-text-secondary uppercase tracking-wider block">
                     Platform
                   </span>
-                  <span className="text-xs sm:text-sm font-semibold text-foreground capitalize mt-1 block truncate">
+                  <span className="text-xs sm:text-sm font-semibold text-foreground capitalize mt-1 block break-words">
                     {platform}
                   </span>
                 </div>
@@ -455,7 +455,7 @@ export default function CreatorBookingDetailModal({
                   <span className="text-[10px] font-bold text-text-secondary uppercase tracking-wider block">
                     Delivery Deadline
                   </span>
-                  <span className="text-xs sm:text-sm font-semibold text-foreground mt-1 block truncate">
+                  <span className="text-xs sm:text-sm font-semibold text-foreground mt-1 block break-words">
                     {formatDate(booking.deadline)}
                   </span>
                 </div>
@@ -464,7 +464,7 @@ export default function CreatorBookingDetailModal({
                   <span className="text-[10px] font-bold text-text-secondary uppercase tracking-wider block">
                     Applied / Sent
                   </span>
-                  <span className="text-xs sm:text-sm font-semibold text-foreground mt-1 block truncate">
+                  <span className="text-xs sm:text-sm font-semibold text-foreground mt-1 block break-words">
                     {formatDate(booking.createdAt)}
                   </span>
                 </div>

@@ -1428,7 +1428,7 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
                       <span className="text-[10px] font-bold text-gray-400 dark:text-zinc-400 uppercase tracking-wider block">
                         Deadline
                       </span>
-                      <span className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white mt-0.5 block truncate">
+                      <span className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white mt-0.5 block break-words">
                         {formatDate(workspace.deadline)}
                       </span>
                     </div>
@@ -1443,7 +1443,7 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
                       <span className="text-[10px] font-bold text-gray-400 dark:text-zinc-400 uppercase tracking-wider block">
                         Platform
                       </span>
-                      <span className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white mt-0.5 capitalize block truncate">
+                      <span className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white mt-0.5 capitalize block break-words">
                         {campaign?.platform || service?.platform || "Not specified"}
                       </span>
                     </div>
@@ -1459,7 +1459,7 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
                         Selected Service
                       </span>
                       <span
-                        className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white mt-0.5 block truncate"
+                        className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white mt-0.5 block break-words"
                         title={service?.title || "Custom Package"}
                       >
                         {service?.title || "Custom Package"}
@@ -1835,7 +1835,7 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
                                 {/* Details */}
                                 <div className="min-w-0 flex-1 space-y-1">
                                   <div className="flex items-center gap-2 flex-wrap">
-                                    <span className="font-bold text-xs sm:text-sm text-gray-900 dark:text-white truncate block">
+                                    <span className="font-bold text-xs sm:text-sm text-gray-900 dark:text-white break-words block">
                                       {subTitle}
                                     </span>
                                     <span
@@ -1846,7 +1846,7 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
                                   </div>
 
                                   {sub.notes && (
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate block">
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 break-words block">
                                       {sub.notes}
                                     </p>
                                   )}
@@ -1971,7 +1971,7 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
                                 {/* Details */}
                                 <div className="min-w-0 flex-1 space-y-1">
                                   <div className="flex items-center gap-2 flex-wrap">
-                                    <span className="font-bold text-xs sm:text-sm text-gray-900 dark:text-white truncate block">
+                                    <span className="font-bold text-xs sm:text-sm text-gray-900 dark:text-white break-words block">
                                       {subTitle}
                                     </span>
                                     <span
@@ -1982,7 +1982,7 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
                                   </div>
 
                                   {sub.notes && (
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate block">
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 break-words block">
                                       {sub.notes}
                                     </p>
                                   )}

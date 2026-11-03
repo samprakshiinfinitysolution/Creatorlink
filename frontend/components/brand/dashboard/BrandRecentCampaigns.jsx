@@ -366,12 +366,12 @@ export default function BrandRecentCampaigns({ campaigns = [] }) {
                         <div className="min-w-0">
                           <Link
                             href="/brand/campaigns"
-                            className="font-semibold text-foreground text-[13px] font-sans hover:text-secondary transition-colors text-left truncate block max-w-[240px]"
+                            className="font-semibold text-foreground text-[13px] font-sans hover:text-secondary transition-colors text-left line-clamp-2 break-words max-w-[360px] block"
                             title={c.title}
                           >
                             {c.title}
                           </Link>
-                          <span className="text-[11px] text-text-secondary truncate block max-w-[240px]">
+                          <span className="text-[11px] text-text-secondary line-clamp-1 break-words block max-w-[360px]">
                             {c.category || "General"}
                           </span>
                         </div>

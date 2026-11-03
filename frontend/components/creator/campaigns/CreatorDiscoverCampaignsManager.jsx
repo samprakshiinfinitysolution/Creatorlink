@@ -522,12 +522,12 @@ export default function CreatorDiscoverCampaignsManager() {
                       </div>
 
                       {/* Campaign Title */}
-                      <h4 className="text-[11px] sm:text-xs font-bold text-neutral-900 dark:text-white truncate leading-snug">
+                      <h4 className="text-[11px] sm:text-xs font-bold text-neutral-900 dark:text-white line-clamp-2 break-words leading-snug">
                         {card.title}
                       </h4>
 
                       {/* Deliverables Meta */}
-                      <p className="text-[9px] sm:text-[10px] text-neutral-500 dark:text-neutral-400 font-sans truncate mt-0.5 mb-1.5">
+                      <p className="text-[9px] sm:text-[10px] text-neutral-500 dark:text-neutral-400 font-sans line-clamp-2 break-words mt-0.5 mb-1.5">
                         {card.deliverables}
                       </p>
 
@@ -666,7 +666,7 @@ export default function CreatorDiscoverCampaignsManager() {
                       {/* Top Row: Category (Pink Text) & Applied Badge (Left), Platform (Right) - Clean Text Without Pill Outlines */}
                       <div className="flex items-center justify-between gap-1.5 flex-wrap">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-[10px] sm:text-[11px] font-sans font-bold tracking-wider uppercase text-pink-500 dark:text-pink-400 truncate max-w-[130px]">
+                          <span className="text-[10px] sm:text-[11px] font-sans font-bold tracking-wider uppercase text-pink-500 dark:text-pink-400 break-words">
                             {campaign.category || "General"}
                           </span>
 
@@ -766,7 +766,7 @@ export default function CreatorDiscoverCampaignsManager() {
                             <span className="text-[9px] sm:text-[10px] text-text-secondary font-medium block leading-tight">
                               End Date
                             </span>
-                            <span className="text-[10px] min-[360px]:text-[11px] sm:text-xs font-semibold text-foreground block truncate leading-tight mt-0.5">
+                            <span className="text-[10px] min-[360px]:text-[11px] sm:text-xs font-semibold text-foreground block break-words leading-tight mt-0.5">
                               {formatDate(campaign.deadline)}
                             </span>
                           </div>
@@ -780,7 +780,7 @@ export default function CreatorDiscoverCampaignsManager() {
                             <span className="text-[9px] sm:text-[10px] text-text-secondary font-medium block leading-tight">
                               Creators
                             </span>
-                            <span className="text-[10px] min-[360px]:text-[11px] sm:text-xs font-semibold text-foreground block truncate leading-tight mt-0.5">
+                            <span className="text-[10px] min-[360px]:text-[11px] sm:text-xs font-semibold text-foreground block break-words leading-tight mt-0.5">
                               {campaign.requiredCreators || 1} Needed
                             </span>
                           </div>
@@ -800,7 +800,7 @@ export default function CreatorDiscoverCampaignsManager() {
                                 className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[11px] font-sans font-medium bg-neutral-50 dark:bg-surface-muted/40 text-foreground border border-neutral-200/70 dark:border-border-theme"
                               >
                                 <CheckIcon className="text-emerald-500 shrink-0 w-3 h-3" />
-                                <span className="break-words max-w-[160px] sm:max-w-[220px] line-clamp-1">{itemText}</span>
+                                <span className="break-words line-clamp-2">{itemText}</span>
                               </span>
                             ))}
                           </div>

@@ -20,8 +20,21 @@ const createProfileService = async (userId, profileData) => {
     // Defense-in-depth: strip protected/system fields and ensure authenticated userId cannot be overridden
     const sanitizedData = { ...profileData };
     delete sanitizedData.user;
-    delete sanitizedData.followerCount;
-    delete sanitizedData.engagementRate;
+    delete sanitizedData.isDemo;
+    delete sanitizedData.isVerifiedBadge;
+
+    if (sanitizedData.followerCount !== undefined && sanitizedData.followerCount !== null && sanitizedData.followerCount !== "") {
+        sanitizedData.followerCount = Math.round(Number(sanitizedData.followerCount));
+    } else if (sanitizedData.followerCount === "") {
+        sanitizedData.followerCount = null;
+    }
+
+    if (sanitizedData.engagementRate !== undefined && sanitizedData.engagementRate !== null && sanitizedData.engagementRate !== "") {
+        sanitizedData.engagementRate = Number(parseFloat(sanitizedData.engagementRate).toFixed(2));
+    } else if (sanitizedData.engagementRate === "") {
+        sanitizedData.engagementRate = null;
+    }
+
 
     // Create the profile using Auth._id.
     const profile = await CreatorProfile.create({
@@ -63,6 +76,27 @@ const getMyProfileService = async (userId) => {
 const updateProfileService = async (userId, profileData) => {
 
     const updateOps = { ...profileData };
+
+    // Defense-in-depth: never allow client to override userId, isDemo, or isVerifiedBadge
+    delete updateOps.user;
+    delete updateOps.isDemo;
+    delete updateOps.isVerifiedBadge;
+
+    if (updateOps.followerCount !== undefined) {
+        if (updateOps.followerCount === null || updateOps.followerCount === "") {
+            updateOps.followerCount = null;
+        } else {
+            updateOps.followerCount = Math.round(Number(updateOps.followerCount));
+        }
+    }
+
+    if (updateOps.engagementRate !== undefined) {
+        if (updateOps.engagementRate === null || updateOps.engagementRate === "") {
+            updateOps.engagementRate = null;
+        } else {
+            updateOps.engagementRate = Number(parseFloat(updateOps.engagementRate).toFixed(2));
+        }
+    }
 
     // Convert empty string dob or gender to null so Mongoose clears them without schema enum errors
     if (updateOps.dob === "") {

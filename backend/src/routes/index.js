@@ -38,8 +38,12 @@ import adminUsersRoutes from "../modules/admin/users/users.route.js";
 import adminVerificationRoutes from "../modules/admin/verification/verification.route.js";
 import adminCampaignRoutes from "../modules/admin/campaigns/campaigns.route.js";
 import adminCollaborationRoutes from "../modules/admin/collaborations/collaborations.route.js";
+import homepageRoutes from "../modules/homepage/homepage.route.js";
 
 const router = Router();
+
+// Homepage / Public routes.
+router.use("/homepage", homepageRoutes);
 
 // Authentication routes.
 router.use("/auth", authRoutes);

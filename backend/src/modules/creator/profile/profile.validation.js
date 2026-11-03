@@ -17,7 +17,9 @@ const ALLOWED_PROFILE_FIELDS = [
     "dob",
     "gender",
     "languages",
-    "ethnicity"
+    "ethnicity",
+    "followerCount",
+    "engagementRate"
 ];
 
 
@@ -60,7 +62,9 @@ const createProfileValidation = (req, res, next) => {
         dob,
         gender,
         languages,
-        ethnicity
+        ethnicity,
+        followerCount,
+        engagementRate
     } = req.body;
 
 
@@ -424,6 +428,36 @@ const createProfileValidation = (req, res, next) => {
         }
     }
 
+
+    // Validate followerCount (numeric, integer only, minimum 0).
+    if (followerCount !== undefined && followerCount !== null && followerCount !== "") {
+        const parsedFollowers = Number(followerCount);
+        if (
+            Number.isNaN(parsedFollowers) ||
+            !Number.isInteger(parsedFollowers) ||
+            parsedFollowers < 0
+        ) {
+            throw createApiError(
+                400,
+                "Follower count must be a non-negative integer"
+            );
+        }
+    }
+
+    // Validate engagementRate (numeric percentage, 0 to 100).
+    if (engagementRate !== undefined && engagementRate !== null && engagementRate !== "") {
+        const parsedEng = Number(engagementRate);
+        if (
+            Number.isNaN(parsedEng) ||
+            parsedEng < 0 ||
+            parsedEng > 100
+        ) {
+            throw createApiError(
+                400,
+                "Engagement rate must be between 0 and 100"
+            );
+        }
+    }
 
     next();
 };

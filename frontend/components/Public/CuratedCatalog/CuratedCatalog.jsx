@@ -1,79 +1,44 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import axiosInstance from "@/lib/axios";
 import ScrollReveal from "@/components/theme/ScrollReveal";
 
 // =========================================================
-// CENTRALIZED MOCK DATA (UI ONLY - READY FOR API REPLACEMENT)
+// HELPER FORMATTERS
 // =========================================================
-const CREATORS = [
-  {
-    id: "elena-vance",
-    name: "Elena Vance",
-    handle: "@elenavance",
-    category: "Fashion & Lifestyle",
-    location: "Mumbai, IN",
-    image:
-      "https://res.cloudinary.com/atr5osne/image/upload/v1792054698/creatorlink/public/avatars/gye9m9prpdv81gc9ipkp.webp",
-    badge: "TRENDING #1",
-    badgeColor: "bg-secondary text-white",
-    fit: "98% Fit",
-    baseRate: "From ₹25,000",
-    audience: "485K",
-    engagement: "5.8%",
-    avgDeliverable: "48h turnaround",
-  },
-  {
-    id: "camille-blanc",
-    name: "Camille Blanc",
-    handle: "@camille.blanc",
-    category: "Beauty & Skincare",
-    location: "Delhi, IN",
-    image:
-      "https://res.cloudinary.com/atr5osne/image/upload/v1792054701/creatorlink/public/avatars/qooau1mzc4okikpsrqri.webp",
-    badge: "LIVE COLLAB",
-    badgeColor: "bg-emerald-500 text-white dark:bg-emerald-600",
-    fit: "96% Fit",
-    baseRate: "From ₹45,000",
-    audience: "920K",
-    engagement: "7.2%",
-    avgDeliverable: "24h express",
-  },
-  {
-    id: "kenji-sato",
-    name: "Kenji Sato",
-    handle: "@kenjisato",
-    category: "Tech & Gadgets",
-    location: "Bengaluru, IN",
-    image:
-      "https://res.cloudinary.com/atr5osne/image/upload/v1792054706/creatorlink/public/avatars/qvmu4uqdqpexdchfnvys.webp",
-    badge: "VERIFIED PRO",
-    badgeColor: "bg-tertiary text-white dark:bg-purple-600",
-    fit: "99% Fit",
-    baseRate: "From ₹35,000",
-    audience: "310K",
-    engagement: "6.4%",
-    avgDeliverable: "3-day delivery",
-  },
-  {
-    id: "astrid-lind",
-    name: "Astrid Lind",
-    handle: "@astrid.lind",
-    category: "Travel & Lifestyle",
-    location: "Goa, IN",
-    image:
-      "https://res.cloudinary.com/atr5osne/image/upload/v1792054710/creatorlink/public/avatars/ra9dirifievmiawd57yl.webp",
-    badge: "FAST RESPONSE",
-    badgeColor: "bg-amber-500 text-white dark:bg-amber-600",
-    fit: "94% Fit",
-    baseRate: "From ₹20,000",
-    audience: "215K",
-    engagement: "8.9%",
-    avgDeliverable: "24h response",
-  },
-];
+function getInitials(name) {
+  if (!name || typeof name !== "string") return "CR";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+function formatAudience(count) {
+  if (count === null || count === undefined || isNaN(count)) return "Not added";
+  const num = Number(count);
+  if (num <= 0) return "Not added";
+  if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`;
+  if (num >= 1_000) return `${(num / 1_000).toFixed(num % 1000 === 0 ? 0 : 1).replace(/\.0$/, "")}K`;
+  return `${num}`;
+}
+
+function formatEngagement(rate) {
+  if (rate === null || rate === undefined || isNaN(rate)) return "Not added";
+  const num = Number(rate);
+  if (num <= 0) return "Not added";
+  return `${num.toFixed(1).replace(/\.0$/, "")}%`;
+}
+
+function formatBaseRate(amount, currency = "INR") {
+  if (amount === null || amount === undefined || isNaN(amount) || Number(amount) <= 0) {
+    return "Not added";
+  }
+  const symbol = currency === "USD" ? "$" : "₹";
+  return `From ${symbol}${Number(amount).toLocaleString("en-IN")}`;
+}
 
 // =========================================================
 // SVG ICONS
@@ -125,28 +90,77 @@ function ArrowRightIcon({ className = "w-4 h-4" }) {
 }
 
 // =========================================================
-// REUSABLE CREATOR CARD COMPONENT
+// DYNAMIC CREATOR CARD COMPONENT
 // =========================================================
-function CreatorCard({ creator }) {
+function CreatorCard({ creator, index }) {
   const [isSaved, setIsSaved] = useState(false);
+  const [imageError, setImageError] = useState(false);
+
+  const imageSrc = !imageError && (creator.displayImage || creator.profileImage || creator.portfolio?.coverImage);
+
+  // Dynamic Badge Assignment
+  let badge = "FEATURED";
+  let badgeColor = "bg-secondary text-white";
+  if (creator.isVerifiedBadge) {
+    badge = "VERIFIED PRO";
+    badgeColor = "bg-tertiary text-white dark:bg-purple-600";
+  } else if (index === 0) {
+    badge = "LATEST #1";
+    badgeColor = "bg-secondary text-white";
+  } else if (creator.startingPrice) {
+    badge = "BOOKING OPEN";
+    badgeColor = "bg-emerald-500 text-white dark:bg-emerald-600";
+  }
+
+  const fitBadge = creator.engagementRate
+    ? `${Math.min(99, Math.max(90, Math.round(90 + Number(creator.engagementRate))))}% Fit`
+    : "Verified Profile";
+
+  const deliverableText =
+    creator.portfolio?.title ||
+    (Array.isArray(creator.niches) && creator.niches.length > 0
+      ? creator.niches[0]
+      : "Not added");
 
   return (
     <div className="group relative flex flex-col h-full overflow-hidden rounded-2xl border border-border-theme bg-surface shadow-xs hover:border-secondary/60 dark:hover:border-secondary/60 hover:shadow-[0_12px_35px_rgba(255,79,135,0.18)] dark:hover:shadow-[0_12px_35px_rgba(255,79,135,0.22)] hover:-translate-y-1 transition-all duration-300">
       {/* CREATOR IMAGE + TOP BADGES + DESKTOP HOVER OVERLAY */}
       <div className="relative w-full aspect-[4/4.8] shrink-0 overflow-hidden bg-black/5 dark:bg-white/5">
-        <Image src={creator.image} alt={creator.name} fill className="h-full w-full object-cover transition-all duration-500 group-hover:scale-105 group-hover:blur-[2px] group-hover:brightness-[0.75]" sizes="(max-width: 768px) 100vw, 33vw" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10 opacity-75 group-hover:opacity-90 transition-opacity duration-300" />
+        {imageSrc ? (
+          <Image
+            src={imageSrc}
+            alt={creator.name || "Creator"}
+            fill
+            className="h-full w-full object-cover transition-all duration-500 group-hover:scale-105 group-hover:blur-[2px] group-hover:brightness-[0.75]"
+            sizes="(max-width: 768px) 100vw, 33vw"
+            onError={() => setImageError(true)}
+          />
+        ) : (
+          <div className="flex h-full w-full flex-col items-center justify-center p-4 bg-gradient-to-br from-surface-muted via-surface to-secondary/10 text-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-secondary/15 border border-secondary/30 text-secondary-dark text-xl font-bold shadow-xs">
+              {getInitials(creator.name)}
+            </div>
+            <p className="mt-2.5 max-w-[160px] truncate text-xs font-semibold text-primary">
+              {creator.name}
+            </p>
+            <p className="mt-0.5 max-w-[160px] truncate text-[10px] text-text-secondary">
+              {creator.category || "Content Creator"}
+            </p>
+          </div>
+        )}
+
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10 opacity-75 group-hover:opacity-90 transition-opacity duration-300 pointer-events-none" />
 
         {/* Top-Left Status Badge */}
         <span
-          className={`absolute top-3.5 left-3.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm backdrop-blur-md z-10 ${creator.badgeColor}`}
+          className={`absolute top-3.5 left-3.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm backdrop-blur-md z-10 ${badgeColor}`}
         >
-          {creator.badge}
+          {badge}
         </span>
 
         {/* Top-Right Fit Badge */}
         <span className="absolute top-3.5 right-3.5 px-2.5 py-1 rounded-full text-[11px] font-semibold text-white bg-black/65 dark:bg-black/80 backdrop-blur-md border border-white/20 z-10">
-          {creator.fit}
+          {fitBadge}
         </span>
 
         {/* DESKTOP HOVER OVERLAY BUTTONS (Media Kit & Book Now) */}
@@ -170,15 +184,16 @@ function CreatorCard({ creator }) {
       <div className="p-4 sm:p-5 flex flex-col flex-1 justify-between gap-4">
         {/* Creator Name, Handle & Base Rate Header */}
         <div className="flex items-start justify-between gap-2">
-          <div>
+          <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5 mb-0.5">
-              <h3 className="text-base sm:text-lg font-semibold text-foreground tracking-tight group-hover:text-secondary transition-colors">
+              <h3 className="truncate text-base sm:text-lg font-semibold text-foreground tracking-tight group-hover:text-secondary transition-colors">
                 {creator.name}
               </h3>
               <VerifiedCheckIcon />
             </div>
-            <p className="text-xs text-text-secondary line-clamp-1">
-              {creator.handle} • {creator.category}, {creator.location}
+            <p className="text-xs text-text-secondary truncate">
+              {creator.handle} • {creator.category || "Creator"}
+              {creator.location ? `, ${creator.location}` : ""}
             </p>
           </div>
 
@@ -187,35 +202,35 @@ function CreatorCard({ creator }) {
               BASE RATE
             </span>
             <span className="text-xs sm:text-sm font-bold text-foreground">
-              {creator.baseRate}
+              {formatBaseRate(creator.startingPrice, creator.currency)}
             </span>
           </div>
         </div>
 
-        {/* Metrics Row (Audience, Engagement, Avg Deliverable) */}
+        {/* Metrics Row (Audience, Engagement, Deliverable) */}
         <div className="grid grid-cols-3 gap-2 p-2.5 rounded-xl bg-surface-muted border border-border-theme text-left">
-          <div>
-            <span className="block text-[9px] uppercase tracking-wider text-text-secondary font-medium">
+          <div className="min-w-0">
+            <span className="block text-[9px] uppercase tracking-wider text-text-secondary font-medium truncate">
               Audience
             </span>
-            <span className="text-xs font-bold text-foreground">
-              {creator.audience}
+            <span className="text-xs font-bold text-foreground truncate block">
+              {formatAudience(creator.followerCount)}
             </span>
           </div>
-          <div>
-            <span className="block text-[9px] uppercase tracking-wider text-text-secondary font-medium">
+          <div className="min-w-0">
+            <span className="block text-[9px] uppercase tracking-wider text-text-secondary font-medium truncate">
               Engagement
             </span>
-            <span className="text-xs font-bold text-foreground">
-              {creator.engagement}
+            <span className="text-xs font-bold text-foreground truncate block">
+              {formatEngagement(creator.engagementRate)}
             </span>
           </div>
-          <div>
-            <span className="block text-[9px] uppercase tracking-wider text-text-secondary font-medium">
+          <div className="min-w-0">
+            <span className="block text-[9px] uppercase tracking-wider text-text-secondary font-medium truncate">
               Deliverable
             </span>
-            <span className="text-xs font-bold text-foreground line-clamp-1">
-              {creator.avgDeliverable}
+            <span className="text-xs font-bold text-foreground truncate block">
+              {deliverableText}
             </span>
           </div>
         </div>
@@ -251,6 +266,42 @@ function CreatorCard({ creator }) {
 // MAIN SECTION COMPONENT
 // =========================================================
 export default function CuratedCatalog() {
+  const [creators, setCreators] = useState([]);
+  const [totalCount, setTotalCount] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchCatalogData = async () => {
+      try {
+        const response = await axiosInstance.get("/homepage/featured");
+        if (isMounted && response.data?.success && response.data?.data) {
+          const data = response.data.data;
+          // Prefer latestCreators sorted by newest createdAt, fallback to topCreators
+          const list =
+            Array.isArray(data.latestCreators) && data.latestCreators.length > 0
+              ? data.latestCreators
+              : Array.isArray(data.topCreators)
+              ? data.topCreators
+              : [];
+          setCreators(list.slice(0, 4));
+          if (typeof data.totalCreatorsCount === "number" && data.totalCreatorsCount > 0) {
+            setTotalCount(data.totalCreatorsCount);
+          }
+        }
+      } catch (err) {
+        console.warn("CuratedCatalog fetch notice:", err?.message);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    fetchCatalogData();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   return (
     <section className="relative overflow-hidden bg-background text-foreground transition-colors duration-300 py-10 md:py-20 px-4 sm:px-6 lg:px-12 border-t border-border-theme">
       {/* Ambient Glow */}
@@ -273,7 +324,7 @@ export default function CuratedCatalog() {
             href="/creators"
             className="text-xs font-bold tracking-wider text-secondary uppercase hover:underline cursor-pointer shrink-0 ml-2"
           >
-            VIEW ALL (184)
+            {totalCount ? `VIEW ALL (${totalCount})` : "VIEW ALL"}
           </Link>
         </ScrollReveal>
 
@@ -300,18 +351,36 @@ export default function CuratedCatalog() {
         {/* =========================================================
             CREATORS GRID / LIST
         ========================================================= */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
-          {CREATORS.map((creator, index) => (
-            <ScrollReveal
-              key={creator.id}
-              direction="up"
-              delay={index * 100}
-              className="h-full"
-            >
-              <CreatorCard creator={creator} />
-            </ScrollReveal>
-          ))}
-        </div>
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+            {[0, 1, 2, 3].map((idx) => (
+              <div
+                key={idx}
+                className="flex flex-col h-[420px] rounded-2xl border border-border-theme bg-surface p-4 animate-pulse justify-between"
+              >
+                <div className="w-full aspect-[4/4.8] rounded-xl bg-surface-muted" />
+                <div className="mt-4 space-y-2">
+                  <div className="h-4 bg-surface-muted rounded w-3/4" />
+                  <div className="h-3 bg-surface-muted rounded w-1/2" />
+                </div>
+                <div className="h-12 bg-surface-muted rounded-xl mt-3" />
+              </div>
+            ))}
+          </div>
+        ) : creators.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+            {creators.map((creator, index) => (
+              <ScrollReveal
+                key={creator.id || index}
+                direction="up"
+                delay={index * 100}
+                className="h-full"
+              >
+                <CreatorCard creator={creator} index={index} />
+              </ScrollReveal>
+            ))}
+          </div>
+        ) : null}
 
         {/* =========================================================
             CENTERED CTA BUTTON (DESKTOP ONLY)
@@ -321,7 +390,11 @@ export default function CuratedCatalog() {
             href="/creators"
             className="inline-flex items-center gap-2 rounded-full border border-border-theme bg-surface text-foreground text-xs md:text-sm font-semibold px-7 py-3.5 shadow-sm hover:border-secondary dark:hover:border-secondary hover:shadow-[0_0_25px_rgba(255,79,135,0.35)] dark:hover:shadow-[0_0_25px_rgba(255,79,135,0.25)] transition-all duration-300 transform hover:scale-[1.02] cursor-pointer"
           >
-            <span>View All 1,480 Curated Creators</span>
+            <span>
+              {totalCount
+                ? `View All ${totalCount.toLocaleString("en-IN")} Curated Creators`
+                : "View All Curated Creators"}
+            </span>
             <ArrowRightIcon className="w-4 h-4 ml-0.5 text-foreground" />
           </Link>
         </ScrollReveal>

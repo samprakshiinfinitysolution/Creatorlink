@@ -7,7 +7,8 @@
     "test": "node --test",
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "seed:admin": "node src/seed/admin.seed.js"
+    "seed:admin": "node src/seed/admin.seed.js",
+    "seed:demo": "node scripts/seed-demo-creators.js"
   },
   "keywords": [],
   "author": "",

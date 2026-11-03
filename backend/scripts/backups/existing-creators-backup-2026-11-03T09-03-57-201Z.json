@@ -1,0 +1,584 @@
+{
+  "timestamp": "2026-11-03T09:03:57.203Z",
+  "recordCount": 4,
+  "profiles": [
+    {
+      "socialLinks": {
+        "instagram": "https://www.instagram.com/nike",
+        "facebook": "",
+        "youtube": "",
+        "tiktok": "",
+        "website": ""
+      },
+      "niches": [],
+      "isDemo": false,
+      "isVerifiedBadge": false,
+      "_id": "6ac12636eab5bae98c3c47b3",
+      "user": {
+        "_id": "6ac0ba6613c685ec30f5cef5",
+        "name": "mohit",
+        "email": "mohit@gmail.com",
+        "password": "$2b$10$T.P1DRqXBwlaQLHijw1m5uyc1tpj72dEQGxN3O3ryoaiHJlczSy5u",
+        "role": "creator",
+        "isVerified": true,
+        "sessions": [
+          {
+            "refreshToken": "387e587ada830b93379deb1757754e8257c823206ee44811fe9a8661f9086adf",
+            "_id": "6ac0c7ab53242a732d1cd086",
+            "createdAt": "2026-10-03T09:15:23.322Z"
+          },
+          {
+            "refreshToken": "500c139cb15ccd3ba078229a54370cc53f1800fc5f29c73991bee6e42a1e99bb",
+            "_id": "6ac0c8cd53242a732d1cd08f",
+            "createdAt": "2026-10-03T09:20:13.249Z"
+          },
+          {
+            "refreshToken": "22f0a205506578c89a36662a187cbeeaf7deb2abc97282602f699727b117a6e3",
+            "_id": "6ac0d5793a135e1eeb4684d1",
+            "createdAt": "2026-10-03T10:14:17.837Z"
+          },
+          {
+            "refreshToken": "3d4d4486af18af075a824a8ccaa2c7595cea30488313ad5370362f65392e36e2",
+            "_id": "6ac0e4343a135e1eeb4684d5",
+            "createdAt": "2026-10-03T11:17:08.111Z"
+          },
+          {
+            "refreshToken": "e4cef081a881fbc895b3b5e0f6270185f822705d9cac286ba3e210dfb3f3c80d",
+            "_id": "6ac0ea113a135e1eeb4684de",
+            "createdAt": "2026-10-03T11:42:09.544Z"
+          },
+          {
+            "refreshToken": "916df197c0af638f1388254304e0038ae1b1dc4b2d3f855012c6d254a1452ac6",
+            "_id": "6ac0ea9c3a135e1eeb4684e4",
+            "createdAt": "2026-10-03T11:44:28.247Z"
+          },
+          {
+            "refreshToken": "a3f8ffe45257fef958ea338c421476448d5ecaf18920163a20d1a3912d899faf",
+            "_id": "6ac0f0043a135e1eeb4684eb",
+            "createdAt": "2026-10-03T12:07:32.429Z"
+          },
+          {
+            "refreshToken": "66fd6abb406e620eba37ffbcbda4a7c81a93871752966aab2b1fe5d1532eadc7",
+            "_id": "6ac113ff148c7dd2cba683d3",
+            "createdAt": "2026-10-03T14:41:03.606Z"
+          },
+          {
+            "refreshToken": "769d7d8b410012bbb9416b0e1ca076abc50257fac83b3039d50cf65a93e431d3",
+            "_id": "6ac1269feab5bae98c3c47bc",
+            "createdAt": "2026-10-03T16:00:31.433Z"
+          },
+          {
+            "refreshToken": "7778c465cfffe0de124fe879119d5235d1b8d334025e9a68f487b26f535533f8",
+            "_id": "6ac1468a781b189503258ef1",
+            "createdAt": "2026-10-03T18:16:42.105Z"
+          },
+          {
+            "refreshToken": "0deff0c4f5e4c0b336147dc4df96fd9d2b50bddc51c1b65399a3c0886457d120",
+            "_id": "6ac21d29640ae61145774b77",
+            "createdAt": "2026-10-04T09:32:25.537Z"
+          },
+          {
+            "refreshToken": "225e5d5fdc8d2c5cec28c49cb10f79c613a53114d96b27d5955050fc8c1487c6",
+            "_id": "6ac226e4640ae61145774baf",
+            "createdAt": "2026-10-04T10:13:56.218Z"
+          },
+          {
+            "refreshToken": "0895afd024bf817f3655ae7fb43ff104032b0bc4e2264a34b7d3fd9d2cc74bd8",
+            "_id": "6ac23ab4640ae61145774be2",
+            "createdAt": "2026-10-04T11:38:28.069Z"
+          },
+          {
+            "refreshToken": "46f3bfa60e812f1a88d4c26f1e54488181800c51a2134c8c06e51c9b1eff197d",
+            "_id": "6ac23ce9640ae61145774bf0",
+            "createdAt": "2026-10-04T11:47:53.157Z"
+          },
+          {
+            "refreshToken": "26b75b20cc4fe03ac457717cb8393b315e994c95208ea931f6ae871f43c86ff1",
+            "_id": "6ac23fc5640ae61145774c04",
+            "createdAt": "2026-10-04T12:00:05.873Z"
+          },
+          {
+            "refreshToken": "757a3a1a365cd14e7538c7b428019dd27b199e895cd8f070db31766d669743be",
+            "_id": "6ac23fd4640ae61145774c14",
+            "createdAt": "2026-10-04T12:00:20.772Z"
+          },
+          {
+            "refreshToken": "bd0c17f7751b123af439bdc7a2d573ee26ca8576e0ea70346703592188c0ea7c",
+            "_id": "6ac241ea640ae61145774c25",
+            "createdAt": "2026-10-04T12:09:14.451Z"
+          },
+          {
+            "refreshToken": "ea5b220f2756a1e511207145565a642bc9ffc7dea43d787fc0546d924f46ffd7",
+            "_id": "6ac251ac640ae61145774c3f",
+            "createdAt": "2026-10-04T13:16:28.429Z"
+          },
+          {
+            "refreshToken": "b4a677907712992920e96450bd68d3f3c7b44850a3e8a50dcff99e2151b9204b",
+            "_id": "6ac25266640ae61145774c52",
+            "createdAt": "2026-10-04T13:19:34.590Z"
+          },
+          {
+            "refreshToken": "324829d690b9f99f71d4b0059b3426c90e6e83fec44333105248b716b7d5917b",
+            "_id": "6ac25700640ae61145774c70",
+            "createdAt": "2026-10-04T13:39:12.605Z"
+          },
+          {
+            "refreshToken": "b3545e887a8f972bc9d112763d7d168e91a8e94553308fd37588ee30246c68bd",
+            "_id": "6ac348a66249df4a7cbac95c",
+            "createdAt": "2026-10-05T06:50:14.394Z"
+          },
+          {
+            "refreshToken": "ff86c6d81eb824b3b92b831aefd4cd0c941082d2d5240509441cfa2df4e84b08",
+            "_id": "6ac349776249df4a7cbac972",
+            "createdAt": "2026-10-05T06:53:43.713Z"
+          },
+          {
+            "refreshToken": "494942923995bcbd551632e9fd8fbc58eb2d7f11970f6bf2c48ef5d3bb3a6871",
+            "createdAt": "2026-10-05T07:19:23.311Z",
+            "_id": "6ac34f7b6249df4a7cbac9a3"
+          },
+          {
+            "refreshToken": "4984fd19f6b2d4b4a435edd4674d7b9101d29c5eef9209445b182cbdb1796cd9",
+            "createdAt": "2026-10-06T06:48:45.849Z",
+            "_id": "6ac499cdf4d4c5134fcc408d"
+          },
+          {
+            "refreshToken": "a4f3999a8cfef2dbfe02d5354cb5807f1aaf62d48e9b9e48958dfbe497574117",
+            "createdAt": "2026-10-06T06:57:28.761Z",
+            "_id": "6ac49bd8f4d4c5134fcc40a7"
+          },
+          {
+            "refreshToken": "2a6e7372a87f1d7548be6f181c3ce454005ed80c883a5af59706afce50aeee6b",
+            "createdAt": "2026-10-06T08:37:59.619Z",
+            "_id": "6ac4b3673e3f69c8965baaba"
+          },
+          {
+            "refreshToken": "07846937de6559e6b3dbf92a16458cc6182d531acc52e7369a1062e8a32c1369",
+            "createdAt": "2026-10-06T09:11:10.784Z",
+            "_id": "6ac4bb2e3e3f69c8965baae0"
+          },
+          {
+            "refreshToken": "8c978d7c7fd10f3a9a49115de7a418aaadd46ed346458a7779330a31d4688db2",
+            "createdAt": "2026-10-06T10:05:55.883Z",
+            "_id": "6ac4c8034498175c0bfb5e86"
+          },
+          {
+            "refreshToken": "c4e5ca32ad29bf1d7a443ab38c52bd22c9fe2e9beffb2417a6e0d018a1a9d3c8",
+            "createdAt": "2026-10-06T10:31:17.628Z",
+            "_id": "6ac4cdf54498175c0bfb5ea4"
+          },
+          {
+            "refreshToken": "062b69660c3bf5389bb472940f833f52eb6aa8f9411d82f32a006650145c734e",
+            "createdAt": "2026-10-06T10:48:48.256Z",
+            "_id": "6ac4d2104498175c0bfb5ecc"
+          },
+          {
+            "refreshToken": "c5fad125643500e50892ad6e21d8895760cc807ecdc609fdb79d3aee29f80f09",
+            "_id": "6ac605a92bb2a4177a1c9c84",
+            "createdAt": "2026-10-07T08:41:13.713Z"
+          },
+          {
+            "refreshToken": "b79942461f233ec7fa93c6f6d24fcd32e595bbaf0ca5d1525900f16f22d7a192",
+            "_id": "6ac609542bb2a4177a1c9cb3",
+            "createdAt": "2026-10-07T08:56:52.395Z"
+          },
+          {
+            "refreshToken": "421ebfbccf28514b0f6df7096090eef77075bbf6aff10303f86b01eeece13245",
+            "_id": "6ac6201f5bdfa844825d2a8e",
+            "createdAt": "2026-10-07T10:34:07.174Z"
+          },
+          {
+            "refreshToken": "cf21063ae33f741f26606bdc761c700baf3167d8cf63d5bdd8f75afa28294b9b",
+            "_id": "6ac62583302a296d3a15312f",
+            "createdAt": "2026-10-07T10:57:07.676Z"
+          },
+          {
+            "refreshToken": "756452c9ddc3308041d08e1f9257050b6e1eb9ee24c47be7d33970d223b678c7",
+            "_id": "6ac625db302a296d3a153152",
+            "createdAt": "2026-10-07T10:58:35.972Z"
+          },
+          {
+            "refreshToken": "8542f386a998f8a44c02f4552e5db733acf9c997723add9a9469287775b8b6ea",
+            "createdAt": "2026-10-07T11:12:49.573Z",
+            "_id": "6ac62931302a296d3a153177"
+          },
+          {
+            "refreshToken": "fe8be7b9a05972b81c50b655f7de366e64e0e05313a6def2b11807ef1999eb60",
+            "_id": "6ac636370e90de4ffc410db0",
+            "createdAt": "2026-10-07T12:08:23.973Z"
+          },
+          {
+            "refreshToken": "a1bbd82b5de9ea4d61e55f9649c7debc0ebe40eebb0444fb693503af0ed199fa",
+            "_id": "6ac637ff0e90de4ffc410dd6",
+            "createdAt": "2026-10-07T12:15:59.772Z"
+          },
+          {
+            "refreshToken": "1e8e9abd2b2e28a8ef81763e665eb397a755ac227f74379fa1f421e737960acb",
+            "_id": "6ac638360e90de4ffc410dfd",
+            "createdAt": "2026-10-07T12:16:54.173Z"
+          },
+          {
+            "refreshToken": "44e037f0b1d49218b2cfb3259685df18620d0c7fc2b620590a2cef256f6bd52f",
+            "_id": "6ac639dc0e90de4ffc410e25",
+            "createdAt": "2026-10-07T12:23:56.962Z"
+          },
+          {
+            "refreshToken": "a788fe1c259ced583162843cdc8a854b8d951ed74af3cbcb308d0dffb540cc2f",
+            "_id": "6ac63ae30e90de4ffc410e4e",
+            "createdAt": "2026-10-07T12:28:19.167Z"
+          },
+          {
+            "refreshToken": "4c8083c5120a3af0194b866fe7828f1931e9d5885bc0e95da3f9911f3f3ac636",
+            "createdAt": "2026-10-07T14:46:10.386Z",
+            "_id": "6ac65b3291fc13611d8ac4b3"
+          },
+          {
+            "refreshToken": "31c94f0a65a1cc267d3bfad3195bbbc155df6463babc2e9c3b7a7e3c65be2e20",
+            "_id": "6ac666876f0546abe7624af9",
+            "createdAt": "2026-10-07T15:34:31.697Z"
+          },
+          {
+            "refreshToken": "ccab35f39db664f0563b64dbcd0ce5da231d71fbe38b38809c54ab765e0da595",
+            "_id": "6ac67fa04a281ba23269df30",
+            "createdAt": "2026-10-07T17:21:36.179Z"
+          },
+          {
+            "refreshToken": "008cd3522bdee213c6e7846e40537f884b43441d545b49eea866092cb71746ff",
+            "_id": "6ac67fd74a281ba23269df5d",
+            "createdAt": "2026-10-07T17:22:31.375Z"
+          },
+          {
+            "refreshToken": "47d4b1be3d9de718b1844664d1c81b0e317d8bb838987a07f4ec085ff2c3ade8",
+            "_id": "6ac681054a281ba23269df9c",
+            "createdAt": "2026-10-07T17:27:33.378Z"
+          },
+          {
+            "refreshToken": "5b680875e684c8b67144b3228c44ed748f5f6ba92195f58c1f73c4f27890e06a",
+            "_id": "6ac6810e4a281ba23269dfcb",
+            "createdAt": "2026-10-07T17:27:42.979Z"
+          },
+          {
+            "refreshToken": "97334ffe1e3284d26eef9a24bc432169f0b717fb6465008c4a0b25461f35196b",
+            "_id": "6ac683284a281ba23269dffb",
+            "createdAt": "2026-10-07T17:36:40.670Z"
+          },
+          {
+            "refreshToken": "8fa732ed6d16e9007559bbb88b89f5c07c388a1fa3cb6c5d2bcb4edab91ed3f3",
+            "_id": "6ac68a776f0546abe7624bb7",
+            "createdAt": "2026-10-07T18:07:51.448Z"
+          },
+          {
+            "refreshToken": "8ffffaac4c23f23b4c352673421032bed763d702e6e333107c41b830469c4bec",
+            "_id": "6ac70f5bca278d6c9c6ac394",
+            "createdAt": "2026-10-08T03:34:51.582Z"
+          },
+          {
+            "refreshToken": "5d14b059581b0db630095d98f962827fbabdc53776ea2074d6621cba6bf027a4",
+            "_id": "6ac722cd3ff5e1c28aed7d17",
+            "createdAt": "2026-10-08T04:57:49.999Z"
+          },
+          {
+            "refreshToken": "e4d41d75c42bb91be646164683fb63db37b832287d2f3451ff5e88cf979b6b0f",
+            "_id": "6ac884c40fd4f26a4955d985",
+            "createdAt": "2026-10-09T06:08:04.078Z"
+          },
+          {
+            "refreshToken": "c93c73e63001212309abe32b6a40ae722b46a6c89df6c5bfb40ca639996215dc",
+            "_id": "6ac886130fd4f26a4955d9c9",
+            "createdAt": "2026-10-09T06:13:39.530Z"
+          },
+          {
+            "refreshToken": "2a74264e65d0005ecf35e4d596dc26398180b28fac4ec8b96ef1d443ac56e779",
+            "_id": "6acccb2dcb81acf25bd625e9",
+            "createdAt": "2026-10-12T11:57:33.894Z"
+          },
+          {
+            "refreshToken": "4b67809192197c8c24e0e1150046b4ecf24c2dc514f8fb6b5b766c81e1f94758",
+            "_id": "6acf07d439ab6217a54e49c9",
+            "createdAt": "2026-10-14T04:40:52.397Z"
+          },
+          {
+            "refreshToken": "cf7a37142cd0270b6dd621aea38d6db8cb51049296b4fedc8f275ee4e435bc7a",
+            "_id": "6ad07e5262320968f0cae860",
+            "createdAt": "2026-10-15T07:18:42.238Z"
+          },
+          {
+            "refreshToken": "2339d0f7fc0f7394041533ce8b6ecbfb9ce463fc4e3f54143f90fef56384aeec",
+            "_id": "6ad07e14864dc0a7b0755fcb",
+            "createdAt": "2026-10-15T07:17:40.471Z"
+          },
+          {
+            "refreshToken": "eb02074179084153420cc95a6591c4f95be8046c070234ab8b4a16d7ca9f1118",
+            "_id": "6ad1e91d9e4a042e7426a482",
+            "createdAt": "2026-10-16T09:06:37.711Z"
+          },
+          {
+            "refreshToken": "40e963bd5d9c8e0919b4bb8915c0d132d94469864094cdcfb70a89709fcbe417",
+            "_id": "6ad4a49b1b514f79e1c4b9a2",
+            "createdAt": "2026-10-18T10:51:07.852Z"
+          },
+          {
+            "refreshToken": "793dba31a576358374a00cb5e73bb6d144f502a8a318f91129d38fc994786fcc",
+            "_id": "6ad5a29646343323be1e01d0",
+            "createdAt": "2026-10-19T04:54:46.749Z"
+          },
+          {
+            "refreshToken": "a452f6e57db42f935e0e1741007f9ba105829087e6d999d0cc9779e618681efe",
+            "_id": "6adc4d3e5203c639834f3c90",
+            "createdAt": "2026-10-24T06:16:30.872Z"
+          },
+          {
+            "refreshToken": "25b123ef84f76b1cba4904419293cc1251715d9b7723abba4e448a92af8ed7f2",
+            "_id": "6adf39b720db22c228cc01a3",
+            "createdAt": "2026-10-26T11:29:59.121Z"
+          },
+          {
+            "refreshToken": "6bb7e9b956b794d69f90858af2cd8584057621a06071a1800ebc24db0b94b02f",
+            "_id": "6ae08216a100b78147f3cce2",
+            "createdAt": "2026-10-27T10:51:02.088Z"
+          },
+          {
+            "refreshToken": "60af125a3025f8e2f440ee5cc77bac409dfa82aca4834fe10f29f0657ff654b4",
+            "_id": "6ae3148845cc05a68e6dc4c5",
+            "createdAt": "2026-10-29T09:40:24.243Z"
+          },
+          {
+            "refreshToken": "c9aab78e5c4c6a2ff975b89a1ad66bf572da88d368df1a926abb9dc7632a445c",
+            "_id": "6ae42fd97351e0235fe511b2",
+            "createdAt": "2026-10-30T05:49:13.699Z"
+          },
+          {
+            "refreshToken": "10322fb9f7b3ffe26ccb28928c80aece454dc19ca48f475d332a7877f5d471ee",
+            "_id": "6ae8525ce6e755fee1971820",
+            "createdAt": "2026-11-02T09:05:32.653Z"
+          },
+          {
+            "refreshToken": "496d2a63e4e36e4c733494e0dc95665c75ecf378941c540a0757570630befd90",
+            "_id": "6ae97bd0019cc06bf8a5eb52",
+            "createdAt": "2026-11-03T06:14:40.461Z"
+          },
+          {
+            "refreshToken": "b2bf84e6608dcf7e3953e9f4c181cffa068434ac1262fa6b8ca8242e24bd38a7",
+            "_id": "6ae97eb127a1d0edbd6203e1",
+            "createdAt": "2026-11-03T06:26:57.673Z"
+          },
+          {
+            "refreshToken": "fdeba9757f7f0ea931ea29b67fd268010bb48b6bb939bda54739895305a7fbdd",
+            "_id": "6ae9814f27a1d0edbd620426",
+            "createdAt": "2026-11-03T06:38:07.196Z"
+          },
+          {
+            "refreshToken": "b9a2d9db5df18ab900be624269641f7c2877ed1e7799116917fbb6c7b48fdfa1",
+            "_id": "6ae981c35999bb0af7e3f649",
+            "createdAt": "2026-11-03T06:40:03.536Z"
+          }
+        ],
+        "createdAt": "2026-10-03T08:18:46.627Z",
+        "updatedAt": "2026-11-03T06:53:48.943Z",
+        "__v": 154,
+        "passwordVersion": 0,
+        "resetPasswordExpire": "2026-10-29T06:47:00.887Z",
+        "resetPasswordToken": "c7d17396d6f04a0d14e6955e744c7c4a3192a2f9f969c0796f7715730edce66c",
+        "emailVerificationOtpAttempts": 0
+      },
+      "bio": "flkn",
+      "category": "Fashion & Luxury",
+      "location": "indore",
+      "profileImage": "https://res.cloudinary.com/atr5osne/image/upload/v1793687288/creatorlink/profiles/tcyeyde27xtlobmpdugc.webp",
+      "followerCount": 0,
+      "engagementRate": 0,
+      "isPublic": true,
+      "createdAt": "2026-10-03T15:58:46.996Z",
+      "updatedAt": "2026-11-03T06:37:47.255Z",
+      "__v": 0,
+      "dob": "2002-02-01T00:00:00.000Z",
+      "ethnicity": "",
+      "gender": "male",
+      "isOnboarded": true,
+      "keywords": [
+        "fashion"
+      ],
+      "languages": [
+        "English"
+      ],
+      "title": "..."
+    },
+    {
+      "socialLinks": {
+        "instagram": "https://www.instagram.com/nike",
+        "facebook": "",
+        "youtube": "",
+        "tiktok": "",
+        "website": ""
+      },
+      "niches": [],
+      "isDemo": false,
+      "isVerifiedBadge": false,
+      "_id": "6accb1f373cecc0ced448518",
+      "user": {
+        "_id": "6ac368d9a94bc8c0ca120cd9",
+        "name": "Shivani Pawar",
+        "email": "sp@gmail.com",
+        "password": "$2b$10$V6sluFLzLNa5V/Y29JHUYOSZuWAtdGlLMQRZ/esbdDGaDSNm2MzhK",
+        "role": "creator",
+        "isVerified": true,
+        "sessions": [
+          {
+            "refreshToken": "9ec1559e514be5e150cdffb075f9a69b151474c8c545de98171b08982d2cd61d",
+            "_id": "6ae1caa9baa02c95a22997c0",
+            "createdAt": "2026-10-28T10:12:57.812Z"
+          },
+          {
+            "refreshToken": "403bbb40ba41adbf966d0d0bc374d0bf46498b48e95534f8cc82b07472d2d202",
+            "_id": "6ae1cdbe3bd65863e2b1b352",
+            "createdAt": "2026-10-28T10:26:06.358Z"
+          },
+          {
+            "refreshToken": "49c24b2420163c4b312d18f70684650075d80e8c4ce49292f42ce3fd7f3a793f",
+            "_id": "6ae2ceacc8f829d906d063d8",
+            "createdAt": "2026-10-29T04:42:20.905Z"
+          },
+          {
+            "refreshToken": "025d90c49cb838d7b6203ef7a1173630b5d39571ac982f633ee0c7ff8247b1b8",
+            "_id": "6ae42e007bca371e14a12a0a",
+            "createdAt": "2026-10-30T05:41:20.420Z"
+          },
+          {
+            "refreshToken": "d05c779db8980d62ec53fc2bde960a18961805023e6dc47e056ade4fbef2d7bc",
+            "_id": "6ae871f62429ec5b7efb60f8",
+            "createdAt": "2026-11-02T11:20:22.929Z"
+          }
+        ],
+        "createdAt": "2026-10-05T09:07:37.590Z",
+        "updatedAt": "2026-11-03T06:39:57.352Z",
+        "__v": 74,
+        "passwordVersion": 2,
+        "passwordChangedAt": "2026-10-28T10:12:57.811Z",
+        "emailVerificationOtpAttempts": 0
+      },
+      "bio": "sdjfg",
+      "category": "Fashion & Luxury",
+      "location": "Delhi NCR, India",
+      "profileImage": "https://res.cloudinary.com/atr5osne/image/upload/v1791817503/creatorlink/profiles/axazspyoozg07miatfa5.jpg",
+      "followerCount": 0,
+      "engagementRate": 0,
+      "isPublic": true,
+      "createdAt": "2026-10-12T10:09:55.715Z",
+      "updatedAt": "2026-11-03T05:34:37.447Z",
+      "__v": 0,
+      "dob": "2000-03-02T00:00:00.000Z",
+      "ethnicity": "",
+      "gender": "female",
+      "keywords": [
+        "fashion"
+      ],
+      "languages": [
+        "English"
+      ],
+      "title": "wliurfhwrli",
+      "isOnboarded": true,
+      "startingRate": 14000
+    },
+    {
+      "socialLinks": {
+        "instagram": "https://www.instagram.com/",
+        "facebook": "",
+        "youtube": "",
+        "tiktok": "",
+        "website": ""
+      },
+      "isDemo": false,
+      "isVerifiedBadge": false,
+      "_id": "6ae60d50e4211a1b7b011bcd",
+      "user": {
+        "_id": "6ae60ce4e4211a1b7b011bcb",
+        "name": "Mohit Patel",
+        "email": "mohitpatell9399@gmail.com",
+        "password": "$2b$10$0DA7ut5xAdKeEJVMdWnxvuSBwLgFfifHlAwosB2g7PQJzg/2.Nxf2",
+        "passwordVersion": 0,
+        "role": "creator",
+        "isVerified": true,
+        "googleId": "117505623528959613223",
+        "emailVerificationOtpAttempts": 0,
+        "sessions": [
+          {
+            "refreshToken": "dc68026fd2ffa8f257b5cd3f0ece79f29e86757da22aacc6c5ef0a06c5023468",
+            "_id": "6ae60ce4e4211a1b7b011bcc",
+            "createdAt": "2026-10-31T15:44:36.187Z"
+          },
+          {
+            "refreshToken": "129c7cff98d461802a4d724e09fd2277e55ebac3ff65c3052dad86578ace30bd",
+            "_id": "6ae61d0fe4211a1b7b011bfd",
+            "createdAt": "2026-10-31T16:53:35.240Z"
+          }
+        ],
+        "createdAt": "2026-10-31T15:44:36.120Z",
+        "updatedAt": "2026-10-31T16:53:35.242Z",
+        "__v": 2
+      },
+      "title": ".",
+      "bio": ".",
+      "category": "Travel & Lifestyle",
+      "niches": [
+        "Travel & Lifestyle",
+        "Fitness & Wellness"
+      ],
+      "keywords": [
+        "fashion"
+      ],
+      "location": "Mumbai, Maharashtra",
+      "profileImage": "",
+      "languages": [],
+      "ethnicity": "",
+      "followerCount": 0,
+      "engagementRate": 0,
+      "isPublic": true,
+      "isOnboarded": false,
+      "startingRate": 0,
+      "createdAt": "2026-10-31T15:46:24.642Z",
+      "updatedAt": "2026-10-31T15:46:24.642Z",
+      "__v": 0
+    },
+    {
+      "socialLinks": {
+        "instagram": "",
+        "facebook": "",
+        "youtube": "",
+        "tiktok": "",
+        "website": ""
+      },
+      "title": "",
+      "niches": [],
+      "keywords": [],
+      "languages": [],
+      "ethnicity": "",
+      "isDemo": false,
+      "_id": "6ae81f2f6dbf6b2cee0b5eeb",
+      "user": {
+        "_id": "6ae81aa8fa67bc16498b6923",
+        "name": "Ansh",
+        "email": "anshchoudhary265@gmail.com",
+        "password": "$2b$10$0UhJdP/FIBAx1DyZKrcP5uziP/xsq0Q7X40WUmr6QvftGtZzKJ9x6",
+        "passwordVersion": 0,
+        "role": "creator",
+        "isVerified": true,
+        "emailVerificationOtpAttempts": 0,
+        "sessions": [],
+        "createdAt": "2026-11-02T05:07:52.322Z",
+        "updatedAt": "2026-11-02T06:04:24.491Z",
+        "__v": 4
+      },
+      "bio": "Test creator profile",
+      "category": "Technology",
+      "location": "",
+      "profileImage": "",
+      "followerCount": 0,
+      "engagementRate": 0,
+      "isPublic": true,
+      "isVerifiedBadge": true,
+      "createdAt": "2026-11-02T05:27:11.363Z",
+      "updatedAt": "2026-11-02T06:19:22.579Z",
+      "__v": 0
+    }
+  ]
+}

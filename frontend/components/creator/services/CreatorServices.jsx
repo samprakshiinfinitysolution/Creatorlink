@@ -498,7 +498,7 @@ export default function CreatorServices() {
                   </div>
 
                   {/* Mini Service Details */}
-                  <p className="text-[11px] sm:text-xs font-bold text-foreground leading-tight mt-2 line-clamp-1">
+                  <p className="text-[11px] sm:text-xs font-bold text-foreground leading-tight mt-2 line-clamp-2 break-words">
                     Social Media Content Creation
                   </p>
 
@@ -764,7 +764,7 @@ export default function CreatorServices() {
                             {service.title}
                           </h3>
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-xs font-normal text-text-secondary line-clamp-1">
+                            <span className="text-xs font-normal text-text-secondary break-words">
                               {service.category || "Social Media Campaign"}
                             </span>
                             {service.contentType && (

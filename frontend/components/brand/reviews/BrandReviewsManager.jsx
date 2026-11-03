@@ -750,10 +750,10 @@ export default function BrandReviewsManager() {
                           <div className="w-full h-full bg-gradient-to-br from-neutral-100 via-neutral-50 to-neutral-200 dark:from-neutral-900/60 dark:via-neutral-800/40 dark:to-surface flex items-center justify-between px-4 sm:px-5 relative overflow-hidden">
                             <div className="absolute -right-8 -bottom-8 w-28 h-28 rounded-full bg-neutral-300/30 dark:bg-white/5 blur-xl pointer-events-none" />
                             <div className="min-w-0 pr-8">
-                              <span className="font-serif font-bold tracking-wider text-base sm:text-lg text-neutral-900 dark:text-neutral-100 uppercase truncate block">
+                              <span className="font-serif font-bold tracking-wider text-base sm:text-lg text-neutral-900 dark:text-neutral-100 uppercase break-words block">
                                 {creatorName}
                               </span>
-                              <span className="text-[10px] text-neutral-600 dark:text-neutral-400 tracking-wider font-sans uppercase mt-0.5 block truncate">
+                              <span className="text-[10px] text-neutral-600 dark:text-neutral-400 tracking-wider font-sans uppercase mt-0.5 block break-words">
                                 {campaignTitle}
                               </span>
                             </div>
@@ -798,7 +798,7 @@ export default function BrandReviewsManager() {
 
                           <div className="min-w-0">
                             <div className="flex items-center gap-1.5 flex-wrap">
-                              <h3 className="font-semibold text-sm sm:text-base text-neutral-900 dark:text-white truncate">
+                              <h3 className="font-semibold text-sm sm:text-base text-neutral-900 dark:text-white break-words line-clamp-2">
                                 {creatorName}
                               </h3>
                               <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-neutral-100 dark:bg-surface-muted text-neutral-700 dark:text-neutral-300 border border-neutral-200 dark:border-border-theme uppercase leading-none">
@@ -845,7 +845,7 @@ export default function BrandReviewsManager() {
                           className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-neutral-200/70 dark:border-border-theme/70 bg-neutral-50/80 dark:bg-surface-muted/40 text-[11px] sm:text-xs font-medium text-neutral-700 dark:text-neutral-300 shadow-2xs"
                         >
                           <FolderIcon className="w-3.5 h-3.5 text-neutral-500 dark:text-neutral-400 shrink-0" />
-                          <span className="truncate max-w-[130px] sm:max-w-[150px]">
+                          <span className="break-words line-clamp-1 max-w-[260px]">
                             {campaignTitle}
                           </span>
                         </div>

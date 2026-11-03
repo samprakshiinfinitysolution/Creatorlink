@@ -143,7 +143,7 @@ export default function BrandRecentCollaborations({ collaborations = [] }) {
                 href={workspaceHref}
                 className="group flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl border border-border-theme bg-surface hover:bg-surface-muted/50 hover:border-secondary/40 transition-all"
               >
-                <div className="space-y-1 min-w-0">
+                <div className="space-y-1 min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <span
                       className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border ${badge.color}`}
@@ -154,10 +154,10 @@ export default function BrandRecentCollaborations({ collaborations = [] }) {
                       {deliverables} deliverable{deliverables === 1 ? "" : "s"}
                     </span>
                   </div>
-                  <h4 className="font-semibold text-foreground text-xs sm:text-sm font-sans truncate group-hover:text-secondary transition-colors">
+                  <h4 className="font-semibold text-foreground text-xs sm:text-sm font-sans line-clamp-2 break-words group-hover:text-secondary transition-colors">
                     {collab.title || serviceTitle}
                   </h4>
-                  <p className="text-[11px] text-text-secondary truncate">
+                  <p className="text-[11px] text-text-secondary flex flex-wrap items-center gap-x-1.5 gap-y-0.5 break-words">
                     <span className="font-medium text-foreground">{creatorName}</span>
                     {collab.platform ? ` · ${collab.platform}` : ""}
                     {collab.deadline ? ` · Due ${formatDate(collab.deadline)}` : ""}
@@ -168,7 +168,7 @@ export default function BrandRecentCollaborations({ collaborations = [] }) {
                   <span className="font-semibold text-foreground text-xs font-sans">
                     {formatCurrency(collab.agreedPrice, collab.currency || "INR")}
                   </span>
-                  <span className="text-[10px] font-medium text-secondary opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span className="text-[11px] font-medium text-secondary inline-flex items-center gap-1 sm:opacity-80 sm:group-hover:opacity-100 transition-opacity mt-0.5">
                     Open workspace →
                   </span>
                 </div>

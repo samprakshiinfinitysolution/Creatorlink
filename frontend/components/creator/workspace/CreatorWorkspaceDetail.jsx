@@ -1153,7 +1153,7 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                       <span className="text-[10px] font-bold text-gray-400 dark:text-zinc-400 uppercase tracking-wider block">
                         Deadline
                       </span>
-                      <span className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white mt-0.5 block truncate">
+                      <span className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white mt-0.5 block break-words">
                         {deadlineFormatted}
                       </span>
                     </div>
@@ -1168,7 +1168,7 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                       <span className="text-[10px] font-bold text-gray-400 dark:text-zinc-400 uppercase tracking-wider block">
                         Platform
                       </span>
-                      <span className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white mt-0.5 capitalize block truncate">
+                      <span className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white mt-0.5 capitalize block break-words">
                         {platformLabel}
                       </span>
                     </div>
@@ -1184,7 +1184,7 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                         Selected Service
                       </span>
                       <span
-                        className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white mt-0.5 block truncate"
+                        className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white mt-0.5 block break-words"
                         title={service?.title || "Custom Package"}
                       >
                         {service?.title || "Custom Package"}
@@ -1838,7 +1838,7 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                                     <div className="ml-5 mt-2 bg-gray-50/70 dark:bg-zinc-800/40 border border-gray-100 dark:border-zinc-800 rounded-2xl p-2.5 flex items-center gap-3">
                                       <div className="min-w-0 flex-1 space-y-1">
                                         <div className="flex items-center gap-2">
-                                          <span className="font-semibold text-xs text-gray-800 dark:text-gray-200 truncate">
+                                          <span className="font-semibold text-xs text-gray-800 dark:text-gray-200 break-words">
                                             {subTitle}
                                           </span>
                                           <span className={`px-2 py-0.2 rounded-full text-[9px] font-bold border uppercase tracking-wider ${delivBadge.color}`}>
@@ -1846,7 +1846,7 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                                           </span>
                                         </div>
                                         {sub.notes && (
-                                          <p className="text-[11px] text-gray-500 dark:text-gray-400 truncate">
+                                          <p className="text-[11px] text-gray-500 dark:text-gray-400 break-words">
                                             {sub.notes}
                                           </p>
                                         )}

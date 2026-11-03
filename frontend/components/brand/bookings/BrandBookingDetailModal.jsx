@@ -371,11 +371,11 @@ export default function BrandBookingDetailModal({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <span className="text-xs text-text-secondary block">Creator Name</span>
-                    <span className="text-sm font-semibold text-foreground block mt-0.5">{creatorName}</span>
+                    <span className="text-sm font-semibold text-foreground block mt-0.5 break-words">{creatorName}</span>
                   </div>
                   <div>
                     <span className="text-xs text-text-secondary block">Creator Email</span>
-                    <span className="text-sm font-semibold text-foreground block mt-0.5">{creatorEmail}</span>
+                    <span className="text-sm font-semibold text-foreground block mt-0.5 break-all">{creatorEmail}</span>
                   </div>
                   <div>
                     <span className="text-xs text-text-secondary block">Agreed Price</span>
@@ -412,7 +412,7 @@ export default function BrandBookingDetailModal({
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
                   <div>
                     <span className="text-text-secondary block">Campaign Title</span>
-                    <span className="font-semibold text-foreground block mt-0.5">{campaignTitle}</span>
+                    <span className="font-semibold text-foreground block mt-0.5 break-words">{campaignTitle}</span>
                   </div>
                   <div>
                     <span className="text-text-secondary block">Category</span>

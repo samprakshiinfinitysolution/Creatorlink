@@ -666,7 +666,7 @@ export default function CreatorAppliedCampaignsManager() {
                       {/* 1. TOP ROW: Category (Pink) & Proposal Text (Left), Status (Right) - Clean Text Without Pill Outlines */}
                       <div className="flex items-center justify-between gap-1.5 flex-wrap">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-[10px] sm:text-[11px] font-sans font-bold tracking-wider uppercase text-pink-500 dark:text-pink-400 truncate max-w-[130px]">
+                          <span className="text-[10px] sm:text-[11px] font-sans font-bold tracking-wider uppercase text-pink-500 dark:text-pink-400 break-words">
                             {campaignObj.category || "Fashion"}
                           </span>
 
@@ -767,7 +767,7 @@ export default function CreatorAppliedCampaignsManager() {
                             <span className="text-[9px] sm:text-[10px] text-text-secondary font-medium block leading-tight">
                               Start Date
                             </span>
-                            <span className="text-[11px] sm:text-xs font-semibold text-foreground block truncate leading-tight mt-0.5">
+                            <span className="text-[11px] sm:text-xs font-semibold text-foreground block break-words leading-tight mt-0.5">
                               {formatDate(item.startDate || item.createdAt)}
                             </span>
                           </div>
@@ -781,7 +781,7 @@ export default function CreatorAppliedCampaignsManager() {
                             <span className="text-[9px] sm:text-[10px] text-text-secondary font-medium block leading-tight">
                               End Date
                             </span>
-                            <span className="text-[11px] sm:text-xs font-semibold text-foreground block truncate leading-tight mt-0.5">
+                            <span className="text-[11px] sm:text-xs font-semibold text-foreground block break-words leading-tight mt-0.5">
                               {formatDate(item.deadline || campaignObj.deadline)}
                             </span>
                           </div>
@@ -801,7 +801,7 @@ export default function CreatorAppliedCampaignsManager() {
                                 className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[11px] font-sans font-medium bg-neutral-50 dark:bg-surface-muted/40 text-foreground border border-neutral-200/70 dark:border-border-theme"
                               >
                                 <CheckIcon className="text-emerald-500 shrink-0 w-3 h-3" />
-                                <span className="break-words max-w-[160px] sm:max-w-[220px] line-clamp-1">{itemText}</span>
+                                <span className="break-words line-clamp-2">{itemText}</span>
                               </span>
                             ))}
                           </div>

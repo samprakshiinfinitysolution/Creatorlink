@@ -272,7 +272,7 @@ export default function CreatorUpcomingDeadlines({ deadlines = [] }) {
                     >
                       {title}
                     </h4>
-                    <p className="text-[11px] text-text-secondary font-sans line-clamp-1 break-words">
+                    <p className="text-[11px] text-text-secondary font-sans flex flex-wrap items-center gap-x-1.5 gap-y-0.5 break-words">
                       {brandName ? <span className="font-medium text-foreground">{brandName}</span> : ""}
                       {brandName && (platform || item.deadline) ? " · " : ""}
                       {platform ? `${platform} · ` : ""}

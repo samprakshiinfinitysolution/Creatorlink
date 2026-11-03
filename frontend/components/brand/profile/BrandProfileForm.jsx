@@ -763,7 +763,7 @@ export default function BrandProfileForm() {
 
                     <div className="min-w-0 flex-1 space-y-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h2 className="font-serif font-semibold text-2xl sm:text-[26px] text-slate-900 dark:text-foreground tracking-wide truncate">
+                        <h2 className="font-serif font-semibold text-2xl sm:text-[26px] text-slate-900 dark:text-foreground tracking-wide break-words">
                           {brandName}
                         </h2>
                         {Boolean(profile?.isVerifiedBusiness) && (

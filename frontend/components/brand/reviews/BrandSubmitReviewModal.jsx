@@ -138,9 +138,16 @@ export default function BrandSubmitReviewModal({
       return;
     }
 
-    // Guard against duplicate review if workspace already has review data from backend
+    // Guard against duplicate review if workspace already has review submitted by this brand
     const matchedWorkspace = workspaces.find((ws) => String(ws._id) === String(targetWsId));
-    if (matchedWorkspace?.review) {
+    if (
+      matchedWorkspace?.myReview ||
+      (matchedWorkspace?.review &&
+        matchedWorkspace.review.reviewer &&
+        matchedWorkspace.brand &&
+        String(matchedWorkspace.review.reviewer._id || matchedWorkspace.review.reviewer) ===
+          String(matchedWorkspace.brand._id || matchedWorkspace.brand))
+    ) {
       setFormValidationError("You have already submitted a review for this workspace.");
       return;
     }

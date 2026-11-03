@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import CreatorSidebar from "@/components/creator/dashboard/CreatorSidebar";
 import CreatorHeader from "@/components/creator/dashboard/CreatorHeader";
@@ -9,6 +10,7 @@ import {
   createCreatorProfile,
   updateCreatorProfile,
 } from "@/redux/creator/profile/profile_slice";
+import { updateAuthUserName } from "@/redux/auth/auth_slice";
 import { uploadSingleImageApi } from "@/lib/upload";
 
 // =========================================================
@@ -317,14 +319,6 @@ function ShieldCheckIcon({ className = "w-4 h-4" }) {
   );
 }
 
-function LayersIcon({ className = "w-4 h-4" }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M6.429 9.75L2.25 12l9.75 5.25 9.75-5.25-4.179-2.25m-11.321 4.5L2.25 16.5l9.75 5.25 9.75-5.25-4.179-2.25M12 2.25L2.25 7.5l9.75 5.25 9.75-5.25L12 2.25z" />
-    </svg>
-  );
-}
-
 function ChartBarIcon({ className = "w-4 h-4" }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -437,6 +431,24 @@ function GenderPrivateIcon({ className = "w-4 h-4" }) {
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
       <path strokeLinecap="round" strokeLinejoin="round" d="M3 3l18 18" />
+    </svg>
+  );
+}
+
+function StarIcon({ className = "w-4 h-4", filled = true }) {
+  return (
+    <svg
+      className={className}
+      fill={filled ? "currentColor" : "none"}
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+      />
     </svg>
   );
 }
@@ -644,9 +656,8 @@ function CreatorAvatarPreview({
             onError={() => {
               setFailedUrl(cleanUrl);
             }}
-            className={`w-full h-full object-cover transition-opacity duration-300 ${
-              isLoaded ? "opacity-100" : "opacity-0"
-            }`}
+            className={`w-full h-full object-cover transition-opacity duration-300 ${isLoaded ? "opacity-100" : "opacity-0"
+              }`}
           />
         </>
       ) : (
@@ -710,6 +721,7 @@ export default function CreatorProfile() {
   const authUser = useSelector((state) => state.auth?.user);
 
   const [formData, setFormData] = useState({
+    name: "",
     title: "",
     bio: "",
     category: "Fashion & Luxury",
@@ -751,6 +763,7 @@ export default function CreatorProfile() {
     if (profile && !isEditing) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({
+        name: profile.user?.name || authUser?.name || "",
         title: profile.title || "",
         bio: profile.bio || "",
         category: profile.category || "Fashion & Luxury",
@@ -770,8 +783,13 @@ export default function CreatorProfile() {
         languages: Array.isArray(profile.languages) ? profile.languages : [],
         ethnicity: profile.ethnicity || "",
       });
+    } else if (!profile && authUser && !isEditing) {
+      setFormData((prev) => ({
+        ...prev,
+        name: authUser.name || prev.name,
+      }));
     }
-  }, [profile, isEditing]);
+  }, [profile, authUser, isEditing]);
 
   // Top-level input change handler
   const handleInputChange = (e) => {
@@ -915,6 +933,7 @@ export default function CreatorProfile() {
     setLanguageInput("");
     if (profile) {
       setFormData({
+        name: profile.user?.name || authUser?.name || "",
         title: profile.title || "",
         bio: profile.bio || "",
         category: profile.category || "Fashion & Luxury",
@@ -934,6 +953,11 @@ export default function CreatorProfile() {
         languages: Array.isArray(profile.languages) ? profile.languages : [],
         ethnicity: profile.ethnicity || "",
       });
+    } else if (authUser) {
+      setFormData((prev) => ({
+        ...prev,
+        name: authUser.name || "",
+      }));
     }
   };
 
@@ -946,6 +970,15 @@ export default function CreatorProfile() {
     setSaveError("");
     setUploadError("");
 
+    const trimmedName = formData.name ? formData.name.trim() : "";
+    if (!trimmedName || trimmedName.length < 2) {
+      setSaveError("Full Name must be at least 2 characters.");
+      return;
+    }
+    if (trimmedName.length > 70) {
+      setSaveError("Full Name must not exceed 70 characters.");
+      return;
+    }
     if (formData.title && formData.title.length > 150) {
       setSaveError("Professional headline must not exceed 150 characters.");
       return;
@@ -985,6 +1018,7 @@ export default function CreatorProfile() {
     const hasExistingProfile = Boolean(profile && (profile._id || profile.id));
 
     const payload = {
+      name: trimmedName,
       title: formData.title ? formData.title.trim() : "",
       bio: formData.bio ? formData.bio.trim() : "",
       category: formData.category.trim(),
@@ -1038,6 +1072,7 @@ export default function CreatorProfile() {
         updateCreatorProfile.fulfilled.match(actionResult) ||
         createCreatorProfile.fulfilled.match(actionResult)
       ) {
+        dispatch(updateAuthUserName(trimmedName));
         setSuccessMessage(
           hasExistingProfile
             ? "Creator profile updated successfully!"
@@ -1100,40 +1135,37 @@ export default function CreatorProfile() {
     lastFetchError ||
     "An error occurred while loading your profile.";
 
-  // Dynamic values falling back to reference defaults
-  const creatorName = profile?.user?.name || authUser?.name || "Aarav Sharma";
+  // Dynamic values falling back to clean authentic states
+  const creatorName = profile?.user?.name || authUser?.name || "Creator";
   const title = profile?.title || formData.title || "";
-  const category = profile?.category || formData.category || "Fashion & Luxury";
+  const category = profile?.category || formData.category || "Content Creator";
   const keywords =
     Array.isArray(profile?.keywords) && profile.keywords.length > 0
       ? profile.keywords
       : Array.isArray(formData.keywords)
-      ? formData.keywords
-      : [];
+        ? formData.keywords
+        : [];
   const dob = profile?.dob || formData.dob || "";
   const gender = profile?.gender || formData.gender || "";
   const languages =
     Array.isArray(profile?.languages) && profile.languages.length > 0
       ? profile.languages
       : Array.isArray(formData.languages)
-      ? formData.languages
-      : [];
+        ? formData.languages
+        : [];
   const ethnicity = profile?.ethnicity || formData.ethnicity || "";
-  const location = profile?.location || formData.location || "Mumbai, India";
-  const displayEmail = profile?.user?.email || authUser?.email || "creator@creatorlink.io";
-  const websiteUrl = profile?.socialLinks?.website || formData.socialLinks?.website || "https://aaravsharma.me";
+  const location = profile?.location || formData.location || "";
+  const displayEmail = profile?.user?.email || authUser?.email || "";
+  const websiteUrl = profile?.socialLinks?.website || formData.socialLinks?.website || "";
   const displayInitial = getCreatorDisplayInitial(creatorName);
-  const bio =
-    profile?.bio ||
-    formData.bio ||
-    "Digital creator, fashion enthusiast, and creative visual storyteller collaborating with modern brands. Passionate about curating high-aesthetic lifestyle content and connecting authentic audiences with innovative products.";
-  const instagramUrl = profile?.socialLinks?.instagram || formData.socialLinks?.instagram || "https://instagram.com/aaravsharma";
-  const youtubeUrl = profile?.socialLinks?.youtube || formData.socialLinks?.youtube || "https://youtube.com/@aaravsharma";
-  const tiktokUrl = profile?.socialLinks?.tiktok || formData.socialLinks?.tiktok || "https://tiktok.com/@aaravsharma";
-  const facebookUrl = profile?.socialLinks?.facebook || formData.socialLinks?.facebook || "https://facebook.com/aaravsharma";
-  const followerCount = profile?.followerCount || 128000;
-  const engagementRate = profile?.engagementRate ? `${profile.engagementRate}%` : "4.8%";
-  const collaborationsCount = profile?.collaborationsCount || profile?.completedCampaignsCount || 24;
+  const bio = profile?.bio || formData.bio || "";
+  const instagramUrl = profile?.socialLinks?.instagram || formData.socialLinks?.instagram || "";
+  const youtubeUrl = profile?.socialLinks?.youtube || formData.socialLinks?.youtube || "";
+  const tiktokUrl = profile?.socialLinks?.tiktok || formData.socialLinks?.tiktok || "";
+  const facebookUrl = profile?.socialLinks?.facebook || formData.socialLinks?.facebook || "";
+  const followerCount = typeof profile?.followerCount === "number" ? profile.followerCount : 0;
+  const engagementRate = profile?.engagementRate ? `${profile.engagementRate}%` : "0%";
+  const collaborationsCount = profile?.collaborationsCount || profile?.completedCampaignsCount || 0;
   const isPublic = profile?.isPublic ?? formData.isPublic ?? true;
   const joinedOn = formatJoinedDate(profile?.createdAt || authUser?.createdAt);
 
@@ -1341,9 +1373,8 @@ export default function CreatorProfile() {
                         disabled={isUploadingImage}
                         aria-label="Change profile picture"
                         title="Change profile picture"
-                        className={`absolute -bottom-1 -right-1 p-2 rounded-xl bg-[#111111] hover:bg-black text-white border border-[#2a2a36] hover:border-secondary/50 shadow-md transition-all cursor-pointer ${
-                          isUploadingImage ? "opacity-50 cursor-not-allowed" : ""
-                        }`}
+                        className={`absolute -bottom-1 -right-1 p-2 rounded-xl bg-[#111111] hover:bg-black text-white border border-[#2a2a36] hover:border-secondary/50 shadow-md transition-all cursor-pointer ${isUploadingImage ? "opacity-50 cursor-not-allowed" : ""
+                          }`}
                       >
                         <CameraIcon className="w-4 h-4 text-white" />
                       </button>
@@ -1351,7 +1382,7 @@ export default function CreatorProfile() {
 
                     <div className="min-w-0 flex-1 space-y-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h2 className="font-serif font-semibold text-2xl sm:text-[26px] text-slate-900 dark:text-foreground tracking-wide truncate">
+                        <h2 className="font-serif font-semibold text-2xl sm:text-[26px] text-slate-900 dark:text-foreground tracking-wide break-words">
                           {creatorName}
                         </h2>
                         {Boolean(profile?.isVerifiedBadge) && (
@@ -1379,7 +1410,7 @@ export default function CreatorProfile() {
                       <div className="flex flex-wrap items-center gap-3 text-xs font-sans text-text-secondary pt-0.5">
                         <span className="inline-flex items-center gap-1.5">
                           <MapPinIcon className="w-3.5 h-3.5 text-black dark:text-white shrink-0" />
-                          <span>{location}</span>
+                          <span>{location || "Location not set"}</span>
                         </span>
                         <span className="text-border-theme">•</span>
                         <span className="inline-flex items-center gap-1.5">
@@ -1391,11 +1422,10 @@ export default function CreatorProfile() {
                       <div className="flex flex-wrap items-center gap-2 pt-1">
                         {/* Status Badge */}
                         <span
-                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
-                            isPublic
+                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${isPublic
                               ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
                               : "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30"
-                          }`}
+                            }`}
                         >
                           <CheckIcon className="w-3 h-3 shrink-0" />
                           <span>{isPublic ? "Profile Active" : "Profile Private"}</span>
@@ -1429,7 +1459,7 @@ export default function CreatorProfile() {
                 </div>
               </div>
 
-              {/* 2. TWO-COLUMN MAIN CONTENT GRID */}
+                            {/* 2. TWO-COLUMN MAIN CONTENT GRID */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-start">
 
                 {/* LEFT COLUMN: 7 COLS on lg */}
@@ -1446,9 +1476,15 @@ export default function CreatorProfile() {
                     </div>
 
                     {/* Bio paragraph */}
-                    <p className="text-xs sm:text-sm text-text-secondary leading-relaxed font-sans whitespace-pre-line">
-                      {bio}
-                    </p>
+                    {bio ? (
+                      <p className="text-xs sm:text-sm text-text-secondary leading-relaxed font-sans whitespace-pre-line">
+                        {bio}
+                      </p>
+                    ) : (
+                      <p className="text-xs sm:text-sm text-text-secondary/70 italic font-sans">
+                        No bio provided yet. Click &apos;Edit Profile&apos; to introduce yourself and describe your creative style to brands.
+                      </p>
+                    )}
 
                     {/* Keywords Subsection */}
                     <div className="pt-3 border-t border-border-theme/60 space-y-2.5">
@@ -1476,6 +1512,78 @@ export default function CreatorProfile() {
                         )}
                       </div>
                     </div>
+                  </div>
+
+                  {/* Card: Portfolio Showcase */}
+                  <div className="bg-white dark:bg-[#131318] border border-border-theme dark:border-[#22222e] rounded-3xl p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3.5">
+                      <div className="w-10 h-10 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center shrink-0 border border-secondary/20">
+                        <PaletteIcon className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-sm sm:text-base text-slate-900 dark:text-foreground">
+                          Creative Portfolio
+                        </h4>
+                        <p className="text-xs text-text-secondary mt-0.5">
+                          Showcase your media kit, past work samples, and high-impact campaign deliverables.
+                        </p>
+                      </div>
+                    </div>
+                    <Link
+                      href="/creator/portfolio"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-neutral-950 dark:bg-white text-white dark:text-black hover:bg-neutral-800 dark:hover:bg-neutral-100 text-xs font-semibold shadow-xs transition-colors cursor-pointer shrink-0"
+                    >
+                      <span>Manage Portfolio</span>
+                      <ExternalLinkIcon className="w-3 h-3 shrink-0" />
+                    </Link>
+                  </div>
+
+                  {/* Card: Services & Packages */}
+                  <div className="bg-white dark:bg-[#131318] border border-border-theme dark:border-[#22222e] rounded-3xl p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3.5">
+                      <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0 border border-emerald-500/20">
+                        <BoltIcon className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-sm sm:text-base text-slate-900 dark:text-foreground">
+                          Services & Offerings
+                        </h4>
+                        <p className="text-xs text-text-secondary mt-0.5">
+                          Configure your standard packages, deliverables, revisions, and production turnaround times.
+                        </p>
+                      </div>
+                    </div>
+                    <Link
+                      href="/creator/services"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-neutral-950 dark:bg-white text-white dark:text-black hover:bg-neutral-800 dark:hover:bg-neutral-100 text-xs font-semibold shadow-xs transition-colors cursor-pointer shrink-0"
+                    >
+                      <span>Manage Services</span>
+                      <ExternalLinkIcon className="w-3 h-3 shrink-0" />
+                    </Link>
+                  </div>
+
+                  {/* Card: Client Reviews & Reputation */}
+                  <div className="bg-white dark:bg-[#131318] border border-border-theme dark:border-[#22222e] rounded-3xl p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3.5">
+                      <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0 border border-amber-500/20">
+                        <StarIcon className="w-5 h-5 fill-amber-400 text-amber-400" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-sm sm:text-base text-slate-900 dark:text-foreground">
+                          Client Reviews & Reputation
+                        </h4>
+                        <p className="text-xs text-text-secondary mt-0.5">
+                          Verified ratings, testimonials, and feedback received from brand partners on completed collaborations.
+                        </p>
+                      </div>
+                    </div>
+                    <Link
+                      href="/creator/reviews"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-neutral-950 dark:bg-white text-white dark:text-black hover:bg-neutral-800 dark:hover:bg-neutral-100 text-xs font-semibold shadow-xs transition-colors cursor-pointer shrink-0"
+                    >
+                      <span>View Client Reviews</span>
+                      <ExternalLinkIcon className="w-3 h-3 shrink-0" />
+                    </Link>
                   </div>
 
                   {/* Card 2: Stats Grid Card */}
@@ -1509,7 +1617,7 @@ export default function CreatorProfile() {
                           <HandshakeIcon className="w-4 h-4" />
                         </div>
                         <span className="block text-xl sm:text-2xl font-bold font-sans text-slate-900 dark:text-foreground">
-                          {collaborationsCount || 24}
+                          {collaborationsCount}
                         </span>
                         <span className="block text-xs text-text-secondary mt-1 font-sans">Collaborations</span>
                       </div>
@@ -1617,7 +1725,7 @@ export default function CreatorProfile() {
                           <MapPinIcon className="w-4 h-4 text-black dark:text-white" />
                           <span className="font-medium">Location</span>
                         </div>
-                        <span className="font-medium text-slate-900 dark:text-foreground text-right">{location}</span>
+                        <span className="font-medium text-slate-900 dark:text-foreground text-right">{location || "Not specified"}</span>
                       </div>
 
                       <div className="flex items-center justify-between gap-3 py-1.5 border-b border-border-theme/40">
@@ -1625,17 +1733,17 @@ export default function CreatorProfile() {
                           <MailIcon className="w-4 h-4 text-black dark:text-white" />
                           <span className="font-medium">Email</span>
                         </div>
-                        <span className="font-medium text-slate-900 dark:text-foreground text-right truncate max-w-[220px]">
-                          {displayEmail}
+                        <span className="font-medium text-slate-900 dark:text-foreground text-right truncate max-w-[170px] min-[400px]:max-w-[240px]">
+                          {displayEmail || "Not specified"}
                         </span>
                       </div>
 
-                      {/* Connected Socials / Website (if available) */}
-                      {(websiteUrl || instagramUrl || youtubeUrl || tiktokUrl || facebookUrl) && (
-                        <div className="pt-2 space-y-2">
-                          <span className="text-[11px] uppercase tracking-wider font-semibold text-text-secondary block">
-                            Connected Channels
-                          </span>
+                      {/* Connected Socials / Website */}
+                      <div className="pt-2 space-y-2">
+                        <span className="text-[11px] uppercase tracking-wider font-semibold text-text-secondary block">
+                          Connected Channels
+                        </span>
+                        {(websiteUrl || instagramUrl || youtubeUrl || tiktokUrl || facebookUrl) ? (
                           <div className="flex flex-wrap gap-2">
                             {websiteUrl && (
                               <a
@@ -1698,8 +1806,12 @@ export default function CreatorProfile() {
                               </a>
                             )}
                           </div>
-                        </div>
-                      )}
+                        ) : (
+                          <span className="text-xs text-text-secondary font-sans italic block pt-1">
+                            No channels connected
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
 
@@ -1717,7 +1829,7 @@ export default function CreatorProfile() {
 
               {/* CARD 1: Creator Identity & Bio */}
               <div className="bg-white dark:bg-[#131318] border border-slate-200/90 dark:border-[#22222e] rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-xs space-y-6">
-                
+
                 {/* Header */}
                 <div className="flex items-center gap-3 border-b border-border-theme/60 pb-4">
                   <div className="w-8 h-8 rounded-lg bg-surface-muted dark:bg-[#1f1f28] flex items-center justify-center text-black dark:text-white shrink-0">
@@ -1735,7 +1847,7 @@ export default function CreatorProfile() {
 
                 {/* Top Section: Avatar + Headline & Category */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start font-sans">
-                  
+
                   {/* Left: Avatar with Camera button + Upload & URL */}
                   <div className="lg:col-span-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
                     <div className="relative shrink-0">
@@ -1803,9 +1915,36 @@ export default function CreatorProfile() {
                     </div>
                   </div>
 
-                  {/* Right: Headline and Primary Category */}
+                  {/* Right: Full Name, Headline and Primary Category */}
                   <div className="lg:col-span-6 space-y-3.5">
-                    
+
+                    {/* Full Name */}
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <label
+                          htmlFor="profile-name"
+                          className="block text-xs font-semibold text-foreground uppercase tracking-wider"
+                        >
+                          Full Name *
+                        </label>
+                        <span className="text-[11px] text-text-secondary">
+                          {formData.name ? formData.name.length : 0}/70
+                        </span>
+                      </div>
+                      <input
+                        id="profile-name"
+                        type="text"
+                        name="name"
+                        maxLength={70}
+                        required
+                        disabled={isSubmitting}
+                        value={formData.name}
+                        onChange={handleInputChange}
+                        placeholder="e.g. Aarav Sharma"
+                        className="w-full bg-white dark:bg-surface border border-slate-300 dark:border-border-theme text-foreground placeholder:text-text-secondary/50 text-xs sm:text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/40 transition-colors"
+                      />
+                    </div>
+
                     {/* Professional Headline */}
                     <div className="space-y-1">
                       <div className="flex items-center justify-between">
@@ -1980,11 +2119,10 @@ export default function CreatorProfile() {
                               }));
                             }
                           }}
-                          className={`text-[11px] px-2.5 py-1 rounded-lg border transition-all ${
-                            isAdded
+                          className={`text-[11px] px-2.5 py-1 rounded-lg border transition-all ${isAdded
                               ? "bg-[#ffeef3] dark:bg-secondary/10 border-secondary/30 text-secondary cursor-default opacity-60"
                               : "bg-white dark:bg-surface border-border-theme text-text-secondary hover:text-foreground hover:border-secondary/40 cursor-pointer"
-                          }`}
+                            }`}
                         >
                           + {sug}
                         </button>
@@ -1997,7 +2135,7 @@ export default function CreatorProfile() {
 
               {/* TWO-COLUMN GRID: Cards 2 & 3 */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 items-start font-sans">
-                
+
                 {/* CARD 2: Identity & Demographics */}
                 <div className="bg-white dark:bg-[#131318] border border-slate-200/90 dark:border-[#22222e] rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-xs space-y-5">
                   <div className="flex items-center justify-between gap-3 border-b border-border-theme/60 pb-4">
@@ -2067,11 +2205,10 @@ export default function CreatorProfile() {
                                   gender: prev.gender === g.id ? "" : g.id,
                                 }));
                               }}
-                              className={`px-3 py-2.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-2 ${
-                                isSelected
+                              className={`px-3 py-2.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-2 ${isSelected
                                   ? "bg-[#ffeef3] dark:bg-secondary/15 border-secondary/60 text-foreground ring-1 ring-secondary/30"
                                   : "bg-white dark:bg-surface border-border-theme hover:border-secondary/40 text-foreground"
-                              } ${isSubmitting ? "opacity-60 cursor-not-allowed" : ""}`}
+                                } ${isSubmitting ? "opacity-60 cursor-not-allowed" : ""}`}
                             >
                               <div className="flex items-center gap-2 min-w-0">
                                 <Icon className="w-4 h-4 text-black dark:text-white shrink-0" />
@@ -2184,11 +2321,10 @@ export default function CreatorProfile() {
                                 }));
                               }
                             }}
-                            className={`text-[11px] px-2.5 py-1 rounded-lg border transition-all ${
-                              isAdded
+                            className={`text-[11px] px-2.5 py-1 rounded-lg border transition-all ${isAdded
                                 ? "bg-[#ffeef3] dark:bg-secondary/10 border-secondary/30 text-secondary cursor-default opacity-60"
                                 : "bg-white dark:bg-surface border-border-theme text-text-secondary hover:text-foreground hover:border-secondary/40 cursor-pointer"
-                            }`}
+                              }`}
                           >
                             + {lang}
                           </button>
@@ -2212,8 +2348,8 @@ export default function CreatorProfile() {
                           ETHNICITY_OPTIONS.includes(formData.ethnicity)
                             ? formData.ethnicity
                             : formData.ethnicity
-                            ? "Other"
-                            : ""
+                              ? "Other"
+                              : ""
                         }
                         onChange={(e) => {
                           const val = e.target.value;
@@ -2243,17 +2379,17 @@ export default function CreatorProfile() {
                       {/* If Other or custom */}
                       {(formData.ethnicity === "Other" ||
                         (formData.ethnicity && !ETHNICITY_OPTIONS.includes(formData.ethnicity))) && (
-                        <input
-                          type="text"
-                          disabled={isSubmitting}
-                          value={formData.ethnicity === "Other" ? "" : formData.ethnicity}
-                          onChange={(e) =>
-                            setFormData((prev) => ({ ...prev, ethnicity: e.target.value }))
-                          }
-                          placeholder="Please describe your cultural background or identity"
-                          className="w-full mt-2 bg-white dark:bg-surface border border-slate-300 dark:border-border-theme text-foreground text-xs sm:text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/40 transition-colors"
-                        />
-                      )}
+                          <input
+                            type="text"
+                            disabled={isSubmitting}
+                            value={formData.ethnicity === "Other" ? "" : formData.ethnicity}
+                            onChange={(e) =>
+                              setFormData((prev) => ({ ...prev, ethnicity: e.target.value }))
+                            }
+                            placeholder="Please describe your cultural background or identity"
+                            className="w-full mt-2 bg-white dark:bg-surface border border-slate-300 dark:border-border-theme text-foreground text-xs sm:text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/40 transition-colors"
+                          />
+                        )}
                     </div>
                   </div>
                 </div>
@@ -2408,16 +2544,14 @@ export default function CreatorProfile() {
                   <button
                     type="button"
                     onClick={handleToggleVisibility}
-                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                      formData.isPublic ? "bg-black" : "bg-slate-300 dark:bg-neutral-700"
-                    }`}
+                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${formData.isPublic ? "bg-black" : "bg-slate-300 dark:bg-neutral-700"
+                      }`}
                     role="switch"
                     aria-checked={formData.isPublic}
                   >
                     <span
-                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
-                        formData.isPublic ? "translate-x-5" : "translate-x-0"
-                      }`}
+                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${formData.isPublic ? "translate-x-5" : "translate-x-0"
+                        }`}
                     />
                   </button>
                 </div>

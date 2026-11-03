@@ -123,7 +123,7 @@ const getCreatorDashboardOverviewService = async (creatorId, query = {}) => {
         // 4. Active Collaborations count (in_progress, submitted, revision_requested)
         Workspace.countDocuments({
             creator: creatorObjectId,
-            status: { $in: ["in_progress", "submitted", "revision_requested"] }
+            status: { $in: ["in_progress", "submitted", "revision_requested", "approved"] }
         }),
 
         // 5. Active Collaborations status breakdown
@@ -131,7 +131,7 @@ const getCreatorDashboardOverviewService = async (creatorId, query = {}) => {
             {
                 $match: {
                     creator: creatorObjectId,
-                    status: { $in: ["in_progress", "submitted", "revision_requested"] }
+                    status: { $in: ["in_progress", "submitted", "revision_requested", "approved"] }
                 }
             },
             {

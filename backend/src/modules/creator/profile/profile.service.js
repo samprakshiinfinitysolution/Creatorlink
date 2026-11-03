@@ -1,4 +1,5 @@
 import CreatorProfile from "./profile.model.js";
+import Auth from "../../auth/auth.model.js";
 import createApiError from "../../../utils/ApiError.js";
 
 
@@ -22,6 +23,15 @@ const createProfileService = async (userId, profileData) => {
     delete sanitizedData.user;
     delete sanitizedData.followerCount;
     delete sanitizedData.engagementRate;
+
+    // Synchronize Auth user full name if provided
+    if (sanitizedData.name !== undefined) {
+        const trimmedName = typeof sanitizedData.name === "string" ? sanitizedData.name.trim() : "";
+        if (trimmedName.length >= 2 && trimmedName.length <= 70) {
+            await Auth.findByIdAndUpdate(userId, { name: trimmedName });
+        }
+        delete sanitizedData.name;
+    }
 
     // Create the profile using Auth._id.
     const profile = await CreatorProfile.create({
@@ -63,6 +73,15 @@ const getMyProfileService = async (userId) => {
 const updateProfileService = async (userId, profileData) => {
 
     const updateOps = { ...profileData };
+
+    // Synchronize Auth user full name if provided
+    if (updateOps.name !== undefined) {
+        const trimmedName = typeof updateOps.name === "string" ? updateOps.name.trim() : "";
+        if (trimmedName.length >= 2 && trimmedName.length <= 70) {
+            await Auth.findByIdAndUpdate(userId, { name: trimmedName });
+        }
+        delete updateOps.name;
+    }
 
     // Convert empty string dob or gender to null so Mongoose clears them without schema enum errors
     if (updateOps.dob === "") {

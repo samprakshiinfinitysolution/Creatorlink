@@ -62,6 +62,7 @@ const submitBrandReviewThunk = createAsyncThunk(
 
 const initialState = {
     reviews: [],
+    stats: null,
     workspaceReview: null,
     workspaceReviewWorkspaceId: null,
     workspaceReviewRequestId: null,
@@ -115,6 +116,7 @@ const brandReviewsSlice = createSlice({
             .addCase(fetchBrandReviews.fulfilled, (state, action) => {
                 state.loading = false;
                 state.reviews = action.payload?.data?.reviews || [];
+                state.stats = action.payload?.data?.stats || null;
                 state.pagination = action.payload?.data?.pagination || null;
                 state.error = null;
             })

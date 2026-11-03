@@ -164,6 +164,7 @@ const STATUS_TABS = [
   { id: "in_progress", label: "In Progress" },
   { id: "submitted", label: "Submitted" },
   { id: "revision_requested", label: "Revision Requested" },
+  { id: "approved", label: "Approved" },
   { id: "completed", label: "Completed" },
   { id: "cancelled", label: "Cancelled" },
 ];
@@ -218,6 +219,11 @@ const getStatusBadge = (status) => {
       return {
         label: "Revision Requested",
         color: "text-rose-600 dark:text-rose-400",
+      };
+    case "approved":
+      return {
+        label: "Approved (Awaiting Payment)",
+        color: "text-blue-600 dark:text-blue-400",
       };
     case "completed":
       return {
@@ -303,7 +309,8 @@ export default function BrandWorkspaceManager() {
           (w) =>
             w.status === "in_progress" ||
             w.status === "submitted" ||
-            w.status === "revision_requested"
+            w.status === "revision_requested" ||
+            w.status === "approved"
         ).length;
 
   const completedCount =

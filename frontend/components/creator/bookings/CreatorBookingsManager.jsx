@@ -96,6 +96,41 @@ function getStatusBadge(status) {
 }
 
 // =========================================================
+// REUSABLE BRAND AVATAR COMPONENT
+// =========================================================
+function BrandAvatar({ brand, name, className = "w-9 h-9 sm:w-10 sm:h-10 text-xs sm:text-sm" }) {
+  const [imageError, setImageError] = useState(false);
+  const imageUrl = !imageError
+    ? brand?.logo || brand?.profileImage || brand?.avatar || brand?.image || brand?.brandProfile?.logo || brand?.profile?.logo || brand?.profile?.profileImage || ""
+    : "";
+  const displayName = brand?.companyName || name || brand?.name || brand?.displayName || "Brand";
+  const initials = getBrandInitials(displayName);
+
+  if (imageUrl) {
+    return (
+      <div className={`relative rounded-full overflow-hidden bg-neutral-100 dark:bg-neutral-800 border border-border-theme shrink-0 ${className}`}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={imageUrl}
+          alt={displayName}
+          className="w-full h-full object-cover"
+          onError={() => setImageError(true)}
+          loading="lazy"
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`rounded-full bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 flex items-center justify-center font-sans font-semibold shrink-0 shadow-2xs select-none ${className}`}
+    >
+      {initials}
+    </div>
+  );
+}
+
+// =========================================================
 // SVG ICONS
 // =========================================================
 function BookingsIcon({ className = "w-6 h-6" }) {
@@ -257,7 +292,7 @@ export default function CreatorBookingsManager() {
     fetchList();
   };
 
-  // Quick Accept / Reject from table
+  // Quick Accept / Reject from table/cards
   const handleQuickStatusUpdate = async (bookingId, targetStatus) => {
     if (!bookingId || quickProcessingId) return;
     setQuickProcessingId(bookingId);
@@ -287,7 +322,7 @@ export default function CreatorBookingsManager() {
     }
   };
 
-  // Quick Cancel / Withdraw application from table
+  // Quick Cancel / Withdraw application from table/cards
   const handleQuickCancel = async (bookingId) => {
     if (!bookingId || quickProcessingId) return;
     setQuickProcessingId(bookingId);
@@ -321,7 +356,7 @@ export default function CreatorBookingsManager() {
       // Search filter
       if (searchQuery.trim()) {
         const query = searchQuery.trim().toLowerCase();
-        const brandName = (b.brand?.name || "").toLowerCase();
+        const brandName = (b.brand?.companyName || b.brand?.name || "").toLowerCase();
         const brandEmail = (b.brand?.email || "").toLowerCase();
         const campaignTitle = (b.campaign?.title || "").toLowerCase();
         const serviceTitle = (b.service?.title || "").toLowerCase();
@@ -379,22 +414,22 @@ export default function CreatorBookingsManager() {
         <CreatorHeader setMobileOpen={setMobileOpen} />
 
         {/* Main Content Area */}
-        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 space-y-6 max-w-7xl w-full mx-auto min-w-0">
+        <main className="flex-1 px-3 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-4 sm:space-y-6 max-w-7xl w-full mx-auto min-w-0">
           {/* Page Hero Header */}
-          <div className="relative overflow-hidden bg-gradient-to-br from-pink-50 via-white to-rose-100/80 dark:bg-gradient-to-br dark:from-surface dark:via-surface dark:to-pink-950/20 border border-pink-200/80 dark:border-pink-900/40 rounded-3xl p-6 sm:p-7 lg:p-8 shadow-[0_4px_24px_rgba(255,45,108,0.06)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 transition-colors">
-            <div className="relative z-10 max-w-xl space-y-2">
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-[11px] tracking-wider uppercase text-[#ff2d6c] font-sans">
+          <div className="relative overflow-hidden bg-gradient-to-br from-pink-50 via-white to-rose-100/80 dark:bg-gradient-to-br dark:from-surface dark:via-surface dark:to-pink-950/20 border border-pink-200/80 dark:border-pink-900/40 rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 shadow-[0_4px_24px_rgba(255,45,108,0.06)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6 transition-colors min-w-0">
+            <div className="relative z-10 max-w-xl space-y-1.5 sm:space-y-2 min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-bold text-[10px] sm:text-[11px] tracking-wider uppercase text-[#ff2d6c] font-sans">
                   COLLABORATION MANAGEMENT
                 </span>
                 {totalItems > 0 && (
-                  <span className="text-xs font-semibold text-text-secondary">
+                  <span className="text-[11px] sm:text-xs font-semibold text-text-secondary">
                     • {totalItems} Total Booking{totalItems !== 1 ? "s" : ""}
                   </span>
                 )}
               </div>
 
-              <h1 className="font-serif font-medium text-2xl sm:text-3xl text-foreground tracking-tight">
+              <h1 className="font-serif font-medium text-xl sm:text-2xl lg:text-3xl text-foreground tracking-tight">
                 Bookings & Proposals
               </h1>
 
@@ -403,10 +438,10 @@ export default function CreatorBookingsManager() {
               </p>
             </div>
 
-            <div className="relative z-10 shrink-0 flex items-center gap-2.5">
+            <div className="relative z-10 shrink-0 flex items-center w-full sm:w-auto">
               <Link
                 href="/creator/campaigns/discover"
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-[#ff2d6c] text-white font-semibold text-xs hover:bg-[#e0205c] transition-all shadow-xs cursor-pointer"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl sm:rounded-2xl bg-black hover:bg-neutral-800 text-white dark:bg-white dark:text-black dark:hover:bg-neutral-200 font-semibold text-xs transition-all shadow-xs cursor-pointer active:scale-95 border border-black dark:border-white focus:outline-none focus:ring-2 focus:ring-black/20"
               >
                 <span>Discover Campaigns</span>
               </Link>
@@ -416,15 +451,15 @@ export default function CreatorBookingsManager() {
           {/* Toast / Local Feedback Alert */}
           {(successMessage || localMessage) && (
             <div
-              className={`p-4 rounded-2xl text-xs font-medium flex items-center justify-between gap-3 shadow-xs transition-all ${
-                (localMessage?.type === "error")
+              className={`p-3.5 sm:p-4 rounded-2xl text-xs font-medium flex items-center justify-between gap-3 shadow-xs transition-all ${
+                localMessage?.type === "error"
                   ? "bg-red-500/10 border border-red-500/20 text-red-500"
                   : "bg-emerald-500/10 border border-emerald-500/20 text-emerald-500"
               }`}
             >
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 min-w-0">
                 <CheckIcon className="w-4 h-4 shrink-0" />
-                <span>{localMessage?.text || successMessage}</span>
+                <span className="truncate">{localMessage?.text || successMessage}</span>
               </div>
               <button
                 type="button"
@@ -432,7 +467,7 @@ export default function CreatorBookingsManager() {
                   setLocalMessage(null);
                   dispatch(clearSuccessMessage());
                 }}
-                className="text-xs opacity-70 hover:opacity-100 font-bold px-2 py-0.5 rounded cursor-pointer"
+                className="text-xs opacity-70 hover:opacity-100 font-bold px-2 py-0.5 rounded cursor-pointer shrink-0"
               >
                 ✕
               </button>
@@ -440,24 +475,25 @@ export default function CreatorBookingsManager() {
           )}
 
           {/* Filter Toolbar */}
-          <div className="bg-surface border border-border-theme rounded-3xl p-4 shadow-xs space-y-3.5">
+          <div className="bg-surface border border-border-theme rounded-2xl sm:rounded-3xl p-3 sm:p-4 shadow-xs space-y-3 min-w-0">
             {/* Top Row: Search and Origin Filter */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 min-w-0">
               {/* Search input */}
-              <div className="relative flex-1 max-w-md">
-                <SearchIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" />
+              <div className="relative flex-1 min-w-0">
+                <SearchIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary pointer-events-none" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search by brand, campaign, or service..."
-                  className="w-full pl-9 pr-4 py-2 bg-surface-muted/50 border border-border-theme rounded-2xl text-xs sm:text-sm text-foreground placeholder:text-text-secondary/60 focus:outline-none focus:border-[#ff2d6c] transition-colors"
+                  className="w-full pl-9 pr-8 py-2 bg-surface-muted/50 border border-border-theme rounded-xl sm:rounded-2xl text-xs sm:text-sm text-foreground placeholder:text-text-secondary/60 focus:outline-none focus:border-[#ff2d6c] transition-colors min-w-0"
                 />
                 {searchQuery && (
                   <button
                     type="button"
                     onClick={() => setSearchQuery("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-text-secondary hover:text-foreground"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-xs text-text-secondary hover:text-foreground cursor-pointer"
+                    aria-label="Clear search"
                   >
                     ✕
                   </button>
@@ -465,14 +501,14 @@ export default function CreatorBookingsManager() {
               </div>
 
               {/* Origin / Source Selector */}
-              <div className="flex items-center gap-2 shrink-0">
-                <span className="text-xs font-semibold text-text-secondary uppercase tracking-wider">
+              <div className="flex items-center justify-between sm:justify-start gap-2 shrink-0">
+                <span className="text-[11px] sm:text-xs font-semibold text-text-secondary uppercase tracking-wider shrink-0">
                   Source:
                 </span>
                 <select
                   value={originFilter}
                   onChange={(e) => setOriginFilter(e.target.value)}
-                  className="bg-surface-muted/50 border border-border-theme text-foreground text-xs sm:text-sm rounded-2xl px-3.5 py-2 focus:outline-none focus:border-[#ff2d6c] transition-colors cursor-pointer"
+                  className="flex-1 sm:flex-none bg-surface-muted/50 border border-border-theme text-foreground text-xs sm:text-sm rounded-xl sm:rounded-2xl px-3 py-2 focus:outline-none focus:border-[#ff2d6c] transition-colors cursor-pointer shrink-0"
                 >
                   {ORIGIN_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>
@@ -484,8 +520,8 @@ export default function CreatorBookingsManager() {
             </div>
 
             {/* Bottom Row: Status Filter Tabs */}
-            <div className="pt-2 border-t border-border-theme flex items-center justify-between gap-2 overflow-x-auto custom-scrollbar">
-              <div className="flex items-center gap-1.5 shrink-0">
+            <div className="pt-2.5 border-t border-border-theme overflow-x-auto touch-pan-x overscroll-x-contain no-scrollbar py-0.5 -mx-1 px-1 min-w-0">
+              <div className="flex items-center gap-1.5 min-w-max">
                 {STATUS_OPTIONS.map((opt) => {
                   const isActive = statusFilter === opt.value;
                   return (
@@ -493,10 +529,10 @@ export default function CreatorBookingsManager() {
                       key={opt.value}
                       type="button"
                       onClick={() => handleStatusFilterChange(opt.value)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer shrink-0 ${
+                      className={`px-3 py-1.5 rounded-xl text-xs transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                         isActive
-                          ? "bg-[#ff2d6c] text-white font-semibold shadow-xs"
-                          : "bg-surface-muted/60 text-text-secondary hover:text-foreground hover:bg-surface-muted"
+                          ? "bg-black text-white dark:bg-white dark:text-black font-semibold shadow-xs border border-black dark:border-white"
+                          : "bg-surface-muted/70 text-text-secondary hover:text-foreground hover:bg-surface-muted border border-border-theme/50 font-medium"
                       }`}
                     >
                       {opt.label}
@@ -509,7 +545,7 @@ export default function CreatorBookingsManager() {
 
           {/* Error Banner */}
           {error && (
-            <div className="bg-red-500/10 border border-red-500/20 text-red-500 rounded-3xl p-4 text-xs font-sans flex items-center justify-between gap-4">
+            <div className="bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl sm:rounded-3xl p-4 text-xs font-sans flex items-center justify-between gap-4">
               <span>{typeof error === "string" ? error : "Failed to load bookings. Please try again."}</span>
               <button
                 type="button"
@@ -523,23 +559,23 @@ export default function CreatorBookingsManager() {
           )}
 
           {/* Bookings Container */}
-          <div className="bg-surface border border-border-theme rounded-3xl shadow-xs overflow-hidden min-w-0">
+          <div className="bg-surface border border-border-theme rounded-2xl sm:rounded-3xl shadow-xs overflow-hidden min-w-0">
             {/* Loading Skeletons */}
             {loading && (
-              <div className="p-6 space-y-4">
+              <div className="p-4 sm:p-6 space-y-4">
                 {[1, 2, 3, 4, 5].map((i) => (
-                  <div key={i} className="h-16 bg-surface-muted rounded-2xl animate-pulse w-full" />
+                  <div key={i} className="h-16 sm:h-20 bg-surface-muted rounded-2xl animate-pulse w-full" />
                 ))}
               </div>
             )}
 
             {/* Empty State */}
             {!loading && !error && filteredBookings.length === 0 && (
-              <div className="text-center py-16 px-4 space-y-3">
+              <div className="text-center py-12 sm:py-16 px-4 space-y-3">
                 <div className="w-12 h-12 mx-auto rounded-full bg-pink-500/10 text-[#ff2d6c] flex items-center justify-center">
                   <BookingsIcon className="w-6 h-6" />
                 </div>
-                <h3 className="font-serif font-medium text-lg text-foreground">
+                <h3 className="font-serif font-medium text-base sm:text-lg text-foreground">
                   {getEmptyStateMessage()}
                 </h3>
                 <p className="text-xs text-text-secondary max-w-sm mx-auto">
@@ -550,7 +586,7 @@ export default function CreatorBookingsManager() {
                 <div className="pt-2">
                   <Link
                     href="/creator/campaigns/discover"
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-border-theme bg-surface hover:bg-surface-muted text-xs font-semibold text-foreground transition-colors"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-black hover:bg-neutral-800 text-white dark:bg-white dark:text-black dark:hover:bg-neutral-200 text-xs font-semibold transition-all shadow-xs cursor-pointer border border-black dark:border-white focus:outline-none focus:ring-2 focus:ring-black/20"
                   >
                     <span>Discover Open Campaigns</span>
                   </Link>
@@ -558,10 +594,10 @@ export default function CreatorBookingsManager() {
               </div>
             )}
 
-            {/* Booking List Table */}
+            {/* 1. Desktop Table View (hidden lg:block) */}
             {!loading && !error && filteredBookings.length > 0 && (
-              <div className="overflow-x-auto no-scrollbar">
-                <table className="w-full text-left text-xs border-collapse">
+              <div className="hidden lg:block overflow-x-auto custom-scrollbar min-w-0">
+                <table className="w-full text-left text-xs border-collapse min-w-[800px]">
                   <thead>
                     <tr className="border-b border-border-theme bg-surface-muted/40 text-text-secondary uppercase tracking-wider text-[10px] font-semibold">
                       <th className="py-3.5 px-5">Brand Client</th>
@@ -577,14 +613,13 @@ export default function CreatorBookingsManager() {
                   <tbody className="divide-y divide-border-theme">
                     {filteredBookings.map((booking) => {
                       const brandName =
+                        booking.brand?.companyName ||
                         booking.brand?.name ||
                         booking.brand?.displayName ||
                         booking.brand?.email ||
                         "Brand Client";
 
                       const brandEmail = booking.brand?.email || "N/A";
-                      const brandInitials = getBrandInitials(brandName);
-
                       const campaignTitle = booking.campaign?.title || "Campaign Collaboration";
                       const category = booking.campaign?.category || "General";
                       const platform =
@@ -611,17 +646,19 @@ export default function CreatorBookingsManager() {
                           key={booking._id}
                           className="hover:bg-surface-muted/30 transition-colors"
                         >
-                          {/* Brand Info */}
+                          {/* Brand Info with Profile Avatar */}
                           <td className="py-4 px-5">
-                            <div className="flex items-center gap-3 min-w-0">
-                              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 flex items-center justify-center font-sans font-semibold text-xs sm:text-sm shrink-0 shadow-2xs">
-                                {brandInitials}
-                              </div>
+                            <div className="flex items-center gap-3 min-w-0 max-w-[220px]">
+                              <BrandAvatar
+                                brand={booking.brand}
+                                name={brandName}
+                                className="w-9 h-9 sm:w-10 sm:h-10 text-xs sm:text-sm shrink-0"
+                              />
                               <div className="min-w-0 flex-1">
-                                <div className="font-semibold text-foreground text-sm font-sans truncate">
+                                <div className="font-semibold text-foreground text-sm font-sans truncate" title={brandName}>
                                   {brandName}
                                 </div>
-                                <div className="text-[11px] text-text-secondary mt-0.5 truncate">
+                                <div className="text-[11px] text-text-secondary mt-0.5 truncate" title={brandEmail}>
                                   {brandEmail}
                                 </div>
                               </div>
@@ -630,24 +667,42 @@ export default function CreatorBookingsManager() {
 
                           {/* Campaign Title & Platform */}
                           <td className="py-4 px-4">
-                            <div className="font-medium text-foreground text-xs sm:text-sm font-sans">
-                              {campaignTitle}
-                            </div>
-                            <div className="text-[11px] text-text-secondary mt-0.5 flex items-center gap-1.5 capitalize">
-                              <span>{category}</span>
-                              <span>•</span>
-                              <span>{platform}</span>
+                            <div className="flex items-center gap-2.5 max-w-[220px]">
+                              {Boolean(booking.campaign?.coverImage) && (
+                                <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-border-theme bg-neutral-100 dark:bg-surface-muted">
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img
+                                    src={booking.campaign.coverImage}
+                                    alt={campaignTitle}
+                                    className="w-full h-full object-cover"
+                                    loading="lazy"
+                                    onError={(e) => {
+                                      e.currentTarget.parentElement.style.display = "none";
+                                    }}
+                                  />
+                                </div>
+                              )}
+                              <div className="min-w-0 flex-1">
+                                <div className="font-medium text-foreground text-xs sm:text-sm font-sans truncate" title={campaignTitle}>
+                                  {campaignTitle}
+                                </div>
+                                <div className="text-[11px] text-text-secondary mt-0.5 flex items-center gap-1.5 capitalize">
+                                  <span className="truncate">{category}</span>
+                                  <span>•</span>
+                                  <span className="truncate">{platform}</span>
+                                </div>
+                              </div>
                             </div>
                           </td>
 
                           {/* Type / Origin */}
                           <td className="py-4 px-4">
                             {isBrandProposal ? (
-                              <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-blue-500/10 text-blue-500 border border-blue-500/20">
+                              <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-blue-500/10 text-blue-500 border border-blue-500/20 whitespace-nowrap">
                                 Direct Proposal
                               </span>
                             ) : (
-                              <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-neutral-500/10 text-neutral-400 border border-neutral-500/20">
+                              <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-neutral-500/10 text-neutral-400 border border-neutral-500/20 whitespace-nowrap">
                                 Application
                               </span>
                             )}
@@ -655,7 +710,7 @@ export default function CreatorBookingsManager() {
 
                           {/* Service Title */}
                           <td className="py-4 px-4 text-text-secondary font-medium">
-                            <div className="text-foreground font-medium truncate max-w-[150px]">
+                            <div className="text-foreground font-medium truncate max-w-[150px]" title={serviceTitle}>
                               {serviceTitle}
                             </div>
                             {booking.service?.deliveryTime && (
@@ -666,14 +721,14 @@ export default function CreatorBookingsManager() {
                           </td>
 
                           {/* Price */}
-                          <td className="py-4 px-4 font-bold text-foreground">
+                          <td className="py-4 px-4 font-bold text-foreground whitespace-nowrap">
                             {formatCurrency(agreedPrice, currency)}
                           </td>
 
                           {/* Status Badge */}
                           <td className="py-4 px-4">
                             <span
-                              className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-bold border ${badge.color}`}
+                              className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-bold border whitespace-nowrap ${badge.color}`}
                             >
                               {badge.label}
                             </span>
@@ -728,7 +783,7 @@ export default function CreatorBookingsManager() {
                               {isAcceptedOrActive && (
                                 <Link
                                   href="/creator/workspace"
-                                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-surface-muted text-foreground text-xs font-semibold hover:bg-surface-muted/80 transition-colors border border-border-theme cursor-pointer"
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-surface text-neutral-800 dark:text-neutral-200 border border-neutral-200/90 dark:border-border-theme text-xs font-semibold shadow-2xs hover:bg-black hover:text-white hover:border-black dark:hover:bg-white dark:hover:text-black dark:hover:border-white transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-neutral-400/20"
                                   title="Open Collaboration Workspace"
                                 >
                                   <WorkspaceIcon className="w-3.5 h-3.5" />
@@ -743,10 +798,10 @@ export default function CreatorBookingsManager() {
                                   setSelectedBookingId(booking._id);
                                   setIsModalOpen(true);
                                 }}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border-theme bg-surface hover:bg-surface-muted text-text-secondary hover:text-foreground text-xs font-semibold transition-colors cursor-pointer"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-surface text-neutral-800 dark:text-neutral-200 border border-neutral-200/90 dark:border-border-theme text-xs font-semibold shadow-2xs hover:bg-black hover:text-white hover:border-black dark:hover:bg-white dark:hover:text-black dark:hover:border-white transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-neutral-400/20"
                                 title="View Details"
                               >
-                                <EyeIcon className="w-4 h-4" />
+                                <EyeIcon className="w-3.5 h-3.5" />
                                 <span>Details</span>
                               </button>
                             </div>
@@ -759,20 +814,219 @@ export default function CreatorBookingsManager() {
               </div>
             )}
 
+            {/* 2. Mobile & Tablet Responsive Cards Layout (block lg:hidden) */}
+            {!loading && !error && filteredBookings.length > 0 && (
+              <div className="block lg:hidden divide-y divide-border-theme">
+                {filteredBookings.map((booking) => {
+                  const brandName =
+                    booking.brand?.companyName ||
+                    booking.brand?.name ||
+                    booking.brand?.displayName ||
+                    booking.brand?.email ||
+                    "Brand Client";
+
+                  const brandEmail = booking.brand?.email || "N/A";
+                  const campaignTitle = booking.campaign?.title || "Campaign Collaboration";
+                  const category = booking.campaign?.category || "General";
+                  const platform =
+                    booking.campaign?.platform ||
+                    booking.service?.platform ||
+                    "General";
+
+                  const serviceTitle =
+                    booking.service?.title || booking.serviceTitle || "Service Package";
+
+                  const agreedPrice = booking.agreedPrice;
+                  const currency = booking.currency || "INR";
+                  const badge = getStatusBadge(booking.status);
+
+                  const isBrandProposal = booking.initiatedBy === "brand";
+                  const isPending = booking.status === "pending";
+                  const isAcceptedOrActive =
+                    booking.status === "accepted" || booking.status === "in_progress";
+
+                  const isThisProcessing = quickProcessingId === booking._id;
+
+                  return (
+                    <div
+                      key={booking._id}
+                      className="p-3.5 sm:p-5 space-y-3 hover:bg-surface-muted/20 transition-colors"
+                    >
+                      {/* Card Header: Brand Profile & Status */}
+                      <div className="flex items-start justify-between gap-2.5">
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <BrandAvatar
+                            brand={booking.brand}
+                            name={brandName}
+                            className="w-10 h-10 sm:w-11 sm:h-11 text-xs sm:text-sm shrink-0"
+                          />
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="font-semibold text-foreground text-sm font-sans truncate max-w-[125px] min-[360px]:max-w-[170px] sm:max-w-none" title={brandName}>
+                                {brandName}
+                              </span>
+                              {isBrandProposal ? (
+                                <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-500/10 text-blue-500 border border-blue-500/20 whitespace-nowrap">
+                                  Direct Proposal
+                                </span>
+                              ) : (
+                                <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-medium bg-neutral-500/10 text-neutral-400 border border-neutral-500/20 whitespace-nowrap">
+                                  Application
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-[11px] text-text-secondary truncate mt-0.5" title={brandEmail}>
+                              {brandEmail}
+                            </div>
+                          </div>
+                        </div>
+
+                        <span
+                          className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-bold border shrink-0 whitespace-nowrap ${badge.color}`}
+                        >
+                          {badge.label}
+                        </span>
+                      </div>
+
+                      {/* Card Body: Campaign & Service Information */}
+                      <div className="p-3 rounded-2xl bg-surface-muted/40 border border-border-theme space-y-2 text-xs">
+                        {Boolean(booking.campaign?.coverImage) && (
+                          <div className="w-full h-24 sm:h-28 rounded-xl overflow-hidden relative border border-border-theme/70 bg-surface-muted/50 shrink-0">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={booking.campaign.coverImage}
+                              alt={campaignTitle}
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                              onError={(e) => {
+                                e.currentTarget.parentElement.style.display = "none";
+                              }}
+                            />
+                          </div>
+                        )}
+                        <div>
+                          <div className="font-semibold text-foreground text-xs sm:text-sm line-clamp-1" title={campaignTitle}>
+                            {campaignTitle}
+                          </div>
+                          <div className="text-[11px] text-text-secondary mt-0.5 flex items-center gap-1.5 capitalize">
+                            <span>{category}</span>
+                            <span>•</span>
+                            <span>{platform}</span>
+                          </div>
+                        </div>
+
+                        <div className="pt-2 border-t border-border-theme flex items-center justify-between gap-2 text-[11px]">
+                          <div className="text-text-secondary truncate">
+                            <span className="font-medium text-foreground">Service:</span> {serviceTitle}
+                            {booking.service?.deliveryTime && (
+                              <span className="ml-1 text-text-secondary/70">
+                                ({booking.service.deliveryTime}d delivery)
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Card Price & Date Bar */}
+                      <div className="flex items-center justify-between text-xs pt-0.5">
+                        <div>
+                          <span className="text-[10px] uppercase font-bold tracking-wider text-text-secondary block">
+                            Agreed Price
+                          </span>
+                          <span className="text-sm sm:text-base font-bold text-foreground">
+                            {formatCurrency(agreedPrice, currency)}
+                          </span>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-[10px] uppercase font-bold tracking-wider text-text-secondary block">
+                            Booking Date
+                          </span>
+                          <span className="text-xs text-text-secondary font-medium">
+                            {formatDate(booking.createdAt)}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Card Actions Footer */}
+                      <div className="pt-2 border-t border-border-theme flex items-center justify-end gap-2 flex-wrap sm:flex-nowrap">
+                        {/* Quick Accept/Reject for Brand Proposals */}
+                        {isPending && isBrandProposal && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => handleQuickStatusUpdate(booking._id, "accepted")}
+                              disabled={isThisProcessing}
+                              className="flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition-colors shadow-2xs disabled:opacity-50 cursor-pointer text-center"
+                            >
+                              Accept
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleQuickStatusUpdate(booking._id, "rejected")}
+                              disabled={isThisProcessing}
+                              className="flex-1 sm:flex-none px-3.5 py-2 rounded-xl border border-red-500/20 bg-red-500/10 text-red-500 hover:bg-red-500/20 text-xs font-semibold transition-colors disabled:opacity-50 cursor-pointer text-center"
+                            >
+                              Decline
+                            </button>
+                          </>
+                        )}
+
+                        {/* Quick Withdraw for Pending Applications */}
+                        {isPending && !isBrandProposal && (
+                          <button
+                            type="button"
+                            onClick={() => handleQuickCancel(booking._id)}
+                            disabled={isThisProcessing}
+                            className="flex-1 sm:flex-none px-3.5 py-2 rounded-xl border border-red-500/20 bg-red-500/10 text-red-500 hover:bg-red-500/20 text-xs font-semibold transition-colors disabled:opacity-50 cursor-pointer text-center"
+                          >
+                            Withdraw
+                          </button>
+                        )}
+
+                        {/* Workspace Link if Active */}
+                        {isAcceptedOrActive && (
+                          <Link
+                            href="/creator/workspace"
+                            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-white dark:bg-surface text-neutral-800 dark:text-neutral-200 border border-neutral-200/90 dark:border-border-theme text-xs font-semibold shadow-2xs hover:bg-black hover:text-white hover:border-black dark:hover:bg-white dark:hover:text-black dark:hover:border-white transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-neutral-400/20"
+                          >
+                            <WorkspaceIcon className="w-3.5 h-3.5" />
+                            <span>Workspace</span>
+                          </Link>
+                        )}
+
+                        {/* Details Modal Trigger */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedBookingId(booking._id);
+                            setIsModalOpen(true);
+                          }}
+                          className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-white dark:bg-surface text-neutral-800 dark:text-neutral-200 border border-neutral-200/90 dark:border-border-theme text-xs font-semibold shadow-2xs hover:bg-black hover:text-white hover:border-black dark:hover:bg-white dark:hover:text-black dark:hover:border-white transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-neutral-400/20"
+                        >
+                          <EyeIcon className="w-3.5 h-3.5" />
+                          <span>Details</span>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
             {/* Pagination Controls */}
             {!loading && !error && filteredBookings.length > 0 && (
-              <div className="border-t border-border-theme px-5 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="border-t border-border-theme px-4 sm:px-5 py-3.5 sm:py-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
                 <span className="text-xs text-text-secondary">
                   Showing page <span className="font-semibold text-foreground">{currentPage}</span> of{" "}
                   <span className="font-semibold text-foreground">{totalPages}</span> ({totalItems} total bookings)
                 </span>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 w-full sm:w-auto justify-center sm:justify-end">
                   <button
                     type="button"
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={!hasPrevPage}
-                    className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-xl border border-border-theme bg-surface text-xs font-medium text-foreground hover:bg-surface-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                    className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1 px-3.5 py-1.5 rounded-xl border border-border-theme bg-surface text-xs font-medium text-foreground hover:bg-surface-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                   >
                     <ChevronLeftIcon className="w-4 h-4" />
                     <span>Previous</span>
@@ -781,7 +1035,7 @@ export default function CreatorBookingsManager() {
                     type="button"
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={!hasNextPage}
-                    className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-xl border border-border-theme bg-surface text-xs font-medium text-foreground hover:bg-surface-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                    className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1 px-3.5 py-1.5 rounded-xl border border-border-theme bg-surface text-xs font-medium text-foreground hover:bg-surface-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                   >
                     <span>Next</span>
                     <ChevronRightIcon className="w-4 h-4" />
@@ -802,4 +1056,3 @@ export default function CreatorBookingsManager() {
     </div>
   );
 }
-

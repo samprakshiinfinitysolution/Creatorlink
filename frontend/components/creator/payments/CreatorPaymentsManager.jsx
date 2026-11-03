@@ -482,7 +482,7 @@ export default function CreatorPaymentsManager() {
                               <CampaignAvatar image={campaignImage} title={campaignTitle} />
                               <div className="space-y-0.5 min-w-0">
                                 <div className="flex items-center gap-1.5">
-                                  <span className="font-semibold text-foreground text-xs sm:text-sm line-clamp-1">
+                                  <span className="font-semibold text-foreground text-xs sm:text-sm line-clamp-2 break-words">
                                     {campaignTitle}
                                   </span>
                                   <svg className="w-3.5 h-3.5 text-text-secondary/60 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">

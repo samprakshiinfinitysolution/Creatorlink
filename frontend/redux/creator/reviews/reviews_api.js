@@ -9,6 +9,16 @@ const getCreatorReviews = async (params = {}) => {
     return response.data;
 };
 
+// Creator submits a review for brand on a completed workspace
+const createCreatorReview = async (reviewData) => {
+    const response = await axiosInstance.post(
+        "/creator/reviews",
+        reviewData
+    );
+    return response.data;
+};
+
 export {
-    getCreatorReviews
+    getCreatorReviews,
+    createCreatorReview
 };

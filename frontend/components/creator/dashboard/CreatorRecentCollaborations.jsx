@@ -210,12 +210,12 @@ export default function CreatorRecentCollaborations({ collaborations = [] }) {
                       )}
                     </div>
                     <h4
-                      className="font-sans font-semibold text-xs sm:text-sm text-foreground truncate group-hover:text-secondary transition-colors"
+                      className="font-sans font-semibold text-xs sm:text-sm text-foreground line-clamp-2 break-words group-hover:text-secondary transition-colors leading-snug"
                       title={collab.title || serviceTitle}
                     >
                       {collab.title || serviceTitle}
                     </h4>
-                    <p className="text-[11px] text-text-secondary font-sans truncate">
+                    <p className="text-[11px] text-text-secondary font-sans line-clamp-1 break-words">
                       <span className="font-medium text-foreground">{brandName}</span>
                       {collab.platform ? ` · ${collab.platform}` : ""}
                       {collab.deadline ? ` · Due ${formatDate(collab.deadline)}` : ""}

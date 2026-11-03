@@ -2,6 +2,13 @@ import mongoose from "mongoose";
 
 const submissionSchema = new mongoose.Schema(
     {
+        deliverableId: {
+            type: mongoose.Schema.Types.ObjectId
+        },
+        version: {
+            type: Number,
+            default: 1
+        },
         title: {
             type: String,
             trim: true,
@@ -73,6 +80,14 @@ const deliverableSchema = new mongoose.Schema(
             default: "pending"
         },
         submission: submissionSchema,
+        // Chronological history of all submissions for this deliverable
+        submissions: [submissionSchema],
+        // Number of revisions requested specifically for this deliverable
+        revisionCount: {
+            type: Number,
+            default: 0,
+            min: 0
+        },
         submittedAt: {
             type: Date
         },
@@ -162,12 +177,20 @@ const workspaceSchema = new mongoose.Schema(
             required: true
         },
 
+        // Maximum revisions agreed for this workspace collaboration (copied from creator service package)
+        maxRevisions: {
+            type: Number,
+            default: 2,
+            min: 0
+        },
+
         status: {
             type: String,
             enum: [
                 "in_progress",
                 "submitted",
                 "revision_requested",
+                "approved",
                 "completed",
                 "cancelled"
             ],

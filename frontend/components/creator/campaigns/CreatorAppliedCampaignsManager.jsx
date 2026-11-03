@@ -635,7 +635,7 @@ export default function CreatorAppliedCampaignsManager() {
             </div>
           ) : campaignsList.length > 0 ? (
             /* 5. APPLIED CAMPAIGNS GRID */
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {campaignsList.map((item) => {
                 const bookingId = item._id || item.bookingId;
                 const campaignObj = item.campaign || {};
@@ -724,7 +724,7 @@ export default function CreatorAppliedCampaignsManager() {
 
                       {/* 3. CAMPAIGN TITLE & BRAND ROW */}
                       <div>
-                        <h2 className="font-sans font-semibold text-base sm:text-lg text-black dark:text-white line-clamp-1 group-hover:text-black dark:group-hover:text-white transition-colors tracking-tight">
+                        <h2 className="font-sans font-semibold text-base sm:text-lg text-black dark:text-white line-clamp-2 group-hover:text-black dark:group-hover:text-white transition-colors tracking-tight break-words">
                           {campaignObj.title || "Campaign Collaboration"}
                         </h2>
                         <div className="flex items-center gap-1.5 mt-0.5">
@@ -801,7 +801,7 @@ export default function CreatorAppliedCampaignsManager() {
                                 className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[11px] font-sans font-medium bg-neutral-50 dark:bg-surface-muted/40 text-foreground border border-neutral-200/70 dark:border-border-theme"
                               >
                                 <CheckIcon className="text-emerald-500 shrink-0 w-3 h-3" />
-                                <span className="truncate max-w-[190px]">{itemText}</span>
+                                <span className="break-words max-w-[160px] sm:max-w-[220px] line-clamp-1">{itemText}</span>
                               </span>
                             ))}
                           </div>

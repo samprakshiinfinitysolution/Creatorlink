@@ -2,10 +2,12 @@ import mongoose from "mongoose";
 
 import Workspace from "./workspace.model.js";
 import Review from "../reviews/reviews.model.js";
+import { attachReviewProfiles } from "../reviews/reviews.service.js";
 import Conversation from "../messages/conversation.model.js";
 import Campaign from "../brand/campaigns/campaign.model.js";
 import BrandProfile from "../brand/profile/profile.model.js";
 import CreatorProfile from "../creator/profile/profile.model.js";
+import CreatorService from "../creator/services/services.model.js";
 import { createNotificationSafe } from "../notifications/notification.service.js";
 import createApiError from "../../utils/ApiError.js";
 import {
@@ -219,6 +221,21 @@ const createWorkspaceForAcceptedBooking = async (booking) => {
             booking.deadline
         );
 
+        let maxRevisions = 2;
+        if (booking.service) {
+            try {
+                const serviceId = booking.service._id || booking.service;
+                if (mongoose.Types.ObjectId.isValid(serviceId)) {
+                    const sDoc = await CreatorService.findById(serviceId).select("revisions").lean();
+                    if (sDoc && typeof sDoc.revisions === "number") {
+                        maxRevisions = sDoc.revisions;
+                    }
+                }
+            } catch {
+                maxRevisions = 2;
+            }
+        }
+
         try {
             workspace = await Workspace.create({
                 booking: booking._id,
@@ -231,6 +248,7 @@ const createWorkspaceForAcceptedBooking = async (booking) => {
                 brief: campaignBrief,
                 deliverables: structuredDeliverables,
                 deadline: booking.deadline,
+                maxRevisions,
                 status: "in_progress"
             });
         } catch (createErr) {
@@ -379,6 +397,45 @@ const getCreatorWorkspaceByIdService = async (
     }
 
     const wsObj = workspace.toObject ? workspace.toObject() : { ...workspace };
+    if (wsObj.status === "completed") {
+        const [myReviewDoc, brandReviewDoc, paidPayment] = await Promise.all([
+            Review.findOne({
+                workspace: wsObj._id,
+                reviewer: creatorId
+            })
+                .populate({ path: "reviewer", select: "name role email" })
+                .populate({ path: "reviewee", select: "name role email" }),
+            Review.findOne({
+                workspace: wsObj._id,
+                reviewer: wsObj.brand?._id || wsObj.brand
+            })
+                .populate({ path: "reviewer", select: "name role email" })
+                .populate({ path: "reviewee", select: "name role email" }),
+            mongoose.model("Payment").findOne({
+                workspace: wsObj._id,
+                status: "paid"
+            }).select("_id amount status paidAt")
+        ]);
+
+        const [enrichedMyReview, enrichedBrandReview] = await Promise.all([
+            myReviewDoc ? attachReviewProfiles(myReviewDoc) : null,
+            brandReviewDoc ? attachReviewProfiles(brandReviewDoc) : null
+        ]);
+
+        wsObj.review = enrichedMyReview || null;
+        wsObj.myReview = enrichedMyReview || null;
+        wsObj.brandReview = enrichedBrandReview || null;
+        wsObj.partnerReview = enrichedBrandReview || null;
+        wsObj.isPaid = Boolean(paidPayment);
+        wsObj.payment = paidPayment || null;
+    } else {
+        wsObj.review = null;
+        wsObj.myReview = null;
+        wsObj.brandReview = null;
+        wsObj.partnerReview = null;
+        wsObj.isPaid = false;
+        wsObj.payment = null;
+    }
     return await attachWorkspaceProfiles(wsObj);
 };
 
@@ -397,7 +454,9 @@ const checkAndUpdateWorkspaceCompletion = (workspace) => {
     );
 
     if (allFinished) {
-        workspace.status = "completed";
+        if (workspace.status !== "completed") {
+            workspace.status = "approved";
+        }
         return;
     }
 
@@ -506,21 +565,30 @@ const submitCreatorWorkspaceDeliverableService = async (
     const submittedAtDate = new Date();
 const submissionId = new mongoose.Types.ObjectId();
 
-const subObj = {
-    _id: submissionId,
-    title: title ? title.trim() : deliverable.title,
-    link: link ? link.trim() : "",
-    fileUrl: fileUrl ? fileUrl.trim() : "",
-    notes: notes ? notes.trim() : "",
-    submittedAt: submittedAtDate
-};
+    const existingSubmissions = Array.isArray(deliverable.submissions) ? deliverable.submissions : [];
+    const nextVersion = existingSubmissions.length + 1;
 
-deliverable.submission = subObj;
-deliverable.submittedAt = submittedAtDate;
-deliverable.status = "submitted";
+    const subObj = {
+        _id: submissionId,
+        deliverableId: deliverable._id,
+        version: nextVersion,
+        title: title ? title.trim() : deliverable.title,
+        link: link ? link.trim() : "",
+        fileUrl: fileUrl ? fileUrl.trim() : "",
+        notes: notes ? notes.trim() : "",
+        submittedAt: submittedAtDate
+    };
 
-// Preserve top-level submissions array for backward compatibility.
-workspace.submissions.push(subObj);
+    if (!Array.isArray(deliverable.submissions)) {
+        deliverable.submissions = [];
+    }
+    deliverable.submissions.push(subObj);
+    deliverable.submission = subObj;
+    deliverable.submittedAt = submittedAtDate;
+    deliverable.status = "submitted";
+
+    // Preserve top-level submissions array for backward compatibility.
+    workspace.submissions.push(subObj);
 
     checkAndUpdateWorkspaceCompletion(workspace);
 
@@ -647,6 +715,7 @@ const getBrandWorkspacesService = async (
             in_progress: 0,
             submitted: 0,
             revision_requested: 0,
+            approved: 0,
             completed: 0,
             cancelled: 0
         }
@@ -662,7 +731,8 @@ const getBrandWorkspacesService = async (
             if (
                 item._id === "in_progress" ||
                 item._id === "submitted" ||
-                item._id === "revision_requested"
+                item._id === "revision_requested" ||
+                item._id === "approved"
             ) {
                 summary.inProgress += count;
             } else if (item._id === "completed") {
@@ -700,7 +770,9 @@ const getBrandWorkspacesService = async (
 
     const workspacesWithReviews = workspaces.map((w) => {
         const wsObj = w.toObject ? w.toObject() : { ...w };
-        wsObj.review = reviewMap.get(w._id.toString()) || null;
+        const myRev = reviewMap.get(w._id.toString()) || null;
+        wsObj.review = myRev;
+        wsObj.myReview = myRev;
         return wsObj;
     });
 
@@ -751,21 +823,43 @@ const getBrandWorkspaceByIdService = async (
 
     const wsObj = workspace.toObject ? workspace.toObject() : { ...workspace };
     if (wsObj.status === "completed") {
-        const review = await Review.findOne({
-            workspace: wsObj._id,
-            reviewer: brandId
-        }).select("_id workspace rating comment createdAt");
+        const [myReviewDoc, creatorReviewDoc, paidPayment] = await Promise.all([
+            Review.findOne({
+                workspace: wsObj._id,
+                reviewer: brandId
+            })
+                .populate({ path: "reviewer", select: "name role email" })
+                .populate({ path: "reviewee", select: "name role email" }),
+            Review.findOne({
+                workspace: wsObj._id,
+                reviewer: wsObj.creator?._id || wsObj.creator
+            })
+                .populate({ path: "reviewer", select: "name role email" })
+                .populate({ path: "reviewee", select: "name role email" }),
+            mongoose.model("Payment").findOne({
+                workspace: wsObj._id,
+                status: "paid"
+            }).select("_id amount status paidAt")
+        ]);
 
-        wsObj.review = review
-            ? {
-                _id: review._id,
-                rating: review.rating,
-                comment: review.comment,
-                createdAt: review.createdAt
-            }
-            : null;
+        const [enrichedMyReview, enrichedCreatorReview] = await Promise.all([
+            myReviewDoc ? attachReviewProfiles(myReviewDoc) : null,
+            creatorReviewDoc ? attachReviewProfiles(creatorReviewDoc) : null
+        ]);
+
+        wsObj.review = enrichedMyReview || null;
+        wsObj.myReview = enrichedMyReview || null;
+        wsObj.creatorReview = enrichedCreatorReview || null;
+        wsObj.partnerReview = enrichedCreatorReview || null;
+        wsObj.isPaid = Boolean(paidPayment);
+        wsObj.payment = paidPayment || null;
     } else {
         wsObj.review = null;
+        wsObj.myReview = null;
+        wsObj.creatorReview = null;
+        wsObj.partnerReview = null;
+        wsObj.isPaid = false;
+        wsObj.payment = null;
     }
 
     return await attachWorkspaceProfiles(wsObj);
@@ -864,11 +958,23 @@ const reviewBrandWorkspaceDeliverableService = async (
             );
         }
 
+        // Enforce maximum revisions limit agreed for this collaboration
+        const allowedRevisions = typeof workspace.maxRevisions === "number" ? workspace.maxRevisions : 2;
+        const currentDeliverableRevisions = deliverable.revisionCount || 0;
+
+        if (currentDeliverableRevisions >= allowedRevisions) {
+            throw createApiError(
+                400,
+                `Revision limit reached (${allowedRevisions} revision${allowedRevisions === 1 ? '' : 's'} included in agreed package). The deliverable must be approved or resolved via platform support.`
+            );
+        }
+
+        deliverable.revisionCount = currentDeliverableRevisions + 1;
         deliverable.status = "revision_requested";
 
         // Preserved top-level revisions array for backward compatibility
         workspace.revisions.push({
-            feedback: `[${deliverable.title}] ${feedback.trim()}`,
+            feedback: `[${deliverable.title}] (Revision ${deliverable.revisionCount}/${allowedRevisions}) ${feedback.trim()}`,
             requestedAt: new Date()
         });
     } else {
@@ -900,35 +1006,35 @@ const reviewBrandWorkspaceDeliverableService = async (
             idempotencyKey: `workspace:deliverable_approved:${workspace._id}:${deliverable._id}`
         });
 
-        if (previousWorkspaceStatus !== "completed" && workspace.status === "completed") {
+        if (previousWorkspaceStatus !== "approved" && (workspace.status === "approved" || workspace.status === "completed")) {
             await createNotificationSafe({
                 recipient: workspace.creator,
                 sender: brandId,
-                type: "workspace:completed",
-                title: "Workspace Completed!",
-                message: "All deliverables have been approved! The collaboration is complete.",
+                type: "workspace:approved",
+                title: "Deliverables Approved!",
+                message: "All deliverables have been approved! Awaiting brand payment to finalize the collaboration.",
                 entityType: "workspace",
                 entityId: workspace._id,
                 destination: `/creator/workspace/${workspace._id}`,
                 metadata: {
                     workspaceId: workspace._id
                 },
-                idempotencyKey: `workspace:completed:creator:${workspace._id}`
+                idempotencyKey: `workspace:approved:creator:${workspace._id}`
             });
 
             await createNotificationSafe({
                 recipient: workspace.brand,
                 sender: null,
-                type: "workspace:completed",
-                title: "Collaboration Completed",
-                message: "All deliverables are approved. Collaboration is complete; you can proceed to payment.",
+                type: "workspace:approved",
+                title: "All Deliverables Approved",
+                message: "All deliverables are approved. Please proceed to payment to finalize the collaboration.",
                 entityType: "workspace",
                 entityId: workspace._id,
                 destination: `/brand/workspace/${workspace._id}`,
                 metadata: {
                     workspaceId: workspace._id
                 },
-                idempotencyKey: `workspace:completed:brand:${workspace._id}`
+                idempotencyKey: `workspace:approved:brand:${workspace._id}`
             });
         }
     } else if (targetAction === "revision_requested" || targetAction === "revision") {

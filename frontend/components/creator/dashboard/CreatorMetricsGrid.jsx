@@ -151,7 +151,7 @@ export default function CreatorMetricsGrid({ metrics }) {
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 items-stretch">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 items-stretch">
       {cards.map((c) => {
         const Icon = c.icon;
         return (
@@ -165,7 +165,7 @@ export default function CreatorMetricsGrid({ metrics }) {
               <div className="w-[42px] shrink-0 invisible sm:hidden" aria-hidden="true" />
 
               <div className="space-y-1 min-w-0 flex-1 flex flex-col items-center sm:items-start text-center sm:text-left">
-                <h3 className="w-full font-sans font-semibold text-sm sm:text-base text-foreground tracking-tight truncate text-center sm:text-left">
+                <h3 className="w-full font-sans font-semibold text-sm sm:text-base text-foreground tracking-tight break-words text-center sm:text-left">
                   {c.title}
                 </h3>
                 <span
@@ -182,15 +182,15 @@ export default function CreatorMetricsGrid({ metrics }) {
             {/* Bottom block: Prominent Metric Value & Supporting Text (Centered on Mobile, Left-aligned on Desktop) */}
             <div className="space-y-1.5 mt-auto pt-2 flex flex-col items-center sm:items-start text-center sm:text-left">
               <div
-                className="w-full font-sans font-bold text-2xl sm:text-3xl lg:text-[26px] xl:text-3xl text-foreground tracking-tight tabular-nums truncate group-hover:text-secondary transition-colors text-center sm:text-left"
+                className="w-full font-sans font-bold text-2xl sm:text-3xl lg:text-[26px] xl:text-3xl text-foreground tracking-tight tabular-nums break-words group-hover:text-secondary transition-colors text-center sm:text-left"
                 title={c.value}
               >
                 {c.value}
               </div>
-              <p className="w-full text-xs text-text-secondary font-sans font-medium leading-relaxed truncate text-center sm:text-left">
+              <p className="w-full text-xs text-text-secondary font-sans font-medium leading-relaxed break-words text-center sm:text-left">
                 {c.subtitle}
               </p>
-              <p className="w-full text-[11px] text-text-secondary/70 font-sans truncate min-h-[16px] text-center sm:text-left">
+              <p className="w-full text-[11px] text-text-secondary/70 font-sans break-words min-h-[16px] text-center sm:text-left">
                 {c.secondaryNote || "\u00A0"}
               </p>
             </div>

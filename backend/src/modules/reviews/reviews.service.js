@@ -130,6 +130,18 @@ const createBrandReviewService = async (brandId, payload) => {
         );
     }
 
+    // Verify successful payment has been completed for this workspace
+    const brandPaidPayment = await mongoose.model("Payment").findOne({
+        workspace: workspace._id,
+        status: "paid"
+    });
+    if (!brandPaidPayment) {
+        throw createApiError(
+            400,
+            "Reviews can only be submitted after payment has been successfully completed"
+        );
+    }
+
     // Verify user has not already submitted a review for this workspace
     const existingReview = await Review.findOne({
         workspace: workspace._id,
@@ -205,12 +217,22 @@ const createBrandReviewService = async (brandId, payload) => {
     return enrichedReview;
 };
 
-// Brand fetches reviews submitted by them
+// Brand fetches reviews (default: reviews received from creators, or reviews submitted by brand)
 const getBrandReviewsService = async (brandId, query = {}) => {
-    const { page, limit } = query;
+    const { page, limit, type = "received" } = query;
     const { page: currentPage, limit: itemsPerPage, skip } = getPagination(page, limit);
 
-    const filter = { reviewer: brandId };
+    const brandObjectId = new mongoose.Types.ObjectId(brandId);
+
+    let filter;
+    if (type === "given") {
+        filter = { reviewer: brandObjectId };
+    } else if (type === "all") {
+        filter = { $or: [{ reviewer: brandObjectId }, { reviewee: brandObjectId }] };
+    } else {
+        // default "received" (Creator -> Brand reviews)
+        filter = { reviewee: brandObjectId };
+    }
 
     const totalReviews = await Review.countDocuments(filter);
 
@@ -219,8 +241,12 @@ const getBrandReviewsService = async (brandId, query = {}) => {
         .skip(skip)
         .limit(itemsPerPage)
         .populate({
+            path: "reviewer",
+            select: "name role email"
+        })
+        .populate({
             path: "reviewee",
-            select: "name role"
+            select: "name role email"
         })
         .populate({
             path: "campaign",
@@ -231,16 +257,31 @@ const getBrandReviewsService = async (brandId, query = {}) => {
             select: "status agreedPrice currency"
         });
 
+    let averageRating = 0;
+    if (totalReviews > 0) {
+        const stats = await Review.aggregate([
+            { $match: filter },
+            { $group: { _id: null, avgRating: { $avg: "$rating" } } }
+        ]);
+        if (stats.length > 0 && stats[0].avgRating) {
+            averageRating = Number(stats[0].avgRating.toFixed(1));
+        }
+    }
+
     const pagination = getPaginationData(currentPage, itemsPerPage, totalReviews);
     const enrichedReviews = await attachReviewProfiles(reviews);
 
     return {
         reviews: enrichedReviews,
+        stats: {
+            totalReviews,
+            averageRating
+        },
         pagination
     };
 };
 
-// Creator fetches reviews received by them
+// Creator fetches reviews received by them or given by them
 const getCreatorReviewsService = async (creatorId, query = {}) => {
     if (!creatorId || !mongoose.Types.ObjectId.isValid(creatorId)) {
         throw createApiError(
@@ -251,10 +292,17 @@ const getCreatorReviewsService = async (creatorId, query = {}) => {
 
     const creatorObjectId = new mongoose.Types.ObjectId(creatorId);
 
-    const { page, limit } = query;
+    const { page, limit, type = "received" } = query;
     const { page: currentPage, limit: itemsPerPage, skip } = getPagination(page, limit);
 
-    const filter = { reviewee: creatorObjectId };
+    let filter;
+    if (type === "given") {
+        filter = { reviewer: creatorObjectId };
+    } else if (type === "all") {
+        filter = { $or: [{ reviewer: creatorObjectId }, { reviewee: creatorObjectId }] };
+    } else {
+        filter = { reviewee: creatorObjectId };
+    }
 
     const totalReviews = await Review.countDocuments(filter);
 
@@ -264,7 +312,11 @@ const getCreatorReviewsService = async (creatorId, query = {}) => {
         .limit(itemsPerPage)
         .populate({
             path: "reviewer",
-            select: "name role"
+            select: "name role email"
+        })
+        .populate({
+            path: "reviewee",
+            select: "name role email"
         })
         .populate({
             path: "campaign",
@@ -275,12 +327,12 @@ const getCreatorReviewsService = async (creatorId, query = {}) => {
             select: "status agreedPrice currency"
         });
 
-    // Calculate average rating for creator
+    // Calculate average rating
     let averageRating = 0;
     if (totalReviews > 0) {
         const stats = await Review.aggregate([
-            { $match: { reviewee: creatorObjectId } },
-            { $group: { _id: "$reviewee", avgRating: { $avg: "$rating" } } }
+            { $match: filter },
+            { $group: { _id: null, avgRating: { $avg: "$rating" } } }
         ]);
         if (stats.length > 0 && stats[0].avgRating) {
             averageRating = Number(stats[0].avgRating.toFixed(1));
@@ -320,18 +372,17 @@ const getWorkspaceReviewService = async (workspaceId, userId) => {
         );
     }
 
-    // Find the review submitted for this workspace where the requesting user is a participant
-    const review = await Review.findOne({
-        workspace: workspaceId,
-        $or: [{ reviewer: userId }, { reviewee: userId }]
+    // Find ALL reviews submitted for this workspace
+    const reviews = await Review.find({
+        workspace: workspaceId
     })
         .populate({
             path: "reviewer",
-            select: "name role"
+            select: "name role email"
         })
         .populate({
             path: "reviewee",
-            select: "name role"
+            select: "name role email"
         })
         .populate({
             path: "campaign",
@@ -342,12 +393,125 @@ const getWorkspaceReviewService = async (workspaceId, userId) => {
             select: "status agreedPrice currency"
         });
 
-    const enrichedReview = review ? await attachReviewProfiles(review) : null;
+    const enrichedReviews = await attachReviewProfiles(reviews);
+
+    const myReview = enrichedReviews.find(
+        (r) => (r.reviewer?._id || r.reviewer)?.toString() === userId.toString()
+    ) || null;
+
+    const partnerReview = enrichedReviews.find(
+        (r) => (r.reviewer?._id || r.reviewer)?.toString() !== userId.toString()
+    ) || null;
+
+    return {
+        myReview,
+        partnerReview,
+        reviews: enrichedReviews,
+        hasReviewed: Boolean(myReview),
+        hasPartnerReviewed: Boolean(partnerReview),
+        workspace: workspaceId,
+        ...(myReview ? {
+            _id: myReview._id,
+            rating: myReview.rating,
+            comment: myReview.comment,
+            createdAt: myReview.createdAt,
+            reviewer: myReview.reviewer,
+            reviewee: myReview.reviewee
+        } : {})
+    };
+};
+
+// Creator submits a review for a brand on a completed workspace
+const createCreatorReviewService = async (creatorId, payload) => {
+    const targetWorkspaceId = payload.workspaceId || payload.workspace;
+    const { rating, comment } = payload;
+
+    const workspace = await Workspace.findById(targetWorkspaceId);
+    if (!workspace) {
+        throw createApiError(404, "Workspace not found");
+    }
+
+    // Verify creator ownership of the workspace
+    if (workspace.creator.toString() !== creatorId.toString()) {
+        throw createApiError(403, "You are not authorized to submit a review for this workspace");
+    }
+
+    // Verify workspace completion
+    if (workspace.status !== "completed") {
+        throw createApiError(400, "Reviews can only be submitted for completed collaborations");
+    }
+
+    // Verify successful payment has been completed for this workspace
+    const creatorPaidPayment = await mongoose.model("Payment").findOne({
+        workspace: workspace._id,
+        status: "paid"
+    });
+    if (!creatorPaidPayment) {
+        throw createApiError(
+            400,
+            "Reviews can only be submitted after payment has been successfully completed"
+        );
+    }
+
+    // Verify creator has not already submitted a review for this workspace
+    const existingReview = await Review.findOne({
+        workspace: workspace._id,
+        reviewer: creatorId
+    });
+    if (existingReview) {
+        throw createApiError(400, "You have already submitted a review for this workspace");
+    }
+
+    const newReview = new Review({
+        workspace: workspace._id,
+        booking: workspace.booking,
+        campaign: workspace.campaign,
+        reviewer: creatorId,
+        reviewee: workspace.brand,
+        rating: Number(rating),
+        comment: comment ? String(comment).trim() : ""
+    });
+
+    try {
+        await newReview.save();
+    } catch (error) {
+        if (error.code === 11000) {
+            throw createApiError(400, "You have already submitted a review for this workspace");
+        }
+        throw error;
+    }
+
+    const populatedReview = await Review.findById(newReview._id)
+        .populate({ path: "reviewer", select: "name role" })
+        .populate({ path: "reviewee", select: "name role" })
+        .populate({ path: "campaign", select: "title coverImage" })
+        .populate({ path: "workspace", select: "status agreedPrice currency" });
+
+    await createNotificationSafe({
+        recipient: workspace.brand,
+        sender: creatorId,
+        type: "review:received",
+        title: "New Review Received",
+        message: `Creator left a ${rating}-star review for collaboration on "${populatedReview?.campaign?.title || 'workspace'}".`,
+        entityType: "review",
+        entityId: newReview._id,
+        destination: `/brand/reviews`,
+        metadata: {
+            workspaceId: workspace._id,
+            rating: Number(rating),
+            reviewId: newReview._id
+        },
+        idempotencyKey: `review:received:${newReview._id}`
+    });
+
+    const enrichedReview = await attachReviewProfiles(populatedReview);
     return enrichedReview;
 };
 
 export {
+    attachReviewProfiles,
     createBrandReviewService,
+    createCreatorReviewService,
     getBrandReviewsService,
     getCreatorReviewsService,
     getWorkspaceReviewService

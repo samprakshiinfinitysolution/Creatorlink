@@ -154,6 +154,10 @@ const profileSchema = new mongoose.Schema(
         },
 
         // Verification badge activated exclusively via approved admin verification request.
+        isOnboarded: {
+            type: Boolean,
+            default: false
+        },
         isVerifiedBadge: {
             type: Boolean,
             default: false

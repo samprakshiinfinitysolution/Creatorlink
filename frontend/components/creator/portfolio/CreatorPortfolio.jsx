@@ -340,7 +340,7 @@ export default function CreatorPortfolio() {
             </div>
           ) : filteredItems.length > 0 ? (
             /* PORTFOLIO GRID */
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {filteredItems.map((project) => (
                 <div
                   key={project._id || project.id}
@@ -357,7 +357,7 @@ export default function CreatorPortfolio() {
                   {/* Card Details */}
                   <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                     <div className="space-y-2">
-                      <h3 className="font-serif font-medium text-lg text-foreground line-clamp-1 group-hover:text-neutral-950 dark:group-hover:text-white transition-colors">
+                      <h3 className="font-serif font-medium text-lg text-foreground line-clamp-2 break-words group-hover:text-neutral-950 dark:group-hover:text-white transition-colors">
                         {project.title}
                       </h3>
                       <p className="text-xs text-text-secondary line-clamp-2 leading-relaxed">

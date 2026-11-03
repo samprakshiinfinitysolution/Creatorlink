@@ -202,6 +202,12 @@ const authSlice = createSlice({
             state.user = null;
             state.isAuthenticated = false;
             state.error = null;
+        },
+
+        updateAuthUserName: (state, action) => {
+            if (state.user && action.payload) {
+                state.user.name = action.payload;
+            }
         }
     },
 
@@ -406,7 +412,8 @@ const authSlice = createSlice({
 
 
 export const {
-    clearAuth
+    clearAuth,
+    updateAuthUserName
 } = authSlice.actions;
 
 

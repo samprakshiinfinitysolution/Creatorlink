@@ -3,6 +3,7 @@ import sendResponse from "../../utils/response.js";
 
 import {
     createBrandReviewService,
+    createCreatorReviewService,
     getBrandReviewsService,
     getCreatorReviewsService,
     getWorkspaceReviewService
@@ -68,8 +69,24 @@ const getWorkspaceReview = asyncHandler(async (req, res) => {
     );
 });
 
+// Creator creates a review for a brand on a completed workspace collaboration
+const createCreatorReview = asyncHandler(async (req, res) => {
+    const result = await createCreatorReviewService(
+        req.user.userId,
+        req.body
+    );
+
+    return sendResponse(
+        res,
+        201,
+        "Review for brand submitted successfully",
+        result
+    );
+});
+
 export {
     createBrandReview,
+    createCreatorReview,
     getBrandReviews,
     getCreatorReviews,
     getWorkspaceReview

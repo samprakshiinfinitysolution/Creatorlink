@@ -82,7 +82,7 @@ const getBrandDashboardOverviewService = async (brandId, query = {}) => {
         // 7. Active Collaborations / Workspaces count
         Workspace.countDocuments({
             brand: brandObjectId,
-            status: { $in: ["in_progress", "submitted", "revision_requested"] }
+            status: { $in: ["in_progress", "submitted", "revision_requested", "approved"] }
         }),
 
         // 8. Active Collaborations status breakdown
@@ -90,7 +90,7 @@ const getBrandDashboardOverviewService = async (brandId, query = {}) => {
             {
                 $match: {
                     brand: brandObjectId,
-                    status: { $in: ["in_progress", "submitted", "revision_requested"] }
+                    status: { $in: ["in_progress", "submitted", "revision_requested", "approved"] }
                 }
             },
             {
@@ -244,7 +244,7 @@ const getBrandDashboardOverviewService = async (brandId, query = {}) => {
     // Query unpaid completed workspaces with no existing payment record to prevent double-counting
     const unpaidCompletedWorkspaces = await Workspace.find({
         brand: brandObjectId,
-        status: "completed",
+        status: { $in: ["completed", "approved"] },
         _id: { $nin: paidOrPendingWorkspaceIds }
     }).select("agreedPrice currency");
 

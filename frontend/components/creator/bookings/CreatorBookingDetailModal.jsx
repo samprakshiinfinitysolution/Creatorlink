@@ -93,6 +93,41 @@ function getStatusBadge(status) {
 }
 
 // =========================================================
+// REUSABLE BRAND AVATAR COMPONENT
+// =========================================================
+function BrandAvatar({ brand, name, className = "w-11 h-11 sm:w-12 sm:h-12 text-sm sm:text-base" }) {
+  const [imageError, setImageError] = useState(false);
+  const imageUrl = !imageError
+    ? brand?.logo || brand?.profileImage || brand?.avatar || brand?.image || brand?.brandProfile?.logo || brand?.profile?.logo || brand?.profile?.profileImage || ""
+    : "";
+  const displayName = brand?.companyName || name || brand?.name || brand?.displayName || "Brand";
+  const initials = getBrandInitials(displayName);
+
+  if (imageUrl) {
+    return (
+      <div className={`relative rounded-full overflow-hidden bg-neutral-100 dark:bg-neutral-800 border border-border-theme shrink-0 ${className}`}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={imageUrl}
+          alt={displayName}
+          className="w-full h-full object-cover"
+          onError={() => setImageError(true)}
+          loading="lazy"
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`rounded-full bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 flex items-center justify-center font-sans font-semibold shrink-0 shadow-2xs select-none ${className}`}
+    >
+      {initials}
+    </div>
+  );
+}
+
+// =========================================================
 // SVG ICONS
 // =========================================================
 function CloseIcon({ className = "w-5 h-5" }) {
@@ -115,6 +150,14 @@ function ArrowPathIcon({ className = "w-4 h-4" }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+    </svg>
+  );
+}
+
+function ChatBubbleIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h.008v.008H8.625V12zm4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h.008v.008h-.008V12zm4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h.008v.008h-.008V12zM21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
     </svg>
   );
 }
@@ -225,14 +268,13 @@ export default function CreatorBookingDetailModal({
   const badge = getStatusBadge(booking?.status);
 
   const brandName =
+    booking?.brand?.companyName ||
     booking?.brand?.name ||
     booking?.brand?.displayName ||
     booking?.brand?.email ||
     "Brand Partner";
 
   const brandEmail = booking?.brand?.email || "N/A";
-  const brandInitials = getBrandInitials(brandName);
-
   const campaignTitle = booking?.campaign?.title || "Collaboration Campaign";
   const campaignCategory = booking?.campaign?.category || "General";
   const platform =
@@ -259,13 +301,13 @@ export default function CreatorBookingDetailModal({
       onClick={handleClose}
     >
       <div
-        className="relative w-full max-w-2xl bg-surface border border-border-theme rounded-3xl shadow-2xl overflow-hidden my-auto transition-all"
+        className="relative w-full max-w-2xl bg-surface border border-border-theme rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden my-auto transition-all"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-border-theme bg-surface-muted/30">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 sm:py-5 border-b border-border-theme bg-surface-muted/30">
+          <div className="space-y-1 min-w-0 flex-1 mr-3">
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="font-bold text-[10px] tracking-wider uppercase text-[#ff2d6c] font-sans">
                 BOOKING DETAILS
               </span>
@@ -275,16 +317,16 @@ export default function CreatorBookingDetailModal({
                 {badge.label}
               </span>
               {isBrandInitiated ? (
-                <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-500/10 text-blue-500 border border-blue-500/20">
+                <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-blue-500/10 text-blue-500 border border-blue-500/20">
                   Direct Proposal
                 </span>
               ) : (
-                <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-medium bg-neutral-500/10 text-neutral-400 border border-neutral-500/20">
+                <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-neutral-500/10 text-neutral-400 border border-neutral-500/20">
                   Application
                 </span>
               )}
             </div>
-            <h2 className="font-serif font-medium text-xl sm:text-2xl text-foreground truncate max-w-md">
+            <h2 className="font-serif font-medium text-lg sm:text-xl lg:text-2xl text-foreground break-words line-clamp-2">
               {campaignTitle}
             </h2>
           </div>
@@ -293,7 +335,7 @@ export default function CreatorBookingDetailModal({
             type="button"
             onClick={handleClose}
             disabled={submitting}
-            className="p-2 rounded-xl text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors cursor-pointer disabled:opacity-50"
+            className="p-2 rounded-xl text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors cursor-pointer disabled:opacity-50 shrink-0"
             aria-label="Close modal"
           >
             <CloseIcon className="w-5 h-5" />
@@ -301,7 +343,7 @@ export default function CreatorBookingDetailModal({
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 space-y-6 max-h-[75vh] overflow-y-auto custom-scrollbar">
+        <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 max-h-[75vh] overflow-y-auto custom-scrollbar">
           {/* Loading Skeleton */}
           {loading && (
             <div className="space-y-4">
@@ -313,23 +355,23 @@ export default function CreatorBookingDetailModal({
 
           {/* Error Banner */}
           {error && !loading && (
-            <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs flex items-center justify-between gap-4">
+            <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs flex items-center justify-between gap-3">
               <span>{typeof error === "string" ? error : "Failed to load booking details."}</span>
               <button
                 type="button"
                 onClick={handleRetryDetail}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500 text-white text-xs font-semibold hover:bg-red-600 transition-colors shrink-0 cursor-pointer"
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-red-500 text-white font-semibold text-xs hover:bg-red-600 transition-colors"
               >
-                <ArrowPathIcon className="w-4 h-4" />
+                <ArrowPathIcon className="w-3.5 h-3.5" />
                 <span>Retry</span>
               </button>
             </div>
           )}
 
-          {/* Local Action Feedback Alert */}
+          {/* Local Action Feedback */}
           {localFeedback && (
             <div
-              className={`p-4 rounded-2xl text-xs font-medium flex items-center gap-2.5 transition-all ${
+              className={`p-3.5 sm:p-4 rounded-2xl text-xs font-medium flex items-center gap-2.5 transition-all ${
                 localFeedback.type === "success"
                   ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-500"
                   : "bg-red-500/10 border border-red-500/20 text-red-500"
@@ -342,17 +384,19 @@ export default function CreatorBookingDetailModal({
 
           {!loading && booking && (
             <>
-              {/* Brand Information Section */}
-              <div className="p-4 rounded-2xl border border-border-theme bg-surface-muted/30 flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-12 h-12 rounded-full bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 flex items-center justify-center font-sans font-bold text-base shrink-0 shadow-xs">
-                    {brandInitials}
-                  </div>
-                  <div className="min-w-0">
+              {/* Brand Information Section with Profile Avatar */}
+              <div className="p-3.5 sm:p-4 rounded-2xl border border-border-theme bg-surface-muted/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <BrandAvatar
+                    brand={booking?.brand}
+                    name={brandName}
+                    className="w-11 h-11 sm:w-12 sm:h-12 text-sm sm:text-base shrink-0"
+                  />
+                  <div className="min-w-0 flex-1">
                     <span className="text-[10px] uppercase font-bold tracking-wider text-text-secondary">
                       Brand Client
                     </span>
-                    <h3 className="font-semibold text-foreground text-sm sm:text-base font-sans truncate">
+                    <h3 className="font-semibold text-foreground text-sm sm:text-base font-sans break-words line-clamp-1">
                       {brandName}
                     </h3>
                     <p className="text-xs text-text-secondary truncate mt-0.5">
@@ -361,8 +405,8 @@ export default function CreatorBookingDetailModal({
                   </div>
                 </div>
 
-                <div className="text-right shrink-0">
-                  <span className="text-[10px] uppercase font-bold tracking-wider text-text-secondary block">
+                <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center border-t sm:border-t-0 pt-2 sm:pt-0 border-border-theme/60 shrink-0">
+                  <span className="text-[10px] uppercase font-bold tracking-wider text-text-secondary">
                     Agreed Price
                   </span>
                   <span className="text-base sm:text-lg font-bold text-foreground font-sans">
@@ -371,47 +415,63 @@ export default function CreatorBookingDetailModal({
                 </div>
               </div>
 
+              {/* Campaign Cover Image Banner (if available) */}
+              {Boolean(booking?.campaign?.coverImage) && (
+                <div className="w-full h-32 sm:h-44 rounded-2xl overflow-hidden relative border border-border-theme bg-surface-muted/30 shrink-0">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={booking.campaign.coverImage}
+                    alt={campaignTitle}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                    onError={(e) => {
+                      e.currentTarget.parentElement.style.display = "none";
+                    }}
+                  />
+                </div>
+              )}
+
               {/* Core Collaboration Metadata Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="p-3.5 rounded-2xl bg-surface-muted/20 border border-border-theme">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
+                <div className="p-3 sm:p-3.5 rounded-2xl bg-surface-muted/20 border border-border-theme">
                   <span className="text-[10px] font-bold text-text-secondary uppercase tracking-wider block">
                     Category
                   </span>
-                  <span className="text-xs sm:text-sm font-semibold text-foreground capitalize mt-1 block">
+                  <span className="text-xs sm:text-sm font-semibold text-foreground capitalize mt-1 block truncate">
                     {campaignCategory}
                   </span>
                 </div>
 
-                <div className="p-3.5 rounded-2xl bg-surface-muted/20 border border-border-theme">
+                <div className="p-3 sm:p-3.5 rounded-2xl bg-surface-muted/20 border border-border-theme">
                   <span className="text-[10px] font-bold text-text-secondary uppercase tracking-wider block">
                     Platform
                   </span>
-                  <span className="text-xs sm:text-sm font-semibold text-foreground capitalize mt-1 block">
+                  <span className="text-xs sm:text-sm font-semibold text-foreground capitalize mt-1 block truncate">
                     {platform}
                   </span>
                 </div>
 
-                <div className="p-3.5 rounded-2xl bg-surface-muted/20 border border-border-theme">
+                <div className="p-3 sm:p-3.5 rounded-2xl bg-surface-muted/20 border border-border-theme">
                   <span className="text-[10px] font-bold text-text-secondary uppercase tracking-wider block">
                     Delivery Deadline
                   </span>
-                  <span className="text-xs sm:text-sm font-semibold text-foreground mt-1 block">
+                  <span className="text-xs sm:text-sm font-semibold text-foreground mt-1 block truncate">
                     {formatDate(booking.deadline)}
                   </span>
                 </div>
 
-                <div className="p-3.5 rounded-2xl bg-surface-muted/20 border border-border-theme">
+                <div className="p-3 sm:p-3.5 rounded-2xl bg-surface-muted/20 border border-border-theme">
                   <span className="text-[10px] font-bold text-text-secondary uppercase tracking-wider block">
                     Applied / Sent
                   </span>
-                  <span className="text-xs sm:text-sm font-semibold text-foreground mt-1 block">
+                  <span className="text-xs sm:text-sm font-semibold text-foreground mt-1 block truncate">
                     {formatDate(booking.createdAt)}
                   </span>
                 </div>
               </div>
 
               {/* Selected Service Detail */}
-              <div className="p-4 rounded-2xl border border-border-theme bg-surface-muted/10 space-y-1.5">
+              <div className="p-3.5 sm:p-4 rounded-2xl border border-border-theme bg-surface-muted/10 space-y-1.5">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-text-secondary uppercase tracking-wider">
                     Package / Service
@@ -445,7 +505,7 @@ export default function CreatorBookingDetailModal({
                         className="flex items-start gap-2 p-2.5 rounded-xl border border-border-theme bg-surface-muted/20 text-xs font-medium text-foreground"
                       >
                         <span className="w-1.5 h-1.5 rounded-full bg-[#ff2d6c] shrink-0 mt-1.5" />
-                        <span>{typeof item === "string" ? item : item.deliverable || item.text || item.title || JSON.stringify(item)}</span>
+                        <span className="break-words">{typeof item === "string" ? item : item.deliverable || item.text || item.title || JSON.stringify(item)}</span>
                       </div>
                     ))}
                   </div>
@@ -458,7 +518,7 @@ export default function CreatorBookingDetailModal({
                   <span className="text-xs font-bold text-text-secondary uppercase tracking-wider block">
                     {isBrandInitiated ? "Brand Proposal Message" : "Your Application Message"}
                   </span>
-                  <div className="p-3.5 rounded-2xl border border-border-theme bg-surface-muted/20 text-xs text-foreground leading-relaxed italic">
+                  <div className="p-3.5 rounded-2xl border border-border-theme bg-surface-muted/20 text-xs text-foreground leading-relaxed italic break-words">
                     &ldquo;{booking.message}&rdquo;
                   </div>
                 </div>
@@ -468,20 +528,20 @@ export default function CreatorBookingDetailModal({
         </div>
 
         {/* Modal Footer Actions */}
-        <div className="px-6 py-4 border-t border-border-theme bg-surface-muted/30 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-t border-border-theme bg-surface-muted/30 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
           {/* Left info or Go to Workspace button */}
           <div>
             {isAcceptedOrActive ? (
               <Link
                 href="/creator/workspace"
                 onClick={handleClose}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#252525] dark:bg-white text-white dark:text-neutral-900 text-xs font-semibold hover:opacity-90 transition-opacity"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 text-xs font-semibold shadow-xs transition-all border border-black dark:border-white focus:outline-none focus:ring-2 focus:ring-black/20"
               >
                 <WorkspaceIcon className="w-4 h-4" />
                 <span>Open Collaboration Workspace</span>
               </Link>
             ) : (
-              <span className="text-xs text-text-secondary">
+              <span className="text-xs text-text-secondary text-center sm:text-left block">
                 {isPending
                   ? isBrandInitiated
                     ? "Respond to brand's collaboration proposal"
@@ -492,10 +552,10 @@ export default function CreatorBookingDetailModal({
           </div>
 
           {/* Right Action Buttons */}
-          <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap sm:flex-nowrap">
             {/* If pending and confirmation is active */}
             {confirmAction ? (
-              <div className="flex items-center gap-2 w-full sm:w-auto">
+              <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
                 <span className="text-xs font-semibold text-text-secondary">
                   {confirmAction === "accept"
                     ? "Accept proposal?"
@@ -531,6 +591,14 @@ export default function CreatorBookingDetailModal({
                 {/* Pending Brand Direct Proposal: Accept or Reject */}
                 {isPending && isBrandInitiated && (
                   <>
+                    <Link
+                      href={`/creator/messages?bookingId=${booking._id}`}
+                      onClick={handleClose}
+                      className="px-3.5 py-2 rounded-xl border border-border-theme bg-surface hover:bg-surface-muted text-text-secondary hover:text-foreground text-xs font-semibold transition-colors cursor-pointer inline-flex items-center gap-1.5"
+                    >
+                      <ChatBubbleIcon className="w-3.5 h-3.5 text-secondary" />
+                      <span>Ask a Question</span>
+                    </Link>
                     <button
                       type="button"
                       onClick={() => setConfirmAction("reject")}
@@ -539,7 +607,6 @@ export default function CreatorBookingDetailModal({
                     >
                       Decline
                     </button>
-
                     <button
                       type="button"
                       onClick={() => setConfirmAction("accept")}
@@ -580,4 +647,3 @@ export default function CreatorBookingDetailModal({
     </div>
   );
 }
-

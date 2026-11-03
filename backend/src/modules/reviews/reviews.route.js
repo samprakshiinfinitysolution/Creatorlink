@@ -5,6 +5,7 @@ import authorizeRoles from "../../middleware/role.middleware.js";
 
 import {
     createBrandReview,
+    createCreatorReview,
     getBrandReviews,
     getCreatorReviews,
     getWorkspaceReview
@@ -55,6 +56,13 @@ const creatorReviewRouter = express.Router();
 creatorReviewRouter.use(
     authenticateUser,
     authorizeRoles("creator")
+);
+
+// Creator creates a review for brand on completed workspace
+creatorReviewRouter.post(
+    "/",
+    validateCreateReview,
+    createCreatorReview
 );
 
 // Creator fetches list of reviews received by them

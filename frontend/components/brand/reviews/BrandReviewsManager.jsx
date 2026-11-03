@@ -253,26 +253,29 @@ export default function BrandReviewsManager() {
   const dispatch = useDispatch();
 
   // Reviews slice state
-  const { reviews, pagination, loading, error, successMessage } =
+  const { reviews, stats, pagination, loading, error, successMessage } =
     useSelector((state) => state.brandReviews || {});
 
   // Workspace slice state (for selecting completed collaborations)
   const { workspaces, loading: workspacesLoading } = useSelector(
     (state) => state.brandWorkspace || {}
   );
+  const { user } = useSelector((state) => state.auth || {});
+  const brandId = user?._id || user?.userId;
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [reviewType, setReviewType] = useState("received"); // "received" | "given"
   const [ratingFilter, setRatingFilter] = useState("all");
 
   // "Write Review" Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [failedCoverUrls, setFailedCoverUrls] = useState({});
 
-  // Fetch reviews on mount or page change
+  // Fetch reviews on mount, page change, or reviewType change
   useEffect(() => {
-    dispatch(fetchBrandReviews({ page: currentPage, limit: 10 }));
-  }, [dispatch, currentPage]);
+    dispatch(fetchBrandReviews({ page: currentPage, limit: 10, type: reviewType }));
+  }, [dispatch, currentPage, reviewType]);
 
   // When modal is opened, fetch workspaces to get completed collaborations
   useEffect(() => {
@@ -288,20 +291,23 @@ export default function BrandReviewsManager() {
 
   const reviewedWorkspaceIdSet = useMemo(() => {
     const set = new Set();
-    (reviews || []).forEach((rev) => {
-      const wsId =
-        typeof rev.workspace === "object" && rev.workspace !== null
-          ? rev.workspace._id
-          : rev.workspace;
-      if (wsId) set.add(wsId.toString());
+    (workspaces || []).forEach((ws) => {
+      if (ws.myReview) {
+        set.add(String(ws._id));
+      } else if (ws.review) {
+        const revReviewer = ws.review.reviewer?._id || ws.review.reviewer;
+        const brandId = ws.brand?._id || ws.brand;
+        if (!revReviewer || (brandId && String(revReviewer) === String(brandId))) {
+          set.add(String(ws._id));
+        }
+      }
     });
     return set;
-  }, [reviews]);
+  }, [workspaces]);
 
   const unreviewedCompletedWorkspaces = useMemo(() => {
     return completedWorkspaces.filter((ws) => {
-      // Backend getBrandWorkspacesService reliably attaches ws.review across pagination
-      if (ws.review) return false;
+      if (ws.review || ws.myReview) return false;
       const wsId = ws._id ? ws._id.toString() : "";
       if (reviewedWorkspaceIdSet.has(wsId)) return false;
       return true;
@@ -309,7 +315,7 @@ export default function BrandReviewsManager() {
   }, [completedWorkspaces, reviewedWorkspaceIdSet]);
 
   const handleRefresh = () => {
-    dispatch(fetchBrandReviews({ page: currentPage, limit: 10 }));
+    dispatch(fetchBrandReviews({ page: currentPage, limit: 10, type: reviewType }));
   };
 
   const handleOpenModal = () => {
@@ -326,13 +332,16 @@ export default function BrandReviewsManager() {
   }, [reviews, ratingFilter]);
 
   // Derived metrics
-  const totalReviewsCount = pagination?.totalItems ?? (reviews?.length || 0);
+  const totalReviewsCount = stats?.totalReviews ?? (pagination?.totalItems ?? (reviews?.length || 0));
 
-  const averageRatingGiven = useMemo(() => {
-    if (!reviews || reviews.length === 0) return 0;
+  const averageRatingDisplay = useMemo(() => {
+    if (stats?.averageRating && Number(stats.averageRating) > 0) {
+      return Number(stats.averageRating).toFixed(1);
+    }
+    if (!reviews || reviews.length === 0) return "0.0";
     const sum = reviews.reduce((acc, r) => acc + (Number(r.rating) || 0), 0);
     return (sum / reviews.length).toFixed(1);
-  }, [reviews]);
+  }, [stats, reviews]);
 
   const currentPageFiveStarPercentage = useMemo(() => {
     if (!reviews || reviews.length === 0) return 0;
@@ -354,21 +363,73 @@ export default function BrandReviewsManager() {
 
         {/* Main Content Area */}
         <main className="p-4 sm:p-6 lg:p-8 space-y-6 flex-1 max-w-7xl w-full mx-auto min-w-0">
+          {/* Main Review Direction Tabs (Received from Creators vs Given to Creators) */}
+          <div className="flex items-center gap-2 border-b border-border-theme pb-1">
+            <button
+              type="button"
+              onClick={() => {
+                setReviewType("received");
+                setCurrentPage(1);
+              }}
+              className={`pb-3 px-1 text-xs sm:text-sm font-semibold border-b-2 transition-all cursor-pointer flex items-center gap-2 ${
+                reviewType === "received"
+                  ? "border-[#ff2d6c] text-[#ff2d6c]"
+                  : "border-transparent text-text-secondary hover:text-foreground"
+              }`}
+            >
+              <span>Reviews from Creators</span>
+              <span
+                className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                  reviewType === "received"
+                    ? "bg-[#ff2d6c]/10 text-[#ff2d6c]"
+                    : "bg-surface-muted text-text-secondary"
+                }`}
+              >
+                Received
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setReviewType("given");
+                setCurrentPage(1);
+              }}
+              className={`pb-3 px-1 text-xs sm:text-sm font-semibold border-b-2 transition-all cursor-pointer flex items-center gap-2 ${
+                reviewType === "given"
+                  ? "border-[#ff2d6c] text-[#ff2d6c]"
+                  : "border-transparent text-text-secondary hover:text-foreground"
+              }`}
+            >
+              <span>Reviews Given to Creators</span>
+              <span
+                className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                  reviewType === "given"
+                    ? "bg-[#ff2d6c]/10 text-[#ff2d6c]"
+                    : "bg-surface-muted text-text-secondary"
+                }`}
+              >
+                Submitted
+              </span>
+            </button>
+          </div>
+
           {/* Header Section */}
           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-2">
               {/* Verification Badge */}
               <div className="flex items-center gap-2">
                 <span className="font-bold text-[11px] tracking-wider uppercase text-[#ff2d6c] dark:text-[#ff4f87] font-sans">
-                  Submitted Creator Evaluations
+                  {reviewType === "received" ? "Verified Creator Feedback" : "Submitted Creator Evaluations"}
                 </span>
               </div>
 
               <h1 className="font-serif font-medium text-3xl sm:text-4xl text-neutral-950 dark:text-white tracking-tight">
-                Reviews And Creator Evaluations
+                {reviewType === "received" ? "Reviews From Creators" : "Reviews And Creator Evaluations"}
               </h1>
               <p className="text-xs sm:text-sm text-text-secondary max-w-xl">
-                Manage performance reviews, star ratings, and feedback submitted for completed campaign collaborations.
+                {reviewType === "received"
+                  ? "Verified feedback, ratings, and testimonials submitted by creators from completed campaign collaborations."
+                  : "Manage performance reviews, star ratings, and feedback submitted for completed campaign collaborations."}
               </p>
             </div>
 
@@ -401,12 +462,12 @@ export default function BrandReviewsManager() {
                       <StarIcon
                         key={star}
                         className="w-3 h-3 text-amber-400 fill-amber-400"
-                        filled={star <= Math.round(Number(averageRatingGiven) || 5)}
+                        filled={star <= Math.round(Number(averageRatingDisplay) || 5)}
                       />
                     ))}
                   </div>
                   <span className="font-semibold text-neutral-900 dark:text-white text-[11px]">
-                    {Number(averageRatingGiven) > 0 ? averageRatingGiven : "0.0"} average rating (current page)
+                    {averageRatingDisplay} average rating {reviewType === "received" ? "(received)" : "(given)"}
                   </span>
                 </div>
               )}
@@ -458,18 +519,18 @@ export default function BrandReviewsManager() {
             {/* 1. Average Rating */}
             <div className="bg-surface border border-border-theme p-4 sm:p-5 rounded-2xl shadow-xs space-y-1">
               <span className="text-[11px] font-semibold text-text-secondary uppercase tracking-wider block">
-                Average Rating (Current Page)
+                {reviewType === "received" ? "Average Rating Received" : "Average Rating Given"}
               </span>
               <div className="flex items-baseline gap-2 pt-0.5">
                 <span className="font-sans font-semibold text-[22px] sm:text-[28px] text-amber-500 tracking-tight">
-                  {Number(averageRatingGiven) > 0 ? averageRatingGiven : "0.0"}
+                  {averageRatingDisplay}
                 </span>
                 <div className="flex items-center gap-0.5 text-amber-400">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <StarIcon
                       key={star}
                       className="w-4 h-4 text-amber-400"
-                      filled={star <= Math.round(Number(averageRatingGiven))}
+                      filled={star <= Math.round(Number(averageRatingDisplay))}
                     />
                   ))}
                 </div>
@@ -583,12 +644,16 @@ export default function BrandReviewsManager() {
               </div>
               <div className="space-y-1">
                 <h3 className="font-sans font-semibold text-lg text-foreground tracking-tight">
-                  No Submitted Reviews Found
+                  {reviewType === "received"
+                    ? "No Client Reviews Received Yet"
+                    : "No Submitted Reviews Found"}
                 </h3>
                 <p className="text-xs text-text-secondary max-w-sm mx-auto leading-relaxed">
                   {ratingFilter === "all"
-                    ? "You haven't submitted any creator reviews yet. You can leave a review once all deliverables in a workspace are approved and the collaboration is completed."
-                    : `No submitted reviews match the selected filter.`}
+                    ? reviewType === "received"
+                      ? "You haven't received any creator reviews yet. When creators complete collaboration workspaces with you and submit ratings, they will appear here."
+                      : "You haven't submitted any creator reviews yet. You can leave a review once all deliverables in a workspace are approved and the collaboration is completed."
+                    : `No reviews match the selected filter.`}
                 </p>
               </div>
               <div className="pt-2 flex items-center justify-center gap-3 flex-wrap">
@@ -612,9 +677,11 @@ export default function BrandReviewsManager() {
             /* Reviews Card Grid */
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
               {filteredReviews.map((review) => {
+                const isReceived = reviewType === "received";
+                const partnerObj = isReceived ? review.reviewer : review.reviewee;
                 const creatorName =
-                  typeof review.reviewee === "object" && review.reviewee !== null
-                    ? (review.reviewee.name || "Creator Partner")
+                  typeof partnerObj === "object" && partnerObj !== null
+                    ? (partnerObj.name || partnerObj.companyName || "Creator Partner")
                     : "Creator Partner";
                 const initials = getInitials(creatorName);
                 const rawRating = Number(review.rating);
@@ -635,9 +702,9 @@ export default function BrandReviewsManager() {
                   null;
 
                 const creatorAvatar =
-                  review.reviewee?.avatar ||
-                  review.reviewee?.profileImage ||
-                  review.reviewee?.image ||
+                  partnerObj?.profileImage ||
+                  partnerObj?.avatar ||
+                  partnerObj?.image ||
                   null;
 
                 const agreedPriceFormatted = formatPrice(
@@ -735,7 +802,7 @@ export default function BrandReviewsManager() {
                                 {creatorName}
                               </h3>
                               <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-neutral-100 dark:bg-surface-muted text-neutral-700 dark:text-neutral-300 border border-neutral-200 dark:border-border-theme uppercase leading-none">
-                                Creator
+                                {isReceived ? "Creator Feedback" : "Submitted Evaluation"}
                               </span>
                             </div>
                             <span className="text-xs text-neutral-500 dark:text-neutral-400 flex items-center gap-1 mt-0.5">
@@ -855,10 +922,11 @@ export default function BrandReviewsManager() {
         workspacesLoading={workspacesLoading}
         onSuccess={() => {
           if (currentPage === 1) {
-            dispatch(fetchBrandReviews({ page: 1, limit: 10 }));
+            dispatch(fetchBrandReviews({ page: 1, limit: 10, type: reviewType }));
           } else {
             setCurrentPage(1);
           }
+          dispatch(fetchBrandWorkspaces({ status: "completed", limit: 50 }));
         }}
       />
     </div>

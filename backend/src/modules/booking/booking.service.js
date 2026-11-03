@@ -5,6 +5,7 @@ import Campaign from "../brand/campaigns/campaign.model.js";
 import CreatorService from "../creator/services/services.model.js";
 import Auth from "../auth/auth.model.js";
 import CreatorProfile from "../creator/profile/profile.model.js";
+import BrandProfile from "../brand/profile/profile.model.js";
 import {
     createWorkspaceForAcceptedBooking,
     cleanupWorkspaceForBooking
@@ -126,7 +127,7 @@ const createBookingService = async (creatorId, bookingData) => {
         idempotencyKey: `booking:application_received:${booking._id}`
     });
 
-    return booking;
+    return await attachBookingProfiles(booking);
 };
 
 
@@ -170,8 +171,10 @@ const getCreatorBookingsService = async (creatorId, query = {}) => {
     ]);
 
 
+    const enrichedBookings = await attachBookingProfiles(bookings);
+
     return {
-        bookings,
+        bookings: enrichedBookings,
         pagination: getPaginationData(
             currentPage,
             itemsPerPage,
@@ -209,7 +212,7 @@ const getCreatorBookingByIdService = async (creatorId, bookingId) => {
     }
 
 
-    return booking;
+    return await attachBookingProfiles(booking);
 };
 
 
@@ -303,37 +306,39 @@ const cancelCreatorBookingService = async (creatorId, bookingId) => {
 };
 
 
-// Helper to enrich bookings with CreatorProfile (profileImage)
+// Helper to enrich bookings with BrandProfile (logo, companyName) and CreatorProfile (profileImage)
 const isMongooseObjectId = (val) =>
     Boolean(val && (val instanceof mongoose.Types.ObjectId || val?._bsontype === "ObjectID"));
 
-const attachBookingCreatorProfiles = async (bookings) => {
+const attachBookingProfiles = async (bookings) => {
     if (!bookings) return bookings;
     const isSingle = !Array.isArray(bookings);
     const bookingList = isSingle ? [bookings] : bookings;
     if (bookingList.length === 0) return bookings;
 
     const creatorIds = new Set();
-    const extractCreatorId = (creator) => {
-        if (!creator) return null;
-        if (typeof creator === "object" && !isMongooseObjectId(creator)) {
-            const rawId = creator._id || creator.id;
+    const brandIds = new Set();
+
+    const extractEntityId = (entity) => {
+        if (!entity) return null;
+        if (typeof entity === "object" && !isMongooseObjectId(entity)) {
+            const rawId = entity._id || entity.id;
             if (rawId) {
                 return rawId.toString ? rawId.toString() : String(rawId);
             }
             return null;
         }
-        if (isMongooseObjectId(creator)) {
-            return creator.toString();
+        if (isMongooseObjectId(entity)) {
+            return entity.toString();
         }
-        if (typeof creator === "string") {
-            const trimmed = creator.trim();
+        if (typeof entity === "string") {
+            const trimmed = entity.trim();
             if (mongoose.Types.ObjectId.isValid(trimmed)) {
                 return trimmed;
             }
         }
-        if (mongoose.Types.ObjectId.isValid(creator)) {
-            return creator.toString ? creator.toString() : String(creator);
+        if (mongoose.Types.ObjectId.isValid(entity)) {
+            return entity.toString ? entity.toString() : String(entity);
         }
         return null;
     };
@@ -341,28 +346,47 @@ const attachBookingCreatorProfiles = async (bookings) => {
     bookingList.forEach((b) => {
         const bObj = b?.toObject ? b.toObject() : b;
         if (!bObj) return;
-        const cId = extractCreatorId(bObj.creator);
+        const cId = extractEntityId(bObj.creator);
+        const bId = extractEntityId(bObj.brand);
         if (cId) creatorIds.add(cId);
+        if (bId) brandIds.add(bId);
     });
 
     const isDbConnected = mongoose.connection?.readyState === 1;
-    const creatorProfiles = creatorIds.size > 0 && isDbConnected
-        ? await CreatorProfile.find({
-            user: { $in: Array.from(creatorIds).map((id) => new mongoose.Types.ObjectId(id)) }
-        })
-            .select("user profileImage")
-            .lean()
-        : [];
+    const [creatorProfiles, brandProfiles] = await Promise.all([
+        creatorIds.size > 0 && isDbConnected
+            ? CreatorProfile.find({
+                user: { $in: Array.from(creatorIds).map((id) => new mongoose.Types.ObjectId(id)) }
+            })
+                .select("user profileImage")
+                .lean()
+            : [],
+        brandIds.size > 0 && isDbConnected
+            ? BrandProfile.find({
+                user: { $in: Array.from(brandIds).map((id) => new mongoose.Types.ObjectId(id)) }
+            })
+                .select("user logo companyName")
+                .lean()
+            : []
+    ]);
 
     const creatorMap = new Map();
     creatorProfiles.forEach((cp) => {
         if (cp?.user) creatorMap.set(cp.user.toString(), cp.profileImage || "");
     });
 
+    const brandMap = new Map();
+    brandProfiles.forEach((bp) => {
+        if (bp?.user) brandMap.set(bp.user.toString(), bp);
+    });
+
     const enriched = bookingList.map((b) => {
         const bObj = b?.toObject ? b.toObject() : { ...b };
-        const cId = extractCreatorId(bObj.creator);
+        const cId = extractEntityId(bObj.creator);
+        const bId = extractEntityId(bObj.brand);
+
         const profileImage = cId ? (creatorMap.get(cId) || "") : "";
+        const bp = bId ? brandMap.get(bId) : null;
 
         if (bObj.creator) {
             const isPopulated = typeof bObj.creator === "object" && !isMongooseObjectId(bObj.creator);
@@ -384,14 +408,41 @@ const attachBookingCreatorProfiles = async (bookings) => {
             }
         }
 
+        if (bObj.brand) {
+            const isPopulated = typeof bObj.brand === "object" && !isMongooseObjectId(bObj.brand);
+            const brandLogo = bp?.logo || "";
+            const companyName = bp?.companyName || "";
+
+            if (isPopulated) {
+                const brandBase = bObj.brand.toObject ? bObj.brand.toObject() : { ...bObj.brand };
+                bObj.brand = {
+                    ...brandBase,
+                    logo: brandLogo || brandBase.logo || "",
+                    profileImage: brandLogo || brandBase.profileImage || "",
+                    avatar: brandLogo || brandBase.avatar || "",
+                    image: brandLogo || brandBase.image || "",
+                    companyName: companyName || brandBase.companyName || ""
+                };
+            } else if (bId) {
+                bObj.brand = {
+                    _id: bObj.brand,
+                    logo: brandLogo,
+                    profileImage: brandLogo,
+                    avatar: brandLogo,
+                    image: brandLogo,
+                    companyName
+                };
+            }
+        }
+
         return bObj;
     });
 
     return isSingle ? enriched[0] : enriched;
 };
 
+const attachBookingCreatorProfiles = attachBookingProfiles;
 
-// Gets bookings received by the authenticated brand for their campaigns.
 const getBrandBookingsService = async (brandId, query = {}) => {
 
     const {
@@ -740,7 +791,7 @@ const createBrandBookingService = async (brandId, bookingData) => {
         idempotencyKey: `booking:proposal_received:${booking._id}`
     });
 
-    return booking;
+    return await attachBookingProfiles(booking);
 };
 
 

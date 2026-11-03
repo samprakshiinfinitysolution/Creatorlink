@@ -201,7 +201,7 @@ export default function CreatorQuickActions({ metrics, actions: customActions })
         </div>
 
         {/* Pipeline Stages */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 pt-1 items-stretch">
+        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 pt-1 items-stretch">
           {pipelineStages.map((stage, idx) => {
             const style = getStageStyle(stage.id, stage.count);
             const isLastOdd = idx === 4; // 5th card on 2-col mobile layout
@@ -237,7 +237,7 @@ export default function CreatorQuickActions({ metrics, actions: customActions })
                 {/* Bottom: Stage Label */}
                 <div className="pt-2 border-t border-border-theme/40">
                   <span
-                    className="text-xs sm:text-sm font-sans font-medium text-foreground block truncate group-hover:text-secondary transition-colors"
+                    className="text-xs sm:text-sm font-sans font-medium text-foreground block break-words line-clamp-1 group-hover:text-secondary transition-colors"
                     title={stage.label}
                   >
                     {stage.label}
@@ -250,7 +250,7 @@ export default function CreatorQuickActions({ metrics, actions: customActions })
       </div>
 
       {/* 2. Quick Action Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 items-stretch">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 items-stretch">
         {actions.map((act) => {
           const Icon = act.icon || CompassIcon;
           return (

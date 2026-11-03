@@ -1146,13 +1146,6 @@ export default function CreatorOnboarding() {
       setIsSubmitting(true);
       setValidationError(null);
 
-      // Derive starting rate safely
-      const validActivePrices = activeServices
-        .map((s) => Number(s?.price))
-        .filter((price) => Number.isFinite(price) && price > 0);
-
-      const startingRate = validActivePrices.length > 0 ? Math.min(...validActivePrices) : 0;
-
       const completionPayload = {
         title: formData.title.trim(),
         bio: formData.bio.trim(),
@@ -1171,7 +1164,6 @@ export default function CreatorOnboarding() {
         languages: formData.languages,
         ethnicity: formData.ethnicity ? formData.ethnicity.trim() : "",
         ...(formData.profileImage ? { profileImage: formData.profileImage } : {}),
-        startingRate,
         isOnboarded: true,
       };
 
@@ -2143,7 +2135,7 @@ export default function CreatorOnboarding() {
                         No services added yet
                       </h3>
                       <p className="text-xs text-neutral-500 max-w-sm mx-auto mb-4">
-                        Define your collaboration packages, delivery timelines, and starting rates for brands.
+                        Define your collaboration packages and delivery timelines for brands.
                       </p>
                       <button
                         type="button"

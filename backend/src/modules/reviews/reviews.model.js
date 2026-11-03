@@ -65,4 +65,20 @@ reviewSchema.index({ reviewee: 1, createdAt: -1 });
 
 const Review = mongoose.model("Review", reviewSchema);
 
+// Safely drop obsolete single-direction unique indexes if they exist in MongoDB
+const dropObsoleteIndexes = async () => {
+    try {
+        await Review.collection.dropIndex("workspace_1");
+    } catch (_) {}
+    try {
+        await Review.collection.dropIndex("workspace_1_booking_1");
+    } catch (_) {}
+};
+
+if (mongoose.connection.readyState === 1) {
+    dropObsoleteIndexes();
+} else {
+    mongoose.connection.once("connected", dropObsoleteIndexes);
+}
+
 export default Review;

@@ -7,6 +7,7 @@ import {
   clearSelectedCreator,
 } from "@/redux/brand/creators/creators_slice";
 import BrandCreateBookingModal from "@/components/brand/bookings/BrandCreateBookingModal";
+import BrandContactUnlockSection from "./BrandContactUnlockSection";
 
 // =========================================================
 // FORMATTING HELPERS
@@ -553,6 +554,12 @@ export default function BrandCreatorDetailModal({
                       </span>
                     </div>
                   </div>
+
+                  {/* Direct Contact Unlock Section */}
+                  <BrandContactUnlockSection
+                    creatorId={creator.user?._id || creator._id}
+                    creatorName={creator.user?.name || "Creator"}
+                  />
 
                   {/* Bio Card */}
                   <div className="bg-surface-muted/30 border border-border-theme rounded-2xl p-5 space-y-2">

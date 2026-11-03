@@ -43,20 +43,20 @@ function ArrowTopRightOnSquareIcon({ className = "w-4 h-4" }) {
 }
 
 const statusBadgeStyles = {
-  in_progress: "bg-blue-500/10 text-blue-400 border border-blue-500/20",
-  submitted: "bg-amber-500/10 text-amber-400 border border-amber-500/20",
-  revision_requested: "bg-purple-500/10 text-purple-400 border border-purple-500/20",
-  completed: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
-  cancelled: "bg-red-500/10 text-red-400 border border-red-500/20"
+  in_progress: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20",
+  submitted: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20",
+  revision_requested: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20",
+  completed: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20",
+  cancelled: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20"
 };
 
 const deliverableStatusStyles = {
-  pending: "bg-zinc-500/10 text-zinc-400 border border-zinc-500/20",
-  in_progress: "bg-blue-500/10 text-blue-400 border border-blue-500/20",
-  submitted: "bg-amber-500/10 text-amber-400 border border-amber-500/20",
-  revision_requested: "bg-purple-500/10 text-purple-400 border border-purple-500/20",
-  approved: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
-  completed: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+  pending: "bg-zinc-500/10 text-zinc-600 dark:text-zinc-400 border border-zinc-500/20",
+  in_progress: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20",
+  submitted: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20",
+  revision_requested: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20",
+  approved: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20",
+  completed: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
 };
 
 export default function AdminCollaborationDetailModal({
@@ -147,21 +147,21 @@ export default function AdminCollaborationDetailModal({
     : "N/A";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
-      <div className="relative w-full max-w-4xl bg-[#0B0F17] border border-[#1F2937] rounded-2xl shadow-2xl overflow-hidden my-8 max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs overflow-y-auto">
+      <div className="relative w-full max-w-4xl bg-surface border border-border-theme rounded-2xl shadow-2xl overflow-hidden my-8 max-h-[90vh] flex flex-col">
         {/* HEADER */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#1F2937] bg-[#111827]/70">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border-theme bg-surface">
           <div className="flex items-center gap-3">
-            <h2 className="text-lg font-semibold text-white">Collaboration Dossier</h2>
+            <h2 className="text-lg font-serif font-bold text-foreground">Collaboration Dossier</h2>
             <span
-              className={`px-2.5 py-0.5 text-xs font-medium rounded-full uppercase ${
+              className={`px-2.5 py-0.5 text-xs font-semibold rounded-full uppercase ${
                 statusBadgeStyles[workspace.status] || statusBadgeStyles.in_progress
               }`}
             >
               {workspace.status.replace("_", " ")}
             </span>
             {isOverdue && (
-              <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-red-500/10 text-red-400 border border-red-500/20">
+              <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 uppercase">
                 OVERDUE
               </span>
             )}
@@ -169,7 +169,7 @@ export default function AdminCollaborationDetailModal({
 
           <button
             onClick={onClose}
-            className="p-1 text-[#9CA3AF] hover:text-white rounded-lg hover:bg-[#1F2937] transition-colors"
+            className="p-1.5 text-text-secondary hover:text-foreground rounded-xl hover:bg-surface-muted transition-colors cursor-pointer"
           >
             <XMarkIcon className="w-5 h-5" />
           </button>
@@ -177,12 +177,12 @@ export default function AdminCollaborationDetailModal({
 
         {/* FEEDBACK BANNERS */}
         {actionError && (
-          <div className="px-6 py-3 bg-red-500/10 border-b border-red-500/20 text-xs text-red-400">
+          <div className="px-6 py-3 bg-rose-500/10 border-b border-rose-500/20 text-xs text-rose-600 dark:text-rose-400 font-medium">
             {actionError}
           </div>
         )}
         {feedbackMsg && (
-          <div className="px-6 py-3 bg-emerald-500/10 border-b border-emerald-500/20 text-xs text-emerald-400">
+          <div className="px-6 py-3 bg-emerald-500/10 border-b border-emerald-500/20 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
             ✓ {feedbackMsg}
           </div>
         )}
@@ -190,25 +190,25 @@ export default function AdminCollaborationDetailModal({
         {/* BODY */}
         <div className="p-6 overflow-y-auto space-y-6 flex-1">
           {/* TOP OVERVIEW CARD */}
-          <div className="bg-[#111827] border border-[#1F2937] rounded-xl p-5">
+          <div className="bg-surface-muted/50 border border-border-theme rounded-2xl p-5 shadow-xs">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <span className="text-xs uppercase font-medium text-blue-400 tracking-wider">
+                <span className="text-xs uppercase font-bold text-secondary tracking-wider">
                   {workspace.campaign?.category || "Direct Hire Collaboration"}
                 </span>
-                <h1 className="text-xl font-bold text-white mt-1">
+                <h1 className="text-xl font-serif font-bold text-foreground mt-1">
                   {workspace.campaign?.title || workspace.service?.title || "Active Collaboration"}
                 </h1>
-                <p className="text-xs text-[#9CA3AF] mt-1">
-                  Workspace ID: <span className="font-mono text-zinc-400">{workspace._id}</span> • Started {formattedCreated}
+                <p className="text-xs text-text-secondary mt-1">
+                  Workspace ID: <span className="font-mono text-foreground">{workspace._id}</span> • Started {formattedCreated}
                 </p>
               </div>
 
-              <div className="text-right sm:border-l sm:border-[#1F2937] sm:pl-6">
-                <span className="text-xs text-[#9CA3AF] block">Agreed Compensation</span>
-                <span className="text-2xl font-black text-white">{formattedPrice}</span>
-                <span className="text-xs text-[#9CA3AF] block mt-0.5">
-                  Deadline: <span className={isOverdue ? "text-red-400 font-semibold" : "text-zinc-300"}>{formattedDeadline}</span>
+              <div className="text-right sm:border-l sm:border-border-theme sm:pl-6">
+                <span className="text-xs text-text-secondary block">Agreed Compensation</span>
+                <span className="text-2xl font-bold font-serif text-foreground">{formattedPrice}</span>
+                <span className="text-xs text-text-secondary block mt-0.5">
+                  Deadline: <span className={isOverdue ? "text-rose-600 dark:text-rose-400 font-semibold" : "text-foreground"}>{formattedDeadline}</span>
                 </span>
               </div>
             </div>
@@ -217,32 +217,32 @@ export default function AdminCollaborationDetailModal({
           {/* TWO-PARTY SUMMARY: BRAND & CREATOR */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* BRAND */}
-            <div className="bg-[#111827] border border-[#1F2937] rounded-xl p-4">
-              <span className="text-[10px] font-semibold text-[#6B7280] uppercase tracking-wider block mb-2">
+            <div className="bg-surface border border-border-theme rounded-2xl p-4 shadow-xs">
+              <span className="text-[10px] font-bold text-text-secondary uppercase tracking-wider block mb-2">
                 Hiring Brand
               </span>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-sm">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-secondary to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
                   {brandProfile?.companyName ? brandProfile.companyName[0].toUpperCase() : workspace.brand?.name?.[0] || "B"}
                 </div>
                 <div className="min-w-0">
-                  <div className="flex items-center gap-1.5 text-white font-semibold text-sm">
+                  <div className="flex items-center gap-1.5 text-foreground font-semibold text-sm">
                     <span className="truncate">{brandProfile?.companyName || workspace.brand?.name}</span>
                     {(brandProfile?.isVerifiedBusiness || workspace.brand?.isVerified) && (
-                      <CheckBadgeIcon className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                      <CheckBadgeIcon className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
                     )}
                   </div>
-                  <div className="text-xs text-[#9CA3AF] truncate">{workspace.brand?.email}</div>
+                  <div className="text-xs text-text-secondary truncate">{workspace.brand?.email}</div>
                 </div>
               </div>
-              <div className="mt-3 text-xs text-[#9CA3AF] flex items-center justify-between border-t border-[#1F2937] pt-2">
+              <div className="mt-3 text-xs text-text-secondary flex items-center justify-between border-t border-border-theme pt-2">
                 <span>Industry: {brandProfile?.industry || "Marketing"}</span>
                 {brandProfile?.website && (
                   <a
                     href={brandProfile.website.startsWith("http") ? brandProfile.website : `https://${brandProfile.website}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-blue-400 hover:underline flex items-center gap-1"
+                    className="text-secondary hover:underline flex items-center gap-1 font-medium"
                   >
                     Site <ArrowTopRightOnSquareIcon className="w-3 h-3" />
                   </a>
@@ -251,25 +251,25 @@ export default function AdminCollaborationDetailModal({
             </div>
 
             {/* CREATOR */}
-            <div className="bg-[#111827] border border-[#1F2937] rounded-xl p-4">
-              <span className="text-[10px] font-semibold text-[#6B7280] uppercase tracking-wider block mb-2">
+            <div className="bg-surface border border-border-theme rounded-2xl p-4 shadow-xs">
+              <span className="text-[10px] font-bold text-text-secondary uppercase tracking-wider block mb-2">
                 Contracted Creator
               </span>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 to-pink-600 flex items-center justify-center text-white font-bold text-sm">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 to-pink-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
                   {creatorProfile?.displayName ? creatorProfile.displayName[0].toUpperCase() : workspace.creator?.name?.[0] || "C"}
                 </div>
                 <div className="min-w-0">
-                  <div className="flex items-center gap-1.5 text-white font-semibold text-sm">
+                  <div className="flex items-center gap-1.5 text-foreground font-semibold text-sm">
                     <span className="truncate">{creatorProfile?.displayName || workspace.creator?.name}</span>
                     {(creatorProfile?.isVerifiedBadge || workspace.creator?.isVerified) && (
-                      <CheckBadgeIcon className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                      <CheckBadgeIcon className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
                     )}
                   </div>
-                  <div className="text-xs text-[#9CA3AF] truncate">{workspace.creator?.email}</div>
+                  <div className="text-xs text-text-secondary truncate">{workspace.creator?.email}</div>
                 </div>
               </div>
-              <div className="mt-3 text-xs text-[#9CA3AF] flex items-center justify-between border-t border-[#1F2937] pt-2">
+              <div className="mt-3 text-xs text-text-secondary flex items-center justify-between border-t border-border-theme pt-2">
                 <span>Niche: {creatorProfile?.primaryNiche || "Lifestyle & Media"}</span>
                 <span>Service: {workspace.service?.title || "Custom Hire"}</span>
               </div>
@@ -277,20 +277,20 @@ export default function AdminCollaborationDetailModal({
           </div>
 
           {/* DELIVERABLES & MILESTONES */}
-          <div className="bg-[#111827] border border-[#1F2937] rounded-xl p-5">
+          <div className="bg-surface border border-border-theme rounded-2xl p-5 shadow-xs">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-white">
+              <h3 className="text-sm font-bold text-foreground">
                 Deliverables & Submissions ({deliverablesSummary.completed || 0}/{deliverablesSummary.total || 0})
               </h3>
-              <span className="text-xs text-blue-400 font-semibold font-mono">
+              <span className="text-xs text-secondary font-semibold font-mono">
                 {deliverablesSummary.percentage || 0}% Complete
               </span>
             </div>
 
             {/* PROGRESS BAR */}
-            <div className="w-full h-1.5 bg-[#0B0F17] rounded-full overflow-hidden mb-4 border border-[#1F2937]">
+            <div className="w-full h-1.5 bg-surface-muted rounded-full overflow-hidden mb-4 border border-border-theme">
               <div
-                className="h-full bg-gradient-to-r from-blue-500 to-emerald-500 rounded-full transition-all duration-300"
+                className="h-full bg-secondary rounded-full transition-all duration-300"
                 style={{ width: `${deliverablesSummary.percentage || 0}%` }}
               />
             </div>
@@ -298,22 +298,22 @@ export default function AdminCollaborationDetailModal({
             {/* DELIVERABLES LIST */}
             <div className="space-y-3">
               {workspace.deliverables?.length === 0 ? (
-                <p className="text-xs text-[#6B7280]">No specific deliverables logged for this workspace.</p>
+                <p className="text-xs text-text-secondary">No specific deliverables logged for this workspace.</p>
               ) : (
                 workspace.deliverables?.map((del, idx) => (
                   <div
                     key={del._id || idx}
-                    className="p-3.5 bg-[#0B0F17] border border-[#1F2937] rounded-lg space-y-2"
+                    className="p-3.5 bg-surface-muted/40 border border-border-theme rounded-xl space-y-2"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="w-5 h-5 rounded-full bg-[#1F2937] text-zinc-300 flex items-center justify-center text-[10px] font-bold">
+                        <span className="w-5 h-5 rounded-full bg-surface-muted text-foreground flex items-center justify-center text-[10px] font-bold border border-border-theme">
                           {idx + 1}
                         </span>
-                        <span className="text-xs font-semibold text-white">{del.title}</span>
+                        <span className="text-xs font-semibold text-foreground">{del.title}</span>
                       </div>
                       <span
-                        className={`px-2 py-0.5 text-[10px] rounded-full uppercase font-medium ${
+                        className={`px-2.5 py-0.5 text-[10px] rounded-full uppercase font-semibold ${
                           deliverableStatusStyles[del.status] || deliverableStatusStyles.pending
                         }`}
                       >
@@ -322,17 +322,17 @@ export default function AdminCollaborationDetailModal({
                     </div>
 
                     {del.description && (
-                      <p className="text-xs text-[#9CA3AF] pl-7">{del.description}</p>
+                      <p className="text-xs text-text-secondary pl-7">{del.description}</p>
                     )}
 
                     {del.submission?.link && (
                       <div className="pl-7 pt-1 flex items-center gap-2 text-xs">
-                        <span className="text-[#6B7280]">Submitted Asset:</span>
+                        <span className="text-text-secondary">Submitted Asset:</span>
                         <a
                           href={del.submission.link.startsWith("http") ? del.submission.link : `https://${del.submission.link}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-blue-400 hover:underline flex items-center gap-1 font-mono text-[11px]"
+                          className="text-secondary hover:underline flex items-center gap-1 font-mono text-[11px]"
                         >
                           View Link <ArrowTopRightOnSquareIcon className="w-3 h-3" />
                         </a>
@@ -346,17 +346,17 @@ export default function AdminCollaborationDetailModal({
 
           {/* REVISIONS & REVIEW SECTION */}
           {workspace.revisions?.length > 0 && (
-            <div className="bg-[#111827] border border-[#1F2937] rounded-xl p-5">
-              <h3 className="text-sm font-semibold text-amber-400 mb-3">
+            <div className="bg-surface border border-border-theme rounded-2xl p-5 shadow-xs">
+              <h3 className="text-sm font-bold text-amber-600 dark:text-amber-400 mb-3">
                 Revision History ({workspace.revisions.length})
               </h3>
               <div className="space-y-2">
                 {workspace.revisions.map((rev, idx) => (
-                  <div key={idx} className="p-3 bg-[#0B0F17] border border-[#1F2937] rounded-lg text-xs">
-                    <span className="text-[10px] text-[#6B7280] block mb-1">
+                  <div key={idx} className="p-3 bg-surface-muted/40 border border-border-theme rounded-xl text-xs">
+                    <span className="text-[10px] text-text-secondary block mb-1">
                       Revision requested on {new Date(rev.requestedAt).toLocaleDateString()}
                     </span>
-                    <p className="text-zinc-200">{rev.feedback}</p>
+                    <p className="text-foreground">{rev.feedback}</p>
                   </div>
                 ))}
               </div>
@@ -364,26 +364,26 @@ export default function AdminCollaborationDetailModal({
           )}
 
           {review && (
-            <div className="bg-[#111827] border border-emerald-500/20 rounded-xl p-5">
-              <h3 className="text-sm font-semibold text-emerald-400 mb-2">Collaboration Review & Rating</h3>
+            <div className="bg-surface border border-emerald-500/20 rounded-2xl p-5 shadow-xs">
+              <h3 className="text-sm font-bold text-emerald-600 dark:text-emerald-400 mb-2">Collaboration Review & Rating</h3>
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-amber-400 text-sm">{"★".repeat(review.rating || 5)}</span>
-                <span className="text-xs text-white font-bold">{review.rating} / 5</span>
+                <span className="text-amber-500 text-sm">{"★".repeat(review.rating || 5)}</span>
+                <span className="text-xs text-foreground font-bold">{review.rating} / 5</span>
               </div>
-              <p className="text-xs text-[#9CA3AF] italic">&ldquo;{review.comment}&rdquo;</p>
+              <p className="text-xs text-text-secondary italic">&ldquo;{review.comment}&rdquo;</p>
             </div>
           )}
 
           {/* OVERRIDE STATUS ACCORDION */}
           {showOverrideBox && (
-            <div className="bg-[#111827] border border-blue-500/30 rounded-xl p-4 space-y-3">
+            <div className="bg-surface-muted/50 border border-secondary/30 rounded-2xl p-4 space-y-3 shadow-xs">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-blue-400 uppercase tracking-wider">
+                <span className="text-xs font-semibold text-secondary uppercase tracking-wider">
                   Administrative Status Override
                 </span>
                 <button
                   onClick={() => setShowOverrideBox(false)}
-                  className="text-xs text-[#9CA3AF] hover:text-white"
+                  className="text-xs text-text-secondary hover:text-foreground cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -391,11 +391,11 @@ export default function AdminCollaborationDetailModal({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[11px] text-[#9CA3AF] block mb-1">Target Status</label>
+                  <label className="text-[11px] text-text-secondary block mb-1">Target Status</label>
                   <select
                     value={overrideStatusVal}
                     onChange={(e) => setOverrideStatusVal(e.target.value)}
-                    className="w-full bg-[#0B0F17] border border-[#1F2937] rounded-lg p-2 text-xs text-white focus:outline-none"
+                    className="w-full bg-surface border border-border-theme rounded-xl p-2 text-xs text-foreground focus:outline-hidden focus:border-secondary cursor-pointer"
                   >
                     <option value="">Select new status...</option>
                     <option value="in_progress">In Progress</option>
@@ -406,13 +406,13 @@ export default function AdminCollaborationDetailModal({
                   </select>
                 </div>
                 <div>
-                  <label className="text-[11px] text-[#9CA3AF] block mb-1">Reason / Admin Note</label>
+                  <label className="text-[11px] text-text-secondary block mb-1">Reason / Admin Note</label>
                   <input
                     type="text"
                     value={overrideReason}
                     onChange={(e) => setOverrideReason(e.target.value)}
                     placeholder="e.g. Deliverable accepted by brand off-platform..."
-                    className="w-full bg-[#0B0F17] border border-[#1F2937] rounded-lg p-2 text-xs text-white focus:outline-none"
+                    className="w-full bg-surface border border-border-theme rounded-xl p-2 text-xs text-foreground placeholder:text-text-secondary focus:outline-hidden focus:border-secondary"
                   />
                 </div>
               </div>
@@ -421,7 +421,7 @@ export default function AdminCollaborationDetailModal({
                 <button
                   disabled={!overrideStatusVal || actionLoading}
                   onClick={handleApplyOverride}
-                  className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold disabled:opacity-50 transition-colors"
+                  className="px-3.5 py-1.5 bg-foreground text-background rounded-xl text-xs font-semibold disabled:opacity-50 transition-colors cursor-pointer shadow-xs"
                 >
                   {actionLoading ? "Applying..." : "Confirm Status Override"}
                 </button>
@@ -431,14 +431,14 @@ export default function AdminCollaborationDetailModal({
 
           {/* EXTEND DEADLINE ACCORDION */}
           {showExtendBox && (
-            <div className="bg-[#111827] border border-amber-500/30 rounded-xl p-4 space-y-3">
+            <div className="bg-surface-muted/50 border border-amber-500/30 rounded-2xl p-4 space-y-3 shadow-xs">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-amber-400 uppercase tracking-wider">
+                <span className="text-xs font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wider">
                   Extend Collaboration Deadline
                 </span>
                 <button
                   onClick={() => setShowExtendBox(false)}
-                  className="text-xs text-[#9CA3AF] hover:text-white"
+                  className="text-xs text-text-secondary hover:text-foreground cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -446,22 +446,22 @@ export default function AdminCollaborationDetailModal({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[11px] text-[#9CA3AF] block mb-1">New Completion Deadline</label>
+                  <label className="text-[11px] text-text-secondary block mb-1">New Completion Deadline</label>
                   <input
                     type="date"
                     value={extendDate}
                     onChange={(e) => setExtendDate(e.target.value)}
-                    className="w-full bg-[#0B0F17] border border-[#1F2937] rounded-lg p-2 text-xs text-white focus:outline-none"
+                    className="w-full bg-surface border border-border-theme rounded-xl p-2 text-xs text-foreground focus:outline-hidden focus:border-amber-500"
                   />
                 </div>
                 <div>
-                  <label className="text-[11px] text-[#9CA3AF] block mb-1">Extension Note / Justification</label>
+                  <label className="text-[11px] text-text-secondary block mb-1">Extension Note / Justification</label>
                   <input
                     type="text"
                     value={extendReason}
                     onChange={(e) => setExtendReason(e.target.value)}
                     placeholder="e.g. Extended by 1 week as agreed by brand & creator..."
-                    className="w-full bg-[#0B0F17] border border-[#1F2937] rounded-lg p-2 text-xs text-white focus:outline-none"
+                    className="w-full bg-surface border border-border-theme rounded-xl p-2 text-xs text-foreground placeholder:text-text-secondary focus:outline-hidden focus:border-amber-500"
                   />
                 </div>
               </div>
@@ -470,7 +470,7 @@ export default function AdminCollaborationDetailModal({
                 <button
                   disabled={!extendDate || actionLoading}
                   onClick={handleApplyExtension}
-                  className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-semibold disabled:opacity-50 transition-colors"
+                  className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-semibold disabled:opacity-50 transition-colors cursor-pointer shadow-xs"
                 >
                   {actionLoading ? "Saving..." : "Confirm Extension"}
                 </button>
@@ -480,14 +480,14 @@ export default function AdminCollaborationDetailModal({
         </div>
 
         {/* FOOTER ACTIONS */}
-        <div className="px-6 py-4 border-t border-[#1F2937] bg-[#111827]/70 flex flex-wrap items-center justify-between gap-3">
+        <div className="px-6 py-4 border-t border-border-theme bg-surface flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <button
               onClick={() => {
                 setShowOverrideBox(!showOverrideBox);
                 setShowExtendBox(false);
               }}
-              className="px-3.5 py-2 text-xs font-semibold rounded-lg bg-blue-600/20 text-blue-400 border border-blue-500/30 hover:bg-blue-600/30 transition-colors"
+              className="px-3.5 py-2 text-xs font-semibold rounded-xl bg-secondary/10 text-secondary border border-secondary/20 hover:bg-secondary/20 transition-colors cursor-pointer"
             >
               Override Status
             </button>
@@ -497,7 +497,7 @@ export default function AdminCollaborationDetailModal({
                 setShowExtendBox(!showExtendBox);
                 setShowOverrideBox(false);
               }}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/30 hover:bg-amber-500/30 transition-colors"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 hover:bg-amber-500/20 transition-colors cursor-pointer"
             >
               <CalendarIcon className="w-3.5 h-3.5" />
               Extend Deadline
@@ -506,7 +506,7 @@ export default function AdminCollaborationDetailModal({
 
           <button
             onClick={onClose}
-            className="px-4 py-2 text-xs font-medium rounded-lg text-[#9CA3AF] hover:text-white hover:bg-[#1F2937] transition-colors"
+            className="px-4 py-2 text-xs font-medium rounded-xl text-text-secondary hover:text-foreground border border-border-theme hover:bg-surface-muted transition-colors cursor-pointer"
           >
             Close
           </button>

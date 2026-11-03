@@ -1,3 +1,4 @@
+import { reEvaluateBrandTrialEligibilityService } from "../../subscriptions/trial.service.js";
 import BrandProfile from "./profile.model.js";
 import createApiError from "../../../utils/ApiError.js";
 
@@ -22,6 +23,13 @@ const createProfileService = async (userId, profileData) => {
         user: userId,
         ...profileData
     });
+
+    // Re-evaluate trial eligibility signals for Admin review (does not modify trial dates or quota)
+    try {
+        await reEvaluateBrandTrialEligibilityService(userId, profileData);
+    } catch (err) {
+        console.error("Trial eligibility check failed during brand profile creation:", err);
+    }
 
     return profile;
 };
@@ -72,6 +80,13 @@ const updateProfileService = async (userId, profileData) => {
             404,
             "Brand profile not found"
         );
+    }
+
+    // Re-evaluate trial eligibility signals for Admin review (does not modify trial dates or quota)
+    try {
+        await reEvaluateBrandTrialEligibilityService(userId, profileData);
+    } catch (err) {
+        console.error("Trial eligibility check failed during brand profile update:", err);
     }
 
     return profile;

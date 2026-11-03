@@ -17,6 +17,7 @@ import {
 } from "../../utils/helpers/token.helper.js";
 
 import { sendEmail } from "../../utils/helpers/email.helper.js";
+import { createBrandTrialSubscriptionService } from "../subscriptions/trial.service.js";
 
 
 // Helper to hash verification OTP consistently with SHA-256.
@@ -698,6 +699,19 @@ const googleAuthUser = async ({ idToken, credential, code, role = "creator" }) =
 
     await user.save();
 
+    // Automatic 5-day trial initialization for Brands registered/verified via Google
+    if (user.role === "brand") {
+        try {
+            await createBrandTrialSubscriptionService({
+                brandId: user._id,
+                email: user.email,
+                name: user.name
+            });
+        } catch (trialError) {
+            console.error("Failed to initialize brand trial subscription in Google Auth:", trialError);
+        }
+    }
+
     const userData = user.toObject();
     delete userData.password;
     delete userData.sessions;
@@ -790,6 +804,19 @@ const verifyEmailOtp = async ({ email, otp }) => {
     });
 
     await user.save();
+
+    // Automatic 5-day trial initialization for newly verified Brands
+    if (user.role === "brand") {
+        try {
+            await createBrandTrialSubscriptionService({
+                brandId: user._id,
+                email: user.email,
+                name: user.name
+            });
+        } catch (trialError) {
+            console.error("Failed to initialize brand trial subscription in verifyEmailOtp:", trialError);
+        }
+    }
 
     const userData = user.toObject();
     delete userData.password;

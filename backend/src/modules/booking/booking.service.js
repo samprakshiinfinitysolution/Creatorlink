@@ -11,6 +11,7 @@ import {
     cleanupWorkspaceForBooking
 } from "../workspace/workspace.service.js";
 import { createNotificationSafe } from "../notifications/notification.service.js";
+import { evaluateBrandEntitlement } from "../subscriptions/entitlement.service.js";
 import createApiError from "../../utils/ApiError.js";
 
 import {
@@ -64,6 +65,15 @@ const createBookingService = async (creatorId, bookingData) => {
 
 
     const brandId = campaign.brand;
+
+    // Verify brand's subscription entitlement
+    const brandEntitlement = await evaluateBrandEntitlement(brandId);
+    if (!brandEntitlement.hasEntitlement) {
+        throw createApiError(
+            400,
+            "Cannot apply: This brand's subscription has expired and this campaign is not accepting new applications."
+        );
+    }
 
 
     // 3. Prevent self-booking/applying.
@@ -574,6 +584,15 @@ const updateBrandBookingStatusService = async (brandId, bookingId, newStatus) =>
 
 
     if (newStatus === "accepted") {
+        // Enforce active subscription or free trial before accepting applications
+        const entitlement = await evaluateBrandEntitlement(brandId);
+        if (!entitlement.hasEntitlement) {
+            throw createApiError(
+                403,
+                "An active subscription or free trial is required to accept booking applications and launch new collaborations. Please upgrade your plan."
+            );
+        }
+
         try {
             await createWorkspaceForAcceptedBooking(booking);
         } catch (wsErr) {
@@ -655,6 +674,15 @@ const updateBrandBookingStatusService = async (brandId, bookingId, newStatus) =>
 
 // Creates a new booking / direct hire proposal from a brand.
 const createBrandBookingService = async (brandId, bookingData) => {
+
+    // 0. Verify Brand Subscription Entitlement
+    const entitlement = await evaluateBrandEntitlement(brandId);
+    if (!entitlement.hasEntitlement) {
+        throw createApiError(
+            403,
+            "An active subscription or free trial is required to send new collaboration proposals. Please upgrade your subscription plan."
+        );
+    }
 
     const {
         creatorId,
@@ -837,6 +865,15 @@ const updateCreatorBookingStatusService = async (creatorId, bookingId, newStatus
 
 
     if (newStatus === "accepted") {
+        // Enforce active subscription or free trial before accepting applications
+        const entitlement = await evaluateBrandEntitlement(brandId);
+        if (!entitlement.hasEntitlement) {
+            throw createApiError(
+                403,
+                "An active subscription or free trial is required to accept booking applications and launch new collaborations. Please upgrade your plan."
+            );
+        }
+
         try {
             await createWorkspaceForAcceptedBooking(booking);
         } catch (wsErr) {

@@ -1,6 +1,8 @@
 "use client";
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import Link from "next/link";
+import axiosInstance from "@/lib/axios";
 import BrandSidebar from "@/components/brand/dashboard/BrandSidebar";
 import BrandHeader from "@/components/brand/dashboard/BrandHeader";
 import BrandCampaignsHero from "@/components/brand/campaigns/BrandCampaignsHero";
@@ -748,6 +750,7 @@ export default function BrandCampaignsManager() {
   const [successMsg, setSuccessMsg] = useState("");
   const [formError, setFormError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [subStatus, setSubStatus] = useState(null);
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isViewOpen, setIsViewOpen] = useState(false);
@@ -828,6 +831,17 @@ export default function BrandCampaignsManager() {
         sortOrder: "desc",
       })
     );
+    // Fetch subscription entitlement status
+    axiosInstance
+      .get("/api/subscriptions/status")
+      .then((res) => {
+        if (res.data?.data) {
+          setSubStatus(res.data.data);
+        }
+      })
+      .catch((err) => {
+        console.warn("Could not load subscription status:", err?.message);
+      });
   }, [dispatch]);
 
   // Sync Edit Form whenever selectedCampaign updates in Redux
@@ -1131,8 +1145,52 @@ export default function BrandCampaignsManager() {
           )}
 
           {/* Modern Reference Campaign Hero */}
+          {/* Subscription Expired Warning Banner */}
+          {subStatus && subStatus.hasEntitlement === false && (
+            <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-amber-500 text-xs">
+              <div className="flex items-center gap-2.5">
+                <svg className="w-5 h-5 shrink-0 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <div>
+                  <p className="font-semibold text-foreground text-sm">Subscription Required</p>
+                  <p className="text-text-secondary mt-0.5">Your trial or subscription has expired. Creating new campaigns and publishing updates is currently locked.</p>
+                </div>
+              </div>
+              <Link
+                href="/brand/subscription/plans"
+                className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-xl text-xs whitespace-nowrap shadow hover:opacity-90 transition-opacity"
+              >
+                Upgrade Plan
+              </Link>
+            </div>
+          )}
+
+          {/* Form Error Banner if triggered outside modal */}
+          {formError && !isCreateOpen && !isEditOpen && (
+            <div className="bg-rose-500/10 border border-rose-500/20 text-rose-500 rounded-2xl p-4 text-xs font-sans flex items-center justify-between gap-2 animate-in fade-in duration-200">
+              <div className="flex items-center gap-2">
+                <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>{formError}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setFormError("")}
+                className="text-rose-500 hover:text-rose-600 font-bold text-xs"
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
+
           <BrandCampaignsHero
             onCreateClick={() => {
+              if (subStatus && subStatus.hasEntitlement === false) {
+                setFormError("Active subscription or trial is required to create new campaigns. Please upgrade your plan.");
+                return;
+              }
               setFormError("");
               setIsCreateOpen(true);
             }}

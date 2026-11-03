@@ -6,6 +6,10 @@ import {
     getDiscoverCreatorById
 } from "./creators.controller.js";
 import {
+    checkCreatorUnlockStatus,
+    unlockCreatorContact
+} from "../../subscriptions/subscription.controller.js";
+import {
     validateGetDiscoverCreators,
     validateGetCreatorById
 } from "./creators.validation.js";
@@ -30,6 +34,18 @@ router.get(
     "/:id",
     validateGetCreatorById,
     getDiscoverCreatorById
+);
+
+// Check contact unlock status for a creator
+router.get(
+    "/:id/unlock-status",
+    checkCreatorUnlockStatus
+);
+
+// Unlock contact details for a creator
+router.post(
+    "/:id/unlock",
+    unlockCreatorContact
 );
 
 export default router;

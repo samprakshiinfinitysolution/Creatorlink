@@ -5,7 +5,9 @@ import authenticateUser from "../../../middleware/auth.middleware.js";
 import {
     createProfile,
     getMyProfile,
-    updateMyProfile
+    updateMyProfile,
+    getContactPrivacy,
+    updateContactPrivacy
 } from "./profile.controller.js";
 
 import {
@@ -45,6 +47,17 @@ router.patch(
     "/me",
     updateProfileValidation,
     updateMyProfile
+);
+
+// Creator contact privacy & direct sharing consent settings.
+router.get(
+    "/contact-privacy",
+    getContactPrivacy
+);
+
+router.put(
+    "/contact-privacy",
+    updateContactPrivacy
 );
 
 // Submit verification request for creator.

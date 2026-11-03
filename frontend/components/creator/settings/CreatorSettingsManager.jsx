@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import CreatorSidebar from "@/components/creator/dashboard/CreatorSidebar";
 import CreatorHeader from "@/components/creator/dashboard/CreatorHeader";
 import ChangePasswordForm from "@/components/common/Security/ChangePasswordForm";
+import CreatorContactPrivacySettings from "./CreatorContactPrivacySettings";
 
 // =========================================================
 // SVG ICONS
@@ -122,6 +123,9 @@ export default function CreatorSettingsManager() {
               </div>
             </div>
           </section>
+
+          {/* Direct Contact & Privacy Controls */}
+          <CreatorContactPrivacySettings />
         </main>
       </div>
     </div>

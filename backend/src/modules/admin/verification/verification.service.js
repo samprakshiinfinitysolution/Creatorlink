@@ -144,6 +144,7 @@ export const approveVerificationService = async (id, adminId) => {
     await request.save();
 
     // Activate profile badge consistency
+    await Auth.findByIdAndUpdate(request.user, { isVerified: true });
     if (request.role === "creator") {
         await CreatorProfile.findOneAndUpdate(
             { user: request.user },
@@ -203,6 +204,7 @@ export const rejectVerificationService = async (id, adminId, rejectionReason) =>
     await request.save();
 
     // Ensure badge remains inactive
+    await Auth.findByIdAndUpdate(request.user, { isVerified: false });
     if (request.role === "creator") {
         await CreatorProfile.findOneAndUpdate(
             { user: request.user },

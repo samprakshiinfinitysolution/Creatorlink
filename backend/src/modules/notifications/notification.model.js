@@ -50,7 +50,8 @@ const notificationSchema = new mongoose.Schema(
                 "payment",
                 "review",
                 "message",
-                "verification"
+                "verification",
+                "subscription"
             ],
             required: true
         },

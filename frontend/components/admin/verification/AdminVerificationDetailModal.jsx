@@ -127,31 +127,31 @@ export default function AdminVerificationDetailModal({
       />
 
       {/* Modal Dialog */}
-      <div className="relative w-full max-w-3xl bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl overflow-hidden z-10 my-8">
+      <div className="relative w-full max-w-3xl bg-surface border border-border-theme rounded-2xl shadow-2xl overflow-hidden z-10 my-8">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-800 bg-neutral-900/80">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-border-theme bg-surface">
           <div>
             <div className="flex items-center gap-3">
-              <h2 className="text-lg font-semibold text-white">
+              <h2 className="text-lg font-serif font-bold text-foreground">
                 Verification Request Review
               </h2>
               <span
                 className={`text-xs px-2.5 py-0.5 rounded-full font-medium ${
                   status === "approved"
-                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
                     : status === "rejected"
-                    ? "bg-rose-500/10 text-rose-400 border border-rose-500/20"
-                    : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                    ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20"
+                    : "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
                 }`}
               >
                 {status.toUpperCase()}
               </span>
             </div>
-            <p className="text-xs text-neutral-400 mt-1">ID: {_id}</p>
+            <p className="text-xs text-text-secondary mt-1">ID: {_id}</p>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-neutral-400 hover:text-white rounded-lg hover:bg-neutral-800 transition"
+            className="p-1.5 text-text-secondary hover:text-foreground rounded-xl hover:bg-surface-muted transition cursor-pointer"
           >
             <XMarkIcon className="w-5 h-5" />
           </button>
@@ -161,15 +161,15 @@ export default function AdminVerificationDetailModal({
         <div className="p-6 space-y-6 max-h-[75vh] overflow-y-auto">
           {/* Action Error Alert */}
           {actionError && (
-            <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-400 text-sm">
+            <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-600 dark:text-rose-400 text-sm">
               {actionError}
             </div>
           )}
 
           {/* Applicant Summary */}
-          <div className="bg-neutral-950/60 border border-neutral-800/80 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="bg-surface-muted/50 border border-border-theme rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-neutral-800 flex items-center justify-center text-lg font-semibold text-white overflow-hidden border border-neutral-700">
+              <div className="w-12 h-12 rounded-full bg-surface flex items-center justify-center text-lg font-semibold text-foreground overflow-hidden border border-border-theme">
                 {user?.avatar ? (
                   <img
                     src={user.avatar}
@@ -181,21 +181,21 @@ export default function AdminVerificationDetailModal({
                 )}
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-white">
+                <h3 className="text-sm font-semibold text-foreground">
                   {displayName}
                 </h3>
-                <p className="text-xs text-neutral-400">{user?.email}</p>
+                <p className="text-xs text-text-secondary">{user?.email}</p>
                 <div className="flex items-center gap-2 mt-1">
                   <span
                     className={`text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full ${
                       role === "creator"
-                        ? "bg-purple-500/10 text-purple-400 border border-purple-500/20"
-                        : "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                        ? "bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20"
+                        : "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20"
                     }`}
                   >
                     {role}
                   </span>
-                  <span className="text-[11px] text-neutral-500">
+                  <span className="text-[11px] text-text-secondary">
                     Joined: {new Date(user?.createdAt || createdAt).toLocaleDateString()}
                   </span>
                 </div>
@@ -204,10 +204,10 @@ export default function AdminVerificationDetailModal({
 
             {/* Profile Context */}
             {profile && (
-              <div className="text-right text-xs text-neutral-400 border-t sm:border-t-0 sm:border-l border-neutral-800 pt-3 sm:pt-0 sm:pl-4">
+              <div className="text-right text-xs text-text-secondary border-t sm:border-t-0 sm:border-l border-border-theme pt-3 sm:pt-0 sm:pl-4">
                 {role === "creator" ? (
                   <>
-                    <p className="text-white font-medium">
+                    <p className="text-foreground font-medium">
                       Category: {profile.category || "Unassigned"}
                     </p>
                     <p>Followers: {profile.followerCount?.toLocaleString() || 0}</p>
@@ -215,7 +215,7 @@ export default function AdminVerificationDetailModal({
                   </>
                 ) : (
                   <>
-                    <p className="text-white font-medium">
+                    <p className="text-foreground font-medium">
                       {profile.companyName || "No Company"}
                     </p>
                     <p>Industry: {profile.industry || "Not specified"}</p>
@@ -228,52 +228,52 @@ export default function AdminVerificationDetailModal({
 
           {/* Submission Details */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-neutral-950/40 border border-neutral-800 rounded-xl p-4">
-              <span className="text-xs text-neutral-500 block mb-1">
+            <div className="bg-surface-muted/40 border border-border-theme rounded-xl p-4">
+              <span className="text-xs text-text-secondary block mb-1">
                 Document Classification
               </span>
-              <p className="text-sm font-medium text-white capitalize">
+              <p className="text-sm font-medium text-foreground capitalize">
                 {documentType ? documentType.replace(/_/g, " ") : "Not specified"}
               </p>
               {documentNumber && (
-                <div className="mt-2 pt-2 border-t border-neutral-800/60">
-                  <span className="text-xs text-neutral-500 block mb-0.5">
+                <div className="mt-2 pt-2 border-t border-border-theme">
+                  <span className="text-xs text-text-secondary block mb-0.5">
                     Identifier Number
                   </span>
-                  <p className="text-xs font-mono text-neutral-300">
+                  <p className="text-xs font-mono text-foreground">
                     {documentNumber}
                   </p>
                 </div>
               )}
             </div>
 
-            <div className="bg-neutral-950/40 border border-neutral-800 rounded-xl p-4">
-              <span className="text-xs text-neutral-500 block mb-1">
+            <div className="bg-surface-muted/40 border border-border-theme rounded-xl p-4">
+              <span className="text-xs text-text-secondary block mb-1">
                 Submission Date
               </span>
-              <p className="text-sm font-medium text-white">
+              <p className="text-sm font-medium text-foreground">
                 {new Date(createdAt).toLocaleString()}
               </p>
               {notes && (
-                <div className="mt-2 pt-2 border-t border-neutral-800/60">
-                  <span className="text-xs text-neutral-500 block mb-0.5">
+                <div className="mt-2 pt-2 border-t border-border-theme">
+                  <span className="text-xs text-text-secondary block mb-0.5">
                     Applicant Remarks
                   </span>
-                  <p className="text-xs text-neutral-300 italic">{notes}</p>
+                  <p className="text-xs text-foreground italic">{notes}</p>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Submitted Document Proofs */}
-          <div className="bg-neutral-950/40 border border-neutral-800 rounded-xl p-4">
-            <h4 className="text-xs font-semibold text-neutral-300 mb-3 flex items-center gap-1.5">
-              <DocumentIcon className="w-4 h-4 text-emerald-400" />
+          {/* Attached Proof Documents */}
+          <div className="bg-surface-muted/40 border border-border-theme rounded-xl p-4">
+            <h4 className="text-xs font-semibold text-foreground mb-3 flex items-center gap-1.5">
+              <DocumentIcon className="w-4 h-4 text-emerald-500" />
               Attached Proof Documents ({documentUrls.length})
             </h4>
 
             {documentUrls.length === 0 ? (
-              <p className="text-xs text-neutral-500">No documents attached.</p>
+              <p className="text-xs text-text-secondary">No documents attached.</p>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {documentUrls.map((url, idx) => {
@@ -281,26 +281,26 @@ export default function AdminVerificationDetailModal({
                   return (
                     <div
                       key={idx}
-                      className="group border border-neutral-800 bg-neutral-900 rounded-lg p-2.5 flex items-center justify-between hover:border-neutral-700 transition"
+                      className="group border border-border-theme bg-surface rounded-xl p-2.5 flex items-center justify-between hover:border-secondary/40 transition shadow-xs"
                     >
                       <div className="flex items-center gap-2 overflow-hidden">
                         {isImage ? (
                           <img
                             src={url}
                             alt={`Doc ${idx + 1}`}
-                            className="w-10 h-10 rounded object-cover border border-neutral-800"
+                            className="w-10 h-10 rounded object-cover border border-border-theme"
                           />
                         ) : (
-                          <div className="w-10 h-10 rounded bg-neutral-800 flex items-center justify-center text-neutral-400">
+                          <div className="w-10 h-10 rounded bg-surface-muted flex items-center justify-center text-text-secondary">
                             <DocumentIcon className="w-5 h-5" />
                           </div>
                         )}
                         <div className="overflow-hidden">
-                          <p className="text-xs font-medium text-white truncate">
+                          <p className="text-xs font-medium text-foreground truncate">
                             Document {idx + 1}
                           </p>
-                          <p className="text-[10px] text-neutral-500 truncate">
-                            Cloudinary Secure Store
+                          <p className="text-[10px] text-text-secondary truncate">
+                            Secure Cloud Store
                           </p>
                         </div>
                       </div>
@@ -309,7 +309,7 @@ export default function AdminVerificationDetailModal({
                         href={url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-1.5 text-neutral-400 hover:text-emerald-400 rounded-md hover:bg-neutral-800 transition"
+                        className="p-1.5 text-text-secondary hover:text-secondary rounded-lg hover:bg-surface-muted transition"
                         title="Open document in new tab"
                       >
                         <ArrowTopRightOnSquareIcon className="w-4 h-4" />
@@ -326,25 +326,25 @@ export default function AdminVerificationDetailModal({
             <div
               className={`p-4 rounded-xl border ${
                 status === "approved"
-                  ? "bg-emerald-500/5 border-emerald-500/20 text-emerald-300"
-                  : "bg-rose-500/5 border-rose-500/20 text-rose-300"
+                  ? "bg-emerald-500/5 border-emerald-500/20 text-emerald-600 dark:text-emerald-300"
+                  : "bg-rose-500/5 border-rose-500/20 text-rose-600 dark:text-rose-300"
               }`}
             >
               <div className="flex items-center gap-2 font-medium text-sm">
                 {status === "approved" ? (
-                  <CheckCircleIcon className="w-5 h-5 text-emerald-400" />
+                  <CheckCircleIcon className="w-5 h-5 text-emerald-500" />
                 ) : (
-                  <XCircleIcon className="w-5 h-5 text-rose-400" />
+                  <XCircleIcon className="w-5 h-5 text-rose-500" />
                 )}
                 Decision: {status.toUpperCase()}
               </div>
-              <p className="text-xs text-neutral-400 mt-1">
+              <p className="text-xs text-text-secondary mt-1">
                 Reviewed on: {new Date(reviewedAt).toLocaleString()}
                 {reviewerName && ` by ${reviewerName}`}
               </p>
               {existingRejectionReason && (
-                <div className="mt-2 p-2.5 bg-neutral-900/60 rounded-lg text-xs text-rose-400 border border-rose-500/20">
-                  <span className="font-semibold block text-neutral-300 mb-0.5">
+                <div className="mt-2 p-2.5 bg-surface rounded-lg text-xs text-rose-600 dark:text-rose-400 border border-rose-500/20">
+                  <span className="font-semibold block text-foreground mb-0.5">
                     Rejection Justification:
                   </span>
                   {existingRejectionReason}
@@ -356,7 +356,7 @@ export default function AdminVerificationDetailModal({
           {/* Rejection Form Drawer (only when rejecting a pending request) */}
           {showRejectBox && status === "pending" && (
             <div className="p-4 bg-rose-500/5 border border-rose-500/20 rounded-xl space-y-3">
-              <label className="block text-xs font-semibold text-rose-300">
+              <label className="block text-xs font-semibold text-rose-600 dark:text-rose-300">
                 Reason for Rejection (Visible to Applicant):
               </label>
               <textarea
@@ -364,10 +364,10 @@ export default function AdminVerificationDetailModal({
                 onChange={(e) => setRejectionReason(e.target.value)}
                 placeholder="Explain why this request is rejected (e.g. document expired, illegible image, mismatched names)..."
                 rows={3}
-                className="w-full text-xs bg-neutral-950 border border-neutral-700 rounded-lg p-2.5 text-white placeholder-neutral-500 focus:outline-none focus:border-rose-500"
+                className="w-full text-xs bg-surface border border-border-theme rounded-xl p-2.5 text-foreground placeholder:text-text-secondary focus:outline-hidden focus:border-rose-500"
               />
               {rejectError && (
-                <p className="text-xs text-rose-400">{rejectError}</p>
+                <p className="text-xs text-rose-600 dark:text-rose-400">{rejectError}</p>
               )}
               <div className="flex items-center justify-end gap-2 pt-1">
                 <button
@@ -376,7 +376,7 @@ export default function AdminVerificationDetailModal({
                     setShowRejectBox(false);
                     setRejectError("");
                   }}
-                  className="px-3 py-1.5 text-xs text-neutral-400 hover:text-white rounded-lg hover:bg-neutral-800 transition"
+                  className="px-3 py-1.5 text-xs text-text-secondary hover:text-foreground rounded-xl hover:bg-surface-muted transition cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -384,7 +384,7 @@ export default function AdminVerificationDetailModal({
                   type="button"
                   disabled={actionLoading}
                   onClick={handleReject}
-                  className="px-4 py-1.5 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-500 rounded-lg transition disabled:opacity-50"
+                  className="px-4 py-1.5 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-500 rounded-xl transition disabled:opacity-50 cursor-pointer shadow-xs"
                 >
                   {actionLoading ? "Submitting..." : "Confirm Rejection"}
                 </button>
@@ -394,11 +394,11 @@ export default function AdminVerificationDetailModal({
         </div>
 
         {/* Modal Footer */}
-        <div className="px-6 py-4 border-t border-neutral-800 bg-neutral-900/90 flex items-center justify-between">
+        <div className="px-6 py-4 border-t border-border-theme bg-surface flex items-center justify-between">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-xs font-medium text-neutral-400 hover:text-white rounded-lg hover:bg-neutral-800 transition"
+            className="px-4 py-2 text-xs font-medium text-text-secondary hover:text-foreground rounded-xl border border-border-theme hover:bg-surface-muted transition cursor-pointer"
           >
             Close
           </button>
@@ -409,7 +409,7 @@ export default function AdminVerificationDetailModal({
                 type="button"
                 onClick={() => setShowRejectBox(true)}
                 disabled={actionLoading}
-                className="px-4 py-2 text-xs font-semibold text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 border border-rose-500/20 rounded-lg transition disabled:opacity-50"
+                className="px-4 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 border border-rose-500/20 rounded-xl transition disabled:opacity-50 cursor-pointer"
               >
                 Reject Request
               </button>
@@ -417,7 +417,7 @@ export default function AdminVerificationDetailModal({
                 type="button"
                 onClick={handleApprove}
                 disabled={actionLoading}
-                className="px-5 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg shadow-lg shadow-emerald-600/20 transition disabled:opacity-50 flex items-center gap-1.5"
+                className="px-5 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl shadow-xs transition disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
               >
                 <CheckCircleIcon className="w-4 h-4" />
                 {actionLoading ? "Approving..." : "Approve & Grant Badge"}

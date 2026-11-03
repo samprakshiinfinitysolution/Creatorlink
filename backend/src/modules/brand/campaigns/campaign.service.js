@@ -3,6 +3,10 @@ import mongoose from "mongoose";
 import Campaign from "./campaign.model.js";
 import Workspace from "../../workspace/workspace.model.js";
 import createApiError from "../../../utils/ApiError.js";
+import {
+    evaluateBrandEntitlement,
+    validateCampaignUpdateEntitlement
+} from "../../subscriptions/entitlement.service.js";
 
 import {
     getPagination,
@@ -14,6 +18,15 @@ import createSearchQuery from "../../../utils/helpers/search.helper.js";
 
 // Create a new campaign for the authenticated brand.
 const createCampaignService = async (brandId, campaignData) => {
+
+    // Enforce subscription entitlement: Brand must have an active trial or paid subscription
+    const entitlement = await evaluateBrandEntitlement(brandId);
+    if (!entitlement.canCreateCampaign) {
+        throw createApiError(
+            403,
+            `An active subscription or free trial is required to create campaigns. ${entitlement.reason}`
+        );
+    }
 
     const campaign = await Campaign.create({
         brand: brandId,
@@ -213,6 +226,9 @@ const updateCampaignService = async (
             `This campaign is currently restricted by platform administration for moderation (Reason: "${campaign.moderation.restrictionReason || "Administrative review"}"). You cannot modify or resume this campaign until the restriction is resolved.`
         );
     }
+
+    // Enforce subscription field-level entitlement checks
+    await validateCampaignUpdateEntitlement(brandId, campaign, updateData);
 
     // Business Rule 5: Do not mark a campaign completed merely because a Brand manually changes its status.
     // Inspect deliverable approval and workspace completion before allowing transition to completed.

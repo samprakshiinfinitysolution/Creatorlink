@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
+import axiosInstance from "@/lib/axios";
 import { useDispatch, useSelector } from "react-redux";
 import { getBrandCampaigns } from "@/redux/brand/campaigns/campaigns_slice";
 import {
@@ -115,6 +117,7 @@ export default function BrandCreateBookingModal({
   const [validationError, setValidationError] = useState("");
   const [apiError, setApiError] = useState("");
   const [successInfo, setSuccessInfo] = useState(null);
+  const [subStatus, setSubStatus] = useState(null);
 
   // Filter only eligible campaigns backed by backend validation ("published" or "in_progress")
   const eligibleCampaigns = useMemo(() => {
@@ -133,6 +136,14 @@ export default function BrandCreateBookingModal({
   useEffect(() => {
     if (isOpen) {
       dispatch(getBrandCampaigns({ limit: 50 }));
+      axiosInstance
+        .get("/api/subscriptions/status")
+        .then((res) => {
+          if (res.data?.data) {
+            setSubStatus(res.data.data);
+          }
+        })
+        .catch(() => {});
     }
   }, [dispatch, isOpen]);
 
@@ -154,6 +165,11 @@ export default function BrandCreateBookingModal({
     e.preventDefault();
     setValidationError("");
     setApiError("");
+
+    if (subStatus && subStatus.hasEntitlement === false) {
+      setValidationError("An active subscription or free trial is required to send collaboration proposals. Please upgrade your plan.");
+      return;
+    }
 
     if (!effectiveCampaignId) {
       setValidationError("Please select an active/published campaign to back this proposal.");
@@ -205,6 +221,11 @@ export default function BrandCreateBookingModal({
     setMessage("");
     setValidationError("");
     setApiError("");
+
+    if (subStatus && subStatus.hasEntitlement === false) {
+      setValidationError("An active subscription or free trial is required to send collaboration proposals. Please upgrade your plan.");
+      return;
+    }
     setSuccessInfo(null);
     onClose();
   };
@@ -410,6 +431,22 @@ export default function BrandCreateBookingModal({
                 </span>
               </div>
 
+              {/* Subscription Expired Warning Banner */}
+              {subStatus && subStatus.hasEntitlement === false && (
+                <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-500 text-xs font-medium flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <ExclamationTriangleIcon className="w-4 h-4 shrink-0" />
+                    <span>Subscription expired. Sending proposals is locked until you renew.</span>
+                  </div>
+                  <Link
+                    href="/brand/subscription/plans"
+                    className="px-3 py-1 bg-amber-500 text-white font-semibold rounded-lg text-xs whitespace-nowrap shadow-xs hover:bg-amber-600 transition-colors"
+                  >
+                    Upgrade Plan
+                  </Link>
+                </div>
+              )}
+
               {/* Validation Error Banner */}
               {validationError && (
                 <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-500 text-xs font-medium flex items-start gap-2">
@@ -442,7 +479,7 @@ export default function BrandCreateBookingModal({
 
                 <button
                   type="submit"
-                  disabled={submitting || eligibleCampaigns.length === 0}
+                  disabled={submitting || eligibleCampaigns.length === 0 || subStatus?.hasEntitlement === false}
                   className="px-5 py-2.5 rounded-xl bg-black text-surface font-semibold hover:text-white/80 transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {submitting ? (

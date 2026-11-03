@@ -61,21 +61,21 @@ function ArrowTopRightOnSquareIcon({ className = "w-4 h-4" }) {
 }
 
 const statusBadgeStyles = {
-  published: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
-  draft: "bg-zinc-500/10 text-zinc-400 border border-zinc-500/20",
-  paused: "bg-amber-500/10 text-amber-400 border border-amber-500/20",
-  in_progress: "bg-blue-500/10 text-blue-400 border border-blue-500/20",
-  completed: "bg-purple-500/10 text-purple-400 border border-purple-500/20",
-  closed: "bg-red-500/10 text-red-400 border border-red-500/20"
+  published: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20",
+  draft: "bg-zinc-500/10 text-zinc-600 dark:text-zinc-400 border border-zinc-500/20",
+  paused: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20",
+  in_progress: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20",
+  completed: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20",
+  closed: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20"
 };
 
 const bookingStatusStyles = {
-  pending: "bg-amber-500/10 text-amber-400 border border-amber-500/20",
-  accepted: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
-  in_progress: "bg-blue-500/10 text-blue-400 border border-blue-500/20",
-  completed: "bg-purple-500/10 text-purple-400 border border-purple-500/20",
-  rejected: "bg-red-500/10 text-red-400 border border-red-500/20",
-  cancelled: "bg-zinc-500/10 text-zinc-400 border border-zinc-500/20"
+  pending: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20",
+  accepted: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20",
+  in_progress: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20",
+  completed: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20",
+  rejected: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20",
+  cancelled: "bg-zinc-500/10 text-zinc-600 dark:text-zinc-400 border border-zinc-500/20"
 };
 
 export default function AdminCampaignDetailModal({
@@ -175,32 +175,32 @@ export default function AdminCampaignDetailModal({
     : "N/A";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
-      <div className="relative w-full max-w-4xl bg-[#0B0F17] border border-[#1F2937] rounded-2xl shadow-2xl overflow-hidden my-8 max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs overflow-y-auto">
+      <div className="relative w-full max-w-4xl bg-surface border border-border-theme rounded-2xl shadow-2xl overflow-hidden my-8 max-h-[90vh] flex flex-col">
         {/* MODAL HEADER */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#1F2937] bg-[#111827]/70">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border-theme bg-surface">
           <div className="flex items-center gap-3">
-            <h2 className="text-lg font-semibold text-white">Campaign Dossier</h2>
+            <h2 className="text-lg font-serif font-bold text-foreground">Campaign Dossier</h2>
             <span
-              className={`px-2.5 py-0.5 text-xs font-medium rounded-full uppercase ${
+              className={`px-2.5 py-0.5 text-xs font-semibold rounded-full uppercase ${
                 statusBadgeStyles[campaign.status] || statusBadgeStyles.draft
               }`}
             >
               {campaign.status}
             </span>
             {isRestricted && (
-              <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-red-500/10 text-red-400 border border-red-500/30 uppercase">
+              <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/30 uppercase">
                 Moderation Restricted
               </span>
             )}
-            <span className="px-2.5 py-0.5 text-xs font-medium rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 capitalize">
+            <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 capitalize">
               {campaign.platform}
             </span>
           </div>
 
           <button
             onClick={onClose}
-            className="p-1 text-[#9CA3AF] hover:text-white rounded-lg hover:bg-[#1F2937] transition-colors"
+            className="p-1.5 text-text-secondary hover:text-foreground rounded-xl hover:bg-surface-muted transition-colors cursor-pointer"
           >
             <XMarkIcon className="w-5 h-5" />
           </button>
@@ -208,19 +208,19 @@ export default function AdminCampaignDetailModal({
 
         {/* FEEDBACK BANNERS */}
         {actionError && (
-          <div className="px-6 py-3 bg-red-500/10 border-b border-red-500/20 text-xs text-red-400">
+          <div className="px-6 py-3 bg-rose-500/10 border-b border-rose-500/20 text-xs text-rose-600 dark:text-rose-400 font-medium">
             {actionError}
           </div>
         )}
         {successMessage && (
-          <div className="px-6 py-3 bg-emerald-500/10 border-b border-emerald-500/20 text-xs text-emerald-400">
+          <div className="px-6 py-3 bg-emerald-500/10 border-b border-emerald-500/20 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
             ✓ {successMessage}
           </div>
         )}
 
         {/* MODERATION RESTRICTION NOTICE */}
         {isRestricted && (
-          <div className="px-6 py-3 bg-amber-500/10 border-b border-amber-500/30 text-xs text-amber-300 flex items-start gap-2">
+          <div className="px-6 py-3 bg-amber-500/10 border-b border-amber-500/30 text-xs text-amber-700 dark:text-amber-300 flex items-start gap-2">
             <span className="font-bold">ADMIN RESTRICTION ACTIVE:</span>
             <span>
               &ldquo;{campaign.moderation?.restrictionReason}&rdquo; &bull; Brand cannot resume until resolved.
@@ -231,25 +231,25 @@ export default function AdminCampaignDetailModal({
         {/* MODAL BODY (SCROLLABLE) */}
         <div className="p-6 overflow-y-auto space-y-6 flex-1">
           {/* TOP SUMMARY CARD */}
-          <div className="bg-[#111827] border border-[#1F2937] rounded-xl p-5">
+          <div className="bg-surface-muted/50 border border-border-theme rounded-2xl p-5 shadow-xs">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <span className="text-xs uppercase font-medium text-blue-400 tracking-wider">
+                <span className="text-xs uppercase font-bold text-secondary tracking-wider">
                   {campaign.category}
                 </span>
-                <h1 className="text-xl font-bold text-white mt-1">
+                <h1 className="text-xl font-serif font-bold text-foreground mt-1">
                   {campaign.title}
                 </h1>
-                <p className="text-xs text-[#9CA3AF] mt-1">
-                  Campaign ID: <span className="font-mono text-zinc-400">{campaign._id}</span> • Created {formattedCreated}
+                <p className="text-xs text-text-secondary mt-1">
+                  Campaign ID: <span className="font-mono text-foreground">{campaign._id}</span> • Created {formattedCreated}
                 </p>
               </div>
 
-              <div className="text-right sm:border-l sm:border-[#1F2937] sm:pl-6">
-                <span className="text-xs text-[#9CA3AF] block">Budget</span>
-                <span className="text-2xl font-black text-white">{formattedBudget}</span>
-                <span className="text-xs text-[#9CA3AF] block mt-0.5">
-                  Deadline: <span className="text-zinc-300">{formattedDeadline}</span>
+              <div className="text-right sm:border-l sm:border-border-theme sm:pl-6">
+                <span className="text-xs text-text-secondary block">Budget</span>
+                <span className="text-2xl font-bold font-serif text-foreground">{formattedBudget}</span>
+                <span className="text-xs text-text-secondary block mt-0.5">
+                  Deadline: <span className="text-foreground">{formattedDeadline}</span>
                 </span>
               </div>
             </div>
@@ -260,25 +260,25 @@ export default function AdminCampaignDetailModal({
             {/* LEFT 2 COLUMNS: DESCRIPTION & DELIVERABLES & AUDIT */}
             <div className="lg:col-span-2 space-y-6">
               {/* DESCRIPTION */}
-              <div className="bg-[#111827] border border-[#1F2937] rounded-xl p-5">
-                <h3 className="text-sm font-semibold text-white mb-2">Campaign Brief</h3>
-                <p className="text-xs leading-relaxed text-[#9CA3AF] whitespace-pre-line">
+              <div className="bg-surface border border-border-theme rounded-2xl p-5 shadow-xs">
+                <h3 className="text-sm font-bold text-foreground mb-2">Campaign Brief</h3>
+                <p className="text-xs leading-relaxed text-text-secondary whitespace-pre-line">
                   {campaign.description}
                 </p>
               </div>
 
               {/* DELIVERABLES */}
-              <div className="bg-[#111827] border border-[#1F2937] rounded-xl p-5">
-                <h3 className="text-sm font-semibold text-white mb-3">
+              <div className="bg-surface border border-border-theme rounded-2xl p-5 shadow-xs">
+                <h3 className="text-sm font-bold text-foreground mb-3">
                   Required Deliverables ({campaign.deliverables?.length || 0})
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {campaign.deliverables?.map((item, idx) => (
                     <span
                       key={idx}
-                      className="px-3 py-1 text-xs rounded-lg bg-[#1F2937] text-zinc-200 border border-zinc-700/50 flex items-center gap-1.5"
+                      className="px-3 py-1 text-xs rounded-xl bg-surface-muted text-foreground border border-border-theme flex items-center gap-1.5 font-medium"
                     >
-                      <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-secondary" />
                       {item}
                     </span>
                   ))}
@@ -286,26 +286,26 @@ export default function AdminCampaignDetailModal({
               </div>
 
               {/* APPLIED CREATOR BOOKINGS TABLE */}
-              <div className="bg-[#111827] border border-[#1F2937] rounded-xl p-5">
+              <div className="bg-surface border border-border-theme rounded-2xl p-5 shadow-xs">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-semibold text-white">
+                  <h3 className="text-sm font-bold text-foreground">
                     Creator Proposals & Bookings ({bookings.length})
                   </h3>
-                  <div className="flex items-center gap-2 text-xs text-[#9CA3AF]">
-                    <span>Accepted: <strong className="text-emerald-400">{bookingStats.accepted || 0}</strong></span>
+                  <div className="flex items-center gap-2 text-xs text-text-secondary">
+                    <span>Accepted: <strong className="text-emerald-600 dark:text-emerald-400">{bookingStats.accepted || 0}</strong></span>
                     <span>•</span>
-                    <span>Pending: <strong className="text-amber-400">{bookingStats.pending || 0}</strong></span>
+                    <span>Pending: <strong className="text-amber-600 dark:text-amber-400">{bookingStats.pending || 0}</strong></span>
                   </div>
                 </div>
 
                 {bookings.length === 0 ? (
-                  <div className="text-center py-6 text-xs text-[#6B7280]">
+                  <div className="text-center py-6 text-xs text-text-secondary">
                     No creators have applied or booked for this campaign yet.
                   </div>
                 ) : (
-                  <div className="overflow-x-auto border border-[#1F2937] rounded-lg">
+                  <div className="overflow-x-auto border border-border-theme rounded-xl">
                     <table className="w-full text-left text-xs">
-                      <thead className="bg-[#0B0F17] text-[#9CA3AF] uppercase text-[10px] tracking-wider border-b border-[#1F2937]">
+                      <thead className="bg-surface-muted/50 text-text-secondary uppercase text-[10px] tracking-wider border-b border-border-theme font-semibold">
                         <tr>
                           <th className="px-3 py-2.5">Creator</th>
                           <th className="px-3 py-2.5">Agreed Price</th>
@@ -313,26 +313,26 @@ export default function AdminCampaignDetailModal({
                           <th className="px-3 py-2.5">Date</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-[#1F2937]">
+                      <tbody className="divide-y divide-border-theme text-foreground">
                         {bookings.map((b) => (
-                          <tr key={b._id} className="hover:bg-[#1F2937]/30 transition-colors">
-                            <td className="px-3 py-2.5 text-zinc-200 font-medium">
+                          <tr key={b._id} className="hover:bg-surface-muted/30 transition-colors">
+                            <td className="px-3 py-2.5 font-medium">
                               <div>{b.creator?.name || "Anonymous Creator"}</div>
-                              <div className="text-[10px] text-[#6B7280]">{b.creator?.email}</div>
+                              <div className="text-[10px] text-text-secondary">{b.creator?.email}</div>
                             </td>
-                            <td className="px-3 py-2.5 text-white font-mono">
+                            <td className="px-3 py-2.5 font-mono text-foreground">
                               ₹{b.agreedPrice?.toLocaleString("en-IN")}
                             </td>
                             <td className="px-3 py-2.5">
                               <span
-                                className={`px-2 py-0.5 text-[10px] rounded-full uppercase ${
+                                className={`px-2 py-0.5 text-[10px] font-semibold rounded-full uppercase ${
                                   bookingStatusStyles[b.status] || bookingStatusStyles.pending
                                 }`}
                               >
                                 {b.status}
                               </span>
                             </td>
-                            <td className="px-3 py-2.5 text-[#9CA3AF] text-[10px]">
+                            <td className="px-3 py-2.5 text-text-secondary text-[10px]">
                               {new Date(b.createdAt).toLocaleDateString()}
                             </td>
                           </tr>
@@ -345,26 +345,26 @@ export default function AdminCampaignDetailModal({
 
               {/* AUDIT LOG HISTORY */}
               {auditLogs?.length > 0 && (
-                <div className="bg-[#111827] border border-[#1F2937] rounded-xl p-5">
-                  <h3 className="text-sm font-semibold text-white mb-3">Moderation Audit Trail</h3>
+                <div className="bg-surface border border-border-theme rounded-2xl p-5 shadow-xs">
+                  <h3 className="text-sm font-bold text-foreground mb-3">Moderation Audit Trail</h3>
                   <div className="space-y-2">
                     {auditLogs.map((log) => (
                       <div
                         key={log._id}
-                        className="p-3 rounded-lg bg-[#0B0F17] border border-[#1F2937] text-xs space-y-1"
+                        className="p-3 rounded-xl bg-surface-muted/40 border border-border-theme text-xs space-y-1"
                       >
                         <div className="flex items-center justify-between text-[11px]">
-                          <span className="font-semibold text-blue-400 uppercase">
+                          <span className="font-semibold text-secondary uppercase">
                             {log.action}
                           </span>
-                          <span className="text-[#6B7280]">
+                          <span className="text-text-secondary">
                             {new Date(log.createdAt).toLocaleString()}
                           </span>
                         </div>
-                        <p className="text-zinc-300">
+                        <p className="text-foreground">
                           {log.reason || "Action performed by administrator"}
                         </p>
-                        <p className="text-[10px] text-[#6B7280]">
+                        <p className="text-[10px] text-text-secondary">
                           Admin: {log.admin?.name || log.admin?.email || "System"}
                         </p>
                       </div>
@@ -376,11 +376,11 @@ export default function AdminCampaignDetailModal({
 
             {/* RIGHT COLUMN: BRAND DOSSIER */}
             <div className="space-y-6">
-              <div className="bg-[#111827] border border-[#1F2937] rounded-xl p-5">
-                <h3 className="text-sm font-semibold text-white mb-4">Brand Information</h3>
+              <div className="bg-surface border border-border-theme rounded-2xl p-5 shadow-xs">
+                <h3 className="text-sm font-bold text-foreground mb-4">Brand Information</h3>
 
-                <div className="flex items-center gap-3 pb-4 border-b border-[#1F2937]">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                <div className="flex items-center gap-3 pb-4 border-b border-border-theme">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-secondary to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-sm">
                     {brandProfile?.companyName
                       ? brandProfile.companyName[0].toUpperCase()
                       : campaign.brand?.name
@@ -388,34 +388,34 @@ export default function AdminCampaignDetailModal({
                       : "B"}
                   </div>
                   <div className="min-w-0">
-                    <div className="flex items-center gap-1.5 font-semibold text-white text-sm">
+                    <div className="flex items-center gap-1.5 font-semibold text-foreground text-sm">
                       <span className="truncate">
                         {brandProfile?.companyName || campaign.brand?.name || "Brand User"}
                       </span>
                       {(brandProfile?.isVerifiedBusiness || campaign.brand?.isVerified) && (
-                        <CheckBadgeIcon className="w-4 h-4 text-emerald-400 shrink-0" />
+                        <CheckBadgeIcon className="w-4 h-4 text-emerald-500 shrink-0" />
                       )}
                     </div>
-                    <p className="text-xs text-[#9CA3AF] truncate">{campaign.brand?.email}</p>
+                    <p className="text-xs text-text-secondary truncate">{campaign.brand?.email}</p>
                   </div>
                 </div>
 
                 <div className="mt-4 space-y-3 text-xs">
                   <div>
-                    <span className="text-[#6B7280] block text-[11px]">Industry</span>
-                    <span className="text-zinc-200 font-medium">
+                    <span className="text-text-secondary block text-[11px]">Industry</span>
+                    <span className="text-foreground font-medium">
                       {brandProfile?.industry || "Not specified"}
                     </span>
                   </div>
 
                   {brandProfile?.website && (
                     <div>
-                      <span className="text-[#6B7280] block text-[11px]">Website</span>
+                      <span className="text-text-secondary block text-[11px]">Website</span>
                       <a
                         href={brandProfile.website.startsWith("http") ? brandProfile.website : `https://${brandProfile.website}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-blue-400 hover:underline flex items-center gap-1 truncate"
+                        className="text-secondary hover:underline flex items-center gap-1 truncate font-medium"
                       >
                         {brandProfile.website}
                         <ArrowTopRightOnSquareIcon className="w-3 h-3 shrink-0" />
@@ -424,15 +424,15 @@ export default function AdminCampaignDetailModal({
                   )}
 
                   <div>
-                    <span className="text-[#6B7280] block text-[11px]">Location</span>
-                    <span className="text-zinc-200">
+                    <span className="text-text-secondary block text-[11px]">Location</span>
+                    <span className="text-foreground">
                       {brandProfile?.location || "India"}
                     </span>
                   </div>
 
                   <div>
-                    <span className="text-[#6B7280] block text-[11px]">Required Creators</span>
-                    <span className="text-zinc-200 font-medium">
+                    <span className="text-text-secondary block text-[11px]">Required Creators</span>
+                    <span className="text-foreground font-medium">
                       {campaign.requiredCreators || 1} creators
                     </span>
                   </div>
@@ -441,9 +441,9 @@ export default function AdminCampaignDetailModal({
 
               {/* MODERATION REASON INPUT ACCORDION */}
               {showReasonInput && (
-                <div className="bg-[#111827] border border-amber-500/30 rounded-xl p-4 space-y-3">
+                <div className="bg-surface-muted/50 border border-amber-500/30 rounded-2xl p-4 space-y-3 shadow-xs">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-amber-400 uppercase tracking-wider">
+                    <span className="text-xs font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wider">
                       Confirm Action: {pendingAction?.toUpperCase()}
                     </span>
                     <button
@@ -451,13 +451,13 @@ export default function AdminCampaignDetailModal({
                         setShowReasonInput(false);
                         setPendingAction(null);
                       }}
-                      className="text-xs text-[#9CA3AF] hover:text-white"
+                      className="text-xs text-text-secondary hover:text-foreground cursor-pointer"
                     >
                       Cancel
                     </button>
                   </div>
 
-                  <p className="text-xs text-[#9CA3AF]">
+                  <p className="text-xs text-text-secondary">
                     {pendingAction === "pause"
                       ? "Mandatory moderation reason (recorded in audit log and notified to brand):"
                       : "Optional note or justification for this moderation action:"}
@@ -472,16 +472,16 @@ export default function AdminCampaignDetailModal({
                         ? "e.g. Inappropriate deliverables claim or pending brand KYC verification..."
                         : "e.g. Issues resolved by brand..."
                     }
-                    className="w-full bg-[#0B0F17] border border-[#1F2937] rounded-lg p-2.5 text-xs text-white placeholder-[#6B7280] focus:outline-none focus:border-amber-500/50"
+                    className="w-full bg-surface border border-border-theme rounded-xl p-2.5 text-xs text-foreground placeholder:text-text-secondary focus:outline-hidden focus:border-amber-500"
                   />
 
                   <div className="flex items-center justify-end gap-2">
                     <button
                       disabled={actionLoading || (pendingAction === "pause" && !moderationReason.trim())}
                       onClick={handleConfirmAction}
-                      className={`px-3 py-1.5 text-xs font-semibold rounded-lg text-white transition-colors disabled:opacity-50 ${
+                      className={`px-3 py-1.5 text-xs font-semibold rounded-xl text-white transition-colors disabled:opacity-50 cursor-pointer shadow-xs ${
                         pendingAction === "delete"
-                          ? "bg-red-600 hover:bg-red-700"
+                          ? "bg-rose-600 hover:bg-rose-700"
                           : pendingAction === "resume"
                           ? "bg-emerald-600 hover:bg-emerald-700"
                           : "bg-amber-600 hover:bg-amber-700"
@@ -497,13 +497,13 @@ export default function AdminCampaignDetailModal({
         </div>
 
         {/* MODAL FOOTER: MODERATION ACTIONS */}
-        <div className="px-6 py-4 border-t border-[#1F2937] bg-[#111827]/70 flex flex-wrap items-center justify-between gap-3">
+        <div className="px-6 py-4 border-t border-border-theme bg-surface flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             {isRestricted ? (
               <button
                 disabled={actionLoading}
                 onClick={() => handleActionClick("resume")}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-lg bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-600/30 transition-colors"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20 transition-colors cursor-pointer"
               >
                 <PlayIcon className="w-3.5 h-3.5" />
                 Resolve Restriction & Resume
@@ -512,7 +512,7 @@ export default function AdminCampaignDetailModal({
               <button
                 disabled={actionLoading || campaign.status === "closed"}
                 onClick={() => handleActionClick("pause")}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/30 hover:bg-amber-500/30 transition-colors disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 hover:bg-amber-500/20 transition-colors disabled:opacity-50 cursor-pointer"
               >
                 <PauseIcon className="w-3.5 h-3.5" />
                 Pause for Moderation
@@ -523,7 +523,7 @@ export default function AdminCampaignDetailModal({
               <button
                 disabled={actionLoading}
                 onClick={() => handleActionClick("close")}
-                className="px-3.5 py-2 text-xs font-semibold rounded-lg bg-[#1F2937] text-zinc-300 hover:bg-zinc-700 border border-zinc-700/50 transition-colors"
+                className="px-3.5 py-2 text-xs font-semibold rounded-xl bg-surface border border-border-theme text-foreground hover:bg-surface-muted transition-colors cursor-pointer shadow-xs"
               >
                 Close Campaign
               </button>
@@ -534,7 +534,7 @@ export default function AdminCampaignDetailModal({
             <button
               disabled={actionLoading}
               onClick={() => handleActionClick("delete")}
-              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg bg-red-600/20 text-red-400 border border-red-500/30 hover:bg-red-600/30 transition-colors"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/30 hover:bg-rose-500/20 transition-colors cursor-pointer"
             >
               <TrashIcon className="w-3.5 h-3.5" />
               Safe Remove
@@ -542,7 +542,7 @@ export default function AdminCampaignDetailModal({
 
             <button
               onClick={onClose}
-              className="px-4 py-2 text-xs font-medium rounded-lg text-[#9CA3AF] hover:text-white hover:bg-[#1F2937] transition-colors"
+              className="px-4 py-2 text-xs font-medium rounded-xl text-text-secondary hover:text-foreground border border-border-theme hover:bg-surface-muted transition-colors cursor-pointer"
             >
               Close
             </button>

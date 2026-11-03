@@ -38,6 +38,8 @@ import adminUsersRoutes from "../modules/admin/users/users.route.js";
 import adminVerificationRoutes from "../modules/admin/verification/verification.route.js";
 import adminCampaignRoutes from "../modules/admin/campaigns/campaigns.route.js";
 import adminCollaborationRoutes from "../modules/admin/collaborations/collaborations.route.js";
+import subscriptionRoutes from "../modules/subscriptions/subscription.route.js";
+import adminSubscriptionRoutes from "../modules/subscriptions/adminSubscription.route.js";
 
 const router = Router();
 
@@ -61,6 +63,10 @@ router.use("/creator/messages", creatorMessagesRouter);
 router.use("/creator/payments", creatorPaymentRouter);
 router.use("/creator/reviews", creatorReviewRouter);
 
+// Subscription routes.
+router.use("/subscriptions", subscriptionRoutes);
+router.use("/brand/subscriptions", subscriptionRoutes);
+
 // Brand routes.
 router.use("/brand/dashboard", brandDashboardRoutes);
 router.use("/brand/profile", brandProfileRoutes);
@@ -80,6 +86,7 @@ router.use("/admin/verification", adminVerificationRoutes);
 router.use("/admin/verifications", adminVerificationRoutes);
 router.use("/admin/campaigns", adminCampaignRoutes);
 router.use("/admin/collaborations", adminCollaborationRoutes);
+router.use("/admin/subscriptions", adminSubscriptionRoutes);
 
 // Upload routes.
 router.use("/upload", uploadRoutes);

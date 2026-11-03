@@ -3,10 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --hostname 0.0.0.0 --port 3005",
+    "dev": "node scripts/patch-next-network-ip.mjs && next dev --hostname 0.0.0.0 --port 3005",
     "build": "next build",
     "start": "next start --port 3005",
-    "lint": "eslint"
+    "lint": "eslint",
+    "postinstall": "node scripts/patch-next-network-ip.mjs"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.13.0",

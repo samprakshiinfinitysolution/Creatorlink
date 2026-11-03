@@ -136,14 +136,22 @@ const profileSchema = new mongoose.Schema(
         // connected social-media accounts.
         followerCount: {
             type: Number,
-            default: 0,
+            default: null,
             min: 0
         },
 
         engagementRate: {
             type: Number,
-            default: 0,
-            min: 0
+            default: null,
+            min: 0,
+            max: 100
+        },
+
+        // Indicates whether this profile is an explicitly seeded demo account.
+        isDemo: {
+            type: Boolean,
+            default: false,
+            index: true
         },
 
         // Controls whether the creator profile

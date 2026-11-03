@@ -59,6 +59,7 @@ function formatErrorMessage(err, fallback = "An unexpected error occurred.") {
     if (typeof err.msg === "string" && err.msg.trim()) {
       return err.msg.trim();
     }
+
     try {
       const json = JSON.stringify(err);
       if (json && json !== "{}") return json;
@@ -740,6 +741,8 @@ export default function CreatorProfile() {
     gender: "",
     languages: [],
     ethnicity: "",
+    followerCount: "",
+    engagementRate: "",
   });
 
   const [keywordInput, setKeywordInput] = useState("");
@@ -782,6 +785,14 @@ export default function CreatorProfile() {
         gender: profile.gender || "",
         languages: Array.isArray(profile.languages) ? profile.languages : [],
         ethnicity: profile.ethnicity || "",
+        followerCount:
+          profile.followerCount !== undefined && profile.followerCount !== null
+            ? String(profile.followerCount)
+            : "",
+        engagementRate:
+          profile.engagementRate !== undefined && profile.engagementRate !== null
+            ? String(profile.engagementRate)
+            : "",
       });
     } else if (!profile && authUser && !isEditing) {
       setFormData((prev) => ({
@@ -952,6 +963,14 @@ export default function CreatorProfile() {
         gender: profile.gender || "",
         languages: Array.isArray(profile.languages) ? profile.languages : [],
         ethnicity: profile.ethnicity || "",
+        followerCount:
+          profile.followerCount !== undefined && profile.followerCount !== null
+            ? String(profile.followerCount)
+            : "",
+        engagementRate:
+          profile.engagementRate !== undefined && profile.engagementRate !== null
+            ? String(profile.engagementRate)
+            : "",
       });
     } else if (authUser) {
       setFormData((prev) => ({
@@ -1015,6 +1034,38 @@ export default function CreatorProfile() {
       }
     }
 
+    if (
+      formData.followerCount !== "" &&
+      formData.followerCount !== undefined &&
+      formData.followerCount !== null
+    ) {
+      const parsedFollowers = Number(formData.followerCount);
+      if (
+        Number.isNaN(parsedFollowers) ||
+        !Number.isInteger(parsedFollowers) ||
+        parsedFollowers < 0
+      ) {
+        setSaveError("Follower count must be a non-negative whole number (0 or greater).");
+        return;
+      }
+    }
+
+    if (
+      formData.engagementRate !== "" &&
+      formData.engagementRate !== undefined &&
+      formData.engagementRate !== null
+    ) {
+      const parsedEng = Number(formData.engagementRate);
+      if (
+        Number.isNaN(parsedEng) ||
+        parsedEng < 0 ||
+        parsedEng > 100
+      ) {
+        setSaveError("Engagement rate must be a percentage between 0 and 100.");
+        return;
+      }
+    }
+
     const hasExistingProfile = Boolean(profile && (profile._id || profile.id));
 
     const payload = {
@@ -1057,6 +1108,26 @@ export default function CreatorProfile() {
       payload.gender = formData.gender;
     } else {
       payload.gender = null;
+    }
+
+    if (
+      formData.followerCount !== "" &&
+      formData.followerCount !== undefined &&
+      formData.followerCount !== null
+    ) {
+      payload.followerCount = parseInt(formData.followerCount, 10);
+    } else {
+      payload.followerCount = null;
+    }
+
+    if (
+      formData.engagementRate !== "" &&
+      formData.engagementRate !== undefined &&
+      formData.engagementRate !== null
+    ) {
+      payload.engagementRate = Number(parseFloat(formData.engagementRate).toFixed(2));
+    } else {
+      payload.engagementRate = null;
     }
 
     try {
@@ -1109,6 +1180,7 @@ export default function CreatorProfile() {
 
   const handleRetry = async () => {
     if (isRetrying || loading) return;
+
     try {
       setIsRetrying(true);
       setLastFetchError(
@@ -1158,14 +1230,17 @@ export default function CreatorProfile() {
   const displayEmail = profile?.user?.email || authUser?.email || "";
   const websiteUrl = profile?.socialLinks?.website || formData.socialLinks?.website || "";
   const displayInitial = getCreatorDisplayInitial(creatorName);
-  const bio = profile?.bio || formData.bio || "";
-  const instagramUrl = profile?.socialLinks?.instagram || formData.socialLinks?.instagram || "";
-  const youtubeUrl = profile?.socialLinks?.youtube || formData.socialLinks?.youtube || "";
-  const tiktokUrl = profile?.socialLinks?.tiktok || formData.socialLinks?.tiktok || "";
-  const facebookUrl = profile?.socialLinks?.facebook || formData.socialLinks?.facebook || "";
-  const followerCount = typeof profile?.followerCount === "number" ? profile.followerCount : 0;
-  const engagementRate = profile?.engagementRate ? `${profile.engagementRate}%` : "0%";
-  const collaborationsCount = profile?.collaborationsCount || profile?.completedCampaignsCount || 0;
+  const bio =
+    profile?.bio ||
+    formData.bio ||
+    "Digital creator, fashion enthusiast, and creative visual storyteller collaborating with modern brands. Passionate about curating high-aesthetic lifestyle content and connecting authentic audiences with innovative products.";
+ const instagramUrl = profile?.socialLinks?.instagram || formData.socialLinks?.instagram || "";
+const youtubeUrl = profile?.socialLinks?.youtube || formData.socialLinks?.youtube || "";
+const tiktokUrl = profile?.socialLinks?.tiktok || formData.socialLinks?.tiktok || "";
+const facebookUrl = profile?.socialLinks?.facebook || formData.socialLinks?.facebook || "";
+const collaborationsCount = profile?.collaborationsCount || profile?.completedCampaignsCount || 0;
+  const followerCount = typeof profile?.followerCount === "number" ? profile.followerCount : null;
+  const engagementRate = typeof profile?.engagementRate === "number" ? profile.engagementRate : null;
   const isPublic = profile?.isPublic ?? formData.isPublic ?? true;
   const joinedOn = formatJoinedDate(profile?.createdAt || authUser?.createdAt);
 
@@ -1595,7 +1670,7 @@ export default function CreatorProfile() {
                           <UsersIcon className="w-4 h-4" />
                         </div>
                         <span className="block text-xl sm:text-2xl font-bold font-sans text-slate-900 dark:text-foreground">
-                          {formatNumber(followerCount)}
+                          {followerCount !== null ? formatNumber(followerCount) : "Not added"}
                         </span>
                         <span className="block text-xs text-text-secondary mt-1 font-sans">Followers</span>
                       </div>
@@ -1606,7 +1681,7 @@ export default function CreatorProfile() {
                           <ChartBarIcon className="w-4 h-4" />
                         </div>
                         <span className="block text-xl sm:text-2xl font-bold font-sans text-slate-900 dark:text-foreground">
-                          {engagementRate}
+                          {engagementRate !== null ? `${engagementRate}%` : "Not added"}
                         </span>
                         <span className="block text-xs text-text-secondary mt-1 font-sans">Engagement</span>
                       </div>
@@ -2517,6 +2592,76 @@ export default function CreatorProfile() {
                         />
                       </div>
                     </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* CARD 4.5: Social Media Metrics */}
+              <div className="bg-white dark:bg-[#131318] border border-slate-200/90 dark:border-[#22222e] rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-xs space-y-5">
+                <div className="flex items-center gap-3 border-b border-border-theme/60 pb-4">
+                  <div className="w-8 h-8 rounded-lg bg-secondary/10 flex items-center justify-center text-secondary-dark shrink-0">
+                    <ChartBarIcon className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h2 className="font-semibold text-base sm:text-lg text-slate-900 dark:text-foreground font-sans tracking-wide">
+                      Social Media Metrics
+                    </h2>
+                    <p className="text-xs text-text-secondary font-sans mt-0.5">
+                      Enter your latest social media metrics. Keep this information accurate and up to date.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 font-sans">
+                  {/* Follower Count */}
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
+                      Follower Count
+                    </label>
+                    <div className="relative flex items-center">
+                      <span className="absolute left-3.5 text-text-secondary pointer-events-none">
+                        <UsersIcon className="w-4 h-4" />
+                      </span>
+                      <input
+                        type="number"
+                        name="followerCount"
+                        min="0"
+                        step="1"
+                        value={formData.followerCount}
+                        onChange={handleInputChange}
+                        placeholder="e.g. 125000"
+                        className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-surface border border-slate-300 dark:border-border-theme text-foreground text-xs sm:text-sm rounded-xl focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/40 transition-colors"
+                      />
+                    </div>
+                    <p className="text-[11px] text-text-secondary">
+                      Total followers or subscribers across your channels (integer, min 0).
+                    </p>
+                  </div>
+
+                  {/* Engagement Rate */}
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
+                      Engagement Rate (%)
+                    </label>
+                    <div className="relative flex items-center">
+                      <span className="absolute left-3.5 text-text-secondary pointer-events-none font-bold text-xs">
+                        %
+                      </span>
+                      <input
+                        type="number"
+                        name="engagementRate"
+                        min="0"
+                        max="100"
+                        step="0.1"
+                        value={formData.engagementRate}
+                        onChange={handleInputChange}
+                        placeholder="e.g. 4.8"
+                        className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-surface border border-slate-300 dark:border-border-theme text-foreground text-xs sm:text-sm rounded-xl focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/40 transition-colors"
+                      />
+                    </div>
+                    <p className="text-[11px] text-text-secondary">
+                      Average engagement percentage between 0 and 100 (e.g. 4.8).
+                    </p>
                   </div>
                 </div>
               </div>

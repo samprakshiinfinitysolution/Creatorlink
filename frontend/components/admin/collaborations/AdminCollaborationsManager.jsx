@@ -441,7 +441,7 @@ export default function AdminCollaborationsManager() {
                         className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-surface border border-border-theme hover:bg-surface-muted text-foreground transition-colors text-xs font-semibold cursor-pointer shadow-xs"
                       >
                         <EyeIcon className="w-3.5 h-3.5" />
-                        <span>Dossier</span>
+                        <span>View Details</span>
                       </button>
                     </td>
                   </tr>

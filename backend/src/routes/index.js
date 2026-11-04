@@ -41,6 +41,8 @@ import adminCollaborationRoutes from "../modules/admin/collaborations/collaborat
 import homepageRoutes from "../modules/homepage/homepage.route.js";
 import subscriptionRoutes from "../modules/subscriptions/subscription.route.js";
 import adminSubscriptionRoutes from "../modules/subscriptions/adminSubscription.route.js";
+import adminSettingsRoutes from "../modules/admin/settings/settings.route.js";
+import adminReportsRoutes from "../modules/admin/reports/reports.route.js";
 
 const router = Router();
 
@@ -91,6 +93,8 @@ router.use("/admin/verifications", adminVerificationRoutes);
 router.use("/admin/campaigns", adminCampaignRoutes);
 router.use("/admin/collaborations", adminCollaborationRoutes);
 router.use("/admin/subscriptions", adminSubscriptionRoutes);
+router.use("/admin/settings", adminSettingsRoutes);
+router.use("/admin/reports", adminReportsRoutes);
 
 // Upload routes.
 router.use("/upload", uploadRoutes);

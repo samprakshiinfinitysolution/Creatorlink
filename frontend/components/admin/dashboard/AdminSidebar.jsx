@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
@@ -164,9 +164,6 @@ function SidebarContent({
               className="inline-flex items-center gap-1.5 font-serif text-lg font-medium tracking-wide text-foreground truncate"
             >
               <span>CREATORLINK</span>
-              <span className="text-secondary text-sm font-sans uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-secondary/10 border border-secondary/20">
-                ADMIN
-              </span>
             </Link>
 
             {/* Desktop Collapse Button */}
@@ -264,13 +261,17 @@ function SidebarContent({
   );
 }
 
-export default function AdminSidebar({ mobileOpen = false, setMobileOpen = () => {} }) {
+export default function AdminSidebar({
+  mobileOpen = false,
+  setMobileOpen = () => {},
+  collapsed = false,
+  setCollapsed = () => {}
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const dispatch = useDispatch();
 
   const { adminUser: user } = useSelector((state) => state.adminAuth || {});
-  const [collapsed, setCollapsed] = useState(false);
 
   const toggleCollapsed = () => setCollapsed((prev) => !prev);
 

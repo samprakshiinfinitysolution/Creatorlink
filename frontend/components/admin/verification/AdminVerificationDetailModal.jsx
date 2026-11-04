@@ -157,14 +157,15 @@ export default function AdminVerificationDetailModal({
           </button>
         </div>
 
+        {/* Action Error Alert - Pinned to top of modal */}
+        {actionError && (
+          <div className="px-6 py-3 bg-rose-600 text-white text-xs sm:text-sm font-semibold flex items-center justify-between shadow-md z-30 sticky top-0 animate-in fade-in">
+            <span>{actionError}</span>
+          </div>
+        )}
+
         {/* Modal Body */}
         <div className="p-6 space-y-6 max-h-[75vh] overflow-y-auto">
-          {/* Action Error Alert */}
-          {actionError && (
-            <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-600 dark:text-rose-400 text-sm">
-              {actionError}
-            </div>
-          )}
 
           {/* Applicant Summary */}
           <div className="bg-surface-muted/50 border border-border-theme rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">

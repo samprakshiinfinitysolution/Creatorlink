@@ -585,7 +585,7 @@ export default function AdminSubscriptionsManager() {
                             onClick={() => handleOpenSubscriberDetail(s._id)}
                             className="px-3 py-1 rounded-lg bg-surface border border-border-theme hover:bg-surface-muted text-foreground font-semibold cursor-pointer"
                           >
-                            Dossier →
+                            View Details →
                           </button>
                         </td>
                       </tr>

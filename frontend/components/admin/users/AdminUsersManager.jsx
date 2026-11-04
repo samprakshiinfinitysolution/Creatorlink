@@ -104,7 +104,7 @@ export default function AdminUsersManager() {
             User Management
           </h1>
           <p className="text-xs sm:text-sm text-text-secondary mt-1">
-            Browse, inspect dossiers, and review credentials for all platform creators, brands, and admins.
+            Browse, inspect accounts, and review credentials for all platform creators, brands, and admins.
           </p>
         </div>
 

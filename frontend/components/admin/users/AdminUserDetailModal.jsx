@@ -105,13 +105,13 @@ export default function AdminUserDetailModal() {
         {detailLoading && (
           <div className="py-12 flex flex-col items-center justify-center gap-3 text-text-secondary">
             <div className="w-6 h-6 border-2 border-secondary border-t-transparent rounded-full animate-spin" />
-            <p className="text-xs font-medium uppercase tracking-wider">Loading user profile dossier...</p>
+            <p className="text-xs font-medium uppercase tracking-wider">Loading user profile details...</p>
           </div>
         )}
 
         {/* Error Alert */}
         {detailError && (
-          <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs sm:text-sm font-medium">
+          <div className="p-4 bg-rose-600 text-white rounded-2xl text-xs sm:text-sm font-semibold shadow-md sticky top-0 z-30 animate-in fade-in">
             {detailError}
           </div>
         )}
@@ -172,7 +172,7 @@ export default function AdminUserDetailModal() {
             {user.role === "brand" && (
               <div className="p-5 rounded-2xl bg-surface-muted/50 border border-border-theme space-y-3">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-text-secondary">
-                  Brand Company Dossier
+                  Brand Company Details
                 </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                   <div>
@@ -328,7 +328,7 @@ export default function AdminUserDetailModal() {
             onClick={handleClose}
             className="px-5 py-2.5 rounded-xl bg-foreground text-background text-xs font-semibold hover:bg-foreground/90 transition-all cursor-pointer shadow-xs"
           >
-            Close Dossier
+            Close Details
           </button>
         </div>
       </div>

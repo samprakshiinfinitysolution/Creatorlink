@@ -117,7 +117,8 @@ const validateGetBookingsQuery = (req, res, next) => {
         page,
         limit,
         status,
-        campaignId
+        campaignId,
+        initiatedBy
     } = req.query;
 
 
@@ -163,6 +164,18 @@ const validateGetBookingsQuery = (req, res, next) => {
         throw createApiError(
             400,
             "Invalid status filter"
+        );
+    }
+
+
+    if (
+        initiatedBy !== undefined &&
+        initiatedBy.trim() !== "" &&
+        !["creator", "brand"].includes(initiatedBy.trim())
+    ) {
+        throw createApiError(
+            400,
+            "Invalid initiatedBy filter. Allowed values: creator, brand"
         );
     }
 

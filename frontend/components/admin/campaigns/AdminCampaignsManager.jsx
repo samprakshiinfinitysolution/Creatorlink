@@ -151,6 +151,17 @@ export default function AdminCampaignsManager() {
     }).format(val || 0);
   };
 
+  const formatCampaignBudget = (c) => {
+    if (!c) return "₹0";
+    const min = c.minBudget;
+    const max = c.maxBudget;
+    if (min !== undefined && min !== null && max !== undefined && max !== null && !isNaN(min) && !isNaN(max) && min > 0 && max > 0) {
+      if (min === max) return formatCurrency(min);
+      return `${formatCurrency(min)} – ${formatCurrency(max)}`;
+    }
+    return formatCurrency(c.budget);
+  };
+
   return (
     <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-300">
       {/* HEADER SECTION */}
@@ -395,7 +406,7 @@ export default function AdminCampaignsManager() {
 
                     {/* BUDGET */}
                     <td className="px-5 py-3.5 font-mono text-foreground font-medium">
-                      {formatCurrency(c.budget)}
+                      {formatCampaignBudget(c)}
                     </td>
 
                     {/* APPLICATIONS */}

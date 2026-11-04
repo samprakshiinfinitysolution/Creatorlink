@@ -8,6 +8,10 @@ import BrandCreatorDetailModal from "@/components/brand/creators/BrandCreatorDet
 import {
   fetchBrandCreators,
   clearSelectedCreator,
+  fetchSavedCreators,
+  fetchSavedCreatorIds,
+  saveCreator,
+  unsaveCreator,
 } from "@/redux/brand/creators/creators_slice";
 
 // =========================================================
@@ -83,6 +87,21 @@ function XMarkIcon({ className = "w-4 h-4" }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  );
+}
+
+function BookmarkIcon({ className = "w-4 h-4", filled = false }) {
+  if (filled) {
+    return (
+      <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+        <path fillRule="evenodd" d="M6.32 2.577a49.255 49.255 0 0111.36 0c1.497.174 2.57 1.46 2.57 2.93V21a.75.75 0 01-1.085.67L12 18.089l-7.165 3.58A.75.75 0 013.75 21V5.507c0-1.47 1.073-2.756 2.57-2.93z" clipRule="evenodd" />
+      </svg>
+    );
+  }
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
     </svg>
   );
 }
@@ -170,7 +189,7 @@ const SORT_OPTIONS = [
 // =========================================================
 // CREATOR CARD COMPONENT
 // =========================================================
-function CreatorCard({ creator, onViewProfile }) {
+function CreatorCard({ creator, onViewProfile, isSaved, isSaving, onToggleSave, showRemoveButton }) {
   const cleanAvatarUrl = typeof creator?.profileImage === "string" ? creator.profileImage.trim() : "";
   const [loadedUrl, setLoadedUrl] = useState(null);
   const [failedUrl, setFailedUrl] = useState(null);
@@ -197,8 +216,9 @@ function CreatorCard({ creator, onViewProfile }) {
   return (
     <div className="bg-surface border border-border-theme hover:border-secondary/40 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between group">
       <div>
-        {/* Top Header: Avatar + Name + Category */}
-        <div className="flex items-start gap-3.5 mb-3.5">
+        {/* Top Header: Avatar + Name + Category + Bookmark Action */}
+        <div className="flex items-start justify-between gap-2 mb-3.5">
+          <div className="flex items-start gap-3.5 min-w-0">
           <div className="relative w-12 h-12 rounded-xl shrink-0 overflow-hidden bg-surface-muted border border-border-theme flex items-center justify-center font-bold text-sm text-text-secondary">
             {cleanAvatarUrl && !isImgError ? (
               <>
@@ -252,6 +272,25 @@ function CreatorCard({ creator, onViewProfile }) {
               </span>
             </div>
           </div>
+        </div>
+
+          {/* Bookmark / Shortlist button */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleSave && onToggleSave(creator._id || creator.id);
+            }}
+            disabled={isSaving}
+            className={`p-2 rounded-xl border transition-all cursor-pointer shrink-0 ${
+              isSaved
+                ? "bg-secondary/15 border-secondary/40 text-secondary hover:bg-secondary/25"
+                : "bg-surface-muted/60 border-border-theme text-text-secondary hover:text-foreground hover:border-secondary/30"
+            }`}
+            title={isSaved ? "Remove from Shortlist" : "Save Creator to Shortlist"}
+          >
+            <BookmarkIcon className="w-4 h-4" filled={isSaved} />
+          </button>
         </div>
 
         {/* Bio Snippet */}
@@ -316,16 +355,31 @@ function CreatorCard({ creator, onViewProfile }) {
         </div>
       </div>
 
-      {/* View Profile Action Button */}
-      <div className="pt-3 border-t border-border-theme/60 mt-3">
+      {/* View Profile Action & Shortlist Actions */}
+      <div className="pt-3 border-t border-border-theme/60 mt-3 flex items-center gap-2">
         <button
           type="button"
           onClick={() => onViewProfile && onViewProfile(creator._id || creator.id)}
-          className="w-full py-2 px-3 rounded-xl bg-surface-muted hover:bg-[#252525] text-text-secondary hover:text-white border border-border-theme hover:border-[#252525] font-semibold text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs group-hover:border-[#252525]/40"
+          className="flex-1 py-2 px-3 rounded-xl bg-surface-muted hover:bg-[#252525] text-text-secondary hover:text-white border border-border-theme hover:border-[#252525] font-semibold text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs group-hover:border-[#252525]/40"
         >
           <EyeIcon className="w-3.5 h-3.5" />
           <span>View Profile</span>
         </button>
+
+        {showRemoveButton && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleSave && onToggleSave(creator._id || creator.id);
+            }}
+            disabled={isSaving}
+            className="py-2 px-3 rounded-xl border border-red-500/20 text-red-500 hover:bg-red-500/10 text-xs font-semibold transition-colors cursor-pointer shrink-0"
+            title="Remove from Shortlist"
+          >
+            Remove
+          </button>
+        )}
       </div>
     </div>
   );
@@ -365,6 +419,9 @@ function CreatorCardSkeleton() {
 export default function BrandCreatorsManager() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  // Tab State: "discover" | "saved"
+  const [activeTab, setActiveTab] = useState("discover");
+
   // Detail Modal state
   const [selectedCreatorId, setSelectedCreatorId] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -379,9 +436,40 @@ export default function BrandCreatorsManager() {
   const [page, setPage] = useState(1);
 
   const dispatch = useDispatch();
-  const { creators, pagination, loading, error } = useSelector(
-    (state) => state.brandCreators || {}
-  );
+  const {
+    creators,
+    pagination,
+    loading,
+    error,
+    savedCreators,
+    savedCreatorIds,
+    savedLoading,
+    savedError,
+    savingId
+  } = useSelector((state) => state.brandCreators || {});
+
+  // Fetch saved creator IDs on initial mount
+  useEffect(() => {
+    dispatch(fetchSavedCreatorIds());
+  }, [dispatch]);
+
+  // Fetch full saved creators when switching to saved tab
+  useEffect(() => {
+    if (activeTab === "saved") {
+      dispatch(fetchSavedCreators());
+    }
+  }, [dispatch, activeTab]);
+
+  // Handle Save / Unsave creator
+  const handleToggleSave = (creatorId) => {
+    if (!creatorId) return;
+    const isAlreadySaved = savedCreatorIds.includes(creatorId.toString());
+    if (isAlreadySaved) {
+      dispatch(unsaveCreator(creatorId));
+    } else {
+      dispatch(saveCreator(creatorId));
+    }
+  };
 
   const handleOpenDetailModal = (creatorId) => {
     setSelectedCreatorId(creatorId);
@@ -552,6 +640,50 @@ export default function BrandCreatorsManager() {
             </div>
           </div>
 
+          {/* Main Navigation Tabs: Discover vs Shortlist */}
+          <div className="flex items-center gap-4 border-b border-border-theme pb-px">
+            <button
+              type="button"
+              onClick={() => setActiveTab("discover")}
+              className={`pb-3 px-1 text-sm font-semibold transition-all relative cursor-pointer border-b-2 flex items-center gap-2 ${
+                activeTab === "discover"
+                  ? "border-secondary text-secondary font-bold"
+                  : "border-transparent text-text-secondary hover:text-foreground"
+              }`}
+            >
+              <span>Explore Marketplace</span>
+              <span className="px-2 py-0.5 rounded-full text-[11px] bg-surface-muted text-text-secondary font-medium">
+                {loading && !creators?.length ? "..." : totalItems}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab("saved")}
+              className={`pb-3 px-1 text-sm font-semibold transition-all relative cursor-pointer border-b-2 flex items-center gap-2 ${
+                activeTab === "saved"
+                  ? "border-secondary text-secondary font-bold"
+                  : "border-transparent text-text-secondary hover:text-foreground"
+              }`}
+            >
+              <div className="flex items-center gap-1.5">
+                <BookmarkIcon className="w-4 h-4" filled={activeTab === "saved"} />
+                <span>Saved Creators</span>
+              </div>
+              <span
+                className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
+                  activeTab === "saved"
+                    ? "bg-secondary/20 text-secondary"
+                    : "bg-surface-muted text-text-secondary"
+                }`}
+              >
+                {savedCreatorIds?.length || 0}
+              </span>
+            </button>
+          </div>
+
+          {activeTab === "discover" ? (
+            <>
           {/* Search & Filter Toolbar */}
           <div className="bg-surface border border-border-theme rounded-2xl p-4 shadow-xs space-y-4">
             <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-3">
@@ -701,13 +833,21 @@ export default function BrandCreatorsManager() {
             ) : creators && creators.length > 0 ? (
               /* Creators Grid */
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                {creators.map((creator) => (
-                  <CreatorCard
-                    key={creator._id || creator.id}
-                    creator={creator}
-                    onViewProfile={handleOpenDetailModal}
-                  />
-                ))}
+                {creators.map((creator) => {
+                  const cId = creator._id || creator.id;
+                  const isSaved = Boolean(cId && savedCreatorIds?.includes(cId.toString()));
+                  const isSaving = Boolean(cId && savingId === cId.toString());
+                  return (
+                    <CreatorCard
+                      key={cId}
+                      creator={creator}
+                      onViewProfile={handleOpenDetailModal}
+                      isSaved={isSaved}
+                      isSaving={isSaving}
+                      onToggleSave={handleToggleSave}
+                    />
+                  );
+                })}
               </div>
             ) : !error ? (
               /* Empty State (Only rendered when there is NO error and creators list is empty) */
@@ -763,6 +903,104 @@ export default function BrandCreatorsManager() {
                   <ChevronRightIcon />
                 </button>
               </div>
+            </div>
+          )}
+            </>
+          ) : (
+            /* ========================================================= */
+            /* SAVED CREATORS / SHORTLIST TAB */
+            /* ========================================================= */
+            <div className="space-y-6">
+              {/* Shortlist Header */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 rounded-2xl bg-surface border border-border-theme">
+                <div>
+                  <h3 className="font-serif font-medium text-lg text-foreground flex items-center gap-2">
+                    <span>Your Saved Creators</span>
+                    <span className="text-secondary text-xs font-sans font-bold px-2 py-0.5 rounded-full bg-secondary/10 border border-secondary/20">
+                      {savedCreators.length} {savedCreators.length === 1 ? "Creator" : "Creators"}
+                    </span>
+                  </h3>
+                  <p className="text-xs text-text-secondary mt-0.5">
+                    Curated shortlist of creators saved for your brand's future collaborations and campaigns.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => dispatch(fetchSavedCreators())}
+                  disabled={savedLoading}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-muted border border-border-theme text-xs font-semibold text-text-secondary hover:text-foreground transition-colors cursor-pointer self-start sm:self-auto"
+                >
+                  <ArrowPathIcon className={`w-3.5 h-3.5 ${savedLoading ? "animate-spin" : ""}`} />
+                  <span>Refresh List</span>
+                </button>
+              </div>
+
+              {/* Error State with Retry */}
+              {savedError && (
+                <div className="bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl p-4 text-xs font-sans flex items-center justify-between gap-4">
+                  <span>{typeof savedError === "string" ? savedError : "Failed to load saved creators. Please try again."}</span>
+                  <button
+                    type="button"
+                    onClick={() => dispatch(fetchSavedCreators())}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500 text-white text-xs font-semibold hover:bg-red-600 transition-colors shrink-0 cursor-pointer"
+                  >
+                    <ArrowPathIcon className="w-3.5 h-3.5" />
+                    <span>Retry</span>
+                  </button>
+                </div>
+              )}
+
+              {/* Saved Creators Content */}
+              {savedLoading ? (
+                /* Loading Skeletons Grid */
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                  {Array.from({ length: 4 }).map((_, idx) => (
+                    <CreatorCardSkeleton key={idx} />
+                  ))}
+                </div>
+              ) : savedCreators && savedCreators.length > 0 ? (
+                /* Saved Creators Grid */
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                  {savedCreators.map((creator) => {
+                    const cId = creator._id || creator.id;
+                    const isSaving = Boolean(cId && savingId === cId.toString());
+                    return (
+                      <CreatorCard
+                        key={cId}
+                        creator={creator}
+                        onViewProfile={handleOpenDetailModal}
+                        isSaved={true}
+                        isSaving={isSaving}
+                        onToggleSave={handleToggleSave}
+                        showRemoveButton={true}
+                      />
+                    );
+                  })}
+                </div>
+              ) : !savedError ? (
+                /* Empty State */
+                <div className="bg-surface border border-border-theme rounded-2xl p-12 text-center shadow-xs space-y-4">
+                  <div className="w-14 h-14 rounded-full bg-secondary/10 text-secondary flex items-center justify-center mx-auto">
+                    <BookmarkIcon className="w-7 h-7" filled />
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="font-serif font-medium text-lg text-foreground">
+                      No Saved Creators Yet
+                    </h3>
+                    <p className="text-xs text-text-secondary max-w-md mx-auto leading-relaxed">
+                      You haven't saved any creators to your shortlist yet. Explore the marketplace and click the bookmark icon on any creator to save them here for quick access.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("discover")}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-secondary hover:bg-secondary-dark text-white text-xs font-semibold tracking-wide transition-all cursor-pointer shadow-xs"
+                  >
+                    <span>Explore Marketplace →</span>
+                  </button>
+                </div>
+              ) : null}
             </div>
           )}
         </main>

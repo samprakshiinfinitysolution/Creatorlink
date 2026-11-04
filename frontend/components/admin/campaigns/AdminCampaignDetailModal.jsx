@@ -152,11 +152,23 @@ export default function AdminCampaignDetailModal({
     }
   };
 
-  const formattedBudget = new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: campaign.currency || "INR",
-    maximumFractionDigits: 0
-  }).format(campaign.budget || 0);
+  const formatAmount = (amt) => {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: campaign.currency || "INR",
+      maximumFractionDigits: 0
+    }).format(amt || 0);
+  };
+
+  const formattedBudget = (() => {
+    const min = campaign.minBudget;
+    const max = campaign.maxBudget;
+    if (min !== undefined && min !== null && max !== undefined && max !== null && !isNaN(min) && !isNaN(max) && min > 0 && max > 0) {
+      if (min === max) return formatAmount(min);
+      return `${formatAmount(min)} – ${formatAmount(max)}`;
+    }
+    return formatAmount(campaign.budget || 0);
+  })();
 
   const formattedDeadline = campaign.deadline
     ? new Date(campaign.deadline).toLocaleDateString("en-US", {
@@ -282,6 +294,94 @@ export default function AdminCampaignDetailModal({
                       {item}
                     </span>
                   ))}
+                </div>
+              </div>
+              {/* TARGET AUDIENCE & SPECIFICATIONS */}
+              <div className="bg-surface border border-border-theme rounded-2xl p-5 shadow-xs">
+                <h3 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
+                  <span>Target Audience Profile</span>
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                  <div className="p-3 rounded-xl bg-surface-muted/40 border border-border-theme">
+                    <span className="text-[11px] text-text-secondary block font-medium">Age Group</span>
+                    <span className="text-foreground font-semibold mt-0.5 block">
+                      {campaign.audienceTargeting?.age || "All Ages"}
+                    </span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-surface-muted/40 border border-border-theme">
+                    <span className="text-[11px] text-text-secondary block font-medium">Target Gender</span>
+                    <span className="text-foreground font-semibold mt-0.5 block capitalize">
+                      {campaign.audienceTargeting?.gender === "all" || !campaign.audienceTargeting?.gender
+                        ? "All Genders"
+                        : campaign.audienceTargeting.gender}
+                    </span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-surface-muted/40 border border-border-theme">
+                    <span className="text-[11px] text-text-secondary block font-medium">Geography</span>
+                    <span className="text-foreground font-semibold mt-0.5 block">
+                      {Array.isArray(campaign.audienceTargeting?.geography) && campaign.audienceTargeting.geography.length > 0
+                        ? campaign.audienceTargeting.geography.join(", ")
+                        : "All Locations (Pan-India)"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* CREATOR ELIGIBILITY REQUIREMENTS */}
+              <div className="bg-surface border border-border-theme rounded-2xl p-5 shadow-xs">
+                <h3 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
+                  <span>Creator Eligibility Requirements</span>
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                  <div className="p-3 rounded-xl bg-surface-muted/40 border border-border-theme">
+                    <span className="text-[11px] text-text-secondary block font-medium">Minimum Followers</span>
+                    <span className="text-foreground font-semibold mt-0.5 block">
+                      {campaign.creatorRequirements?.minFollowers
+                        ? `${campaign.creatorRequirements.minFollowers.toLocaleString("en-IN")}+ followers`
+                        : "Open to all creators (No minimum)"}
+                    </span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-surface-muted/40 border border-border-theme">
+                    <span className="text-[11px] text-text-secondary block font-medium">Minimum Engagement Rate</span>
+                    <span className="text-foreground font-semibold mt-0.5 block">
+                      {campaign.creatorRequirements?.minEngagementRate
+                        ? `${campaign.creatorRequirements.minEngagementRate}%+ engagement`
+                        : "No minimum engagement rate"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* CONTENT USAGE RIGHTS & LICENSING */}
+              <div className="bg-surface border border-border-theme rounded-2xl p-5 shadow-xs">
+                <h3 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
+                  <span>Content Usage Rights & Licensing</span>
+                </h3>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                  <div className="p-3 rounded-xl bg-surface-muted/40 border border-border-theme">
+                    <span className="text-[11px] text-text-secondary block font-medium">Organic Usage</span>
+                    <span className={`text-xs font-semibold mt-0.5 block ${campaign.usageRights?.organicUsage !== false ? "text-emerald-600 dark:text-emerald-400" : "text-text-secondary"}`}>
+                      {campaign.usageRights?.organicUsage !== false ? "✓ Permitted" : "✕ Not Included"}
+                    </span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-surface-muted/40 border border-border-theme">
+                    <span className="text-[11px] text-text-secondary block font-medium">Paid Advertising</span>
+                    <span className={`text-xs font-semibold mt-0.5 block ${campaign.usageRights?.paidAds ? "text-purple-600 dark:text-purple-400" : "text-text-secondary"}`}>
+                      {campaign.usageRights?.paidAds ? "✓ Paid Ads Allowed" : "Organic Only"}
+                    </span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-surface-muted/40 border border-border-theme">
+                    <span className="text-[11px] text-text-secondary block font-medium">Usage Duration</span>
+                    <span className="text-foreground font-semibold mt-0.5 block">
+                      {campaign.usageRights?.duration || "30 days"}
+                    </span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-surface-muted/40 border border-border-theme">
+                    <span className="text-[11px] text-text-secondary block font-medium">Brand Exclusivity</span>
+                    <span className={`text-xs font-semibold mt-0.5 block ${campaign.usageRights?.exclusivity ? "text-amber-600 dark:text-amber-400" : "text-text-secondary"}`}>
+                      {campaign.usageRights?.exclusivity ? "Exclusivity Required" : "Non-exclusive"}
+                    </span>
+                  </div>
                 </div>
               </div>
 

@@ -5,7 +5,11 @@ import {
 
 import {
     getBrandCreatorsApi,
-    getBrandCreatorByIdApi
+    getBrandCreatorByIdApi,
+    getSavedCreatorsApi,
+    getSavedCreatorIdsApi,
+    saveCreatorApi,
+    unsaveCreatorApi
 } from "./creators_api";
 
 import {
@@ -44,6 +48,66 @@ const fetchBrandCreatorById = createAsyncThunk(
     }
 );
 
+// Handles fetching full saved creators shortlist for the brand.
+const fetchSavedCreators = createAsyncThunk(
+    "brandCreators/fetchSavedCreators",
+    async (_, { rejectWithValue }) => {
+        try {
+            return await getSavedCreatorsApi();
+        } catch (error) {
+            return rejectWithValue(
+                error.response?.data?.message ||
+                "Unable to fetch saved creators"
+            );
+        }
+    }
+);
+
+// Handles fetching array of saved creator IDs for fast bookmark lookup.
+const fetchSavedCreatorIds = createAsyncThunk(
+    "brandCreators/fetchSavedCreatorIds",
+    async (_, { rejectWithValue }) => {
+        try {
+            return await getSavedCreatorIdsApi();
+        } catch (error) {
+            return rejectWithValue(
+                error.response?.data?.message ||
+                "Unable to fetch saved creator IDs"
+            );
+        }
+    }
+);
+
+// Handles saving a creator to the brand's shortlist.
+const saveCreator = createAsyncThunk(
+    "brandCreators/saveCreator",
+    async (creatorId, { rejectWithValue }) => {
+        try {
+            return await saveCreatorApi(creatorId);
+        } catch (error) {
+            return rejectWithValue(
+                error.response?.data?.message ||
+                "Unable to save creator"
+            );
+        }
+    }
+);
+
+// Handles removing a creator from the brand's shortlist.
+const unsaveCreator = createAsyncThunk(
+    "brandCreators/unsaveCreator",
+    async (creatorId, { rejectWithValue }) => {
+        try {
+            return await unsaveCreatorApi(creatorId);
+        } catch (error) {
+            return rejectWithValue(
+                error.response?.data?.message ||
+                "Unable to remove creator from shortlist"
+            );
+        }
+    }
+);
+
 const initialState = {
     creators: [],
     selectedCreator: null,
@@ -51,7 +115,13 @@ const initialState = {
     loading: false,
     detailsLoading: false,
     error: null,
-    detailsError: null
+    detailsError: null,
+    // Saved creators / shortlist state
+    savedCreators: [],
+    savedCreatorIds: [],
+    savedLoading: false,
+    savedError: null,
+    savingId: null
 };
 
 const brandCreatorsSlice = createSlice({
@@ -65,6 +135,7 @@ const brandCreatorsSlice = createSlice({
         clearCreatorError: (state) => {
             state.error = null;
             state.detailsError = null;
+            state.savedError = null;
         },
         clearCreatorsState: (state) => {
             state.creators = [];
@@ -74,6 +145,11 @@ const brandCreatorsSlice = createSlice({
             state.detailsLoading = false;
             state.error = null;
             state.detailsError = null;
+            state.savedCreators = [];
+            state.savedCreatorIds = [];
+            state.savedLoading = false;
+            state.savedError = null;
+            state.savingId = null;
         }
     },
     extraReducers: (builder) => {
@@ -109,6 +185,60 @@ const brandCreatorsSlice = createSlice({
                 state.detailsError = action.payload || action.error?.message || "Unable to fetch creator details";
             })
 
+            // Fetch Saved Creators shortlist
+            .addCase(fetchSavedCreators.pending, (state) => {
+                state.savedLoading = true;
+                state.savedError = null;
+            })
+            .addCase(fetchSavedCreators.fulfilled, (state, action) => {
+                state.savedLoading = false;
+                state.savedCreators = action.payload?.data?.creators || [];
+                const ids = (action.payload?.data?.creators || []).map((c) => (c._id || c.id)?.toString()).filter(Boolean);
+                state.savedCreatorIds = Array.from(new Set([...state.savedCreatorIds, ...ids]));
+                state.savedError = null;
+            })
+            .addCase(fetchSavedCreators.rejected, (state, action) => {
+                state.savedLoading = false;
+                state.savedError = action.payload || "Unable to fetch saved creators";
+            })
+
+            // Fetch Saved Creator IDs
+            .addCase(fetchSavedCreatorIds.fulfilled, (state, action) => {
+                const ids = (action.payload?.data?.ids || []).map((id) => id?.toString()).filter(Boolean);
+                state.savedCreatorIds = ids;
+            })
+
+            // Save Creator
+            .addCase(saveCreator.pending, (state, action) => {
+                state.savingId = action.meta.arg?.toString();
+            })
+            .addCase(saveCreator.fulfilled, (state, action) => {
+                state.savingId = null;
+                const savedId = (action.payload?.data?.creatorId || action.meta.arg)?.toString();
+                if (savedId && !state.savedCreatorIds.includes(savedId)) {
+                    state.savedCreatorIds.push(savedId);
+                }
+            })
+            .addCase(saveCreator.rejected, (state) => {
+                state.savingId = null;
+            })
+
+            // Unsave Creator
+            .addCase(unsaveCreator.pending, (state, action) => {
+                state.savingId = action.meta.arg?.toString();
+            })
+            .addCase(unsaveCreator.fulfilled, (state, action) => {
+                state.savingId = null;
+                const removedId = (action.payload?.data?.creatorId || action.meta.arg)?.toString();
+                if (removedId) {
+                    state.savedCreatorIds = state.savedCreatorIds.filter((id) => id !== removedId);
+                    state.savedCreators = state.savedCreators.filter((c) => (c._id || c.id)?.toString() !== removedId);
+                }
+            })
+            .addCase(unsaveCreator.rejected, (state) => {
+                state.savingId = null;
+            })
+
             // Clear state on auth events
             .addCase(login.fulfilled, (state) => {
                 state.creators = [];
@@ -118,6 +248,11 @@ const brandCreatorsSlice = createSlice({
                 state.detailsLoading = false;
                 state.error = null;
                 state.detailsError = null;
+                state.savedCreators = [];
+                state.savedCreatorIds = [];
+                state.savedLoading = false;
+                state.savedError = null;
+                state.savingId = null;
             })
             .addCase(logout.fulfilled, (state) => {
                 state.creators = [];
@@ -127,6 +262,11 @@ const brandCreatorsSlice = createSlice({
                 state.detailsLoading = false;
                 state.error = null;
                 state.detailsError = null;
+                state.savedCreators = [];
+                state.savedCreatorIds = [];
+                state.savedLoading = false;
+                state.savedError = null;
+                state.savingId = null;
             })
             .addCase(clearAuth, (state) => {
                 state.creators = [];
@@ -136,6 +276,11 @@ const brandCreatorsSlice = createSlice({
                 state.detailsLoading = false;
                 state.error = null;
                 state.detailsError = null;
+                state.savedCreators = [];
+                state.savedCreatorIds = [];
+                state.savedLoading = false;
+                state.savedError = null;
+                state.savingId = null;
             });
     }
 });
@@ -148,7 +293,11 @@ export const {
 
 export {
     fetchBrandCreators,
-    fetchBrandCreatorById
+    fetchBrandCreatorById,
+    fetchSavedCreators,
+    fetchSavedCreatorIds,
+    saveCreator,
+    unsaveCreator
 };
 
 export default brandCreatorsSlice.reducer;

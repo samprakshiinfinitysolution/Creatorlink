@@ -93,8 +93,85 @@ const updateProfileService = async (userId, profileData) => {
 };
 
 
+// Finalizes brand onboarding after strictly verifying required profile fields.
+const completeOnboardingService = async (userId, data = {}) => {
+
+    // 1. Fetch existing profile or create one if none exists yet
+    let profile = await BrandProfile.findOne({
+        user: userId
+    });
+
+    if (!profile) {
+        profile = await BrandProfile.create({
+            user: userId,
+            companyName: data.companyName ? data.companyName.trim() : "",
+            industry: data.industry ? data.industry.trim() : "",
+            location: data.location ? data.location.trim() : "",
+            description: data.description ? data.description.trim() : "",
+            website: data.website ? data.website.trim() : "",
+            logo: data.logo ? data.logo.trim() : "",
+            socialLinks: data.socialLinks || {},
+            contactInformation: data.contactInformation || {}
+        });
+    } else {
+        // Update with any freshly provided fields from Step 1 & 2
+        if (data.companyName !== undefined) profile.companyName = data.companyName.trim();
+        if (data.industry !== undefined) profile.industry = data.industry.trim();
+        if (data.location !== undefined) profile.location = data.location.trim();
+        if (data.description !== undefined) profile.description = data.description.trim();
+        if (data.website !== undefined) profile.website = data.website.trim();
+        if (data.logo !== undefined) profile.logo = data.logo.trim();
+        if (data.socialLinks !== undefined) profile.socialLinks = data.socialLinks;
+        if (data.contactInformation !== undefined) profile.contactInformation = data.contactInformation;
+    }
+
+    // 2. Strict backend verification of required fields before granting onboarded status
+    if (!profile.companyName || !profile.companyName.trim()) {
+        throw createApiError(
+            400,
+            "Company name is required to complete brand onboarding."
+        );
+    }
+
+    if (!profile.industry || !profile.industry.trim()) {
+        throw createApiError(
+            400,
+            "Industry is required to complete brand onboarding."
+        );
+    }
+
+    if (!profile.location || !profile.location.trim()) {
+        throw createApiError(
+            400,
+            "Location is required to complete brand onboarding."
+        );
+    }
+
+    // 3. Mark profile as onboarded
+    profile.isOnboarded = true;
+    await profile.save();
+
+    // Re-evaluate trial eligibility signals for Admin review
+    try {
+        await reEvaluateBrandTrialEligibilityService(userId, {
+            companyName: profile.companyName,
+            website: profile.website,
+            location: profile.location
+        });
+    } catch (err) {
+        console.error("Trial eligibility check failed during onboarding completion:", err);
+    }
+
+    return await profile.populate(
+        "user",
+        "name email role"
+    );
+};
+
+
 export {
     createProfileService,
     getMyProfileService,
-    updateProfileService
+    updateProfileService,
+    completeOnboardingService
 };

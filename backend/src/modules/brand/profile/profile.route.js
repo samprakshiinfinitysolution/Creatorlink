@@ -5,7 +5,8 @@ import authorizeRoles from "../../../middleware/role.middleware.js";
 import {
     createProfile,
     getMyProfile,
-    updateMyProfile
+    updateMyProfile,
+    completeOnboarding
 } from "./profile.controller.js";
 
 import {
@@ -48,6 +49,12 @@ router.patch(
     "/me",
     updateProfileValidation,
     updateMyProfile
+);
+
+// Complete brand onboarding with required field verification.
+router.post(
+    "/complete-onboarding",
+    completeOnboarding
 );
 
 // Submit verification request for brand.

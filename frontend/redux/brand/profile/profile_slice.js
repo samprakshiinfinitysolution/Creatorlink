@@ -6,7 +6,8 @@ import {
 import {
     createProfile,
     getMyProfile,
-    updateMyProfile
+    updateMyProfile,
+    completeOnboardingApi
 } from "./profile_api";
 
 import {
@@ -78,6 +79,26 @@ const updateBrandProfile = createAsyncThunk(
             return rejectWithValue(
                 error.response?.data?.message ||
                 "Brand profile update failed"
+            );
+        }
+    }
+);
+
+
+// Handles completing brand onboarding with backend required-fields verification.
+const completeBrandOnboarding = createAsyncThunk(
+    "brandProfile/completeOnboarding",
+    async (profileData, { rejectWithValue }) => {
+
+        try {
+
+            return await completeOnboardingApi(profileData);
+
+        } catch (error) {
+
+            return rejectWithValue(
+                error.response?.data?.message ||
+                "Brand onboarding completion failed"
             );
         }
     }
@@ -183,6 +204,30 @@ const profileSlice = createSlice({
                 state.error = action.payload;
             })
 
+
+            // Complete onboarding started.
+            .addCase(completeBrandOnboarding.pending, (state) => {
+
+                state.loading = true;
+                state.error = null;
+            })
+
+            // Complete onboarding successful.
+            .addCase(completeBrandOnboarding.fulfilled, (state, action) => {
+
+                state.loading = false;
+                state.profile = action.payload.data;
+                state.error = null;
+            })
+
+            // Complete onboarding failed.
+            .addCase(completeBrandOnboarding.rejected, (state, action) => {
+
+                state.loading = false;
+                state.error = action.payload;
+            })
+
+
             // Clear profile state when user logs in, logs out, or clears auth state.
             .addCase(login.fulfilled, (state) => {
 
@@ -219,7 +264,8 @@ export const {
 export {
     createBrandProfile,
     getBrandProfile,
-    updateBrandProfile
+    updateBrandProfile,
+    completeBrandOnboarding
 };
 
 

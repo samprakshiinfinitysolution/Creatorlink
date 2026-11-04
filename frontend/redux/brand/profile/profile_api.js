@@ -36,8 +36,21 @@ const updateMyProfile = async (profileData) => {
 };
 
 
+// Completes brand onboarding with backend verification of required fields.
+const completeOnboardingApi = async (profileData) => {
+
+    const response = await axiosInstance.post(
+        "/brand/profile/complete-onboarding",
+        profileData
+    );
+
+    return response.data;
+};
+
+
 export {
     createProfile,
     getMyProfile,
-    updateMyProfile
+    updateMyProfile,
+    completeOnboardingApi
 };

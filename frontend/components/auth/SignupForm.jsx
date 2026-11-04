@@ -149,7 +149,7 @@ export default function SignupForm() {
         if (userRole === "creator") {
           router.push("/creator/onboarding");
         } else if (userRole === "brand") {
-          router.push("/brand/dashboard");
+          router.push("/brand/onboarding");
         } else if (userRole === "admin") {
           router.push("/admin/dashboard");
         } else {
@@ -257,7 +257,7 @@ export default function SignupForm() {
           if (userRole === "creator") {
             router.push("/creator/onboarding");
           } else if (userRole === "brand") {
-            router.push("/brand/dashboard");
+            router.push("/brand/onboarding");
           } else if (userRole === "admin") {
             router.push("/admin/dashboard");
           } else {

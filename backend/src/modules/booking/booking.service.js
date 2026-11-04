@@ -6,6 +6,7 @@ import CreatorService from "../creator/services/services.model.js";
 import Auth from "../auth/auth.model.js";
 import CreatorProfile from "../creator/profile/profile.model.js";
 import BrandProfile from "../brand/profile/profile.model.js";
+import Review from "../reviews/reviews.model.js";
 import {
     createWorkspaceForAcceptedBooking,
     cleanupWorkspaceForBooking
@@ -363,12 +364,12 @@ const attachBookingProfiles = async (bookings) => {
     });
 
     const isDbConnected = mongoose.connection?.readyState === 1;
-    const [creatorProfiles, brandProfiles] = await Promise.all([
+    const [creatorProfiles, brandProfiles, reviewStats] = await Promise.all([
         creatorIds.size > 0 && isDbConnected
             ? CreatorProfile.find({
                 user: { $in: Array.from(creatorIds).map((id) => new mongoose.Types.ObjectId(id)) }
             })
-                .select("user profileImage")
+                .select("user profileImage category followerCount")
                 .lean()
             : [],
         brandIds.size > 0 && isDbConnected
@@ -377,12 +378,33 @@ const attachBookingProfiles = async (bookings) => {
             })
                 .select("user logo companyName")
                 .lean()
+            : [],
+        creatorIds.size > 0 && isDbConnected
+            ? Review.aggregate([
+                {
+                    $match: {
+                        reviewee: { $in: Array.from(creatorIds).map((id) => new mongoose.Types.ObjectId(id)) }
+                    }
+                },
+                {
+                    $group: {
+                        _id: "$reviewee",
+                        averageRating: { $avg: "$rating" },
+                        reviewCount: { $sum: 1 }
+                    }
+                }
+            ])
             : []
     ]);
 
     const creatorMap = new Map();
     creatorProfiles.forEach((cp) => {
-        if (cp?.user) creatorMap.set(cp.user.toString(), cp.profileImage || "");
+        if (cp?.user) creatorMap.set(cp.user.toString(), cp);
+    });
+
+    const reviewMap = new Map();
+    (reviewStats || []).forEach((r) => {
+        if (r?._id) reviewMap.set(r._id.toString(), r);
     });
 
     const brandMap = new Map();
@@ -395,7 +417,13 @@ const attachBookingProfiles = async (bookings) => {
         const cId = extractEntityId(bObj.creator);
         const bId = extractEntityId(bObj.brand);
 
-        const profileImage = cId ? (creatorMap.get(cId) || "") : "";
+        const cp = cId ? creatorMap.get(cId) : null;
+        const profileImage = cp?.profileImage || "";
+        const rStat = cId ? reviewMap.get(cId) : null;
+        const avgRating = rStat?.averageRating ? Math.round(rStat.averageRating * 10) / 10 : null;
+        const reviewCount = rStat?.reviewCount || 0;
+        const category = cp?.category || "";
+        const followerCount = cp?.followerCount !== undefined ? cp.followerCount : null;
         const bp = bId ? brandMap.get(bId) : null;
 
         if (bObj.creator) {
@@ -406,14 +434,24 @@ const attachBookingProfiles = async (bookings) => {
                     ...creatorBase,
                     profileImage: profileImage || creatorBase.profileImage || "",
                     avatar: profileImage || creatorBase.avatar || "",
-                    image: profileImage || creatorBase.image || ""
+                    image: profileImage || creatorBase.image || "",
+                    category: category || creatorBase.category || "",
+                    followerCount: followerCount !== null ? followerCount : (creatorBase.followerCount ?? null),
+                    followers: followerCount !== null ? followerCount : (creatorBase.followers ?? null),
+                    rating: avgRating !== null ? avgRating : (creatorBase.rating ?? null),
+                    reviewCount: reviewCount || creatorBase.reviewCount || 0
                 };
             } else if (cId) {
                 bObj.creator = {
                     _id: bObj.creator,
                     profileImage,
                     avatar: profileImage,
-                    image: profileImage
+                    image: profileImage,
+                    category,
+                    followerCount,
+                    followers: followerCount,
+                    rating: avgRating,
+                    reviewCount
                 };
             }
         }
@@ -459,7 +497,8 @@ const getBrandBookingsService = async (brandId, query = {}) => {
         page = 1,
         limit = 10,
         status,
-        campaignId
+        campaignId,
+        initiatedBy
     } = query;
 
 
@@ -482,6 +521,19 @@ const getBrandBookingsService = async (brandId, query = {}) => {
 
     if (campaignId && mongoose.Types.ObjectId.isValid(campaignId)) {
         filter.campaign = campaignId;
+    }
+
+
+    if (initiatedBy && ["creator", "brand"].includes(initiatedBy.trim())) {
+        if (initiatedBy.trim() === "creator") {
+            filter.$or = [
+                { initiatedBy: "creator" },
+                { initiatedBy: { $exists: false } },
+                { initiatedBy: null }
+            ];
+        } else {
+            filter.initiatedBy = "brand";
+        }
     }
 
 
@@ -866,7 +918,8 @@ const updateCreatorBookingStatusService = async (creatorId, bookingId, newStatus
 
     if (newStatus === "accepted") {
         // Enforce active subscription or free trial before accepting applications
-        const entitlement = await evaluateBrandEntitlement(brandId);
+        const targetBrandId = booking.brand?._id || booking.brand;
+        const entitlement = await evaluateBrandEntitlement(targetBrandId);
         if (!entitlement.hasEntitlement) {
             throw createApiError(
                 403,

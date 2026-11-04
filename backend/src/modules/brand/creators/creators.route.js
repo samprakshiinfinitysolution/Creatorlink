@@ -3,7 +3,11 @@ import authenticateUser from "../../../middleware/auth.middleware.js";
 import authorizeRoles from "../../../middleware/role.middleware.js";
 import {
     getDiscoverCreators,
-    getDiscoverCreatorById
+    getDiscoverCreatorById,
+    saveCreator,
+    unsaveCreator,
+    getSavedCreators,
+    getSavedCreatorIds
 } from "./creators.controller.js";
 import {
     checkCreatorUnlockStatus,
@@ -20,6 +24,32 @@ const router = express.Router();
 router.use(
     authenticateUser,
     authorizeRoles("brand")
+);
+
+// GET /brand/creators/saved - Fetch saved creators shortlist for the brand
+router.get(
+    "/saved",
+    getSavedCreators
+);
+
+// GET /brand/creators/saved/ids - Fetch array of saved creator IDs
+router.get(
+    "/saved/ids",
+    getSavedCreatorIds
+);
+
+// POST /brand/creators/:id/save - Save creator to shortlist
+router.post(
+    "/:id/save",
+    validateGetCreatorById,
+    saveCreator
+);
+
+// DELETE /brand/creators/:id/save - Remove creator from shortlist
+router.delete(
+    "/:id/save",
+    validateGetCreatorById,
+    unsaveCreator
 );
 
 // GET /brand/creators - Search, filter, sort and paginate discoverable creators

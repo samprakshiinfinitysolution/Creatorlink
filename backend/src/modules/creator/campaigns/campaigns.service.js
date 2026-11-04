@@ -120,21 +120,26 @@ const getDiscoverCampaignsService = async (query = {}) => {
     }
 
 
-    // Filter by budget range.
+    // Filter by budget range (matches both legacy single budget and range-enabled campaigns)
     if (
         (minBudget !== undefined && minBudget !== "") ||
         (maxBudget !== undefined && maxBudget !== "")
     ) {
+        const numMin = minBudget !== undefined && minBudget !== "" ? Number(minBudget) : null;
+        const numMax = maxBudget !== undefined && maxBudget !== "" ? Number(maxBudget) : null;
 
-        filter.budget = {};
+        const singleBudgetMatch = {};
+        if (numMin !== null) singleBudgetMatch.$gte = numMin;
+        if (numMax !== null) singleBudgetMatch.$lte = numMax;
 
-        if (minBudget !== undefined && minBudget !== "") {
-            filter.budget.$gte = Number(minBudget);
-        }
+        const rangeBudgetMatch = {};
+        if (numMin !== null) rangeBudgetMatch.maxBudget = { $gte: numMin };
+        if (numMax !== null) rangeBudgetMatch.minBudget = { $lte: numMax };
 
-        if (maxBudget !== undefined && maxBudget !== "") {
-            filter.budget.$lte = Number(maxBudget);
-        }
+        filter.$or = [
+            { budget: singleBudgetMatch },
+            rangeBudgetMatch
+        ];
     }
 
 

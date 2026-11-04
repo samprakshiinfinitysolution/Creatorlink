@@ -66,6 +66,13 @@ const profileSchema = new mongoose.Schema(
         isVerifiedBusiness: {
             type: Boolean,
             default: false
+        },
+
+        // Onboarding completion flag indicating whether initial brand setup has been finalized.
+        isOnboarded: {
+            type: Boolean,
+            default: false,
+            index: true
         }
     },
     {

@@ -1,3 +1,4 @@
+import SavedCreator from "./savedCreator.model.js";
 import mongoose from "mongoose";
 import CreatorProfile from "../../creator/profile/profile.model.js";
 import Auth from "../../auth/auth.model.js";
@@ -544,7 +545,284 @@ const getDiscoverCreatorByIdService = async (creatorId) => {
     return results[0];
 };
 
+// Saves a creator to the brand's shortlist
+const saveCreatorService = async (brandId, creatorId) => {
+    if (!creatorId || !mongoose.Types.ObjectId.isValid(creatorId)) {
+        throw createApiError(400, "Invalid creator ID format");
+    }
+
+    const objId = new mongoose.Types.ObjectId(creatorId);
+
+    // Verify creator exists and is discoverable (check either profile ID or user ID)
+    const creatorProfile = await CreatorProfile.findOne({
+        $or: [
+            { _id: objId },
+            { user: objId }
+        ]
+    });
+
+    if (!creatorProfile) {
+        throw createApiError(404, "Creator profile not found");
+    }
+
+    // Upsert to prevent duplicate records
+    await SavedCreator.findOneAndUpdate(
+        {
+            brand: brandId,
+            creator: creatorProfile._id
+        },
+        {
+            $setOnInsert: {
+                brand: brandId,
+                creator: creatorProfile._id
+            }
+        },
+        {
+            upsert: true,
+            new: true
+        }
+    );
+
+    return {
+        saved: true,
+        creatorId: creatorProfile._id.toString(),
+        userId: creatorProfile.user?.toString()
+    };
+};
+
+// Removes a creator from the brand's shortlist
+const unsaveCreatorService = async (brandId, creatorId) => {
+    if (!creatorId || !mongoose.Types.ObjectId.isValid(creatorId)) {
+        throw createApiError(400, "Invalid creator ID format");
+    }
+
+    const objId = new mongoose.Types.ObjectId(creatorId);
+
+    // Resolve creator profile ID
+    const creatorProfile = await CreatorProfile.findOne({
+        $or: [
+            { _id: objId },
+            { user: objId }
+        ]
+    });
+
+    const targetCreatorId = creatorProfile ? creatorProfile._id : objId;
+
+    await SavedCreator.findOneAndDelete({
+        brand: brandId,
+        creator: targetCreatorId
+    });
+
+    return {
+        saved: false,
+        creatorId: targetCreatorId.toString()
+    };
+};
+
+// Fetches array of saved creator IDs for quick lookup in discovery cards
+const getSavedCreatorIdsService = async (brandId) => {
+    const savedRecords = await SavedCreator.find({ brand: brandId })
+        .select("creator")
+        .lean();
+
+    const ids = savedRecords.map((r) => r.creator.toString());
+
+    return {
+        ids,
+        total: ids.length
+    };
+};
+
+// Fetches full rich creator details for all saved creators belonging to the brand
+const getSavedCreatorsService = async (brandId) => {
+    const savedRecords = await SavedCreator.find({ brand: brandId })
+        .sort({ createdAt: -1 })
+        .lean();
+
+    if (!savedRecords || savedRecords.length === 0) {
+        return {
+            creators: [],
+            total: 0
+        };
+    }
+
+    const creatorIds = savedRecords.map((r) => r.creator);
+
+    const pipeline = [
+        {
+            $match: {
+                _id: { $in: creatorIds }
+            }
+        },
+        {
+            $lookup: {
+                from: Auth.collection.name,
+                localField: "user",
+                foreignField: "_id",
+                as: "user"
+            }
+        },
+        {
+            $unwind: "$user"
+        },
+        {
+            $match: {
+                "user.role": "creator"
+            }
+        },
+        {
+            $lookup: {
+                from: CreatorService.collection.name,
+                let: { creatorAuthId: "$user._id" },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: {
+                                $and: [
+                                    { $eq: ["$creator", "$creatorAuthId"] },
+                                    { $eq: ["$isActive", true] }
+                                ]
+                            }
+                        }
+                    },
+                    { $sort: { price: 1, createdAt: -1 } }
+                ],
+                as: "services"
+            }
+        },
+        {
+            $lookup: {
+                from: Portfolio.collection.name,
+                let: { creatorAuthId: "$user._id" },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: {
+                                $and: [
+                                    { $eq: ["$creator", "$creatorAuthId"] },
+                                    { $eq: ["$isPublic", true] }
+                                ]
+                            }
+                        }
+                    },
+                    { $sort: { createdAt: -1 } }
+                ],
+                as: "portfolio"
+            }
+        },
+        {
+            $lookup: {
+                from: Review.collection.name,
+                let: { creatorAuthId: "$user._id" },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: {
+                                $eq: ["$reviewee", "$creatorAuthId"]
+                            }
+                        }
+                    },
+                    {
+                        $group: {
+                            _id: "$reviewee",
+                            averageRating: { $avg: "$rating" },
+                            reviewCount: { $sum: 1 }
+                        }
+                    }
+                ],
+                as: "reviewStats"
+            }
+        },
+        {
+            $addFields: {
+                reviewStats: { $arrayElemAt: ["$reviewStats", 0] },
+                minPrice: {
+                    $cond: {
+                        if: { $gt: [{ $size: "$services" }, 0] },
+                        then: { $min: "$services.price" },
+                        else: null
+                    }
+                }
+            }
+        },
+        {
+            $addFields: {
+                rating: {
+                    $cond: {
+                        if: {
+                            $and: [
+                                { $ne: ["$reviewStats", null] },
+                                { $gt: ["$reviewStats.reviewCount", 0] }
+                            ]
+                        },
+                        then: { $round: ["$reviewStats.averageRating", 1] },
+                        else: null
+                    }
+                },
+                reviewCount: {
+                    $ifNull: ["$reviewStats.reviewCount", 0]
+                }
+            }
+        },
+        {
+            $project: {
+                _id: 1,
+                user: {
+                    _id: "$user._id",
+                    name: "$user.name",
+                    role: "$user.role",
+                    isVerified: "$user.isVerified"
+                },
+                bio: 1,
+                title: 1,
+                category: 1,
+                niches: 1,
+                keywords: 1,
+                location: 1,
+                profileImage: 1,
+                socialLinks: 1,
+                followerCount: 1,
+                engagementRate: 1,
+                isPublic: 1,
+                isVerifiedBadge: 1,
+                createdAt: 1,
+                updatedAt: 1,
+                services: 1,
+                portfolio: 1,
+                rating: 1,
+                reviewCount: 1,
+                minPrice: 1
+            }
+        }
+    ];
+
+    const results = await CreatorProfile.aggregate(pipeline);
+
+    // Re-order results to match the order savedRecords was sorted (most recently saved first)
+    const map = new Map();
+    results.forEach((c) => {
+        map.set(c._id.toString(), c);
+    });
+
+    const sortedCreators = [];
+    creatorIds.forEach((id) => {
+        const item = map.get(id.toString());
+        if (item) {
+            sortedCreators.push(item);
+        }
+    });
+
+    return {
+        creators: sortedCreators,
+        total: sortedCreators.length
+    };
+};
+
 export {
     getDiscoverCreatorsService,
-    getDiscoverCreatorByIdService
+    getDiscoverCreatorByIdService,
+    saveCreatorService,
+    unsaveCreatorService,
+    getSavedCreatorsService,
+    getSavedCreatorIdsService
 };

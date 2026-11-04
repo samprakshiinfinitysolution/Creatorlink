@@ -124,6 +124,14 @@ function XIcon({ className = "w-4 h-4" }) {
   );
 }
 
+function ClockIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  );
+}
+
 // =========================================================
 // MAIN COMPONENT
 // =========================================================
@@ -203,6 +211,7 @@ export default function BrandBookingDetailModal({
 
   const handleConfirmStatusChange = async () => {
     if (!confirmAction || !bookingId || submitting) return;
+    if (booking?.initiatedBy === "brand") return;
 
     if (confirmAction === "accept" && subStatus && subStatus.hasEntitlement === false) {
       setLocalFeedback({
@@ -241,6 +250,7 @@ export default function BrandBookingDetailModal({
 
   const booking = selectedBooking;
   const isPending = booking?.status?.toLowerCase() === "pending";
+  const isBrandInitiated = booking?.initiatedBy === "brand";
   const badge = getStatusBadge(booking?.status);
 
   // Safely extract nested fields
@@ -289,7 +299,7 @@ export default function BrandBookingDetailModal({
           <div>
             <div className="flex items-center gap-2">
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-secondary/15 text-secondary border border-secondary/20 uppercase tracking-wide">
-                Booking Request Details
+                {isBrandInitiated ? "Direct Proposal" : "Booking Request Details"}
               </span>
               {booking?.status && (
                 <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${badge.color}`}>
@@ -396,7 +406,7 @@ export default function BrandBookingDetailModal({
                 {/* Proposal Message */}
                 {message && (
                   <div className="pt-2 border-t border-border-theme">
-                    <span className="text-xs text-text-secondary block mb-1">Creator Message / Pitch:</span>
+                    <span className="text-xs text-text-secondary block mb-1">{isBrandInitiated ? "Brand Proposal Message / Note:" : "Creator Message / Pitch:"}</span>
                     <p className="text-xs text-foreground bg-surface p-3 rounded-xl border border-border-theme whitespace-pre-line">
                       {message}
                     </p>
@@ -516,7 +526,15 @@ export default function BrandBookingDetailModal({
 
           {/* Pending Status Actions & Confirmation Box */}
           {isPending && (
-            <div className="w-full sm:w-auto flex flex-col sm:flex-row items-center gap-3">
+            isBrandInitiated ? (
+              <div className="w-full sm:w-auto flex items-center justify-center sm:justify-end">
+                <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500 text-xs font-semibold">
+                  <ClockIcon className="w-4 h-4 shrink-0" />
+                  <span>Awaiting Creator Response</span>
+                </div>
+              </div>
+            ) : (
+              <div className="w-full sm:w-auto flex flex-col sm:flex-row items-center gap-3">
               {confirmAction ? (
                 /* Inline Confirmation Step */
                 <div className="flex items-center gap-2 bg-surface border border-border-theme p-2 rounded-xl w-full sm:w-auto">
@@ -585,6 +603,7 @@ export default function BrandBookingDetailModal({
                 </div>
               )}
             </div>
+            )
           )}
 
           {/* Accepted or In-Progress Workspace Action */}

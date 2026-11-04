@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { login, loginWithGoogle } from "@/redux/auth/auth_slice";
 import { getCreatorProfile } from "@/redux/creator/profile/profile_slice";
+import { getBrandProfile } from "@/redux/brand/profile/profile_slice";
 import { getGoogleClientId } from "@/redux/auth/auth_api";
 import { requestGoogleAuthCode } from "@/lib/googleAuth";
 
@@ -123,7 +124,21 @@ export default function LoginForm() {
             router.push("/creator/onboarding");
           }
         } else if (role === "brand") {
-          router.push("/brand/dashboard");
+          try {
+            const profileAction = await dispatch(getBrandProfile());
+            if (getBrandProfile.fulfilled.match(profileAction)) {
+              const profile = profileAction.payload?.data;
+              if (profile?.isOnboarded) {
+                router.push("/brand/dashboard");
+              } else {
+                router.push("/brand/onboarding");
+              }
+            } else {
+              router.push("/brand/onboarding");
+            }
+          } catch {
+            router.push("/brand/onboarding");
+          }
         } else if (role === "admin") {
           router.push("/admin/dashboard");
         } else {
@@ -190,7 +205,21 @@ export default function LoginForm() {
             router.push("/creator/onboarding");
           }
         } else if (role === "brand") {
-          router.push("/brand/dashboard");
+          try {
+            const profileAction = await dispatch(getBrandProfile());
+            if (getBrandProfile.fulfilled.match(profileAction)) {
+              const profile = profileAction.payload?.data;
+              if (profile?.isOnboarded) {
+                router.push("/brand/dashboard");
+              } else {
+                router.push("/brand/onboarding");
+              }
+            } else {
+              router.push("/brand/onboarding");
+            }
+          } catch {
+            router.push("/brand/onboarding");
+          }
         } else if (role === "admin") {
           router.push("/admin/dashboard");
         } else {

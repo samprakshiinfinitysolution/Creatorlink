@@ -186,6 +186,18 @@ const formatBudget = (amount, currency = "INR") => {
   return `${symbol}${new Intl.NumberFormat("en-IN").format(amount)}`;
 };
 
+const formatCampaignBudgetRange = (campaign) => {
+  if (!campaign) return "N/A";
+  const currency = campaign.currency || "INR";
+  const min = campaign.minBudget;
+  const max = campaign.maxBudget;
+  if (min !== undefined && min !== null && max !== undefined && max !== null && !isNaN(min) && !isNaN(max) && min > 0 && max > 0) {
+    if (min === max) return formatBudget(min, currency);
+    return `${formatBudget(min, currency)} – ${formatBudget(max, currency)}`;
+  }
+  return formatBudget(campaign.budget || max || min, currency);
+};
+
 const formatDate = (dateString) => {
   if (!dateString) return "N/A";
   try {
@@ -751,10 +763,31 @@ export default function CreatorDiscoverCampaignsManager() {
                             Campaign Budget
                           </span>
                           <span className="font-sans font-bold text-lg min-[360px]:text-xl sm:text-2xl text-foreground tabular-nums tracking-tight leading-none block truncate">
-                            {formatBudget(campaign.budget, campaign.currency || "INR")}
+                            {formatCampaignBudgetRange(campaign)}
                           </span>
                         </div>
                       </div>
+
+                      {/* Key Requirements & Rights Badges */}
+                      {(campaign.creatorRequirements?.minFollowers > 0 || campaign.usageRights?.paidAds || campaign.usageRights?.exclusivity) && (
+                        <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                          {campaign.creatorRequirements?.minFollowers > 0 && (
+                            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+                              Min {Number(campaign.creatorRequirements.minFollowers).toLocaleString()} Followers
+                            </span>
+                          )}
+                          {campaign.usageRights?.paidAds && (
+                            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                              Paid Ads
+                            </span>
+                          )}
+                          {campaign.usageRights?.exclusivity && (
+                            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                              Exclusive
+                            </span>
+                          )}
+                        </div>
+                      )}
 
                       {/* Aligned Specs: End Date & Required Creators */}
                       <div className="grid grid-cols-2 gap-1.5 sm:gap-2 text-xs font-sans text-text-secondary">

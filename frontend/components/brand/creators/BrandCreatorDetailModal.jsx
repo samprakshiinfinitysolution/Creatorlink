@@ -5,6 +5,8 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   fetchBrandCreatorById,
   clearSelectedCreator,
+  saveCreator,
+  unsaveCreator,
 } from "@/redux/brand/creators/creators_slice";
 import BrandCreateBookingModal from "@/components/brand/bookings/BrandCreateBookingModal";
 import BrandContactUnlockSection from "./BrandContactUnlockSection";
@@ -87,6 +89,21 @@ function formatSocialUrl(platform, rawValue) {
 // =========================================================
 // SVG ICONS
 // =========================================================
+function BookmarkIcon({ className = "w-4 h-4", filled = false }) {
+  if (filled) {
+    return (
+      <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+        <path fillRule="evenodd" d="M6.32 2.577a49.255 49.255 0 0111.36 0c1.497.174 2.57 1.46 2.57 2.93V21a.75.75 0 01-1.085.67L12 18.089l-7.165 3.58A.75.75 0 013.75 21V5.507c0-1.47 1.073-2.756 2.57-2.93z" clipRule="evenodd" />
+      </svg>
+    );
+  }
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
+    </svg>
+  );
+}
+
 function CloseIcon({ className = "w-5 h-5" }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
@@ -188,17 +205,33 @@ function BriefcaseIcon({ className = "w-6 h-6" }) {
   );
 }
 
+function PhotoIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+    </svg>
+  );
+}
+
 function ModalPortfolioCover({ cover, title, category }) {
+  const [prevCover, setPrevCover] = useState(cover);
   const [loadedUrl, setLoadedUrl] = useState(null);
   const [failedUrl, setFailedUrl] = useState(null);
 
-  const isImgLoaded = loadedUrl === cover;
-  const isImgError = failedUrl === cover;
-  const isImgLoading = Boolean(cover) && !isImgLoaded && !isImgError;
+  if (cover !== prevCover) {
+    setPrevCover(cover);
+    setLoadedUrl(null);
+    setFailedUrl(null);
+  }
+
+  const cleanCover = typeof cover === "string" ? cover.trim() : "";
+  const isImgLoaded = loadedUrl === cleanCover;
+  const isImgError = Boolean(cleanCover) && failedUrl === cleanCover;
+  const isImgLoading = Boolean(cleanCover) && !isImgLoaded && !isImgError;
 
   return (
-    <div className="h-44 w-full bg-surface-muted overflow-hidden relative border-b border-border-theme">
-      {cover && !isImgError ? (
+    <div className="h-44 sm:h-48 w-full bg-surface-muted overflow-hidden relative border-b border-border-theme">
+      {cleanCover && !isImgError ? (
         <>
           {isImgLoading && (
             <div className="absolute inset-0 bg-surface-muted animate-pulse flex items-center justify-center text-text-secondary/30">
@@ -207,20 +240,24 @@ function ModalPortfolioCover({ cover, title, category }) {
           )}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            key={cover}
-            src={cover}
+            key={cleanCover}
+            src={cleanCover}
             alt={title || "Portfolio Work"}
             loading="lazy"
             decoding="async"
-            onLoad={() => setLoadedUrl(cover)}
-            onError={() => setFailedUrl(cover)}
-            className={`w-full h-full object-cover transition-opacity duration-300 ${isImgLoaded ? "opacity-100" : "opacity-0"
-              }`}
+            onLoad={() => setLoadedUrl(cleanCover)}
+            onError={() => setFailedUrl(cleanCover)}
+            className={`w-full h-full object-cover transition-opacity duration-300 ${
+              isImgLoaded ? "opacity-100" : "opacity-0"
+            }`}
           />
         </>
       ) : (
-        <div className="w-full h-full flex items-center justify-center text-text-secondary">
-          <SparklesIcon className="w-6 h-6 opacity-40 text-secondary" />
+        <div className="w-full h-full flex flex-col items-center justify-center bg-neutral-100/80 dark:bg-surface-muted/60 text-text-secondary p-4 text-center">
+          <PhotoIcon className="w-8 h-8 opacity-30 mb-1.5 text-secondary" />
+          <span className="text-[11px] font-medium text-text-secondary/80">
+            {category || "Creative Work"}
+          </span>
         </div>
       )}
       {category && (
@@ -228,6 +265,71 @@ function ModalPortfolioCover({ cover, title, category }) {
           {category}
         </span>
       )}
+    </div>
+  );
+}
+
+function ModalServiceCover({ cover, title, platform, category, contentType }) {
+  const [prevCover, setPrevCover] = useState(cover);
+  const [loadedUrl, setLoadedUrl] = useState(null);
+  const [failedUrl, setFailedUrl] = useState(null);
+
+  if (cover !== prevCover) {
+    setPrevCover(cover);
+    setLoadedUrl(null);
+    setFailedUrl(null);
+  }
+
+  const cleanCover = typeof cover === "string" ? cover.trim() : "";
+  const isImgLoaded = loadedUrl === cleanCover;
+  const isImgError = Boolean(cleanCover) && failedUrl === cleanCover;
+  const isImgLoading = Boolean(cleanCover) && !isImgLoaded && !isImgError;
+
+  return (
+    <div className="relative h-40 sm:h-44 w-full bg-surface-muted overflow-hidden border-b border-border-theme">
+      {cleanCover && !isImgError ? (
+        <>
+          {isImgLoading && (
+            <div className="absolute inset-0 bg-surface-muted animate-pulse flex items-center justify-center text-text-secondary/30">
+              <SparklesIcon className="w-8 h-8 opacity-30 text-secondary" />
+            </div>
+          )}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            key={cleanCover}
+            src={cleanCover}
+            alt={title || "Service package"}
+            loading="lazy"
+            decoding="async"
+            onLoad={() => setLoadedUrl(cleanCover)}
+            onError={() => setFailedUrl(cleanCover)}
+            className={`w-full h-full object-cover transition-opacity duration-300 ${
+              isImgLoaded ? "opacity-100" : "opacity-0"
+            }`}
+          />
+        </>
+      ) : (
+        <div className="w-full h-full flex flex-col items-center justify-center bg-neutral-100/80 dark:bg-surface-muted/60 text-text-secondary p-4 text-center">
+          <PhotoIcon className="w-8 h-8 opacity-30 mb-1.5 text-secondary" />
+          <span className="text-[11px] font-medium text-text-secondary/80">
+            {platform ? `${platform.charAt(0).toUpperCase() + platform.slice(1)} Package` : "Service Package"}
+          </span>
+        </div>
+      )}
+
+      {/* Floating platform & content type chips on top of cover */}
+      <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between pointer-events-none gap-2 z-10">
+        {platform && (
+          <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-black/60 text-white backdrop-blur-xs uppercase tracking-wider">
+            {platform}
+          </span>
+        )}
+        {contentType && (
+          <span className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-black/50 text-white/90 backdrop-blur-xs capitalize">
+            {contentType}
+          </span>
+        )}
+      </div>
     </div>
   );
 }
@@ -242,7 +344,7 @@ export default function BrandCreatorDetailModal({
 }) {
   const dispatch = useDispatch();
 
-  const { selectedCreator, detailsLoading, detailsError, error: listError } = useSelector(
+  const { selectedCreator, detailsLoading, detailsError, error: listError, savedCreatorIds, savingId } = useSelector(
     (state) => state.brandCreators || {}
   );
   const error = detailsError ?? listError;
@@ -293,6 +395,24 @@ export default function BrandCreatorDetailModal({
 
   const isCorrectCreator = Boolean(creatorId) && (selectedCreator?._id === creatorId || selectedCreator?.id === creatorId);
   const creator = isCorrectCreator ? selectedCreator : null;
+
+  const currentCreatorId = creator?._id || creator?.id || creatorId;
+  const isSaved = Boolean(
+    currentCreatorId &&
+    Array.isArray(savedCreatorIds) &&
+    savedCreatorIds.includes(currentCreatorId.toString())
+  );
+  const isSaving = Boolean(currentCreatorId && savingId === currentCreatorId.toString());
+
+  const handleToggleSave = () => {
+    if (!currentCreatorId || isSaving) return;
+    if (isSaved) {
+      dispatch(unsaveCreator(currentCreatorId));
+    } else {
+      dispatch(saveCreator(currentCreatorId));
+    }
+  };
+
   const cleanAvatarUrl = typeof creator?.profileImage === "string" ? creator.profileImage.trim() : "";
   const isProfileImgLoaded = Boolean(cleanAvatarUrl) && loadedAvatarUrl === cleanAvatarUrl;
   const isProfileImgError = Boolean(cleanAvatarUrl) && failedAvatarUrl === cleanAvatarUrl;
@@ -414,14 +534,32 @@ export default function BrandCreatorDetailModal({
             </div>
           )}
 
-          <button
-            type="button"
-            onClick={handleClose}
-            className="p-2 rounded-xl text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors cursor-pointer shrink-0"
-            title="Close modal"
-          >
-            <CloseIcon />
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            {creator && (
+              <button
+                type="button"
+                onClick={handleToggleSave}
+                disabled={isSaving}
+                className={`px-3 py-1.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+                  isSaved
+                    ? "bg-secondary/10 border-secondary/40 text-secondary hover:bg-secondary/20"
+                    : "bg-surface-muted border-border-theme text-text-secondary hover:text-foreground hover:border-secondary/40"
+                }`}
+                title={isSaved ? "Remove from Shortlist" : "Save Creator to Shortlist"}
+              >
+                <BookmarkIcon className="w-4 h-4" filled={isSaved} />
+                <span>{isSaving ? "Updating..." : isSaved ? "Saved" : "Save"}</span>
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={handleClose}
+              className="p-2 rounded-xl text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors cursor-pointer shrink-0"
+              title="Close modal"
+            >
+              <CloseIcon />
+            </button>
+          </div>
         </div>
 
         {/* Tab Navigation */}
@@ -682,7 +820,17 @@ export default function BrandCreatorDetailModal({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {portfolioItems.map((item) => {
                         const contents = Array.isArray(item.contents) ? item.contents : [];
-                        const cover = item.coverImage || (contents.find((c) => c.previewImage)?.previewImage);
+                        const directCover = typeof item.coverImage === "string" ? item.coverImage.trim() : "";
+                        const itemImg = typeof item.image === "string" ? item.image.trim() : "";
+                        const itemThumb = typeof item.thumbnail === "string" ? item.thumbnail.trim() : "";
+                        const contentPreview = contents.find((c) => typeof c?.previewImage === "string" && c.previewImage.trim())?.previewImage?.trim();
+                        const contentImgUrl = contents.find((c) => {
+                          if (typeof c?.url !== "string" || !c.url.trim()) return false;
+                          const u = c.url.trim().toLowerCase();
+                          return u.includes("cloudinary.com") || /\.(jpeg|jpg|png|webp|gif)($|\?)/i.test(u);
+                        })?.url?.trim();
+
+                        const cover = directCover || itemImg || itemThumb || contentPreview || contentImgUrl || "";
 
                         return (
                           <div
@@ -691,22 +839,11 @@ export default function BrandCreatorDetailModal({
                           >
                             <div>
                               {/* Cover Image Preview */}
-                              {cover ? (
-                                <ModalPortfolioCover
-                                  cover={cover}
-                                  title={item.title}
-                                  category={item.category}
-                                />
-                              ) : (
-                                <div className="h-28 w-full bg-surface-muted/70 flex items-center justify-center text-text-secondary border-b border-border-theme">
-                                  <div className="text-center p-3">
-                                    <SparklesIcon className="w-5 h-5 mx-auto mb-1 text-secondary/60" />
-                                    <span className="text-[11px] font-medium block">
-                                      {item.category || "Creative Work"}
-                                    </span>
-                                  </div>
-                                </div>
-                              )}
+                              <ModalPortfolioCover
+                                cover={cover}
+                                title={item.title}
+                                category={item.category}
+                              />
 
                               {/* Portfolio Details */}
                               <div className="p-4 space-y-2">
@@ -734,24 +871,42 @@ export default function BrandCreatorDetailModal({
                                       const plat = content.platform || "media";
                                       const cType = content.contentType || "work";
                                       const cTitle = content.title || `${plat} ${cType}`;
+                                      const previewImg = typeof content.previewImage === "string" ? content.previewImage.trim() : "";
 
                                       return (
                                         <div
                                           key={content._id || cIdx}
-                                          className="flex items-center justify-between text-xs py-1 px-2.5 rounded-lg bg-surface border border-border-theme gap-2"
+                                          className="flex items-center justify-between text-xs py-1.5 px-2.5 rounded-lg bg-surface border border-border-theme gap-2"
                                         >
-                                          <div className="flex items-center gap-1.5 min-w-0">
-                                            <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-secondary/10 text-secondary capitalize shrink-0">
-                                              {plat}
-                                            </span>
-                                            <span className="text-[11px] text-text-secondary capitalize shrink-0">
-                                              {cType}
-                                            </span>
-                                            {content.title && (
-                                              <span className="text-xs text-foreground truncate font-medium" title={cTitle}>
-                                                • {content.title}
-                                              </span>
+                                          <div className="flex items-center gap-2 min-w-0">
+                                            {previewImg && (
+                                              <div className="w-8 h-8 rounded-md overflow-hidden bg-surface-muted shrink-0 border border-border-theme relative">
+                                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                <img
+                                                  src={previewImg}
+                                                  alt={content.title || cTitle}
+                                                  className="w-full h-full object-cover"
+                                                  onError={(e) => {
+                                                    e.currentTarget.style.display = "none";
+                                                  }}
+                                                />
+                                              </div>
                                             )}
+                                            <div className="min-w-0">
+                                              <div className="flex items-center gap-1.5 flex-wrap">
+                                                <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-secondary/10 text-secondary capitalize shrink-0">
+                                                  {plat}
+                                                </span>
+                                                <span className="text-[11px] text-text-secondary capitalize shrink-0">
+                                                  {cType}
+                                                </span>
+                                              </div>
+                                              {content.title && (
+                                                <span className="text-xs text-foreground truncate font-medium block mt-0.5" title={cTitle}>
+                                                  {content.title}
+                                                </span>
+                                              )}
+                                            </div>
                                           </div>
 
                                           {hasValidUrl && (
@@ -810,91 +965,109 @@ export default function BrandCreatorDetailModal({
                             : service.pricingType === "custom"
                               ? "Custom Quote"
                               : "Fixed Price";
+                        const serviceCover =
+                          (typeof service.coverImage === "string" && service.coverImage.trim()) ||
+                          (typeof service.image === "string" && service.image.trim()) ||
+                          (typeof service.thumbnail === "string" && service.thumbnail.trim()) ||
+                          "";
 
                         return (
                           <div
                             key={service._id || service.id}
-                            className="bg-surface border border-border-theme rounded-2xl p-5 shadow-xs hover:border-secondary/40 transition-all flex flex-col justify-between"
+                            className="bg-surface border border-border-theme rounded-2xl overflow-hidden shadow-xs hover:border-secondary/40 transition-all flex flex-col justify-between"
                           >
-                            <div className="space-y-3">
-                              {/* Header: Title + Price */}
-                              <div className="flex items-start justify-between gap-3">
-                                <div>
-                                  <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-secondary/10 text-secondary border border-secondary/20 uppercase">
-                                      {service.platform || "Platform"}
-                                    </span>
-                                    {service.category && (
-                                      <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-surface-muted text-text-secondary border border-border-theme">
-                                        {service.category}
+                            <div>
+                              {/* Service Cover Image Preview */}
+                              <ModalServiceCover
+                                cover={serviceCover}
+                                title={service.title}
+                                platform={service.platform}
+                                category={service.category}
+                                contentType={service.contentType}
+                              />
+
+                              <div className="p-4 sm:p-5 space-y-3">
+                                {/* Header: Title + Price */}
+                                <div className="flex items-start justify-between gap-3">
+                                  <div className="min-w-0">
+                                    <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                                      <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-secondary/10 text-secondary border border-secondary/20 uppercase">
+                                        {service.platform || "Platform"}
                                       </span>
-                                    )}
+                                      {service.category && (
+                                        <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-surface-muted text-text-secondary border border-border-theme">
+                                          {service.category}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <h4 className="font-semibold text-foreground text-sm font-sans" title={service.title}>
+                                      {service.title}
+                                    </h4>
                                   </div>
-                                  <h4 className="font-semibold text-foreground text-sm font-sans" title={service.title}>
-                                    {service.title}
-                                  </h4>
+
+                                  <div className="text-right shrink-0">
+                                    <span className="text-base font-bold text-foreground block">
+                                      {priceStr}
+                                    </span>
+                                    <span className="text-[10px] text-text-secondary font-medium">
+                                      {pricingTypeBadge}
+                                    </span>
+                                  </div>
                                 </div>
 
-                                <div className="text-right shrink-0">
-                                  <span className="text-base font-bold text-foreground block">
-                                    {priceStr}
-                                  </span>
-                                  <span className="text-[10px] text-text-secondary font-medium">
-                                    {pricingTypeBadge}
-                                  </span>
+                                {/* Description */}
+                                {service.description && (
+                                  <p className="text-xs text-text-secondary leading-relaxed">
+                                    {service.description}
+                                  </p>
+                                )}
+
+                                {/* Service Delivery Specs */}
+                                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border-theme text-xs">
+                                  <div className="flex items-center gap-1.5 text-text-secondary">
+                                    <ClockIcon className="w-3.5 h-3.5 text-text-secondary shrink-0" />
+                                    <span>
+                                      {service.deliveryTime || 7}{" "}
+                                      {service.deliveryTime === 1 ? "day delivery" : "days delivery"}
+                                    </span>
+                                  </div>
+
+                                  <div className="flex items-center gap-1.5 text-text-secondary">
+                                    <ArrowPathRoundedSquareIcon className="w-3.5 h-3.5 text-text-secondary shrink-0" />
+                                    <span>
+                                      {typeof service.revisions === "number"
+                                        ? `${service.revisions} ${service.revisions === 1 ? "revision" : "revisions"}`
+                                        : "1 revision"}
+                                    </span>
+                                  </div>
                                 </div>
+
+                                {/* Deliverables List */}
+                                {deliverables.length > 0 && (
+                                  <div className="pt-2 border-t border-border-theme space-y-1.5">
+                                    <span className="text-[10px] font-bold text-text-secondary uppercase tracking-wider block">
+                                      Included Deliverables
+                                    </span>
+                                    <ul className="space-y-1">
+                                      {deliverables.map((deliv, dIdx) => (
+                                        <li key={dIdx} className="flex items-start gap-1.5 text-xs text-foreground">
+                                          <CheckCircleIcon className="w-3.5 h-3.5 text-secondary shrink-0 mt-0.5" />
+                                          <span>{deliv}</span>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
                               </div>
+                            </div>
 
-                              {/* Description */}
-                              {service.description && (
-                                <p className="text-xs text-text-secondary leading-relaxed">
-                                  {service.description}
-                                </p>
-                              )}
-
-                              {/* Service Delivery Specs */}
-                              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border-theme text-xs">
-                                <div className="flex items-center gap-1.5 text-text-secondary">
-                                  <ClockIcon className="w-3.5 h-3.5 text-text-secondary shrink-0" />
-                                  <span>
-                                    {service.deliveryTime || 7}{" "}
-                                    {service.deliveryTime === 1 ? "day delivery" : "days delivery"}
-                                  </span>
-                                </div>
-
-                                <div className="flex items-center gap-1.5 text-text-secondary">
-                                  <ArrowPathRoundedSquareIcon className="w-3.5 h-3.5 text-text-secondary shrink-0" />
-                                  <span>
-                                    {typeof service.revisions === "number"
-                                      ? `${service.revisions} ${service.revisions === 1 ? "revision" : "revisions"}`
-                                      : "1 revision"}
-                                  </span>
-                                </div>
-                              </div>
-
-                              {/* Deliverables List */}
-                              {deliverables.length > 0 && (
-                                <div className="pt-2 border-t border-border-theme space-y-1.5">
-                                  <span className="text-[10px] font-bold text-text-secondary uppercase tracking-wider block">
-                                    Included Deliverables
-                                  </span>
-                                  <ul className="space-y-1">
-                                    {deliverables.map((deliv, dIdx) => (
-                                      <li key={dIdx} className="flex items-start gap-1.5 text-xs text-foreground">
-                                        <CheckCircleIcon className="w-3.5 h-3.5 text-secondary shrink-0 mt-0.5" />
-                                        <span>{deliv}</span>
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              )}
-
-                              {/* Book Service Action Button */}
-                              <div className="pt-3 border-t border-border-theme mt-3">
+                            {/* Book Service Action Button */}
+                            <div className="p-4 sm:p-5 pt-0">
+                              <div className="pt-3 border-t border-border-theme">
                                 <button
                                   type="button"
                                   onClick={() => handleOpenBooking(service)}
-                                  className="w-full py-2.5 px-3 rounded-xl bg-black text-surface font-semibold text-xs hovegreondary/90 transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
+                                  className="w-full py-2.5 px-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 dark:bg-white dark:hover:bg-neutral-100 text-white dark:text-neutral-900 font-semibold text-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
                                 >
                                   <SparklesIcon className="w-3.5 h-3.5" />
                                   <span>Book Service</span>

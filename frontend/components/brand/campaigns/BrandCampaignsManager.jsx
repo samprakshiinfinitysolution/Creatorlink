@@ -6,6 +6,7 @@ import axiosInstance from "@/lib/axios";
 import BrandSidebar from "@/components/brand/dashboard/BrandSidebar";
 import BrandHeader from "@/components/brand/dashboard/BrandHeader";
 import BrandCampaignsHero from "@/components/brand/campaigns/BrandCampaignsHero";
+import BrandBookingDetailModal from "@/components/brand/bookings/BrandBookingDetailModal";
 import { uploadSingleImageApi } from "@/lib/upload";
 import {
   getBrandCampaigns,
@@ -14,10 +15,27 @@ import {
   updateCampaign,
   clearSelectedCampaign,
 } from "@/redux/brand/campaigns/campaigns_slice";
+import { getBrandBookings as getBrandBookingsApi } from "@/redux/brand/bookings/bookings_api";
+import { updateBrandBookingStatus } from "@/redux/brand/bookings/bookings_slice";
 
 // =========================================================
 // HELPER FORMATTERS & BADGES
 // =========================================================
+function formatBudgetRange(minBudget, maxBudget, fallbackBudget, currency = "INR") {
+  const hasMin = minBudget !== undefined && minBudget !== null && !isNaN(Number(minBudget)) && Number(minBudget) > 0;
+  const hasMax = maxBudget !== undefined && maxBudget !== null && !isNaN(Number(maxBudget)) && Number(maxBudget) > 0;
+
+  if (hasMin && hasMax) {
+    if (Number(minBudget) === Number(maxBudget)) {
+      return formatCurrency(minBudget, currency);
+    }
+    return `${formatCurrency(minBudget, currency)} – ${formatCurrency(maxBudget, currency)}`;
+  }
+  if (hasMax) return formatCurrency(maxBudget, currency);
+  if (hasMin) return `From ${formatCurrency(minBudget, currency)}`;
+  return formatCurrency(fallbackBudget, currency);
+}
+
 function formatCurrency(amount, currency = "INR") {
   const numericAmount =
     amount === undefined || amount === null || isNaN(Number(amount))
@@ -127,6 +145,102 @@ function getStatusBadge(status) {
         color: "bg-surface-muted text-text-secondary border-border-theme",
       };
   }
+}
+
+function getBookingStatusBadge(status) {
+  switch (status?.toLowerCase()) {
+    case "pending":
+      return {
+        label: "Pending",
+        color: "bg-amber-500/10 text-amber-500 border-amber-500/20",
+      };
+    case "accepted":
+      return {
+        label: "Accepted",
+        color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+      };
+    case "rejected":
+      return {
+        label: "Rejected",
+        color: "bg-red-500/10 text-red-500 border-red-500/20",
+      };
+    case "cancelled":
+      return {
+        label: "Cancelled",
+        color: "bg-gray-500/10 text-gray-500 border-gray-500/20",
+      };
+    case "in_progress":
+      return {
+        label: "In Progress",
+        color: "bg-blue-500/10 text-blue-500 border-blue-500/20",
+      };
+    case "completed":
+      return {
+        label: "Completed",
+        color: "bg-secondary/10 text-secondary border-secondary/20",
+      };
+    default:
+      return {
+        label: status ? String(status).replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()) : "Unknown",
+        color: "bg-surface-muted text-text-secondary border-border-theme",
+      };
+  }
+}
+
+function getCreatorInitials(name) {
+  if (!name || typeof name !== "string") return "C";
+  const clean = name.trim();
+  if (!clean) return "C";
+  const parts = clean.split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+  return clean.slice(0, 2).toUpperCase();
+}
+
+function formatFollowers(count) {
+  if (count === undefined || count === null || isNaN(Number(count))) return "N/A";
+  const num = Number(count);
+  if (num >= 1000000) {
+    return `${(num / 1000000).toFixed(1).replace(/\.0$/, "")}M`;
+  }
+  if (num >= 1000) {
+    return `${(num / 1000).toFixed(1).replace(/\.0$/, "")}K`;
+  }
+  return num.toLocaleString();
+}
+
+function StarIcon({ className = "w-3.5 h-3.5" }) {
+  return (
+    <svg className={className} fill="currentColor" viewBox="0 0 20 20">
+      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+    </svg>
+  );
+}
+
+function CreatorApplicantAvatar({ name, image }) {
+  const [hasFailed, setHasFailed] = useState(false);
+  const initials = getCreatorInitials(name);
+
+  if (image && !hasFailed) {
+    return (
+      <div className="w-11 h-11 rounded-full overflow-hidden shrink-0 border border-border-theme bg-surface-muted flex items-center justify-center">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={image}
+          alt={name || "Creator"}
+          className="w-full h-full object-cover"
+          onError={() => setHasFailed(true)}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-11 h-11 rounded-full shrink-0 border border-border-theme bg-secondary/10 text-secondary flex items-center justify-center font-bold text-xs uppercase select-none">
+      {initials}
+    </div>
+  );
 }
 
 function getCampaignInitials(title) {
@@ -756,36 +870,73 @@ export default function BrandCampaignsManager() {
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
 
+  // Campaign View Tabs & Applicants State
+  const [activeViewTab, setActiveViewTab] = useState("details"); // "details" | "applicants"
+  const [applicants, setApplicants] = useState([]);
+  const [applicantsLoading, setApplicantsLoading] = useState(false);
+  const [applicantsError, setApplicantsError] = useState(null);
+  const [activeCampaignId, setActiveCampaignId] = useState(null);
+
+  // Accept/Reject & Booking Detail Modal state
+  const [confirmingApplicantAction, setConfirmingApplicantAction] = useState(null); // { bookingId, action: 'accept' | 'reject', creatorName }
+  const [applicantActionFeedback, setApplicantActionFeedback] = useState(null); // { type: 'success' | 'error', text }
+  const [updatingBookingId, setUpdatingBookingId] = useState(null);
+  const [viewingBookingId, setViewingBookingId] = useState(null);
+
   // Uploading state for cover images
   const [isUploadingCreate, setIsUploadingCreate] = useState(false);
   const [isUploadingEdit, setIsUploadingEdit] = useState(false);
 
   // Create Form State
-  const [createForm, setCreateForm] = useState({
+  const initialCreateForm = {
     title: "",
     description: "",
     category: "",
     coverImage: "",
     platform: "instagram",
     budget: "",
+    minBudget: "",
+    maxBudget: "",
     deadline: "",
     requiredCreators: "1",
-  });
+    audienceAge: "All",
+    audienceGender: "all",
+    audienceGeography: "",
+    usageOrganic: true,
+    usagePaidAds: false,
+    usageDuration: "30 days",
+    usageExclusivity: false,
+    minFollowers: "",
+    minEngagementRate: "",
+  };
+  const [createForm, setCreateForm] = useState(initialCreateForm);
   const [createDeliverables, setCreateDeliverables] = useState([]);
   const [createDeliverableInput, setCreateDeliverableInput] = useState("");
 
   // Edit Form State
-  const [editForm, setEditForm] = useState({
+  const initialEditForm = {
     title: "",
     description: "",
     category: "",
     coverImage: "",
     platform: "instagram",
     budget: "",
+    minBudget: "",
+    maxBudget: "",
     deadline: "",
     requiredCreators: "1",
     status: "draft",
-  });
+    audienceAge: "All",
+    audienceGender: "all",
+    audienceGeography: "",
+    usageOrganic: true,
+    usagePaidAds: false,
+    usageDuration: "30 days",
+    usageExclusivity: false,
+    minFollowers: "",
+    minEngagementRate: "",
+  };
+  const [editForm, setEditForm] = useState(initialEditForm);
   const [editDeliverables, setEditDeliverables] = useState([]);
   const [editDeliverableInput, setEditDeliverableInput] = useState("");
 
@@ -794,6 +945,10 @@ export default function BrandCampaignsManager() {
   const { campaigns, pagination, selectedCampaign, loading, error } = useSelector(
     (state) => state.brandCampaigns || {}
   );
+  const { profile } = useSelector(
+    (state) => state.brandProfile || {}
+  );
+  const [dismissCampaignGuidance, setDismissCampaignGuidance] = useState(false);
 
   // Helper to trigger API dispatch with current filters + overrides
   const fetchCampaignsWithFilters = useCallback(
@@ -939,8 +1094,23 @@ export default function BrandCampaignsManager() {
       }
     }
     if (!data.platform) return "Platform is required.";
-    if (data.budget === "" || isNaN(Number(data.budget)) || Number(data.budget) < 0) {
-      return "Budget must be a number greater than or equal to 0.";
+    const effBudget = data.maxBudget || data.budget;
+    if (effBudget === "" || isNaN(Number(effBudget)) || Number(effBudget) < 0) {
+      return "Budget (or Max Budget) must be a number greater than or equal to 0.";
+    }
+    if (data.minBudget && (isNaN(Number(data.minBudget)) || Number(data.minBudget) < 0)) {
+      return "Min Budget must be a number greater than or equal to 0.";
+    }
+    if (data.minBudget && data.maxBudget) {
+      if (Number(data.minBudget) > Number(data.maxBudget)) {
+        return "Min Budget cannot exceed Max Budget.";
+      }
+    }
+    if (data.minFollowers && (isNaN(Number(data.minFollowers)) || Number(data.minFollowers) < 0)) {
+      return "Minimum followers must be a positive number.";
+    }
+    if (data.minEngagementRate && (isNaN(Number(data.minEngagementRate)) || Number(data.minEngagementRate) < 0 || Number(data.minEngagementRate) > 100)) {
+      return "Minimum engagement rate must be between 0% and 100%.";
     }
     if (!data.deadline) return "Deadline date is required.";
     if (
@@ -969,16 +1139,38 @@ export default function BrandCampaignsManager() {
     }
 
     setSubmitting(true);
+    const effMaxBudget = createForm.maxBudget ? Number(createForm.maxBudget) : Number(createForm.budget || 0);
+    const effMinBudget = createForm.minBudget ? Number(createForm.minBudget) : (createForm.budget ? Number(createForm.budget) : 0);
+
     const payload = {
       title: createForm.title.trim(),
       description: createForm.description.trim(),
       category: createForm.category.trim(),
       coverImage: createForm.coverImage ? createForm.coverImage.trim() : "",
       platform: createForm.platform,
-      budget: Number(createForm.budget),
+      budget: effMaxBudget,
+      minBudget: effMinBudget,
+      maxBudget: effMaxBudget,
       deadline: createForm.deadline,
       requiredCreators: Number(createForm.requiredCreators),
       deliverables: createDeliverables,
+      audienceTargeting: {
+        age: createForm.audienceAge || "All",
+        gender: createForm.audienceGender || "all",
+        geography: createForm.audienceGeography
+          ? createForm.audienceGeography.split(",").map((s) => s.trim()).filter(Boolean)
+          : [],
+      },
+      usageRights: {
+        organicUsage: Boolean(createForm.usageOrganic),
+        paidAds: Boolean(createForm.usagePaidAds),
+        duration: createForm.usageDuration || "30 days",
+        exclusivity: Boolean(createForm.usageExclusivity),
+      },
+      creatorRequirements: {
+        minFollowers: createForm.minFollowers ? Number(createForm.minFollowers) : 0,
+        minEngagementRate: createForm.minEngagementRate ? Number(createForm.minEngagementRate) : 0,
+      },
     };
 
     const actionResult = await dispatch(createCampaign(payload));
@@ -986,16 +1178,7 @@ export default function BrandCampaignsManager() {
 
     if (createCampaign.fulfilled.match(actionResult)) {
       setIsCreateOpen(false);
-      setCreateForm({
-        title: "",
-        description: "",
-        category: "",
-        coverImage: "",
-        platform: "instagram",
-        budget: "",
-        deadline: "",
-        requiredCreators: "1",
-      });
+      setCreateForm(initialCreateForm);
       setCreateDeliverables([]);
       setSuccessMsg("Campaign created successfully!");
       setTimeout(() => setSuccessMsg(""), 4000);
@@ -1009,12 +1192,123 @@ export default function BrandCampaignsManager() {
     }
   };
 
+  // Fetch applicants for a campaign using existing Brand Bookings API
+  const fetchCampaignApplicants = useCallback(async (campaignId) => {
+    if (!campaignId) return;
+    setApplicantsLoading(true);
+    setApplicantsError(null);
+    try {
+      const response = await getBrandBookingsApi({
+        campaignId,
+        limit: 100,
+        initiatedBy: "creator",
+      });
+
+      const rawBookings = response?.data?.bookings || response?.bookings || [];
+      // Show only Creator applications (initiatedBy === "creator")
+      // Exclude Brand-initiated bookings/proposals
+      const creatorOnly = rawBookings.filter(
+        (b) => b && (b.initiatedBy === "creator" || !b.initiatedBy)
+      );
+      setApplicants(creatorOnly);
+    } catch (err) {
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Unable to load applicants for this campaign.";
+      setApplicantsError(msg);
+    } finally {
+      setApplicantsLoading(false);
+    }
+  }, []);
+
+  // Handle Accept or Decline for an applicant
+  const handleConfirmApplicantStatus = async (applicant, targetStatus) => {
+    if (!applicant?._id || !targetStatus || updatingBookingId) return;
+
+    if (targetStatus === "accepted" && subStatus && subStatus.hasEntitlement === false) {
+      setApplicantActionFeedback({
+        type: "error",
+        text: "An active subscription or free trial is required to accept booking applications and launch new collaborations. Please upgrade your plan.",
+      });
+      setConfirmingApplicantAction(null);
+      return;
+    }
+
+    setUpdatingBookingId(applicant._id);
+    setApplicantActionFeedback(null);
+
+    try {
+      const result = await dispatch(
+        updateBrandBookingStatus({
+          bookingId: applicant._id,
+          status: targetStatus,
+        })
+      );
+
+      if (updateBrandBookingStatus.fulfilled.match(result)) {
+        const creatorName =
+          applicant.creator?.name ||
+          applicant.creator?.displayName ||
+          "Creator";
+
+        setApplicants((prev) =>
+          prev.map((app) =>
+            app._id === applicant._id
+              ? { ...app, status: targetStatus, ...(result.payload?.data || {}) }
+              : app
+          )
+        );
+
+        setApplicantActionFeedback({
+          type: "success",
+          text:
+            targetStatus === "accepted"
+              ? `Application from ${creatorName} accepted! Collaboration workspace and conversation initialized.`
+              : `Application from ${creatorName} declined.`,
+        });
+        setConfirmingApplicantAction(null);
+      } else {
+        setApplicantActionFeedback({
+          type: "error",
+          text:
+            typeof result.payload === "string"
+              ? result.payload
+              : "Failed to update application status.",
+        });
+      }
+    } catch (err) {
+      setApplicantActionFeedback({
+        type: "error",
+        text: err?.message || "Failed to update application status.",
+      });
+    } finally {
+      setUpdatingBookingId(null);
+    }
+  };
+
+  // Sync effect when selectedCampaign or isViewOpen changes to clear stale applicants & fetch fresh
+  useEffect(() => {
+    const cid = selectedCampaign?._id || selectedCampaign?.id;
+    if (isViewOpen && cid && cid !== activeCampaignId) {
+      setActiveCampaignId(cid);
+      setApplicants([]);
+      fetchCampaignApplicants(cid);
+    }
+  }, [isViewOpen, selectedCampaign, activeCampaignId, fetchCampaignApplicants]);
+
   // Handle View Action Click
   const handleViewClick = (campaign) => {
     setFormError("");
+    setApplicantActionFeedback(null);
+    setConfirmingApplicantAction(null);
+    setActiveViewTab("details");
     const campaignId = campaign._id || campaign.id;
+    setActiveCampaignId(campaignId);
+    setApplicants([]);
     if (campaignId) {
       dispatch(getCampaignById(campaignId));
+      fetchCampaignApplicants(campaignId);
     }
     setIsViewOpen(true);
   };
@@ -1030,9 +1324,20 @@ export default function BrandCampaignsManager() {
         coverImage: campaign.coverImage || campaign.image || "",
         platform: campaign.platform || "instagram",
         budget: campaign.budget !== undefined ? String(campaign.budget) : "",
+        minBudget: campaign.minBudget !== undefined && campaign.minBudget !== null ? String(campaign.minBudget) : (campaign.budget !== undefined ? String(campaign.budget) : ""),
+        maxBudget: campaign.maxBudget !== undefined && campaign.maxBudget !== null ? String(campaign.maxBudget) : (campaign.budget !== undefined ? String(campaign.budget) : ""),
         deadline: formatDateForInput(campaign.deadline),
         requiredCreators: campaign.requiredCreators !== undefined ? String(campaign.requiredCreators) : "1",
         status: campaign.status || "draft",
+        audienceAge: campaign.audienceTargeting?.age || "All",
+        audienceGender: campaign.audienceTargeting?.gender || "all",
+        audienceGeography: Array.isArray(campaign.audienceTargeting?.geography) ? campaign.audienceTargeting.geography.join(", ") : (campaign.audienceTargeting?.geography || ""),
+        usageOrganic: campaign.usageRights?.organicUsage !== undefined ? Boolean(campaign.usageRights.organicUsage) : true,
+        usagePaidAds: Boolean(campaign.usageRights?.paidAds),
+        usageDuration: campaign.usageRights?.duration || "30 days",
+        usageExclusivity: Boolean(campaign.usageRights?.exclusivity),
+        minFollowers: campaign.creatorRequirements?.minFollowers ? String(campaign.creatorRequirements.minFollowers) : "",
+        minEngagementRate: campaign.creatorRequirements?.minEngagementRate ? String(campaign.creatorRequirements.minEngagementRate) : "",
       });
       setEditDeliverables(
         Array.isArray(campaign.deliverables) ? [...campaign.deliverables] : []
@@ -1064,6 +1369,9 @@ export default function BrandCampaignsManager() {
     }
 
     setSubmitting(true);
+    const effEditMaxBudget = editForm.maxBudget ? Number(editForm.maxBudget) : Number(editForm.budget || 0);
+    const effEditMinBudget = editForm.minBudget ? Number(editForm.minBudget) : (editForm.budget ? Number(editForm.budget) : 0);
+
     const payload = {
       campaignId,
       campaignData: {
@@ -1072,11 +1380,30 @@ export default function BrandCampaignsManager() {
         category: editForm.category.trim(),
         coverImage: editForm.coverImage ? editForm.coverImage.trim() : "",
         platform: editForm.platform,
-        budget: Number(editForm.budget),
+        budget: effEditMaxBudget,
+        minBudget: effEditMinBudget,
+        maxBudget: effEditMaxBudget,
         deadline: editForm.deadline,
         requiredCreators: Number(editForm.requiredCreators),
         deliverables: editDeliverables,
         status: editForm.status,
+        audienceTargeting: {
+          age: editForm.audienceAge || "All",
+          gender: editForm.audienceGender || "all",
+          geography: editForm.audienceGeography
+            ? editForm.audienceGeography.split(",").map((s) => s.trim()).filter(Boolean)
+            : [],
+        },
+        usageRights: {
+          organicUsage: Boolean(editForm.usageOrganic),
+          paidAds: Boolean(editForm.usagePaidAds),
+          duration: editForm.usageDuration || "30 days",
+          exclusivity: Boolean(editForm.usageExclusivity),
+        },
+        creatorRequirements: {
+          minFollowers: editForm.minFollowers ? Number(editForm.minFollowers) : 0,
+          minEngagementRate: editForm.minEngagementRate ? Number(editForm.minEngagementRate) : 0,
+        },
       },
     };
 
@@ -1109,6 +1436,14 @@ export default function BrandCampaignsManager() {
   const closeViewModal = () => {
     setIsViewOpen(false);
     dispatch(clearSelectedCampaign());
+    setActiveCampaignId(null);
+    setApplicants([]);
+    setApplicantsLoading(false);
+    setApplicantsError(null);
+    setActiveViewTab("details");
+    setApplicantActionFeedback(null);
+    setConfirmingApplicantAction(null);
+    setViewingBookingId(null);
   };
 
   const closeEditModal = () => {
@@ -1182,6 +1517,35 @@ export default function BrandCampaignsManager() {
               >
                 Dismiss
               </button>
+            </div>
+          )}
+
+          {/* First Campaign Guidance Banner for incomplete Brand profiles */}
+          {!profile?.isOnboarded && !dismissCampaignGuidance && (
+            <div className="bg-gradient-to-r from-pink-500/10 via-purple-500/10 to-indigo-500/10 border border-pink-500/20 rounded-2xl p-4 text-xs font-sans flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs animate-in fade-in duration-200">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className="text-[#ff2d6c] text-base shrink-0">✦</span>
+                <p className="text-foreground leading-relaxed">
+                  <strong className="font-semibold">Pro Tip for Campaigns:</strong> Creators are 3x more likely to accept proposals from brands with complete profiles and verified company links.
+                </p>
+              </div>
+              <div className="flex items-center gap-2.5 shrink-0 self-end sm:self-auto">
+                <Link
+                  href="/brand/onboarding"
+                  className="font-semibold text-[#ff2d6c] hover:underline whitespace-nowrap cursor-pointer text-xs"
+                >
+                  Complete Brand Profile →
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setDismissCampaignGuidance(true)}
+                  className="text-text-secondary hover:text-foreground text-xs p-1 cursor-pointer"
+                  title="Dismiss tip"
+                  aria-label="Dismiss first campaign tip"
+                >
+                  ✕
+                </button>
+              </div>
             </div>
           )}
 
@@ -1623,20 +1987,50 @@ export default function BrandCampaignsManager() {
               {/* Budget, Deadline, Required Creators Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
 
-                {/* Budget */}
-                <div className="space-y-1">
-                  <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
-                    Budget (₹) *
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    required
-                    placeholder="50000"
-                    value={createForm.budget}
-                    onChange={(e) => setCreateForm({ ...createForm, budget: e.target.value })}
-                    className="w-full bg-surface-muted/60 border border-border-theme text-foreground text-xs sm:text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-secondary transition-colors"
-                  />
+                {/* Budget Range (Min & Max Budget) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
+                      Min Budget (₹) *
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      required
+                      placeholder="20000"
+                      value={createForm.minBudget}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setCreateForm({
+                          ...createForm,
+                          minBudget: val,
+                          budget: createForm.maxBudget || val,
+                        });
+                      }}
+                      className="w-full bg-surface-muted/60 border border-border-theme text-foreground text-xs sm:text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-secondary transition-colors"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
+                      Max Budget (₹) *
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      required
+                      placeholder="50000"
+                      value={createForm.maxBudget}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setCreateForm({
+                          ...createForm,
+                          maxBudget: val,
+                          budget: val,
+                        });
+                      }}
+                      className="w-full bg-surface-muted/60 border border-border-theme text-foreground text-xs sm:text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-secondary transition-colors"
+                    />
+                  </div>
                 </div>
 
                 {/* Deadline */}
@@ -1669,6 +2063,157 @@ export default function BrandCampaignsManager() {
                   />
                 </div>
 
+              </div>
+
+              {/* Audience Targeting Section */}
+              <div className="p-4 rounded-xl border border-border-theme bg-surface-muted/30 space-y-3">
+                <span className="text-[11px] font-bold text-foreground uppercase tracking-wider block">
+                  Audience Targeting
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <label className="block text-[11px] text-text-secondary font-medium">
+                      Target Age Bracket
+                    </label>
+                    <select
+                      value={createForm.audienceAge}
+                      onChange={(e) => setCreateForm({ ...createForm, audienceAge: e.target.value })}
+                      className="w-full bg-surface-muted/60 border border-border-theme text-foreground text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-secondary transition-colors cursor-pointer"
+                    >
+                      <option value="All">All Ages</option>
+                      <option value="13-17">13 - 17</option>
+                      <option value="18-24">18 - 24</option>
+                      <option value="25-34">25 - 34</option>
+                      <option value="35-44">35 - 44</option>
+                      <option value="45+">45+</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="block text-[11px] text-text-secondary font-medium">
+                      Gender
+                    </label>
+                    <select
+                      value={createForm.audienceGender}
+                      onChange={(e) => setCreateForm({ ...createForm, audienceGender: e.target.value })}
+                      className="w-full bg-surface-muted/60 border border-border-theme text-foreground text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-secondary transition-colors cursor-pointer"
+                    >
+                      <option value="all">All Genders</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="block text-[11px] text-text-secondary font-medium">
+                      Geography / Target Regions
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. India, Mumbai, Delhi"
+                      value={createForm.audienceGeography}
+                      onChange={(e) => setCreateForm({ ...createForm, audienceGeography: e.target.value })}
+                      className="w-full bg-surface-muted/60 border border-border-theme text-foreground text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-secondary transition-colors"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Usage Rights & Licensing Section */}
+              <div className="p-4 rounded-xl border border-border-theme bg-surface-muted/30 space-y-3">
+                <span className="text-[11px] font-bold text-foreground uppercase tracking-wider block">
+                  Usage Rights & Licensing
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="block text-[11px] text-text-secondary font-medium">
+                      Usage Duration
+                    </label>
+                    <select
+                      value={createForm.usageDuration}
+                      onChange={(e) => setCreateForm({ ...createForm, usageDuration: e.target.value })}
+                      className="w-full bg-surface-muted/60 border border-border-theme text-foreground text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-secondary transition-colors cursor-pointer"
+                    >
+                      <option value="30 days">30 Days</option>
+                      <option value="60 days">60 Days</option>
+                      <option value="90 days">90 Days</option>
+                      <option value="6 months">6 Months</option>
+                      <option value="1 year">1 Year</option>
+                      <option value="Perpetual">Perpetual</option>
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col justify-center gap-2 pt-1 sm:pt-0">
+                    <label className="inline-flex items-center gap-2 cursor-pointer text-xs text-foreground">
+                      <input
+                        type="checkbox"
+                        checked={createForm.usageOrganic}
+                        onChange={(e) => setCreateForm({ ...createForm, usageOrganic: e.target.checked })}
+                        className="rounded border-border-theme text-secondary focus:ring-secondary w-4 h-4 cursor-pointer"
+                      />
+                      <span>Organic Usage (Creator Feed)</span>
+                    </label>
+
+                    <label className="inline-flex items-center gap-2 cursor-pointer text-xs text-foreground">
+                      <input
+                        type="checkbox"
+                        checked={createForm.usagePaidAds}
+                        onChange={(e) => setCreateForm({ ...createForm, usagePaidAds: e.target.checked })}
+                        className="rounded border-border-theme text-secondary focus:ring-secondary w-4 h-4 cursor-pointer"
+                      />
+                      <span>Paid Ads / Whitelisting Amplification</span>
+                    </label>
+
+                    <label className="inline-flex items-center gap-2 cursor-pointer text-xs text-foreground">
+                      <input
+                        type="checkbox"
+                        checked={createForm.usageExclusivity}
+                        onChange={(e) => setCreateForm({ ...createForm, usageExclusivity: e.target.checked })}
+                        className="rounded border-border-theme text-secondary focus:ring-secondary w-4 h-4 cursor-pointer"
+                      />
+                      <span>Exclusivity Required</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Creator Eligibility Requirements Section */}
+              <div className="p-4 rounded-xl border border-border-theme bg-surface-muted/30 space-y-3">
+                <span className="text-[11px] font-bold text-foreground uppercase tracking-wider block">
+                  Creator Eligibility Requirements
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="block text-[11px] text-text-secondary font-medium">
+                      Minimum Followers
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      placeholder="e.g. 10000 (0 for no limit)"
+                      value={createForm.minFollowers}
+                      onChange={(e) => setCreateForm({ ...createForm, minFollowers: e.target.value })}
+                      className="w-full bg-surface-muted/60 border border-border-theme text-foreground text-xs rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-secondary transition-colors"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="block text-[11px] text-text-secondary font-medium">
+                      Minimum Engagement Rate (%)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      max="100"
+                      placeholder="e.g. 2.5 (0 for no limit)"
+                      value={createForm.minEngagementRate}
+                      onChange={(e) => setCreateForm({ ...createForm, minEngagementRate: e.target.value })}
+                      className="w-full bg-surface-muted/60 border border-border-theme text-foreground text-xs rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-secondary transition-colors"
+                    />
+                  </div>
+                </div>
               </div>
 
               {/* Deliverables List Builder */}
@@ -1751,13 +2296,16 @@ export default function BrandCampaignsManager() {
       {/* ========================================================= */}
       {isViewOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs overflow-y-auto">
-          <div className="bg-surface border border-border-theme rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl animate-in fade-in zoom-in-95 duration-150 my-auto">
-
+          <div
+            className={`bg-surface border border-border-theme rounded-2xl w-full ${
+              activeViewTab === "applicants" ? "max-w-3xl lg:max-w-4xl" : "max-w-2xl"
+            } max-h-[90vh] flex flex-col shadow-2xl animate-in fade-in zoom-in-95 duration-150 my-auto transition-all`}
+          >
             {/* Modal Header */}
             <div className="px-6 py-4 border-b border-border-theme flex items-center justify-between">
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-secondary">
-                  Campaign Details
+                  Campaign Overview
                 </span>
                 <h3 className="font-serif font-medium text-lg text-foreground break-words line-clamp-2">
                   {selectedCampaign?.title || "Campaign"}
@@ -1772,138 +2320,591 @@ export default function BrandCampaignsManager() {
               </button>
             </div>
 
+            {/* Navigation Tabs */}
+            <div className="px-6 border-b border-border-theme flex items-center gap-6 bg-surface shrink-0">
+              <button
+                type="button"
+                onClick={() => setActiveViewTab("details")}
+                className={`pt-3 pb-2.5 text-xs font-semibold uppercase tracking-wider transition-colors relative cursor-pointer border-b-2 ${
+                  activeViewTab === "details"
+                    ? "text-secondary border-secondary font-bold"
+                    : "text-text-secondary border-transparent hover:text-foreground"
+                }`}
+              >
+                Campaign Details
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveViewTab("applicants")}
+                className={`pt-3 pb-2.5 text-xs font-semibold uppercase tracking-wider transition-colors relative flex items-center gap-2 cursor-pointer border-b-2 ${
+                  activeViewTab === "applicants"
+                    ? "text-secondary border-secondary font-bold"
+                    : "text-text-secondary border-transparent hover:text-foreground"
+                }`}
+              >
+                <span>Applicants</span>
+                <span
+                  className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                    activeViewTab === "applicants"
+                      ? "bg-secondary/15 text-secondary"
+                      : "bg-surface-muted text-text-secondary"
+                  }`}
+                >
+                  {applicantsLoading ? "..." : applicants.length}
+                </span>
+              </button>
+            </div>
+
             {/* Modal Content */}
             <div className="flex-1 overflow-y-auto p-6 space-y-6 text-xs">
-              {loading && !selectedCampaign ? (
-                <div className="space-y-4 p-4 animate-pulse">
-                  <div className="h-6 bg-surface-muted rounded-md w-2/3" />
-                  <div className="h-20 bg-surface-muted rounded-xl w-full" />
-                  <div className="h-10 bg-surface-muted rounded-xl w-full" />
-                </div>
-              ) : selectedCampaign ? (
+              {activeViewTab === "details" ? (
                 <>
-                  {/* Campaign Cover Banner (if present) */}
-                  {(selectedCampaign.coverImage || selectedCampaign.image) && (
-                    <div className="relative h-44 sm:h-52 w-full rounded-2xl overflow-hidden border border-border-theme bg-surface-muted/60 shrink-0">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={selectedCampaign.coverImage || selectedCampaign.image}
-                        alt={selectedCampaign.title || "Campaign banner"}
-                        className="w-full h-full object-cover"
-                      />
+                  {loading && !selectedCampaign ? (
+                    <div className="space-y-4 p-4 animate-pulse">
+                      <div className="h-6 bg-surface-muted rounded-md w-2/3" />
+                      <div className="h-20 bg-surface-muted rounded-xl w-full" />
+                      <div className="h-10 bg-surface-muted rounded-xl w-full" />
+                    </div>
+                  ) : selectedCampaign ? (
+                    <>
+                      {/* Campaign Cover Banner (if present) */}
+                      {(selectedCampaign.coverImage || selectedCampaign.image) && (
+                        <div className="relative h-44 sm:h-52 w-full rounded-2xl overflow-hidden border border-border-theme bg-surface-muted/60 shrink-0">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={selectedCampaign.coverImage || selectedCampaign.image}
+                            alt={selectedCampaign.title || "Campaign banner"}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+
+                      {/* Status & Category Banner */}
+                      <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-xl bg-surface-muted/50 border border-border-theme">
+                        <div>
+                          <span className="text-[10px] text-text-secondary uppercase tracking-wider block font-semibold">
+                            Status
+                          </span>
+                          <div className="inline-flex items-center gap-2 mt-1">
+                            <span
+                              className={`w-2 h-2 rounded-full shrink-0 ${
+                                getStatusBadge(selectedCampaign.status).dotColor || "bg-slate-400"
+                              }`}
+                            />
+                            <span
+                              className={`text-xs font-medium font-sans ${
+                                getStatusBadge(selectedCampaign.status).textColor || "text-foreground"
+                              }`}
+                            >
+                              {getStatusBadge(selectedCampaign.status).label}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div>
+                          <span className="text-[10px] text-text-secondary uppercase tracking-wider block font-semibold">
+                            Platform
+                          </span>
+                          <span className="font-semibold text-foreground capitalize mt-0.5 block">
+                            {selectedCampaign.platform || "Multi-Platform"}
+                          </span>
+                        </div>
+
+                        <div>
+                          <span className="text-[10px] text-text-secondary uppercase tracking-wider block font-semibold">
+                            Category
+                          </span>
+                          <span className="font-semibold text-foreground mt-0.5 block">
+                            {selectedCampaign.category || "General"}
+                          </span>
+                        </div>
+
+                        <div>
+                          <span className="text-[10px] text-text-secondary uppercase tracking-wider block font-semibold">
+                            Created On
+                          </span>
+                          <span className="font-semibold text-foreground mt-0.5 block">
+                            {formatDate(selectedCampaign.createdAt)}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Overview / Description */}
+                      <div className="space-y-2">
+                        <h4 className="font-semibold text-foreground uppercase tracking-wider text-[11px]">
+                          Description & Brief
+                        </h4>
+                        <p className="text-text-secondary leading-relaxed whitespace-pre-line bg-surface-muted/30 p-4 rounded-xl border border-border-theme">
+                          {selectedCampaign.description || "No description provided."}
+                        </p>
+                      </div>
+
+                      {/* Specs Grid */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div className="p-3.5 rounded-xl border border-border-theme bg-surface-muted/30">
+                          <span className="text-[10px] text-text-secondary uppercase tracking-wider block font-semibold">
+                            Budget Range
+                          </span>
+                          <span className="font-serif font-semibold text-base text-foreground mt-0.5 block">
+                            {formatBudgetRange(
+                              selectedCampaign.minBudget,
+                              selectedCampaign.maxBudget,
+                              selectedCampaign.budget,
+                              selectedCampaign.currency
+                            )}
+                          </span>
+                        </div>
+
+                        <div className="p-3.5 rounded-xl border border-border-theme bg-surface-muted/30">
+                          <span className="text-[10px] text-text-secondary uppercase tracking-wider block font-semibold">
+                            Creators Needed
+                          </span>
+                          <span className="font-serif font-semibold text-base text-foreground mt-0.5 block">
+                            {selectedCampaign.requiredCreators || 1}
+                          </span>
+                        </div>
+
+                        <div className="p-3.5 rounded-xl border border-border-theme bg-surface-muted/30">
+                          <span className="text-[10px] text-text-secondary uppercase tracking-wider block font-semibold">
+                            Deadline
+                          </span>
+                          <span className="font-serif font-semibold text-base text-foreground mt-0.5 block">
+                            {formatDate(selectedCampaign.deadline)}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Deliverables List */}
+                      <div className="space-y-2">
+                        <h4 className="font-semibold text-foreground uppercase tracking-wider text-[11px]">
+                          Required Deliverables
+                        </h4>
+                        {Array.isArray(selectedCampaign.deliverables) && selectedCampaign.deliverables.length > 0 ? (
+                          <div className="flex flex-wrap gap-2">
+                            {selectedCampaign.deliverables.map((item, idx) => (
+                              <span
+                                key={idx}
+                                className="px-3 py-1.5 rounded-xl bg-surface-muted border border-border-theme text-foreground font-medium"
+                              >
+                                ✓ {item}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-text-secondary">No deliverables specified.</p>
+                        )}
+                      </div>
+
+                      {/* Audience Targeting & Requirements Cards */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {/* Audience Targeting Card */}
+                        <div className="p-4 rounded-xl border border-border-theme bg-surface-muted/20 space-y-2.5">
+                          <span className="text-[10px] text-text-secondary uppercase tracking-wider block font-semibold">
+                            Target Audience Profile
+                          </span>
+                          <div className="space-y-1.5 text-xs">
+                            <div className="flex items-center justify-between">
+                              <span className="text-text-secondary">Age Bracket:</span>
+                              <span className="font-semibold text-foreground">
+                                {selectedCampaign.audienceTargeting?.age || "All Ages"}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-text-secondary">Gender:</span>
+                              <span className="font-semibold text-foreground capitalize">
+                                {selectedCampaign.audienceTargeting?.gender || "All Genders"}
+                              </span>
+                            </div>
+                            <div className="flex items-start justify-between gap-2">
+                              <span className="text-text-secondary">Geographies:</span>
+                              <span className="font-semibold text-foreground text-right break-words">
+                                {Array.isArray(selectedCampaign.audienceTargeting?.geography) && selectedCampaign.audienceTargeting.geography.length > 0
+                                  ? selectedCampaign.audienceTargeting.geography.join(", ")
+                                  : "Global / Any"}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Creator Requirements Card */}
+                        <div className="p-4 rounded-xl border border-border-theme bg-surface-muted/20 space-y-2.5">
+                          <span className="text-[10px] text-text-secondary uppercase tracking-wider block font-semibold">
+                            Creator Eligibility Requirements
+                          </span>
+                          <div className="space-y-1.5 text-xs">
+                            <div className="flex items-center justify-between">
+                              <span className="text-text-secondary">Minimum Followers:</span>
+                              <span className="font-semibold text-foreground">
+                                {selectedCampaign.creatorRequirements?.minFollowers
+                                  ? `${selectedCampaign.creatorRequirements.minFollowers.toLocaleString()}+ followers`
+                                  : "Open to all"}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-text-secondary">Min Engagement Rate:</span>
+                              <span className="font-semibold text-foreground">
+                                {selectedCampaign.creatorRequirements?.minEngagementRate
+                                  ? `${selectedCampaign.creatorRequirements.minEngagementRate}%`
+                                  : "No minimum"}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Usage Rights & Licensing Details Card */}
+                      <div className="p-4 rounded-xl border border-border-theme bg-surface-muted/20 space-y-2.5">
+                        <span className="text-[10px] text-text-secondary uppercase tracking-wider block font-semibold">
+                          Usage Rights & Licensing
+                        </span>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                          <div>
+                            <span className="text-[10px] text-text-secondary block">Duration</span>
+                            <span className="font-semibold text-foreground block mt-0.5">
+                              {selectedCampaign.usageRights?.duration || "30 days"}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-text-secondary block">Organic Usage</span>
+                            <span className="font-semibold text-emerald-600 dark:text-emerald-400 block mt-0.5">
+                              {selectedCampaign.usageRights?.organicUsage !== false ? "Included" : "Excluded"}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-text-secondary block">Paid Ads Amplification</span>
+                            <span className={`font-semibold block mt-0.5 ${selectedCampaign.usageRights?.paidAds ? "text-emerald-600 dark:text-emerald-400" : "text-text-secondary"}`}>
+                              {selectedCampaign.usageRights?.paidAds ? "Allowed" : "Not Included"}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-text-secondary block">Exclusivity</span>
+                            <span className={`font-semibold block mt-0.5 ${selectedCampaign.usageRights?.exclusivity ? "text-amber-500" : "text-text-secondary"}`}>
+                              {selectedCampaign.usageRights?.exclusivity ? "Exclusive Required" : "Non-exclusive"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-text-secondary py-4 text-center">Unable to load campaign details.</p>
+                  )}
+                </>
+              ) : (
+                /* ========================================================= */
+                /* APPLICANTS TAB CONTENT */
+                /* ========================================================= */
+                <div className="space-y-4">
+                  {/* Feedback Notification Banner */}
+                  {applicantActionFeedback && (
+                    <div
+                      className={`p-3.5 rounded-xl border flex items-start justify-between gap-3 ${
+                        applicantActionFeedback.type === "success"
+                          ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
+                          : "bg-red-500/10 border-red-500/20 text-red-500"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        {applicantActionFeedback.type === "success" ? (
+                          <CheckCircleIcon className="w-4 h-4 shrink-0" />
+                        ) : (
+                          <span className="font-bold shrink-0">!</span>
+                        )}
+                        <span className="text-xs font-medium">{applicantActionFeedback.text}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setApplicantActionFeedback(null)}
+                        className="text-xs opacity-75 hover:opacity-100 cursor-pointer"
+                      >
+                        <XMarkIcon className="w-3.5 h-3.5" />
+                      </button>
                     </div>
                   )}
 
-                  {/* Status & Category Banner */}
-                  <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-xl bg-surface-muted/50 border border-border-theme">
-                    <div>
-                      <span className="text-[10px] text-text-secondary uppercase tracking-wider block font-semibold">
-                        Status
-                      </span>
-                      <div className="inline-flex items-center gap-2 mt-1">
-                        <span className={`w-2 h-2 rounded-full shrink-0 ${getStatusBadge(selectedCampaign.status).dotColor || "bg-slate-400"}`} />
-                        <span className={`text-xs font-medium font-sans ${getStatusBadge(selectedCampaign.status).textColor || "text-foreground"}`}>
-                          {getStatusBadge(selectedCampaign.status).label}
-                        </span>
+                  {/* Loading State */}
+                  {applicantsLoading ? (
+                    <div className="space-y-3">
+                      <div className="p-4 rounded-2xl border border-border-theme bg-surface-muted/40 animate-pulse space-y-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-11 h-11 rounded-full bg-surface-muted" />
+                          <div className="space-y-1.5 flex-1">
+                            <div className="h-4 bg-surface-muted rounded-md w-1/3" />
+                            <div className="h-3 bg-surface-muted rounded-md w-1/4" />
+                          </div>
+                        </div>
+                        <div className="h-14 bg-surface-muted rounded-xl" />
+                      </div>
+                      <div className="p-4 rounded-2xl border border-border-theme bg-surface-muted/40 animate-pulse space-y-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-11 h-11 rounded-full bg-surface-muted" />
+                          <div className="space-y-1.5 flex-1">
+                            <div className="h-4 bg-surface-muted rounded-md w-1/3" />
+                            <div className="h-3 bg-surface-muted rounded-md w-1/4" />
+                          </div>
+                        </div>
+                        <div className="h-14 bg-surface-muted rounded-xl" />
                       </div>
                     </div>
-
-                    <div>
-                      <span className="text-[10px] text-text-secondary uppercase tracking-wider block font-semibold">
-                        Platform
-                      </span>
-                      <span className="font-semibold text-foreground capitalize mt-0.5 block">
-                        {selectedCampaign.platform || "Multi-Platform"}
-                      </span>
+                  ) : applicantsError ? (
+                    /* Error State with Retry */
+                    <div className="p-6 rounded-2xl bg-red-500/10 border border-red-500/20 text-center space-y-3 my-2">
+                      <p className="text-xs text-red-500 font-medium">{applicantsError}</p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const cid = activeCampaignId || selectedCampaign?._id || selectedCampaign?.id;
+                          if (cid) fetchCampaignApplicants(cid);
+                        }}
+                        className="px-4 py-1.5 rounded-xl bg-surface border border-red-500/30 text-red-500 text-xs font-semibold hover:bg-surface-muted transition-colors cursor-pointer inline-flex items-center gap-1.5"
+                      >
+                        <ArrowPathIcon className="w-3.5 h-3.5" />
+                        <span>Retry</span>
+                      </button>
                     </div>
-
-                    <div>
-                      <span className="text-[10px] text-text-secondary uppercase tracking-wider block font-semibold">
-                        Category
-                      </span>
-                      <span className="font-semibold text-foreground mt-0.5 block">
-                        {selectedCampaign.category || "General"}
-                      </span>
+                  ) : applicants.length === 0 ? (
+                    /* Empty State */
+                    <div className="text-center py-12 px-4 space-y-3 border border-dashed border-border-theme rounded-2xl bg-surface-muted/20">
+                      <div className="w-12 h-12 rounded-2xl bg-surface-muted border border-border-theme flex items-center justify-center mx-auto text-text-secondary">
+                        <UsersIcon className="w-6 h-6" />
+                      </div>
+                      <h4 className="font-serif font-medium text-base text-foreground">
+                        No applications yet
+                      </h4>
+                      <p className="text-xs text-text-secondary max-w-sm mx-auto leading-relaxed">
+                        Content creators have not submitted proposals for this campaign yet. Applications will appear here as soon as creators apply.
+                      </p>
                     </div>
+                  ) : (
+                    /* Applicants List */
+                    <div className="space-y-3">
+                      {applicants.map((applicant) => {
+                        const creator = applicant.creator || {};
+                        const creatorName =
+                          creator.name ||
+                          creator.displayName ||
+                          creator.email ||
+                          "Creator";
+                        const creatorAvatar =
+                          creator.profileImage ||
+                          creator.avatar ||
+                          creator.image ||
+                          "";
+                        const category =
+                          creator.category ||
+                          applicant.campaign?.category ||
+                          "General";
+                        const followersFormatted = formatFollowers(
+                          creator.followers ?? creator.followerCount
+                        );
+                        const ratingDisplay =
+                          creator.rating !== undefined && creator.rating !== null
+                            ? `${creator.rating} ★ (${creator.reviewCount || 0})`
+                            : "New (No reviews)";
+                        const serviceTitle =
+                          applicant.service?.title ||
+                          applicant.serviceTitle ||
+                          "Campaign Service";
+                        const proposedPrice =
+                          applicant.agreedPrice !== undefined
+                            ? applicant.agreedPrice
+                            : applicant.service?.price;
+                        const currency = applicant.currency || selectedCampaign?.currency || "INR";
+                        const statusBadge = getBookingStatusBadge(applicant.status);
+                        const isPending = applicant.status === "pending";
+                        const isConfirming =
+                          confirmingApplicantAction?.bookingId === applicant._id;
+                        const isUpdating = updatingBookingId === applicant._id;
 
-                    <div>
-                      <span className="text-[10px] text-text-secondary uppercase tracking-wider block font-semibold">
-                        Created On
-                      </span>
-                      <span className="font-semibold text-foreground mt-0.5 block">
-                        {formatDate(selectedCampaign.createdAt)}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Overview / Description */}
-                  <div className="space-y-2">
-                    <h4 className="font-semibold text-foreground uppercase tracking-wider text-[11px]">
-                      Description & Brief
-                    </h4>
-                    <p className="text-text-secondary leading-relaxed whitespace-pre-line bg-surface-muted/30 p-4 rounded-xl border border-border-theme">
-                      {selectedCampaign.description || "No description provided."}
-                    </p>
-                  </div>
-
-                  {/* Specs Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div className="p-3.5 rounded-xl border border-border-theme bg-surface-muted/30">
-                      <span className="text-[10px] text-text-secondary uppercase tracking-wider block font-semibold">
-                        Budget
-                      </span>
-                      <span className="font-serif font-semibold text-base text-foreground mt-0.5 block">
-                        {formatCurrency(selectedCampaign.budget)}
-                      </span>
-                    </div>
-
-                    <div className="p-3.5 rounded-xl border border-border-theme bg-surface-muted/30">
-                      <span className="text-[10px] text-text-secondary uppercase tracking-wider block font-semibold">
-                        Creators Needed
-                      </span>
-                      <span className="font-serif font-semibold text-base text-foreground mt-0.5 block">
-                        {selectedCampaign.requiredCreators || 1}
-                      </span>
-                    </div>
-
-                    <div className="p-3.5 rounded-xl border border-border-theme bg-surface-muted/30">
-                      <span className="text-[10px] text-text-secondary uppercase tracking-wider block font-semibold">
-                        Deadline
-                      </span>
-                      <span className="font-serif font-semibold text-base text-foreground mt-0.5 block">
-                        {formatDate(selectedCampaign.deadline)}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Deliverables List */}
-                  <div className="space-y-2">
-                    <h4 className="font-semibold text-foreground uppercase tracking-wider text-[11px]">
-                      Required Deliverables
-                    </h4>
-                    {Array.isArray(selectedCampaign.deliverables) && selectedCampaign.deliverables.length > 0 ? (
-                      <div className="flex flex-wrap gap-2">
-                        {selectedCampaign.deliverables.map((item, idx) => (
-                          <span
-                            key={idx}
-                            className="px-3 py-1.5 rounded-xl bg-surface-muted border border-border-theme text-foreground font-medium"
+                        return (
+                          <div
+                            key={applicant._id}
+                            className="p-4 sm:p-5 rounded-2xl border border-border-theme bg-surface hover:border-secondary/30 transition-all duration-150 space-y-4"
                           >
-                            ✓ {item}
-                          </span>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-text-secondary">No deliverables specified.</p>
-                    )}
-                  </div>
-                </>
-              ) : (
-                <p className="text-text-secondary py-4 text-center">Unable to load campaign details.</p>
+                            {/* Top row: Creator details & Status badge */}
+                            <div className="flex flex-wrap items-start justify-between gap-3">
+                              <div className="flex items-center gap-3 min-w-0">
+                                <CreatorApplicantAvatar
+                                  name={creatorName}
+                                  image={creatorAvatar}
+                                />
+                                <div className="min-w-0">
+                                  <h5 className="font-semibold text-sm text-foreground truncate">
+                                    {creatorName}
+                                  </h5>
+                                  <div className="flex items-center gap-2 mt-0.5 text-[11px] text-text-secondary flex-wrap">
+                                    <span className="px-2 py-0.5 rounded-md bg-surface-muted border border-border-theme font-medium text-foreground">
+                                      {category}
+                                    </span>
+                                    <span className="flex items-center gap-1 font-medium">
+                                      <UsersIcon className="w-3.5 h-3.5 text-text-secondary" />
+                                      <span>{followersFormatted}</span>
+                                    </span>
+                                    <span className="flex items-center gap-1 font-medium text-amber-500">
+                                      <StarIcon className="w-3.5 h-3.5" />
+                                      <span>{ratingDisplay}</span>
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="shrink-0">
+                                <span
+                                  className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border ${statusBadge.color}`}
+                                >
+                                  {statusBadge.label}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Middle specs: Service, Proposed Price, Application Date */}
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 rounded-xl bg-surface-muted/40 border border-border-theme text-xs">
+                              <div>
+                                <span className="text-[10px] uppercase font-semibold text-text-secondary block">
+                                  Service Offering
+                                </span>
+                                <span
+                                  className="font-medium text-foreground mt-0.5 block truncate"
+                                  title={serviceTitle}
+                                >
+                                  {serviceTitle}
+                                </span>
+                              </div>
+
+                              <div>
+                                <span className="text-[10px] uppercase font-semibold text-text-secondary block">
+                                  Proposed Price
+                                </span>
+                                <span className="font-serif font-bold text-sm text-foreground mt-0.5 block">
+                                  {formatCurrency(proposedPrice, currency)}
+                                </span>
+                              </div>
+
+                              <div>
+                                <span className="text-[10px] uppercase font-semibold text-text-secondary block">
+                                  Applied On
+                                </span>
+                                <span className="font-medium text-foreground mt-0.5 block">
+                                  {formatDate(applicant.createdAt)}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Confirmation box if user clicked Accept or Reject */}
+                            {isConfirming && (
+                              <div className="p-3.5 rounded-xl bg-surface-muted border border-border-theme space-y-2.5 animate-in fade-in duration-100">
+                                <p className="text-xs text-foreground font-medium">
+                                  {confirmingApplicantAction.action === "accept"
+                                    ? `Are you sure you want to accept ${creatorName}'s application? This will create a collaboration workspace and conversation.`
+                                    : `Are you sure you want to decline ${creatorName}'s application?`}
+                                </p>
+                                <div className="flex items-center gap-2 justify-end">
+                                  <button
+                                    type="button"
+                                    onClick={() => setConfirmingApplicantAction(null)}
+                                    disabled={isUpdating}
+                                    className="px-3 py-1.5 rounded-lg border border-border-theme text-text-secondary hover:text-foreground text-xs font-medium cursor-pointer"
+                                  >
+                                    Cancel
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      handleConfirmApplicantStatus(
+                                        applicant,
+                                        confirmingApplicantAction.action === "accept"
+                                          ? "accepted"
+                                          : "rejected"
+                                      )
+                                    }
+                                    disabled={isUpdating}
+                                    className={`px-3.5 py-1.5 rounded-lg text-white text-xs font-semibold cursor-pointer transition-colors ${
+                                      confirmingApplicantAction.action === "accept"
+                                        ? "bg-emerald-600 hover:bg-emerald-500"
+                                        : "bg-red-600 hover:bg-red-500"
+                                    }`}
+                                  >
+                                    {isUpdating
+                                      ? "Processing..."
+                                      : confirmingApplicantAction.action === "accept"
+                                      ? "Confirm Accept"
+                                      : "Confirm Decline"}
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Bottom row actions */}
+                            {!isConfirming && (
+                              <div className="flex items-center justify-between gap-3 pt-1 flex-wrap">
+                                <button
+                                  type="button"
+                                  onClick={() => setViewingBookingId(applicant._id)}
+                                  className="text-xs text-secondary hover:underline font-medium inline-flex items-center gap-1 cursor-pointer"
+                                >
+                                  <EyeIcon className="w-3.5 h-3.5" />
+                                  <span>View Full Application</span>
+                                </button>
+
+                                {isPending && (
+                                  <div className="flex items-center gap-2">
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        setConfirmingApplicantAction({
+                                          bookingId: applicant._id,
+                                          action: "reject",
+                                          creatorName,
+                                        })
+                                      }
+                                      disabled={isUpdating}
+                                      className="px-3.5 py-1.5 rounded-xl border border-red-500/30 text-red-500 hover:bg-red-500/10 font-semibold text-xs transition-colors cursor-pointer"
+                                    >
+                                      Reject
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        setConfirmingApplicantAction({
+                                          bookingId: applicant._id,
+                                          action: "accept",
+                                          creatorName,
+                                        })
+                                      }
+                                      disabled={isUpdating}
+                                      className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs shadow-xs transition-colors cursor-pointer"
+                                    >
+                                      Accept
+                                    </button>
+                                  </div>
+                                )}
+
+                                {applicant.status === "accepted" && (
+                                  <Link
+                                    href="/brand/workspace"
+                                    className="text-xs text-emerald-500 hover:underline font-medium inline-flex items-center gap-1"
+                                  >
+                                    <span>Collaboration Active — Open Workspace →</span>
+                                  </Link>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
               )}
             </div>
 
             {/* Modal Footer */}
-            <div className="px-6 py-4 border-t border-border-theme flex items-center justify-end">
+            <div className="px-6 py-4 border-t border-border-theme flex items-center justify-between">
+              <span className="text-[11px] text-text-secondary">
+                {activeViewTab === "applicants"
+                  ? `${applicants.length} total applicant${applicants.length === 1 ? "" : "s"}`
+                  : `Created ${formatDate(selectedCampaign?.createdAt)}`}
+              </span>
               <button
                 type="button"
                 onClick={closeViewModal}
@@ -1912,7 +2913,6 @@ export default function BrandCampaignsManager() {
                 Close
               </button>
             </div>
-
           </div>
         </div>
       )}
@@ -1920,6 +2920,19 @@ export default function BrandCampaignsManager() {
       {/* ========================================================= */}
       {/* 3. EDIT CAMPAIGN MODAL */}
       {/* ========================================================= */}
+      {/* 4. BRAND BOOKING DETAIL MODAL */}
+      <BrandBookingDetailModal
+        isOpen={Boolean(viewingBookingId)}
+        onClose={() => {
+          setViewingBookingId(null);
+          const cid = activeCampaignId || selectedCampaign?._id || selectedCampaign?.id;
+          if (cid) {
+            fetchCampaignApplicants(cid);
+          }
+        }}
+        bookingId={viewingBookingId}
+      />
+
       {isEditOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs overflow-y-auto">
           <div className="bg-surface border border-border-theme rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl animate-in fade-in zoom-in-95 duration-150 my-auto">
@@ -2071,19 +3084,50 @@ export default function BrandCampaignsManager() {
               {/* Budget, Deadline, Required Creators Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
 
-                {/* Budget */}
-                <div className="space-y-1">
-                  <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
-                    Budget (₹) *
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    required
-                    value={editForm.budget}
-                    onChange={(e) => setEditForm({ ...editForm, budget: e.target.value })}
-                    className="w-full bg-surface-muted/60 border border-border-theme text-foreground text-xs sm:text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-secondary transition-colors"
-                  />
+                {/* Budget Range (Min & Max Budget) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
+                      Min Budget (₹) *
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      required
+                      placeholder="20000"
+                      value={editForm.minBudget}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setEditForm({
+                          ...editForm,
+                          minBudget: val,
+                          budget: editForm.maxBudget || val,
+                        });
+                      }}
+                      className="w-full bg-surface-muted/60 border border-border-theme text-foreground text-xs sm:text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-secondary transition-colors"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
+                      Max Budget (₹) *
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      required
+                      placeholder="50000"
+                      value={editForm.maxBudget}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setEditForm({
+                          ...editForm,
+                          maxBudget: val,
+                          budget: val,
+                        });
+                      }}
+                      className="w-full bg-surface-muted/60 border border-border-theme text-foreground text-xs sm:text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-secondary transition-colors"
+                    />
+                  </div>
                 </div>
 
                 {/* Deadline */}
@@ -2115,6 +3159,157 @@ export default function BrandCampaignsManager() {
                   />
                 </div>
 
+              </div>
+
+              {/* Audience Targeting Section */}
+              <div className="p-4 rounded-xl border border-border-theme bg-surface-muted/30 space-y-3">
+                <span className="text-[11px] font-bold text-foreground uppercase tracking-wider block">
+                  Audience Targeting
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <label className="block text-[11px] text-text-secondary font-medium">
+                      Target Age Bracket
+                    </label>
+                    <select
+                      value={editForm.audienceAge}
+                      onChange={(e) => setEditForm({ ...editForm, audienceAge: e.target.value })}
+                      className="w-full bg-surface-muted/60 border border-border-theme text-foreground text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-secondary transition-colors cursor-pointer"
+                    >
+                      <option value="All">All Ages</option>
+                      <option value="13-17">13 - 17</option>
+                      <option value="18-24">18 - 24</option>
+                      <option value="25-34">25 - 34</option>
+                      <option value="35-44">35 - 44</option>
+                      <option value="45+">45+</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="block text-[11px] text-text-secondary font-medium">
+                      Gender
+                    </label>
+                    <select
+                      value={editForm.audienceGender}
+                      onChange={(e) => setEditForm({ ...editForm, audienceGender: e.target.value })}
+                      className="w-full bg-surface-muted/60 border border-border-theme text-foreground text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-secondary transition-colors cursor-pointer"
+                    >
+                      <option value="all">All Genders</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="block text-[11px] text-text-secondary font-medium">
+                      Geography / Target Regions
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. India, Mumbai, Delhi"
+                      value={editForm.audienceGeography}
+                      onChange={(e) => setEditForm({ ...editForm, audienceGeography: e.target.value })}
+                      className="w-full bg-surface-muted/60 border border-border-theme text-foreground text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-secondary transition-colors"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Usage Rights & Licensing Section */}
+              <div className="p-4 rounded-xl border border-border-theme bg-surface-muted/30 space-y-3">
+                <span className="text-[11px] font-bold text-foreground uppercase tracking-wider block">
+                  Usage Rights & Licensing
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="block text-[11px] text-text-secondary font-medium">
+                      Usage Duration
+                    </label>
+                    <select
+                      value={editForm.usageDuration}
+                      onChange={(e) => setEditForm({ ...editForm, usageDuration: e.target.value })}
+                      className="w-full bg-surface-muted/60 border border-border-theme text-foreground text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-secondary transition-colors cursor-pointer"
+                    >
+                      <option value="30 days">30 Days</option>
+                      <option value="60 days">60 Days</option>
+                      <option value="90 days">90 Days</option>
+                      <option value="6 months">6 Months</option>
+                      <option value="1 year">1 Year</option>
+                      <option value="Perpetual">Perpetual</option>
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col justify-center gap-2 pt-1 sm:pt-0">
+                    <label className="inline-flex items-center gap-2 cursor-pointer text-xs text-foreground">
+                      <input
+                        type="checkbox"
+                        checked={editForm.usageOrganic}
+                        onChange={(e) => setEditForm({ ...editForm, usageOrganic: e.target.checked })}
+                        className="rounded border-border-theme text-secondary focus:ring-secondary w-4 h-4 cursor-pointer"
+                      />
+                      <span>Organic Usage (Creator Feed)</span>
+                    </label>
+
+                    <label className="inline-flex items-center gap-2 cursor-pointer text-xs text-foreground">
+                      <input
+                        type="checkbox"
+                        checked={editForm.usagePaidAds}
+                        onChange={(e) => setEditForm({ ...editForm, usagePaidAds: e.target.checked })}
+                        className="rounded border-border-theme text-secondary focus:ring-secondary w-4 h-4 cursor-pointer"
+                      />
+                      <span>Paid Ads / Whitelisting Amplification</span>
+                    </label>
+
+                    <label className="inline-flex items-center gap-2 cursor-pointer text-xs text-foreground">
+                      <input
+                        type="checkbox"
+                        checked={editForm.usageExclusivity}
+                        onChange={(e) => setEditForm({ ...editForm, usageExclusivity: e.target.checked })}
+                        className="rounded border-border-theme text-secondary focus:ring-secondary w-4 h-4 cursor-pointer"
+                      />
+                      <span>Exclusivity Required</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Creator Eligibility Requirements Section */}
+              <div className="p-4 rounded-xl border border-border-theme bg-surface-muted/30 space-y-3">
+                <span className="text-[11px] font-bold text-foreground uppercase tracking-wider block">
+                  Creator Eligibility Requirements
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="block text-[11px] text-text-secondary font-medium">
+                      Minimum Followers
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      placeholder="e.g. 10000 (0 for no limit)"
+                      value={editForm.minFollowers}
+                      onChange={(e) => setEditForm({ ...editForm, minFollowers: e.target.value })}
+                      className="w-full bg-surface-muted/60 border border-border-theme text-foreground text-xs rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-secondary transition-colors"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="block text-[11px] text-text-secondary font-medium">
+                      Minimum Engagement Rate (%)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      max="100"
+                      placeholder="e.g. 2.5 (0 for no limit)"
+                      value={editForm.minEngagementRate}
+                      onChange={(e) => setEditForm({ ...editForm, minEngagementRate: e.target.value })}
+                      className="w-full bg-surface-muted/60 border border-border-theme text-foreground text-xs rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-secondary transition-colors"
+                    />
+                  </div>
+                </div>
               </div>
 
               {/* Deliverables List Builder */}

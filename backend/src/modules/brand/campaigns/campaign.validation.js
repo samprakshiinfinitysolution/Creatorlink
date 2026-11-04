@@ -128,6 +128,93 @@ const validateCreateCampaign = (req, res, next) => {
         );
     }
 
+    // Auto-sync budget with maxBudget if provided
+    if (req.body.budget === undefined && req.body.maxBudget !== undefined) {
+        req.body.budget = req.body.maxBudget;
+    }
+    if (req.body.maxBudget !== undefined && req.body.budget !== undefined) {
+        // keep budget synchronized with maxBudget
+        req.body.budget = req.body.maxBudget;
+    }
+
+    // Validate budget range if minBudget or maxBudget are provided
+    const { minBudget, maxBudget, audienceTargeting, usageRights, creatorRequirements } = req.body;
+
+    if (minBudget !== undefined && minBudget !== null && minBudget !== "") {
+        if (typeof minBudget !== "number" || minBudget < 0) {
+            throw createApiError(400, "Minimum budget must be a non-negative number");
+        }
+    }
+
+    if (maxBudget !== undefined && maxBudget !== null && maxBudget !== "") {
+        if (typeof maxBudget !== "number" || maxBudget < 0) {
+            throw createApiError(400, "Maximum budget must be a non-negative number");
+        }
+    }
+
+    if (
+        minBudget !== undefined && minBudget !== null && minBudget !== "" &&
+        maxBudget !== undefined && maxBudget !== null && maxBudget !== ""
+    ) {
+        if (Number(minBudget) > Number(maxBudget)) {
+            throw createApiError(400, "Minimum budget cannot exceed maximum budget");
+        }
+    }
+
+    // Validate audienceTargeting if provided
+    if (audienceTargeting !== undefined && audienceTargeting !== null) {
+        if (typeof audienceTargeting !== "object" || Array.isArray(audienceTargeting)) {
+            throw createApiError(400, "Audience targeting must be an object");
+        }
+        if (audienceTargeting.gender && !["all", "male", "female", "other"].includes(audienceTargeting.gender.toLowerCase())) {
+            throw createApiError(400, "Invalid audience gender. Allowed: all, male, female, other");
+        }
+        if (audienceTargeting.age && typeof audienceTargeting.age !== "string") {
+            throw createApiError(400, "Audience age must be a string");
+        }
+        if (audienceTargeting.geography && !Array.isArray(audienceTargeting.geography) && typeof audienceTargeting.geography !== "string") {
+            throw createApiError(400, "Audience geography must be a string or array of strings");
+        }
+    }
+
+    // Validate usageRights if provided
+    if (usageRights !== undefined && usageRights !== null) {
+        if (typeof usageRights !== "object" || Array.isArray(usageRights)) {
+            throw createApiError(400, "Usage rights must be an object");
+        }
+        if (usageRights.organicUsage !== undefined && typeof usageRights.organicUsage !== "boolean") {
+            throw createApiError(400, "organicUsage must be a boolean");
+        }
+        if (usageRights.paidAds !== undefined && typeof usageRights.paidAds !== "boolean") {
+            throw createApiError(400, "paidAds must be a boolean");
+        }
+        if (usageRights.duration && typeof usageRights.duration !== "string") {
+            throw createApiError(400, "Usage duration must be a string");
+        }
+        if (usageRights.exclusivity !== undefined && typeof usageRights.exclusivity !== "boolean") {
+            throw createApiError(400, "exclusivity must be a boolean");
+        }
+    }
+
+    // Validate creatorRequirements if provided
+    if (creatorRequirements !== undefined && creatorRequirements !== null) {
+        if (typeof creatorRequirements !== "object" || Array.isArray(creatorRequirements)) {
+            throw createApiError(400, "Creator requirements must be an object");
+        }
+        if (creatorRequirements.minFollowers !== undefined && creatorRequirements.minFollowers !== null && creatorRequirements.minFollowers !== "") {
+            const parsedFollowers = Number(creatorRequirements.minFollowers);
+            if (!Number.isFinite(parsedFollowers) || parsedFollowers < 0) {
+                throw createApiError(400, "Minimum followers must be a non-negative number");
+            }
+        }
+        if (creatorRequirements.minEngagementRate !== undefined && creatorRequirements.minEngagementRate !== null && creatorRequirements.minEngagementRate !== "") {
+            const parsedEng = Number(creatorRequirements.minEngagementRate);
+            if (!Number.isFinite(parsedEng) || parsedEng < 0 || parsedEng > 100) {
+                throw createApiError(400, "Minimum engagement rate must be a percentage between 0 and 100");
+            }
+        }
+    }
+
 
     // Validate currency if provided (must be "INR").
     if (currency !== undefined) {
@@ -205,6 +292,11 @@ const validateUpdateCampaign = (req, res, next) => {
         "coverImage",
         "platform",
         "budget",
+        "minBudget",
+        "maxBudget",
+        "audienceTargeting",
+        "usageRights",
+        "creatorRequirements",
         "currency",
         "deadline",
         "requiredCreators",
@@ -224,6 +316,20 @@ const validateUpdateCampaign = (req, res, next) => {
         );
     }
 
+
+    // Sync budget if maxBudget is updated
+    if (req.body.maxBudget !== undefined && req.body.maxBudget !== null && req.body.maxBudget !== "") {
+        req.body.budget = Number(req.body.maxBudget);
+    }
+
+    if (
+        req.body.minBudget !== undefined && req.body.minBudget !== null && req.body.minBudget !== "" &&
+        req.body.maxBudget !== undefined && req.body.maxBudget !== null && req.body.maxBudget !== ""
+    ) {
+        if (Number(req.body.minBudget) > Number(req.body.maxBudget)) {
+            throw createApiError(400, "Minimum budget cannot exceed maximum budget");
+        }
+    }
 
     // Prevent unknown fields from being updated.
     const invalidFields = providedFields.filter(

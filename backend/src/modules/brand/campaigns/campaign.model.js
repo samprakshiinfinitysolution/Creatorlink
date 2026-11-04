@@ -84,6 +84,69 @@ const campaignSchema = new mongoose.Schema(
             min: 0
         },
 
+        minBudget: {
+            type: Number,
+            min: 0,
+            default: null
+        },
+
+        maxBudget: {
+            type: Number,
+            min: 0,
+            default: null
+        },
+
+        audienceTargeting: {
+            age: {
+                type: String,
+                trim: true,
+                default: "All"
+            },
+            gender: {
+                type: String,
+                enum: ["all", "male", "female", "other"],
+                default: "all"
+            },
+            geography: {
+                type: [String],
+                default: []
+            }
+        },
+
+        usageRights: {
+            organicUsage: {
+                type: Boolean,
+                default: true
+            },
+            paidAds: {
+                type: Boolean,
+                default: false
+            },
+            duration: {
+                type: String,
+                trim: true,
+                default: "30 days"
+            },
+            exclusivity: {
+                type: Boolean,
+                default: false
+            }
+        },
+
+        creatorRequirements: {
+            minFollowers: {
+                type: Number,
+                min: 0,
+                default: 0
+            },
+            minEngagementRate: {
+                type: Number,
+                min: 0,
+                max: 100,
+                default: 0
+            }
+        },
+
         currency: {
             type: String,
             default: "INR",

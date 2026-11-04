@@ -4,7 +4,8 @@ import sendResponse from "../../../utils/response.js";
 import {
     createProfileService,
     getMyProfileService,
-    updateProfileService
+    updateProfileService,
+    completeOnboardingService
 } from "./profile.service.js";
 
 
@@ -58,8 +59,26 @@ const updateMyProfile = asyncHandler(async (req, res) => {
 });
 
 
+// Complete brand onboarding
+const completeOnboarding = asyncHandler(async (req, res) => {
+
+    const profile = await completeOnboardingService(
+        req.user.userId,
+        req.body
+    );
+
+    return sendResponse(
+        res,
+        200,
+        "Brand onboarding completed successfully",
+        profile
+    );
+});
+
+
 export {
     createProfile,
     getMyProfile,
-    updateMyProfile
+    updateMyProfile,
+    completeOnboarding
 };

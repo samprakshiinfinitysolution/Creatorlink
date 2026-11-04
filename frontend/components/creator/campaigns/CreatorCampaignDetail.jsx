@@ -356,8 +356,10 @@ export default function CreatorCampaignDetail({ campaignId }) {
                     <CurrencyIcon className="w-4 h-4 text-secondary shrink-0" />
                     <span className="font-medium">Budget</span>
                   </div>
-                  <span className="font-sans font-semibold text-xl text-foreground block">
-                    {formatBudget(campaign.budget)}
+                  <span className="font-sans font-semibold text-lg sm:text-xl text-foreground block">
+                    {campaign.minBudget && campaign.maxBudget && campaign.minBudget !== campaign.maxBudget
+                      ? `${formatBudget(campaign.minBudget, campaign.currency)} – ${formatBudget(campaign.maxBudget, campaign.currency)}`
+                      : formatBudget(campaign.budget, campaign.currency)}
                   </span>
                 </div>
 
@@ -457,6 +459,8 @@ export default function CreatorCampaignDetail({ campaignId }) {
         campaignId={campaignId}
         campaignTitle={campaign?.title}
         campaignBudget={campaign?.budget}
+        minBudget={campaign?.minBudget}
+        maxBudget={campaign?.maxBudget}
         onContinue={handleApplySubmit}
         submitting={submitting}
         submitError={error}

@@ -46,6 +46,8 @@ export default function ApplyToCampaignModal({
   campaignId,
   campaignTitle,
   campaignBudget,
+  minBudget,
+  maxBudget,
   onContinue = () => {},
   submitting = false,
   submitError = null,
@@ -305,9 +307,13 @@ export default function ApplyToCampaignModal({
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-foreground flex items-center justify-between">
                   <span>Proposed Price (₹) <span className="text-red-500">*</span></span>
-                  {campaignBudget !== undefined && (
+                  {(minBudget || maxBudget || campaignBudget !== undefined) && (
                     <span className="text-[11px] font-normal text-text-secondary">
-                      Campaign Budget: ₹{new Intl.NumberFormat("en-IN").format(campaignBudget)}
+                      Campaign Budget: {
+                        minBudget && maxBudget && minBudget !== maxBudget
+                          ? `₹${new Intl.NumberFormat("en-IN").format(minBudget)} – ₹${new Intl.NumberFormat("en-IN").format(maxBudget)}`
+                          : `₹${new Intl.NumberFormat("en-IN").format(maxBudget || campaignBudget || minBudget || 0)}`
+                      }
                     </span>
                   )}
                 </label>

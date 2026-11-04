@@ -28,6 +28,10 @@ const createCampaignService = async (brandId, campaignData) => {
         );
     }
 
+    if (campaignData.maxBudget !== undefined && campaignData.maxBudget !== null && campaignData.maxBudget !== "") {
+        campaignData.budget = Number(campaignData.maxBudget);
+    }
+
     const campaign = await Campaign.create({
         brand: brandId,
         ...campaignData
@@ -302,6 +306,10 @@ const updateCampaignService = async (
         }
     }
 
+
+    if (updateData.maxBudget !== undefined && updateData.maxBudget !== null && updateData.maxBudget !== "") {
+        updateData.budget = Number(updateData.maxBudget);
+    }
 
     const updatedCampaign =
         await Campaign.findOneAndUpdate(

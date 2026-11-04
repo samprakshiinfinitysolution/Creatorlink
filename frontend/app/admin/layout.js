@@ -10,6 +10,7 @@ import AdminHeader from "@/components/admin/dashboard/AdminHeader";
 function AdminLayoutContent({ children }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
   // Do not show admin sidebar/header chrome on the dedicated login page
   if (pathname === "/admin/login") {
@@ -19,10 +20,19 @@ function AdminLayoutContent({ children }) {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col font-sans transition-colors duration-200 select-auto">
       {/* Admin Sidebar Navigation */}
-      <AdminSidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
+      <AdminSidebar
+        mobileOpen={mobileOpen}
+        setMobileOpen={setMobileOpen}
+        collapsed={collapsed}
+        setCollapsed={setCollapsed}
+      />
 
-      {/* Main Content Area Offset by Desktop Sidebar */}
-      <div className="flex-1 lg:ml-64 flex flex-col min-w-0 transition-all duration-300">
+      {/* Main Content Area Dynamically Offsets Based on Sidebar Collapsed State */}
+      <div
+        className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out ${
+          collapsed ? "lg:ml-[72px]" : "lg:ml-64"
+        }`}
+      >
         {/* Admin Header with Theme Toggle & Profile Actions */}
         <AdminHeader setMobileOpen={setMobileOpen} />
 

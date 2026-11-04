@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { adminLogin } from "@/redux/admin/auth/admin_auth_slice";
+import ThemeToggle from "@/components/common/ThemeToggle/ThemeToggle";
 
 // =========================================================
 // SVG ICONS
@@ -52,27 +53,34 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-neutral-950 text-white flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-neutral-900 border border-neutral-800 rounded-3xl p-8 shadow-2xl space-y-6">
+    <div className="min-h-screen w-full bg-background text-foreground flex items-center justify-center p-4 relative transition-colors duration-200">
+      {/* Top right theme toggle */}
+      <div className="absolute top-6 right-6">
+        <ThemeToggle />
+      </div>
+
+      <div className="w-full max-w-md bg-surface border border-border-theme rounded-3xl p-8 shadow-sm space-y-6">
         {/* Header Branding */}
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-neutral-800 border border-neutral-700 text-emerald-400 mb-2 shadow-inner">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-secondary/10 border border-secondary/20 text-secondary mb-2 shadow-xs">
             <ShieldLockIcon className="w-6 h-6" />
           </div>
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[11px] font-semibold tracking-wider uppercase">
-            Admin Console
+          <div className="block">
+            <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-secondary/10 text-secondary border border-secondary/20 text-[11px] font-semibold tracking-wider uppercase">
+              Admin Portal
+            </span>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white font-serif">
-            CreatorLink Staff
+          <h1 className="text-2xl font-bold tracking-tight text-foreground font-serif">
+            CreatorLink Admin
           </h1>
-          <p className="text-xs text-neutral-400">
-            Sign in with your authorized administrator credentials to manage platform operations.
+          <p className="text-xs text-text-secondary">
+            Sign in with your administrator credentials to manage platform operations.
           </p>
         </div>
 
         {/* Error Notification */}
         {(formError || error) && (
-          <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-xs text-rose-400">
+          <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-xs text-red-500">
             {formError || error}
           </div>
         )}
@@ -80,8 +88,8 @@ export default function AdminLoginPage() {
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-neutral-300 mb-1.5">
-              Staff Email Address
+            <label className="block text-xs font-semibold text-foreground mb-1.5">
+              Admin Email Address
             </label>
             <input
               type="email"
@@ -89,12 +97,12 @@ export default function AdminLoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="admin@gmail.com"
               required
-              className="w-full px-4 py-2.5 rounded-xl bg-neutral-950 border border-neutral-800 text-white text-xs placeholder:text-neutral-500 focus:outline-none focus:border-emerald-500 transition-colors"
+              className="w-full px-4 py-2.5 rounded-xl bg-surface-muted border border-border-theme text-foreground text-xs placeholder:text-text-secondary/50 focus:outline-none focus:border-secondary transition-colors"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-neutral-300 mb-1.5">
+            <label className="block text-xs font-semibold text-foreground mb-1.5">
               Password
             </label>
             <input
@@ -103,23 +111,23 @@ export default function AdminLoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               required
-              className="w-full px-4 py-2.5 rounded-xl bg-neutral-950 border border-neutral-800 text-white text-xs placeholder:text-neutral-500 focus:outline-none focus:border-emerald-500 transition-colors"
+              className="w-full px-4 py-2.5 rounded-xl bg-surface-muted border border-border-theme text-foreground text-xs placeholder:text-text-secondary/50 focus:outline-none focus:border-secondary transition-colors"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-lg shadow-emerald-600/20 transition-all disabled:opacity-50 cursor-pointer mt-2"
+            className="w-full py-2.5 rounded-xl bg-secondary hover:bg-secondary-dark text-white text-xs font-semibold shadow-md shadow-secondary/20 transition-all disabled:opacity-50 cursor-pointer mt-2"
           >
-            {loading ? "Authenticating..." : "Sign In to Admin Console"}
+            {loading ? "Authenticating..." : "Sign In to Admin"}
           </button>
         </form>
 
         {/* Footer Security Note */}
-        <div className="text-center pt-2 border-t border-neutral-800/60">
-          <p className="text-[11px] text-neutral-500">
-            Protected by isolated administrative session security.
+        <div className="text-center pt-2 border-t border-border-theme">
+          <p className="text-[11px] text-text-secondary">
+            Protected by CreatorLink administrative security.
           </p>
         </div>
       </div>

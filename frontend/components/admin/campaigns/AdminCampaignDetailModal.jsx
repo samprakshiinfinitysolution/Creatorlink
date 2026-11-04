@@ -180,7 +180,7 @@ export default function AdminCampaignDetailModal({
         {/* MODAL HEADER */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-theme bg-surface">
           <div className="flex items-center gap-3">
-            <h2 className="text-lg font-serif font-bold text-foreground">Campaign Dossier</h2>
+            <h2 className="text-lg font-serif font-bold text-foreground">Campaign Details</h2>
             <span
               className={`px-2.5 py-0.5 text-xs font-semibold rounded-full uppercase ${
                 statusBadgeStyles[campaign.status] || statusBadgeStyles.draft
@@ -206,15 +206,15 @@ export default function AdminCampaignDetailModal({
           </button>
         </div>
 
-        {/* FEEDBACK BANNERS */}
+        {/* FEEDBACK BANNERS - Pinned on top of modal */}
         {actionError && (
-          <div className="px-6 py-3 bg-rose-500/10 border-b border-rose-500/20 text-xs text-rose-600 dark:text-rose-400 font-medium">
-            {actionError}
+          <div className="px-6 py-3 bg-rose-600 text-white text-xs sm:text-sm font-semibold flex items-center justify-between shadow-md z-30 sticky top-0 animate-in fade-in">
+            <span>{actionError}</span>
           </div>
         )}
         {successMessage && (
-          <div className="px-6 py-3 bg-emerald-500/10 border-b border-emerald-500/20 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-            ✓ {successMessage}
+          <div className="px-6 py-3 bg-emerald-600 text-white text-xs sm:text-sm font-semibold flex items-center justify-between shadow-md z-30 sticky top-0 animate-in fade-in">
+            <span>✓ {successMessage}</span>
           </div>
         )}
 

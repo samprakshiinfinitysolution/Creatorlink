@@ -58,6 +58,9 @@ const adminAuthSlice = createSlice({
     name: "adminAuth",
     initialState,
     reducers: {
+        updateAdminUser: (state, action) => {
+            state.adminUser = { ...state.adminUser, ...action.payload };
+        },
         clearAdminAuth: (state) => {
             state.adminUser = null;
             state.error = null;
@@ -108,7 +111,7 @@ const adminAuthSlice = createSlice({
     }
 });
 
-export const { clearAdminAuth, clearAdminError } = adminAuthSlice.actions;
+export const { updateAdminUser, clearAdminAuth, clearAdminError } = adminAuthSlice.actions;
 
 export default adminAuthSlice.reducer;
 

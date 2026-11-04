@@ -18,6 +18,12 @@ const authSchema = new mongoose.Schema(
             trim: true
         },
 
+        // Profile avatar image URL (optional)
+        avatar: {
+            type: String,
+            default: ""
+        },
+
         // Hashed password.
         password: {
             type: String,

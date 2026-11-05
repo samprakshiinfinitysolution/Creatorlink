@@ -30,6 +30,8 @@ const createCampaignService = async (brandId, campaignData) => {
 
     if (campaignData.maxBudget !== undefined && campaignData.maxBudget !== null && campaignData.maxBudget !== "") {
         campaignData.budget = Number(campaignData.maxBudget);
+    } else if (campaignData.minBudget !== undefined && campaignData.minBudget !== null && campaignData.minBudget !== "") {
+        campaignData.budget = Number(campaignData.minBudget);
     }
 
     const campaign = await Campaign.create({
@@ -117,6 +119,8 @@ const getMyCampaignsService = async (brandId, query) => {
         "updatedAt",
         "title",
         "budget",
+        "minBudget",
+        "maxBudget",
         "deadline",
         "requiredCreators"
     ];
@@ -309,6 +313,10 @@ const updateCampaignService = async (
 
     if (updateData.maxBudget !== undefined && updateData.maxBudget !== null && updateData.maxBudget !== "") {
         updateData.budget = Number(updateData.maxBudget);
+    } else if (updateData.budget !== undefined && updateData.budget !== null && updateData.budget !== "") {
+        if (updateData.maxBudget === undefined) {
+            updateData.maxBudget = Number(updateData.budget);
+        }
     }
 
     const updatedCampaign =

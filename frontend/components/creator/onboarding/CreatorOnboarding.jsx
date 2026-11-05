@@ -9,7 +9,9 @@ import {
   getCreatorProfile,
   createCreatorProfile,
   updateCreatorProfile,
+  completeCreatorOnboarding,
 } from "@/redux/creator/profile/profile_slice";
+import { updateAuthUserName } from "@/redux/auth/auth_slice";
 import {
   getPortfolios,
   deletePortfolioItem,
@@ -456,6 +458,7 @@ export default function CreatorOnboarding() {
 
   // Consolidated Step 1 form data (Basic Info + Demographics)
   const [formData, setFormData] = useState({
+    name: "",
     profileImage: "",
     title: "",
     bio: "",
@@ -591,6 +594,13 @@ export default function CreatorOnboarding() {
   const [deletingServiceId, setDeletingServiceId] = useState(null);
   const isMountedRef = useRef(true);
 
+  // Keep name pre-filled from user if formData.name is not yet set
+  useEffect(() => {
+    if (user?.name && !formData.name) {
+      setFormData((prev) => ({ ...prev, name: user.name }));
+    }
+  }, [user, formData.name]);
+
   // Step completion status derived from actual saved Redux data
   const hasValidSavedSocialLink = Boolean(
     profile?.socialLinks &&
@@ -713,6 +723,7 @@ export default function CreatorOnboarding() {
             }
 
             return {
+              name: p.user?.name || user?.name || prev.name || "",
               profileImage: p.profileImage || prev.profileImage || "",
               title: p.title || prev.title || "",
               bio: p.bio || prev.bio || "",
@@ -975,6 +986,16 @@ export default function CreatorOnboarding() {
     // STEP 1 VALIDATION & SUBMISSION
     // ==========================================
     if (currentStep === 1) {
+      const cleanName = formData.name ? formData.name.trim() : "";
+      if (!cleanName || cleanName.length < 2) {
+        setValidationError("Please enter your full name (at least 2 characters).");
+        return;
+      }
+      if (cleanName.length > 70) {
+        setValidationError("Full name must not exceed 70 characters.");
+        return;
+      }
+
       if (!formData.title || !formData.title.trim()) {
         setValidationError("Please enter your professional headline / title.");
         return;
@@ -1040,6 +1061,7 @@ export default function CreatorOnboarding() {
       setValidationError(null);
 
       const profilePayload = {
+        name: formData.name.trim(),
         title: formData.title.trim(),
         bio: formData.bio.trim(),
         category: formData.category.trim(),
@@ -1050,6 +1072,7 @@ export default function CreatorOnboarding() {
           youtube: formData.socialLinks.youtube?.trim() || "",
           facebook: formData.socialLinks.facebook?.trim() || "",
           tiktok: formData.socialLinks.tiktok?.trim() || "",
+          twitter: formData.socialLinks.twitter?.trim() || "",
           website: formData.socialLinks.website?.trim() || "",
         },
         dob: formData.dob,
@@ -1057,7 +1080,6 @@ export default function CreatorOnboarding() {
         languages: formData.languages,
         ethnicity: formData.ethnicity ? formData.ethnicity.trim() : "",
         ...(formData.profileImage ? { profileImage: formData.profileImage } : {}),
-        isOnboarded: false,
       };
 
       try {
@@ -1080,6 +1102,7 @@ export default function CreatorOnboarding() {
           }
         }
 
+        dispatch(updateAuthUserName(formData.name.trim()));
         setSaveSuccessMessage("Profile information saved successfully.");
         setValidationError(null);
         setCurrentStep(2);
@@ -1147,6 +1170,7 @@ export default function CreatorOnboarding() {
       setValidationError(null);
 
       const completionPayload = {
+        name: formData.name ? formData.name.trim() : (user?.name || ""),
         title: formData.title.trim(),
         bio: formData.bio.trim(),
         category: formData.category.trim(),
@@ -1157,6 +1181,7 @@ export default function CreatorOnboarding() {
           youtube: formData.socialLinks.youtube?.trim() || "",
           facebook: formData.socialLinks.facebook?.trim() || "",
           tiktok: formData.socialLinks.tiktok?.trim() || "",
+          twitter: formData.socialLinks.twitter?.trim() || "",
           website: formData.socialLinks.website?.trim() || "",
         },
         dob: formData.dob,
@@ -1164,27 +1189,12 @@ export default function CreatorOnboarding() {
         languages: formData.languages,
         ethnicity: formData.ethnicity ? formData.ethnicity.trim() : "",
         ...(formData.profileImage ? { profileImage: formData.profileImage } : {}),
-        isOnboarded: true,
       };
 
       try {
-        const hasExistingProfile = Boolean(profile && (profile._id || profile.id));
-        if (hasExistingProfile) {
-          await dispatch(updateCreatorProfile(completionPayload)).unwrap();
-        } else {
-          try {
-            await dispatch(createCreatorProfile(completionPayload)).unwrap();
-          } catch (createErr) {
-            const createErrMsg = formatErrorMessage(createErr);
-            if (
-              createErrMsg.toLowerCase().includes("already exists") ||
-              createErrMsg.includes("409")
-            ) {
-              await dispatch(updateCreatorProfile(completionPayload)).unwrap();
-            } else {
-              throw createErr;
-            }
-          }
+        await dispatch(completeCreatorOnboarding(completionPayload)).unwrap();
+        if (formData.name?.trim()) {
+          dispatch(updateAuthUserName(formData.name.trim()));
         }
         router.replace("/creator/dashboard");
       } catch (err) {
@@ -1428,14 +1438,20 @@ export default function CreatorOnboarding() {
 
                       {/* Name */}
                       <div className="space-y-1.5">
-                        <label className="text-xs font-semibold uppercase tracking-wider text-neutral-800 dark:text-neutral-200 block">
-                          Name *
+                        <label htmlFor="creatorName" className="text-xs font-semibold uppercase tracking-wider text-neutral-800 dark:text-neutral-200 block">
+                          Full Name *
                         </label>
                         <input
+                          id="creatorName"
                           type="text"
-                          readOnly
-                          value={user?.name || user?.fullName || "Creator"}
-                          className="w-full px-4 py-2.5 rounded-xl bg-neutral-50 dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-800 text-neutral-700 dark:text-neutral-300 text-sm font-medium cursor-not-allowed"
+                          disabled={isSubmitting}
+                          value={formData.name}
+                          onChange={(e) => {
+                            setFormData((prev) => ({ ...prev, name: e.target.value }));
+                            setValidationError(null);
+                          }}
+                          placeholder="Your full name"
+                          className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all"
                         />
                       </div>
 

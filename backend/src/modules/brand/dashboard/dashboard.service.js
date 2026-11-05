@@ -8,7 +8,59 @@ import Message from "../../messages/message.model.js";
 import Notification from "../../notifications/notification.model.js";
 import Auth from "../../auth/auth.model.js";
 import CreatorService from "../../creator/services/services.model.js";
+import BrandProfile from "../profile/profile.model.js";
 import createApiError from "../../../utils/ApiError.js";
+
+// Validates and returns a safe IANA timezone, defaulting to Asia/Kolkata (platform business timezone)
+const getValidTimezone = (tz) => {
+    if (!tz || typeof tz !== "string") return "Asia/Kolkata";
+    try {
+        Intl.DateTimeFormat(undefined, { timeZone: tz.trim() });
+        return tz.trim();
+    } catch {
+        return "Asia/Kolkata";
+    }
+};
+
+// Calculates the precise UTC instant of midnight (00:00:00.000) on the 1st day of the 6th month prior in target timezone
+const getZonedSixMonthsAgo = (date = new Date(), timeZone = "Asia/Kolkata") => {
+    const formatter = new Intl.DateTimeFormat("en-US", {
+        timeZone,
+        year: "numeric",
+        month: "numeric",
+        day: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+        second: "numeric",
+        hour12: false
+    });
+    const parts = formatter.formatToParts(date);
+    const p = {};
+    for (const part of parts) {
+        p[part.type] = part.value;
+    }
+    let targetYear = parseInt(p.year, 10);
+    let targetMonth = parseInt(p.month, 10) - 5;
+    while (targetMonth < 1) {
+        targetMonth += 12;
+        targetYear -= 1;
+    }
+
+    const monthStr = String(targetMonth).padStart(2, "0");
+    const naiveUtc = new Date(`${targetYear}-${monthStr}-01T00:00:00Z`);
+    const naiveParts = formatter.formatToParts(naiveUtc);
+    const np = {};
+    for (const part of naiveParts) {
+        np[part.type] = part.value;
+    }
+    const targetLocalTime = naiveUtc.getTime();
+    const naiveInTarget = new Date(
+        `${np.year}-${String(np.month).padStart(2, "0")}-${String(np.day).padStart(2, "0")}T${String(np.hour).padStart(2, "0")}:${String(np.minute).padStart(2, "0")}:${String(np.second).padStart(2, "0")}Z`
+    ).getTime();
+    const offset = naiveInTarget - targetLocalTime;
+
+    return new Date(naiveUtc.getTime() - offset);
+};
 
 // Fetches aggregated brand dashboard overview metrics, recent campaigns, collaborations, and upcoming deadlines
 const getBrandDashboardOverviewService = async (brandId, query = {}) => {
@@ -19,7 +71,16 @@ const getBrandDashboardOverviewService = async (brandId, query = {}) => {
     const brandObjectId = new mongoose.Types.ObjectId(brandId);
     const recentLimit = Math.min(Math.max(Number(query.recentLimit) || 5, 1), 50);
     const deadlinesLimit = Math.min(Math.max(Number(query.deadlinesLimit) || 5, 1), 50);
+    const timezone = getValidTimezone(query.timezone);
     const now = new Date();
+    // 6-month historical window anchored to the start of the 6th month prior in target timezone
+    const sixMonthsAgo = getZonedSixMonthsAgo(now, timezone);
+
+    // Verify brand profile exists and has completed onboarding
+    const brandProfile = await BrandProfile.findOne({ user: brandObjectId }).select("isOnboarded").lean();
+    if (!brandProfile || !brandProfile.isOnboarded) {
+        throw createApiError(403, "Please complete onboarding before accessing the brand dashboard");
+    }
 
     // Execute first wave of independent queries in parallel
     const [
@@ -42,7 +103,9 @@ const getBrandDashboardOverviewService = async (brandId, query = {}) => {
         upcomingCampaignDeadlines,
         upcomingWorkspaceDeadlines,
         upcomingBookingDeadlines,
-        brandUser
+        brandUser,
+        monthlyCampaignBudgetAgg,
+        totalCampaignBudgetAgg
     ] = await Promise.all([
         // 1. Total Campaigns count
         Campaign.countDocuments({ brand: brandObjectId }),
@@ -238,7 +301,60 @@ const getBrandDashboardOverviewService = async (brandId, query = {}) => {
             .select("_id deadline status agreedPrice currency campaign creator initiatedBy"),
 
         // 20. Authenticated Brand User basic info
-        Auth.findById(brandObjectId).select("name email role")
+        Auth.findById(brandObjectId).select("name email role"),
+
+        // 21. Monthly Campaign Budget distribution (6 consecutive calendar months) across ALL brand campaigns
+        Campaign.aggregate([
+            {
+                $match: {
+                    brand: brandObjectId,
+                    createdAt: { $gte: sixMonthsAgo }
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        year: { $year: { date: "$createdAt", timezone } },
+                        month: { $month: { date: "$createdAt", timezone } },
+                        currency: { $ifNull: ["$currency", "INR"] }
+                    },
+                    totalBudget: {
+                        $sum: {
+                            $ifNull: [
+                                "$budget",
+                                { $ifNull: ["$maxBudget", { $ifNull: ["$minBudget", 0] }] }
+                            ]
+                        }
+                    },
+                    campaignsCount: { $sum: 1 }
+                }
+            },
+            {
+                $sort: {
+                    "_id.year": 1,
+                    "_id.month": 1
+                }
+            }
+        ]),
+
+        // 22. Total Campaign Budget across all brand campaigns grouped by currency
+        Campaign.aggregate([
+            { $match: { brand: brandObjectId } },
+            {
+                $group: {
+                    _id: { $ifNull: ["$currency", "INR"] },
+                    total: {
+                        $sum: {
+                            $ifNull: [
+                                "$budget",
+                                { $ifNull: ["$maxBudget", { $ifNull: ["$minBudget", 0] }] }
+                            ]
+                        }
+                    },
+                    count: { $sum: 1 }
+                }
+            }
+        ])
     ]);
 
     // Query unpaid completed workspaces with no existing payment record to prevent double-counting
@@ -335,6 +451,34 @@ const getBrandDashboardOverviewService = async (brandId, query = {}) => {
         if (item._id && activeWorkspaceStatusMap[item._id] !== undefined) {
             activeWorkspaceStatusMap[item._id] = item.count;
         }
+    });
+
+    // Process total campaign budget by currency across ALL brand campaigns
+    const budgetByCurrency = totalCampaignBudgetAgg.map((item) => ({
+        currency: (item._id || "INR").toUpperCase(),
+        amount: Number(item.total || 0),
+        campaignsCount: Number(item.count || 0)
+    }));
+
+    const inrBudget = budgetByCurrency.find((b) => b.currency === "INR");
+    const totalBudgetAmount = inrBudget ? inrBudget.amount : 0;
+    const totalBudgetCampaignsCount = inrBudget ? inrBudget.campaignsCount : 0;
+
+    // Format monthly budgets for the 6-month historical chart
+    const monthlyBudgets = monthlyCampaignBudgetAgg.map((item) => {
+        const year = item._id.year;
+        const month = item._id.month; // 1-12 calendar month
+        const monthIndex = month - 1; // 0-11 JS month index
+        const currency = (item._id.currency || "INR").toUpperCase();
+        return {
+            year,
+            month,
+            monthIndex,
+            key: `${year}-${monthIndex}`,
+            currency,
+            totalBudget: Number(item.totalBudget || 0),
+            campaignsCount: Number(item.campaignsCount || 0)
+        };
     });
 
     // Format upcoming deadlines with explicit source types
@@ -451,7 +595,14 @@ const getBrandDashboardOverviewService = async (brandId, query = {}) => {
             campaigns: {
                 total: totalCampaignsCount,
                 active: activeCampaignsCount,
-                statusBreakdown: campaignStatusMap
+                statusBreakdown: campaignStatusMap,
+                totalBudget: {
+                    amount: totalBudgetAmount,
+                    currency: "INR",
+                    campaignsCount: totalBudgetCampaignsCount,
+                    byCurrency: budgetByCurrency
+                },
+                monthlyBudgets
             },
             pendingBookings: {
                 total: pendingBookingsTotal,

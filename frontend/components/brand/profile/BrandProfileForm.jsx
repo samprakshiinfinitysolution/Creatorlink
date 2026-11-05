@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import BrandSidebar from "@/components/brand/dashboard/BrandSidebar";
@@ -82,14 +82,6 @@ function UserGroupIcon({ className = "w-5 h-5" }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
-    </svg>
-  );
-}
-
-function ArrowRightIcon({ className = "w-3.5 h-3.5" }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
     </svg>
   );
 }
@@ -300,52 +292,6 @@ export default function BrandProfileForm() {
   const { profile, loading, error } = useSelector(
     (state) => state.brandProfile || {}
   );
-
-  const completionData = useMemo(() => {
-    const data = isEditing ? formData : (profile || formData);
-
-    const checklist = [
-      { key: "companyName", label: "Company Name", isDone: Boolean(data?.companyName?.trim()) },
-      { key: "industry", label: "Industry", isDone: Boolean(data?.industry?.trim()) },
-      { key: "location", label: "Location", isDone: Boolean(data?.location?.trim()) },
-      { key: "logo", label: "Brand Logo", isDone: Boolean(data?.logo?.trim()) },
-      { key: "description", label: "Company Description", isDone: Boolean(data?.description?.trim()) },
-      { key: "website", label: "Website", isDone: Boolean(data?.website?.trim()) },
-      {
-        key: "socialLinks",
-        label: "Social Media Links",
-        isDone: Boolean(
-          data?.socialLinks?.instagram?.trim() ||
-          data?.socialLinks?.facebook?.trim() ||
-          data?.socialLinks?.linkedin?.trim() ||
-          data?.socialLinks?.youtube?.trim()
-        ),
-      },
-      {
-        key: "contactInformation",
-        label: "Contact Information",
-        isDone: Boolean(
-          data?.contactInformation?.name?.trim() ||
-          data?.contactInformation?.email?.trim() ||
-          data?.contactInformation?.phone?.trim()
-        ),
-      },
-    ];
-
-    const completed = checklist.filter((item) => item.isDone).length;
-    const total = checklist.length;
-    const percentage = Math.round((completed / total) * 100);
-    const missing = checklist.filter((item) => !item.isDone);
-
-    return {
-      checklist,
-      completed,
-      total,
-      percentage,
-      missing,
-      isOnboarded: Boolean(profile?.isOnboarded || percentage === 100),
-    };
-  }, [isEditing, formData, profile]);
 
   const [formData, setFormData] = useState({
     companyName: "",
@@ -682,75 +628,6 @@ export default function BrandProfileForm() {
               <PencilIcon className="w-4 h-4" />
               <span>{isEditing ? "View Profile" : "Edit Profile"}</span>
             </button>
-          </div>
-
-          {/* Profile Completion Indicator Card */}
-          <div className="bg-white dark:bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 shadow-xs transition-colors">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2.5 flex-wrap">
-                  <h3 className="font-sans font-semibold text-sm sm:text-base text-foreground tracking-tight">
-                    Profile Completion
-                  </h3>
-                  {completionData.percentage === 100 ? (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                      <CheckBadgeIcon className="w-3.5 h-3.5 text-emerald-500" />
-                      <span>100% Complete</span>
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-pink-500/10 text-[#ff2d6c] border border-pink-500/20">
-                      {completionData.percentage}% Completed ({completionData.completed}/{completionData.total} items)
-                    </span>
-                  )}
-                </div>
-                <p className="text-xs text-text-secondary leading-relaxed">
-                  {completionData.percentage === 100
-                    ? "Your brand profile is fully configured and ready for high-converting creator partnerships."
-                    : "Complete all recommended profile fields to maximize creator trust and campaign application rates."}
-                </p>
-              </div>
-
-              {!completionData.isOnboarded && !isEditing && (
-                <div className="flex items-center gap-2 shrink-0">
-                  <Link
-                    href="/brand/onboarding"
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-secondary hover:bg-secondary/90 text-white text-xs font-semibold shadow-xs hover:shadow-md transition-all cursor-pointer"
-                  >
-                    <span>Finish Setup Wizard</span>
-                    <ArrowRightIcon className="w-3.5 h-3.5" />
-                  </Link>
-                </div>
-              )}
-            </div>
-
-            {/* Progress Bar Track */}
-            <div className="mt-4 w-full bg-surface-muted rounded-full h-2 overflow-hidden">
-              <div
-                className={`h-full rounded-full transition-all duration-500 ${
-                  completionData.percentage === 100
-                    ? "bg-emerald-500"
-                    : "bg-gradient-to-r from-[#ff2d6c] to-purple-500"
-                }`}
-                style={{ width: `${completionData.percentage}%` }}
-              />
-            </div>
-
-            {/* Missing Fields Breakdown */}
-            {completionData.missing.length > 0 && (
-              <div className="mt-3.5 pt-3.5 border-t border-border-theme flex flex-wrap items-center gap-2">
-                <span className="text-[11px] font-semibold text-text-secondary uppercase tracking-wider">
-                  Missing Fields:
-                </span>
-                {completionData.missing.map((item) => (
-                  <span
-                    key={item.key}
-                    className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-surface-muted text-text-secondary border border-border-theme"
-                  >
-                    {item.label}
-                  </span>
-                ))}
-              </div>
-            )}
           </div>
 
           {/* Success Message Alert */}

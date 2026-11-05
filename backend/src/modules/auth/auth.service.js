@@ -18,6 +18,7 @@ import {
 
 import { sendEmail } from "../../utils/helpers/email.helper.js";
 import { createBrandTrialSubscriptionService } from "../subscriptions/trial.service.js";
+import BrandProfile from "../brand/profile/profile.model.js";
 
 
 // Helper to hash verification OTP consistently with SHA-256.
@@ -710,6 +711,20 @@ const googleAuthUser = async ({ idToken, credential, code, role = "creator" }) =
         } catch (trialError) {
             console.error("Failed to initialize brand trial subscription in Google Auth:", trialError);
         }
+
+        // Ensure newly registered/verified brand via Google gets an initial BrandProfile with isOnboarded: false
+        try {
+            const existingProfile = await BrandProfile.findOne({ user: user._id });
+            if (!existingProfile) {
+                await BrandProfile.create({
+                    user: user._id,
+                    companyName: user.name || "",
+                    isOnboarded: false
+                });
+            }
+        } catch (profileError) {
+            console.error("Failed to initialize brand profile in Google Auth:", profileError);
+        }
     }
 
     const userData = user.toObject();
@@ -815,6 +830,20 @@ const verifyEmailOtp = async ({ email, otp }) => {
             });
         } catch (trialError) {
             console.error("Failed to initialize brand trial subscription in verifyEmailOtp:", trialError);
+        }
+
+        // Ensure newly verified brand gets an initial BrandProfile document with isOnboarded: false
+        try {
+            const existingProfile = await BrandProfile.findOne({ user: user._id });
+            if (!existingProfile) {
+                await BrandProfile.create({
+                    user: user._id,
+                    companyName: user.name || "",
+                    isOnboarded: false
+                });
+            }
+        } catch (profileError) {
+            console.error("Failed to initialize brand profile in verifyEmailOtp:", profileError);
         }
     }
 

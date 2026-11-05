@@ -231,6 +231,27 @@ const campaignSchema = new mongoose.Schema(
     }
 );
 
+// Ensure budget, minBudget, and maxBudget consistency before validation
+campaignSchema.pre("validate", function (next) {
+    const hasBudget = this.budget !== undefined && this.budget !== null && !isNaN(this.budget);
+    const hasMin = this.minBudget !== undefined && this.minBudget !== null && !isNaN(this.minBudget);
+    const hasMax = this.maxBudget !== undefined && this.maxBudget !== null && !isNaN(this.maxBudget);
+
+    if (!hasBudget) {
+        if (hasMax) {
+            this.budget = Number(this.maxBudget);
+        } else if (hasMin) {
+            this.budget = Number(this.minBudget);
+        }
+    }
+
+    if (hasMin && hasMax && Number(this.minBudget) > Number(this.maxBudget)) {
+        return next(new Error("Minimum budget cannot exceed maximum budget"));
+    }
+
+    next();
+});
+
 campaignSchema.index({ status: 1, "moderation.isRestricted": 1, createdAt: -1 });
 
 const Campaign = mongoose.model(

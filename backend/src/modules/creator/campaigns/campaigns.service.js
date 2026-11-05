@@ -34,6 +34,9 @@ const formatAppliedCampaignItem = (b) => {
             category: b.campaign.category,
             platform: b.campaign.platform,
             budget: b.campaign.budget,
+            minBudget: b.campaign.minBudget,
+            maxBudget: b.campaign.maxBudget,
+            currency: b.campaign.currency || "INR",
             deadline: b.campaign.deadline,
             coverImage: b.campaign.coverImage || ""
         } : null,
@@ -286,7 +289,7 @@ const getAppliedCampaignsService = async (creatorId, query = {}) => {
     const [bookings, totalItems] = await Promise.all([
         Booking.find(filter)
             .populate("brand", "name email")
-            .populate("campaign", "title description category platform budget deadline coverImage")
+            .populate("campaign", "title description category platform budget minBudget maxBudget currency deadline coverImage")
             .populate("service", "title price deliveryTime")
             .sort({ createdAt: -1 })
             .skip(skip)

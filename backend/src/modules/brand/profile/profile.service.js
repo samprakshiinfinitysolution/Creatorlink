@@ -1,5 +1,6 @@
 import { reEvaluateBrandTrialEligibilityService } from "../../subscriptions/trial.service.js";
 import BrandProfile from "./profile.model.js";
+import Auth from "../../auth/auth.model.js";
 import createApiError from "../../../utils/ApiError.js";
 
 
@@ -18,9 +19,10 @@ const createProfileService = async (userId, profileData) => {
         );
     }
 
-    // Create the profile using Auth._id.
+    // Create the profile using Auth._id with isOnboarded: false
     const profile = await BrandProfile.create({
         user: userId,
+        isOnboarded: false,
         ...profileData
     });
 
@@ -38,7 +40,7 @@ const createProfileService = async (userId, profileData) => {
 // Get the brand profile of the authenticated user.
 const getMyProfileService = async (userId) => {
 
-    const profile = await BrandProfile.findOne({
+    let profile = await BrandProfile.findOne({
         user: userId
     }).populate(
         "user",
@@ -46,10 +48,29 @@ const getMyProfileService = async (userId) => {
     );
 
     if (!profile) {
-        throw createApiError(
-            404,
-            "Brand profile not found"
-        );
+        // If an authenticated user with role "brand" requests their profile,
+        // automatically ensure an initial BrandProfile document exists with isOnboarded: false
+        const authUser = await Auth.findById(userId).select("name email role");
+        if (authUser && authUser.role === "brand") {
+            profile = await BrandProfile.create({
+                user: userId,
+                companyName: authUser.name || "",
+                isOnboarded: false
+            });
+            await profile.populate(
+                "user",
+                "name email role"
+            );
+        } else {
+            throw createApiError(
+                404,
+                "Brand profile not found"
+            );
+        }
+    } else if (profile.isOnboarded === undefined || profile.isOnboarded === null) {
+        // Self-heal: ensure isOnboarded: false is explicitly persisted in MongoDB if missing
+        profile.isOnboarded = false;
+        await profile.save();
     }
 
     return profile;
@@ -57,14 +78,45 @@ const getMyProfileService = async (userId) => {
 
 
 // Update the brand profile of the authenticated user.
-const updateProfileService = async (userId, profileData) => {
+const updateProfileService = async (userId, profileData = {}) => {
+
+    const updateOps = { ...profileData };
+
+    // Prevent direct client modification of protected system fields
+    delete updateOps.isOnboarded;
+    delete updateOps.isVerifiedBusiness;
+    delete updateOps.user;
+
+    // Flatten socialLinks object to dot notation to preserve existing keys during partial updates
+    if (
+        updateOps.socialLinks &&
+        typeof updateOps.socialLinks === "object" &&
+        !Array.isArray(updateOps.socialLinks)
+    ) {
+        for (const [key, value] of Object.entries(updateOps.socialLinks)) {
+            updateOps[`socialLinks.${key}`] = typeof value === "string" ? value.trim() : value;
+        }
+        delete updateOps.socialLinks;
+    }
+
+    // Flatten contactInformation object to dot notation to preserve existing keys during partial updates
+    if (
+        updateOps.contactInformation &&
+        typeof updateOps.contactInformation === "object" &&
+        !Array.isArray(updateOps.contactInformation)
+    ) {
+        for (const [key, value] of Object.entries(updateOps.contactInformation)) {
+            updateOps[`contactInformation.${key}`] = typeof value === "string" ? value.trim() : value;
+        }
+        delete updateOps.contactInformation;
+    }
 
     const profile = await BrandProfile.findOneAndUpdate(
         {
             user: userId
         },
         {
-            $set: profileData
+            $set: updateOps
         },
         {
             new: true,
@@ -80,6 +132,11 @@ const updateProfileService = async (userId, profileData) => {
             404,
             "Brand profile not found"
         );
+    }
+
+    if (profile.isOnboarded === undefined || profile.isOnboarded === null) {
+        profile.isOnboarded = false;
+        await profile.save();
     }
 
     // Re-evaluate trial eligibility signals for Admin review (does not modify trial dates or quota)
@@ -111,7 +168,8 @@ const completeOnboardingService = async (userId, data = {}) => {
             website: data.website ? data.website.trim() : "",
             logo: data.logo ? data.logo.trim() : "",
             socialLinks: data.socialLinks || {},
-            contactInformation: data.contactInformation || {}
+            contactInformation: data.contactInformation || {},
+            isOnboarded: false
         });
     } else {
         // Update with any freshly provided fields from Step 1 & 2
@@ -121,8 +179,28 @@ const completeOnboardingService = async (userId, data = {}) => {
         if (data.description !== undefined) profile.description = data.description.trim();
         if (data.website !== undefined) profile.website = data.website.trim();
         if (data.logo !== undefined) profile.logo = data.logo.trim();
-        if (data.socialLinks !== undefined) profile.socialLinks = data.socialLinks;
-        if (data.contactInformation !== undefined) profile.contactInformation = data.contactInformation;
+
+        // Deep merge social links to preserve already saved platforms
+        if (data.socialLinks && typeof data.socialLinks === "object") {
+            const currentSocial = profile.socialLinks?.toObject
+                ? profile.socialLinks.toObject()
+                : (profile.socialLinks || {});
+            profile.socialLinks = {
+                ...currentSocial,
+                ...data.socialLinks
+            };
+        }
+
+        // Deep merge contact details to preserve existing contact fields
+        if (data.contactInformation && typeof data.contactInformation === "object") {
+            const currentContact = profile.contactInformation?.toObject
+                ? profile.contactInformation.toObject()
+                : (profile.contactInformation || {});
+            profile.contactInformation = {
+                ...currentContact,
+                ...data.contactInformation
+            };
+        }
     }
 
     // 2. Strict backend verification of required fields before granting onboarded status
@@ -144,6 +222,54 @@ const completeOnboardingService = async (userId, data = {}) => {
         throw createApiError(
             400,
             "Location is required to complete brand onboarding."
+        );
+    }
+
+    // Step 2: Company Description / Bio
+    if (!profile.description || !profile.description.trim()) {
+        throw createApiError(
+            400,
+            "Company Description / Bio is required to complete brand onboarding."
+        );
+    }
+
+    // Step 2: Social Media (at least one non-empty profile string among Instagram, LinkedIn, YouTube, Facebook, Twitter/X)
+    const socialLinks = profile.socialLinks || {};
+    const hasAtLeastOneSocial = [
+        socialLinks.instagram,
+        socialLinks.linkedin,
+        socialLinks.youtube,
+        socialLinks.facebook,
+        socialLinks.twitter
+    ].some((link) => typeof link === "string" && link.trim().length > 0);
+
+    if (!hasAtLeastOneSocial) {
+        throw createApiError(
+            400,
+            "Please add at least one social media channel to complete brand onboarding."
+        );
+    }
+
+    // Step 2: Brand Collaboration Contact (Name, Email, Phone all required)
+    const contactInfo = profile.contactInformation || {};
+    if (!contactInfo.name || typeof contactInfo.name !== "string" || !contactInfo.name.trim()) {
+        throw createApiError(
+            400,
+            "Contact Name is required to complete brand onboarding."
+        );
+    }
+
+    if (!contactInfo.email || typeof contactInfo.email !== "string" || !contactInfo.email.trim()) {
+        throw createApiError(
+            400,
+            "Contact Email is required to complete brand onboarding."
+        );
+    }
+
+    if (!contactInfo.phone || typeof contactInfo.phone !== "string" || !contactInfo.phone.trim()) {
+        throw createApiError(
+            400,
+            "Contact Phone Number is required to complete brand onboarding."
         );
     }
 

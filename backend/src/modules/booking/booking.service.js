@@ -172,7 +172,7 @@ const getCreatorBookingsService = async (creatorId, query = {}) => {
     const [bookings, totalItems] = await Promise.all([
         Booking.find(filter)
             .populate("brand", "name email")
-            .populate("campaign", "title category budget deadline platform coverImage")
+            .populate("campaign", "title category budget minBudget maxBudget currency deadline platform coverImage")
             .populate("service", "title price deliveryTime")
             .sort({ createdAt: -1 })
             .skip(skip)
@@ -540,7 +540,7 @@ const getBrandBookingsService = async (brandId, query = {}) => {
     const [bookings, totalItems] = await Promise.all([
         Booking.find(filter)
             .populate("creator", "name email")
-            .populate("campaign", "title category budget deadline platform coverImage")
+            .populate("campaign", "title category budget minBudget maxBudget currency deadline platform coverImage")
             .populate("service", "title price deliveryTime")
             .sort({ createdAt: -1 })
             .skip(skip)

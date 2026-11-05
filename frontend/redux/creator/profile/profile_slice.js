@@ -6,7 +6,8 @@ import {
 import {
     createProfile,
     getMyProfile,
-    updateMyProfile
+    updateMyProfile,
+    completeOnboardingApi
 } from "./profile_api";
 
 import {
@@ -23,8 +24,9 @@ const createCreatorProfile = createAsyncThunk(
     async (profileData, { rejectWithValue }) => {
 
         try {
-
-            return await createProfile(profileData);
+            const sanitized = { ...profileData };
+            delete sanitized.isOnboarded;
+            return await createProfile(sanitized);
 
         } catch (error) {
 
@@ -63,14 +65,34 @@ const updateCreatorProfile = createAsyncThunk(
     async (profileData, { rejectWithValue }) => {
 
         try {
-
-            return await updateMyProfile(profileData);
+            const sanitized = { ...profileData };
+            delete sanitized.isOnboarded;
+            return await updateMyProfile(sanitized);
 
         } catch (error) {
 
             return rejectWithValue(
                 error.response?.data?.message ||
                 "Profile update failed"
+            );
+        }
+    }
+);
+
+// Handles completing creator onboarding with backend verification.
+const completeCreatorOnboarding = createAsyncThunk(
+    "profile/completeOnboarding",
+    async (profileData, { rejectWithValue }) => {
+
+        try {
+
+            return await completeOnboardingApi(profileData);
+
+        } catch (error) {
+
+            return rejectWithValue(
+                error.response?.data?.message ||
+                "Creator onboarding completion failed"
             );
         }
     }
@@ -170,6 +192,28 @@ const profileSlice = createSlice({
                 state.error = action.payload;
             })
 
+            // Complete onboarding started.
+            .addCase(completeCreatorOnboarding.pending, (state) => {
+
+                state.loading = true;
+                state.error = null;
+            })
+
+            // Complete onboarding successful.
+            .addCase(completeCreatorOnboarding.fulfilled, (state, action) => {
+
+                state.loading = false;
+                state.profile = action.payload.data;
+                state.error = null;
+            })
+
+            // Complete onboarding failed.
+            .addCase(completeCreatorOnboarding.rejected, (state, action) => {
+
+                state.loading = false;
+                state.error = action.payload;
+            })
+
             // Clear profile state when user logs in, logs out, or clears auth state.
             .addCase(login.fulfilled, (state) => {
 
@@ -210,7 +254,8 @@ export const {
 export {
     createCreatorProfile,
     getCreatorProfile,
-    updateCreatorProfile
+    updateCreatorProfile,
+    completeCreatorOnboarding
 };
 
 

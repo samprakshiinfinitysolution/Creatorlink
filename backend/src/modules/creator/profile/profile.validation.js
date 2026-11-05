@@ -9,7 +9,6 @@ const ALLOWED_PROFILE_FIELDS = [
     "location",
     "profileImage",
     "isPublic",
-    "isOnboarded",
     "socialLinks",
     "title",
     "keywords",
@@ -54,7 +53,6 @@ const createProfileValidation = (req, res, next) => {
         location,
         profileImage,
         isPublic,
-        isOnboarded,
         socialLinks,
         title,
         keywords,
@@ -170,18 +168,6 @@ const createProfileValidation = (req, res, next) => {
     }
 
 
-    // Validate isOnboarded status flag.
-    if (isOnboarded !== undefined) {
-
-        if (typeof isOnboarded !== "boolean") {
-            throw createApiError(
-                400,
-                "isOnboarded must be a boolean"
-            );
-        }
-    }
-
-
     // socialLinks must be an object.
     if (socialLinks !== undefined) {
 
@@ -203,7 +189,9 @@ const createProfileValidation = (req, res, next) => {
             "facebook",
             "youtube",
             "tiktok",
-            "website"
+            "website",
+            "twitter",
+            "linkedin"
         ];
 
         const receivedSocialKeys = Object.keys(socialLinks);
@@ -225,7 +213,9 @@ const createProfileValidation = (req, res, next) => {
             facebook,
             youtube,
             tiktok,
-            website
+            website,
+            twitter,
+            linkedin
         } = socialLinks;
 
 
@@ -280,6 +270,26 @@ const createProfileValidation = (req, res, next) => {
             throw createApiError(
                 400,
                 "Website link must be a string"
+            );
+        }
+
+        if (
+            twitter !== undefined &&
+            typeof twitter !== "string"
+        ) {
+            throw createApiError(
+                400,
+                "Twitter link must be a string"
+            );
+        }
+
+        if (
+            linkedin !== undefined &&
+            typeof linkedin !== "string"
+        ) {
+            throw createApiError(
+                400,
+                "LinkedIn link must be a string"
             );
         }
     }

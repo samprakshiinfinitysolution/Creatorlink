@@ -43,12 +43,31 @@ function formatYAxisINR(amount) {
   }
 }
 
-// Safely derive YYYY-M calendar month key from date string or Date object
-function getCalendarMonthKey(dateInput) {
+const PLATFORM_TIMEZONE = "Asia/Kolkata";
+
+// Safely derive YYYY-M calendar month key from date string or Date object in platform timezone
+function getCalendarMonthKey(dateInput, timeZone = PLATFORM_TIMEZONE) {
   if (!dateInput) return null;
   const d = dateInput instanceof Date ? dateInput : new Date(dateInput);
   if (isNaN(d.getTime())) return null;
-  return `${d.getFullYear()}-${d.getMonth()}`;
+  try {
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone,
+      year: "numeric",
+      month: "numeric",
+    });
+    const parts = formatter.formatToParts(d);
+    let y = "";
+    let m = "";
+    for (const p of parts) {
+      if (p.type === "year") y = p.value;
+      if (p.type === "month") m = p.value;
+    }
+    const monthIndex = parseInt(m, 10) - 1;
+    return `${y}-${monthIndex}`;
+  } catch {
+    return `${d.getFullYear()}-${d.getMonth()}`;
+  }
 }
 
 // Generate smooth cubic bezier SVG curve across an array of {x, y} coordinate objects
@@ -232,8 +251,10 @@ function CampaignStatusDonut({ statusBreakdown = {}, totalCampaigns = 0 }) {
 // =========================================================
 function CampaignPerformanceChart({
   recentCampaigns = [],
+  monthlyBudgets = [],
   totalSpending = 0,
   totalRecentBudget = 0,
+  totalCampaignBudget = null,
   totalCampaigns = 0,
   paymentsHistory = [],
   paymentsPagination = null,
@@ -253,10 +274,9 @@ function CampaignPerformanceChart({
 
     const checkMonthTransition = () => {
       const currentDate = new Date();
-      const currentKey = `${currentDate.getFullYear()}-${currentDate.getMonth()}`;
+      const currentKey = getCalendarMonthKey(currentDate);
       setMonthTimestamp((prev) => {
-        const memoDate = new Date(prev);
-        const memoKey = `${memoDate.getFullYear()}-${memoDate.getMonth()}`;
+        const memoKey = getCalendarMonthKey(new Date(prev));
         if (currentKey !== memoKey) {
           return Date.now();
         }
@@ -292,17 +312,43 @@ function CampaignPerformanceChart({
     };
   }, []);
 
-  // Derive 6 consecutive calendar months ending at current calendar month
+  // Derive 6 consecutive calendar months ending at current calendar month in platform timezone
   const timelineMonths = useMemo(() => {
     const dNow = new Date(monthTimestamp);
+    let currentYear = dNow.getFullYear();
+    let currentMonth = dNow.getMonth() + 1;
+
+    try {
+      const formatter = new Intl.DateTimeFormat("en-US", {
+        timeZone: PLATFORM_TIMEZONE,
+        year: "numeric",
+        month: "numeric",
+      });
+      const parts = formatter.formatToParts(dNow);
+      for (const p of parts) {
+        if (p.type === "year") currentYear = parseInt(p.value, 10);
+        if (p.type === "month") currentMonth = parseInt(p.value, 10);
+      }
+    } catch {
+      // Fallback to local
+    }
+
     const months = [];
     for (let i = 5; i >= 0; i--) {
-      const d = new Date(dNow.getFullYear(), dNow.getMonth() - i, 1);
+      let targetYear = currentYear;
+      let targetMonth = currentMonth - i;
+      while (targetMonth < 1) {
+        targetMonth += 12;
+        targetYear -= 1;
+      }
+      const monthIndex = targetMonth - 1;
+      const sampleDate = new Date(Date.UTC(targetYear, monthIndex, 15));
+      const label = sampleDate.toLocaleDateString("en-US", { month: "short", timeZone: "UTC" });
       months.push({
-        label: d.toLocaleDateString("en-US", { month: "short" }),
-        year: d.getFullYear(),
-        monthIndex: d.getMonth(),
-        key: `${d.getFullYear()}-${d.getMonth()}`,
+        label,
+        year: targetYear,
+        monthIndex,
+        key: `${targetYear}-${monthIndex}`,
       });
     }
     return months;
@@ -321,19 +367,39 @@ function CampaignPerformanceChart({
       countMap[m.key] = 0;
     });
 
-    // 1. Budget Series: aggregate genuine campaign budgets by creation month
-    // Every valid campaign with a valid createdAt increments monthly count,
-    // distinguishing missing/null budgets from genuine zero budgets
-    if (Array.isArray(recentCampaigns)) {
+    // 1. Budget Series: aggregate from backend monthlyBudgets (calculated over all brand campaigns)
+    // with safe fallback to recentCampaigns
+    const hasMonthlyBudgets = Array.isArray(monthlyBudgets) && monthlyBudgets.length > 0;
+
+    if (hasMonthlyBudgets) {
+      monthlyBudgets.forEach((mb) => {
+        if (!mb || !mb.key) return;
+        // Strictly preserve currency separation: Chart displays INR
+        const cur = (mb.currency || "INR").toUpperCase();
+        if (cur !== "INR") return;
+
+        if (budgetMap[mb.key] !== undefined) {
+          const b = typeof mb.totalBudget === "number" ? mb.totalBudget : Number(mb.totalBudget);
+          if (!isNaN(b) && b >= 0 && isFinite(b)) {
+            budgetMap[mb.key] += b;
+          }
+          const cnt = typeof mb.campaignsCount === "number" ? mb.campaignsCount : Number(mb.campaignsCount);
+          if (!isNaN(cnt) && cnt >= 0 && isFinite(cnt)) {
+            countMap[mb.key] += cnt;
+          }
+        }
+      });
+    } else if (Array.isArray(recentCampaigns)) {
       recentCampaigns.forEach((c) => {
         if (!c || !c.createdAt) return;
+        const cur = (c.currency || "INR").toUpperCase();
+        if (cur !== "INR") return;
+
         const key = getCalendarMonthKey(c.createdAt);
         if (!key || budgetMap[key] === undefined) return;
 
-        // Increment count independently of budget value
         countMap[key] += 1;
 
-        // Distinguish genuine numeric budgets (including 0) from missing/null/undefined values
         if (c.budget !== null && c.budget !== undefined && c.budget !== "") {
           const b = typeof c.budget === "number" ? c.budget : Number(c.budget);
           if (!isNaN(b) && b >= 0 && isFinite(b)) {
@@ -375,7 +441,7 @@ function CampaignPerformanceChart({
       hasMappedPayments,
       paidTransactionsCount,
     };
-  }, [timelineMonths, recentCampaigns, paymentsHistory]);
+  }, [timelineMonths, monthlyBudgets, recentCampaigns, paymentsHistory]);
 
   // Enhanced chart dimensions giving ample horizontal room for Y-axis currency labels and vertical room for both series
   const svgWidth = 680;
@@ -867,10 +933,14 @@ function CampaignPerformanceChart({
           Confirmed Paid Spend: <strong className="text-foreground font-semibold">{formatCurrency(totalSpending, "INR")}</strong>
         </span>
         <span>
-          {isPartialCampaignList
+          {totalCampaignBudget !== null && totalCampaignBudget !== undefined
+            ? `Total Campaign Budget (${totalCampaigns} total): `
+            : isPartialCampaignList
             ? `Recent Campaign Budget (${recentCampaigns.length} listed of ${totalCampaigns} total): `
             : `Recent Campaign Budget (${recentCampaigns.length} listed): `}
-          <strong className="text-foreground font-semibold">{formatCurrency(totalRecentBudget, "INR")}</strong>
+          <strong className="text-foreground font-semibold">
+            {formatCurrency(totalCampaignBudget ?? totalRecentBudget, "INR")}
+          </strong>
         </span>
       </div>
     </div>
@@ -924,6 +994,8 @@ export default function BrandCampaignAnalytics({ metrics, recentCampaigns = [] }
   const totalCampaigns = metrics?.campaigns?.total ?? 0;
   const statusBreakdown = metrics?.campaigns?.statusBreakdown || {};
   const totalSpending = metrics?.totalSpending?.amount ?? 0;
+  const monthlyBudgets = metrics?.campaigns?.monthlyBudgets || [];
+  const totalCampaignBudget = metrics?.campaigns?.totalBudget?.amount ?? null;
 
   // Real aggregate campaign budget calculated from recorded campaigns
   const totalRecentBudget = useMemo(() => {
@@ -936,13 +1008,13 @@ export default function BrandCampaignAnalytics({ metrics, recentCampaigns = [] }
   }, [recentCampaigns]);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 items-stretch min-w-0">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-stretch min-w-0">
       {/* Left Card: Campaign Performance Line Chart */}
-      <div className="lg:col-span-8 bg-surface border border-border-theme rounded-2xl p-3.5 sm:p-4.5 md:p-5 shadow-xs flex flex-col justify-between transition-colors min-w-0 overflow-hidden">
+      <div className="lg:col-span-8 bg-white dark:bg-surface border border-border-theme rounded-2xl sm:rounded-3xl p-5 sm:p-6 lg:p-7 shadow-xs flex flex-col justify-between transition-colors min-w-0 overflow-hidden">
         <div className="mb-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
             <div>
-              <h2 className="font-sans font-semibold text-base sm:text-lg text-slate-900 dark:text-foreground tracking-tight">
+              <h2 className="font-serif font-semibold text-lg sm:text-xl text-foreground tracking-tight">
                 Campaign Performance
               </h2>
             </div>
@@ -958,9 +1030,11 @@ export default function BrandCampaignAnalytics({ metrics, recentCampaigns = [] }
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#f472b6] shrink-0" />
-                <span className="text-text-secondary font-medium">Budget (Recent):</span>
+                <span className="text-text-secondary font-medium">
+                  {totalCampaignBudget !== null ? "Budget:" : "Budget (Recent):"}
+                </span>
                 <span className="font-semibold text-slate-900 dark:text-foreground">
-                  {formatCurrency(totalRecentBudget, "INR")}
+                  {formatCurrency(totalCampaignBudget ?? totalRecentBudget, "INR")}
                 </span>
               </div>
             </div>
@@ -969,8 +1043,10 @@ export default function BrandCampaignAnalytics({ metrics, recentCampaigns = [] }
 
         <CampaignPerformanceChart
           recentCampaigns={recentCampaigns}
+          monthlyBudgets={monthlyBudgets}
           totalSpending={totalSpending}
           totalRecentBudget={totalRecentBudget}
+          totalCampaignBudget={totalCampaignBudget}
           totalCampaigns={totalCampaigns}
           paymentsHistory={paymentsHistory}
           paymentsPagination={paymentsPagination}
@@ -981,10 +1057,10 @@ export default function BrandCampaignAnalytics({ metrics, recentCampaigns = [] }
       </div>
 
       {/* Right Card: Campaign Status Donut Chart */}
-      <div className="lg:col-span-4 bg-surface border border-border-theme rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col justify-between transition-colors min-w-0 overflow-hidden">
+      <div className="lg:col-span-4 bg-white dark:bg-surface border border-border-theme rounded-2xl sm:rounded-3xl p-5 sm:p-6 lg:p-7 shadow-xs flex flex-col justify-between transition-colors min-w-0 overflow-hidden">
         <div className="mb-2">
           <div className="flex items-center justify-between">
-            <h2 className="font-sans font-semibold text-base sm:text-lg text-slate-900 dark:text-foreground tracking-tight">
+            <h2 className="font-serif font-semibold text-lg sm:text-xl text-foreground tracking-tight">
               Campaign Status
             </h2>
             <span className="text-xs font-semibold text-text-secondary font-sans">

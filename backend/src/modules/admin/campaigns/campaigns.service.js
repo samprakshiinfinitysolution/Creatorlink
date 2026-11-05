@@ -26,6 +26,7 @@ export const getAdminCampaignsService = async (queryParams) => {
     } = queryParams;
 
     const filter = {};
+    const andClauses = [];
 
     // Filter by lifecycle status
     if (status && status !== "all") {
@@ -49,15 +50,28 @@ export const getAdminCampaignsService = async (queryParams) => {
         filter.category = new RegExp(category.trim(), "i");
     }
 
-    // Filter by budget range
-    if (minBudget !== undefined || maxBudget !== undefined) {
-        filter.budget = {};
-        if (minBudget !== undefined) {
-            filter.budget.$gte = Number(minBudget);
-        }
-        if (maxBudget !== undefined) {
-            filter.budget.$lte = Number(maxBudget);
-        }
+    // Filter by budget range (supports both fixed budget and min/max budget range)
+    if (
+        (minBudget !== undefined && minBudget !== "") ||
+        (maxBudget !== undefined && maxBudget !== "")
+    ) {
+        const numMin = minBudget !== undefined && minBudget !== "" ? Number(minBudget) : null;
+        const numMax = maxBudget !== undefined && maxBudget !== "" ? Number(maxBudget) : null;
+
+        const singleBudgetMatch = {};
+        if (numMin !== null) singleBudgetMatch.$gte = numMin;
+        if (numMax !== null) singleBudgetMatch.$lte = numMax;
+
+        const rangeBudgetMatch = {};
+        if (numMin !== null) rangeBudgetMatch.maxBudget = { $gte: numMin };
+        if (numMax !== null) rangeBudgetMatch.minBudget = { $lte: numMax };
+
+        andClauses.push({
+            $or: [
+                { budget: singleBudgetMatch },
+                rangeBudgetMatch
+            ]
+        });
     }
 
     // Search by title, description, category, or brand name/email
@@ -72,12 +86,18 @@ export const getAdminCampaignsService = async (queryParams) => {
 
         const brandIds = matchingBrands.map((b) => b._id);
 
-        filter.$or = [
-            { title: searchRegex },
-            { description: searchRegex },
-            { category: searchRegex },
-            { brand: { $in: brandIds } }
-        ];
+        andClauses.push({
+            $or: [
+                { title: searchRegex },
+                { description: searchRegex },
+                { category: searchRegex },
+                { brand: { $in: brandIds } }
+            ]
+        });
+    }
+
+    if (andClauses.length > 0) {
+        filter.$and = andClauses;
     }
 
     const { skip, limit: parsedLimit } = getPagination(page, limit);

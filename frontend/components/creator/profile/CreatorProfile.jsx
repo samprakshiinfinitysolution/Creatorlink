@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import CreatorSidebar from "@/components/creator/dashboard/CreatorSidebar";
@@ -155,6 +155,15 @@ function CameraIcon({ className = "w-4 h-4" }) {
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
       <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+    </svg>
+  );
+}
+
+
+function XTwitterIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
     </svg>
   );
 }
@@ -733,6 +742,7 @@ export default function CreatorProfile() {
     socialLinks: {
       instagram: "",
       facebook: "",
+      twitter: "",
       youtube: "",
       tiktok: "",
       website: "",
@@ -777,6 +787,7 @@ export default function CreatorProfile() {
         socialLinks: {
           instagram: profile.socialLinks?.instagram || "",
           facebook: profile.socialLinks?.facebook || "",
+          twitter: profile.socialLinks?.twitter || "",
           youtube: profile.socialLinks?.youtube || "",
           tiktok: profile.socialLinks?.tiktok || "",
           website: profile.socialLinks?.website || "",
@@ -955,6 +966,7 @@ export default function CreatorProfile() {
         socialLinks: {
           instagram: profile.socialLinks?.instagram || "",
           facebook: profile.socialLinks?.facebook || "",
+          twitter: profile.socialLinks?.twitter || "",
           youtube: profile.socialLinks?.youtube || "",
           tiktok: profile.socialLinks?.tiktok || "",
           website: profile.socialLinks?.website || "",
@@ -1080,6 +1092,7 @@ export default function CreatorProfile() {
       socialLinks: {
         instagram: formData.socialLinks?.instagram ? formData.socialLinks.instagram.trim() : "",
         facebook: formData.socialLinks?.facebook ? formData.socialLinks.facebook.trim() : "",
+        twitter: formData.socialLinks?.twitter ? formData.socialLinks.twitter.trim() : "",
         youtube: formData.socialLinks?.youtube ? formData.socialLinks.youtube.trim() : "",
         tiktok: formData.socialLinks?.tiktok ? formData.socialLinks.tiktok.trim() : "",
         website: formData.socialLinks?.website ? formData.socialLinks.website.trim() : "",
@@ -1235,14 +1248,120 @@ export default function CreatorProfile() {
     formData.bio ||
     "Digital creator, fashion enthusiast, and creative visual storyteller collaborating with modern brands. Passionate about curating high-aesthetic lifestyle content and connecting authentic audiences with innovative products.";
  const instagramUrl = profile?.socialLinks?.instagram || formData.socialLinks?.instagram || "";
-const youtubeUrl = profile?.socialLinks?.youtube || formData.socialLinks?.youtube || "";
-const tiktokUrl = profile?.socialLinks?.tiktok || formData.socialLinks?.tiktok || "";
-const facebookUrl = profile?.socialLinks?.facebook || formData.socialLinks?.facebook || "";
+  const twitterUrl = profile?.socialLinks?.twitter || formData.socialLinks?.twitter || "";
+  const youtubeUrl = profile?.socialLinks?.youtube || formData.socialLinks?.youtube || "";
+  const tiktokUrl = profile?.socialLinks?.tiktok || formData.socialLinks?.tiktok || "";
+  const facebookUrl = profile?.socialLinks?.facebook || formData.socialLinks?.facebook || "";
 const collaborationsCount = profile?.collaborationsCount || profile?.completedCampaignsCount || 0;
   const followerCount = typeof profile?.followerCount === "number" ? profile.followerCount : null;
   const engagementRate = typeof profile?.engagementRate === "number" ? profile.engagementRate : null;
   const isPublic = profile?.isPublic ?? formData.isPublic ?? true;
   const joinedOn = formatJoinedDate(profile?.createdAt || authUser?.createdAt);
+
+  // Profile completion calculation (strictly independent of isOnboarded)
+  const completionStats = useMemo(() => {
+    const checks = [
+      {
+        id: "name",
+        label: "Full Name",
+        complete: Boolean(creatorName && creatorName.trim() && creatorName !== "Creator"),
+      },
+      {
+        id: "avatar",
+        label: "Profile Picture",
+        complete: Boolean(profile?.profileImage || formData.profileImage),
+      },
+      {
+        id: "title",
+        label: "Professional Headline",
+        complete: Boolean((profile?.title || formData.title)?.trim()),
+      },
+      {
+        id: "bio",
+        label: "Bio & About",
+        complete: Boolean((profile?.bio || formData.bio)?.trim()),
+      },
+      {
+        id: "category",
+        label: "Primary Category",
+        complete: Boolean((profile?.category || formData.category)?.trim()),
+      },
+      {
+        id: "keywords",
+        label: "Niche Keywords",
+        complete: Array.isArray(keywords) && keywords.length > 0,
+      },
+      {
+        id: "location",
+        label: "Location",
+        complete: Boolean((profile?.location || formData.location)?.trim()),
+      },
+      {
+        id: "demographics",
+        label: "Demographics",
+        complete: Boolean(
+          (profile?.dob || formData.dob) && (profile?.gender || formData.gender)
+        ),
+      },
+      {
+        id: "languages",
+        label: "Languages Spoken",
+        complete: Array.isArray(languages) && languages.length > 0,
+      },
+      {
+        id: "socials",
+        label: "Connected Channels",
+        complete: Boolean(
+          websiteUrl || instagramUrl || twitterUrl || youtubeUrl || tiktokUrl || facebookUrl
+        ),
+      },
+      {
+        id: "metrics",
+        label: "Follower Count & Metrics",
+        complete:
+          (profile?.followerCount !== null && profile?.followerCount !== undefined) ||
+          (profile?.engagementRate !== null && profile?.engagementRate !== undefined),
+      },
+    ];
+
+    const completedCount = checks.filter((c) => c.complete).length;
+    const percentage = Math.round((completedCount / checks.length) * 100);
+    const missingItems = checks.filter((c) => !c.complete);
+
+    return {
+      percentage,
+      completedCount,
+      totalCount: checks.length,
+      missingItems,
+      isFullyComplete: percentage === 100,
+    };
+  }, [
+    creatorName,
+    profile?.profileImage,
+    formData.profileImage,
+    profile?.title,
+    formData.title,
+    profile?.bio,
+    formData.bio,
+    profile?.category,
+    formData.category,
+    keywords,
+    profile?.location,
+    formData.location,
+    profile?.dob,
+    formData.dob,
+    profile?.gender,
+    formData.gender,
+    languages,
+    websiteUrl,
+    instagramUrl,
+    twitterUrl,
+    youtubeUrl,
+    tiktokUrl,
+    facebookUrl,
+    profile?.followerCount,
+    profile?.engagementRate,
+  ]);
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
@@ -1424,6 +1543,83 @@ const collaborationsCount = profile?.collaborationsCount || profile?.completedCa
           {/* ========================================================= */}
           {!isEditing && (
             <div className="space-y-6">
+
+              {/* PROFILE COMPLETION INDICATOR CARD */}
+              <div className="bg-white dark:bg-[#131318] border border-border-theme dark:border-[#22222e] rounded-3xl p-5 sm:p-6 shadow-xs relative overflow-hidden">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-border-theme/40">
+                  <div className="flex items-start sm:items-center gap-3.5">
+                    <div className="w-10 h-10 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center shrink-0 border border-secondary/20">
+                      <SparklesIcon className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2.5 flex-wrap">
+                        <h2 className="font-semibold text-sm sm:text-base text-slate-900 dark:text-foreground">
+                          Profile Completion
+                        </h2>
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-secondary/10 text-secondary border border-secondary/20">
+                          {completionStats.percentage}% Complete
+                        </span>
+                        {profile?.isOnboarded ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                            <CheckIcon className="w-3 h-3" />
+                            <span>Onboarded Creator</span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                            Onboarding In Progress
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-text-secondary mt-1">
+                        {completionStats.isFullyComplete
+                          ? "Your profile is fully optimized to maximize discovery by premium brands."
+                          : "Complete your profile details to improve matchmaking and receive more campaign invitations."}
+                      </p>
+                    </div>
+                  </div>
+
+                  {!completionStats.isFullyComplete && (
+                    <button
+                      type="button"
+                      onClick={() => setIsEditing(true)}
+                      className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-neutral-950 dark:bg-white text-white dark:text-black hover:bg-neutral-800 dark:hover:bg-neutral-100 text-xs font-semibold shadow-xs transition-colors cursor-pointer shrink-0 self-start md:self-auto"
+                    >
+                      <PencilIcon className="w-3.5 h-3.5" />
+                      <span>Complete Profile</span>
+                    </button>
+                  )}
+                </div>
+
+                {/* Progress Bar */}
+                <div className="pt-4 space-y-3">
+                  <div className="w-full h-2.5 bg-surface-muted rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-secondary to-pink-500 rounded-full transition-all duration-500"
+                      style={{ width: `${completionStats.percentage}%` }}
+                    />
+                  </div>
+
+                  {/* Missing Fields Chips & Guidance */}
+                  {completionStats.missingItems.length > 0 && (
+                    <div className="flex flex-wrap items-center gap-2 pt-1">
+                      <span className="text-[11px] font-medium text-text-secondary">
+                        Suggested additions:
+                      </span>
+                      {completionStats.missingItems.map((item) => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => setIsEditing(true)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-surface-muted text-text-secondary hover:text-secondary hover:bg-secondary/10 border border-border-theme hover:border-secondary/30 transition-all cursor-pointer"
+                        >
+                          <PlusIcon className="w-3 h-3 text-secondary" />
+                          <span>{item.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
 
               {/* 1. HERO BANNER CARD */}
               <div className="bg-white dark:bg-[#131318] border border-border-theme dark:border-[#22222e] rounded-3xl p-6 sm:p-7 relative overflow-hidden shadow-xs">
@@ -1818,7 +2014,7 @@ const collaborationsCount = profile?.collaborationsCount || profile?.completedCa
                         <span className="text-[11px] uppercase tracking-wider font-semibold text-text-secondary block">
                           Connected Channels
                         </span>
-                        {(websiteUrl || instagramUrl || youtubeUrl || tiktokUrl || facebookUrl) ? (
+                        {(websiteUrl || instagramUrl || twitterUrl || youtubeUrl || tiktokUrl || facebookUrl) ? (
                           <div className="flex flex-wrap gap-2">
                             {websiteUrl && (
                               <a
@@ -1841,6 +2037,18 @@ const collaborationsCount = profile?.collaborationsCount || profile?.completedCa
                               >
                                 <InstagramIcon className="w-3.5 h-3.5" />
                                 <span>Instagram</span>
+                                <ExternalLinkIcon className="w-3 h-3 opacity-60" />
+                              </a>
+                            )}
+                            {twitterUrl && (
+                              <a
+                                href={twitterUrl.startsWith("http") ? twitterUrl : `https://x.com/${twitterUrl.replace(/^@/, "")}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-muted hover:bg-secondary/10 text-text-secondary hover:text-secondary border border-border-theme hover:border-secondary/30 transition-all text-xs"
+                              >
+                                <XTwitterIcon className="w-3.5 h-3.5" />
+                                <span>Twitter / X</span>
                                 <ExternalLinkIcon className="w-3 h-3 opacity-60" />
                               </a>
                             )}
@@ -2588,6 +2796,26 @@ const collaborationsCount = profile?.collaborationsCount || profile?.completedCa
                           value={formData.socialLinks.facebook}
                           onChange={handleSocialChange}
                           placeholder="https://facebook.com/yourprofile"
+                          className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-surface border border-slate-300 dark:border-border-theme text-foreground text-xs sm:text-sm rounded-xl focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/40 transition-colors"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Twitter / X */}
+                    <div className="space-y-1.5">
+                      <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
+                        Twitter / X
+                      </label>
+                      <div className="relative flex items-center">
+                        <span className="absolute left-3.5 text-black dark:text-white pointer-events-none">
+                          <XTwitterIcon className="w-4 h-4" />
+                        </span>
+                        <input
+                          type="text"
+                          name="twitter"
+                          value={formData.socialLinks.twitter || ""}
+                          onChange={handleSocialChange}
+                          placeholder="https://x.com/yourhandle or @yourhandle"
                           className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-surface border border-slate-300 dark:border-border-theme text-foreground text-xs sm:text-sm rounded-xl focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/40 transition-colors"
                         />
                       </div>

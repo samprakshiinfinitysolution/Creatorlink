@@ -95,7 +95,7 @@ export default function BrandMetricsGrid({ metrics }) {
       icon: PlayCircleIcon,
     },
     {
-      title: "TOTAL BUDGET",
+      title: "TOTAL SPENT",
       value: formatCurrency(totalSpending, spendingCurrency),
       subtitle: `${paidCount} paid${outstandingEst > 0 ? ` · Est. ${formatCurrency(outstandingEst, pendingCurrency)} pending` : ""}`,
       icon: RupeeIcon,

@@ -338,7 +338,7 @@ const getCreatorWorkspacesService = async (creatorId, query = {}) => {
             .populate("creator", "name email")
             .populate(
                 "campaign",
-                "title category budget deadline platform coverImage"
+                "title category budget minBudget maxBudget currency deadline platform coverImage"
             )
             .populate(
                 "service",
@@ -677,7 +677,7 @@ const getBrandWorkspacesService = async (
             .populate("creator", "name email")
             .populate(
                 "campaign",
-                "title category budget deadline platform coverImage"
+                "title category budget minBudget maxBudget currency deadline platform coverImage"
             )
             .populate(
                 "service",

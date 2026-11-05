@@ -107,6 +107,12 @@ const profileSchema = new mongoose.Schema(
                 default: ""
             },
 
+            linkedin: {
+                type: String,
+                trim: true,
+                default: ""
+            },
+
             facebook: {
                 type: String,
                 trim: true,
@@ -126,6 +132,12 @@ const profileSchema = new mongoose.Schema(
             },
 
             website: {
+                type: String,
+                trim: true,
+                default: ""
+            },
+
+            twitter: {
                 type: String,
                 trim: true,
                 default: ""

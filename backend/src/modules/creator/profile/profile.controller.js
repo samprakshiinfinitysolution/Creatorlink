@@ -4,7 +4,8 @@ import sendResponse from "../../../utils/response.js";
 import {
     createProfileService,
     getMyProfileService,
-    updateProfileService
+    updateProfileService,
+    completeOnboardingService
 } from "./profile.service.js";
 import {
     getCreatorContactConsentService,
@@ -91,10 +92,26 @@ const updateContactPrivacy = asyncHandler(async (req, res) => {
 });
 
 
+// Complete creator onboarding
+const completeOnboarding = asyncHandler(async (req, res) => {
+    const profile = await completeOnboardingService(
+        req.user.userId,
+        req.body
+    );
+
+    return sendResponse(
+        res,
+        200,
+        "Creator onboarding completed successfully",
+        profile
+    );
+});
+
 export {
     createProfile,
     getMyProfile,
     updateMyProfile,
+    completeOnboarding,
     getContactPrivacy,
     updateContactPrivacy
 };

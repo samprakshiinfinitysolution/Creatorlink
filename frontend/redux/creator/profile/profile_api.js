@@ -26,8 +26,18 @@ const updateMyProfile = async (profileData) => {
     return response.data;
 };
 
+// Completes creator onboarding with backend verification.
+const completeOnboardingApi = async (profileData) => {
+    const response = await axiosInstance.post(
+        "/creator/profile/complete-onboarding",
+        profileData
+    );
+    return response.data;
+};
+
 export {
     createProfile,
     getMyProfile,
-    updateMyProfile
+    updateMyProfile,
+    completeOnboardingApi
 };

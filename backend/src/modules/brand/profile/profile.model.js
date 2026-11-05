@@ -1,5 +1,60 @@
 import mongoose from "mongoose";
 
+const brandSocialLinksSchema = new mongoose.Schema(
+    {
+        instagram: {
+            type: String,
+            trim: true,
+            default: ""
+        },
+        linkedin: {
+            type: String,
+            trim: true,
+            default: ""
+        },
+        youtube: {
+            type: String,
+            trim: true,
+            default: ""
+        },
+        facebook: {
+            type: String,
+            trim: true,
+            default: ""
+        },
+        twitter: {
+            type: String,
+            trim: true,
+            default: ""
+        }
+    },
+    { _id: false, strict: false }
+);
+
+const brandContactInfoSchema = new mongoose.Schema(
+    {
+        name: {
+            type: String,
+            trim: true,
+            maxlength: 100,
+            default: ""
+        },
+        email: {
+            type: String,
+            trim: true,
+            lowercase: true,
+            default: ""
+        },
+        phone: {
+            type: String,
+            trim: true,
+            maxlength: 30,
+            default: ""
+        }
+    },
+    { _id: false, strict: false }
+);
+
 const profileSchema = new mongoose.Schema(
     {
         // Links this brand profile with the authenticated user.
@@ -50,16 +105,16 @@ const profileSchema = new mongoose.Schema(
             default: ""
         },
 
-        // Social links structure will be finalized
+        // Verified structured social media channels
         socialLinks: {
-            type: Object,
-            default: {}
+            type: brandSocialLinksSchema,
+            default: () => ({})
         },
 
-        // Contact information structure will be finalized
+        // Collaboration contact details for campaigns and direct inquiries
         contactInformation: {
-            type: Object,
-            default: {}
+            type: brandContactInfoSchema,
+            default: () => ({})
         },
 
         // Verification business status activated exclusively via approved admin verification request.

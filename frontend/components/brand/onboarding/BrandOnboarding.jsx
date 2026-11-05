@@ -1,6 +1,7 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
@@ -105,6 +106,14 @@ function EnvelopeIcon({ className = "w-4 h-4" }) {
   );
 }
 
+function CheckIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+    </svg>
+  );
+}
+
 function InstagramIcon({ className = "w-4 h-4" }) {
   return (
     <svg className={className} fill="currentColor" viewBox="0 0 24 24">
@@ -137,9 +146,31 @@ function YoutubeIcon({ className = "w-4 h-4" }) {
   );
 }
 
+function TwitterIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  );
+}
+
 // =========================================================
-// CONSTANTS & TAXONOMY
+// TAXONOMY & CONSTANTS
 // =========================================================
+const hasAtLeastOneSocialProfile = (socialLinks) => {
+  if (!socialLinks || typeof socialLinks !== "object") return false;
+  const platforms = [
+    socialLinks.instagram,
+    socialLinks.linkedin,
+    socialLinks.youtube,
+    socialLinks.facebook,
+    socialLinks.twitter,
+  ];
+  return platforms.some(
+    (link) => typeof link === "string" && link.trim().length > 0
+  );
+};
+
 const INDUSTRY_OPTIONS = [
   "Fashion & Apparel",
   "Beauty & Cosmetics",
@@ -169,10 +200,10 @@ const POPULAR_LOCATIONS = [
   "Remote / Global",
 ];
 
-const ONBOARDING_STEPS = [
-  { id: 1, title: "Company Essentials", subtitle: "Name, Industry & Logo" },
-  { id: 2, title: "Story & Socials", subtitle: "Description & Links" },
-  { id: 3, title: "Review & Launch", subtitle: "Verify & Complete" },
+const STEPS_META = [
+  { number: 1, title: "Company Essentials", subtitle: "Identity & Logo" },
+  { number: 2, title: "Story & Socials", subtitle: "Vision & Links" },
+  { number: 3, title: "Review & Complete", subtitle: "Preview & Launch" },
 ];
 
 export default function BrandOnboarding() {
@@ -182,9 +213,11 @@ export default function BrandOnboarding() {
   const { profile } = useSelector((state) => state.brandProfile || {});
   const { user: authUser } = useSelector((state) => state.auth || {});
 
-  // Current Step (1, 2, 3)
+  // Current onboarding step (1 = Essentials, 2 = Story & Socials, 3 = Review & Complete)
   const [currentStep, setCurrentStep] = useState(1);
+  const [maxVisitedStep, setMaxVisitedStep] = useState(1);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [initialLoadError, setInitialLoadError] = useState(null);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -196,9 +229,10 @@ export default function BrandOnboarding() {
     description: "",
     socialLinks: {
       instagram: "",
-      facebook: "",
       linkedin: "",
       youtube: "",
+      facebook: "",
+      twitter: "",
     },
     contactInformation: {
       name: "",
@@ -208,66 +242,252 @@ export default function BrandOnboarding() {
   });
 
   // UI States
-  const [stepError, setStepError] = useState("");
+  const [validationError, setValidationError] = useState(null);
+  const [saveSuccessMessage, setSaveSuccessMessage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSavingDraft, setIsSavingDraft] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
-  const [uploadError, setUploadError] = useState("");
+  const [uploadError, setUploadError] = useState(null);
   const fileInputRef = useRef(null);
+  const isMountedRef = useRef(true);
+  const hasFetchedRef = useRef(false);
 
-  // Fetch brand profile on mount to resume existing draft or redirect if already onboarded
+  // Initialize company name / contact name from auth user if empty
   useEffect(() => {
-    let isMounted = true;
-    dispatch(getBrandProfile())
-      .unwrap()
-      .then((data) => {
-        if (!isMounted) return;
-        const p = data?.data || data;
-        if (p?.isOnboarded) {
-          router.replace("/brand/dashboard");
-          return;
-        }
-        if (p) {
-          setFormData((prev) => ({
-            companyName: p.companyName || prev.companyName || "",
-            industry: p.industry || prev.industry || "",
-            location: p.location || prev.location || "",
-            logo: p.logo || prev.logo || "",
-            website: p.website || prev.website || "",
-            description: p.description || prev.description || "",
-            socialLinks: {
-              instagram: p.socialLinks?.instagram || prev.socialLinks.instagram || "",
-              facebook: p.socialLinks?.facebook || prev.socialLinks.facebook || "",
-              linkedin: p.socialLinks?.linkedin || prev.socialLinks.linkedin || "",
-              youtube: p.socialLinks?.youtube || prev.socialLinks.youtube || "",
-            },
-            contactInformation: {
-              name: p.contactInformation?.name || prev.contactInformation.name || "",
-              email: p.contactInformation?.email || prev.contactInformation.email || "",
-              phone: p.contactInformation?.phone || prev.contactInformation.phone || "",
-            },
-          }));
+    if (authUser?.name && !formData.companyName) {
+      setFormData((prev) => ({
+        ...prev,
+        companyName: prev.companyName || authUser.name,
+        contactInformation: {
+          ...prev.contactInformation,
+          name: prev.contactInformation.name || authUser.name,
+          email: prev.contactInformation.email || authUser.email || "",
+        },
+      }));
+    }
+  }, [authUser, formData.companyName]);
 
-          // Determine starting step based on saved draft completeness
-          if (p.companyName && p.industry && p.location) {
-            setCurrentStep(2);
+  // Step 1 required validation (Company Name, Industry, Location)
+  const isStep1Done = Boolean(
+    typeof formData.companyName === "string" &&
+    formData.companyName.trim().length > 0 &&
+    typeof formData.industry === "string" &&
+    formData.industry.trim().length > 0 &&
+    typeof formData.location === "string" &&
+    formData.location.trim().length > 0
+  );
+
+  // Step 2 required validation:
+  // - Company Description / Bio: required, non-empty
+  // - Social Media: at least ONE non-empty field
+  // - Brand Collaboration Contact: Contact Name, Email, and Phone all three required
+  const hasAtLeastOneSocial = Boolean(hasAtLeastOneSocialProfile(formData.socialLinks));
+  const hasDescription = Boolean(
+    typeof formData.description === "string" && formData.description.trim().length > 0
+  );
+  const hasContactName = Boolean(
+    typeof formData.contactInformation?.name === "string" &&
+      formData.contactInformation.name.trim().length > 0
+  );
+  const hasContactEmail = Boolean(
+    typeof formData.contactInformation?.email === "string" &&
+      formData.contactInformation.email.trim().length > 0
+  );
+  const hasContactPhone = Boolean(
+    typeof formData.contactInformation?.phone === "string" &&
+      formData.contactInformation.phone.trim().length > 0
+  );
+
+  const isStep2Done = Boolean(
+    isStep1Done &&
+      hasDescription &&
+      hasAtLeastOneSocial &&
+      hasContactName &&
+      hasContactEmail &&
+      hasContactPhone
+  );
+
+  // Step 3 is completed when the backend marks isOnboarded true
+  const isStep3Done = Boolean(profile?.isOnboarded);
+
+  const isStepCompleted = (stepNumber) => {
+    switch (stepNumber) {
+      case 1:
+        return isStep1Done;
+      case 2:
+        return isStep2Done;
+      case 3:
+        return isStep3Done;
+      default:
+        return false;
+    }
+  };
+
+  // Populate data when loaded from backend
+  const applyProfileData = useCallback(
+    (profileData) => {
+      if (!isMountedRef.current) return;
+
+      const p = profileData?.data || profileData;
+      if (!p) return;
+
+      // 1. If already onboarded, redirect directly to dashboard
+      if (p.isOnboarded) {
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("brand_onboarding_step");
+        }
+        router.replace("/brand/dashboard");
+        return;
+      }
+
+      // 2. Pre-fill existing draft values without overwriting with blanks
+      setFormData((prev) => ({
+        companyName: p.companyName || prev.companyName || "",
+        industry: p.industry || prev.industry || "",
+        location: p.location || prev.location || "",
+        logo: p.logo || prev.logo || "",
+        website: p.website || prev.website || "",
+        description: p.description || prev.description || "",
+        socialLinks: {
+          instagram: p.socialLinks?.instagram || prev.socialLinks?.instagram || "",
+          linkedin: p.socialLinks?.linkedin || prev.socialLinks?.linkedin || "",
+          youtube: p.socialLinks?.youtube || prev.socialLinks?.youtube || "",
+          facebook: p.socialLinks?.facebook || prev.socialLinks?.facebook || "",
+          twitter: p.socialLinks?.twitter || prev.socialLinks?.twitter || "",
+        },
+        contactInformation: {
+          name: p.contactInformation?.name || prev.contactInformation?.name || "",
+          email: p.contactInformation?.email || prev.contactInformation?.email || "",
+          phone: p.contactInformation?.phone || prev.contactInformation?.phone || "",
+        },
+      }));
+
+      // 3. Step 1 required details validation check
+      const pStep1Done = Boolean(
+        typeof p.companyName === "string" &&
+        p.companyName.trim().length > 0 &&
+        typeof p.industry === "string" &&
+        p.industry.trim().length > 0 &&
+        typeof p.location === "string" &&
+        p.location.trim().length > 0
+      );
+
+      // Step 2 required details validation check
+      const pStep2Done = Boolean(
+        pStep1Done &&
+        typeof p.description === "string" &&
+        p.description.trim().length > 0 &&
+        hasAtLeastOneSocialProfile(p.socialLinks) &&
+        typeof p.contactInformation?.name === "string" &&
+        p.contactInformation.name.trim().length > 0 &&
+        typeof p.contactInformation?.email === "string" &&
+        p.contactInformation.email.trim().length > 0 &&
+        typeof p.contactInformation?.phone === "string" &&
+        p.contactInformation.phone.trim().length > 0
+      );
+
+      // 4. Auto-resume step determination:
+      // - Missing Step 1 required details -> resume Step 1
+      // - Step 1 complete but Step 2 incomplete -> resume Step 2
+      // - Required onboarding details complete -> resume Step 3 Review & Complete
+      if (!pStep1Done) {
+        setCurrentStep(1);
+        setMaxVisitedStep(1);
+        if (typeof window !== "undefined") {
+          localStorage.setItem("brand_onboarding_step", "1");
+        }
+      } else if (!pStep2Done) {
+        setCurrentStep(2);
+        setMaxVisitedStep(2);
+        if (typeof window !== "undefined") {
+          localStorage.setItem("brand_onboarding_step", "2");
+        }
+      } else {
+        let savedStep = 3;
+        if (typeof window !== "undefined") {
+          const stored = localStorage.getItem("brand_onboarding_step");
+          if (stored) {
+            const parsed = parseInt(stored, 10);
+            if (parsed >= 1 && parsed <= 3) {
+              savedStep = parsed;
+            }
           }
         }
-      })
-      .catch(() => {
-        // 404 is normal for a brand who just registered and hasn't created a profile document yet
-      })
-      .finally(() => {
-        if (isMounted) setIsInitialLoading(false);
-      });
+
+        setCurrentStep(savedStep);
+        setMaxVisitedStep(savedStep);
+      }
+    },
+    [router]
+  );
+
+  // Sync form data whenever profile in Redux updates
+  useEffect(() => {
+    if (profile) {
+      applyProfileData(profile);
+      setIsInitialLoading(false);
+      setInitialLoadError(null);
+    }
+  }, [profile, applyProfileData]);
+
+  // Fetch initial profile on mount
+  const loadProfile = useCallback(async (force = false) => {
+    setIsInitialLoading(true);
+    setInitialLoadError(null);
+
+    try {
+      const response = await dispatch(getBrandProfile({ force })).unwrap();
+      if (isMountedRef.current) {
+        applyProfileData(response);
+      }
+    } catch (err) {
+      if (!isMountedRef.current) return;
+
+      // If aborted due to condition callback returning false, an identical fetch is already
+      // in progress. Redux will receive the data and the profile effect above will apply it.
+      const isConditionAbort =
+        err?.name === "ConditionError" ||
+        (typeof err?.message === "string" &&
+          err.message.includes("condition callback returning false"));
+
+      if (isConditionAbort) {
+        return;
+      }
+
+      const errMsg =
+        typeof err === "string"
+          ? err
+          : err?.message || err?.response?.data?.message || "";
+      const isNotFound =
+        errMsg.toLowerCase().includes("not found") || errMsg.includes("404");
+
+      // 404 is normal for newly registered brands without an existing profile doc
+      if (!isNotFound) {
+        setInitialLoadError(errMsg || "Failed to load brand profile.");
+      }
+    } finally {
+      if (isMountedRef.current) {
+        setIsInitialLoading(false);
+      }
+    }
+  }, [dispatch, applyProfileData]);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    if (!hasFetchedRef.current) {
+      hasFetchedRef.current = true;
+      loadProfile();
+    }
 
     return () => {
-      isMounted = false;
+      isMountedRef.current = false;
     };
-  }, [dispatch, router]);
+  }, [loadProfile]);
 
-  // Handle Input Changes
+  // Input Handlers
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    if (validationError) setValidationError(null);
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -276,6 +496,7 @@ export default function BrandOnboarding() {
 
   const handleSocialChange = (e) => {
     const { name, value } = e.target;
+    if (validationError) setValidationError(null);
     setFormData((prev) => ({
       ...prev,
       socialLinks: {
@@ -287,6 +508,7 @@ export default function BrandOnboarding() {
 
   const handleContactChange = (e) => {
     const { name, value } = e.target;
+    if (validationError) setValidationError(null);
     setFormData((prev) => ({
       ...prev,
       contactInformation: {
@@ -311,11 +533,11 @@ export default function BrandOnboarding() {
       return;
     }
 
-    setUploadError("");
+    setUploadError(null);
     setIsUploadingLogo(true);
 
     try {
-      const uploadRes = await uploadSingleImageApi(file);
+      const uploadRes = await uploadSingleImageApi(file, "creatorlink/brands");
       const uploadedUrl =
         uploadRes?.url ||
         uploadRes?.secure_url ||
@@ -327,11 +549,17 @@ export default function BrandOnboarding() {
           ...prev,
           logo: uploadedUrl,
         }));
+        // If profile already exists, update logo immediately
+        if (profile && (profile._id || profile.id)) {
+          dispatch(updateBrandProfile({ logo: uploadedUrl }));
+        }
       } else {
-        setUploadError("Could not retrieve uploaded image URL.");
+        setUploadError("Could not retrieve uploaded logo URL.");
       }
     } catch (err) {
-      setUploadError(err?.response?.data?.message || err?.message || "Failed to upload logo.");
+      setUploadError(
+        err?.response?.data?.message || err?.message || "Failed to upload logo."
+      );
     } finally {
       setIsUploadingLogo(false);
       if (fileInputRef.current) {
@@ -341,7 +569,7 @@ export default function BrandOnboarding() {
   };
 
   // Draft persistence helper (Does NOT mark profile as onboarded)
-  const saveDraft = async (stepPayload) => {
+  const saveDraft = async (stepPayload = {}, showFeedback = false) => {
     const hasProfile = Boolean(profile && (profile._id || profile.id));
     const mergedPayload = {
       companyName: formData.companyName.trim(),
@@ -355,28 +583,55 @@ export default function BrandOnboarding() {
       ...stepPayload,
     };
 
+    let result;
     if (hasProfile) {
-      await dispatch(updateBrandProfile(mergedPayload)).unwrap();
+      result = await dispatch(updateBrandProfile(mergedPayload)).unwrap();
     } else {
-      await dispatch(createBrandProfile(mergedPayload)).unwrap();
+      result = await dispatch(createBrandProfile(mergedPayload)).unwrap();
+    }
+
+    if (showFeedback) {
+      setSaveSuccessMessage("Draft progress saved successfully.");
+      setTimeout(() => {
+        setSaveSuccessMessage(null);
+      }, 3500);
+    }
+
+    return result;
+  };
+
+  // Explicit Save Draft action
+  const handleExplicitSaveDraft = async () => {
+    setValidationError(null);
+    setSaveSuccessMessage(null);
+
+    try {
+      setIsSavingDraft(true);
+      await saveDraft({}, true);
+    } catch (err) {
+      setValidationError(
+        typeof err === "string" ? err : err?.message || "Failed to save draft."
+      );
+    } finally {
+      setIsSavingDraft(false);
     }
   };
 
   // Step 1 Validation & Proceed
-  const handleStep1Submit = async (e) => {
-    e.preventDefault();
-    setStepError("");
+  const handleStep1Continue = async (e) => {
+    if (e) e.preventDefault();
+    setValidationError(null);
 
     if (!formData.companyName.trim()) {
-      setStepError("Company Name is required.");
+      setValidationError("Company Name is required.");
       return;
     }
     if (!formData.industry.trim()) {
-      setStepError("Please select an Industry.");
+      setValidationError("Please select an Industry.");
       return;
     }
     if (!formData.location.trim()) {
-      setStepError("Location is required.");
+      setValidationError("Headquarters / Operating Location is required.");
       return;
     }
 
@@ -389,31 +644,84 @@ export default function BrandOnboarding() {
         logo: formData.logo.trim(),
       });
       setCurrentStep(2);
+      setMaxVisitedStep((prev) => Math.max(prev, 2));
+      if (typeof window !== "undefined") {
+        localStorage.setItem("brand_onboarding_step", "2");
+      }
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
-      setStepError(err?.message || "Failed to save company essentials. Please try again.");
+      setValidationError(
+        err?.message || "Failed to save company essentials. Please try again."
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
 
   // Step 2 Validation & Proceed
-  const handleStep2Submit = async (e) => {
-    e.preventDefault();
-    setStepError("");
+  const handleStep2Continue = async (e) => {
+    if (e) e.preventDefault();
+    setValidationError(null);
+
+    // 1. Mandatory Description / Bio
+    if (!formData.description?.trim()) {
+      setValidationError("Company Description / Bio is required.");
+      return;
+    }
+
+    // 2. Mandatory at least one social media profile (any non-empty string accepted, no URL validation)
+    if (!hasAtLeastOneSocialProfile(formData.socialLinks)) {
+      setValidationError("Please add at least one social media profile URL.");
+      return;
+    }
+
+    // 3. Mandatory Brand Collaboration Contact fields (Name, Email, Phone all required)
+    if (!formData.contactInformation?.name?.trim()) {
+      setValidationError("Contact Name is required.");
+      return;
+    }
+
+    if (!formData.contactInformation?.email?.trim()) {
+      setValidationError("Contact Email is required.");
+      return;
+    }
+
+    if (!formData.contactInformation?.phone?.trim()) {
+      setValidationError("Contact Phone Number is required.");
+      return;
+    }
+
+    const socialPayload = {
+      instagram: formData.socialLinks?.instagram?.trim() || "",
+      linkedin: formData.socialLinks?.linkedin?.trim() || "",
+      youtube: formData.socialLinks?.youtube?.trim() || "",
+      facebook: formData.socialLinks?.facebook?.trim() || "",
+      twitter: formData.socialLinks?.twitter?.trim() || "",
+    };
 
     try {
       setIsSubmitting(true);
       await saveDraft({
         description: formData.description.trim(),
-        website: formData.website.trim(),
-        socialLinks: formData.socialLinks,
-        contactInformation: formData.contactInformation,
+        website: formData.website?.trim() || "",
+        socialLinks: socialPayload,
+        contactInformation: {
+          name: formData.contactInformation?.name?.trim() || "",
+          email: formData.contactInformation?.email?.trim() || "",
+          phone: formData.contactInformation?.phone?.trim() || "",
+        },
       });
+
       setCurrentStep(3);
+      setMaxVisitedStep(3);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("brand_onboarding_step", "3");
+      }
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
-      setStepError(err?.message || "Failed to save brand story. Please try again.");
+      setValidationError(
+        err?.message || "Failed to save brand story. Please try again."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -421,13 +729,53 @@ export default function BrandOnboarding() {
 
   // Step 3 Completion
   const handleCompleteOnboarding = async () => {
-    setStepError("");
+    setValidationError(null);
 
-    // Verify required fields
-    if (!formData.companyName.trim() || !formData.industry.trim() || !formData.location.trim()) {
-      setStepError("Please complete all required company essentials before completing onboarding.");
+    // Verify required fields from Step 1
+    if (
+      !formData.companyName?.trim() ||
+      !formData.industry?.trim() ||
+      !formData.location?.trim()
+    ) {
+      setValidationError(
+        "Please complete all required company essentials (Company Name, Industry, Location) before completing onboarding."
+      );
       return;
     }
+
+    // Verify required fields from Step 2
+    if (!formData.description?.trim()) {
+      setValidationError("Company Description / Bio is required.");
+      return;
+    }
+
+    if (!hasAtLeastOneSocialProfile(formData.socialLinks)) {
+      setValidationError("Please add at least one social media profile URL.");
+      return;
+    }
+
+    if (!formData.contactInformation?.name?.trim()) {
+      setValidationError("Contact Name is required.");
+      return;
+    }
+
+    if (!formData.contactInformation?.email?.trim()) {
+      setValidationError("Contact Email is required.");
+      return;
+    }
+
+    if (!formData.contactInformation?.phone?.trim()) {
+      setValidationError("Contact Phone Number is required.");
+      return;
+    }
+
+    const socialPayload = {
+      instagram: formData.socialLinks?.instagram?.trim() || "",
+      linkedin: formData.socialLinks?.linkedin?.trim() || "",
+      youtube: formData.socialLinks?.youtube?.trim() || "",
+      facebook: formData.socialLinks?.facebook?.trim() || "",
+      twitter: formData.socialLinks?.twitter?.trim() || "",
+    };
 
     try {
       setIsSubmitting(true);
@@ -436,36 +784,58 @@ export default function BrandOnboarding() {
           companyName: formData.companyName.trim(),
           industry: formData.industry.trim(),
           location: formData.location.trim(),
-          logo: formData.logo.trim(),
+          logo: formData.logo?.trim() || "",
           description: formData.description.trim(),
-          website: formData.website.trim(),
-          socialLinks: formData.socialLinks,
-          contactInformation: formData.contactInformation,
+          website: formData.website?.trim() || "",
+          socialLinks: socialPayload,
+          contactInformation: {
+            name: formData.contactInformation?.name?.trim() || "",
+            email: formData.contactInformation?.email?.trim() || "",
+            phone: formData.contactInformation?.phone?.trim() || "",
+          },
         })
       ).unwrap();
 
       if (actionResult) {
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("brand_onboarding_step");
+        }
         router.push("/brand/dashboard");
       }
     } catch (err) {
-      setStepError(
+      setValidationError(
         typeof err === "string"
           ? err
-          : err?.message || "Failed to finalize onboarding. Please check your inputs and try again."
+          : err?.message ||
+          "Failed to finalize onboarding. Please check your inputs and try again."
       );
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Missing Fields calculation for Step 3 review
+  // Missing Fields calculation for Step 3 review (Only mandatory fields)
   const missingRequiredFields = useMemo(() => {
     const missing = [];
-    if (!formData.companyName.trim()) missing.push("Company Name");
-    if (!formData.industry.trim()) missing.push("Industry");
-    if (!formData.location.trim()) missing.push("Location");
+    if (!formData.companyName?.trim()) missing.push("Company Name");
+    if (!formData.industry?.trim()) missing.push("Industry");
+    if (!formData.location?.trim()) missing.push("Headquarters Location");
+    if (!formData.description?.trim()) missing.push("Company Description / Bio");
+    if (!hasAtLeastOneSocial) missing.push("Social Media Channel");
+    if (!formData.contactInformation?.name?.trim()) missing.push("Contact Name");
+    if (!formData.contactInformation?.email?.trim()) missing.push("Contact Email");
+    if (!formData.contactInformation?.phone?.trim()) missing.push("Contact Phone");
     return missing;
-  }, [formData]);
+  }, [
+    formData.companyName,
+    formData.industry,
+    formData.location,
+    formData.description,
+    hasAtLeastOneSocial,
+    formData.contactInformation?.name,
+    formData.contactInformation?.email,
+    formData.contactInformation?.phone,
+  ]);
 
   // Initial avatar initial fallback
   const displayInitial = useMemo(() => {
@@ -475,705 +845,1077 @@ export default function BrandOnboarding() {
     return authUser?.name ? authUser.name[0].toUpperCase() : "B";
   }, [formData.companyName, authUser]);
 
-  if (isInitialLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="text-center space-y-3">
-          <div className="w-10 h-10 border-3 border-secondary border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-xs text-text-secondary font-medium">Loading your onboarding setup...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col font-sans transition-colors duration-200">
-      {/* TOP BRAND NAVIGATION BAR */}
-      <header className="border-b border-border-theme bg-surface sticky top-0 z-30 shadow-xs">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-1.5 font-serif text-lg font-bold tracking-wide text-foreground"
-          >
-            <span>CREATORLINK</span>
-            <span className="text-secondary text-lg leading-none">✦</span>
-          </Link>
+    <div className="w-full min-h-screen bg-[#fff0f3] dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 flex flex-col justify-between p-4 sm:p-8 lg:p-12 transition-colors duration-300 font-sans">
+      {/* =========================================================
+          TOP BAR: BRANDING & STEP BADGE (NO SKIP OPTION)
+      ========================================================= */}
+      <header className="max-w-5xl w-full mx-auto flex items-center justify-between pb-6 sm:pb-8">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 font-serif text-xl sm:text-2xl font-bold tracking-wide text-neutral-950 dark:text-white"
+        >
+          <span>CREATORLINK</span>
+          <span className="text-pink-500 text-xl sm:text-2xl leading-none">✦</span>
+        </Link>
 
-          <div className="flex items-center gap-4">
-            <span className="hidden sm:inline-flex px-2.5 py-1 rounded-full text-[11px] font-semibold bg-secondary/10 text-secondary border border-secondary/20">
-              Brand Setup Wizard
-            </span>
-            <Link
-              href="/brand/dashboard"
-              className="text-xs text-text-secondary hover:text-foreground font-medium transition-colors"
-            >
-              Skip to Dashboard
-            </Link>
-          </div>
-        </div>
+        <span className="text-xs font-semibold px-3.5 py-1.5 rounded-full bg-pink-500/10 border border-pink-500/20 text-pink-600 dark:text-pink-400">
+          Step {currentStep} of 3
+        </span>
       </header>
 
-      {/* MAIN CONTAINER */}
-      <main className="flex-1 max-w-3xl w-full mx-auto px-4 sm:px-6 py-8 space-y-8">
-        {/* STEP PROGRESS TRACKER */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between text-xs text-text-secondary">
-            <span className="font-semibold text-foreground">
-              Step {currentStep} of 3: {ONBOARDING_STEPS[currentStep - 1].title}
-            </span>
-            <span>{Math.round((currentStep / 3) * 100)}% Complete</span>
-          </div>
-
-          {/* Progress Bar Track */}
-          <div className="w-full bg-surface-muted rounded-full h-2 overflow-hidden border border-border-theme">
-            <div
-              className="bg-secondary h-full rounded-full transition-all duration-300 ease-out"
-              style={{ width: `${(currentStep / 3) * 100}%` }}
-            />
-          </div>
-
-          {/* Step Pills */}
-          <div className="grid grid-cols-3 gap-2 pt-1">
-            {ONBOARDING_STEPS.map((s) => {
-              const isPast = currentStep > s.id;
-              const isCurrent = currentStep === s.id;
-              return (
-                <button
-                  key={s.id}
-                  type="button"
-                  onClick={() => {
-                    if (isPast) setCurrentStep(s.id);
-                  }}
-                  disabled={!isPast && !isCurrent}
-                  className={`text-left p-2.5 rounded-xl border transition-all text-xs cursor-pointer ${
-                    isCurrent
-                      ? "border-secondary bg-secondary/5 font-semibold text-foreground shadow-xs"
-                      : isPast
-                      ? "border-border-theme bg-surface hover:bg-surface-muted text-text-secondary cursor-pointer"
-                      : "border-border-theme/40 bg-surface/40 text-text-secondary/50 cursor-not-allowed"
-                  }`}
-                >
-                  <div className="flex items-center gap-1.5">
-                    <span
-                      className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                        isCurrent
-                          ? "bg-secondary text-white"
-                          : isPast
-                          ? "bg-emerald-500 text-white"
-                          : "bg-surface-muted text-text-secondary"
-                      }`}
-                    >
-                      {isPast ? "✓" : s.id}
-                    </span>
-                    <span className="truncate font-medium">{s.title}</span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+      {/* =========================================================
+          MAIN CONTAINER
+      ========================================================= */}
+      <main className="my-auto max-w-5xl w-full mx-auto">
+        {/* Onboarding Heading */}
+        <div className="text-center sm:text-left mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-950 dark:text-white font-sans">
+            Brand Onboarding
+          </h1>
+          <p className="text-xs sm:text-sm text-neutral-600 dark:text-neutral-400 mt-1">
+            Set up your brand profile to start launching campaigns, receiving creator proposals, and building partnerships.
+          </p>
         </div>
 
-        {/* FEEDBACK ERROR BANNER */}
-        {stepError && (
-          <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-600 dark:text-rose-400 font-medium flex items-center gap-2">
-            <span className="font-bold">Error:</span>
-            <span>{stepError}</span>
-          </div>
-        )}
+        {/* 3-Step Stepper Progress Bar */}
+        <div className="flex items-center justify-between max-w-2xl mx-auto mb-8 px-2 sm:px-4">
+          {STEPS_META.map((s, idx) => {
+            const isDone = isStepCompleted(s.number);
+            const isCurrent = s.number === currentStep;
+            // Can click if step is accessible according to required completion flow:
+            // - Step 1: always accessible
+            // - Step 2: accessible once Step 1 is done
+            // - Step 3: accessible once Step 1 AND Step 2 (at least 1 valid social URL) are done
+            const canClick =
+              s.number === 1 ||
+              (s.number === 2 && isStep1Done) ||
+              (s.number === 3 && isStep1Done && isStep2Done);
 
-        {/* ========================================================= */}
-        {/* STEP 1: COMPANY ESSENTIALS                                */}
-        {/* ========================================================= */}
-        {currentStep === 1 && (
-          <form onSubmit={handleStep1Submit} className="space-y-6 animate-in fade-in duration-200">
-            <div className="space-y-1">
-              <h2 className="text-xl font-serif font-bold text-foreground">Company Essentials</h2>
-              <p className="text-xs text-text-secondary">
-                Set up your brand identity so creators know who you are and what you stand for.
-              </p>
-            </div>
-
-            <div className="bg-surface border border-border-theme rounded-2xl p-6 shadow-xs space-y-6">
-              {/* Brand Logo Upload Section */}
-              <div className="space-y-3">
-                <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
-                  Brand Logo
-                </label>
-                <div className="flex items-center gap-5">
-                  <div className="relative w-20 h-20 rounded-2xl overflow-hidden border border-border-theme bg-surface-muted flex items-center justify-center shadow-xs shrink-0">
-                    {formData.logo ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={formData.logo}
-                        alt="Brand Logo Preview"
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-2xl font-serif font-bold text-secondary">
-                        {displayInitial}
-                      </span>
-                    )}
-
-                    {isUploadingLogo && (
-                      <div className="absolute inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center">
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp"
-                      onChange={handleLogoUpload}
-                      className="hidden"
-                      id="brand-logo-file"
-                    />
-                    <div className="flex items-center gap-2">
-                      <label
-                        htmlFor="brand-logo-file"
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface border border-border-theme text-foreground text-xs font-medium hover:bg-surface-muted transition-colors cursor-pointer shadow-xs"
-                      >
-                        <CameraIcon className="w-3.5 h-3.5" />
-                        <span>{formData.logo ? "Change Logo" : "Upload Logo"}</span>
-                      </label>
-                      {formData.logo && (
-                        <button
-                          type="button"
-                          onClick={() => setFormData((prev) => ({ ...prev, logo: "" }))}
-                          className="px-2.5 py-1.5 text-xs text-rose-500 hover:text-rose-600 transition-colors cursor-pointer"
-                        >
-                          Remove
-                        </button>
-                      )}
-                    </div>
-                    <p className="text-[11px] text-text-secondary">
-                      Recommended: Square PNG or WebP, minimum 300x300px.
-                    </p>
-                    {uploadError && <p className="text-[11px] text-rose-500 font-medium">{uploadError}</p>}
-                  </div>
-                </div>
-              </div>
-
-              {/* Company Name */}
-              <div className="space-y-1.5">
-                <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
-                  Company / Brand Name <span className="text-secondary">*</span>
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-secondary">
-                    <BuildingIcon className="w-4 h-4" />
-                  </div>
-                  <input
-                    type="text"
-                    name="companyName"
-                    required
-                    maxLength={150}
-                    value={formData.companyName}
-                    onChange={handleInputChange}
-                    placeholder="e.g. Acme Studios, Zenith Wear, Aura Botanics"
-                    className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-background border border-border-theme text-foreground text-xs placeholder:text-text-secondary focus:outline-hidden focus:border-secondary transition-colors"
-                  />
-                </div>
-              </div>
-
-              {/* Industry Dropdown */}
-              <div className="space-y-1.5">
-                <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
-                  Primary Industry <span className="text-secondary">*</span>
-                </label>
-                <select
-                  name="industry"
-                  required
-                  value={formData.industry}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2.5 rounded-xl bg-background border border-border-theme text-foreground text-xs focus:outline-hidden focus:border-secondary transition-colors"
-                >
-                  <option value="">Select your industry...</option>
-                  {INDUSTRY_OPTIONS.map((ind) => (
-                    <option key={ind} value={ind}>
-                      {ind}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Location with Quick Suggestions */}
-              <div className="space-y-2">
-                <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
-                  Headquarters / Operating Location <span className="text-secondary">*</span>
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-secondary">
-                    <MapPinIcon className="w-4 h-4" />
-                  </div>
-                  <input
-                    type="text"
-                    name="location"
-                    required
-                    maxLength={100}
-                    value={formData.location}
-                    onChange={handleInputChange}
-                    placeholder="e.g. Mumbai, India or Bengaluru, Karnataka"
-                    className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-background border border-border-theme text-foreground text-xs placeholder:text-text-secondary focus:outline-hidden focus:border-secondary transition-colors"
-                  />
-                </div>
-
-                {/* Popular Quick Location Pills */}
-                <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                  <span className="text-[11px] text-text-secondary">Suggestions:</span>
-                  {POPULAR_LOCATIONS.slice(0, 4).map((loc) => (
-                    <button
-                      key={loc}
-                      type="button"
-                      onClick={() => setFormData((prev) => ({ ...prev, location: loc }))}
-                      className="px-2 py-0.5 rounded-lg text-[10px] bg-surface-muted hover:bg-secondary/10 hover:text-secondary border border-border-theme transition-colors cursor-pointer"
-                    >
-                      {loc}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex items-center justify-between pt-2">
-              <Link
-                href="/brand/dashboard"
-                className="text-xs text-text-secondary hover:text-foreground transition-colors"
-              >
-                Skip for now
-              </Link>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-secondary hover:bg-secondary/90 text-white text-xs font-semibold transition-all shadow-md shadow-secondary/20 hover:shadow-lg hover:-translate-y-0.5 cursor-pointer disabled:opacity-50"
-              >
-                <span>{isSubmitting ? "Saving..." : "Save & Continue"}</span>
-                <ArrowRightIcon />
-              </button>
-            </div>
-          </form>
-        )}
-
-        {/* ========================================================= */}
-        {/* STEP 2: BRAND STORY & SOCIALS                             */}
-        {/* ========================================================= */}
-        {currentStep === 2 && (
-          <form onSubmit={handleStep2Submit} className="space-y-6 animate-in fade-in duration-200">
-            <div className="space-y-1">
-              <h2 className="text-xl font-serif font-bold text-foreground">Brand Story & Socials</h2>
-              <p className="text-xs text-text-secondary">
-                Tell creators about your vision, provide official links, and add collaboration contact info.
-              </p>
-            </div>
-
-            <div className="bg-surface border border-border-theme rounded-2xl p-6 shadow-xs space-y-6">
-              {/* Company Description */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
-                    Company Description / Bio
-                  </label>
-                  <span className="text-[11px] text-text-secondary">
-                    {formData.description.length} / 2000
-                  </span>
-                </div>
-                <textarea
-                  name="description"
-                  rows={4}
-                  maxLength={2000}
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  placeholder="Describe your brand mission, signature product lines, aesthetic, and what you look for in creator collaborations..."
-                  className="w-full px-3 py-2.5 rounded-xl bg-background border border-border-theme text-foreground text-xs placeholder:text-text-secondary focus:outline-hidden focus:border-secondary transition-colors"
-                />
-              </div>
-
-              {/* Website URL */}
-              <div className="space-y-1.5">
-                <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
-                  Official Website
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-secondary">
-                    <GlobeIcon className="w-4 h-4" />
-                  </div>
-                  <input
-                    type="url"
-                    name="website"
-                    value={formData.website}
-                    onChange={handleInputChange}
-                    placeholder="https://yourbrand.com"
-                    className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-background border border-border-theme text-foreground text-xs placeholder:text-text-secondary focus:outline-hidden focus:border-secondary transition-colors"
-                  />
-                </div>
-              </div>
-
-              {/* Social Media Links */}
-              <div className="space-y-3 pt-2 border-t border-border-theme">
-                <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
-                  Social Channels
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {/* Instagram */}
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-pink-500">
-                      <InstagramIcon className="w-4 h-4" />
-                    </div>
-                    <input
-                      type="url"
-                      name="instagram"
-                      value={formData.socialLinks?.instagram || ""}
-                      onChange={handleSocialChange}
-                      placeholder="Instagram URL"
-                      className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-background border border-border-theme text-foreground text-xs placeholder:text-text-secondary focus:outline-hidden focus:border-secondary transition-colors"
-                    />
-                  </div>
-
-                  {/* LinkedIn */}
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-blue-600">
-                      <LinkedinIcon className="w-4 h-4" />
-                    </div>
-                    <input
-                      type="url"
-                      name="linkedin"
-                      value={formData.socialLinks?.linkedin || ""}
-                      onChange={handleSocialChange}
-                      placeholder="LinkedIn Company URL"
-                      className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-background border border-border-theme text-foreground text-xs placeholder:text-text-secondary focus:outline-hidden focus:border-secondary transition-colors"
-                    />
-                  </div>
-
-                  {/* YouTube */}
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-red-500">
-                      <YoutubeIcon className="w-4 h-4" />
-                    </div>
-                    <input
-                      type="url"
-                      name="youtube"
-                      value={formData.socialLinks?.youtube || ""}
-                      onChange={handleSocialChange}
-                      placeholder="YouTube Channel URL"
-                      className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-background border border-border-theme text-foreground text-xs placeholder:text-text-secondary focus:outline-hidden focus:border-secondary transition-colors"
-                    />
-                  </div>
-
-                  {/* Facebook */}
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-blue-500">
-                      <FacebookIcon className="w-4 h-4" />
-                    </div>
-                    <input
-                      type="url"
-                      name="facebook"
-                      value={formData.socialLinks?.facebook || ""}
-                      onChange={handleSocialChange}
-                      placeholder="Facebook Page URL"
-                      className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-background border border-border-theme text-foreground text-xs placeholder:text-text-secondary focus:outline-hidden focus:border-secondary transition-colors"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Collaboration Contact Information */}
-              <div className="space-y-3 pt-2 border-t border-border-theme">
-                <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
-                  Brand Collaboration Contact
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  {/* Contact Name */}
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-secondary">
-                      <UserIcon className="w-4 h-4" />
-                    </div>
-                    <input
-                      type="text"
-                      name="name"
-                      value={formData.contactInformation?.name || ""}
-                      onChange={handleContactChange}
-                      placeholder="Contact Name"
-                      className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-background border border-border-theme text-foreground text-xs placeholder:text-text-secondary focus:outline-hidden focus:border-secondary transition-colors"
-                    />
-                  </div>
-
-                  {/* Contact Email */}
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-secondary">
-                      <EnvelopeIcon className="w-4 h-4" />
-                    </div>
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.contactInformation?.email || ""}
-                      onChange={handleContactChange}
-                      placeholder="business@brand.com"
-                      className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-background border border-border-theme text-foreground text-xs placeholder:text-text-secondary focus:outline-hidden focus:border-secondary transition-colors"
-                    />
-                  </div>
-
-                  {/* Contact Phone */}
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-secondary">
-                      <PhoneIcon className="w-4 h-4" />
-                    </div>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.contactInformation?.phone || ""}
-                      onChange={handleContactChange}
-                      placeholder="+91 98765 43210"
-                      className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-background border border-border-theme text-foreground text-xs placeholder:text-text-secondary focus:outline-hidden focus:border-secondary transition-colors"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Step 2 Actions */}
-            <div className="flex items-center justify-between pt-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setCurrentStep(1);
-                  window.scrollTo({ top: 0, behavior: "smooth" });
-                }}
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-border-theme text-xs font-semibold hover:bg-surface-muted transition-colors cursor-pointer"
-              >
-                <ArrowLeftIcon />
-                <span>Back</span>
-              </button>
-
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-secondary hover:bg-secondary/90 text-white text-xs font-semibold transition-all shadow-md shadow-secondary/20 hover:shadow-lg hover:-translate-y-0.5 cursor-pointer disabled:opacity-50"
-              >
-                <span>{isSubmitting ? "Saving..." : "Review & Continue"}</span>
-                <ArrowRightIcon />
-              </button>
-            </div>
-          </form>
-        )}
-
-        {/* ========================================================= */}
-        {/* STEP 3: REVIEW & COMPLETE                                 */}
-        {/* ========================================================= */}
-        {currentStep === 3 && (
-          <div className="space-y-6 animate-in fade-in duration-200">
-            <div className="space-y-1">
-              <h2 className="text-xl font-serif font-bold text-foreground">Review & Complete</h2>
-              <p className="text-xs text-text-secondary">
-                Review your profile details below before finalizing onboarding.
-              </p>
-            </div>
-
-            {/* MISSING FIELDS WARNING (IF ANY) */}
-            {missingRequiredFields.length > 0 && (
-              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-amber-700 dark:text-amber-400">
-                    Required fields missing before completion:
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setCurrentStep(1)}
-                    className="text-xs font-semibold text-secondary hover:underline cursor-pointer"
-                  >
-                    Edit Step 1 &rarr;
-                  </button>
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {missingRequiredFields.map((f) => (
-                    <span
-                      key={f}
-                      className="px-2.5 py-0.5 rounded-md text-[11px] bg-amber-500/20 text-amber-800 dark:text-amber-200 font-medium"
-                    >
-                      {f}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* REVIEW CARD 1: COMPANY OVERVIEW */}
-            <div className="bg-surface border border-border-theme rounded-2xl p-6 shadow-xs space-y-5">
-              <div className="flex items-center justify-between pb-4 border-b border-border-theme">
-                <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-2xl overflow-hidden border border-border-theme bg-surface-muted flex items-center justify-center shrink-0">
-                    {formData.logo ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={formData.logo} alt="Logo" className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-xl font-serif font-bold text-secondary">
-                        {displayInitial}
-                      </span>
-                    )}
-                  </div>
-                  <div>
-                    <h3 className="font-serif font-bold text-lg text-foreground">
-                      {formData.companyName || "Untitled Brand"}
-                    </h3>
-                    <div className="flex items-center gap-2 text-xs text-text-secondary mt-0.5">
-                      <span>{formData.industry || "Industry not set"}</span>
-                      <span>•</span>
-                      <span>{formData.location || "Location not set"}</span>
-                    </div>
-                  </div>
-                </div>
-
+            return (
+              <div key={s.number} className="flex items-center flex-1 last:flex-none">
                 <button
                   type="button"
-                  onClick={() => setCurrentStep(1)}
-                  className="text-xs text-secondary hover:underline font-medium cursor-pointer"
+                  onClick={() => {
+                    if (canClick) {
+                      setValidationError(null);
+                      setCurrentStep(s.number);
+                      if (typeof window !== "undefined") {
+                        localStorage.setItem("brand_onboarding_step", String(s.number));
+                      }
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }
+                  }}
+                  disabled={!canClick && !isCurrent}
+                  className="flex flex-col items-center group cursor-pointer disabled:cursor-not-allowed"
                 >
-                  Edit
-                </button>
-              </div>
-
-              {/* Bio & Details */}
-              <div className="space-y-3 text-xs">
-                <div>
-                  <span className="text-text-secondary block text-[11px] font-medium">About the Brand</span>
-                  <p className="text-foreground mt-0.5 whitespace-pre-line leading-relaxed">
-                    {formData.description || "No company description provided yet."}
-                  </p>
-                </div>
-
-                {formData.website && (
-                  <div>
-                    <span className="text-text-secondary block text-[11px] font-medium">Website</span>
-                    <a
-                      href={formData.website.startsWith("http") ? formData.website : `https://${formData.website}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-secondary hover:underline flex items-center gap-1 font-medium mt-0.5"
-                    >
-                      {formData.website}
-                    </a>
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${isCurrent
+                      ? "bg-pink-500 text-white shadow-md ring-4 ring-pink-100 dark:ring-pink-950/40"
+                      : isDone
+                        ? "bg-neutral-950 text-white dark:bg-neutral-100 dark:text-neutral-950"
+                        : "bg-white dark:bg-neutral-800 text-neutral-400 border border-neutral-300 dark:border-neutral-700"
+                      }`}
+                  >
+                    {isDone && !isCurrent ? (
+                      <CheckIcon className="w-3.5 h-3.5" />
+                    ) : (
+                      s.number
+                    )}
                   </div>
+                  <span
+                    className={`text-xs mt-1.5 font-medium whitespace-nowrap ${isCurrent
+                      ? "text-pink-600 dark:text-pink-400 font-bold"
+                      : "text-neutral-500 dark:text-neutral-400"
+                      }`}
+                  >
+                    {s.title}
+                  </span>
+                </button>
+                {idx < STEPS_META.length - 1 && (
+                  <div
+                    className={`flex-1 h-0.5 mx-2 -mt-5 transition-all ${isDone
+                      ? "bg-pink-500"
+                      : "bg-neutral-200 dark:bg-neutral-800"
+                      }`}
+                  />
                 )}
               </div>
+            );
+          })}
+        </div>
 
-              {/* Social Channels Preview */}
-              <div className="pt-3 border-t border-border-theme">
-                <span className="text-text-secondary block text-[11px] font-medium mb-2">
-                  Connected Channels & Contact
-                </span>
-                <div className="flex flex-wrap gap-2 text-xs">
-                  {formData.socialLinks?.instagram && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-surface-muted border border-border-theme">
-                      <InstagramIcon className="w-3.5 h-3.5 text-pink-500" />
-                      <span>Instagram</span>
-                    </span>
-                  )}
-                  {formData.socialLinks?.linkedin && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-surface-muted border border-border-theme">
-                      <LinkedinIcon className="w-3.5 h-3.5 text-blue-600" />
-                      <span>LinkedIn</span>
-                    </span>
-                  )}
-                  {formData.socialLinks?.youtube && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-surface-muted border border-border-theme">
-                      <YoutubeIcon className="w-3.5 h-3.5 text-red-500" />
-                      <span>YouTube</span>
-                    </span>
-                  )}
-                  {formData.socialLinks?.facebook && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-surface-muted border border-border-theme">
-                      <FacebookIcon className="w-3.5 h-3.5 text-blue-500" />
-                      <span>Facebook</span>
-                    </span>
-                  )}
-                  {formData.contactInformation?.email && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-surface-muted border border-border-theme">
-                      <EnvelopeIcon className="w-3.5 h-3.5 text-secondary" />
-                      <span>{formData.contactInformation.email}</span>
-                    </span>
-                  )}
-                </div>
-              </div>
+        {/* Main Card Surface */}
+        <div className="bg-white dark:bg-neutral-900 border border-neutral-200/80 dark:border-neutral-800 rounded-3xl p-6 sm:p-10 shadow-sm transition-colors duration-300">
+          {/* Alerts */}
+          {initialLoadError && (
+            <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs sm:text-sm font-sans font-medium flex items-center justify-between gap-3">
+              <span>⚠ {initialLoadError}</span>
+              <button
+                type="button"
+                onClick={() => loadProfile(true)}
+                className="px-3.5 py-1.5 rounded-lg bg-neutral-950 text-white dark:bg-white dark:text-neutral-950 text-xs font-semibold cursor-pointer shrink-0"
+              >
+                Retry
+              </button>
             </div>
+          )}
 
-            {/* FIRST CAMPAIGN GUIDANCE CARD */}
-            <div className="p-6 rounded-2xl bg-gradient-to-br from-secondary/5 via-surface to-surface border border-secondary/20 shadow-xs space-y-4">
+          {saveSuccessMessage && (
+            <div className="mb-6 p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs sm:text-sm font-sans font-medium flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center shrink-0">
-                  <MegaphoneIcon className="w-4 h-4" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-foreground font-serif">
-                    Next Step: Launch Your First Campaign
-                  </h4>
-                  <p className="text-xs text-text-secondary">
-                    How campaign collaboration works on CreatorLink
-                  </p>
-                </div>
+                <CheckIcon className="w-4 h-4 shrink-0" />
+                <span>{saveSuccessMessage}</span>
               </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                <div className="p-3 rounded-xl bg-surface border border-border-theme space-y-1">
-                  <span className="w-5 h-5 rounded-full bg-secondary/10 text-secondary text-[11px] font-bold flex items-center justify-center">
-                    1
-                  </span>
-                  <span className="font-semibold text-foreground block">Define Deliverables</span>
-                  <p className="text-[11px] text-text-secondary leading-relaxed">
-                    Specify Reel, Dedicated Video, or Story requirements with exact deadlines.
-                  </p>
-                </div>
-
-                <div className="p-3 rounded-xl bg-surface border border-border-theme space-y-1">
-                  <span className="w-5 h-5 rounded-full bg-secondary/10 text-secondary text-[11px] font-bold flex items-center justify-center">
-                    2
-                  </span>
-                  <span className="font-semibold text-foreground block">Set Budget Range</span>
-                  <p className="text-[11px] text-text-secondary leading-relaxed">
-                    Set a Min & Max budget to attract competitive creator bids and proposals.
-                  </p>
-                </div>
-
-                <div className="p-3 rounded-xl bg-surface border border-border-theme space-y-1">
-                  <span className="w-5 h-5 rounded-full bg-secondary/10 text-secondary text-[11px] font-bold flex items-center justify-center">
-                    3
-                  </span>
-                  <span className="font-semibold text-foreground block">Target & Protect</span>
-                  <p className="text-[11px] text-text-secondary leading-relaxed">
-                    Choose age/location demographics and content usage rights (organic vs paid ads).
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* COMPLETION ACTIONS */}
-            <div className="flex items-center justify-between pt-2">
               <button
                 type="button"
-                onClick={() => {
-                  setCurrentStep(2);
-                  window.scrollTo({ top: 0, behavior: "smooth" });
-                }}
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-border-theme text-xs font-semibold hover:bg-surface-muted transition-colors cursor-pointer"
+                onClick={() => setSaveSuccessMessage(null)}
+                className="text-emerald-600 dark:text-emerald-400 hover:opacity-75 p-1 cursor-pointer"
               >
-                <ArrowLeftIcon />
-                <span>Back</span>
-              </button>
-
-              <button
-                type="button"
-                disabled={isSubmitting || missingRequiredFields.length > 0}
-                onClick={handleCompleteOnboarding}
-                className="inline-flex items-center gap-2 px-7 py-3 rounded-xl bg-secondary hover:bg-secondary/90 text-white text-xs font-bold transition-all shadow-md shadow-secondary/20 hover:shadow-lg hover:-translate-y-0.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <SparklesIcon className="w-4 h-4" />
-                <span>{isSubmitting ? "Finalizing Setup..." : "Complete Setup & Launch"}</span>
+                ✕
               </button>
             </div>
-          </div>
-        )}
+          )}
+
+          {validationError && (
+            <div className="mb-6 p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs sm:text-sm font-sans font-medium flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="shrink-0 font-bold">⚠</span>
+                <span>{validationError}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setValidationError(null)}
+                className="text-red-500 hover:opacity-75 p-1 cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
+          {isInitialLoading ? (
+            <div className="py-20 flex flex-col items-center justify-center text-center">
+              <svg
+                className="animate-spin h-8 w-8 text-pink-500 mb-4"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                />
+              </svg>
+              <p className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+                Loading your brand workspace...
+              </p>
+            </div>
+          ) : (
+            <>
+              {/* =========================================================
+                  STEP 1: COMPANY ESSENTIALS (REQUIRED)
+              ========================================================= */}
+              {currentStep === 1 && (
+                <form onSubmit={handleStep1Continue} className="space-y-6">
+                  {/* Card Section Header */}
+                  <div className="pb-4 border-b border-neutral-100 dark:border-neutral-800">
+                    <h2 className="text-lg sm:text-xl font-serif font-bold text-neutral-950 dark:text-white">
+                      Company Essentials
+                    </h2>
+                    <p className="text-xs sm:text-sm text-neutral-600 dark:text-neutral-400 mt-1">
+                      Set up your company identity and logo so creators instantly recognize your brand.
+                    </p>
+                  </div>
+
+                  <div className="bg-neutral-50/60 dark:bg-neutral-900/40 border border-neutral-200/60 dark:border-neutral-800 rounded-2xl p-5 sm:p-6 space-y-6">
+                    {/* Brand Logo Upload Section (Optional) */}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <label className="block text-xs font-semibold text-neutral-800 dark:text-neutral-200 uppercase tracking-wider">
+                          Brand Logo
+                        </label>
+                        <span className="text-[11px] text-neutral-500 dark:text-neutral-400">
+                          Optional
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-5">
+                        <div className="relative w-20 h-20 rounded-2xl overflow-hidden border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 flex items-center justify-center shadow-xs shrink-0">
+                          {formData.logo ? (
+                            <img
+                              src={formData.logo}
+                              alt="Brand Logo Preview"
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-2xl font-serif font-bold text-pink-500">
+                              {displayInitial}
+                            </span>
+                          )}
+
+                          {isUploadingLogo && (
+                            <div className="absolute inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center">
+                              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="space-y-2">
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            onChange={handleLogoUpload}
+                            className="hidden"
+                            id="brand-logo-file"
+                          />
+                          <div className="flex items-center gap-2">
+                            <label
+                              htmlFor="brand-logo-file"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 text-neutral-800 dark:text-neutral-200 text-xs font-medium hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors cursor-pointer shadow-xs"
+                            >
+                              <CameraIcon className="w-3.5 h-3.5" />
+                              <span>{formData.logo ? "Change Logo" : "Upload Logo"}</span>
+                            </label>
+                            {formData.logo && (
+                              <button
+                                type="button"
+                                onClick={() => setFormData((prev) => ({ ...prev, logo: "" }))}
+                                className="px-2.5 py-1.5 text-xs text-red-500 hover:text-red-600 transition-colors cursor-pointer"
+                              >
+                                Remove
+                              </button>
+                            )}
+                          </div>
+                          <p className="text-[11px] text-neutral-500 dark:text-neutral-400">
+                            Square PNG, JPEG, or WebP up to 5 MB. Minimum 300x300px recommended.
+                          </p>
+                          {uploadError && (
+                            <p className="text-[11px] text-red-500 font-medium">{uploadError}</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Company Name (Required) */}
+                    <div className="space-y-1.5">
+                      <label className="block text-xs font-semibold text-neutral-800 dark:text-neutral-200 uppercase tracking-wider">
+                        Company / Brand Name <span className="text-pink-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-400">
+                          <BuildingIcon className="w-4 h-4" />
+                        </div>
+                        <input
+                          type="text"
+                          name="companyName"
+                          required
+                          maxLength={150}
+                          value={formData.companyName}
+                          onChange={handleInputChange}
+                          placeholder="e.g. Acme Studios, Zenith Wear, Aura Botanics"
+                          className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-neutral-100 text-xs sm:text-sm placeholder:text-neutral-400 focus:outline-hidden focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-colors"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Industry Dropdown (Required) */}
+                    <div className="space-y-1.5">
+                      <label className="block text-xs font-semibold text-neutral-800 dark:text-neutral-200 uppercase tracking-wider">
+                        Primary Industry <span className="text-pink-500">*</span>
+                      </label>
+                      <select
+                        name="industry"
+                        required
+                        value={formData.industry}
+                        onChange={handleInputChange}
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-neutral-100 text-xs sm:text-sm focus:outline-hidden focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-colors"
+                      >
+                        <option value="">Select your industry...</option>
+                        {INDUSTRY_OPTIONS.map((ind) => (
+                          <option key={ind} value={ind}>
+                            {ind}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Location with Quick Suggestions (Required) */}
+                    <div className="space-y-2">
+                      <label className="block text-xs font-semibold text-neutral-800 dark:text-neutral-200 uppercase tracking-wider">
+                        Headquarters / Operating Location <span className="text-pink-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-400">
+                          <MapPinIcon className="w-4 h-4" />
+                        </div>
+                        <input
+                          type="text"
+                          name="location"
+                          required
+                          maxLength={100}
+                          value={formData.location}
+                          onChange={handleInputChange}
+                          placeholder="e.g. Mumbai, India or Bengaluru, Karnataka"
+                          className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-neutral-100 text-xs sm:text-sm placeholder:text-neutral-400 focus:outline-hidden focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-colors"
+                        />
+                      </div>
+
+                      {/* Quick Location Suggestion Pills */}
+                      <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                        <span className="text-[11px] text-neutral-500 dark:text-neutral-400 font-medium">
+                          Quick Picks:
+                        </span>
+                        {POPULAR_LOCATIONS.slice(0, 5).map((loc) => (
+                          <button
+                            key={loc}
+                            type="button"
+                            onClick={() => setFormData((prev) => ({ ...prev, location: loc }))}
+                            className="px-2.5 py-1 rounded-lg text-[11px] bg-white dark:bg-neutral-800 hover:bg-pink-50 hover:text-pink-600 dark:hover:bg-neutral-700 dark:hover:text-pink-400 border border-neutral-200 dark:border-neutral-700 transition-colors cursor-pointer"
+                          >
+                            {loc}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons (Bottom Bar - No Skip or Dashboard Bypass) */}
+                  <div className="mt-8 pt-6 border-t border-neutral-100 dark:border-neutral-800 flex items-center justify-end gap-3">
+                    <button
+                      type="button"
+                      onClick={handleExplicitSaveDraft}
+                      disabled={isSubmitting || isSavingDraft}
+                      className="px-4 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 text-sm font-medium transition-colors cursor-pointer disabled:opacity-50"
+                    >
+                      {isSavingDraft ? "Saving..." : "Save Draft"}
+                    </button>
+
+                    <button
+                      type="submit"
+                      disabled={isSubmitting || isSavingDraft}
+                      className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-neutral-950 text-white hover:bg-neutral-800 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-neutral-200 text-sm font-semibold transition-all shadow-xs cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <svg
+                            className="animate-spin w-4 h-4 text-white dark:text-neutral-950"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            />
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            />
+                          </svg>
+                          <span>Saving...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>Continue to Story & Socials</span>
+                          <ArrowRightIcon className="w-4 h-4" />
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              {/* =========================================================
+                  STEP 2: BRAND STORY & SOCIALS
+              ========================================================= */}
+              {currentStep === 2 && (
+                <form onSubmit={handleStep2Continue} className="space-y-6">
+                  {/* Card Section Header */}
+                  <div className="pb-4 border-b border-neutral-100 dark:border-neutral-800">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h2 className="text-lg sm:text-xl font-serif font-bold text-neutral-950 dark:text-white">
+                          Brand Story & Socials
+                        </h2>
+                        <p className="text-xs sm:text-sm text-neutral-600 dark:text-neutral-400 mt-1">
+                          Share your brand mission, web presence, social channels, and partnership contact info.
+                        </p>
+                      </div>
+                      <span className="text-[11px] text-pink-600 dark:text-pink-400 font-medium bg-pink-50 dark:bg-pink-950/40 px-2.5 py-1 rounded-full border border-pink-200/50 shrink-0 hidden sm:inline-block">
+                        Step 2 of 3
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="bg-neutral-50/60 dark:bg-neutral-900/40 border border-neutral-200/60 dark:border-neutral-800 rounded-2xl p-5 sm:p-7 space-y-6">
+                    {/* Company Description (Required) */}
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label htmlFor="brand-description" className="block text-xs font-semibold text-neutral-800 dark:text-neutral-200 uppercase tracking-wider">
+                          Company Description / Bio <span className="text-pink-500">*</span>
+                        </label>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[11px] text-neutral-500 dark:text-neutral-400">
+                            {formData.description.length} / 2000
+                          </span>
+                        </div>
+                      </div>
+                      <textarea
+                        id="brand-description"
+                        name="description"
+                        rows={4}
+                        required
+                        maxLength={2000}
+                        value={formData.description}
+                        onChange={handleInputChange}
+                        placeholder="Describe your brand mission, signature product lines, aesthetic, and what you look for in creator collaborations..."
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-800 text-neutral-900 dark:text-neutral-100 text-xs sm:text-sm placeholder:text-neutral-400 focus:outline-hidden focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all leading-relaxed"
+                      />
+                    </div>
+
+                    {/* Official Website (Optional) */}
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label htmlFor="brand-website" className="block text-xs font-semibold text-neutral-800 dark:text-neutral-200 uppercase tracking-wider">
+                          Official Website
+                        </label>
+                        <span className="text-[11px] text-neutral-500 dark:text-neutral-400">
+                          Optional
+                        </span>
+                      </div>
+                      <div className="relative flex items-center">
+                        <div className="absolute left-3.5 flex items-center pointer-events-none text-neutral-400">
+                          <GlobeIcon className="w-4 h-4" />
+                        </div>
+                        <input
+                          id="brand-website"
+                          type="text"
+                          name="website"
+                          value={formData.website}
+                          onChange={handleInputChange}
+                          placeholder="https://yourbrand.com"
+                          className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-800 text-neutral-900 dark:text-neutral-100 text-xs sm:text-sm placeholder:text-neutral-400 focus:outline-hidden focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Social Channels (Required - At least 1 non-empty handle/URL) */}
+                    <div className="space-y-3 pt-5 border-t border-neutral-200/80 dark:border-neutral-800">
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <label className="block text-xs font-semibold text-neutral-800 dark:text-neutral-200 uppercase tracking-wider">
+                              Social Media Channels <span className="text-pink-500">*</span>
+                            </label>
+                            <span className="text-[10px] text-pink-600 dark:text-pink-400 font-semibold bg-pink-50 dark:bg-pink-950/40 px-2.5 py-0.5 rounded-full border border-pink-200/50">
+                              At least 1 required
+                            </span>
+                          </div>
+                          {hasAtLeastOneSocial && (
+                            <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
+                              <CheckIcon className="w-3.5 h-3.5" />
+                              Connected
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-neutral-500 dark:text-neutral-400">
+                          Add at least one active profile URL or handle so creators can verify and learn about your brand.
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
+                        {/* Instagram */}
+                        <div className="space-y-1.5">
+                          <label htmlFor="social-instagram" className="block text-xs font-medium text-neutral-700 dark:text-neutral-300">
+                            Instagram
+                          </label>
+                          <div className="relative flex items-center">
+                            <div className="absolute left-3.5 flex items-center pointer-events-none text-pink-500">
+                              <InstagramIcon className="w-4 h-4" />
+                            </div>
+                            <input
+                              id="social-instagram"
+                              type="text"
+                              name="instagram"
+                              value={formData.socialLinks?.instagram || ""}
+                              onChange={handleSocialChange}
+                              placeholder="https://instagram.com/yourbrand"
+                              className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-800 text-neutral-900 dark:text-neutral-100 text-xs sm:text-sm placeholder:text-neutral-400 focus:outline-hidden focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all"
+                            />
+                          </div>
+                        </div>
+
+                        {/* LinkedIn */}
+                        <div className="space-y-1.5">
+                          <label htmlFor="social-linkedin" className="block text-xs font-medium text-neutral-700 dark:text-neutral-300">
+                            LinkedIn
+                          </label>
+                          <div className="relative flex items-center">
+                            <div className="absolute left-3.5 flex items-center pointer-events-none text-blue-600">
+                              <LinkedinIcon className="w-4 h-4" />
+                            </div>
+                            <input
+                              id="social-linkedin"
+                              type="text"
+                              name="linkedin"
+                              value={formData.socialLinks?.linkedin || ""}
+                              onChange={handleSocialChange}
+                              placeholder="https://linkedin.com/company/yourbrand"
+                              className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-800 text-neutral-900 dark:text-neutral-100 text-xs sm:text-sm placeholder:text-neutral-400 focus:outline-hidden focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all"
+                            />
+                          </div>
+                        </div>
+
+                        {/* YouTube */}
+                        <div className="space-y-1.5">
+                          <label htmlFor="social-youtube" className="block text-xs font-medium text-neutral-700 dark:text-neutral-300">
+                            YouTube
+                          </label>
+                          <div className="relative flex items-center">
+                            <div className="absolute left-3.5 flex items-center pointer-events-none text-red-500">
+                              <YoutubeIcon className="w-4 h-4" />
+                            </div>
+                            <input
+                              id="social-youtube"
+                              type="text"
+                              name="youtube"
+                              value={formData.socialLinks?.youtube || ""}
+                              onChange={handleSocialChange}
+                              placeholder="https://youtube.com/@yourbrand"
+                              className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-800 text-neutral-900 dark:text-neutral-100 text-xs sm:text-sm placeholder:text-neutral-400 focus:outline-hidden focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Facebook */}
+                        <div className="space-y-1.5">
+                          <label htmlFor="social-facebook" className="block text-xs font-medium text-neutral-700 dark:text-neutral-300">
+                            Facebook
+                          </label>
+                          <div className="relative flex items-center">
+                            <div className="absolute left-3.5 flex items-center pointer-events-none text-blue-500">
+                              <FacebookIcon className="w-4 h-4" />
+                            </div>
+                            <input
+                              id="social-facebook"
+                              type="text"
+                              name="facebook"
+                              value={formData.socialLinks?.facebook || ""}
+                              onChange={handleSocialChange}
+                              placeholder="https://facebook.com/yourbrand"
+                              className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-800 text-neutral-900 dark:text-neutral-100 text-xs sm:text-sm placeholder:text-neutral-400 focus:outline-hidden focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Twitter / X */}
+                        <div className="space-y-1.5 sm:col-span-2">
+                          <label htmlFor="social-twitter" className="block text-xs font-medium text-neutral-700 dark:text-neutral-300">
+                            Twitter / X
+                          </label>
+                          <div className="relative flex items-center">
+                            <div className="absolute left-3.5 flex items-center pointer-events-none text-neutral-900 dark:text-neutral-100">
+                              <TwitterIcon className="w-4 h-4" />
+                            </div>
+                            <input
+                              id="social-twitter"
+                              type="text"
+                              name="twitter"
+                              value={formData.socialLinks?.twitter || ""}
+                              onChange={handleSocialChange}
+                              placeholder="https://x.com/yourbrand"
+                              className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-800 text-neutral-900 dark:text-neutral-100 text-xs sm:text-sm placeholder:text-neutral-400 focus:outline-hidden focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Collaboration Contact Information (Required) */}
+                    <div className="space-y-3 pt-5 border-t border-neutral-200/80 dark:border-neutral-800">
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <label className="block text-xs font-semibold text-neutral-800 dark:text-neutral-200 uppercase tracking-wider">
+                            Brand Collaboration Contact <span className="text-pink-500">*</span>
+                          </label>
+                        </div>
+                        <p className="text-[11px] text-neutral-500 dark:text-neutral-400">
+                          Direct partnership details for creator proposals and communications.
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-1">
+                        {/* Contact Name */}
+                        <div className="space-y-1.5">
+                          <label htmlFor="contact-name" className="block text-xs font-medium text-neutral-700 dark:text-neutral-300">
+                            Contact Name <span className="text-pink-500">*</span>
+                          </label>
+                          <div className="relative flex items-center">
+                            <div className="absolute left-3.5 flex items-center pointer-events-none text-neutral-400">
+                              <UserIcon className="w-4 h-4" />
+                            </div>
+                            <input
+                              id="contact-name"
+                              type="text"
+                              name="name"
+                              required
+                              value={formData.contactInformation?.name || ""}
+                              onChange={handleContactChange}
+                              placeholder="e.g. Sarah Jenkins"
+                              className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-800 text-neutral-900 dark:text-neutral-100 text-xs sm:text-sm placeholder:text-neutral-400 focus:outline-hidden focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Contact Email */}
+                        <div className="space-y-1.5">
+                          <label htmlFor="contact-email" className="block text-xs font-medium text-neutral-700 dark:text-neutral-300">
+                            Partnership Email <span className="text-pink-500">*</span>
+                          </label>
+                          <div className="relative flex items-center">
+                            <div className="absolute left-3.5 flex items-center pointer-events-none text-neutral-400">
+                              <EnvelopeIcon className="w-4 h-4" />
+                            </div>
+                            <input
+                              id="contact-email"
+                              type="email"
+                              name="email"
+                              required
+                              value={formData.contactInformation?.email || ""}
+                              onChange={handleContactChange}
+                              placeholder="partnerships@yourbrand.com"
+                              className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-800 text-neutral-900 dark:text-neutral-100 text-xs sm:text-sm placeholder:text-neutral-400 focus:outline-hidden focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Contact Phone */}
+                        <div className="space-y-1.5">
+                          <label htmlFor="contact-phone" className="block text-xs font-medium text-neutral-700 dark:text-neutral-300">
+                            Phone Number <span className="text-pink-500">*</span>
+                          </label>
+                          <div className="relative flex items-center">
+                            <div className="absolute left-3.5 flex items-center pointer-events-none text-neutral-400">
+                              <PhoneIcon className="w-4 h-4" />
+                            </div>
+                            <input
+                              id="contact-phone"
+                              type="tel"
+                              name="phone"
+                              required
+                              value={formData.contactInformation?.phone || ""}
+                              onChange={handleContactChange}
+                              placeholder="+1 (555) 000-0000"
+                              className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-800 text-neutral-900 dark:text-neutral-100 text-xs sm:text-sm placeholder:text-neutral-400 focus:outline-hidden focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons (Bottom Bar) */}
+                  <div className="mt-8 pt-6 border-t border-neutral-100 dark:border-neutral-800 flex items-center justify-between">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setValidationError(null);
+                        setCurrentStep(1);
+                        if (typeof window !== "undefined") {
+                          localStorage.setItem("brand_onboarding_step", "1");
+                        }
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                      disabled={isSubmitting || isSavingDraft}
+                      className="px-5 py-2.5 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 text-neutral-800 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-800 text-sm font-medium transition-colors cursor-pointer disabled:opacity-50"
+                    >
+                      <ArrowLeftIcon className="w-4 h-4 mr-1 inline-block" />
+                      <span>Back</span>
+                    </button>
+
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={handleExplicitSaveDraft}
+                        disabled={isSubmitting || isSavingDraft}
+                        className="px-4 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 text-sm font-medium transition-colors cursor-pointer disabled:opacity-50"
+                      >
+                        {isSavingDraft ? "Saving..." : "Save Draft"}
+                      </button>
+
+                      <button
+                        type="submit"
+                        disabled={isSubmitting || isSavingDraft}
+                        className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-neutral-950 text-white hover:bg-neutral-800 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-neutral-200 text-sm font-semibold transition-all shadow-xs cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <svg
+                              className="animate-spin w-4 h-4 text-white dark:text-neutral-950"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                              />
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                              />
+                            </svg>
+                            <span>Saving...</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>Review & Continue</span>
+                            <ArrowRightIcon className="w-4 h-4" />
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              )}
+
+              {/* =========================================================
+                  STEP 3: REVIEW & COMPLETE
+              ========================================================= */}
+              {currentStep === 3 && (
+                <div className="space-y-6">
+                  {/* Card Section Header */}
+                  <div className="pb-4 border-b border-neutral-100 dark:border-neutral-800">
+                    <h2 className="text-lg sm:text-xl font-serif font-bold text-neutral-950 dark:text-white">
+                      Review & Launch
+                    </h2>
+                    <p className="text-xs sm:text-sm text-neutral-600 dark:text-neutral-400 mt-1">
+                      Check your brand information below before finalizing setup and accessing your dashboard.
+                    </p>
+                  </div>
+
+                  {/* Missing Mandatory Fields Warning Alert */}
+                  {missingRequiredFields.length > 0 && (
+                    <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-semibold text-amber-800 dark:text-amber-300">
+                          Mandatory details missing before completion:
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setValidationError(null);
+                            const needStep1 =
+                              !formData.companyName?.trim() ||
+                              !formData.industry?.trim() ||
+                              !formData.location?.trim();
+                            const targetStep = needStep1 ? 1 : 2;
+                            setCurrentStep(targetStep);
+                            if (typeof window !== "undefined") {
+                              localStorage.setItem("brand_onboarding_step", String(targetStep));
+                            }
+                            window.scrollTo({ top: 0, behavior: "smooth" });
+                          }}
+                          className="text-xs font-semibold text-pink-600 dark:text-pink-400 hover:underline cursor-pointer"
+                        >
+                          {!formData.companyName?.trim() ||
+                          !formData.industry?.trim() ||
+                          !formData.location?.trim()
+                            ? "Edit Step 1 →"
+                            : "Edit Step 2 →"}
+                        </button>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {missingRequiredFields.map((f) => (
+                          <span
+                            key={f}
+                            className="px-2.5 py-0.5 rounded-md text-[11px] bg-amber-500/20 text-amber-900 dark:text-amber-200 font-medium"
+                          >
+                            {f}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Review Card: Company Overview */}
+                  <div className="bg-neutral-50/60 dark:bg-neutral-900/40 border border-neutral-200/60 dark:border-neutral-800 rounded-2xl p-5 sm:p-6 space-y-5">
+                    <div className="flex items-center justify-between pb-4 border-b border-neutral-200 dark:border-neutral-800">
+                      <div className="flex items-center gap-4">
+                        <div className="w-16 h-16 rounded-2xl overflow-hidden border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 flex items-center justify-center shrink-0">
+                          {formData.logo ? (
+                            <img
+                              src={formData.logo}
+                              alt="Brand Logo"
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-xl font-serif font-bold text-pink-500">
+                              {displayInitial}
+                            </span>
+                          )}
+                        </div>
+                        <div>
+                          <h3 className="font-serif font-bold text-lg text-neutral-950 dark:text-white">
+                            {formData.companyName || "Untitled Brand"}
+                          </h3>
+                          <div className="flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
+                            <span>{formData.industry || "Industry not set"}</span>
+                            <span>•</span>
+                            <span>{formData.location || "Location not set"}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setValidationError(null);
+                          setCurrentStep(1);
+                          if (typeof window !== "undefined") {
+                            localStorage.setItem("brand_onboarding_step", "1");
+                          }
+                          window.scrollTo({ top: 0, behavior: "smooth" });
+                        }}
+                        className="text-xs font-semibold text-pink-600 dark:text-pink-400 hover:underline cursor-pointer"
+                      >
+                        Edit
+                      </button>
+                    </div>
+
+                    {/* Bio & Details */}
+                    <div className="space-y-3 text-xs sm:text-sm">
+                      <div>
+                        <span className="text-neutral-500 dark:text-neutral-400 block text-xs font-semibold uppercase tracking-wider mb-1">
+                          About the Brand
+                        </span>
+                        <p className="text-neutral-800 dark:text-neutral-200 whitespace-pre-line leading-relaxed">
+                          {formData.description || "No company description provided yet."}
+                        </p>
+                      </div>
+
+                      {formData.website && (
+                        <div>
+                          <span className="text-neutral-500 dark:text-neutral-400 block text-xs font-semibold uppercase tracking-wider mb-1">
+                            Official Website
+                          </span>
+                          <a
+                            href={
+                              formData.website.startsWith("http")
+                                ? formData.website
+                                : `https://${formData.website}`
+                            }
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-pink-600 dark:text-pink-400 hover:underline inline-flex items-center gap-1 font-medium"
+                          >
+                            <span>{formData.website}</span>
+                            <GlobeIcon className="w-3.5 h-3.5" />
+                          </a>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Connected Socials & Contact Preview */}
+                    <div className="pt-3 border-t border-neutral-200 dark:border-neutral-800">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-neutral-500 dark:text-neutral-400 block text-xs font-semibold uppercase tracking-wider">
+                          Connected Channels & Contact
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setValidationError(null);
+                            setCurrentStep(2);
+                            if (typeof window !== "undefined") {
+                              localStorage.setItem("brand_onboarding_step", "2");
+                            }
+                            window.scrollTo({ top: 0, behavior: "smooth" });
+                          }}
+                          className="text-xs font-semibold text-pink-600 dark:text-pink-400 hover:underline cursor-pointer"
+                        >
+                          Edit
+                        </button>
+                      </div>
+                      <div className="flex flex-wrap gap-2 text-xs">
+                        {formData.socialLinks?.instagram && (
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-800 dark:text-neutral-200">
+                            <InstagramIcon className="w-3.5 h-3.5 text-pink-500" />
+                            <span>Instagram</span>
+                          </span>
+                        )}
+                        {formData.socialLinks?.linkedin && (
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-800 dark:text-neutral-200">
+                            <LinkedinIcon className="w-3.5 h-3.5 text-blue-600" />
+                            <span>LinkedIn</span>
+                          </span>
+                        )}
+                        {formData.socialLinks?.youtube && (
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-800 dark:text-neutral-200">
+                            <YoutubeIcon className="w-3.5 h-3.5 text-red-500" />
+                            <span>YouTube</span>
+                          </span>
+                        )}
+                        {formData.socialLinks?.facebook && (
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-800 dark:text-neutral-200">
+                            <FacebookIcon className="w-3.5 h-3.5 text-blue-500" />
+                            <span>Facebook</span>
+                          </span>
+                        )}
+                        {formData.socialLinks?.twitter && (
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-800 dark:text-neutral-200">
+                            <TwitterIcon className="w-3.5 h-3.5 text-neutral-900 dark:text-neutral-100" />
+                            <span>Twitter / X</span>
+                          </span>
+                        )}
+                        {formData.contactInformation?.email && (
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-800 dark:text-neutral-200">
+                            <EnvelopeIcon className="w-3.5 h-3.5 text-pink-500" />
+                            <span>{formData.contactInformation.email}</span>
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* First Campaign Guidance Card */}
+                  <div className="p-6 rounded-2xl bg-gradient-to-br from-pink-500/5 via-neutral-50 to-neutral-50 dark:from-pink-950/20 dark:via-neutral-900/40 dark:to-neutral-900/40 border border-pink-500/20 shadow-xs space-y-4">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-pink-500/10 text-pink-600 dark:text-pink-400 flex items-center justify-center shrink-0">
+                        <MegaphoneIcon className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-bold text-neutral-950 dark:text-white font-serif">
+                          Next Step: Launch Your First Campaign
+                        </h4>
+                        <p className="text-xs text-neutral-600 dark:text-neutral-400">
+                          How collaboration works on CreatorLink
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                      <div className="p-3.5 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 space-y-1.5">
+                        <span className="w-5 h-5 rounded-full bg-pink-500/10 text-pink-600 dark:text-pink-400 text-[11px] font-bold flex items-center justify-center">
+                          1
+                        </span>
+                        <span className="font-semibold text-neutral-950 dark:text-white block">
+                          Define Deliverables
+                        </span>
+                        <p className="text-[11px] text-neutral-600 dark:text-neutral-400 leading-relaxed">
+                          Specify Reel, Dedicated Video, or Story requirements with exact submission deadlines.
+                        </p>
+                      </div>
+
+                      <div className="p-3.5 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 space-y-1.5">
+                        <span className="w-5 h-5 rounded-full bg-pink-500/10 text-pink-600 dark:text-pink-400 text-[11px] font-bold flex items-center justify-center">
+                          2
+                        </span>
+                        <span className="font-semibold text-neutral-950 dark:text-white block">
+                          Set Budget Range
+                        </span>
+                        <p className="text-[11px] text-neutral-600 dark:text-neutral-400 leading-relaxed">
+                          Set Min & Max budget to attract competitive creator applications and bids.
+                        </p>
+                      </div>
+
+                      <div className="p-3.5 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 space-y-1.5">
+                        <span className="w-5 h-5 rounded-full bg-pink-500/10 text-pink-600 dark:text-pink-400 text-[11px] font-bold flex items-center justify-center">
+                          3
+                        </span>
+                        <span className="font-semibold text-neutral-950 dark:text-white block">
+                          Target & Protect
+                        </span>
+                        <p className="text-[11px] text-neutral-600 dark:text-neutral-400 leading-relaxed">
+                          Specify target audience demographics and content usage rights for your brand.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons (Bottom Bar - No Skip Option) */}
+                  <div className="mt-8 pt-6 border-t border-neutral-100 dark:border-neutral-800 flex items-center justify-between">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setValidationError(null);
+                        setCurrentStep(2);
+                        if (typeof window !== "undefined") {
+                          localStorage.setItem("brand_onboarding_step", "2");
+                        }
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                      disabled={isSubmitting}
+                      className="px-5 py-2.5 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 text-neutral-800 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-800 text-sm font-medium transition-colors cursor-pointer disabled:opacity-50"
+                    >
+                      <ArrowLeftIcon className="w-4 h-4 mr-1 inline-block" />
+                      <span>Back</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={isSubmitting || missingRequiredFields.length > 0}
+                      onClick={handleCompleteOnboarding}
+                      className="inline-flex items-center gap-2 px-7 py-3 rounded-xl bg-neutral-950 text-white hover:bg-neutral-800 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-neutral-200 text-sm font-bold transition-all shadow-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <svg
+                            className="animate-spin w-4 h-4 text-white dark:text-neutral-950"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            />
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            />
+                          </svg>
+                          <span>Finalizing Setup...</span>
+                        </>
+                      ) : (
+                        <>
+                          <SparklesIcon className="w-4 h-4 text-pink-500" />
+                          <span>Complete Setup & Launch</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </main>
+
+      {/* Clean Subtle Footer */}
+      <footer className="max-w-5xl w-full mx-auto text-center pt-8 text-xs text-neutral-400 dark:text-neutral-600">
+        CreatorLink Platform • Brand Partner Onboarding
+      </footer>
     </div>
   );
 }

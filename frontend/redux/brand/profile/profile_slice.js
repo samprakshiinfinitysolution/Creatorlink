@@ -40,7 +40,7 @@ const createBrandProfile = createAsyncThunk(
 // Handles fetching the logged-in brand profile.
 const getBrandProfile = createAsyncThunk(
     "brandProfile/getMyProfile",
-    async (_, { rejectWithValue }) => {
+    async (options, { rejectWithValue }) => {
 
         try {
 
@@ -55,7 +55,10 @@ const getBrandProfile = createAsyncThunk(
         }
     },
     {
-        condition: (_, { getState }) => {
+        condition: (options, { getState }) => {
+            if (options?.force) {
+                return true;
+            }
             const { brandProfile } = getState();
             if (brandProfile?.fetchLoading) {
                 return false;
@@ -175,6 +178,12 @@ const profileSlice = createSlice({
 
             // Get profile failed.
             .addCase(getBrandProfile.rejected, (state, action) => {
+
+                // If aborted by condition callback (a duplicate in-flight call),
+                // do NOT clear fetchLoading or set error, because the primary request is still running.
+                if (action.meta?.condition) {
+                    return;
+                }
 
                 state.loading = false;
                 state.fetchLoading = false;

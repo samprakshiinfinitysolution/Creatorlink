@@ -6,6 +6,7 @@ import {
     createProfile,
     getMyProfile,
     updateMyProfile,
+    completeOnboarding,
     getContactPrivacy,
     updateContactPrivacy
 } from "./profile.controller.js";
@@ -47,6 +48,12 @@ router.patch(
     "/me",
     updateProfileValidation,
     updateMyProfile
+);
+
+// Complete creator onboarding.
+router.post(
+    "/complete-onboarding",
+    completeOnboarding
 );
 
 // Creator contact privacy & direct sharing consent settings.

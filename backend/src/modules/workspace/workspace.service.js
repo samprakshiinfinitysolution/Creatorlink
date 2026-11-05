@@ -222,12 +222,22 @@ const createWorkspaceForAcceptedBooking = async (booking) => {
         );
 
         let maxRevisions = 2;
-        if (booking.service) {
+        if (typeof booking.revisions === "number" && booking.revisions >= 0) {
+            // Primary: Use immutable revision allowance snapshot saved on Booking
+            maxRevisions = booking.revisions;
+        } else if (typeof booking.service?.revisions === "number" && booking.service.revisions >= 0) {
+            // Secondary: Populated service on booking (if service object was attached)
+            maxRevisions = booking.service.revisions;
+        } else if (booking.service) {
+            // Backward-compatible fallback for legacy bookings created prior to snapshot field.
+            // NOTE: For legacy bookings that lack a snapshot, this queries the latest CreatorService
+            // document at workspace creation time. Their original revision allowance is NOT guaranteed
+            // to be preserved if the creator modified the service after the booking was initiated.
             try {
                 const serviceId = booking.service._id || booking.service;
                 if (mongoose.Types.ObjectId.isValid(serviceId)) {
                     const sDoc = await CreatorService.findById(serviceId).select("revisions").lean();
-                    if (sDoc && typeof sDoc.revisions === "number") {
+                    if (sDoc && typeof sDoc.revisions === "number" && sDoc.revisions >= 0) {
                         maxRevisions = sDoc.revisions;
                     }
                 }

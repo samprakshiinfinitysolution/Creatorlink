@@ -665,6 +665,9 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
     const secondaryLabel =
       mediaType === "video" ? "Video" : mediaType === "image" ? "Image" : "File";
     const isRevisionTarget = isObject && status === "revision_requested";
+    const maxRevisions = typeof workspace?.maxRevisions === "number" ? workspace.maxRevisions : 2;
+    const usedRevisions = isObject && typeof item.revisionCount === "number" ? item.revisionCount : 0;
+    const remainingRevisions = Math.max(0, maxRevisions - usedRevisions);
 
     return (
       <div
@@ -672,7 +675,7 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
         className="bg-white dark:bg-zinc-900 border border-gray-100/90 dark:border-zinc-800 rounded-3xl p-5 sm:p-6 shadow-xs space-y-4 transition-all"
       >
         {/* Deliverable Header Row */}
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <div className="flex items-center gap-2.5 flex-wrap">
               <h3 className="font-serif text-lg sm:text-xl font-bold text-gray-900 dark:text-white tracking-tight">
@@ -699,6 +702,55 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
               {description}
             </p>
           )}
+
+          {/* Deliverable Revision Allowance Counters */}
+          <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap pt-0.5 text-xs">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-gray-50 dark:bg-zinc-800/80 border border-gray-100 dark:border-zinc-700/70 text-gray-600 dark:text-gray-300">
+              <RefreshIcon className="w-3 h-3 text-gray-400 shrink-0" />
+              <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-zinc-400 tracking-wider">
+                Included:
+              </span>
+              <span className="font-bold text-gray-900 dark:text-white">
+                {maxRevisions}
+              </span>
+            </div>
+
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-gray-50 dark:bg-zinc-800/80 border border-gray-100 dark:border-zinc-700/70 text-gray-600 dark:text-gray-300">
+              <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-zinc-400 tracking-wider">
+                Used:
+              </span>
+              <span className="font-bold text-gray-900 dark:text-white">
+                {usedRevisions}
+              </span>
+            </div>
+
+            <div
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl font-semibold border ${
+                remainingRevisions > 0
+                  ? "bg-emerald-50 text-emerald-700 border-emerald-200/80 dark:bg-emerald-950/30 dark:text-emerald-300 dark:border-emerald-900/40"
+                  : maxRevisions === 0
+                  ? "bg-zinc-100 text-zinc-600 border-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:border-zinc-700"
+                  : "bg-rose-50 text-rose-700 border-rose-200/80 dark:bg-rose-950/30 dark:text-rose-300 dark:border-rose-900/40"
+              }`}
+            >
+              <span className="text-[10px] uppercase font-bold tracking-wider opacity-80">
+                Remaining:
+              </span>
+              <span className="font-bold">
+                {remainingRevisions}
+              </span>
+              {remainingRevisions === 0 && maxRevisions > 0 && (
+                <span className="text-[10px] font-bold uppercase tracking-wider ml-0.5">
+                  (Limit Reached)
+                </span>
+              )}
+              {maxRevisions === 0 && (
+                <span className="text-[10px] font-bold uppercase tracking-wider ml-0.5">
+                  (None)
+                </span>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Media Preview & Submission Details or Awaiting State */}

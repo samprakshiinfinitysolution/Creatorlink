@@ -62,6 +62,63 @@ const getZonedSixMonthsAgo = (date = new Date(), timeZone = "Asia/Kolkata") => {
     return new Date(naiveUtc.getTime() - offset);
 };
 
+// Calculates the precise UTC instant of midnight (00:00:00.000) X days ago in target timezone
+const getZonedDaysAgo = (date = new Date(), days = 30, timeZone = "Asia/Kolkata") => {
+    const formatter = new Intl.DateTimeFormat("en-US", {
+        timeZone,
+        year: "numeric",
+        month: "numeric",
+        day: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+        second: "numeric",
+        hour12: false
+    });
+
+    const msInDay = 24 * 60 * 60 * 1000;
+    const targetDate = new Date(date.getTime() - (days * msInDay));
+
+    const parts = formatter.formatToParts(targetDate);
+    const p = {};
+    for (const part of parts) {
+        p[part.type] = part.value;
+    }
+
+    const y = parseInt(p.year, 10);
+    const m = String(p.month).padStart(2, "0");
+    const d = String(p.day).padStart(2, "0");
+
+    const naiveUtc = new Date(`${y}-${m}-${d}T00:00:00Z`);
+    const naiveParts = formatter.formatToParts(naiveUtc);
+    const np = {};
+    for (const part of naiveParts) {
+        np[part.type] = part.value;
+    }
+    const targetLocalTime = naiveUtc.getTime();
+    const naiveInTarget = new Date(
+        `${np.year}-${String(np.month).padStart(2, "0")}-${String(np.day).padStart(2, "0")}T${String(np.hour).padStart(2, "0")}:${String(np.minute).padStart(2, "0")}:${String(np.second).padStart(2, "0")}Z`
+    ).getTime();
+    const offset = naiveInTarget - targetLocalTime;
+
+    return new Date(naiveUtc.getTime() - offset);
+};
+
+// Derives the start Date threshold for the requested timeframe in target timezone. Returns null for "all".
+const getTimeframeStartDate = (timeframe = "6m", date = new Date(), timeZone = "Asia/Kolkata") => {
+    const normalized = typeof timeframe === "string" ? timeframe.trim().toLowerCase() : "6m";
+    if (normalized === "all") {
+        return null;
+    }
+    if (normalized === "30d") {
+        return getZonedDaysAgo(date, 30, timeZone);
+    }
+    if (normalized === "90d") {
+        return getZonedDaysAgo(date, 90, timeZone);
+    }
+    // Default to "6m"
+    return getZonedSixMonthsAgo(date, timeZone);
+};
+
 // Fetches aggregated brand dashboard overview metrics, recent campaigns, collaborations, and upcoming deadlines
 const getBrandDashboardOverviewService = async (brandId, query = {}) => {
     if (!brandId || !mongoose.Types.ObjectId.isValid(brandId)) {
@@ -72,9 +129,49 @@ const getBrandDashboardOverviewService = async (brandId, query = {}) => {
     const recentLimit = Math.min(Math.max(Number(query.recentLimit) || 5, 1), 50);
     const deadlinesLimit = Math.min(Math.max(Number(query.deadlinesLimit) || 5, 1), 50);
     const timezone = getValidTimezone(query.timezone);
+    const rawTimeframe = typeof query.timeframe === "string" ? query.timeframe.trim().toLowerCase() : "6m";
+    const timeframe = ["30d", "90d", "6m", "all"].includes(rawTimeframe) ? rawTimeframe : "6m";
     const now = new Date();
-    // 6-month historical window anchored to the start of the 6th month prior in target timezone
-    const sixMonthsAgo = getZonedSixMonthsAgo(now, timezone);
+    // Timeframe start boundary in target timezone (null for "all")
+    const startDate = getTimeframeStartDate(timeframe, now, timezone);
+
+    // Timeframe match filter for brand campaigns
+    const campaignTimeframeFilter = { brand: brandObjectId };
+    if (startDate) {
+        campaignTimeframeFilter.createdAt = { $gte: startDate };
+    }
+
+    // Active campaigns count filter with timeframe
+    const activeCampaignsFilter = {
+        brand: brandObjectId,
+        status: { $in: ["published", "in_progress"] }
+    };
+    if (startDate) {
+        activeCampaignsFilter.createdAt = { $gte: startDate };
+    }
+
+    // Payment spending filter using effective payment date (paidAt falling back to createdAt)
+    const paymentSpendingMatch = {
+        brand: brandObjectId,
+        status: "paid"
+    };
+    if (startDate) {
+        paymentSpendingMatch.$expr = {
+            $gte: [{ $ifNull: ["$paidAt", "$createdAt"] }, startDate]
+        };
+    }
+
+    // Direct Pending Payments filter (in-flight active orders within timeframe)
+    const paymentPendingMatch = {
+        brand: brandObjectId,
+        status: { $in: ["pending", "processing"] },
+        isActive: true
+    };
+    if (startDate) {
+        paymentPendingMatch.$expr = {
+            $gte: [{ $ifNull: ["$paidAt", "$createdAt"] }, startDate]
+        };
+    }
 
     // Verify brand profile exists and has completed onboarding
     const brandProfile = await BrandProfile.findOne({ user: brandObjectId }).select("isOnboarded").lean();
@@ -107,18 +204,15 @@ const getBrandDashboardOverviewService = async (brandId, query = {}) => {
         monthlyCampaignBudgetAgg,
         totalCampaignBudgetAgg
     ] = await Promise.all([
-        // 1. Total Campaigns count
-        Campaign.countDocuments({ brand: brandObjectId }),
+        // 1. Total Campaigns count (respecting timeframe)
+        Campaign.countDocuments(campaignTimeframeFilter),
 
-        // 2. Active Campaigns count (published or in_progress)
-        Campaign.countDocuments({
-            brand: brandObjectId,
-            status: { $in: ["published", "in_progress"] }
-        }),
+        // 2. Active Campaigns count (published or in_progress, respecting timeframe)
+        Campaign.countDocuments(activeCampaignsFilter),
 
-        // 3. Campaign status distribution breakdown
+        // 3. Campaign status distribution breakdown (respecting timeframe)
         Campaign.aggregate([
-            { $match: { brand: brandObjectId } },
+            { $match: campaignTimeframeFilter },
             { $group: { _id: "$status", count: { $sum: 1 } } }
         ]),
 
@@ -170,13 +264,10 @@ const getBrandDashboardOverviewService = async (brandId, query = {}) => {
             status: "completed"
         }),
 
-        // 10. Total Spending: Sum of unique completed/paid payments per workspace grouped by currency
+        // 10. Total Spending: Sum of unique completed/paid payments per workspace grouped by currency (respecting timeframe)
         Payment.aggregate([
             {
-                $match: {
-                    brand: brandObjectId,
-                    status: "paid"
-                }
+                $match: paymentSpendingMatch
             },
             {
                 $sort: {
@@ -201,14 +292,10 @@ const getBrandDashboardOverviewService = async (brandId, query = {}) => {
             }
         ]),
 
-        // 11. Direct Pending Payments: Sum of unique in-flight active payment orders not yet captured grouped by currency
+        // 11. Direct Pending Payments: Sum of unique in-flight active payment orders not yet captured grouped by currency (respecting timeframe)
         Payment.aggregate([
             {
-                $match: {
-                    brand: brandObjectId,
-                    status: { $in: ["pending", "processing"] },
-                    isActive: true
-                }
+                $match: paymentPendingMatch
             },
             {
                 $sort: {
@@ -303,13 +390,10 @@ const getBrandDashboardOverviewService = async (brandId, query = {}) => {
         // 20. Authenticated Brand User basic info
         Auth.findById(brandObjectId).select("name email role"),
 
-        // 21. Monthly Campaign Budget distribution (6 consecutive calendar months) across ALL brand campaigns
+        // 21. Monthly Campaign Budget distribution across brand campaigns (respecting timeframe)
         Campaign.aggregate([
             {
-                $match: {
-                    brand: brandObjectId,
-                    createdAt: { $gte: sixMonthsAgo }
-                }
+                $match: campaignTimeframeFilter
             },
             {
                 $group: {
@@ -337,9 +421,9 @@ const getBrandDashboardOverviewService = async (brandId, query = {}) => {
             }
         ]),
 
-        // 22. Total Campaign Budget across all brand campaigns grouped by currency
+        // 22. Total Campaign Budget across brand campaigns grouped by currency (respecting timeframe)
         Campaign.aggregate([
-            { $match: { brand: brandObjectId } },
+            { $match: campaignTimeframeFilter },
             {
                 $group: {
                     _id: { $ifNull: ["$currency", "INR"] },
@@ -592,6 +676,7 @@ const getBrandDashboardOverviewService = async (brandId, query = {}) => {
 
     return {
         metrics: {
+            timeframe,
             campaigns: {
                 total: totalCampaignsCount,
                 active: activeCampaignsCount,

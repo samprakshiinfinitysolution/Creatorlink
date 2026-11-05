@@ -30,6 +30,13 @@ const bookingSchema = new mongoose.Schema(
             required: true
         },
 
+        // Revision allowance snapshot agreed at booking creation time (copied from selected CreatorService).
+        revisions: {
+            type: Number,
+            min: 0,
+            default: 1
+        },
+
         // Price agreed for the collaboration.
         agreedPrice: {
             type: Number,

@@ -112,6 +112,9 @@ const createBookingService = async (creatorId, bookingData) => {
         creator: creatorId,
         campaign: campaignId,
         service: serviceId,
+        revisions: (typeof service?.revisions === "number" && service.revisions >= 0)
+            ? service.revisions
+            : 1,
         agreedPrice: finalPrice,
         currency: service.currency || "INR",
         message: message ? message.trim() : "",
@@ -173,7 +176,7 @@ const getCreatorBookingsService = async (creatorId, query = {}) => {
         Booking.find(filter)
             .populate("brand", "name email")
             .populate("campaign", "title category budget minBudget maxBudget currency deadline platform coverImage")
-            .populate("service", "title price deliveryTime")
+            .populate("service", "title price deliveryTime revisions")
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(itemsPerPage),
@@ -541,7 +544,7 @@ const getBrandBookingsService = async (brandId, query = {}) => {
         Booking.find(filter)
             .populate("creator", "name email")
             .populate("campaign", "title category budget minBudget maxBudget currency deadline platform coverImage")
-            .populate("service", "title price deliveryTime")
+            .populate("service", "title price deliveryTime revisions")
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(itemsPerPage),
@@ -844,6 +847,9 @@ const createBrandBookingService = async (brandId, bookingData) => {
         creator: creatorId,
         campaign: campaignId,
         service: serviceId,
+        revisions: (typeof service?.revisions === "number" && service.revisions >= 0)
+            ? service.revisions
+            : 1,
         agreedPrice: finalPrice,
         currency: service.currency || "INR",
         message: message ? message.trim() : "",

@@ -21,6 +21,7 @@ function BrandDashboardContent() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isVerifying, setIsVerifying] = useState(true);
   const [isOnboardedVerified, setIsOnboardedVerified] = useState(false);
+  const [timeframe, setTimeframe] = useState("6m");
   const hasFetchedDashboardRef = useRef(false);
 
   const { dashboard, error, loading } = useSelector(
@@ -33,10 +34,18 @@ function BrandDashboardContent() {
     (state) => state.auth || {}
   );
 
-  // Dashboard API fetch handler with retry support
-  const handleFetchDashboard = useCallback(() => {
-    dispatch(getBrandDashboardOverview({ recentLimit: 5, deadlinesLimit: 5 }));
-  }, [dispatch]);
+  // Dashboard API fetch handler with retry and timeframe support
+  const handleFetchDashboard = useCallback((tf = timeframe) => {
+    const activeTf = typeof tf === "string" ? tf : timeframe;
+    dispatch(getBrandDashboardOverview({ recentLimit: 5, deadlinesLimit: 5, timeframe: activeTf }));
+  }, [dispatch, timeframe]);
+
+  // Handle timeframe filter change without duplicate dispatches
+  const handleTimeframeChange = useCallback((newTimeframe) => {
+    if (!newTimeframe || newTimeframe === timeframe) return;
+    setTimeframe(newTimeframe);
+    dispatch(getBrandDashboardOverview({ recentLimit: 5, deadlinesLimit: 5, timeframe: newTimeframe }));
+  }, [dispatch, timeframe]);
 
   // Onboarding verification check to guard dashboard access
   useEffect(() => {
@@ -204,6 +213,9 @@ function BrandDashboardContent() {
                   <BrandCampaignAnalytics
                     metrics={dashboard.metrics}
                     recentCampaigns={dashboard.recentCampaigns}
+                    timeframe={timeframe}
+                    onTimeframeChange={handleTimeframeChange}
+                    dashboardLoading={loading}
                   />
 
                   {/* 4. Bottom Grid: Recent Campaigns Table (8 cols) + Upcoming Deliverables (4 cols) */}

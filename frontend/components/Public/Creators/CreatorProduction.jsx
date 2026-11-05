@@ -5,52 +5,48 @@ import Image from "next/image";
 import ScrollReveal from "@/components/theme/ScrollReveal";
 
 export default function CreatorProduction() {
-  // Conceptual structure for future backend video switching
   const [mediaData] = useState({
-    mediaType: "image", // "image" | "video"
     imageUrl: "https://res.cloudinary.com/atr5osne/image/upload/v1792055989/creatorlink/public/editorial/xedvtbznkr5xa0ueowdf.webp",
-    videoUrl: "",
-    title: "GLOW RITUAL",
-    subtitle: "Lumina Skin",
-    creatorName: "@aarohi.mehta",
-    caption: "Quiet mornings with @glowbeauty botanical dew. Shot on prime 50mm.",
+    title: "CREATIVE SHOWCASE",
+    subtitle: "Original Video & Visual Content",
+    caption: "Bring campaign concepts to life through authentic personal expression.",
   });
 
   const steps = [
     {
       num: "STEP 01",
-      title: "Concept",
-      desc: "Moodboard & shotlist aligned.",
+      title: "Plan Your Concept",
+      desc: "Understand the brief and develop your creative idea.",
     },
     {
       num: "STEP 02",
-      title: "Shoot",
-      desc: "Natural light capture.",
+      title: "Create",
+      desc: "Shoot, record or design content in your own style.",
     },
     {
       num: "STEP 03",
-      title: "Color Edit",
-      desc: "Warm pastel grading.",
+      title: "Refine",
+      desc: "Edit your content and make it ready for submission.",
     },
     {
       num: "STEP 04",
-      title: "Deliver",
-      desc: "One-click submission.",
+      title: "Submit",
+      desc: "Share agreed deliverables with the brand for review.",
     },
   ];
 
   const deliverables = [
     {
-      filename: "Reel_01_MorningRoutine_Master.mov (480MB)",
-      status: "Ready",
+      filename: "Primary Video Deliverable",
+      status: "Ready for Review",
     },
     {
-      filename: "Reel_02_MacroTexture_Cut.mov (510MB)",
-      status: "Ready",
+      filename: "Secondary Creative Cut",
+      status: "Ready for Review",
     },
     {
-      filename: "Story_Frames_Bundle_1–3.zip (65MB)",
-      status: "Ready",
+      filename: "High-Resolution Photo Package",
+      status: "Ready for Review",
     },
   ];
 
@@ -67,13 +63,13 @@ export default function CreatorProduction() {
         ========================================================= */}
         <ScrollReveal direction="up" delay={0} className="max-w-2xl text-left mb-12 sm:mb-16">
           <span className="text-[11px] font-bold tracking-[0.22em] uppercase text-secondary font-sans block mb-3">
-            06 / PRODUCTION
+            06 / CREATE YOUR CONTENT
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-medium tracking-tight text-slate-900 dark:text-foreground leading-[1.15] mb-4">
-            Now make something unforgettable.
+            Bring Your Creative Ideas to Life.
           </h2>
           <p className="text-sm sm:text-base text-slate-600 dark:text-text-secondary font-sans leading-relaxed">
-            Focus entirely on lighting, grading, and authentic expression. Creator Hub manages preview approvals, frame-accurate notes, and rights clearance.
+            Once the campaign details are agreed, focus on creating content that reflects both your style and the brand&apos;s brief. Plan your concept, create your content and prepare the agreed deliverables.
           </p>
         </ScrollReveal>
 
@@ -88,27 +84,18 @@ export default function CreatorProduction() {
           <ScrollReveal direction="right" delay={120} className="lg:col-span-5 flex justify-center lg:justify-start">
             <div className="group relative w-full max-w-[340px] sm:max-w-[360px] h-[520px] sm:h-[560px] rounded-[36px] overflow-hidden bg-slate-900 border-4 border-[#1C1917] shadow-2xl hover:shadow-[0_20px_45px_-10px_rgba(255,79,135,0.25)] hover:-translate-y-1 transition-all duration-300">
 
-              {/* Media Content (Structure ready for Image / Video switching) */}
-              {mediaData.mediaType === "video" ? (
-                <video
-                  src={mediaData.videoUrl}
-                  controls
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <Image
-                  src={mediaData.imageUrl}
-                  alt="Production Media Preview"
-                  fill
-                  sizes="(max-width: 640px) 100vw, 360px"
-                  className="object-cover group-hover:scale-[1.04] transition-transform duration-500 ease-out"
-                />
-              )}
+              <Image
+                src={mediaData.imageUrl}
+                alt="Production Media Preview"
+                fill
+                sizes="(max-width: 640px) 100vw, 360px"
+                className="object-cover group-hover:scale-[1.04] transition-transform duration-500 ease-out"
+              />
 
               {/* Top-Left Pill Overlay */}
               <div className="absolute top-4 left-4 z-10">
                 <span className="bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase text-white border border-white/10 shadow-xs">
-                  4K 60FPS • PRORES
+                  ORIGINAL CONTENT
                 </span>
               </div>
 
@@ -123,26 +110,22 @@ export default function CreatorProduction() {
               </div>
 
               {/* Center Play Button Icon */}
-              <button
-                type="button"
-                aria-label="Play video preview"
-                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-white/25 backdrop-blur-md border border-white/40 text-white flex items-center justify-center text-xl shadow-lg transition-transform duration-300 group-hover:scale-110 z-10 cursor-pointer"
-              >
+              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-white/25 backdrop-blur-md border border-white/40 text-white flex items-center justify-center text-xl shadow-lg transition-transform duration-300 group-hover:scale-110 z-10">
                 ▶
-              </button>
+              </div>
 
               {/* Bottom Frosted Overlay Card */}
               <div className="absolute inset-x-3 bottom-3 z-10 bg-black/75 backdrop-blur-md border border-white/10 rounded-2xl p-3.5 text-left text-white">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-pink-200 text-slate-900 font-sans font-bold text-xs flex items-center justify-center shrink-0">
-                    AM
+                  <div className="w-8 h-8 rounded-full bg-secondary/30 text-white font-sans font-bold text-xs flex items-center justify-center shrink-0">
+                    CL
                   </div>
                   <div>
                     <span className="text-xs font-bold font-sans text-white block">
-                      {mediaData.creatorName}
+                      From Creative Idea to Final Content.
                     </span>
                     <p className="text-[11px] font-sans text-white/80 leading-snug mt-0.5">
-                      {mediaData.caption}
+                      Create content that feels authentic while meeting the campaign requirements.
                     </p>
                   </div>
                 </div>
@@ -152,25 +135,25 @@ export default function CreatorProduction() {
           </ScrollReveal>
 
           {/* -------------------------------------------------------
-              RIGHT COLUMN: STEP CARDS & FINAL SUBMISSION CARD (Lg: 7 Cols)
+              RIGHT COLUMN: STEP CARDS & SUBMISSION CARD (Lg: 7 Cols)
           ------------------------------------------------------- */}
           <div className="lg:col-span-7 space-y-6 sm:space-y-7">
 
-            {/* 4 HORIZONTAL STEP CARDS */}
+            {/* 4 STEP CARDS */}
             <ScrollReveal direction="up" delay={160}>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 {steps.map((step, idx) => (
                   <div
                     key={idx}
-                    className="p-4 rounded-2xl border text-left transition-all duration-300 bg-white dark:bg-surface border-slate-200/80 dark:border-white/10 hover:border-secondary/60 hover:shadow-[0_8px_20px_-6px_rgba(255,79,135,0.18)] hover:-translate-y-0.5"
+                    className="p-5 rounded-2xl border text-left transition-all duration-300 bg-white dark:bg-surface border-slate-200/80 dark:border-white/10 hover:border-secondary/60 hover:shadow-[0_8px_20px_-6px_rgba(255,79,135,0.18)] hover:-translate-y-0.5"
                   >
-                    <span className="text-[10px] font-bold tracking-widest uppercase text-slate-500 dark:text-text-muted font-sans block mb-1">
+                    <span className="text-[10px] font-bold tracking-widest uppercase text-secondary font-sans block mb-1.5">
                       {step.num}
                     </span>
-                    <h4 className="font-serif font-semibold text-sm text-slate-900 dark:text-foreground mb-1">
+                    <h4 className="font-serif font-semibold text-base text-slate-900 dark:text-foreground mb-1">
                       {step.title}
                     </h4>
-                    <p className="text-[11px] font-sans text-slate-500 dark:text-text-muted leading-tight">
+                    <p className="text-xs font-sans text-slate-600 dark:text-text-secondary leading-relaxed">
                       {step.desc}
                     </p>
                   </div>
@@ -178,7 +161,7 @@ export default function CreatorProduction() {
               </div>
             </ScrollReveal>
 
-            {/* WHITE FINAL SUBMISSION CARD */}
+            {/* WHITE SUBMISSION CARD */}
             <ScrollReveal direction="up" delay={220}>
               <div className="group bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 hover:border-secondary/60 rounded-[32px] p-6 sm:p-8 shadow-sm hover:shadow-[0_12px_32px_-8px_rgba(255,79,135,0.2)] hover:-translate-y-1 transition-all duration-300 relative text-left">
 
@@ -186,10 +169,10 @@ export default function CreatorProduction() {
                 <div className="flex flex-wrap items-start justify-between gap-3 mb-6">
                   <div>
                     <span className="text-[10px] font-bold tracking-widest uppercase text-slate-500 dark:text-text-muted font-sans block mb-1">
-                      FINAL CONTENT SUBMISSION
+                      DELIVERABLE SUBMISSION
                     </span>
                     <h3 className="font-serif text-xl sm:text-2xl font-medium text-slate-900 dark:text-foreground">
-                      Aarohi Mehta → Glow Beauty
+                      Campaign Deliverables
                     </h3>
                   </div>
 
@@ -216,13 +199,13 @@ export default function CreatorProduction() {
                   ))}
                 </div>
 
-                {/* Bottom Info Panel (Brand Review Window) */}
-                <div className="bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-800/30 rounded-2xl p-4 flex items-start gap-3 text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
-                  <span className="text-amber-600 dark:text-amber-400 font-bold flex-shrink-0 mt-0.5">
-                    🔒
+                {/* Bottom Info Panel */}
+                <div className="bg-pink-50/60 dark:bg-secondary/10 border border-pink-200/60 dark:border-secondary/20 rounded-2xl p-4 flex items-start gap-3 text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+                  <span className="text-secondary font-bold flex-shrink-0 mt-0.5">
+                    ✓
                   </span>
                   <p>
-                    <strong className="font-bold text-slate-900 dark:text-white">Brand Review Window:</strong> Glow Beauty has 48 hours to request minor audio or cut edits. If no revision is requested, earnings automatically release.
+                    <strong className="font-bold text-slate-900 dark:text-white">Review &amp; Feedback:</strong> Share deliverables and collaborate on any necessary refinements with the brand.
                   </p>
                 </div>
 

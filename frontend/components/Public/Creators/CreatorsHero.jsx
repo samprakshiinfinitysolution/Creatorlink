@@ -73,13 +73,13 @@ export default function CreatorsHero() {
             <div className="inline-flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span className="text-[11px] sm:text-xs font-bold tracking-[0.18em] uppercase text-slate-600 dark:text-text-muted font-sans">
-                FOR CREATORS & VISIONARIES
+                FOR CONTENT CREATORS & ARTISTS
               </span>
             </div>
 
-            {/* Right subtitle */}
-            <span className="text-[11px] sm:text-xs font-bold tracking-[0.18em] uppercase text-slate-600 dark:text-text-muted font-sans">
-              AUTUMN / WINTER EDITORIAL ISSUE
+            {/* Right indicator */}
+            <span className="text-[11px] sm:text-xs font-bold tracking-[0.18em] uppercase text-secondary font-sans">
+              CREATOR COLLABORATIONS
             </span>
           </div>
         </ScrollReveal>
@@ -96,17 +96,17 @@ export default function CreatorsHero() {
 
             {/* 2. Main Heading */}
             <ScrollReveal direction="up" delay={80}>
-              <h1 className="font-serif font-medium uppercase tracking-tight text-slate-900 dark:text-foreground text-5xl sm:text-7xl md:text-8xl lg:text-[84px] xl:text-[92px] leading-[0.92] mb-6">
-                MAKE<br />
-                <span className="inline-block bg-[#F5D8CE] dark:bg-secondary/20 text-slate-900 dark:text-foreground px-3.5 py-0.5 rounded-sm my-1">
-                  YOUR
-                </span><br />
-                MARK.
+              <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-secondary block mb-3 font-sans">
+                BUILT FOR CREATORS
+              </span>
+
+              <h1 className="font-serif font-medium tracking-tight text-slate-900 dark:text-foreground text-4xl sm:text-5xl md:text-6xl lg:text-[54px] xl:text-[62px] leading-[1.08] mb-6">
+                Your Creativity Deserves the Right Opportunities.
               </h1>
 
               {/* Description */}
               <p className="text-base sm:text-lg text-slate-600 dark:text-text-secondary font-sans leading-relaxed max-w-md mb-8">
-                The private digital sanctuary where elite taste, creative autonomy, and top-tier luxury brand partnerships converge seamlessly.
+                You have the ideas, the talent and the passion to create. CreatorLink helps you showcase your work, connect with brands and explore collaboration opportunities that match your creative style.
               </p>
             </ScrollReveal>
 
@@ -115,35 +115,35 @@ export default function CreatorsHero() {
               <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-3">
                 {/* Primary Button */}
                 <Link
-                  href="/signup"
+                  href="/signup?role=creator"
                   className="group inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-[#1C1917] dark:bg-white text-white dark:text-black hover:bg-secondary dark:hover:bg-secondary dark:hover:text-white font-sans font-semibold text-xs tracking-wider uppercase shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
                 >
-                  <span>JOIN CREATOR HUB</span>
+                  <span>JOIN AS A CREATOR</span>
                   <span className="text-sm leading-none group-hover:translate-x-1 transition-transform duration-200">→</span>
                 </Link>
 
                 {/* Secondary Button */}
                 <Link
-                  href="/brands"
+                  href="/how-it-works"
                   className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-transparent border border-slate-300 dark:border-white/20 text-slate-900 dark:text-foreground hover:border-secondary hover:text-secondary font-sans font-semibold text-xs tracking-wider uppercase transition-all duration-300 hover:-translate-y-0.5"
                 >
-                  <span>EXPLORE OPPORTUNITIES</span>
+                  <span>EXPLORE HOW IT WORKS</span>
                 </Link>
               </div>
 
               {/* 4. Small Supporting Line */}
-              <p className="text-[11px] sm:text-xs text-slate-500 dark:text-text-muted font-sans mb-8">
-                ✦ Free to create your profile • Curated access • No agency lock-in
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-text-muted font-sans mb-8">
+                Show your work. Find your people. Create your next opportunity.
               </p>
             </ScrollReveal>
 
-            {/* 5. Creator Profile Mini Card */}
+            {/* 5. Creator Profile Mini Card (Sample Illustrative Profile) */}
             <ScrollReveal direction="up" delay={240}>
               <div className="bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 rounded-2xl p-3 inline-flex items-center gap-3.5 shadow-sm hover:shadow-md transition-shadow duration-200">
                 <div className="relative w-11 h-11 rounded-full overflow-hidden flex-shrink-0 bg-slate-100">
                   <Image
                     src="https://res.cloudinary.com/atr5osne/image/upload/v1792054754/creatorlink/public/creators/asaeu3b0m8gtfekaphzu.webp"
-                    alt="Aarohi Mehta"
+                    alt="Creative Portfolio Sample"
                     fill
                     sizes="44px"
                     className="object-cover"
@@ -153,14 +153,11 @@ export default function CreatorsHero() {
                 <div>
                   <div className="flex items-center gap-1.5">
                     <span className="font-sans font-bold text-sm text-slate-900 dark:text-foreground">
-                      @aarohi.mehta
-                    </span>
-                    <span className="w-4 h-4 rounded-full bg-secondary/15 text-secondary flex items-center justify-center text-[10px] font-bold">
-                      ✓
+                      Sample Creator Profile
                     </span>
                   </div>
                   <p className="text-[10px] font-sans font-bold tracking-wider uppercase text-slate-500 dark:text-text-muted mt-0.5">
-                    BEAUTY / LIFESTYLE • 24.8K FOLLOWERS
+                    LIFESTYLE &amp; VISUAL STORYTELLER
                   </p>
                 </div>
               </div>
@@ -177,11 +174,11 @@ export default function CreatorsHero() {
             <ScrollReveal direction="left" delay={120} className="w-full flex justify-center lg:justify-end">
               <div className="relative w-[90%] sm:w-full max-w-[340px] min-[380px]:max-w-[380px] sm:max-w-[480px] lg:max-w-[470px] xl:max-w-[510px] mx-auto lg:mx-0">
 
-                {/* Main Rounded Portrait Visual with Subtle Hover Zoom */}
+                {/* Main Rounded Portrait Visual */}
                 <div className="group/main relative w-full h-[350px] min-[380px]:h-[390px] sm:h-[590px] rounded-[28px] sm:rounded-[40px] overflow-hidden shadow-2xl hover:shadow-[0_25px_50px_-12px_rgba(255,79,135,0.18)] dark:hover:shadow-secondary/20 transition-all duration-500 ease-out bg-slate-200 dark:bg-surface border border-white/60 dark:border-white/10">
                   <Image
                     src="https://res.cloudinary.com/atr5osne/image/upload/v1792054754/creatorlink/public/creators/asaeu3b0m8gtfekaphzu.webp"
-                    alt="Aarohi Mehta - Digital Creator"
+                    alt="Creator Visual Portrait"
                     fill
                     preload
                     sizes="(max-width: 768px) 100vw, 520px"
@@ -191,25 +188,25 @@ export default function CreatorsHero() {
                   {/* Dark Gradient Overlay at Bottom */}
                   <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent p-5 sm:p-8 text-white text-left pointer-events-none">
                     <span className="inline-block bg-white/20 backdrop-blur-md px-2.5 py-0.5 rounded text-[10px] uppercase tracking-widest font-bold text-white mb-2">
-                      LOOKBOOK NO. 14
+                      PORTFOLIO SHOWCASE
                     </span>
                     <h3 className="font-serif text-2xl sm:text-3xl font-medium text-white mb-0.5">
-                      Aarohi Mehta
+                      Authentic Storytelling
                     </h3>
                     <p className="text-xs font-sans text-white/80">
-                      Digital Creator & Creative Director
+                      Showcase your niche, aesthetic and creative style
                     </p>
                   </div>
                 </div>
 
                 {/* THREE FLOATING CORNER IMAGE CARDS */}
 
-                {/* TOP-LEFT CARD (Beach / Coastal View) */}
+                {/* TOP-LEFT CARD */}
                 <div className="absolute -left-3 min-[380px]:-left-5 sm:-left-12 top-3 sm:top-10 w-22 min-[380px]:w-26 sm:w-40 h-16 min-[380px]:h-20 sm:h-30 rounded-xl sm:rounded-2xl border-2 sm:border-4 border-white dark:border-surface bg-white dark:bg-surface shadow-xl overflow-hidden creator-float-card-1 z-20">
                   <div className="relative w-full h-full">
                     <Image
                       src="https://res.cloudinary.com/atr5osne/image/upload/v1792054758/creatorlink/public/editorial/avjxgors8karuxcb8p43.webp"
-                      alt="Coastal Terrace View"
+                      alt="Lifestyle Imagery"
                       fill
                       sizes="(max-width: 640px) 104px, 160px"
                       className="object-cover"
@@ -217,14 +214,13 @@ export default function CreatorsHero() {
                   </div>
                 </div>
 
-                {/* TOP-RIGHT CARD (Coffee & Interior with tape detail) */}
+                {/* TOP-RIGHT CARD */}
                 <div className="absolute -right-3 min-[380px]:-right-5 sm:-right-8 -top-3 sm:-top-8 w-20 min-[380px]:w-24 sm:w-36 h-26 min-[380px]:h-30 sm:h-44 rounded-xl sm:rounded-2xl border-2 sm:border-4 border-white dark:border-surface bg-white dark:bg-surface shadow-xl overflow-hidden creator-float-card-2 z-20">
-                  {/* Washi Tape Detail */}
                   <div className="w-8 h-2.5 bg-pink-200/90 dark:bg-secondary/40 rounded-sm absolute -top-1 left-1/2 -translate-x-1/2 z-30 shadow-xs" />
                   <div className="relative w-full h-full">
                     <Image
                       src="https://res.cloudinary.com/atr5osne/image/upload/v1792054745/creatorlink/public/campaigns/tt4slqpoo1tprmx7ndss.webp"
-                      alt="Coffee and linen setup"
+                      alt="Content Aesthetics"
                       fill
                       sizes="(max-width: 640px) 96px, 144px"
                       className="object-cover"
@@ -232,18 +228,18 @@ export default function CreatorsHero() {
                   </div>
                 </div>
 
-                {/* BOTTOM-RIGHT CARD (Texture detail) */}
+                {/* BOTTOM-RIGHT CARD */}
                 <div className="absolute -right-3 min-[380px]:-right-5 sm:-right-8 bottom-3 sm:bottom-10 w-22 min-[380px]:w-26 sm:w-40 h-16 min-[380px]:h-20 sm:h-30 rounded-xl sm:rounded-2xl border-2 sm:border-4 border-white dark:border-surface bg-white dark:bg-surface shadow-xl overflow-hidden creator-float-card-3 z-20">
                   <div className="relative w-full h-full">
                     <Image
                       src="https://res.cloudinary.com/atr5osne/image/upload/v1792054860/creatorlink/public/campaigns/tmkqzb5b64olyrrvyscm.webp"
-                      alt="Texture Detail"
+                      alt="Product Details"
                       fill
                       sizes="(max-width: 640px) 104px, 160px"
                       className="object-cover"
                     />
                     <div className="absolute bottom-2 left-2 bg-black/70 backdrop-blur-xs text-white text-[9px] font-bold px-2 py-0.5 rounded tracking-widest uppercase">
-                      TEXTURE DETAIL
+                      DETAILS
                     </div>
                   </div>
                 </div>
@@ -255,7 +251,7 @@ export default function CreatorsHero() {
             <ScrollReveal direction="up" delay={200} className="mt-8 lg:mr-10">
               <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 shadow-sm text-xs font-sans text-slate-700 dark:text-foreground font-medium">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                Currently Accepting Selective Brand Partnerships
+                Open for Meaningful Brand Collaborations
               </div>
             </ScrollReveal>
 
@@ -267,4 +263,3 @@ export default function CreatorsHero() {
     </section>
   );
 }
-

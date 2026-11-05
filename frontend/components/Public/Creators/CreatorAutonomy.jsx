@@ -7,10 +7,10 @@ export default function CreatorAutonomy() {
   const [accepted, setAccepted] = useState(false);
 
   const features = [
-    "Right audience alignment (Beauty / Clean Wellness)",
-    "Creative freedom guaranteed on hook & framing",
-    "Fair market compensation locked in escrow upfront",
-    "Direct chat without intermediate agency friction",
+    "Choose opportunities that match your niche.",
+    "Understand campaign requirements before accepting.",
+    "Discuss creative ideas with brands.",
+    "Agree on deliverables and expectations.",
   ];
 
   return (
@@ -29,17 +29,17 @@ export default function CreatorAutonomy() {
           <ScrollReveal direction="up" delay={0} className="lg:col-span-6 text-left">
             {/* Eyebrow */}
             <span className="text-[11px] font-bold tracking-[0.22em] uppercase text-secondary font-sans block mb-3">
-              04 / AUTONOMY
+              01 / YOUR CREATIVE FREEDOM
             </span>
 
             {/* Main Heading */}
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-medium tracking-tight text-slate-900 dark:text-foreground leading-[1.15] mb-5">
-              Not every opportunity needs to be yours.
+              Your Creativity. Your Style. Your Decisions.
             </h2>
 
             {/* Supporting Text */}
             <p className="text-sm sm:text-base text-slate-600 dark:text-text-secondary font-sans leading-relaxed max-w-xl mb-8">
-              Your feed is your curation. Creator Hub gives you full clarity on deliverable expectations, commercial rights, and artistic freedom before you ever commit.
+              Your creative identity is what makes you unique. Explore opportunities that fit your interests, understand campaign expectations and decide which collaborations feel right for you.
             </p>
 
             {/* 4 Feature Rows */}
@@ -70,15 +70,18 @@ export default function CreatorAutonomy() {
               <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
                 <div>
                   <span className="text-[10px] font-bold tracking-widest uppercase text-slate-500 dark:text-text-muted font-sans block mb-1">
-                    INVITATION SHEET #089
+                    CAMPAIGN INVITATION
                   </span>
                   <h3 className="font-serif text-xl sm:text-2xl font-medium text-slate-900 dark:text-foreground">
-                    Glow Beauty Campaign Invitation
+                    Create on Your Own Terms.
                   </h3>
+                  <p className="text-xs text-slate-500 dark:text-text-muted font-sans mt-0.5">
+                    Build collaborations that respect your creativity and personal style.
+                  </p>
                 </div>
 
                 <span className="bg-secondary/20 dark:bg-secondary/20 text-secondary text-[10px] font-bold tracking-wider uppercase px-3 py-1 rounded-full border border-secondary/30 flex-shrink-0">
-                  ACTIVE INVITATION
+                  NEW INVITATION
                 </span>
               </div>
 
@@ -93,35 +96,35 @@ export default function CreatorAutonomy() {
                     Primary Deliverable
                   </span>
                   <h4 className="font-sans font-bold text-sm text-slate-900 dark:text-foreground mb-0.5">
-                    2× 9:16 Instagram Reels
+                    1× Short Video Reel
                   </h4>
                   <p className="text-xs text-slate-500 dark:text-text-muted font-sans">
-                    Aesthetic routine integration
+                    Aligned with your authentic content format
                   </p>
                 </div>
 
                 {/* Deliverable 2 */}
                 <div className="bg-slate-50/60 dark:bg-surface-muted/40 border border-slate-200/60 dark:border-white/10 rounded-2xl p-4">
                   <span className="text-[10px] font-bold tracking-wider uppercase text-slate-500 dark:text-text-muted font-sans block mb-1">
-                    Secondary Support
+                    Supporting Deliverables
                   </span>
                   <h4 className="font-sans font-bold text-sm text-slate-900 dark:text-foreground mb-0.5">
-                    3× High-Res Story Frames
+                    2× Creative Story Frames
                   </h4>
                   <p className="text-xs text-slate-500 dark:text-text-muted font-sans">
-                    With direct swipeable brand tag
+                    Featuring product experience &amp; details
                   </p>
                 </div>
 
               </div>
 
-              {/* Green Escrow Panel */}
-              <div className="bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800/40 rounded-2xl p-4 flex items-start gap-3 my-5">
-                <div className="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
-                  🔒
+              {/* Clear Terms Panel */}
+              <div className="bg-pink-50/60 dark:bg-secondary/10 border border-pink-200/60 dark:border-secondary/20 rounded-2xl p-4 flex items-start gap-3 my-5">
+                <div className="w-5 h-5 rounded-full bg-secondary/15 text-secondary flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
+                  ✓
                 </div>
                 <p className="text-xs font-sans text-slate-700 dark:text-slate-300 leading-relaxed">
-                  <strong className="font-bold text-slate-900 dark:text-white">₹30,000 Guaranteed Escrow:</strong> Funds already secured in third-party vault. Auto-released upon approval.
+                  <strong className="font-bold text-slate-900 dark:text-white">Mutual Agreement:</strong> Review brief details, compensation and timelines. You decide whether to collaborate or decline.
                 </p>
               </div>
 
@@ -131,24 +134,24 @@ export default function CreatorAutonomy() {
                 {/* Accept Button (Toggles state) */}
                 <button
                   type="button"
-                  aria-label={accepted ? "Collaboration confirmed" : "Accept collaboration"}
+                  aria-label={accepted ? "Collaboration confirmed" : "Accept invitation"}
                   onClick={() => setAccepted(true)}
                   className="w-full sm:w-auto flex-1 inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full bg-primary hover:bg-theme-hover text-white font-sans font-bold text-xs tracking-wider uppercase transition-all duration-300 shadow-sm hover:shadow-md active:scale-98 cursor-pointer"
                 >
                   {accepted ? (
-                    <span>COLLABORATION CONFIRMED ✓</span>
+                    <span>INVITATION ACCEPTED ✓</span>
                   ) : (
-                    <span>Accept Collaboration</span>
+                    <span>Accept Invitation</span>
                   )}
                 </button>
 
                 {/* Decline Button */}
                 <button
                   type="button"
-                  aria-label="Decline respectfully"
+                  aria-label="Decline invitation"
                   className="w-full sm:w-auto flex-1 inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full bg-white dark:bg-surface border border-slate-200/80 dark:border-white/20 text-slate-700 dark:text-foreground hover:border-secondary hover:text-secondary font-sans font-bold text-xs tracking-wider transition-all duration-300 shadow-xs cursor-pointer"
                 >
-                  <span>Decline Respectfully</span>
+                  <span>Decline</span>
                 </button>
 
               </div>

@@ -8,65 +8,42 @@ export default function HowItWorksLifecycle() {
     {
       number: "01",
       title: "Discover",
-      description: "Aesthetic talent matching",
-      numberColor: "text-secondary",
-      titleColor: "text-white group-hover:text-secondary",
+      description: "Find creator matches for your brand",
     },
     {
       number: "02",
-      title: "Create",
-      description: "Structured visual briefs",
-      numberColor: "text-secondary",
-      titleColor: "text-white group-hover:text-secondary",
+      title: "Create a Campaign",
+      description: "Define your creative brief and goals",
     },
     {
       number: "03",
       title: "Connect",
-      description: "Proposal & moodboard chat",
-      numberColor: "text-secondary",
-      titleColor: "text-white group-hover:text-secondary",
+      description: "Start the conversation and discuss ideas",
     },
     {
       number: "04",
-      title: "Collaborate",
-      description: "Unified workspace locking",
-      numberColor: "text-secondary",
-      titleColor: "text-white group-hover:text-secondary",
+      title: "Plan Together",
+      description: "Agree on deliverables and timelines",
     },
     {
       number: "05",
-      title: "Content",
-      description: "Authentic 9:16 production",
-      numberColor: "text-secondary",
-      titleColor: "text-white group-hover:text-secondary",
+      title: "Collaborate",
+      description: "Work together in a dedicated workspace",
     },
     {
       number: "06",
-      title: "Review",
-      description: "Timestamped refinement",
-      numberColor: "text-secondary",
-      titleColor: "text-white group-hover:text-secondary",
+      title: "Create Content",
+      description: "Produce engaging, original creator content",
     },
     {
       number: "07",
-      title: "Approve",
-      description: "Formal deliverable signoff",
-      numberColor: "text-emerald-400",
-      titleColor: "text-white group-hover:text-emerald-400",
+      title: "Review & Approve",
+      description: "Share feedback and finalize deliverables",
     },
     {
       number: "08",
-      title: "Pay",
-      description: "Instant escrow release",
-      numberColor: "text-emerald-400",
-      titleColor: "text-white group-hover:text-emerald-400",
-    },
-    {
-      number: "09",
-      title: "Grow",
-      description: "Guild & ambassador ties",
-      numberColor: "text-secondary",
-      titleColor: "text-white group-hover:text-secondary",
+      title: "Complete & Grow",
+      description: "Wrap up successfully and build partnerships",
     },
   ];
 
@@ -84,41 +61,40 @@ export default function HowItWorksLifecycle() {
         <ScrollReveal direction="up" delay={0} className="max-w-3xl mx-auto mb-12 sm:mb-16">
           {/* Eyebrow */}
           <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-secondary block mb-4 font-sans text-center">
-            END-TO-END ORCHESTRATION
+            THE CREATORLINK JOURNEY
           </span>
 
           {/* Editorial Main Heading */}
           <h2 className="text-3xl sm:text-4xl lg:text-[44px] font-serif font-medium tracking-tight text-white leading-[1.15] mb-5 text-center">
-            The 9-Stage Collaboration <br className="hidden sm:inline" />
-            Lifecycle
+            Simple Steps. Meaningful Collaborations.
           </h2>
 
           {/* Description */}
           <p className="text-sm sm:text-base text-slate-400 font-sans leading-relaxed max-w-xl mx-auto text-center">
-            A coherent continuum where every stage preserves artistic integrity and transactional safety.
+            From discovering the right creator to completing a campaign, CreatorLink brings the collaboration journey together.
           </p>
         </ScrollReveal>
 
 
         {/* -------------------------------------------------------
-            9 STAGE CARDS GRID (1 ROW ON DESKTOP)
+            8 STAGE CARDS GRID
         ------------------------------------------------------- */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-9 gap-3 sm:gap-3.5">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 sm:gap-3.5">
           {stages.map((stage, idx) => (
             <ScrollReveal
               key={idx}
               direction="up"
-              delay={(idx % 9) * 40}
-              className="bg-[#222226] border border-white/10 rounded-2xl p-4 sm:p-4.5 text-left transition-all duration-300 ease-out cursor-pointer hover:-translate-y-[4px] hover:scale-[1.01] hover:border-secondary hover:shadow-[0_8px_24px_-4px_rgba(255,79,135,0.25)] flex flex-col justify-between min-h-[140px] sm:min-h-[155px] group"
+              delay={(idx % 8) * 40}
+              className="bg-[#222226] border border-white/10 rounded-2xl p-4 sm:p-4.5 text-left transition-all duration-300 ease-out cursor-pointer hover:-translate-y-[4px] hover:scale-[1.01] hover:border-secondary hover:shadow-[0_8px_24px_-4px_rgba(255,79,135,0.25)] flex flex-col justify-between min-h-[145px] sm:min-h-[160px] group"
             >
               {/* Stage Number */}
               <div>
-                <span className={`text-xs sm:text-sm font-bold font-sans block mb-2 ${stage.numberColor}`}>
+                <span className="text-xs sm:text-sm font-bold font-sans block mb-2 text-secondary">
                   {stage.number}
                 </span>
 
                 {/* Stage Title */}
-                <h3 className={`font-sans font-bold text-sm sm:text-base block mb-1.5 leading-tight transition-colors duration-300 ${stage.titleColor}`}>
+                <h3 className="font-sans font-bold text-sm sm:text-base block mb-1.5 leading-tight text-white group-hover:text-secondary transition-colors duration-300">
                   {stage.title}
                 </h3>
               </div>

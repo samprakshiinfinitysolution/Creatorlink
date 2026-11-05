@@ -4,37 +4,36 @@ import React, { useState } from "react";
 import ScrollReveal from "@/components/theme/ScrollReveal";
 
 export default function CreatorLifecycle() {
-  // Clean static data structure ready for future backend integration
   const [lifecycleSteps] = useState([
     {
       number: "01",
-      title: "Identity",
-      description: "Publish your visual lookbook and rate card with zero clutter.",
+      title: "Create Your Profile",
+      description: "Introduce yourself and your creative niche.",
     },
     {
       number: "02",
-      title: "Discover",
-      description: "Let compatible fashion & lifestyle brands come directly to you.",
+      title: "Showcase Your Work",
+      description: "Add your portfolio, content and services.",
     },
     {
       number: "03",
-      title: "Collaborate",
-      description: "Lock deliverables, timeline, and escrow upfront with clear mutual terms.",
+      title: "Discover Opportunities",
+      description: "Explore campaigns that interest you.",
     },
     {
       number: "04",
-      title: "Create",
-      description: "Produce high-fidelity imagery and reels true to your aesthetic voice.",
+      title: "Connect With Brands",
+      description: "Discuss opportunities and expectations.",
     },
     {
       number: "05",
-      title: "Earn",
-      description: "Guaranteed instant payouts deposited the second deliverables approve.",
+      title: "Create Content",
+      description: "Work on agreed campaign deliverables.",
     },
     {
       number: "06",
-      title: "Grow",
-      description: "Accumulate verified reviews, private brand retainers, and reputation equity.",
+      title: "Complete & Grow",
+      description: "Build experience and explore future collaborations.",
     },
   ]);
 
@@ -51,13 +50,13 @@ export default function CreatorLifecycle() {
         ========================================================= */}
         <ScrollReveal direction="up" delay={0} className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
           <span className="text-[11px] font-bold tracking-[0.22em] uppercase text-secondary font-sans block mb-3">
-            09 / THE LIFECYCLE
+            08 / YOUR CREATOR JOURNEY
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-medium tracking-tight text-slate-900 dark:text-foreground leading-[1.15] mb-4">
-            Create. Collaborate. Grow.
+            A Simple Journey From Profile to Partnership.
           </h2>
           <p className="text-sm sm:text-base text-slate-600 dark:text-text-secondary font-sans leading-relaxed">
-            A seamless lifelong loop for the modern independent aesthetic entrepreneur.
+            CreatorLink helps bring the important parts of your creator journey together, from showcasing your work to connecting with brands and completing collaborations.
           </p>
         </ScrollReveal>
 

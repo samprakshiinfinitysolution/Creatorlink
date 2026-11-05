@@ -18,7 +18,7 @@ import HowItWorksFinalCTA from "@/components/Public/HowItWorks/HowItWorksFinalCT
 export const metadata = {
   title: "How It Works | Creatorlink",
   description:
-    "Creator Hub brings brands and creators together through one simple, structured collaboration journey.",
+    "CreatorLink brings brands and creators together through one simple, structured collaboration journey.",
 };
 
 export default function HowItWorksPage() {

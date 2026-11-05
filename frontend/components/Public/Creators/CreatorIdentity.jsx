@@ -5,6 +5,13 @@ import Image from "next/image";
 import ScrollReveal from "@/components/theme/ScrollReveal";
 
 export default function CreatorIdentity() {
+  const profileFeatures = [
+    "Add your creator bio.",
+    "Highlight your niche and interests.",
+    "Share your social media profiles.",
+    "Showcase your services and creative strengths.",
+  ];
+
   return (
     <section className="relative overflow-hidden bg-[#FAF7F6] dark:bg-background text-foreground py-16 sm:py-20 lg:py-28 px-4 sm:px-6 lg:px-10 xl:px-12 border-b border-border-theme/60 transition-colors duration-300">
       
@@ -14,46 +21,60 @@ export default function CreatorIdentity() {
       <div className="mx-auto max-w-[1440px] relative z-10">
         
         {/* =========================================================
-            1. TOP AREA: HEAVY EDITORIAL INTRO + CREATOR PROFILE PILL
+            1. TOP AREA: EDITORIAL INTRO + CREATOR PROFILE PILL
         ========================================================= */}
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-12 sm:mb-16">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10 sm:mb-14">
           
           {/* Left Intro Text */}
           <ScrollReveal direction="up" delay={0} className="max-w-2xl text-left">
             <span className="text-[11px] font-bold tracking-[0.22em] uppercase text-secondary font-sans block mb-3">
-              02 / IDENTITY
+              02 / BUILD YOUR IDENTITY
             </span>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-medium tracking-tight text-slate-900 dark:text-foreground leading-[1.15] mb-4">
-              Your work says who you are.
+              Let Your Work Introduce You.
             </h2>
             <p className="text-sm sm:text-base text-slate-600 dark:text-text-secondary font-sans leading-relaxed">
-              Show brands your signature aesthetic, palette, and creative cadence before you ever send a formal pitch deck.
+              Create a creator profile that reflects who you are and what you create. Share your bio, niche, social links, content style and professional details so brands can understand your work.
             </p>
           </ScrollReveal>
 
           {/* Right Creator Profile Pill */}
           <ScrollReveal direction="left" delay={100} className="flex-shrink-0">
-            <div className="bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 rounded-full px-4 py-2.5 inline-flex items-center gap-3 shadow-sm">
+            <div className="bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 rounded-full px-5 py-3 inline-flex items-center gap-3 shadow-sm">
               <div className="w-8 h-8 rounded-full bg-secondary/15 text-secondary font-sans font-bold text-xs flex items-center justify-center">
-                AM
+                CP
               </div>
               <div className="text-left">
-                <div className="flex items-center gap-1.5">
-                  <span className="font-sans font-bold text-xs text-slate-900 dark:text-foreground">
-                    Aarohi Mehta
-                  </span>
-                  <span className="w-3.5 h-3.5 rounded-full bg-secondary/15 text-secondary flex items-center justify-center text-[9px] font-bold">
-                    ✓
-                  </span>
-                </div>
+                <span className="font-sans font-bold text-xs text-slate-900 dark:text-foreground block">
+                  Your Creator Identity Starts Here.
+                </span>
                 <p className="text-[10px] font-sans font-medium text-slate-500 dark:text-text-muted">
-                  Beauty & Lifestyle • 4.8★ Rating
+                  Give brands a clear picture of your creativity, experience and content style.
                 </p>
               </div>
             </div>
           </ScrollReveal>
 
         </div>
+
+        {/* 4 Feature Points Row */}
+        <ScrollReveal direction="up" delay={60} className="mb-10 sm:mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            {profileFeatures.map((feature, idx) => (
+              <div
+                key={idx}
+                className="bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 rounded-2xl p-4 flex items-center gap-3 shadow-2xs hover:-translate-y-0.5 transition-transform"
+              >
+                <div className="w-5 h-5 rounded-full bg-secondary/15 text-secondary flex items-center justify-center text-xs font-bold flex-shrink-0">
+                  ✓
+                </div>
+                <span className="text-xs sm:text-sm font-sans font-medium text-slate-800 dark:text-foreground text-left">
+                  {feature}
+                </span>
+              </div>
+            ))}
+          </div>
+        </ScrollReveal>
 
         {/* =========================================================
             2. MAIN ASYMMETRIC MASONRY PORTFOLIO GRID
@@ -69,7 +90,7 @@ export default function CreatorIdentity() {
             <div className="group relative w-full h-[320px] sm:h-[350px] rounded-3xl overflow-hidden bg-slate-100 dark:bg-surface border border-black/[0.06] dark:border-white/10 shadow-sm hover:shadow-xl transition-all duration-300">
               <Image
                 src="https://res.cloudinary.com/atr5osne/image/upload/v1792054714/creatorlink/public/editorial/se3wpecdot8jphnowzci.webp"
-                alt="Beauty Reel"
+                alt="Beauty & Wellness Content Sample"
                 fill
                 sizes="(max-width: 640px) 100vw, 350px"
                 className="object-cover group-hover:scale-[1.05] transition-transform duration-500 ease-out"
@@ -78,7 +99,7 @@ export default function CreatorIdentity() {
               {/* Top Tag Pill */}
               <div className="absolute top-4 left-4 z-10">
                 <span className="bg-white/90 dark:bg-surface/90 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase text-slate-900 dark:text-foreground border border-black/5 shadow-xs">
-                  BEAUTY • REEL
+                  BEAUTY &amp; WELLNESS
                 </span>
               </div>
 
@@ -86,13 +107,12 @@ export default function CreatorIdentity() {
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-5 text-white text-left z-10 flex items-end justify-between">
                 <div>
                   <h4 className="font-sans font-semibold text-sm text-white">
-                    Velvet Dew Lip Care
+                    Video Feature &amp; Demo
                   </h4>
                   <p className="text-xs text-white/80 font-sans mt-0.5">
-                    2.4M Views
+                    Original Creator Work
                   </p>
                 </div>
-                {/* Reel icon */}
                 <div className="w-7 h-7 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white text-xs">
                   ▶
                 </div>
@@ -103,14 +123,14 @@ export default function CreatorIdentity() {
             <div className="group relative w-full h-[220px] sm:h-[240px] rounded-3xl overflow-hidden bg-slate-100 dark:bg-surface border border-black/[0.06] dark:border-white/10 shadow-sm hover:shadow-xl transition-all duration-300">
               <Image
                 src="https://res.cloudinary.com/atr5osne/image/upload/v1792054740/creatorlink/public/editorial/hwajtuk9gwkhujb9glj8.webp"
-                alt="Interior Spaces"
+                alt="Interior Design Sample"
                 fill
                 sizes="(max-width: 640px) 100vw, 350px"
                 className="object-cover group-hover:scale-[1.05] transition-transform duration-500 ease-out"
               />
               <div className="absolute top-4 left-4 z-10">
                 <span className="bg-white/90 dark:bg-surface/90 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase text-slate-900 dark:text-foreground border border-black/5 shadow-xs">
-                  SPACES
+                  SPACES &amp; INTERIORS
                 </span>
               </div>
             </div>
@@ -121,33 +141,30 @@ export default function CreatorIdentity() {
               COLUMN 2 (Lg: 3 cols): TALL LOOKBOOK CARD
           ------------------------------------------------------- */}
           <ScrollReveal direction="up" delay={160} className="lg:col-span-3">
-            {/* CARD 2: LOOKBOOK #04 */}
             <div className="group relative w-full h-[566px] sm:h-[617px] rounded-3xl overflow-hidden bg-slate-100 dark:bg-surface border border-black/[0.06] dark:border-white/10 shadow-sm hover:shadow-xl transition-all duration-300">
               <Image
                 src="https://res.cloudinary.com/atr5osne/image/upload/v1792055946/creatorlink/public/editorial/pxw6resagifvayqppnqp.webp"
-                alt="Lookbook 04"
+                alt="Fashion & Editorial Photography Sample"
                 fill
                 sizes="(max-width: 640px) 100vw, 400px"
                 className="object-cover object-top group-hover:scale-[1.05] transition-transform duration-500 ease-out"
               />
               
-              {/* Top Tag Pill */}
               <div className="absolute top-4 right-4 z-10">
                 <span className="bg-[#FCEFEF] dark:bg-secondary/20 text-secondary border border-secondary/30 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase shadow-xs">
-                  LOOKBOOK #04
+                  PORTFOLIO LOOKBOOK
                 </span>
               </div>
 
-              {/* Bottom Text Overlay */}
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent p-6 text-white text-left z-10">
                 <span className="text-[10px] font-bold tracking-widest uppercase text-pink-200 block mb-1">
-                  AUTUMN CAPSULE
+                  EDITORIAL SERIES
                 </span>
                 <h3 className="font-serif text-2xl sm:text-3xl font-medium text-white mb-1.5">
-                  Architectural Ease
+                  Visual Aesthetics &amp; Styling
                 </h3>
                 <p className="text-xs font-sans text-white/80">
-                  8 Assets Delivered • 100% Brand Approval
+                  Curated photography and brand deliverables
                 </p>
               </div>
             </div>
@@ -165,14 +182,14 @@ export default function CreatorIdentity() {
               <div className="group relative w-full h-[220px] sm:h-[240px] rounded-3xl overflow-hidden bg-slate-100 dark:bg-surface border border-black/[0.06] dark:border-white/10 shadow-sm hover:shadow-xl transition-all duration-300">
                 <Image
                   src="https://res.cloudinary.com/atr5osne/image/upload/v1792054733/creatorlink/public/campaigns/cru8rs8ckm8iszusol6z.webp"
-                  alt="UGC Editorial Skincare"
+                  alt="UGC Product Feature Sample"
                   fill
                   sizes="(max-width: 640px) 100vw, 350px"
                   className="object-cover group-hover:scale-[1.05] transition-transform duration-500 ease-out"
                 />
                 <div className="absolute top-4 left-4 z-10">
                   <span className="bg-white/90 dark:bg-surface/90 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase text-slate-900 dark:text-foreground border border-black/5 shadow-xs">
-                    UGC EDITORIAL
+                    UGC CONTENT
                   </span>
                 </div>
               </div>
@@ -181,49 +198,47 @@ export default function CreatorIdentity() {
               <div className="group relative w-full h-[220px] sm:h-[240px] rounded-3xl overflow-hidden bg-slate-100 dark:bg-surface border border-black/[0.06] dark:border-white/10 shadow-sm hover:shadow-xl transition-all duration-300">
                 <Image
                   src="https://res.cloudinary.com/atr5osne/image/upload/v1792055958/creatorlink/public/editorial/wknylb4namiugiypc1sn.webp"
-                  alt="Gastronomy Table"
+                  alt="Lifestyle Content Sample"
                   fill
                   sizes="(max-width: 640px) 100vw, 350px"
                   className="object-cover group-hover:scale-[1.05] transition-transform duration-500 ease-out"
                 />
                 <div className="absolute top-4 left-4 z-10">
                   <span className="bg-[#FCEFEF]/90 dark:bg-secondary/20 text-secondary border border-secondary/30 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase shadow-xs">
-                    GASTRONOMY
+                    FOOD &amp; LIFESTYLE
                   </span>
                 </div>
                 <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-4 text-white text-left z-10">
                   <h4 className="font-sans font-semibold text-xs text-white">
-                    Slow Living Morning Table
+                    Morning Routine &amp; Storytelling
                   </h4>
                 </div>
               </div>
 
             </div>
 
-            {/* BOTTOM ROW (WIDE CAMPAIGN CARD: FEATURED TRIP) */}
+            {/* BOTTOM ROW (WIDE CAMPAIGN CARD) */}
             <div className="group relative w-full h-[320px] sm:h-[350px] rounded-3xl overflow-hidden bg-slate-100 dark:bg-surface border border-black/[0.06] dark:border-white/10 shadow-sm hover:shadow-xl transition-all duration-300">
               <Image
                 src="https://res.cloudinary.com/atr5osne/image/upload/v1792055986/creatorlink/public/editorial/baenp9gwb0oiigc80uuz.webp"
-                alt="Amalfi Horizon Campaign"
+                alt="Travel & Hospitality Campaign Showcase"
                 fill
                 sizes="(max-width: 640px) 100vw, 700px"
                 className="object-cover group-hover:scale-[1.05] transition-transform duration-500 ease-out"
               />
               
-              {/* Top Tag Pill */}
               <div className="absolute top-4 left-4 z-10">
                 <span className="bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/40 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase shadow-xs">
-                  FEATURED TRIP
+                  TRAVEL &amp; EXPERIENCES
                 </span>
               </div>
 
-              {/* Bottom Text Overlay */}
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent p-6 text-white text-left z-10">
                 <h3 className="font-serif text-xl sm:text-2xl font-medium text-white mb-1">
-                  The Amalfi Horizon Campaign
+                  Destination Storytelling
                 </h3>
                 <p className="text-xs font-sans text-white/80">
-                  Client: Luxury Escapes • 4.1M Reach
+                  Showcase brand experiences through evocative photography &amp; video
                 </p>
               </div>
             </div>

@@ -15,7 +15,7 @@ import CreatorFinalCTA from "@/components/Public/Creators/CreatorFinalCTA";
 export const metadata = {
   title: "For Creators | Creatorlink",
   description:
-    "The private digital sanctuary where elite taste, creative autonomy, and top-tier luxury brand partnerships converge.",
+    "CreatorLink helps content creators and influencers showcase their portfolio, connect with brands and discover collaboration opportunities.",
 };
 
 export default function CreatorsPage() {

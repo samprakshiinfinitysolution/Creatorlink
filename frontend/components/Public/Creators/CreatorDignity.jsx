@@ -4,18 +4,21 @@ import React, { useState } from "react";
 import ScrollReveal from "@/components/theme/ScrollReveal";
 
 export default function CreatorDignity() {
-  // Clean structure ready for future backend integration
-  const [payoutData] = useState({
-    campaignLabel: "SETTLED CAMPAIGN",
-    campaignTitle: "Glow Beauty Rose Peptide Launch",
-    payoutStatus: "PAID DIRECT TO BANK",
-    netEarnings: "₹30,000",
-    deductionNote: "Zero platform transaction deduction on creator fee",
+  const dealFeatures = [
+    "Discuss your compensation.",
+    "Confirm content deliverables.",
+    "Agree on timelines.",
+    "Clarify campaign expectations.",
+  ];
+
+  const [collaborationDetails] = useState({
+    title: "Clear Terms. Better Partnerships.",
+    description: "Make sure you and the brand are aligned before the work begins.",
     stages: [
-      { name: "PENDING", completed: true },
-      { name: "APPROVED", completed: true },
-      { name: "PROCESSING", completed: true },
-      { name: "PAID ✓", completed: true, isCurrent: true },
+      { name: "PROPOSED", completed: true },
+      { name: "AGREED", completed: true },
+      { name: "IN PROGRESS", completed: true, isCurrent: true },
+      { name: "COMPLETED", completed: false },
     ],
   });
 
@@ -30,20 +33,39 @@ export default function CreatorDignity() {
         {/* =========================================================
             1. TOP CONTENT: CENTERED INTRO
         ========================================================= */}
-        <ScrollReveal direction="up" delay={0} className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
+        <ScrollReveal direction="up" delay={0} className="text-center max-w-2xl mx-auto mb-10 sm:mb-14">
           <span className="text-[11px] font-bold tracking-[0.22em] uppercase text-secondary font-sans block mb-3">
-            07 / DIGNITY
+            05 / AGREE ON THE DETAILS
           </span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-medium tracking-tight text-slate-900 dark:text-foreground leading-[1.15] mb-4 uppercase">
-            YOUR CREATIVITY HAS VALUE.
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-medium tracking-tight text-slate-900 dark:text-foreground leading-[1.15] mb-4">
+            Know the Plan Before You Start Creating.
           </h2>
           <p className="text-sm sm:text-base text-slate-600 dark:text-text-secondary font-sans leading-relaxed">
-            No chasing invoices, net-90 payment delays, or ambiguous commission deductions. Guaranteed payouts released immediately upon milestone signoff.
+            Before starting a collaboration, discuss the content requirements, deliverables, pricing, deadlines and usage expectations. Clear communication helps both sides work with confidence.
           </p>
         </ScrollReveal>
 
+        {/* 4 Feature Points Row */}
+        <ScrollReveal direction="up" delay={60} className="mb-10 sm:mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 max-w-5xl mx-auto">
+            {dealFeatures.map((feature, idx) => (
+              <div
+                key={idx}
+                className="bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 rounded-2xl p-4 flex items-center gap-3 shadow-2xs hover:-translate-y-0.5 transition-transform"
+              >
+                <div className="w-5 h-5 rounded-full bg-secondary/15 text-secondary flex items-center justify-center text-xs font-bold flex-shrink-0">
+                  ✓
+                </div>
+                <span className="text-xs sm:text-sm font-sans font-medium text-slate-800 dark:text-foreground text-left">
+                  {feature}
+                </span>
+              </div>
+            ))}
+          </div>
+        </ScrollReveal>
+
         {/* =========================================================
-            2. MAIN SETTLED PAYMENT CARD
+            2. MAIN CLEAR TERMS CARD
         ========================================================= */}
         <ScrollReveal direction="scale" delay={100} className="max-w-[880px] mx-auto">
           <div className="w-full bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 hover:border-secondary/60 rounded-[32px] sm:rounded-[36px] p-6 sm:p-10 shadow-sm hover:shadow-[0_12px_36px_-8px_rgba(255,79,135,0.18)] hover:-translate-y-1 hover:scale-[1.005] transition-all duration-300 relative text-left group">
@@ -52,52 +74,76 @@ export default function CreatorDignity() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <span className="text-[10px] font-bold tracking-widest uppercase text-slate-500 dark:text-text-muted font-sans block mb-1">
-                  {payoutData.campaignLabel}
+                  ALIGNMENT &amp; EXPECTATIONS
                 </span>
                 <h3 className="font-serif text-xl sm:text-2xl font-medium text-slate-900 dark:text-foreground">
-                  {payoutData.campaignTitle}
+                  {collaborationDetails.title}
                 </h3>
               </div>
 
               <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/40 text-emerald-700 dark:text-emerald-400 text-xs font-bold px-3.5 py-1.5 rounded-full flex items-center gap-1.5 flex-shrink-0 self-start sm:self-auto">
-                <span className="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-[10px] font-bold">
-                  ✓
-                </span>
-                <span>{payoutData.payoutStatus}</span>
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span>TERMS ALIGNED</span>
               </div>
             </div>
 
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-text-secondary font-sans mt-2">
+              {collaborationDetails.description}
+            </p>
+
             <div className="border-t border-slate-100 dark:border-white/10 my-6 sm:my-8" />
 
-            {/* Earnings Area */}
-            <div className="text-center py-2 sm:py-4">
-              <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-slate-500 dark:text-text-muted font-sans block mb-2">
-                NET CREATOR EARNINGS
-              </span>
-              <span className="font-serif text-5xl sm:text-6xl lg:text-7xl font-medium tracking-tight text-slate-900 dark:text-foreground mb-3 block">
-                {payoutData.netEarnings}
-              </span>
-              <p className="text-xs font-sans text-emerald-600 dark:text-emerald-400 font-medium flex items-center justify-center gap-1.5">
-                <span>✦</span>
-                <span>{payoutData.deductionNote}</span>
-              </p>
+            {/* Terms Summary Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 text-center sm:text-left">
+              <div className="p-4 rounded-2xl bg-slate-50/70 dark:bg-surface-muted/40 border border-slate-200/60 dark:border-white/10">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-text-muted font-sans block mb-1">
+                  Deliverables
+                </span>
+                <span className="font-sans font-bold text-sm text-slate-900 dark:text-foreground">
+                  Pre-agreed Content Scope
+                </span>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-slate-50/70 dark:bg-surface-muted/40 border border-slate-200/60 dark:border-white/10">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-text-muted font-sans block mb-1">
+                  Timeline
+                </span>
+                <span className="font-sans font-bold text-sm text-slate-900 dark:text-foreground">
+                  Clear Review &amp; Post Dates
+                </span>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-slate-50/70 dark:bg-surface-muted/40 border border-slate-200/60 dark:border-white/10">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-text-muted font-sans block mb-1">
+                  Pricing
+                </span>
+                <span className="font-sans font-bold text-sm text-slate-900 dark:text-foreground">
+                  Transparent Agreed Rates
+                </span>
+              </div>
             </div>
 
-            <div className="border-t border-slate-100 dark:border-white/10 my-6 sm:my-8" />
-
-            {/* 4-Stage Payment Status Tracker */}
+            {/* 4-Stage Status Tracker */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 items-center">
-              {payoutData.stages.map((stage, idx) => (
+              {collaborationDetails.stages.map((stage, idx) => (
                 <div key={idx} className="flex flex-col items-center">
                   {/* Progress Segment Bar */}
-                  <div className="w-full h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 shadow-xs" />
+                  <div
+                    className={`w-full h-1.5 rounded-full shadow-xs ${
+                      stage.completed
+                        ? "bg-emerald-500 dark:bg-emerald-400"
+                        : "bg-slate-200 dark:bg-white/10"
+                    }`}
+                  />
                   
                   {/* Stage Label */}
                   <span
                     className={`text-[10px] sm:text-xs font-bold tracking-widest uppercase font-sans text-center mt-2.5 ${
                       stage.isCurrent
-                        ? "text-slate-900 dark:text-foreground font-extrabold"
-                        : "text-slate-500 dark:text-text-muted"
+                        ? "text-secondary font-extrabold"
+                        : stage.completed
+                        ? "text-slate-900 dark:text-foreground"
+                        : "text-slate-400 dark:text-text-muted"
                     }`}
                   >
                     {stage.name}

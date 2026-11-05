@@ -15,8 +15,15 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata = {
-  title: "Maison Synergie",
-  description: "Maison Synergie - Creator & Brand Collaboration Platform",
+  title: "CreatorLink | Brand & Creator Collaboration Platform",
+  description:
+    "CreatorLink connects visionary creators with premium brands for high-impact campaigns, verified audience metrics, and seamless collaborations.",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico" },
+    ],
+  },
 };
 
 export default function RootLayout({ children }) {

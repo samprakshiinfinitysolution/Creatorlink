@@ -6,7 +6,16 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   fetchBrandWorkspaceById,
   clearSuccessMessage,
+  updateWorkspaceFromSocket,
 } from "@/redux/brand/workspace/workspace_slice";
+import {
+  socket,
+  registerSocketConsumer,
+  unregisterSocketConsumer,
+  confirmSocketAuthSuccess,
+  handleSocketConnectionError,
+} from "@/lib/socket";
+import { refreshToken } from "@/redux/auth/auth_slice";
 import {
   createPaymentOrder,
   verifyPayment,
@@ -571,6 +580,70 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
   const [deliverableFilter, setDeliverableFilter] = useState("all"); // 'all' | 'submitted' | 'pending'
   const [isOlderSubmissionsOpen, setIsOlderSubmissionsOpen] = useState(false);
   const [failedAvatarImages, setFailedAvatarImages] = useState({});
+
+  const authenticatedUserId = user?._id || user?.id || null;
+
+  // Register socket consumer for the active brand workspace session
+  useEffect(() => {
+    const consumerId = `brand-workspace-${workspaceId}`;
+    registerSocketConsumer(consumerId, authenticatedUserId);
+    return () => {
+      unregisterSocketConsumer(consumerId);
+    };
+  }, [workspaceId, authenticatedUserId]);
+
+  // Join workspace room and subscribe to real-time deliverable synchronization events
+  useEffect(() => {
+    if (!workspaceId) return;
+
+    const joinWorkspace = () => {
+      socket.emit("workspace:join", String(workspaceId), (result) => {
+        if (!result?.success) {
+          console.error("Failed to join workspace room:", result?.message);
+        }
+      });
+    };
+
+    if (socket.connected) {
+      joinWorkspace();
+    }
+
+    const handleConnectSuccess = () => {
+      confirmSocketAuthSuccess();
+      joinWorkspace();
+    };
+
+    const handleConnectError = (err) => {
+      handleSocketConnectionError(err, dispatch, refreshToken);
+    };
+
+    const handleWorkspaceRealtimeUpdate = (data) => {
+      if (!data?.workspaceId || String(data.workspaceId) !== String(workspaceId)) return;
+
+      if (data.workspace) {
+        dispatch(updateWorkspaceFromSocket(data.workspace));
+      }
+      dispatch(fetchBrandWorkspaceById(workspaceId));
+    };
+
+    socket.on("connect", handleConnectSuccess);
+    socket.on("connect_error", handleConnectError);
+    socket.on("workspace:deliverable_submitted", handleWorkspaceRealtimeUpdate);
+    socket.on("workspace:revision_requested", handleWorkspaceRealtimeUpdate);
+    socket.on("workspace:approved", handleWorkspaceRealtimeUpdate);
+
+    return () => {
+      socket.off("connect", handleConnectSuccess);
+      socket.off("connect_error", handleConnectError);
+      socket.off("workspace:deliverable_submitted", handleWorkspaceRealtimeUpdate);
+      socket.off("workspace:revision_requested", handleWorkspaceRealtimeUpdate);
+      socket.off("workspace:approved", handleWorkspaceRealtimeUpdate);
+
+      if (socket.connected) {
+        socket.emit("workspace:leave", String(workspaceId));
+      }
+    };
+  }, [dispatch, workspaceId]);
 
   useEffect(() => {
     setFailedAvatarImages({});

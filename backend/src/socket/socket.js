@@ -2,6 +2,7 @@
 import { Server } from "socket.io";
 import { parseCookie } from "cookie";
 import Conversation from "../modules/messages/conversation.model.js";
+import Workspace from "../modules/workspace/workspace.model.js";
 import Auth from "../modules/auth/auth.model.js";
 import {
     verifyAccessToken,
@@ -261,6 +262,59 @@ const initializeSocket = (httpServer) => {
             }
         });
 
+        // Join workspace room only if the authenticated user is an authorized participant (creator or brand).
+        socket.on("workspace:join", async (workspaceId, callback) => {
+            try {
+                if (
+                    typeof workspaceId !== "string" ||
+                    !/^[a-f\d]{24}$/i.test(workspaceId)
+                ) {
+                    return callback?.({
+                        success: false,
+                        message: "Invalid workspace ID"
+                    });
+                }
+
+                const workspace = await Workspace.findOne({
+                    _id: workspaceId,
+                    $or: [
+                        { creator: socket.data.user.userId },
+                        { brand: socket.data.user.userId }
+                    ]
+                }).select("_id");
+
+                if (!workspace) {
+                    return callback?.({
+                        success: false,
+                        message: "Workspace not found or access denied"
+                    });
+                }
+
+                await socket.join(`workspace:${workspaceId}`);
+
+                callback?.({
+                    success: true,
+                    workspaceId
+                });
+            } catch (error) {
+                console.error("Workspace join failed:", error);
+
+                callback?.({
+                    success: false,
+                    message: "Unable to join workspace"
+                });
+            }
+        });
+
+        socket.on("workspace:leave", async (workspaceId) => {
+            if (
+                typeof workspaceId === "string" &&
+                /^[a-f\d]{24}$/i.test(workspaceId)
+            ) {
+                await socket.leave(`workspace:${workspaceId}`);
+            }
+        });
+
         socket.on("disconnect", () => {
             console.log(
                 "Socket disconnected:",
@@ -288,10 +342,25 @@ const emitNotificationToUser = (userId, notificationData) => {
     }
 };
 
+const emitWorkspaceEvent = (workspaceId, eventName, payload) => {
+    if (!ioInstance || !workspaceId) {
+        return false;
+    }
+
+    try {
+        ioInstance.to(`workspace:${workspaceId.toString()}`).emit(eventName, payload);
+        return true;
+    } catch (error) {
+        console.error(`Socket workspace event emission failed (${eventName}):`, error?.message || error);
+        return false;
+    }
+};
+
 export {
     initializeSocket,
     getIO,
-    emitNotificationToUser
+    emitNotificationToUser,
+    emitWorkspaceEvent
 };
 
 export default initializeSocket;

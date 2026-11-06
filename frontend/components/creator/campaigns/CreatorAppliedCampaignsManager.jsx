@@ -640,10 +640,12 @@ export default function CreatorAppliedCampaignsManager() {
                 const bookingId = item._id || item.bookingId;
                 const campaignObj = item.campaign || {};
                 const brandObj = item.brand || {};
+                const brandName = brandObj.companyName || brandObj.name || "Brand Partner";
+                const brandLogo = brandObj.logo || brandObj.avatar || brandObj.profileImage || "";
                 const badge = getStatusBadge(item.status);
                 const StatusIcon = badge.Icon;
                 const displayPrice = item.agreedPrice || campaignObj.budget;
-                const brandInitial = (brandObj.name || "B").charAt(0).toUpperCase();
+                const brandInitial = (brandName.trim()[0] || "B").toUpperCase();
 
                 const deliverablesList =
                   (Array.isArray(item.deliverables) && item.deliverables.length > 0
@@ -713,11 +715,20 @@ export default function CreatorAppliedCampaignsManager() {
 
                         {/* Floating Brand Badge Bottom-Left */}
                         <div className="absolute bottom-2 left-2 bg-white/95 dark:bg-surface/95 backdrop-blur-xs px-2 py-0.5 rounded-lg shadow-xs border border-border-theme/60 flex items-center gap-1.5 max-w-[85%]">
-                          <div className="w-3.5 h-3.5 rounded-full bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 flex items-center justify-center text-[8px] font-sans font-semibold shrink-0">
-                            {brandInitial}
-                          </div>
+                          {brandLogo ? (
+                            /* eslint-disable-next-line @next/next/no-img-element */
+                            <img
+                              src={brandLogo}
+                              alt={brandName}
+                              className="w-3.5 h-3.5 rounded-full object-cover shrink-0"
+                            />
+                          ) : (
+                            <div className="w-3.5 h-3.5 rounded-full bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 flex items-center justify-center text-[8px] font-sans font-semibold shrink-0">
+                              {brandInitial}
+                            </div>
+                          )}
                           <span className="text-[10px] sm:text-[11px] font-sans font-semibold text-foreground truncate">
-                            {brandObj.name || "Brand Partner"}
+                            {brandName}
                           </span>
                         </div>
                       </div>
@@ -728,11 +739,20 @@ export default function CreatorAppliedCampaignsManager() {
                           {campaignObj.title || "Campaign Collaboration"}
                         </h2>
                         <div className="flex items-center gap-1.5 mt-0.5">
-                          <div className="w-3.5 h-3.5 rounded-full bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 flex items-center justify-center text-[8px] font-sans font-semibold shrink-0">
-                            {brandInitial}
-                          </div>
+                          {brandLogo ? (
+                            /* eslint-disable-next-line @next/next/no-img-element */
+                            <img
+                              src={brandLogo}
+                              alt={brandName}
+                              className="w-3.5 h-3.5 rounded-full object-cover shrink-0"
+                            />
+                          ) : (
+                            <div className="w-3.5 h-3.5 rounded-full bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 flex items-center justify-center text-[8px] font-sans font-semibold shrink-0">
+                              {brandInitial}
+                            </div>
+                          )}
                           <span className="text-xs font-sans text-text-secondary truncate">
-                            by {brandObj.name || "Brand User"}
+                            by {brandName}
                           </span>
                         </div>
                       </div>

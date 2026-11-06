@@ -426,11 +426,25 @@ export default function CreatorCampaignDetail({ campaignId }) {
                 <h1 className="font-serif font-medium text-2xl sm:text-3xl text-foreground tracking-tight">
                   {campaign.title}
                 </h1>
-                {campaign.brand?.name && (
-                  <p className="text-xs sm:text-sm text-text-secondary font-medium">
-                    Posted by <span className="text-foreground font-semibold">{campaign.brand.name}</span>
-                    {campaign.brand.email && ` (${campaign.brand.email})`}
-                  </p>
+                {(campaign.brand?.name || campaign.brand?.companyName) && (
+                  <div className="flex items-center gap-2 pt-0.5">
+                    {campaign.brand?.logo || campaign.brand?.avatar ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img
+                        src={campaign.brand.logo || campaign.brand.avatar}
+                        alt={campaign.brand.companyName || campaign.brand.name}
+                        className="w-5 h-5 rounded-full object-cover shrink-0 border border-border-theme"
+                      />
+                    ) : (
+                      <div className="w-5 h-5 rounded-full bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 flex items-center justify-center text-[10px] font-sans font-semibold shrink-0">
+                        {((campaign.brand.companyName || campaign.brand.name || "B").trim()[0] || "B").toUpperCase()}
+                      </div>
+                    )}
+                    <p className="text-xs sm:text-sm text-text-secondary font-medium">
+                      Posted by <span className="text-foreground font-semibold">{campaign.brand.companyName || campaign.brand.name}</span>
+                      {campaign.brand.email && ` (${campaign.brand.email})`}
+                    </p>
+                  </div>
                 )}
               </div>
 
@@ -691,6 +705,7 @@ export default function CreatorCampaignDetail({ campaignId }) {
         campaignBudget={campaign?.budget}
         minBudget={campaign?.minBudget}
         maxBudget={campaign?.maxBudget}
+        brand={campaign?.brand}
         onContinue={handleApplySubmit}
         submitting={submitting}
         submitError={error}

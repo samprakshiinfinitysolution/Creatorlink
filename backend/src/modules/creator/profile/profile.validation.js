@@ -12,7 +12,6 @@ const ALLOWED_PROFILE_FIELDS = [
     "socialLinks",
     "title",
     "keywords",
-    "niches",
     "dob",
     "gender",
     "languages",
@@ -56,7 +55,6 @@ const createProfileValidation = (req, res, next) => {
         socialLinks,
         title,
         keywords,
-        niches,
         dob,
         gender,
         languages,
@@ -335,32 +333,6 @@ const createProfileValidation = (req, res, next) => {
             throw createApiError(
                 400,
                 "Each keyword must be a string"
-            );
-        }
-    }
-
-
-    // Validate niches.
-    if (niches !== undefined) {
-
-        if (!Array.isArray(niches)) {
-            throw createApiError(
-                400,
-                "Niches must be an array"
-            );
-        }
-
-        if (niches.length > 3) {
-            throw createApiError(
-                400,
-                "Niches cannot exceed 3 items"
-            );
-        }
-
-        if (niches.some((niche) => typeof niche !== "string")) {
-            throw createApiError(
-                400,
-                "Each niche must be a string"
             );
         }
     }

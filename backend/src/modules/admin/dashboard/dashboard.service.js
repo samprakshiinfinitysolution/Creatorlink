@@ -116,23 +116,23 @@ const getAdminDashboardOverviewService = async (query = {}) => {
 
         // 9. Recent signups
         Auth.find({ role: { $in: ["creator", "brand"] } })
-            .select("name email role isVerified createdAt")
+            .select("name email role isVerified avatar createdAt")
             .sort({ createdAt: -1 })
             .limit(recentLimit)
             .lean(),
 
         // 10. Recent campaigns
         Campaign.find()
-            .populate("brand", "name email")
-            .select("title brand budget currency status requiredCreators createdAt")
+            .populate("brand", "name email avatar")
+            .select("title brand budget currency status requiredCreators coverImage createdAt")
             .sort({ createdAt: -1 })
             .limit(recentLimit)
             .lean(),
 
         // 11. Recent collaboration payments
         Payment.find({ status: "paid" })
-            .populate("brand", "name email")
-            .populate("creator", "name email")
+            .populate("brand", "name email avatar")
+            .populate("creator", "name email avatar")
             .select("amount currency status razorpayPaymentId brand creator paidAt createdAt")
             .sort({ paidAt: -1, createdAt: -1 })
             .limit(recentLimit)
@@ -140,7 +140,7 @@ const getAdminDashboardOverviewService = async (query = {}) => {
 
         // 12. Recent subscription payments
         SubscriptionPayment.find({ status: "captured" })
-            .populate("brand", "name email")
+            .populate("brand", "name email avatar")
             .populate("plan", "name planType")
             .select("amount currency status razorpayPaymentId brand plan paidAt createdAt")
             .sort({ createdAt: -1 })

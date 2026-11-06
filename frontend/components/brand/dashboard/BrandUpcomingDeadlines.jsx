@@ -104,7 +104,7 @@ export default function BrandUpcomingDeadlines({ deadlines = [] }) {
   const safeDeadlines = Array.isArray(deadlines) ? deadlines : [];
 
   return (
-    <div className="bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col h-full transition-colors min-w-0 overflow-hidden">
+    <div className="bg-surface border border-border-theme rounded-2xl p-4 sm:p-6 shadow-xs flex flex-col h-full transition-colors min-w-0 overflow-hidden">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="font-sans font-semibold text-base sm:text-lg text-slate-900 dark:text-foreground tracking-tight">

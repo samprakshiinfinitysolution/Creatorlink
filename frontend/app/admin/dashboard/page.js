@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSelector } from "react-redux";
 import axiosInstance from "@/lib/axios";
+import AdminAvatar from "@/components/admin/AdminAvatar";
 
 // =========================================================
 // SVG ICONS
@@ -386,9 +387,12 @@ export default function AdminDashboardPage() {
                 recentActivity.signups.map((usr) => (
                   <div key={usr._id} className="p-4 sm:p-5 flex items-center justify-between gap-4 hover:bg-surface-muted/50 transition-colors">
                     <div className="flex items-center gap-3.5 min-w-0">
-                      <div className="w-10 h-10 rounded-full bg-secondary/15 text-secondary flex items-center justify-center font-bold text-sm shrink-0">
-                        {usr.name ? usr.name.charAt(0).toUpperCase() : "U"}
-                      </div>
+                      <AdminAvatar
+                        src={usr.avatar || usr.profileImage || usr.profile?.profileImage || usr.profile?.logo}
+                        name={usr.name || "Unnamed User"}
+                        type={usr.role || "user"}
+                        className="w-10 h-10 rounded-full bg-secondary/15 text-secondary flex items-center justify-center font-bold text-sm uppercase shrink-0 overflow-hidden"
+                      />
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
                           <p className="text-sm font-semibold text-foreground truncate">{usr.name || "Unnamed User"}</p>
@@ -500,6 +504,13 @@ export default function AdminDashboardPage() {
               ) : (
                 recentActivity.campaigns.map((cmp) => (
                   <div key={cmp._id} className="p-4 sm:p-5 flex items-center justify-between gap-4 hover:bg-surface-muted/50 transition-colors">
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <AdminAvatar
+                        src={cmp.coverImage}
+                        name={cmp.title}
+                        type="campaign"
+                        className="w-10 h-10 rounded-xl bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/20 flex items-center justify-center font-bold text-xs uppercase shrink-0 overflow-hidden"
+                      />
                     <div className="min-w-0 space-y-1">
                       <div className="flex items-center gap-2">
                         <h5 className="text-sm font-semibold text-foreground truncate">{cmp.title}</h5>
@@ -510,6 +521,8 @@ export default function AdminDashboardPage() {
                       <p className="text-xs text-text-secondary truncate">
                         By <span className="font-medium text-foreground">{cmp.brand?.name || "Brand"}</span> • Budget: ₹{Number(cmp.budget || 0).toLocaleString("en-IN")}
                       </p>
+                    </div>
+
                     </div>
 
                     <div className="text-right shrink-0">

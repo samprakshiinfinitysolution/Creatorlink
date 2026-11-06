@@ -6,6 +6,7 @@ import {
   overrideStatus,
   extendDeadline
 } from "@/redux/admin/collaborations/collaborations_slice";
+import AdminAvatar from "@/components/admin/AdminAvatar";
 
 // =========================================================
 // SVG ICONS
@@ -192,18 +193,27 @@ export default function AdminCollaborationDetailModal({
           {/* TOP OVERVIEW CARD */}
           <div className="bg-surface-muted/50 border border-border-theme rounded-2xl p-5 shadow-xs">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <span className="text-xs uppercase font-bold text-secondary tracking-wider">
-                  {workspace.campaign?.category || "Direct Hire Collaboration"}
-                </span>
-                <h1 className="text-xl font-serif font-bold text-foreground mt-1">
-                  {workspace.campaign?.title || workspace.service?.title || "Active Collaboration"}
-                </h1>
-                <p className="text-xs text-text-secondary mt-1">
-                  Workspace ID: <span className="font-mono text-foreground">{workspace._id}</span> • Started {formattedCreated}
-                </p>
+              <div className="min-w-0">
+                <div className="flex items-center gap-4 min-w-0">
+                  <AdminAvatar
+                    src={workspace.campaign?.coverImage}
+                    name={workspace.campaign?.title || workspace.service?.title || "Active Collaboration"}
+                    type="campaign"
+                    className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/20 font-bold text-lg uppercase shrink-0"
+                  />
+                  <div className="min-w-0">
+                    <span className="text-xs uppercase font-bold text-secondary tracking-wider">
+                      {workspace.campaign?.category || "Direct Hire Collaboration"}
+                    </span>
+                    <h1 className="text-xl font-serif font-bold text-foreground mt-1">
+                      {workspace.campaign?.title || workspace.service?.title || "Active Collaboration"}
+                    </h1>
+                    <p className="text-xs text-text-secondary mt-1">
+                      Workspace ID: <span className="font-mono text-foreground">{workspace._id}</span> • Started {formattedCreated}
+                    </p>
+                  </div>
+                </div>
               </div>
-
               <div className="text-right sm:border-l sm:border-border-theme sm:pl-6">
                 <span className="text-xs text-text-secondary block">Agreed Compensation</span>
                 <span className="text-2xl font-bold font-serif text-foreground">{formattedPrice}</span>
@@ -222,9 +232,12 @@ export default function AdminCollaborationDetailModal({
                 Hiring Brand
               </span>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-secondary to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
-                  {brandProfile?.companyName ? brandProfile.companyName[0].toUpperCase() : workspace.brand?.name?.[0] || "B"}
-                </div>
+                <AdminAvatar
+                  src={brandProfile?.logo || workspace.brand?.avatar}
+                  name={brandProfile?.companyName || workspace.brand?.name || "Brand"}
+                  type="brand"
+                  className="w-10 h-10 rounded-xl bg-gradient-to-tr from-secondary to-purple-600 text-white font-bold text-sm shadow-sm shrink-0"
+                />
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5 text-foreground font-semibold text-sm">
                     <span className="truncate">{brandProfile?.companyName || workspace.brand?.name}</span>
@@ -256,9 +269,12 @@ export default function AdminCollaborationDetailModal({
                 Contracted Creator
               </span>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 to-pink-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
-                  {creatorProfile?.displayName ? creatorProfile.displayName[0].toUpperCase() : workspace.creator?.name?.[0] || "C"}
-                </div>
+                <AdminAvatar
+                  src={creatorProfile?.profileImage || workspace.creator?.avatar}
+                  name={creatorProfile?.displayName || workspace.creator?.name || "Creator"}
+                  type="creator"
+                  className="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 to-pink-600 text-white font-bold text-sm shadow-sm shrink-0"
+                />
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5 text-foreground font-semibold text-sm">
                     <span className="truncate">{creatorProfile?.displayName || workspace.creator?.name}</span>
@@ -270,7 +286,7 @@ export default function AdminCollaborationDetailModal({
                 </div>
               </div>
               <div className="mt-3 text-xs text-text-secondary flex items-center justify-between border-t border-border-theme pt-2">
-                <span>Niche: {creatorProfile?.primaryNiche || "Lifestyle & Media"}</span>
+                <span>Category: {creatorProfile?.category || "Content Creator"}</span>
                 <span>Service: {workspace.service?.title || "Custom Hire"}</span>
               </div>
             </div>

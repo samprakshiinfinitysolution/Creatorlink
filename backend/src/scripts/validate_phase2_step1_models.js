@@ -99,7 +99,7 @@ const validateModels = async () => {
 
         // Verify existing fields are completely preserved
         const existingExpectedFields = [
-            "user", "title", "bio", "category", "niches", "keywords",
+            "user", "title", "bio", "category", "keywords",
             "location", "profileImage", "dob", "gender", "languages",
             "ethnicity", "socialLinks.instagram", "socialLinks.youtube",
             "followerCount", "engagementRate", "isPublic", "isVerifiedBadge"

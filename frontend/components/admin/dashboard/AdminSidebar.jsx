@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { adminLogout } from "@/redux/admin/auth/admin_auth_slice";
+import AdminAvatar from "@/components/admin/AdminAvatar";
 
 // =========================================================
 // SVG ICONS
@@ -235,9 +236,12 @@ function SidebarContent({
       <div className={`p-3 border-t border-border-theme shrink-0 ${collapsed ? "px-2" : "px-4"}`}>
         {!collapsed && user && (
           <div className="mb-3 px-2 py-2 rounded-xl bg-surface-muted/60 border border-border-theme flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-secondary/15 text-secondary flex items-center justify-center font-bold text-xs uppercase shrink-0">
-              {user.name ? user.name.slice(0, 2) : "AD"}
-            </div>
+            <AdminAvatar
+              src={user.avatar}
+              name={user.name || "Admin"}
+              type="admin"
+              className="w-8 h-8 rounded-full bg-secondary/15 text-secondary flex items-center justify-center font-bold text-xs uppercase shrink-0 overflow-hidden"
+            />
             <div className="min-w-0 flex-1">
               <p className="text-xs font-semibold text-foreground truncate">{user.name || "Admin"}</p>
               <p className="text-[11px] text-text-secondary truncate">{user.email || ""}</p>

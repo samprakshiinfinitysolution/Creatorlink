@@ -222,7 +222,6 @@ const getDiscoverCreatorsService = async (query = {}) => {
                     { "user.name": { $regex: safeSearch, $options: "i" } },
                     { bio: { $regex: safeSearch, $options: "i" } },
                     { category: { $regex: safeSearch, $options: "i" } },
-                    { niches: { $regex: safeSearch, $options: "i" } },
                     { location: { $regex: safeSearch, $options: "i" } },
                     { "services.title": { $regex: safeSearch, $options: "i" } }
                 ]
@@ -330,7 +329,6 @@ const getDiscoverCreatorsService = async (query = {}) => {
             bio: 1,
             title: 1,
             category: 1,
-            niches: 1,
             keywords: 1,
             location: 1,
             profileImage: 1,
@@ -513,7 +511,6 @@ const getDiscoverCreatorByIdService = async (creatorId) => {
                 bio: 1,
                 title: 1,
                 category: 1,
-                niches: 1,
                 keywords: 1,
                 location: 1,
                 profileImage: 1,
@@ -776,7 +773,6 @@ const getSavedCreatorsService = async (brandId) => {
                 bio: 1,
                 title: 1,
                 category: 1,
-                niches: 1,
                 keywords: 1,
                 location: 1,
                 profileImage: 1,

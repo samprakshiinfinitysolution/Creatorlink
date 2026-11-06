@@ -9,6 +9,7 @@ import {
   clearSelectedCollaboration
 } from "@/redux/admin/collaborations/collaborations_slice";
 import AdminCollaborationDetailModal from "./AdminCollaborationDetailModal";
+import AdminAvatar from "@/components/admin/AdminAvatar";
 
 // =========================================================
 // SVG ICONS
@@ -348,44 +349,73 @@ export default function AdminCollaborationsManager() {
                   <tr key={collab._id} className="hover:bg-surface-muted/30 transition-colors">
                     {/* CAMPAIGN / SERVICE */}
                     <td className="px-5 py-3.5">
-                      <div className="font-semibold text-foreground truncate max-w-xs">
-                        {collab.campaign?.title || collab.service?.title || "Direct Collaboration"}
-                      </div>
-                      <div className="text-[10px] text-text-secondary capitalize mt-0.5">
-                        {collab.campaign?.platform || "Direct"} • {collab.campaign?.category || "Services"}
+                      <div className="flex items-center gap-2.5">
+                        <AdminAvatar
+                          src={collab.campaign?.coverImage}
+                          name={collab.campaign?.title || collab.service?.title || "Direct Collaboration"}
+                          type="campaign"
+                          className="w-8 h-8 rounded-lg bg-surface-muted border border-border-theme font-bold text-[10px] text-secondary shrink-0"
+                        />
+                        <div className="min-w-0">
+                          <div className="font-semibold text-foreground truncate max-w-xs">
+                            {collab.campaign?.title || collab.service?.title || "Direct Collaboration"}
+                          </div>
+                          <div className="text-[10px] text-text-secondary capitalize mt-0.5">
+                            {collab.campaign?.platform || "Direct"} • {collab.campaign?.category || "Services"}
+                          </div>
+                        </div>
                       </div>
                     </td>
 
                     {/* BRAND */}
                     <td className="px-5 py-3.5">
-                      <div className="flex items-center gap-1 text-foreground font-medium truncate max-w-[140px]">
-                        <span className="truncate">
-                          {collab.brandProfile?.companyName || collab.brand?.name || "Brand"}
-                        </span>
-                        {(collab.brandProfile?.isVerifiedBusiness || collab.brand?.isVerified) && (
-                          <CheckBadgeIcon className="w-3.5 h-3.5 shrink-0" />
-                        )}
-                      </div>
-                      <div className="text-[10px] text-text-secondary truncate max-w-[140px]">
-                        {collab.brand?.email}
+                      <div className="flex items-center gap-2.5">
+                        <AdminAvatar
+                          src={collab.brandProfile?.logo || collab.brand?.avatar}
+                          name={collab.brandProfile?.companyName || collab.brand?.name || "Brand"}
+                          type="brand"
+                          className="w-8 h-8 rounded-full bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/20 font-bold text-[10px] uppercase shrink-0"
+                        />
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1 text-foreground font-medium truncate max-w-[130px]">
+                            <span className="truncate">
+                              {collab.brandProfile?.companyName || collab.brand?.name || "Brand"}
+                            </span>
+                            {(collab.brandProfile?.isVerifiedBusiness || collab.brand?.isVerified) && (
+                              <CheckBadgeIcon className="w-3.5 h-3.5 shrink-0" />
+                            )}
+                          </div>
+                          <div className="text-[10px] text-text-secondary truncate max-w-[130px]">
+                            {collab.brand?.email}
+                          </div>
+                        </div>
                       </div>
                     </td>
 
                     {/* CREATOR */}
                     <td className="px-5 py-3.5">
-                      <div className="flex items-center gap-1 text-foreground font-medium truncate max-w-[140px]">
-                        <span className="truncate">
-                          {collab.creatorProfile?.displayName || collab.creator?.name || "Creator"}
-                        </span>
-                        {(collab.creatorProfile?.isVerifiedBadge || collab.creator?.isVerified) && (
-                          <CheckBadgeIcon className="w-3.5 h-3.5 shrink-0" />
-                        )}
-                      </div>
-                      <div className="text-[10px] text-text-secondary truncate max-w-[140px]">
-                        {collab.creator?.email}
+                      <div className="flex items-center gap-2.5">
+                        <AdminAvatar
+                          src={collab.creatorProfile?.profileImage || collab.creator?.avatar}
+                          name={collab.creatorProfile?.displayName || collab.creator?.name || "Creator"}
+                          type="creator"
+                          className="w-8 h-8 rounded-full bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/20 font-bold text-[10px] uppercase shrink-0"
+                        />
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1 text-foreground font-medium truncate max-w-[130px]">
+                            <span className="truncate">
+                              {collab.creatorProfile?.displayName || collab.creator?.name || "Creator"}
+                            </span>
+                            {(collab.creatorProfile?.isVerifiedBadge || collab.creator?.isVerified) && (
+                              <CheckBadgeIcon className="w-3.5 h-3.5 shrink-0" />
+                            )}
+                          </div>
+                          <div className="text-[10px] text-text-secondary truncate max-w-[130px]">
+                            {collab.creator?.email}
+                          </div>
+                        </div>
                       </div>
                     </td>
-
                     {/* PRICE */}
                     <td className="px-5 py-3.5 font-mono text-foreground font-medium">
                       {formatCurrency(collab.agreedPrice)}

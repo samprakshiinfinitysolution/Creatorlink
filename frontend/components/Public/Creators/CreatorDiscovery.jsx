@@ -32,7 +32,7 @@ export default function CreatorDiscovery() {
             Find Brands That Match Your Creative World.
           </h2>
           <p className="text-sm sm:text-base text-slate-600 dark:text-text-secondary font-sans leading-relaxed">
-            Explore collaboration opportunities and discover brands looking for creative talent. Find projects that connect with your niche, content style and interests.
+            Explore collaboration opportunities and discover brands looking for creative talent. No generic bidding boards — opportunities are matched to your precise category, visual palette, and audience demographics.
           </p>
         </ScrollReveal>
 

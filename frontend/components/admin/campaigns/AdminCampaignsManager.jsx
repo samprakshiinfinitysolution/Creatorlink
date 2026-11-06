@@ -10,6 +10,7 @@ import {
   clearSelectedCampaign
 } from "@/redux/admin/campaigns/campaigns_slice";
 import AdminCampaignDetailModal from "./AdminCampaignDetailModal";
+import AdminAvatar from "@/components/admin/AdminAvatar";
 
 // =========================================================
 // SVG ICONS
@@ -381,26 +382,46 @@ export default function AdminCampaignsManager() {
                   <tr key={c._id} className="hover:bg-surface-muted/30 transition-colors">
                     {/* CAMPAIGN TITLE & CATEGORY */}
                     <td className="px-5 py-3.5">
-                      <div className="font-semibold text-foreground truncate max-w-xs">{c.title}</div>
-                      <div className="flex items-center gap-1.5 mt-0.5">
-                        <span className="text-[10px] text-text-secondary capitalize">{c.category}</span>
-                        <span className="text-text-secondary">•</span>
-                        <span className="text-[10px] text-blue-600 dark:text-blue-400 capitalize">{c.platform}</span>
+                      <div className="flex items-center gap-3">
+                        <AdminAvatar
+                          src={c.coverImage}
+                          name={c.title}
+                          type="campaign"
+                          className="w-9 h-9 rounded-xl bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/20 font-bold text-xs uppercase shrink-0"
+                        />
+                        <div className="min-w-0">
+                          <div className="font-semibold text-foreground truncate max-w-xs">{c.title}</div>
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <span className="text-[10px] text-text-secondary capitalize">{c.category}</span>
+                            <span className="text-text-secondary">•</span>
+                            <span className="text-[10px] text-blue-600 dark:text-blue-400 capitalize">{c.platform}</span>
+                          </div>
+                        </div>
                       </div>
                     </td>
 
                     {/* BRAND INFO */}
                     <td className="px-5 py-3.5">
-                      <div className="flex items-center gap-1 text-foreground font-medium truncate max-w-[180px]">
-                        <span className="truncate">
-                          {c.brandProfile?.companyName || c.brand?.name || "Brand User"}
-                        </span>
-                        {(c.brandProfile?.isVerifiedBusiness || c.brand?.isVerified) && (
-                          <CheckBadgeIcon className="w-3.5 h-3.5 shrink-0" />
-                        )}
-                      </div>
-                      <div className="text-[10px] text-text-secondary truncate max-w-[180px]">
-                        {c.brand?.email}
+                      <div className="flex items-center gap-2.5">
+                        <AdminAvatar
+                          src={c.brandProfile?.logo || c.brand?.avatar}
+                          name={c.brandProfile?.companyName || c.brand?.name || "Brand User"}
+                          type="brand"
+                          className="w-8 h-8 rounded-full bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/20 font-bold text-xs uppercase shrink-0"
+                        />
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1 text-foreground font-medium truncate max-w-[150px]">
+                            <span className="truncate">
+                              {c.brandProfile?.companyName || c.brand?.name || "Brand User"}
+                            </span>
+                            {(c.brandProfile?.isVerifiedBusiness || c.brand?.isVerified) && (
+                              <CheckBadgeIcon className="w-3.5 h-3.5 shrink-0" />
+                            )}
+                          </div>
+                          <div className="text-[10px] text-text-secondary truncate max-w-[150px]">
+                            {c.brand?.email}
+                          </div>
+                        </div>
                       </div>
                     </td>
 

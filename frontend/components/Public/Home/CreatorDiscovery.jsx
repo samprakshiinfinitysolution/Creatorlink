@@ -12,7 +12,7 @@ const PLATFORM_OPTIONS = [
 ];
 
 const INDUSTRY_OPTIONS = [
-  "All Niches",
+  "All Categories",
   "Fashion & Luxury",
   "Beauty & Wellness",
   "Food & Hospitality",
@@ -165,7 +165,7 @@ function FilterDropdown({
 
 export default function CreatorDiscovery() {
   const [platform, setPlatform] = useState("All Channels");
-  const [industry, setIndustry] = useState("All Niches");
+  const [industry, setIndustry] = useState("All Categories");
   const [audience, setAudience] = useState("Any Tier");
   const [budget, setBudget] = useState("$200 - $1,000");
 
@@ -248,7 +248,7 @@ export default function CreatorDiscovery() {
             </h2>
 
             <p className="mt-2 text-[13px] leading-relaxed text-text-secondary min-[400px]:text-[14px] sm:mt-2.5 sm:text-[15px] lg:text-[16px]">
-              Filter by niche, platform, audience size, and budget for high-impact collaborations.
+              Filter by category, platform, audience size, and budget for high-impact collaborations.
             </p>
           </div>
 

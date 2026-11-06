@@ -23,7 +23,7 @@ export default function BrandQuickActions() {
     },
     {
       title: "Discover Creators",
-      description: "Explore talent by niche & reach",
+      description: "Explore talent by category & reach",
       href: "/brand/creators",
     },
   ];

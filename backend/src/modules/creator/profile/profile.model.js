@@ -35,20 +35,6 @@ const profileSchema = new mongoose.Schema(
             default: ""
         },
 
-        // Multiple creator niches (maximum 3 items).
-        niches: {
-            type: [String],
-            default: [],
-            validate: [
-                {
-                    validator: function (val) {
-                        return !val || val.length <= 3;
-                    },
-                    message: "Niches cannot exceed 3 items"
-                }
-            ]
-        },
-
         // Searchable keywords representing the creator's content.
         keywords: {
             type: [String],

@@ -40,11 +40,16 @@ export default function BrandReviewModal({
   workspaceId,
   targetDeliverable = null,
   initialMode = "approve", // 'approve' | 'revision'
+  maxRevisions: propMaxRevisions,
 }) {
   const dispatch = useDispatch();
   const { submitting, error, successMessage } = useSelector(
     (state) => state.brandWorkspace
   );
+
+  const maxRevisions = typeof propMaxRevisions === "number" ? propMaxRevisions : 2;
+  const revisionCount = typeof targetDeliverable?.revisionCount === "number" ? targetDeliverable.revisionCount : 0;
+  const isRevisionLimitReached = revisionCount >= maxRevisions || maxRevisions === 0;
 
   const [mode, setMode] = useState(initialMode); // 'approve' | 'revision'
   const [feedback, setFeedback] = useState("");
@@ -54,12 +59,13 @@ export default function BrandReviewModal({
   useEffect(() => {
     if (isOpen) {
       queueMicrotask(() => {
-        setMode(initialMode || "approve");
+        const safeMode = isRevisionLimitReached ? "approve" : (initialMode || "approve");
+        setMode(safeMode);
         setFeedback("");
-        setLocalError("");
+        setLocalError(isRevisionLimitReached && initialMode === "revision" ? "Revision limit reached for this deliverable. You may approve the deliverable." : "");
       });
     }
-  }, [isOpen, initialMode]);
+  }, [isOpen, initialMode, isRevisionLimitReached]);
 
   const handleClose = () => {
     if (submitting) return;
@@ -84,6 +90,14 @@ export default function BrandReviewModal({
     let reviewData = {};
 
     if (mode === "revision") {
+      if (isRevisionLimitReached) {
+        setLocalError(
+          maxRevisions === 0
+            ? "No revisions are included in this package. Deliverable must be approved."
+            : `Revision limit reached (${maxRevisions} revision${maxRevisions === 1 ? '' : 's'} included in agreed package). Deliverable must be approved.`
+        );
+        return;
+      }
       const trimmedFeedback = feedback.trim();
       if (!trimmedFeedback) {
         setLocalError("Feedback is required when requesting a revision.");
@@ -117,14 +131,14 @@ export default function BrandReviewModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
       {/* Backdrop */}
       <div className="fixed inset-0" onClick={handleClose} />
 
       {/* Modal Container */}
-      <div className="relative z-10 bg-surface border border-border-theme rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="relative z-10 bg-surface border border-border-theme rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden flex flex-col max-h-[92vh] sm:max-h-[90vh]">
         {/* Modal Header */}
-        <div className="p-5 border-b border-border-theme flex items-center justify-between bg-surface">
+        <div className="p-4 sm:p-5 border-b border-border-theme flex items-center justify-between bg-surface">
           <div>
             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-secondary/15 text-secondary border border-secondary/20 uppercase tracking-wide">
               {targetDeliverable?.title ? `Deliverable: ${targetDeliverable.title}` : "Workspace Review"}
@@ -144,7 +158,7 @@ export default function BrandReviewModal({
         </div>
 
         {/* Mode Selector Tabs */}
-        <div className="p-4 border-b border-border-theme bg-surface-muted/40 flex items-center gap-2">
+        <div className="p-3 sm:p-4 border-b border-border-theme bg-surface-muted/40 flex items-center gap-2">
           <button
             type="button"
             onClick={() => {
@@ -163,22 +177,26 @@ export default function BrandReviewModal({
           <button
             type="button"
             onClick={() => {
+              if (isRevisionLimitReached) return;
               setMode("revision");
               setLocalError("");
             }}
-            disabled={submitting}
-            className={`flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-              mode === "revision"
-                ? "bg-amber-500 text-white shadow-xs"
-                : "bg-surface text-text-secondary hover:text-foreground border border-border-theme"
+            disabled={submitting || isRevisionLimitReached}
+            className={`flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition-all ${
+              isRevisionLimitReached
+                ? "bg-surface text-text-muted/60 border border-border-theme cursor-not-allowed opacity-60"
+                : mode === "revision"
+                ? "bg-amber-500 text-white shadow-xs cursor-pointer"
+                : "bg-surface text-text-secondary hover:text-foreground border border-border-theme cursor-pointer"
             }`}
+            title={isRevisionLimitReached ? "Revision limit reached for this deliverable" : undefined}
           >
-            Request Revision
+            {isRevisionLimitReached ? "Revision limit reached" : "Request Revision"}
           </button>
         </div>
 
         {/* Modal Body */}
-        <form onSubmit={handleSubmit} className="flex-1 flex flex-col justify-between overflow-y-auto p-5 space-y-5 custom-scrollbar">
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col justify-between overflow-y-auto p-4 sm:p-5 space-y-4 sm:space-y-5 custom-scrollbar">
           <div className="space-y-4">
             {/* Global or Local Error Display */}
             {(localError || error) && (
@@ -254,11 +272,13 @@ export default function BrandReviewModal({
 
             <button
               type="submit"
-              disabled={submitting}
-              className={`px-5 py-2.5 rounded-xl text-white text-xs font-semibold transition-all shadow-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+              disabled={submitting || (mode === "revision" && isRevisionLimitReached)}
+              className={`px-5 py-2.5 rounded-xl text-white text-xs font-semibold transition-all shadow-xs disabled:opacity-50 disabled:cursor-not-allowed ${
                 mode === "approve"
-                  ? "bg-emerald-600 hover:bg-emerald-700"
-                  : "bg-amber-500 hover:bg-amber-600"
+                  ? "bg-emerald-600 hover:bg-emerald-700 cursor-pointer"
+                  : isRevisionLimitReached
+                  ? "bg-gray-400 dark:bg-zinc-700 cursor-not-allowed"
+                  : "bg-amber-500 hover:bg-amber-600 cursor-pointer"
               }`}
             >
               {submitting ? (
@@ -269,7 +289,7 @@ export default function BrandReviewModal({
               ) : mode === "approve" ? (
                 <span>Approve Deliverable</span>
               ) : (
-                <span>Send Revision Request</span>
+                <span>{isRevisionLimitReached ? "Revision Limit Reached" : "Send Revision Request"}</span>
               )}
             </button>
           </div>

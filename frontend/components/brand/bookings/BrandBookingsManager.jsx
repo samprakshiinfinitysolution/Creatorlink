@@ -364,7 +364,7 @@ export default function BrandBookingsManager() {
             {/* Booking List Table (Desktop / Tablet / Mobile Responsive) */}
             {!loading && !error && bookings.length > 0 && (
               <div className="overflow-x-auto no-scrollbar">
-                <table className="w-full text-left text-xs border-collapse">
+                <table className="w-full text-left text-xs border-collapse min-w-[760px]">
                   <thead>
                     <tr className="border-b border-border-theme bg-surface-muted/40 text-text-secondary uppercase tracking-wider text-[10px] font-semibold">
                       <th className="py-3.5 px-5">Creator</th>
@@ -559,6 +559,7 @@ export default function BrandBookingsManager() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         bookingId={selectedBookingId}
+        booking={bookings.find((b) => (b._id || b.id) === selectedBookingId)}
       />
     </div>
   );

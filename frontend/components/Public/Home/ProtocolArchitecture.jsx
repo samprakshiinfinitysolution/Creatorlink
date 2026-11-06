@@ -14,7 +14,7 @@ const DESKTOP_CARDS = [
     number: "01",
     title: "Discover & Match",
     description:
-      "Brands find creators matching their niche, audience, and campaign needs. Creators discover genuine paid brand opportunities.",
+      "Brands find creators matching their category, audience, and campaign needs. Creators discover genuine paid brand opportunities.",
     tag: "Verified Matching",
   },
   {

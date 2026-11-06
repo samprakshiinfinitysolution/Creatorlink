@@ -54,21 +54,37 @@ const DISCOVERY_CATEGORIES = [
     title: "Fashion & Beauty",
     desc: "Aesthetic styling, skincare, makeup and fashion routines.",
     icon: "✦",
+    creatorName: "Aarohi Mehta",
+    creatorCategory: "Beauty • 98% Match",
+    image:
+      "https://res.cloudinary.com/atr5osne/image/upload/v1792054698/creatorlink/public/avatars/gye9m9prpdv81gc9ipkp.webp",
   },
   {
     title: "Food & Lifestyle",
     desc: "Culinary arts, morning rituals, home and living experiences.",
     icon: "✦",
+    creatorName: "Maya Kapoor",
+    creatorCategory: "Lifestyle • 89% Match",
+    image:
+      "https://res.cloudinary.com/atr5osne/image/upload/v1792054710/creatorlink/public/avatars/ra9dirifievmiawd57yl.webp",
   },
   {
     title: "Travel & Experiences",
     desc: "Destination stories, hospitality, architecture and journeys.",
     icon: "✦",
+    creatorName: "Riya Sharma",
+    creatorCategory: "Wellness • 92% Match",
+    image:
+      "https://res.cloudinary.com/atr5osne/image/upload/v1792054701/creatorlink/public/avatars/qooau1mzc4okikpsrqri.webp",
   },
   {
     title: "Technology & Digital Content",
     desc: "Tech storytelling, creative digital tools and reviews.",
     icon: "✦",
+    creatorName: "Anaya Shah",
+    creatorCategory: "Design • 87% Match",
+    image:
+      "https://res.cloudinary.com/atr5osne/image/upload/v1792054706/creatorlink/public/avatars/qvmu4uqdqpexdchfnvys.webp",
   },
 ];
 
@@ -289,17 +305,38 @@ export default function InteractiveJourney() {
                       {DISCOVERY_CATEGORIES.map((item, idx) => (
                         <div
                           key={idx}
-                          className="p-4 rounded-2xl bg-surface-muted border border-border-theme/80 hover:border-secondary/40 transition-all text-left"
+                          className="p-4 rounded-2xl bg-surface-muted border border-border-theme/80 hover:border-secondary/40 transition-all text-left flex flex-col justify-between"
                         >
-                          <div className="flex items-center gap-2 mb-1.5">
-                            <span className="text-secondary text-xs">{item.icon}</span>
-                            <h5 className="text-sm font-bold text-foreground font-sans">
-                              {item.title}
-                            </h5>
+                          <div>
+                            <div className="flex items-center gap-2 mb-1.5">
+                              <span className="text-secondary text-xs">{item.icon}</span>
+                              <h5 className="text-sm font-bold text-foreground font-sans">
+                                {item.title}
+                              </h5>
+                            </div>
+                            <p className="text-xs text-text-secondary font-sans leading-relaxed mb-3">
+                              {item.desc}
+                            </p>
                           </div>
-                          <p className="text-xs text-text-secondary font-sans leading-relaxed">
-                            {item.desc}
-                          </p>
+                          {item.image && (
+                            <div className="pt-2.5 border-t border-border-theme/60 flex items-center gap-2">
+                              <Image
+                                src={item.image}
+                                alt={item.creatorName || item.title}
+                                width={24}
+                                height={24}
+                                className="w-6 h-6 rounded-full object-cover border border-border-theme shrink-0"
+                              />
+                              <div className="min-w-0 flex items-center gap-1.5 text-[11px] font-sans">
+                                <span className="font-semibold text-foreground truncate">
+                                  {item.creatorName}
+                                </span>
+                                <span className="text-secondary font-medium truncate">
+                                  • {item.creatorCategory}
+                                </span>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>

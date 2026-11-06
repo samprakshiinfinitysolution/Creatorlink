@@ -364,7 +364,7 @@ export default function BrandReviewsManager() {
         {/* Main Content Area */}
         <main className="p-4 sm:p-6 lg:p-8 space-y-6 flex-1 max-w-7xl w-full mx-auto min-w-0">
           {/* Main Review Direction Tabs (Received from Creators vs Given to Creators) */}
-          <div className="flex items-center gap-2 border-b border-border-theme pb-1">
+          <div className="flex items-center gap-2 border-b border-border-theme pb-1 overflow-x-auto no-scrollbar">
             <button
               type="button"
               onClick={() => {

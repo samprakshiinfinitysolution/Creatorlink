@@ -298,19 +298,6 @@ function CreatorCard({ creator, onViewProfile, isSaved, isSaving, onToggleSave, 
           {bio}
         </p>
 
-        {/* Niches badges */}
-        {Array.isArray(creator.niches) && creator.niches.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-3.5">
-            {creator.niches.slice(0, 3).map((niche, idx) => (
-              <span
-                key={idx}
-                className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-surface-muted text-text-secondary border border-border-theme truncate max-w-[120px]"
-              >
-                #{niche}
-              </span>
-            ))}
-          </div>
-        )}
 
         {/* Core Metrics Grid */}
         <div className="grid grid-cols-3 gap-2 p-2.5 rounded-xl bg-surface-muted/60 border border-border-theme mb-4 text-center">
@@ -626,7 +613,7 @@ export default function BrandCreatorsManager() {
                 <span className="text-secondary text-lg">✦</span>
               </h1>
               <p className="text-xs sm:text-sm text-text-secondary mt-1">
-                Explore, evaluate, and collaborate with verified content creators across niches and platforms.
+                Explore, evaluate, and collaborate with verified content creators across categories and platforms.
               </p>
             </div>
 
@@ -691,7 +678,7 @@ export default function BrandCreatorsManager() {
               <form onSubmit={handleSearchSubmit} className="flex-1 relative">
                 <input
                   type="text"
-                  placeholder="Search creators by name, bio, niche, or skills..."
+                  placeholder="Search creators by name, bio, category, or skills..."
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
                   className="w-full bg-surface-muted/60 border border-border-theme text-foreground text-xs sm:text-sm rounded-xl pl-9 pr-24 py-2.5 focus:outline-none focus:border-secondary transition-colors"

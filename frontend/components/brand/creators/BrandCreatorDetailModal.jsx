@@ -503,16 +503,6 @@ export default function BrandCreatorDetailModal({
                   <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-secondary/10 text-secondary border border-secondary/20">
                     {category}
                   </span>
-                  {Array.isArray(creator?.niches) && creator.niches.length > 0 && (
-                    creator.niches.map((niche, idx) => (
-                      <span
-                        key={idx}
-                        className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-surface-muted text-text-secondary border border-border-theme"
-                      >
-                        #{niche}
-                      </span>
-                    ))
-                  )}
                 </div>
                 {creator?.title && (
                   <p className="text-xs text-secondary font-medium mt-0.5 truncate" title={creator.title}>
@@ -720,21 +710,6 @@ export default function BrandCreatorDetailModal({
                         {category}
                       </span>
                     </div>
-                    {Array.isArray(creator?.niches) && creator.niches.length > 0 && (
-                      <div className="space-y-1.5 pt-1">
-                        <span className="text-xs text-text-secondary font-medium block">Niches:</span>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          {creator.niches.map((niche, idx) => (
-                            <span
-                              key={idx}
-                              className="px-2.5 py-1 rounded-lg text-xs font-medium bg-surface border border-border-theme text-foreground"
-                            >
-                              #{niche}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
                     {Array.isArray(creator?.keywords) && creator.keywords.length > 0 && (
                       <div className="space-y-1.5 pt-1">
                         <span className="text-xs text-text-secondary font-medium block">Keywords:</span>

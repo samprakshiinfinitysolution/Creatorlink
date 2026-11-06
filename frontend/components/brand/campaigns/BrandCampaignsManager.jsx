@@ -1875,11 +1875,11 @@ export default function BrandCampaignsManager() {
       {/* 1. CREATE CAMPAIGN MODAL */}
       {/* ========================================================= */}
       {isCreateOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs overflow-y-auto">
-          <div className="bg-surface border border-border-theme rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl animate-in fade-in zoom-in-95 duration-150 my-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-black/50 backdrop-blur-xs overflow-y-auto">
+          <div className="bg-surface border border-border-theme rounded-2xl w-full max-w-2xl max-h-[92vh] sm:max-h-[90vh] flex flex-col shadow-2xl animate-in fade-in zoom-in-95 duration-150 my-auto">
 
             {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-border-theme flex items-center justify-between">
+            <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-border-theme flex items-center justify-between">
               <div>
                 <h3 className="font-serif font-medium text-lg text-foreground">
                   Create Campaign
@@ -1899,7 +1899,7 @@ export default function BrandCampaignsManager() {
             </div>
 
             {/* Modal Form */}
-            <form onSubmit={handleCreateSubmit} className="flex-1 overflow-y-auto p-6 space-y-4 text-xs">
+            <form onSubmit={handleCreateSubmit} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 text-xs">
 
               {/* Form Validation Error Banner */}
               {formError && (
@@ -1984,11 +1984,8 @@ export default function BrandCampaignsManager() {
 
               </div>
 
-              {/* Budget, Deadline, Required Creators Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-
-                {/* Budget Range (Min & Max Budget) */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Budget Range (Min & Max Budget) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div className="space-y-1">
                     <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
                       Min Budget (₹) *
@@ -2032,6 +2029,9 @@ export default function BrandCampaignsManager() {
                     />
                   </div>
                 </div>
+
+              {/* Deadline & Required Creators */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
 
                 {/* Deadline */}
                 <div className="space-y-1">
@@ -2295,14 +2295,14 @@ export default function BrandCampaignsManager() {
       {/* 2. VIEW CAMPAIGN DETAILS MODAL */}
       {/* ========================================================= */}
       {isViewOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-black/50 backdrop-blur-xs overflow-y-auto">
           <div
             className={`bg-surface border border-border-theme rounded-2xl w-full ${
               activeViewTab === "applicants" ? "max-w-3xl lg:max-w-4xl" : "max-w-2xl"
-            } max-h-[90vh] flex flex-col shadow-2xl animate-in fade-in zoom-in-95 duration-150 my-auto transition-all`}
+            } max-h-[92vh] sm:max-h-[90vh] flex flex-col shadow-2xl animate-in fade-in zoom-in-95 duration-150 my-auto transition-all`}
           >
             {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-border-theme flex items-center justify-between">
+            <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-border-theme flex items-center justify-between">
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-secondary">
                   Campaign Overview
@@ -2321,7 +2321,7 @@ export default function BrandCampaignsManager() {
             </div>
 
             {/* Navigation Tabs */}
-            <div className="px-6 border-b border-border-theme flex items-center gap-6 bg-surface shrink-0">
+            <div className="px-4 sm:px-6 border-b border-border-theme flex items-center gap-4 sm:gap-6 bg-surface shrink-0 overflow-x-auto no-scrollbar">
               <button
                 type="button"
                 onClick={() => setActiveViewTab("details")}
@@ -2357,7 +2357,7 @@ export default function BrandCampaignsManager() {
             </div>
 
             {/* Modal Content */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6 text-xs">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6 text-xs">
               {activeViewTab === "details" ? (
                 <>
                   {loading && !selectedCampaign ? (
@@ -2931,14 +2931,15 @@ export default function BrandCampaignsManager() {
           }
         }}
         bookingId={viewingBookingId}
+        booking={applicants.find((a) => (a._id || a.id) === viewingBookingId)}
       />
 
       {isEditOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs overflow-y-auto">
-          <div className="bg-surface border border-border-theme rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl animate-in fade-in zoom-in-95 duration-150 my-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-black/50 backdrop-blur-xs overflow-y-auto">
+          <div className="bg-surface border border-border-theme rounded-2xl w-full max-w-2xl max-h-[92vh] sm:max-h-[90vh] flex flex-col shadow-2xl animate-in fade-in zoom-in-95 duration-150 my-auto">
 
             {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-border-theme flex items-center justify-between">
+            <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-border-theme flex items-center justify-between">
               <div>
                 <h3 className="font-serif font-medium text-lg text-foreground">
                   Edit Campaign
@@ -2958,7 +2959,7 @@ export default function BrandCampaignsManager() {
             </div>
 
             {/* Modal Form */}
-            <form onSubmit={handleEditSubmit} className="flex-1 overflow-y-auto p-6 space-y-4 text-xs">
+            <form onSubmit={handleEditSubmit} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 text-xs">
 
               {/* Form Validation Error Banner */}
               {formError && (
@@ -3081,11 +3082,8 @@ export default function BrandCampaignsManager() {
 
               </div>
 
-              {/* Budget, Deadline, Required Creators Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-
-                {/* Budget Range (Min & Max Budget) */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Budget Range (Min & Max Budget) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div className="space-y-1">
                     <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
                       Min Budget (₹) *
@@ -3129,6 +3127,9 @@ export default function BrandCampaignsManager() {
                     />
                   </div>
                 </div>
+
+              {/* Deadline & Required Creators */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
 
                 {/* Deadline */}
                 <div className="space-y-1">

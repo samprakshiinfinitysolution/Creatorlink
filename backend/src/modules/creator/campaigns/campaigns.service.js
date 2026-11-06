@@ -38,7 +38,25 @@ const formatAppliedCampaignItem = (b) => {
             maxBudget: b.campaign.maxBudget,
             currency: b.campaign.currency || "INR",
             deadline: b.campaign.deadline,
-            coverImage: b.campaign.coverImage || ""
+            coverImage: b.campaign.coverImage || "",
+            requiredCreators: b.campaign.requiredCreators !== undefined && b.campaign.requiredCreators !== null
+                ? b.campaign.requiredCreators
+                : 1,
+            audienceTargeting: b.campaign.audienceTargeting || {
+                age: "All",
+                gender: "all",
+                geography: []
+            },
+            usageRights: b.campaign.usageRights || {
+                organicUsage: true,
+                paidAds: false,
+                duration: "30 days",
+                exclusivity: false
+            },
+            creatorRequirements: b.campaign.creatorRequirements || {
+                minFollowers: 0,
+                minEngagementRate: 0
+            }
         } : null,
         brand: b.brand ? {
             _id: b.brand._id,
@@ -289,7 +307,7 @@ const getAppliedCampaignsService = async (creatorId, query = {}) => {
     const [bookings, totalItems] = await Promise.all([
         Booking.find(filter)
             .populate("brand", "name email")
-            .populate("campaign", "title description category platform budget minBudget maxBudget currency deadline coverImage")
+            .populate("campaign", "title description category platform budget minBudget maxBudget currency deadline coverImage requiredCreators audienceTargeting usageRights creatorRequirements")
             .populate("service", "title price deliveryTime")
             .sort({ createdAt: -1 })
             .skip(skip)

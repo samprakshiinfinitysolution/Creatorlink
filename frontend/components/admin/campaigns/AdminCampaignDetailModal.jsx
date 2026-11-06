@@ -8,6 +8,7 @@ import {
   closeForModeration,
   removeCampaign
 } from "@/redux/admin/campaigns/campaigns_slice";
+import AdminAvatar from "@/components/admin/AdminAvatar";
 
 // =========================================================
 // SVG ICONS
@@ -245,18 +246,27 @@ export default function AdminCampaignDetailModal({
           {/* TOP SUMMARY CARD */}
           <div className="bg-surface-muted/50 border border-border-theme rounded-2xl p-5 shadow-xs">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <span className="text-xs uppercase font-bold text-secondary tracking-wider">
-                  {campaign.category}
-                </span>
-                <h1 className="text-xl font-serif font-bold text-foreground mt-1">
-                  {campaign.title}
-                </h1>
-                <p className="text-xs text-text-secondary mt-1">
-                  Campaign ID: <span className="font-mono text-foreground">{campaign._id}</span> • Created {formattedCreated}
-                </p>
+              <div className="min-w-0">
+                <div className="flex items-center gap-4 min-w-0">
+                  <AdminAvatar
+                    src={campaign.coverImage}
+                    name={campaign.title}
+                    type="campaign"
+                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/30 font-bold text-xl uppercase shrink-0"
+                  />
+                  <div className="min-w-0">
+                    <span className="text-xs uppercase font-bold text-secondary tracking-wider">
+                      {campaign.category}
+                    </span>
+                    <h1 className="text-xl font-serif font-bold text-foreground mt-1">
+                      {campaign.title}
+                    </h1>
+                    <p className="text-xs text-text-secondary mt-1">
+                      Campaign ID: <span className="font-mono text-foreground">{campaign._id}</span> • Created {formattedCreated}
+                    </p>
+                  </div>
+                </div>
               </div>
-
               <div className="text-right sm:border-l sm:border-border-theme sm:pl-6">
                 <span className="text-xs text-text-secondary block">Budget</span>
                 <span className="text-2xl font-bold font-serif text-foreground">{formattedBudget}</span>
@@ -417,8 +427,18 @@ export default function AdminCampaignDetailModal({
                         {bookings.map((b) => (
                           <tr key={b._id} className="hover:bg-surface-muted/30 transition-colors">
                             <td className="px-3 py-2.5 font-medium">
-                              <div>{b.creator?.name || "Anonymous Creator"}</div>
-                              <div className="text-[10px] text-text-secondary">{b.creator?.email}</div>
+                              <div className="flex items-center gap-2">
+                                <AdminAvatar
+                                  src={b.creator?.avatar || b.creator?.profileImage}
+                                  name={b.creator?.name || "Anonymous Creator"}
+                                  type="creator"
+                                  className="w-7 h-7 rounded-full bg-purple-500/15 text-purple-600 dark:text-purple-400 font-bold text-[10px] uppercase shrink-0"
+                                />
+                                <div className="min-w-0">
+                                  <div className="truncate">{b.creator?.name || "Anonymous Creator"}</div>
+                                  <div className="text-[10px] text-text-secondary truncate">{b.creator?.email}</div>
+                                </div>
+                              </div>
                             </td>
                             <td className="px-3 py-2.5 font-mono text-foreground">
                               ₹{b.agreedPrice?.toLocaleString("en-IN")}
@@ -480,13 +500,12 @@ export default function AdminCampaignDetailModal({
                 <h3 className="text-sm font-bold text-foreground mb-4">Brand Information</h3>
 
                 <div className="flex items-center gap-3 pb-4 border-b border-border-theme">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-secondary to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-sm">
-                    {brandProfile?.companyName
-                      ? brandProfile.companyName[0].toUpperCase()
-                      : campaign.brand?.name
-                      ? campaign.brand.name[0].toUpperCase()
-                      : "B"}
-                  </div>
+                  <AdminAvatar
+                    src={brandProfile?.logo || campaign.brand?.avatar}
+                    name={brandProfile?.companyName || campaign.brand?.name || "Brand User"}
+                    type="brand"
+                    className="w-12 h-12 rounded-xl bg-gradient-to-tr from-secondary to-purple-600 text-white font-bold text-base shadow-sm shrink-0"
+                  />
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5 font-semibold text-foreground text-sm">
                       <span className="truncate">

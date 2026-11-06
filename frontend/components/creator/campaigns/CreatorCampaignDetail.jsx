@@ -9,6 +9,7 @@ import {
   clearSelectedDiscoverCampaign,
   applyToCampaign,
 } from "@/redux/creator/campaigns/campaigns_slice";
+import { getCreatorProfile } from "@/redux/creator/profile/profile_slice";
 import CreatorSidebar from "@/components/creator/dashboard/CreatorSidebar";
 import CreatorHeader from "@/components/creator/dashboard/CreatorHeader";
 import ApplyToCampaignModal from "@/components/creator/campaigns/ApplyToCampaignModal";
@@ -140,6 +141,7 @@ export default function CreatorCampaignDetail({ campaignId }) {
   const { selectedDiscoverCampaign, appliedCampaigns, loading, error, submitting } = useSelector(
     (state) => state.creatorCampaigns
   );
+  const { profile } = useSelector((state) => state.profile || {});
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
@@ -155,6 +157,12 @@ export default function CreatorCampaignDetail({ campaignId }) {
       dispatch(clearSelectedDiscoverCampaign());
     };
   }, [dispatch, campaignId]);
+
+  useEffect(() => {
+    if (!profile) {
+      dispatch(getCreatorProfile());
+    }
+  }, [dispatch, profile]);
 
   const handleRetry = () => {
     if (campaignId) {
@@ -188,6 +196,84 @@ export default function CreatorCampaignDetail({ campaignId }) {
   );
 
   const campaign = selectedDiscoverCampaign;
+
+  // Profile metrics for eligibility comparison
+  const creatorFollowers =
+    typeof profile?.followerCount === "number"
+      ? profile.followerCount
+      : profile?.followerCount !== undefined && profile?.followerCount !== null && profile?.followerCount !== "" && !isNaN(Number(profile.followerCount))
+      ? Number(profile.followerCount)
+      : typeof profile?.followersCount === "number"
+      ? profile.followersCount
+      : null;
+
+  const creatorEngagementRate =
+    typeof profile?.engagementRate === "number"
+      ? profile.engagementRate
+      : profile?.engagementRate !== undefined && profile?.engagementRate !== null && profile?.engagementRate !== "" && !isNaN(Number(profile.engagementRate))
+      ? Number(profile.engagementRate)
+      : null;
+
+  const minFollowersReq =
+    typeof campaign?.creatorRequirements?.minFollowers === "number"
+      ? campaign.creatorRequirements.minFollowers
+      : 0;
+
+  const minEngagementReq =
+    typeof campaign?.creatorRequirements?.minEngagementRate === "number"
+      ? campaign.creatorRequirements.minEngagementRate
+      : 0;
+
+  const getFollowersStatus = () => {
+    if (minFollowersReq <= 0) {
+      return { label: "Meets Requirements", type: "meets", note: "Open to all" };
+    }
+    if (creatorFollowers === null || isNaN(creatorFollowers)) {
+      return { label: "Not Available", type: "na", note: "Metric not added" };
+    }
+    if (creatorFollowers >= minFollowersReq) {
+      return { label: "Meets Requirements", type: "meets", note: `${creatorFollowers.toLocaleString()} followers` };
+    }
+    return { label: "Below Requirements", type: "below", note: `${creatorFollowers.toLocaleString()} followers` };
+  };
+
+  const getEngagementStatus = () => {
+    if (minEngagementReq <= 0) {
+      return { label: "Meets Requirements", type: "meets", note: "No minimum" };
+    }
+    if (creatorEngagementRate === null || isNaN(creatorEngagementRate)) {
+      return { label: "Not Available", type: "na", note: "Metric not added" };
+    }
+    if (creatorEngagementRate >= minEngagementReq) {
+      return { label: "Meets Requirements", type: "meets", note: `${creatorEngagementRate}% engagement` };
+    }
+    return { label: "Below Requirements", type: "below", note: `${creatorEngagementRate}% engagement` };
+  };
+
+  const followersStatus = getFollowersStatus();
+  const engagementStatus = getEngagementStatus();
+
+  const renderEligibilityBadge = (statusObj) => {
+    if (statusObj.type === "meets") {
+      return (
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+          ✓ {statusObj.label}
+        </span>
+      );
+    }
+    if (statusObj.type === "below") {
+      return (
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+          ! {statusObj.label}
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-semibold bg-zinc-500/10 text-zinc-600 dark:text-zinc-400 border border-zinc-500/20">
+        • {statusObj.label}
+      </span>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
@@ -437,6 +523,150 @@ export default function CreatorCampaignDetail({ campaignId }) {
                   </div>
                 );
               })()}
+
+              {/* Target Audience Profile */}
+              <div className="space-y-3 pt-2">
+                <h3 className="font-serif font-semibold text-lg text-foreground">
+                  Target Audience Profile
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="p-4 rounded-xl border border-border-theme bg-surface-muted/30 space-y-1">
+                    <span className="text-[10px] uppercase font-bold text-text-secondary tracking-wider block">
+                      Age Bracket
+                    </span>
+                    <span className="text-xs sm:text-sm font-semibold text-foreground block">
+                      {campaign.audienceTargeting?.age || "All Ages"}
+                    </span>
+                  </div>
+                  <div className="p-4 rounded-xl border border-border-theme bg-surface-muted/30 space-y-1">
+                    <span className="text-[10px] uppercase font-bold text-text-secondary tracking-wider block">
+                      Gender
+                    </span>
+                    <span className="text-xs sm:text-sm font-semibold text-foreground capitalize block">
+                      {campaign.audienceTargeting?.gender === "all" || !campaign.audienceTargeting?.gender
+                        ? "All Genders"
+                        : campaign.audienceTargeting.gender}
+                    </span>
+                  </div>
+                  <div className="p-4 rounded-xl border border-border-theme bg-surface-muted/30 space-y-1">
+                    <span className="text-[10px] uppercase font-bold text-text-secondary tracking-wider block">
+                      Geography / Regions
+                    </span>
+                    <span className="text-xs sm:text-sm font-semibold text-foreground block break-words">
+                      {Array.isArray(campaign.audienceTargeting?.geography) && campaign.audienceTargeting.geography.length > 0
+                        ? campaign.audienceTargeting.geography.join(", ")
+                        : (campaign.audienceTargeting?.geography || "Global / Any")}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Content Usage Rights & Licensing */}
+              <div className="space-y-3 pt-2">
+                <h3 className="font-serif font-semibold text-lg text-foreground">
+                  Usage Rights & Licensing
+                </h3>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                  <div className="p-4 rounded-xl border border-border-theme bg-surface-muted/30 space-y-1">
+                    <span className="text-[10px] uppercase font-bold text-text-secondary tracking-wider block">
+                      Duration
+                    </span>
+                    <span className="text-xs sm:text-sm font-semibold text-foreground block">
+                      {campaign.usageRights?.duration || "30 days"}
+                    </span>
+                  </div>
+                  <div className="p-4 rounded-xl border border-border-theme bg-surface-muted/30 space-y-1">
+                    <span className="text-[10px] uppercase font-bold text-text-secondary tracking-wider block">
+                      Organic Usage
+                    </span>
+                    <span className={`text-xs sm:text-sm font-semibold block ${campaign.usageRights?.organicUsage !== false ? "text-emerald-600 dark:text-emerald-400" : "text-text-secondary"}`}>
+                      {campaign.usageRights?.organicUsage !== false ? "✓ Included" : "✕ Excluded"}
+                    </span>
+                  </div>
+                  <div className="p-4 rounded-xl border border-border-theme bg-surface-muted/30 space-y-1">
+                    <span className="text-[10px] uppercase font-bold text-text-secondary tracking-wider block">
+                      Paid Ads Amplification
+                    </span>
+                    <span className={`text-xs sm:text-sm font-semibold block ${campaign.usageRights?.paidAds ? "text-purple-600 dark:text-purple-400" : "text-text-secondary"}`}>
+                      {campaign.usageRights?.paidAds ? "✓ Allowed" : "Not Included"}
+                    </span>
+                  </div>
+                  <div className="p-4 rounded-xl border border-border-theme bg-surface-muted/30 space-y-1">
+                    <span className="text-[10px] uppercase font-bold text-text-secondary tracking-wider block">
+                      Exclusivity
+                    </span>
+                    <span className={`text-xs sm:text-sm font-semibold block ${campaign.usageRights?.exclusivity ? "text-amber-600 dark:text-amber-400" : "text-text-secondary"}`}>
+                      {campaign.usageRights?.exclusivity ? "Exclusivity Required" : "Non-exclusive"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Creator Eligibility Requirements */}
+              <div className="space-y-3 pt-2">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <h3 className="font-serif font-semibold text-lg text-foreground">
+                    Creator Eligibility Requirements
+                  </h3>
+                  <span className="text-[11px] text-text-secondary font-medium">
+                    Guideline for Applicants
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Minimum Followers */}
+                  <div className="p-4 rounded-xl border border-border-theme bg-surface-muted/30 space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[10px] uppercase font-bold text-text-secondary tracking-wider block">
+                        Minimum Followers
+                      </span>
+                      {renderEligibilityBadge(followersStatus)}
+                    </div>
+                    <div>
+                      <span className="text-base font-semibold text-foreground block">
+                        {minFollowersReq > 0
+                          ? `${minFollowersReq.toLocaleString()} Followers`
+                          : "Open to all creators"}
+                      </span>
+                      <span className="text-xs text-text-secondary block mt-0.5">
+                        {creatorFollowers !== null && !isNaN(creatorFollowers)
+                          ? `Your profile: ${creatorFollowers.toLocaleString()} followers`
+                          : "Your profile: Metric not added"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Minimum Engagement Rate */}
+                  <div className="p-4 rounded-xl border border-border-theme bg-surface-muted/30 space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[10px] uppercase font-bold text-text-secondary tracking-wider block">
+                        Minimum Engagement Rate
+                      </span>
+                      {renderEligibilityBadge(engagementStatus)}
+                    </div>
+                    <div>
+                      <span className="text-base font-semibold text-foreground block">
+                        {minEngagementReq > 0
+                          ? `${minEngagementReq}% Engagement`
+                          : "No minimum engagement"}
+                      </span>
+                      <span className="text-xs text-text-secondary block mt-0.5">
+                        {creatorEngagementRate !== null && !isNaN(creatorEngagementRate)
+                          ? `Your profile: ${creatorEngagementRate}% engagement`
+                          : "Your profile: Metric not added"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Soft Guideline Notice */}
+                <div className="p-3 rounded-xl bg-pink-50/50 dark:bg-pink-950/20 border border-pink-100/70 dark:border-pink-900/40 text-[11px] text-text-secondary flex items-start gap-2">
+                  <span className="font-semibold text-pink-600 dark:text-pink-400 shrink-0">Note:</span>
+                  <span>
+                    Eligibility requirements are soft guidelines provided by the brand. You can still apply to this campaign even if your metrics differ or are not connected to your profile.
+                  </span>
+                </div>
+              </div>
 
               {/* Footer Specs & Dates */}
               <div className="pt-4 border-t border-border-theme flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-text-secondary">

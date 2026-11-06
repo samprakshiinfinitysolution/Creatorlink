@@ -116,7 +116,7 @@ export const getAdminCampaignsService = async (queryParams) => {
 
     const [campaigns, totalItems] = await Promise.all([
         Campaign.find(filter)
-            .populate("brand", "name email role isVerified createdAt")
+            .populate("brand", "name email role isVerified avatar createdAt")
             .populate("moderation.restrictedBy", "name email role")
             .sort(sortOptions)
             .skip(skip)
@@ -238,7 +238,7 @@ export const getAdminCampaignStatsService = async () => {
  */
 export const getAdminCampaignByIdService = async (campaignId) => {
     const campaign = await Campaign.findById(campaignId)
-        .populate("brand", "name email role isVerified createdAt")
+        .populate("brand", "name email role isVerified avatar createdAt")
         .populate("moderation.restrictedBy", "name email role")
         .populate("moderation.resolvedBy", "name email role")
         .populate("moderation.history.admin", "name email role")
@@ -257,7 +257,7 @@ export const getAdminCampaignByIdService = async (campaignId) => {
                   .lean()
             : null,
         Booking.find({ campaign: campaignId })
-            .populate("creator", "name email isVerified")
+            .populate("creator", "name email isVerified avatar")
             .populate("service", "title price deliveryTime")
             .sort({ createdAt: -1 })
             .lean(),

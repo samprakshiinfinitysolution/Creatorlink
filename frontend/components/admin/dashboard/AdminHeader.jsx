@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { adminLogout } from "@/redux/admin/auth/admin_auth_slice";
 import ThemeToggle from "@/components/common/ThemeToggle/ThemeToggle";
+import AdminAvatar from "@/components/admin/AdminAvatar";
 
 // =========================================================
 // SVG ICONS
@@ -76,8 +77,6 @@ export default function AdminHeader({ setMobileOpen = () => {} }) {
     }
   };
 
-  const adminInitials = user?.name ? user.name.slice(0, 2).toUpperCase() : "AD";
-
   return (
     <header className="sticky top-0 z-20 bg-surface/80 backdrop-blur-md border-b border-border-theme h-16 px-4 sm:px-6 flex items-center justify-between transition-colors duration-200">
       {/* Left: Mobile Menu Trigger */}
@@ -105,13 +104,12 @@ export default function AdminHeader({ setMobileOpen = () => {} }) {
             className="flex items-center gap-2 p-1 sm:px-2 sm:py-1.5 rounded-xl hover:bg-surface-muted transition-colors cursor-pointer select-none"
             aria-expanded={dropdownOpen}
           >
-            <div className="w-8 h-8 rounded-full bg-secondary/20 text-secondary border border-secondary/30 flex items-center justify-center font-bold text-xs uppercase shadow-xs overflow-hidden shrink-0 aspect-square">
-              {user?.avatar ? (
-                <img src={user.avatar} alt="Admin" className="w-full h-full object-cover" />
-              ) : (
-                adminInitials
-              )}
-            </div>
+            <AdminAvatar
+              src={user?.avatar}
+              name={user?.name || "Administrator"}
+              type="admin"
+              className="w-8 h-8 rounded-full bg-secondary/20 text-secondary border border-secondary/30 flex items-center justify-center font-bold text-xs uppercase shadow-xs overflow-hidden shrink-0 aspect-square"
+            />
             <div className="hidden md:flex flex-col text-left">
               <span className="text-xs font-semibold text-foreground leading-tight">
                 {user?.name || "Administrator"}
@@ -162,4 +160,3 @@ export default function AdminHeader({ setMobileOpen = () => {} }) {
     </header>
   );
 }
-

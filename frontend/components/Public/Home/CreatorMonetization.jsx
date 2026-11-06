@@ -16,7 +16,7 @@ const MONETIZATION_DATA = {
   features: [
     {
       id: "pre-funded",
-      title: "Direct campaign offers tailored to your niche",
+      title: "Direct campaign offers tailored to your category",
       description:
         "Receive briefs and proposals directly from brands looking for your audience and content style.",
       icon: "banknote",

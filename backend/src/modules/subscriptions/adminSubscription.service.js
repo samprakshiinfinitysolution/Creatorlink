@@ -367,6 +367,8 @@ export const getAllSubscribersAdminService = async (queryParams = {}) => {
                 _id: sub.brandUser._id,
                 name: sub.brandUser.name,
                 email: sub.brandUser.email,
+                avatar: sub.brandUser?.avatar || sub.brandProfile?.logo || "",
+                logo: sub.brandProfile?.logo || sub.brandUser?.avatar || "",
                 companyName: sub.brandProfile?.companyName || "",
                 website: sub.brandProfile?.website || ""
             }
@@ -384,7 +386,7 @@ export const getSubscriberDetailAdminService = async (subscriptionId) => {
         throw createApiError(404, "Subscription not found");
     }
 
-    const brandUser = await Auth.findById(subscription.brand).select("name email role isVerified createdAt");
+    const brandUser = await Auth.findById(subscription.brand).select("name email role avatar isVerified createdAt");
     const brandProfile = await BrandProfile.findOne({ user: subscription.brand });
 
     // Recent payments

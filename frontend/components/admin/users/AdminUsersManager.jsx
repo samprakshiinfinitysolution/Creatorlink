@@ -7,6 +7,7 @@ import {
   fetchAdminUserById
 } from "@/redux/admin/users/users_slice";
 import AdminUserDetailModal from "./AdminUserDetailModal";
+import AdminAvatar from "@/components/admin/AdminAvatar";
 
 // =========================================================
 // SVG ICONS
@@ -220,7 +221,6 @@ export default function AdminUsersManager() {
                 </tr>
               ) : (
                 users.map((user) => {
-                  const initials = user.name ? user.name.slice(0, 2).toUpperCase() : "US";
                   const formattedDate = user.createdAt
                     ? new Date(user.createdAt).toLocaleDateString("en-US", {
                         month: "short",
@@ -237,9 +237,18 @@ export default function AdminUsersManager() {
                       {/* Name & Email */}
                       <td className="py-3.5 px-4 sm:px-6">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-secondary/15 text-secondary flex items-center justify-center font-bold text-xs uppercase shrink-0">
-                            {initials}
-                          </div>
+                          <AdminAvatar
+                            src={user.avatar || user.profile?.profileImage || user.profile?.logo || user.profileImage}
+                            name={user.name}
+                            type={user.role || "user"}
+                            className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs uppercase shrink-0 overflow-hidden ${
+                              user.role === "creator"
+                                ? "bg-purple-500/15 text-purple-600 dark:text-purple-400"
+                                : user.role === "brand"
+                                ? "bg-blue-500/15 text-blue-600 dark:text-blue-400"
+                                : "bg-secondary/15 text-secondary"
+                            }`}
+                          />
                           <div className="min-w-0">
                             <p className="font-semibold text-foreground truncate">{user.name}</p>
                             <p className="text-[11px] text-text-secondary truncate">{user.email}</p>

@@ -306,7 +306,7 @@ export default function BrandNotificationDropdown({
 
       {/* Floating Dropdown Panel */}
       {isOpen && (
-        <div className="absolute right-[-3.5rem] sm:right-0 top-full mt-2 w-[calc(100vw-1.5rem)] sm:w-96 max-w-sm sm:max-w-md bg-surface border border-border-theme rounded-2xl shadow-xl z-50 text-foreground font-sans select-none animate-in fade-in slide-in-from-top-1 duration-150 overflow-hidden flex flex-col">
+        <div className="fixed inset-x-2 top-16 sm:absolute sm:inset-auto sm:right-0 sm:top-full sm:mt-2 w-auto sm:w-96 sm:max-w-md bg-surface border border-border-theme rounded-2xl shadow-xl z-50 text-foreground font-sans select-none animate-in fade-in slide-in-from-top-1 duration-150 overflow-hidden flex flex-col">
           {/* Header */}
           <div className="px-4 py-3 border-b border-border-theme flex items-center justify-between gap-2 bg-surface">
             <div className="flex items-center gap-2 min-w-0">

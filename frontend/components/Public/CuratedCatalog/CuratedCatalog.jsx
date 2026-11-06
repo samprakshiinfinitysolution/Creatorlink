@@ -118,9 +118,7 @@ function CreatorCard({ creator, index }) {
 
   const deliverableText =
     creator.portfolio?.title ||
-    (Array.isArray(creator.niches) && creator.niches.length > 0
-      ? creator.niches[0]
-      : "Not added");
+    (creator.category || "Not added");
 
   return (
     <div className="group relative flex flex-col h-full overflow-hidden rounded-2xl border border-border-theme bg-surface shadow-xs hover:border-secondary/60 dark:hover:border-secondary/60 hover:shadow-[0_12px_35px_rgba(255,79,135,0.18)] dark:hover:shadow-[0_12px_35px_rgba(255,79,135,0.22)] hover:-translate-y-1 transition-all duration-300">

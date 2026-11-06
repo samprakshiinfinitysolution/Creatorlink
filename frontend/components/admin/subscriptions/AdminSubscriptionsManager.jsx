@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import axiosInstance from "@/lib/axios";
+import AdminAvatar from "@/components/admin/AdminAvatar";
 
 export default function AdminSubscriptionsManager() {
   const [activeTab, setActiveTab] = useState("dashboard"); // "dashboard" | "plans" | "subscribers"
@@ -552,13 +553,25 @@ export default function AdminSubscriptionsManager() {
                     {subscribers.map((s) => (
                       <tr key={s._id} className="hover:bg-surface-muted/30">
                         <td className="py-3 px-4">
-                          <span className="font-bold text-foreground block">{s.brand?.name || "Brand"}</span>
-                          <span className="text-[11px] text-text-secondary">{s.brand?.email}</span>
-                          {s.trialEligibility?.isFlagged && (
-                            <span className="inline-block px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 mt-0.5">
-                              ⚠️ Flagged
-                            </span>
-                          )}
+                          <div className="flex items-center gap-3">
+                            <AdminAvatar
+                              src={s.brand?.logo || s.brand?.avatar}
+                              name={s.brand?.companyName || s.brand?.name}
+                              type="brand"
+                              size="w-8 h-8"
+                              shape="rounded-lg"
+                              className="shrink-0"
+                            />
+                            <div className="min-w-0">
+                              <span className="font-bold text-foreground block truncate">{s.brand?.companyName || s.brand?.name || "Brand"}</span>
+                              <span className="text-[11px] text-text-secondary truncate block">{s.brand?.email}</span>
+                              {s.trialEligibility?.isFlagged && (
+                                <span className="inline-block px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 mt-0.5">
+                                  ⚠️ Flagged
+                                </span>
+                              )}
+                            </div>
+                          </div>
                         </td>
                         <td className="py-3 px-4 font-semibold text-foreground">
                           {s.planSnapshot?.name || (s.billingCycle === "trial" ? "Free Trial" : "Custom")}
@@ -784,11 +797,21 @@ export default function AdminSubscriptionsManager() {
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
               <div className="bg-surface border border-border-theme rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
                 <div className="flex items-start justify-between border-b border-border-theme pb-3">
-                  <div>
-                    <h3 className="text-base font-bold text-foreground">
-                      {selectedSubDetail.brand?.user?.name || "Brand Subscriber"}
-                    </h3>
-                    <span className="text-xs text-text-secondary">{selectedSubDetail.brand?.user?.email}</span>
+                  <div className="flex items-center gap-3">
+                    <AdminAvatar
+                      src={selectedSubDetail.brand?.profile?.logo || selectedSubDetail.brand?.user?.avatar}
+                      name={selectedSubDetail.brand?.profile?.companyName || selectedSubDetail.brand?.user?.name}
+                      type="brand"
+                      size="w-10 h-10"
+                      shape="rounded-xl"
+                      className="shrink-0"
+                    />
+                    <div>
+                      <h3 className="text-base font-bold text-foreground">
+                        {selectedSubDetail.brand?.profile?.companyName || selectedSubDetail.brand?.user?.name || "Brand Subscriber"}
+                      </h3>
+                      <span className="text-xs text-text-secondary">{selectedSubDetail.brand?.user?.email}</span>
+                    </div>
                   </div>
                   <button
                     type="button"

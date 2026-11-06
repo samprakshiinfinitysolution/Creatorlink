@@ -128,7 +128,6 @@ const AFFINITY_DOMAINS = [
 const extractAffinityKeywords = (item) => {
     const textPieces = [
         item.creator?.category || "",
-        ...(Array.isArray(item.creator?.niches) ? item.creator.niches : []),
         item.brand?.category || "",
         item.title || ""
     ];
@@ -204,9 +203,14 @@ export const getHomepageFeaturedService = async () => {
                         else: 0
                     }
                 },
-                hasNiches: {
+                hasCategory: {
                     $cond: {
-                        if: { $gt: [{ $size: { $ifNull: ["$niches", []] } }, 0] },
+                        if: {
+                            $and: [
+                                { $ne: ["$category", null] },
+                                { $ne: ["$category", ""] }
+                            ]
+                        },
                         then: 1,
                         else: 0
                     }
@@ -221,7 +225,7 @@ export const getHomepageFeaturedService = async () => {
                 followerCount: -1,
                 hasProfileImage: -1,
                 hasBio: -1,
-                hasNiches: -1,
+                hasCategory: -1,
                 createdAt: -1
             }
         },
@@ -357,7 +361,6 @@ export const getHomepageFeaturedService = async () => {
 
         const category =
             c.category ||
-            (Array.isArray(c.niches) && c.niches.length > 0 ? c.niches[0] : "") ||
             "Creator";
 
         const profileImage =
@@ -387,7 +390,6 @@ export const getHomepageFeaturedService = async () => {
             handle,
             profileImage,
             category,
-            niches: Array.isArray(c.niches) ? c.niches : [],
             location: c.location && typeof c.location === "string" ? c.location.trim() : "",
             followerCount,
             engagementRate,
@@ -441,7 +443,6 @@ export const getHomepageFeaturedService = async () => {
         let creatorName = booking.creator?.name || "Creator";
         let creatorProfileImage = null;
         let creatorCategory = "Content Creator";
-        let creatorNiches = [];
         let creatorSocial = null;
 
         if (creatorProfile) {
@@ -453,10 +454,8 @@ export const getHomepageFeaturedService = async () => {
             }
             creatorCategory =
                 creatorProfile.category ||
-                (Array.isArray(creatorProfile.niches) && creatorProfile.niches[0]) ||
-                booking.campaign?.category ||
+                                booking.campaign?.category ||
                 "Content Creator";
-            creatorNiches = Array.isArray(creatorProfile.niches) ? creatorProfile.niches : [];
             creatorSocial = creatorProfile.socialLinks;
         }
 
@@ -497,7 +496,6 @@ export const getHomepageFeaturedService = async () => {
                 handle: creatorHandle,
                 profileImage: creatorProfileImage,
                 category: creatorCategory,
-                niches: creatorNiches
             },
             // Backwards-compatibility fields for existing components
             brandName,
@@ -540,7 +538,7 @@ export const getHomepageFeaturedService = async () => {
         // Latest collaboration strictly on the basis of newest createdAt
         latestCollaboration = allCollaborations[0].record;
 
-        // Extract domain keywords for niche affinity priority
+        // Extract domain keywords for category affinity priority
         const latestKeywords = extractAffinityKeywords(latestCollaboration);
         const matchedDomains = AFFINITY_DOMAINS.filter((domain) =>
             domain.keywords.some((kw) => latestKeywords.includes(kw))
@@ -580,7 +578,7 @@ export const getHomepageFeaturedService = async () => {
             }
             seenDeals.add(dealKey);
 
-            // Niche priority scoring: same niche gets higher score, but all niches are included
+            // Category priority scoring: same category gets higher score, but all categories are included
             const candidateKeywords = extractAffinityKeywords(formatted);
             let matchScore = 0;
             for (const kw of candidateKeywords) {
@@ -596,7 +594,7 @@ export const getHomepageFeaturedService = async () => {
             });
         }
 
-        // Priority to same niche (matchScore descending), then newest createdAt
+        // Priority to same category (matchScore descending), then newest createdAt
         scoredCandidates.sort((a, b) => {
             if (b.matchScore !== a.matchScore) {
                 return b.matchScore - a.matchScore;

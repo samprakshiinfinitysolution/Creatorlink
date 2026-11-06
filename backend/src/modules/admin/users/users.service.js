@@ -50,7 +50,7 @@ const getAdminUsersService = async (query = {}) => {
     // 2. Query users and total count in parallel
     const [users, totalUsers] = await Promise.all([
         Auth.find(filter)
-            .select("name email role isVerified createdAt updatedAt")
+            .select("name email role isVerified avatar createdAt updatedAt")
             .sort(sortOrder)
             .skip(skip)
             .limit(limit)
@@ -109,7 +109,7 @@ const getAdminUserByIdService = async (userId) => {
 
     // 1. Fetch user auth document with strict field projection (no sensitive credentials)
     const user = await Auth.findById(userId)
-        .select("name email role isVerified createdAt updatedAt")
+        .select("name email role isVerified avatar createdAt updatedAt")
         .lean();
 
     if (!user) {

@@ -35,7 +35,7 @@ const getReportsOverviewService = async (query = {}) => {
             { $group: { _id: "$status", count: { $sum: 1 }, totalBudget: { $sum: "$budget" } } }
         ]),
 
-        // 3. Campaigns by Category / Niche Breakdown
+        // 3. Campaigns by Category Breakdown
         Campaign.aggregate([
             { $group: { _id: "$category", count: { $sum: 1 }, totalBudget: { $sum: "$budget" } } },
             { $sort: { count: -1 } },
@@ -154,7 +154,8 @@ const getReportsOverviewService = async (query = {}) => {
                     totalCampaigns: 1,
                     totalBudget: 1,
                     name: { $ifNull: ["$brandInfo.name", "Brand"] },
-                    email: { $ifNull: ["$brandInfo.email", "—"] }
+                    email: { $ifNull: ["$brandInfo.email", "—"] },
+                    avatar: { $ifNull: ["$brandInfo.avatar", ""] }
                 }
             }
         ])

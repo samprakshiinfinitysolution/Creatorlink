@@ -320,14 +320,14 @@ export default function SpotlightCarousel() {
         )}
 
         {/* =========================================================
-            2. SIMILAR NICHE COLLABORATIONS (RELATED CARDS GRID)
+            2. SIMILAR CATEGORY COLLABORATIONS (RELATED CARDS GRID)
         ========================================================= */}
         {related.length > 0 && (
           <ScrollReveal direction="up" delay={200}>
             <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-secondary block font-sans">
-                  SIMILAR NICHE COLLABORATIONS
+                  SIMILAR CATEGORY COLLABORATIONS
                 </span>
                 <h3 className="text-lg sm:text-xl font-serif font-bold text-foreground mt-0.5">
                   Recent Brand ↔ Creator Partnerships

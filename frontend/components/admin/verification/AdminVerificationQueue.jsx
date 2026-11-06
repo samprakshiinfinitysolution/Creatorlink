@@ -7,6 +7,7 @@ import {
   fetchVerificationDetails
 } from "@/redux/admin/verification/verification_slice";
 import AdminVerificationDetailModal from "./AdminVerificationDetailModal";
+import AdminAvatar from "@/components/admin/AdminAvatar";
 
 // =========================================================
 // SVG ICONS
@@ -261,17 +262,16 @@ export default function AdminVerificationQueue() {
                       {/* Applicant */}
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-surface-muted flex items-center justify-center text-xs font-semibold text-foreground overflow-hidden border border-border-theme">
-                            {item.user?.avatar ? (
-                              <img
-                                src={item.user.avatar}
-                                alt={applicantName}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              initial
-                            )}
-                          </div>
+                          <AdminAvatar
+                            src={
+                              item.role === "creator"
+                                ? (item.profile?.profileImage || item.user?.avatar)
+                                : (item.profile?.logo || item.user?.avatar)
+                            }
+                            name={applicantName}
+                            type={item.role || "user"}
+                            className="w-8 h-8 rounded-full bg-surface-muted border border-border-theme font-semibold text-xs text-foreground shrink-0 overflow-hidden"
+                          />
                           <div>
                             <p className="font-medium text-foreground group-hover:text-secondary transition">
                               {applicantName}

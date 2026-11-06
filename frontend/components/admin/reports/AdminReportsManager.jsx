@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import axiosInstance from "@/lib/axios";
+import AdminAvatar from "@/components/admin/AdminAvatar";
 
 // =========================================================
 // SVG ICONS
@@ -218,7 +219,7 @@ export default function AdminReportsManager() {
         <div className="p-6 sm:p-8 rounded-3xl bg-surface border border-border-theme shadow-xs space-y-5">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-base font-bold text-foreground">Campaigns by Category / Niche</h3>
+              <h3 className="text-base font-bold text-foreground">Campaigns by Category</h3>
               <p className="text-xs text-text-secondary">Distribution across influencer marketing verticals</p>
             </div>
             <ChartBarIcon className="w-5 h-5 text-secondary" />
@@ -299,9 +300,15 @@ export default function AdminReportsManager() {
                 <div key={cr._id} className="py-3 flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0">
                     <span className="w-6 text-xs font-bold text-text-secondary">#{idx + 1}</span>
-                    <div className="w-8 h-8 rounded-full bg-secondary/15 text-secondary flex items-center justify-center font-bold text-xs shrink-0">
-                      {cr.name ? cr.name.charAt(0).toUpperCase() : "C"}
-                    </div>
+<AdminAvatar
+                      src={cr.avatar || cr.profileImage}
+                      name={cr.name}
+                      type="creator"
+                      size="w-8 h-8"
+                      shape="rounded-full"
+                      className="shrink-0"
+                      fallbackColor="bg-secondary/15 text-secondary"
+                    />
                     <div className="min-w-0">
                       <p className="text-xs font-bold text-foreground truncate">{cr.name || "Creator"}</p>
                       <p className="text-[11px] text-text-secondary truncate">{cr.email}</p>
@@ -336,9 +343,15 @@ export default function AdminReportsManager() {
                 <div key={br._id} className="py-3 flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0">
                     <span className="w-6 text-xs font-bold text-text-secondary">#{idx + 1}</span>
-                    <div className="w-8 h-8 rounded-full bg-blue-500/15 text-blue-500 flex items-center justify-center font-bold text-xs shrink-0">
-                      {br.name ? br.name.charAt(0).toUpperCase() : "B"}
-                    </div>
+<AdminAvatar
+                      src={br.avatar || br.logo}
+                      name={br.name}
+                      type="brand"
+                      size="w-8 h-8"
+                      shape="rounded-full"
+                      className="shrink-0"
+                      fallbackColor="bg-blue-500/15 text-blue-500"
+                    />
                     <div className="min-w-0">
                       <p className="text-xs font-bold text-foreground truncate">{br.name || "Brand"}</p>
                       <p className="text-[11px] text-text-secondary truncate">{br.email}</p>

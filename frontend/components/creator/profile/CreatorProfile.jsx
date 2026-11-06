@@ -530,7 +530,7 @@ const CATEGORIES = [
   {
     id: "other",
     name: "Other",
-    desc: "Education, business, comedy, music & creative niches",
+    desc: "Education, business, comedy, music & creative categories",
     icon: SquaresIcon,
   },
 ];
@@ -1288,7 +1288,7 @@ const collaborationsCount = profile?.collaborationsCount || profile?.completedCa
       },
       {
         id: "keywords",
-        label: "Niche Keywords",
+        label: "Keywords",
         complete: Array.isArray(keywords) && keywords.length > 0,
       },
       {

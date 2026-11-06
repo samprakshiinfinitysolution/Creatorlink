@@ -919,6 +919,7 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
     const maxRevisions = typeof workspace?.maxRevisions === "number" ? workspace.maxRevisions : 2;
     const usedRevisions = isObject && typeof item.revisionCount === "number" ? item.revisionCount : 0;
     const remainingRevisions = Math.max(0, maxRevisions - usedRevisions);
+    const isRevisionLimitReached = usedRevisions >= maxRevisions || maxRevisions === 0;
 
     return (
       <div
@@ -1114,14 +1115,26 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
         {/* Deliverable Review Actions (Only on Current Reviewable Submission) */}
         {isReviewable && (
           <div className="pt-3 border-t border-gray-100 dark:border-zinc-800/80 flex items-center justify-end gap-3 flex-wrap">
-            <button
-              type="button"
-              onClick={() => handleOpenReviewModal("revision", isObject ? item : null)}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-[#FDE68A] bg-[#FFFBEB] hover:bg-[#FEF3C7] text-[#D97706] dark:bg-amber-950/30 dark:text-amber-300 dark:border-amber-800 text-xs font-semibold transition-all cursor-pointer shadow-2xs"
-            >
-              <RefreshIcon className="w-3.5 h-3.5" />
-              <span>Request Revision</span>
-            </button>
+            {isRevisionLimitReached ? (
+              <button
+                type="button"
+                disabled
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800/60 text-gray-400 dark:text-zinc-500 text-xs font-semibold cursor-not-allowed opacity-75 shadow-2xs"
+                title="Revision limit reached for this deliverable. You may approve the deliverable."
+              >
+                <RefreshIcon className="w-3.5 h-3.5 text-gray-400 dark:text-zinc-500" />
+                <span>Revision limit reached</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => handleOpenReviewModal("revision", isObject ? item : null)}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-[#FDE68A] bg-[#FFFBEB] hover:bg-[#FEF3C7] text-[#D97706] dark:bg-amber-950/30 dark:text-amber-300 dark:border-amber-800 text-xs font-semibold transition-all cursor-pointer shadow-2xs"
+              >
+                <RefreshIcon className="w-3.5 h-3.5" />
+                <span>Request Revision</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={() => handleOpenReviewModal("approve", isObject ? item : null)}
@@ -1703,7 +1716,7 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
                 <div className="lg:col-span-7 space-y-4">
                   {/* Campaign Deliverables Header */}
                   <div className="flex items-center justify-between gap-3 flex-wrap">
-                    <div className="flex items-center gap-2.5">
+                    <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
                       <h2 className="font-serif text-xl sm:text-2xl font-medium text-gray-900 dark:text-white tracking-tight">
                         Required Campaign Deliverables
                       </h2>
@@ -1825,7 +1838,7 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
                             <div key={sub._id || idx} className="relative group">
                               {/* Timeline Marker */}
                               <div className="flex items-center justify-between gap-2">
-                                <div className="flex items-center gap-2.5">
+                                <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
                                   <div className="w-3 h-3 rounded-full bg-[#E11D48] ring-4 ring-pink-100 dark:ring-pink-950/60 shrink-0 z-10" />
                                   <div className="flex items-center gap-1.5 text-[#E11D48] dark:text-[#FB7185] text-xs font-bold">
                                     <FolderIcon className="w-3.5 h-3.5" />
@@ -1961,7 +1974,7 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
                             <div key={sub._id || idx} className="relative group">
                               {/* Timeline Marker */}
                               <div className="flex items-center justify-between gap-2">
-                                <div className="flex items-center gap-2.5">
+                                <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
                                   <div className="w-3 h-3 rounded-full bg-gray-400 dark:bg-zinc-600 ring-4 ring-gray-100 dark:ring-zinc-800 shrink-0 z-10" />
                                   <div className="flex items-center gap-1.5 text-gray-600 dark:text-gray-400 text-xs font-semibold">
                                     <HistoryIcon className="w-3.5 h-3.5" />
@@ -2118,7 +2131,7 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
                                 return (
                                   <div key={sub._id || idx} className="relative group">
                                     <div className="flex items-center justify-between gap-2">
-                                      <div className="flex items-center gap-2.5">
+                                      <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
                                         <div className="w-2.5 h-2.5 rounded-full bg-gray-300 dark:bg-zinc-600 shrink-0 z-10 ml-0.5" />
                                         <span className="text-gray-500 dark:text-gray-400 text-xs font-medium">
                                           Historical Version
@@ -2279,6 +2292,7 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
         workspaceId={workspaceId}
         targetDeliverable={selectedDeliverable}
         initialMode={reviewMode}
+        maxRevisions={workspace?.maxRevisions}
       />
 
       {/* Creator Rating & Review Modal */}

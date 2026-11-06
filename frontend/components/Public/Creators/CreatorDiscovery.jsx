@@ -25,7 +25,7 @@ export default function CreatorDiscovery() {
             Let the right brands find your style.
           </h2>
           <p className="text-sm sm:text-base text-slate-600 dark:text-text-secondary font-sans leading-relaxed">
-            No generic bidding boards. Opportunities are matched to your precise niche, visual palette, and audience demographics.
+            No generic bidding boards. Opportunities are matched to your precise category, visual palette, and audience demographics.
           </p>
         </ScrollReveal>
 

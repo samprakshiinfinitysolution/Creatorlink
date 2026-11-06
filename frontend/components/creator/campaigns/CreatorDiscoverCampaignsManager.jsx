@@ -769,11 +769,19 @@ export default function CreatorDiscoverCampaignsManager() {
                       </div>
 
                       {/* Key Requirements & Rights Badges */}
-                      {(campaign.creatorRequirements?.minFollowers > 0 || campaign.usageRights?.paidAds || campaign.usageRights?.exclusivity) && (
+                      {(campaign.creatorRequirements?.minFollowers > 0 ||
+                        campaign.creatorRequirements?.minEngagementRate > 0 ||
+                        campaign.usageRights?.paidAds ||
+                        campaign.usageRights?.exclusivity) && (
                         <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
                           {campaign.creatorRequirements?.minFollowers > 0 && (
                             <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
                               Min {Number(campaign.creatorRequirements.minFollowers).toLocaleString()} Followers
+                            </span>
+                          )}
+                          {campaign.creatorRequirements?.minEngagementRate > 0 && (
+                            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+                              Min {campaign.creatorRequirements.minEngagementRate}% Engagement
                             </span>
                           )}
                           {campaign.usageRights?.paidAds && (

@@ -6,6 +6,7 @@ import {
   approveVerificationRequest,
   rejectVerificationRequest
 } from "@/redux/admin/verification/verification_slice";
+import AdminAvatar from "@/components/admin/AdminAvatar";
 
 // =========================================================
 // SVG ICONS
@@ -170,17 +171,16 @@ export default function AdminVerificationDetailModal({
           {/* Applicant Summary */}
           <div className="bg-surface-muted/50 border border-border-theme rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-surface flex items-center justify-center text-lg font-semibold text-foreground overflow-hidden border border-border-theme">
-                {user?.avatar ? (
-                  <img
-                    src={user.avatar}
-                    alt={displayName}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  displayName.charAt(0)?.toUpperCase() || "U"
-                )}
-              </div>
+              <AdminAvatar
+                src={
+                  role === "creator"
+                    ? (profile?.profileImage || user?.avatar)
+                    : (profile?.logo || user?.avatar)
+                }
+                name={displayName}
+                type={role || "user"}
+                className="w-12 h-12 rounded-full bg-surface border border-border-theme font-semibold text-lg text-foreground shrink-0 overflow-hidden"
+              />
               <div>
                 <h3 className="text-sm font-semibold text-foreground">
                   {displayName}

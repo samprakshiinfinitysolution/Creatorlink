@@ -52,35 +52,35 @@ const STAGES = [
 const DISCOVERY_CREATORS = [
   {
     name: "Aarohi Mehta",
-    niche: "Beauty • 98% Match",
+    category: "Beauty • 98% Match",
     fee: "₹30,000",
     image:
       "https://res.cloudinary.com/atr5osne/image/upload/v1792054698/creatorlink/public/avatars/gye9m9prpdv81gc9ipkp.webp",
   },
   {
     name: "Riya Sharma",
-    niche: "Wellness • 92% Match",
+    category: "Wellness • 92% Match",
     fee: "₹25,000",
     image:
       "https://res.cloudinary.com/atr5osne/image/upload/v1792054701/creatorlink/public/avatars/qooau1mzc4okikpsrqri.webp",
   },
   {
     name: "Maya Kapoor",
-    niche: "Lifestyle • 89% Match",
+    category: "Lifestyle • 89% Match",
     fee: "₹32,000",
     image:
       "https://res.cloudinary.com/atr5osne/image/upload/v1792054710/creatorlink/public/avatars/ra9dirifievmiawd57yl.webp",
   },
   {
     name: "Anaya Shah",
-    niche: "Design • 87% Match",
+    category: "Design • 87% Match",
     fee: "₹18,000",
     image:
       "https://res.cloudinary.com/atr5osne/image/upload/v1792054706/creatorlink/public/avatars/qvmu4uqdqpexdchfnvys.webp",
   },
   {
     name: "Kiara Jain",
-    niche: "Skincare • 94% Match",
+    category: "Skincare • 94% Match",
     fee: "₹28,000",
     image:
       "https://res.cloudinary.com/atr5osne/image/upload/v1792054726/creatorlink/public/avatars/ygxg39zcf4is7tn711ez.webp",
@@ -302,7 +302,7 @@ export default function InteractiveJourney() {
                                 {c.name}
                               </p>
                               <p className="text-[10px] text-secondary font-medium font-sans truncate">
-                                {c.niche}
+                                {c.category}
                               </p>
                             </div>
                           </div>

@@ -285,7 +285,7 @@ export default function BrandRecentCampaigns({ campaigns = [] }) {
   const safeCampaigns = Array.isArray(campaigns) ? campaigns : [];
 
   return (
-    <div className="bg-surface border border-border-theme rounded-2xl p-6 shadow-xs space-y-5 transition-colors">
+    <div className="bg-surface border border-border-theme rounded-2xl p-4 sm:p-6 shadow-xs space-y-4 sm:space-y-5 transition-colors">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="font-sans font-semibold text-base sm:text-lg text-slate-900 dark:text-foreground tracking-tight">
@@ -325,7 +325,7 @@ export default function BrandRecentCampaigns({ campaigns = [] }) {
           </div>
         </div>
       ) : (
-        <div className="overflow-x-auto no-scrollbar -mx-6 px-6 min-h-[160px]">
+        <div className="overflow-x-auto no-scrollbar -mx-4 px-4 sm:-mx-6 sm:px-6 min-h-[160px]">
           <table className="w-full text-left text-xs border-collapse min-w-[780px]">
             <thead>
               <tr className="border-b border-border-theme bg-surface-muted/40 text-text-secondary uppercase tracking-wider text-[10px] font-semibold">

@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import axiosInstance from "@/lib/axios";
 import { updateAdminUser } from "@/redux/admin/auth/admin_auth_slice";
+import AdminAvatar from "@/components/admin/AdminAvatar";
 
 // =========================================================
 // SVG ICONS
@@ -254,7 +255,7 @@ export default function AdminSettingsManager() {
     }
   };
 
-  const adminInitials = adminUser?.name ? adminUser.name.slice(0, 2).toUpperCase() : "AD";
+
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-300">
@@ -327,17 +328,14 @@ export default function AdminSettingsManager() {
 
             {/* Avatar Preview */}
             <div className="relative group">
-              <div className="w-28 h-28 rounded-full bg-secondary/20 border-2 border-secondary/40 text-secondary flex items-center justify-center font-bold text-3xl uppercase overflow-hidden shadow-md">
-                {adminUser?.avatar ? (
-                  <img
-                    src={adminUser.avatar}
-                    alt={adminUser?.name || "Admin"}
-                    className="w-full h-full object-cover rounded-full"
-                  />
-                ) : (
-                  <span>{adminInitials}</span>
-                )}
-              </div>
+              <AdminAvatar
+                src={adminUser?.avatar}
+                name={adminUser?.name || "Administrator"}
+                type="admin"
+                size="w-28 h-28"
+                shape="rounded-full"
+                className="border-2 border-secondary/40 shadow-md text-3xl font-bold"
+              />
               {avatarLoading && (
                 <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center text-white text-xs font-medium">
                   Saving...

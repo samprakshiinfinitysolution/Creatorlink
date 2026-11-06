@@ -3,6 +3,7 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { clearSelectedUser } from "@/redux/admin/users/users_slice";
+import AdminAvatar from "@/components/admin/AdminAvatar";
 
 // =========================================================
 // SVG ICONS
@@ -58,7 +59,7 @@ export default function AdminUserDetailModal() {
   const stats = selectedUserDossier?.stats || {};
   const recentActivity = selectedUserDossier?.recentActivity || {};
 
-  const initials = user.name ? user.name.slice(0, 2).toUpperCase() : "US";
+
   const joinedDate = user.createdAt
     ? new Date(user.createdAt).toLocaleDateString("en-US", {
         month: "short",
@@ -73,9 +74,18 @@ export default function AdminUserDetailModal() {
         {/* Header Bar */}
         <div className="flex items-start justify-between gap-4 border-b border-border-theme pb-4">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-secondary/15 text-secondary flex items-center justify-center font-bold text-base uppercase shrink-0">
-              {initials}
-            </div>
+            <AdminAvatar
+              src={user.avatar || profile?.profileImage || profile?.logo}
+              name={user.name || profile?.companyName}
+              type={user.role || "user"}
+              className={`w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-base uppercase shrink-0 overflow-hidden ${
+                user.role === "creator"
+                  ? "bg-purple-500/15 text-purple-600 dark:text-purple-400"
+                  : user.role === "brand"
+                  ? "bg-blue-500/15 text-blue-600 dark:text-blue-400"
+                  : "bg-secondary/15 text-secondary"
+              }`}
+            />
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-lg sm:text-xl font-serif font-bold text-foreground">
@@ -277,10 +287,21 @@ export default function AdminUserDetailModal() {
                       className="p-3 rounded-xl bg-surface-muted/60 border border-border-theme flex items-center justify-between text-xs"
                     >
                       <div>
-                        <p className="font-semibold text-foreground">{camp.title}</p>
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <AdminAvatar
+                            src={camp.coverImage}
+                            name={camp.title}
+                            type="campaign"
+                            className="w-8 h-8 rounded-lg bg-secondary/15 text-secondary font-bold text-[11px] shrink-0"
+                          />
+                          <div className="min-w-0">
+                            <p className="font-semibold text-foreground truncate">{camp.title}</p>
+                          </div>
+                        </div>
                         <p className="text-[11px] text-text-secondary">
                           ₹{Number(camp.budget || 0).toLocaleString("en-IN")} • Status: {camp.status}
                         </p>
+
                       </div>
                       <span className="px-2 py-0.5 rounded-full bg-secondary/10 text-secondary text-[10px] font-bold uppercase">
                         {camp.status}
@@ -303,12 +324,23 @@ export default function AdminUserDetailModal() {
                       className="p-3 rounded-xl bg-surface-muted/60 border border-border-theme flex items-center justify-between text-xs"
                     >
                       <div>
-                        <p className="font-semibold text-foreground">
-                          {user.role === "creator" ? b.brand?.name : b.creator?.name || "Direct Proposal"}
-                        </p>
+
+                        <div className="flex items-center gap-2.5 min-w-0 mb-1">
+                          <AdminAvatar
+                            src={user.role === "creator" ? (b.brand?.avatar || b.brand?.logo) : (b.creator?.avatar || b.creator?.profileImage)}
+                            name={user.role === "creator" ? b.brand?.name : b.creator?.name || "Direct Proposal"}
+                            type={user.role === "creator" ? "brand" : "creator"}
+                            className="w-8 h-8 rounded-full bg-surface-muted text-foreground font-bold text-[11px] shrink-0"
+                          />
+                          <span className="font-semibold text-foreground truncate">
+                            {user.role === "creator" ? b.brand?.name : b.creator?.name || "Direct Proposal"}
+                          </span>
+                        </div>
+
                         <p className="text-[11px] text-text-secondary">
                           Agreed: ₹{Number(b.agreedPrice || 0).toLocaleString("en-IN")} • {b.status}
                         </p>
+
                       </div>
                       <span className="px-2 py-0.5 rounded-full bg-foreground/10 text-foreground text-[10px] font-bold uppercase">
                         {b.status}

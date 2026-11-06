@@ -93,7 +93,7 @@ export default function PricingCreatorDiscovery() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search creators by aesthetic, niche, location..."
+                placeholder="Search creators by aesthetic, category, location..."
                 className="w-full bg-transparent border-none outline-none focus:outline-none focus:ring-0 text-xs sm:text-sm text-slate-900 dark:text-foreground placeholder:text-slate-400 dark:placeholder:text-text-muted font-sans p-0 m-0"
               />
             </div>
@@ -101,7 +101,7 @@ export default function PricingCreatorDiscovery() {
             {/* Active Filter Pills */}
             <div className="flex items-center gap-2 flex-wrap md:flex-nowrap">
               <span className="bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-text-secondary text-xs font-sans font-medium px-3 py-1.5 rounded-full inline-flex items-center gap-1.5 hover:bg-slate-200/70 dark:hover:bg-white/20 transition-colors cursor-pointer">
-                <span>Niche: Beauty & Wellness</span>
+                <span>Category: Beauty & Wellness</span>
                 <span className="text-slate-400 dark:text-text-muted hover:text-slate-900">×</span>
               </span>
 

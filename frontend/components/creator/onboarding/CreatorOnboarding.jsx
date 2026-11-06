@@ -117,7 +117,7 @@ const CATEGORIES = [
   {
     id: "other",
     name: "Other",
-    desc: "Education, business, comedy, music & creative niches",
+    desc: "Education, business, comedy, music & creative categories",
     icon: SquaresIcon,
   },
 ];

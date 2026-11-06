@@ -22,8 +22,8 @@ const IMPACT_CARDS = [
     id: '02',
     title: 'Authentic Voices',
     description:
-      'Prestige brands discover distinct niche aesthetics rather than repetitive mass tropes.',
-    bottomLabel: 'niche > generic',
+      'Prestige brands discover distinct category aesthetics rather than repetitive mass tropes.',
+    bottomLabel: 'curated > generic',
     bgStyle: 'bg-surface border-border-theme',
     iconBg: 'bg-secondary/15 text-secondary border border-secondary/20',
     icon: (

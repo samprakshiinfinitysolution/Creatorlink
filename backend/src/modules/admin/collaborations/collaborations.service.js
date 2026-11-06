@@ -140,8 +140,8 @@ export const getAdminCollaborationsService = async (queryParams) => {
 
     const [workspaces, totalItems] = await Promise.all([
         Workspace.find(filter)
-            .populate("brand", "name email role isVerified")
-            .populate("creator", "name email role isVerified")
+            .populate("brand", "name email role isVerified avatar")
+            .populate("creator", "name email role isVerified avatar")
             .populate("campaign", "title category platform budget coverImage")
             .populate("service", "title price deliveryTime")
             .sort(sortOptions)
@@ -160,7 +160,7 @@ export const getAdminCollaborationsService = async (queryParams) => {
             .select("user companyName logo isVerifiedBusiness")
             .lean(),
         CreatorProfile.find({ user: { $in: creatorIds } })
-            .select("user displayName profileImage isVerifiedBadge")
+            .select("user category bio profileImage isVerifiedBadge")
             .lean()
     ]);
 
@@ -216,8 +216,8 @@ export const getAdminCollaborationsService = async (queryParams) => {
  */
 export const getAdminCollaborationByIdService = async (workspaceId) => {
     const workspace = await Workspace.findById(workspaceId)
-        .populate("brand", "name email role isVerified createdAt")
-        .populate("creator", "name email role isVerified createdAt")
+        .populate("brand", "name email role isVerified avatar createdAt")
+        .populate("creator", "name email role isVerified avatar createdAt")
         .populate("campaign", "title description category platform budget deadline requiredCreators deliverables coverImage")
         .populate("service", "title description price deliveryTime")
         .populate("booking", "status agreedPrice startDate deadline initiatedBy message")
@@ -235,13 +235,17 @@ export const getAdminCollaborationByIdService = async (workspaceId) => {
             : null,
         workspace.creator?._id
             ? CreatorProfile.findOne({ user: workspace.creator._id })
-                  .select("displayName profileImage bio primaryNiche isVerifiedBadge")
+                  .select("category bio profileImage isVerifiedBadge")
                   .lean()
             : null,
         workspace.booking?._id
             ? Review.findOne({ booking: workspace.booking._id }).lean()
             : null
     ]);
+
+    if (creatorProfile) {
+        creatorProfile.displayName = workspace.creator?.name || "";
+    }
 
     const deliverablesList = workspace.deliverables || [];
     const totalDeliverables = deliverablesList.length;

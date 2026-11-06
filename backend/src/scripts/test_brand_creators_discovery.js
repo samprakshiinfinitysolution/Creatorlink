@@ -427,7 +427,7 @@ async function runTests() {
         if (catRes.creators.length !== 1 || catRes.creators[0].user._id.toString() !== creatorBUser._id.toString()) {
             throw new Error("Category filter for 'Fashion' failed.");
         }
-        console.log("  ✓ Test 8 Passed: Category filter correctly filtered by niche.");
+        console.log("  ✓ Test 8 Passed: Category filter correctly filtered by category.");
 
         // Test 9: Platform filter
         const platRes = await getDiscoverCreatorsService({ search: testTag, platform: "youtube" });

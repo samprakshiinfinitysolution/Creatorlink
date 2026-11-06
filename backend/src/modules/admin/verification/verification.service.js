@@ -56,7 +56,7 @@ export const getAdminVerificationsService = async (queryParams) => {
 
     const [requests, totalItems] = await Promise.all([
         VerificationRequest.find(filter)
-            .populate("user", "name email role isVerified createdAt")
+            .populate("user", "name email role isVerified avatar createdAt")
             .populate("reviewedBy", "name email role")
             .sort({ createdAt: sortOrder })
             .skip(skip)
@@ -98,7 +98,7 @@ export const getAdminVerificationsService = async (queryParams) => {
  */
 export const getAdminVerificationByIdService = async (id) => {
     const request = await VerificationRequest.findById(id)
-        .populate("user", "name email role isVerified createdAt")
+        .populate("user", "name email role isVerified avatar createdAt")
         .populate("reviewedBy", "name email role")
         .lean();
 

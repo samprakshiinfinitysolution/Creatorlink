@@ -175,7 +175,7 @@ const getCreatorBookingsService = async (creatorId, query = {}) => {
     const [bookings, totalItems] = await Promise.all([
         Booking.find(filter)
             .populate("brand", "name email")
-            .populate("campaign", "title category budget minBudget maxBudget currency deadline platform coverImage")
+            .populate("campaign", "title description category budget minBudget maxBudget currency deadline platform coverImage requiredCreators deliverables creatorRequirements audienceTargeting usageRights")
             .populate("service", "title price deliveryTime revisions")
             .sort({ createdAt: -1 })
             .skip(skip)
@@ -370,9 +370,12 @@ const attachBookingProfiles = async (bookings) => {
     const [creatorProfiles, brandProfiles, reviewStats] = await Promise.all([
         creatorIds.size > 0 && isDbConnected
             ? CreatorProfile.find({
-                user: { $in: Array.from(creatorIds).map((id) => new mongoose.Types.ObjectId(id)) }
+                $or: [
+                    { user: { $in: Array.from(creatorIds).map((id) => new mongoose.Types.ObjectId(id)) } },
+                    { _id: { $in: Array.from(creatorIds).map((id) => new mongoose.Types.ObjectId(id)) } }
+                ]
             })
-                .select("user profileImage category followerCount")
+                .select("user profileImage category followerCount engagementRate")
                 .lean()
             : [],
         brandIds.size > 0 && isDbConnected
@@ -403,6 +406,7 @@ const attachBookingProfiles = async (bookings) => {
     const creatorMap = new Map();
     creatorProfiles.forEach((cp) => {
         if (cp?.user) creatorMap.set(cp.user.toString(), cp);
+        if (cp?._id) creatorMap.set(cp._id.toString(), cp);
     });
 
     const reviewMap = new Map();
@@ -427,6 +431,7 @@ const attachBookingProfiles = async (bookings) => {
         const reviewCount = rStat?.reviewCount || 0;
         const category = cp?.category || "";
         const followerCount = cp?.followerCount !== undefined ? cp.followerCount : null;
+        const engagementRate = cp?.engagementRate !== undefined ? cp.engagementRate : null;
         const bp = bId ? brandMap.get(bId) : null;
 
         if (bObj.creator) {
@@ -441,6 +446,7 @@ const attachBookingProfiles = async (bookings) => {
                     category: category || creatorBase.category || "",
                     followerCount: followerCount !== null ? followerCount : (creatorBase.followerCount ?? null),
                     followers: followerCount !== null ? followerCount : (creatorBase.followers ?? null),
+                    engagementRate: engagementRate !== null ? engagementRate : (creatorBase.engagementRate ?? null),
                     rating: avgRating !== null ? avgRating : (creatorBase.rating ?? null),
                     reviewCount: reviewCount || creatorBase.reviewCount || 0
                 };
@@ -453,11 +459,18 @@ const attachBookingProfiles = async (bookings) => {
                     category,
                     followerCount,
                     followers: followerCount,
+                    engagementRate,
                     rating: avgRating,
                     reviewCount
                 };
             }
         }
+
+        bObj.creatorProfile = cp ? {
+            ...cp,
+            followerCount,
+            engagementRate
+        } : (bObj.creatorProfile || null);
 
         if (bObj.brand) {
             const isPopulated = typeof bObj.brand === "object" && !isMongooseObjectId(bObj.brand);
@@ -543,7 +556,7 @@ const getBrandBookingsService = async (brandId, query = {}) => {
     const [bookings, totalItems] = await Promise.all([
         Booking.find(filter)
             .populate("creator", "name email")
-            .populate("campaign", "title category budget minBudget maxBudget currency deadline platform coverImage")
+            .populate("campaign", "title description category budget minBudget maxBudget currency deadline platform coverImage requiredCreators deliverables creatorRequirements audienceTargeting usageRights")
             .populate("service", "title price deliveryTime revisions")
             .sort({ createdAt: -1 })
             .skip(skip)

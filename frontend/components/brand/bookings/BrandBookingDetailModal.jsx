@@ -139,10 +139,11 @@ export default function BrandBookingDetailModal({
   isOpen,
   onClose,
   bookingId,
+  booking: propBooking = null,
 }) {
   const dispatch = useDispatch();
 
-  const { selectedBooking, loading, error, submitting, successMessage } = useSelector(
+  const { selectedBooking, bookings: listBookings, loading, error, submitting, successMessage } = useSelector(
     (state) => state.brandBookings || {}
   );
 
@@ -248,7 +249,11 @@ export default function BrandBookingDetailModal({
 
   if (!isOpen) return null;
 
-  const booking = selectedBooking;
+  const booking =
+    propBooking ||
+    (selectedBooking && ((selectedBooking._id || selectedBooking.id) === bookingId) ? selectedBooking : null) ||
+    (Array.isArray(listBookings) ? listBookings.find((b) => (b._id || b.id) === bookingId) : null) ||
+    selectedBooking;
   const isPending = booking?.status?.toLowerCase() === "pending";
   const isBrandInitiated = booking?.initiatedBy === "brand";
   const badge = getStatusBadge(booking?.status);
@@ -287,15 +292,173 @@ export default function BrandBookingDetailModal({
         ? booking.campaign.deliverables
         : [];
 
+  // Profile metrics for eligibility comparison
+  const rawFollowers =
+    booking?.creator?.followerCount ??
+    booking?.creator?.followers ??
+    booking?.creatorProfile?.followerCount ??
+    booking?.creatorProfile?.followersCount ??
+    booking?.creator?.profile?.followerCount ??
+    booking?.creator?.creatorProfile?.followerCount;
+
+  const creatorFollowers =
+    rawFollowers !== undefined && rawFollowers !== null && rawFollowers !== "" && !isNaN(Number(rawFollowers))
+      ? Number(rawFollowers)
+      : null;
+
+  const rawEngagement =
+    booking?.creator?.engagementRate ??
+    booking?.creatorProfile?.engagementRate ??
+    booking?.creator?.profile?.engagementRate ??
+    booking?.creator?.creatorProfile?.engagementRate;
+
+  const creatorEngagement =
+    rawEngagement !== undefined && rawEngagement !== null && rawEngagement !== "" && !isNaN(Number(rawEngagement))
+      ? Number(rawEngagement)
+      : null;
+
+  const hasCampaign = Boolean(booking?.campaign);
+
+  const rawMinFollowers =
+    booking?.campaign?.creatorRequirements?.minFollowers ??
+    booking?.campaign?.minFollowers;
+  const minFollowersReq =
+    typeof rawMinFollowers === "number"
+      ? rawMinFollowers
+      : rawMinFollowers !== undefined && rawMinFollowers !== null && !isNaN(Number(rawMinFollowers))
+        ? Number(rawMinFollowers)
+        : 0;
+
+  const rawMinEngagement =
+    booking?.campaign?.creatorRequirements?.minEngagementRate ??
+    booking?.campaign?.minEngagementRate;
+  const minEngagementReq =
+    typeof rawMinEngagement === "number"
+      ? rawMinEngagement
+      : rawMinEngagement !== undefined && rawMinEngagement !== null && !isNaN(Number(rawMinEngagement))
+        ? Number(rawMinEngagement)
+        : 0;
+
+  const getFollowersComparison = () => {
+    if (!hasCampaign) {
+      return {
+        requirement: "Direct Booking (No Minimum)",
+        actual: creatorFollowers !== null ? `${creatorFollowers.toLocaleString()} Followers` : "Not Available",
+        status: "meets",
+        statusLabel: "Meets Requirements",
+        badgeColor: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+      };
+    }
+
+    const requirementText = minFollowersReq > 0
+      ? `${minFollowersReq.toLocaleString()} Followers`
+      : "No Minimum";
+
+    if (minFollowersReq <= 0) {
+      return {
+        requirement: requirementText,
+        actual: creatorFollowers !== null ? `${creatorFollowers.toLocaleString()} Followers` : "Not Available",
+        status: "meets",
+        statusLabel: "Meets Requirements",
+        badgeColor: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+      };
+    }
+
+    if (creatorFollowers === null) {
+      return {
+        requirement: requirementText,
+        actual: "Not Available",
+        status: "na",
+        statusLabel: "Not Available",
+        badgeColor: "bg-surface-muted text-text-secondary border-border-theme",
+      };
+    }
+
+    if (creatorFollowers >= minFollowersReq) {
+      return {
+        requirement: requirementText,
+        actual: `${creatorFollowers.toLocaleString()} Followers`,
+        status: "meets",
+        statusLabel: "Meets Requirements",
+        badgeColor: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+      };
+    }
+
+    return {
+      requirement: requirementText,
+      actual: `${creatorFollowers.toLocaleString()} Followers`,
+      status: "below",
+      statusLabel: "Below Requirements",
+      badgeColor: "bg-amber-500/10 text-amber-500 border-amber-500/20",
+    };
+  };
+
+  const getEngagementComparison = () => {
+    if (!hasCampaign) {
+      return {
+        requirement: "Direct Booking (No Minimum)",
+        actual: creatorEngagement !== null ? `${creatorEngagement}% Engagement` : "Not Available",
+        status: "meets",
+        statusLabel: "Meets Requirements",
+        badgeColor: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+      };
+    }
+
+    const requirementText = minEngagementReq > 0
+      ? `${minEngagementReq}% Engagement`
+      : "No Minimum";
+
+    if (minEngagementReq <= 0) {
+      return {
+        requirement: requirementText,
+        actual: creatorEngagement !== null ? `${creatorEngagement}% Engagement` : "Not Available",
+        status: "meets",
+        statusLabel: "Meets Requirements",
+        badgeColor: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+      };
+    }
+
+    if (creatorEngagement === null) {
+      return {
+        requirement: requirementText,
+        actual: "Not Available",
+        status: "na",
+        statusLabel: "Not Available",
+        badgeColor: "bg-surface-muted text-text-secondary border-border-theme",
+      };
+    }
+
+    if (creatorEngagement >= minEngagementReq) {
+      return {
+        requirement: requirementText,
+        actual: `${creatorEngagement}% Engagement`,
+        status: "meets",
+        statusLabel: "Meets Requirements",
+        badgeColor: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+      };
+    }
+
+    return {
+      requirement: requirementText,
+      actual: `${creatorEngagement}% Engagement`,
+      status: "below",
+      statusLabel: "Below Requirements",
+      badgeColor: "bg-amber-500/10 text-amber-500 border-amber-500/20",
+    };
+  };
+
+  const followersComparison = getFollowersComparison();
+  const engagementComparison = getEngagementComparison();
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
       {/* Backdrop */}
       <div className="fixed inset-0" onClick={handleClose} />
 
       {/* Modal Container */}
-      <div className="relative z-10 bg-surface border border-border-theme rounded-2xl max-w-3xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="relative z-10 bg-surface border border-border-theme rounded-2xl max-w-3xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[92vh] sm:max-h-[90vh]">
         {/* Modal Header */}
-        <div className="p-5 sm:p-6 border-b border-border-theme flex items-center justify-between bg-surface">
+        <div className="p-4 sm:p-6 border-b border-border-theme flex items-center justify-between bg-surface">
           <div>
             <div className="flex items-center gap-2">
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-secondary/15 text-secondary border border-secondary/20 uppercase tracking-wide">
@@ -322,7 +485,7 @@ export default function BrandBookingDetailModal({
         </div>
 
         {/* Modal Body */}
-        <div className="p-5 sm:p-6 overflow-y-auto space-y-6 flex-1 custom-scrollbar">
+        <div className="p-4 sm:p-6 overflow-y-auto space-y-6 flex-1 custom-scrollbar">
 
           {/* Loading State Skeleton */}
           {loading && !booking && (
@@ -370,7 +533,7 @@ export default function BrandBookingDetailModal({
           )}
 
           {/* Booking Details Grid */}
-          {!loading && booking && (
+          {booking && (
             <div className="space-y-6">
 
               {/* Creator & Proposal Overview Card */}
@@ -412,6 +575,84 @@ export default function BrandBookingDetailModal({
                     </p>
                   </div>
                 )}
+              </div>
+
+              {/* Creator Eligibility & Profile Metrics Card */}
+              <div className="bg-surface-muted/40 border border-border-theme rounded-2xl p-5 space-y-4">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <span className="text-[10px] font-bold text-text-secondary uppercase tracking-wider block">
+                    Creator Eligibility & Profile Metrics
+                  </span>
+                  <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-surface border border-border-theme text-text-secondary">
+                    Soft Guideline
+                  </span>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs min-w-[460px]">
+                    <thead>
+                      <tr className="border-b border-border-theme text-[10px] font-bold text-text-secondary uppercase tracking-wider">
+                        <th className="pb-2.5 pr-4 font-semibold">Metric</th>
+                        <th className="pb-2.5 px-4 font-semibold">Campaign Requirement</th>
+                        <th className="pb-2.5 px-4 font-semibold">Creator Actual</th>
+                        <th className="pb-2.5 pl-4 font-semibold text-right">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border-theme/60 text-xs">
+                      {/* Followers Row */}
+                      <tr>
+                        <td className="py-3 pr-4 font-medium text-foreground whitespace-nowrap">
+                          <div className="flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-secondary shrink-0" />
+                            <span>Followers</span>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 text-text-secondary font-medium whitespace-nowrap">
+                          {followersComparison.requirement}
+                        </td>
+                        <td className="py-3 px-4 font-semibold text-foreground whitespace-nowrap">
+                          {followersComparison.actual}
+                        </td>
+                        <td className="py-3 pl-4 text-right whitespace-nowrap">
+                          <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${followersComparison.badgeColor}`}>
+                            {followersComparison.statusLabel}
+                          </span>
+                        </td>
+                      </tr>
+
+                      {/* Engagement Rate Row */}
+                      <tr>
+                        <td className="py-3 pr-4 font-medium text-foreground whitespace-nowrap">
+                          <div className="flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-accent shrink-0" />
+                            <span>Engagement Rate</span>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 text-text-secondary font-medium whitespace-nowrap">
+                          {engagementComparison.requirement}
+                        </td>
+                        <td className="py-3 px-4 font-semibold text-foreground whitespace-nowrap">
+                          {engagementComparison.actual}
+                        </td>
+                        <td className="py-3 pl-4 text-right whitespace-nowrap">
+                          <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${engagementComparison.badgeColor}`}>
+                            {engagementComparison.statusLabel}
+                          </span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Soft Guideline Note */}
+                <div className="flex items-start gap-2 pt-2 border-t border-border-theme/60 text-[11px] text-text-secondary">
+                  <svg className="w-4 h-4 text-text-secondary/70 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                  </svg>
+                  <span>
+                    Campaign eligibility criteria serve as a soft guideline to inform your decision. You retain full autonomy to accept or decline any proposal.
+                  </span>
+                </div>
               </div>
 
               {/* Campaign Information Card */}

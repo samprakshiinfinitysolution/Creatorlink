@@ -72,29 +72,24 @@ export default function BrandsHero() {
             <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-secondary/10 border border-secondary/20 mb-6">
               <span className="text-secondary text-xs">•</span>
               <span className="text-[11px] font-bold tracking-[0.18em] uppercase text-secondary font-sans">
-                FOR BRANDS ✦
+                FOR BRANDS
               </span>
             </div>
 
             {/* Main Heading */}
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif font-medium tracking-tight text-foreground leading-[1.15] mb-6">
-              Your brand.<br />
-              <span className="relative inline-block px-3 py-0.5 bg-secondary/15 dark:bg-secondary/20 rounded-2xl text-foreground font-serif my-1">
-                Their influence.
-              </span><br />
-              One meaningful<br />
-              collaboration.
+              Find the Creators Who Bring Your Brand to Life.
             </h1>
 
             {/* Supporting Text */}
             <p className="text-base sm:text-lg text-text-secondary font-sans leading-relaxed max-w-xl mb-8 sm:mb-10">
-              Discover creators who fit your brand, build authentic campaigns, and turn creative briefs into high-impact content people remember.
+              Your brand has a story worth sharing. CreatorLink helps you discover creative talent, connect with the right creators and turn your campaign ideas into meaningful content.
             </p>
 
             {/* CTA Buttons */}
             <div className="flex flex-wrap items-center gap-4 sm:gap-5 mb-10">
               <Link
-                href="/signup"
+                href="/signup?role=brand"
                 className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full bg-secondary hover:bg-secondary-dark text-white font-sans font-semibold text-sm tracking-wide shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300"
               >
                 <span>Start a Campaign</span>
@@ -111,22 +106,12 @@ export default function BrandsHero() {
             </div>
 
             {/* Divider Line & Trust Statement */}
-            <div className="pt-6 border-t border-border-theme/60 flex items-center gap-4">
-              {/* 3 Overlapping Circular Initials */}
-              <div className="flex items-center shrink-0">
-                <div className="w-7 h-7 rounded-full bg-secondary/15 border border-surface text-secondary text-xs font-bold font-sans flex items-center justify-center z-30">
-                  V
-                </div>
-                <div className="w-7 h-7 rounded-full bg-secondary/20 border border-surface text-secondary text-xs font-bold font-sans flex items-center justify-center -ml-2 z-20">
-                  K
-                </div>
-                <div className="w-7 h-7 rounded-full bg-secondary/25 border border-surface text-secondary text-xs font-bold font-sans flex items-center justify-center -ml-2 z-10">
-                  L
-                </div>
+            <div className="pt-6 border-t border-border-theme/60 flex items-center gap-3">
+              <div className="w-6 h-6 rounded-full bg-secondary/15 text-secondary flex items-center justify-center text-xs font-bold shrink-0">
+                ✓
               </div>
-
-              <p className="text-xs text-text-secondary font-sans leading-snug max-w-sm">
-                Trusted by modern luxury houses, boutique agencies & direct-to-consumer icons.
+              <p className="text-xs sm:text-sm text-text-secondary font-sans leading-snug">
+                Discover creative talent. Build genuine connections. Create meaningful campaigns.
               </p>
             </div>
           </ScrollReveal>
@@ -137,63 +122,46 @@ export default function BrandsHero() {
           <ScrollReveal direction="left" delay={120} className="lg:col-span-6 xl:col-span-6 relative">
             <div className="relative w-full max-w-[620px] mx-auto h-[500px] sm:h-[560px] flex items-center justify-center">
 
-              {/* TOP CARD 1 (Camille Dupont - Top Left) */}
+              {/* TOP CARD 1 (Top Left) */}
               <div className="absolute z-20 top-[0%] left-0 hero-float-1 w-[210px] sm:w-[235px]">
                 <div className="group relative bg-surface p-3 rounded-2xl border border-border-theme/80 shadow-md transition-all duration-350 hover:scale-[1.03] hover:-translate-y-[6px] hover:border-secondary/60 hover:shadow-[0_12px_32px_rgba(255,79,135,0.22)] cursor-pointer">
-                  {/* Image Container with Verified Badge */}
                   <div className="relative aspect-[4/5] rounded-xl overflow-hidden mb-3 bg-surface-muted">
                     <Image
                       src="https://res.cloudinary.com/atr5osne/image/upload/v1792054698/creatorlink/public/avatars/gye9m9prpdv81gc9ipkp.webp"
-                      alt="Camille Dupont"
+                      alt="Creator Portfolio"
                       fill
                       preload
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       sizes="(max-width: 768px) 100vw, 235px"
                     />
-                    <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-[10px] font-semibold text-white flex items-center gap-1 font-sans">
-                      <span className="text-emerald-400 text-[10px]">✔</span>
-                      <span>Verified</span>
-                    </div>
-
-                    {/* Floating Pill on image */}
                     <div className="absolute bottom-2 left-2 z-10">
                       <div className="px-2.5 py-1 rounded-full bg-white/90 dark:bg-black/80 backdrop-blur-md border border-border-theme/60 text-[10px] font-bold text-foreground flex items-center gap-1 font-sans shadow-xs">
                         <span className="text-secondary">✦</span>
-                        <span>Audience Fit 98.4%</span>
+                        <span>Lifestyle &amp; Visuals</span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Card Info */}
                   <div className="flex items-start justify-between">
                     <div>
                       <h3 className="text-sm font-bold text-foreground font-sans leading-none">
-                        Camille Dupont
+                        Creator Profile
                       </h3>
                       <p className="text-[11px] text-text-secondary font-sans mt-1">
-                        Paris
+                        Curated Visual Portfolio
                       </p>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-xs font-bold text-foreground font-sans block leading-none">
-                        4.9 ★
-                      </span>
-                      <span className="text-[10px] text-text-secondary font-sans block mt-1">
-                        ₹22K/collab
-                      </span>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* TOP CARD 2 (Sora Lin - Top Right) */}
+              {/* TOP CARD 2 (Top Right) */}
               <div className="absolute z-20 top-[6%] right-0 hero-float-2 w-[205px] sm:w-[225px]">
                 <div className="group relative bg-surface p-3 rounded-2xl border border-border-theme/80 shadow-md transition-all duration-350 hover:scale-[1.03] hover:-translate-y-[6px] hover:border-secondary/60 hover:shadow-[0_12px_32px_rgba(255,79,135,0.22)] cursor-pointer">
-                  {/* Image Container with Available Next Week Badge */}
                   <div className="relative aspect-[4/5] rounded-xl overflow-hidden mb-3 bg-surface-muted">
                     <Image
                       src="https://res.cloudinary.com/atr5osne/image/upload/v1792054701/creatorlink/public/avatars/qooau1mzc4okikpsrqri.webp"
-                      alt="Sora Lin"
+                      alt="Creator Profile"
                       fill
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       sizes="(max-width: 768px) 100vw, 225px"
@@ -201,62 +169,55 @@ export default function BrandsHero() {
                     <div className="absolute bottom-2 left-2 z-10">
                       <div className="px-2.5 py-1 rounded-full bg-white/90 dark:bg-black/80 backdrop-blur-md border border-border-theme/60 text-[10px] font-semibold text-foreground flex items-center gap-1.5 font-sans shadow-xs">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                        <span>Available Next Week</span>
+                        <span>Available for Campaigns</span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Card Info */}
                   <div className="flex items-end justify-between">
                     <div>
                       <h3 className="text-sm font-bold text-foreground font-sans leading-none">
-                        Sora Lin
+                        Creator Profile
                       </h3>
                       <p className="text-[10px] text-text-secondary font-sans mt-1">
-                        Tokyo / London • Skincare
+                        Beauty &amp; Skincare
                       </p>
                     </div>
-                    <span className="px-2 py-0.5 rounded-full bg-secondary/15 text-secondary text-[10px] font-bold font-sans">
-                      38.4K
-                    </span>
                   </div>
                 </div>
               </div>
 
-              {/* BOTTOM CARD 1 (Marcus Vance - Bottom Left: Default Tilted RIGHT rotate 3.5deg -> Hover Straightens to 0deg) */}
+              {/* BOTTOM CARD 1 (Bottom Left) */}
               <div className="absolute z-20 bottom-[2%] left-[4%] hero-float-3 w-[205px] sm:w-[225px]">
                 <div className="group relative card-tilt-right bg-surface p-3 rounded-2xl border border-border-theme/80 shadow-md hover:border-secondary/60 hover:shadow-[0_14px_35px_rgba(255,79,135,0.25)] cursor-pointer">
-                  {/* Image Container */}
                   <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-3 bg-surface-muted">
                     <Image
                       src="https://res.cloudinary.com/atr5osne/image/upload/v1792054706/creatorlink/public/avatars/qvmu4uqdqpexdchfnvys.webp"
-                      alt="Marcus Vance"
+                      alt="Creator Profile"
                       fill
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       sizes="(max-width: 768px) 100vw, 225px"
                     />
                   </div>
 
-                  {/* Card Info */}
                   <div>
                     <h3 className="text-xs font-bold text-foreground font-sans leading-none">
-                      Marcus Vance
+                      Creator Profile
                     </h3>
                     <p className="text-[10px] text-text-secondary font-sans mt-1">
-                      Culinary & Interior • 94% Match
+                      Culinary &amp; Interior Design
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* BOTTOM CARD 2 (Elena Rostova - Bottom Right: Default Tilted LEFT rotate -3.5deg -> Hover Straightens to 0deg) */}
+              {/* BOTTOM CARD 2 (Bottom Right) */}
               <div className="absolute z-20 bottom-[0%] right-[2%] hero-float-4 w-[195px] sm:w-[215px]">
                 <div className="group relative card-tilt-left bg-surface p-3 rounded-2xl border border-border-theme/80 shadow-md hover:border-secondary/60 hover:shadow-[0_14px_35px_rgba(255,79,135,0.25)] cursor-pointer">
-                  {/* Image Container with Engagement Pill */}
                   <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-3 bg-surface-muted">
                     <Image
                       src="https://res.cloudinary.com/atr5osne/image/upload/v1792054710/creatorlink/public/avatars/ra9dirifievmiawd57yl.webp"
-                      alt="Elena Rostova"
+                      alt="Creator Profile"
                       fill
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       sizes="(max-width: 768px) 100vw, 215px"
@@ -264,18 +225,17 @@ export default function BrandsHero() {
                     <div className="absolute top-2 right-2 z-10">
                       <div className="px-2 py-0.5 rounded-full bg-white/90 dark:bg-black/80 backdrop-blur-md border border-border-theme/60 text-[9px] font-semibold text-foreground flex items-center gap-1 font-sans shadow-xs">
                         <span className="w-1.5 h-1.5 rounded-full bg-secondary" />
-                        <span>Avg. Engagement 6.8%</span>
+                        <span>Original Content</span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Card Info */}
                   <div className="flex items-center justify-between">
                     <h3 className="text-xs font-bold text-foreground font-sans leading-none">
-                      Elena Rostova
+                      Creator Profile
                     </h3>
                     <span className="text-[10px] font-semibold text-text-secondary font-sans">
-                      ₹18K
+                      Fashion &amp; Style
                     </span>
                   </div>
                 </div>

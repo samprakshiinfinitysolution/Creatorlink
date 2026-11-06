@@ -5,47 +5,54 @@ import Image from "next/image";
 import ScrollReveal from "@/components/theme/ScrollReveal";
 
 export default function CreatorVisualGallery() {
-  // Clean static gallery data ready for future backend integration
+  const categories = [
+    "Fashion & Beauty",
+    "Food & Lifestyle",
+    "Travel & Experiences",
+    "Art & Creativity",
+    "Technology & Digital Content",
+  ];
+
   const [galleryItems] = useState([
     // TOP ROW (Items 1 - 5)
     {
       id: 1,
       src: "https://res.cloudinary.com/atr5osne/image/upload/v1792054721/creatorlink/public/creators/lyhqi3si95n8so90e1gl.webp",
-      alt: "Fashion & Art Gallery Creator",
-      handle: "@serena.gallery",
-      category: "EDITORIAL",
+      alt: "Fashion & Art Inspiration",
+      label: "Visual Styling",
+      category: "Fashion & Beauty",
       aspectRatio: "aspect-[4/5]",
     },
     {
       id: 2,
       src: "https://res.cloudinary.com/atr5osne/image/upload/v1792056000/creatorlink/public/editorial/tmvytlc1dprhgkrn5del.webp",
-      alt: "Slow Living & Artisanal Morning Breakfast",
-      handle: "@slow.kitchen",
-      category: "SLOW LIVING",
+      alt: "Morning Food & Table Storytelling",
+      label: "Morning Rituals",
+      category: "Food & Lifestyle",
       aspectRatio: "aspect-[3/4]",
     },
     {
       id: 3,
       src: "https://res.cloudinary.com/atr5osne/image/upload/v1792054885/creatorlink/public/editorial/o5nw5mti6eh115xsuxfj.webp",
-      alt: "Coastal Lifestyle Overlooking Amalfi Coast",
-      handle: "@journey.with.maya",
-      category: "TRAVEL",
+      alt: "Coastal Travel & Destination",
+      label: "Coastal Journeys",
+      category: "Travel & Experiences",
       aspectRatio: "aspect-[3/4]",
     },
     {
       id: 4,
       src: "https://res.cloudinary.com/atr5osne/image/upload/v1792054891/creatorlink/public/campaigns/l3ga6hm8eeyh0b4glc2o.webp",
-      alt: "Macro Skincare Dew Droplet Detail",
-      handle: "@botanical.dew",
-      category: "BEAUTY",
+      alt: "Product Detail Demonstration",
+      label: "Product Focus",
+      category: "Fashion & Beauty",
       aspectRatio: "aspect-[2/3]",
     },
     {
       id: 5,
       src: "https://res.cloudinary.com/atr5osne/image/upload/v1792054897/creatorlink/public/editorial/mhkn5bujhgmqdurgheqz.webp",
-      alt: "Minimalist Serene Living Lounge Interior",
-      handle: "@minimal.sanctuary",
-      category: "ARCHITECTURE",
+      alt: "Interior & Architectural Design",
+      label: "Spaces & Mood",
+      category: "Art & Creativity",
       aspectRatio: "aspect-[4/3]",
     },
 
@@ -53,41 +60,41 @@ export default function CreatorVisualGallery() {
     {
       id: 6,
       src: "https://res.cloudinary.com/atr5osne/image/upload/v1792054698/creatorlink/public/avatars/gye9m9prpdv81gc9ipkp.webp",
-      alt: "Coffee & Creative Lifestyle Creator at Workspace",
-      handle: "@aarohi.mehta",
-      category: "CREATOR",
+      alt: "Creative Workspace",
+      label: "Digital Storytelling",
+      category: "Technology & Digital Content",
       aspectRatio: "aspect-[3/4]",
     },
     {
       id: 7,
       src: "https://res.cloudinary.com/atr5osne/image/upload/v1792054902/creatorlink/public/campaigns/vgtcgq8lejpxdavms5ku.webp",
-      alt: "Handcrafted Leather Sandals on Sunset Beach Sand",
-      handle: "@sol.atelier",
-      category: "CRAFT",
+      alt: "Handcrafted Product Aesthetics",
+      label: "Product Story",
+      category: "Fashion & Beauty",
       aspectRatio: "aspect-[1/1]",
     },
     {
       id: 8,
       src: "https://res.cloudinary.com/atr5osne/image/upload/v1792054913/creatorlink/public/editorial/hr87whbaii0lozxsyzyd.webp",
-      alt: "Female Artist Painting in Sunlit Studio",
-      handle: "@canvas.notes",
-      category: "STUDIO",
+      alt: "Artist Studio Creative Process",
+      label: "Studio Process",
+      category: "Art & Creativity",
       aspectRatio: "aspect-[3/4]",
     },
     {
       id: 9,
       src: "https://res.cloudinary.com/atr5osne/image/upload/v1792054919/creatorlink/public/campaigns/eocmumqyfn0jr0ryguxl.webp",
-      alt: "Layered Gold Necklaces Fine Jewelry Detail",
-      handle: "@luxe.details",
-      category: "QUIET LUXURY",
+      alt: "Accessory & Detail Shoot",
+      label: "Curated Details",
+      category: "Fashion & Beauty",
       aspectRatio: "aspect-[3/4]",
     },
     {
       id: 10,
       src: "https://res.cloudinary.com/atr5osne/image/upload/v1792054924/creatorlink/public/campaigns/dhmyvkdz6gcjmjbij8vz.webp",
-      alt: "Vintage Convertible Drive Along Coastal Cliff",
-      handle: "ESCAPE",
-      category: "ESCAPE",
+      alt: "Travel Exploration Drive",
+      label: "Road & Escape",
+      category: "Travel & Experiences",
       aspectRatio: "aspect-[4/3]",
     },
   ]);
@@ -101,24 +108,41 @@ export default function CreatorVisualGallery() {
       <div className="mx-auto max-w-[1440px] relative z-10">
         
         {/* =========================================================
-            1. TOP CONTENT: CENTERED INTRO & DESIGNED HEADING
+            1. TOP CONTENT: CENTERED INTRO
         ========================================================= */}
-        <ScrollReveal direction="up" delay={0} className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
+        <ScrollReveal direction="up" delay={0} className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
           <span className="text-[11px] font-bold tracking-[0.22em] uppercase text-secondary font-sans block mb-3">
-            10 / VISUAL GALLERY
+            09 / CREATIVE POSSIBILITIES
           </span>
 
-          {/* Heading with "STYLE" highlight pill */}
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-medium tracking-tight text-slate-900 dark:text-foreground leading-tight mb-4 flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1.5">
-            <span>YOUR</span>
-            <span className="inline-block bg-slate-900 dark:bg-slate-900 text-[#FCE7F3] rounded-2xl sm:rounded-[22px] px-4 sm:px-6 py-0.5 sm:py-1 font-serif text-2xl sm:text-4xl lg:text-5xl align-middle shadow-md tracking-wide">
-              STYLE
-            </span>
-            <span>MATTERS.</span>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-medium tracking-tight text-slate-900 dark:text-foreground leading-tight mb-4">
+            Every Creator Has a Different Story.
           </h2>
 
-          <p className="text-sm sm:text-base text-slate-600 dark:text-text-secondary font-sans leading-relaxed max-w-xl mx-auto">
-            Join over 12,000 discerning creators showcasing authentic work across beauty, architecture, travel, and quiet luxury.
+          <p className="text-sm sm:text-base text-slate-600 dark:text-text-secondary font-sans leading-relaxed max-w-2xl mx-auto mb-6">
+            From fashion and beauty to food, travel, lifestyle and technology, creativity comes in many forms. Showcase what makes your content unique and let your work inspire new opportunities.
+          </p>
+
+          {/* Category Badges */}
+          <div className="flex flex-wrap items-center justify-center gap-2 max-w-2xl mx-auto">
+            {categories.map((cat, idx) => (
+              <span
+                key={idx}
+                className="bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 text-slate-800 dark:text-foreground text-xs font-sans font-medium px-3.5 py-1.5 rounded-full shadow-2xs"
+              >
+                {cat}
+              </span>
+            ))}
+          </div>
+        </ScrollReveal>
+
+        {/* Visual Heading & Description Banner */}
+        <ScrollReveal direction="up" delay={60} className="text-center max-w-xl mx-auto mb-10 sm:mb-12">
+          <h3 className="font-serif text-xl sm:text-2xl font-medium text-slate-900 dark:text-foreground mb-1">
+            Your Niche. Your Voice. Your Style.
+          </h3>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-text-muted font-sans">
+            Show the world what you love creating.
           </p>
         </ScrollReveal>
 
@@ -147,8 +171,8 @@ export default function CreatorVisualGallery() {
 
                 {/* Editorial Metadata Label on Hover */}
                 <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 z-10 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 pointer-events-none flex flex-col items-start gap-0.5">
-                  <span className="text-[11px] sm:text-xs font-mono font-medium text-white tracking-tight drop-shadow-md">
-                    {item.handle}
+                  <span className="text-[11px] sm:text-xs font-sans font-medium text-white tracking-tight drop-shadow-md">
+                    {item.label}
                   </span>
                   <span className="text-[9px] sm:text-[10px] font-sans font-bold uppercase tracking-widest text-pink-200/90 drop-shadow-md">
                     {item.category}

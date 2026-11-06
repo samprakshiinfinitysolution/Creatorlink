@@ -19,29 +19,28 @@ export default function HowItWorksFinalCTA() {
 
             {/* Eyebrow */}
             <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-slate-700 dark:text-slate-300 block mb-5 font-sans text-center">
-              THE FUTURE OF CREATIVE ALLIANCES
+              YOUR NEXT COLLABORATION STARTS HERE
             </span>
 
             {/* Editorial Main Heading */}
             <h2 className="text-3xl sm:text-5xl lg:text-[56px] font-serif font-medium tracking-tight text-slate-900 dark:text-foreground leading-[1.12] mb-6 text-center max-w-3xl mx-auto">
-              Ready to create something <br className="hidden sm:inline" />
-              meaningful?
+              Ready to Create Something Great Together?
             </h2>
 
             {/* Description */}
             <p className="text-sm sm:text-base text-slate-700 dark:text-text-secondary font-sans font-medium leading-relaxed mb-10 text-center max-w-xl mx-auto">
-              Join the invitation-only registry where prestigious brands and visionary creators produce culture together.
+              Whether you&apos;re a brand looking for creative talent or a creator ready to work with exciting brands, CreatorLink is the place to start building meaningful connections.
             </p>
 
             {/* Two Action Buttons Row */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-4 mb-10 max-w-md mx-auto sm:max-w-none">
 
-              {/* Button 1: Request Access */}
+              {/* Button 1: Join CreatorLink */}
               <Link
                 href="/signup"
                 className="text-center bg-slate-900 dark:bg-foreground text-white dark:text-slate-900 font-sans font-semibold text-xs sm:text-sm px-8 py-3.5 rounded-full hover:bg-secondary hover:text-white dark:hover:bg-secondary dark:hover:text-white hover:-translate-y-[2px] hover:scale-[1.02] hover:shadow-lg transition-all duration-300 cursor-pointer shadow-md"
               >
-                Request Access
+                Join CreatorLink
               </Link>
 
               {/* Button 2: Explore Creators */}
@@ -56,7 +55,7 @@ export default function HowItWorksFinalCTA() {
 
             {/* Bottom Supporting Text */}
             <p className="text-xs sm:text-sm font-sans font-medium text-slate-600 dark:text-slate-400 text-center max-w-xl mx-auto">
-              No credit card required. Free onboarding consultation for qualified brands and talent.
+              Discover opportunities. Connect with people. Create together.
             </p>
 
           </div>

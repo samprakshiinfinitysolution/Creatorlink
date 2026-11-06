@@ -139,12 +139,20 @@ const extractAffinityKeywords = (item) => {
         .filter((w) => w.length > 2);
 };
 
+// In-memory cache for high-traffic homepage components (TTL: 20s)
+let cachedFeaturedData = null;
+let lastCacheTimestamp = 0;
+const CACHE_TTL_MS = 20 * 1000;
+
 /**
  * Service to fetch featured homepage data:
  * - Top 4 creators based on follower count (descending), with consistent tie-breaking
  * - Latest brand collaboration record
  */
 export const getHomepageFeaturedService = async () => {
+    if (cachedFeaturedData && Date.now() - lastCacheTimestamp < CACHE_TTL_MS) {
+        return cachedFeaturedData;
+    }
     // 1. Fetch Top 4 creators
     const creatorPipeline = [
         { $match: { isPublic: { $ne: false } } },
@@ -507,29 +515,43 @@ export const getHomepageFeaturedService = async () => {
         };
     };
 
-    // Format all valid bookings without excluding any brand/creator (test, Brand User, Chinki, etc.)
-    const allCollaborations = [];
-    for (const booking of allValidBookings) {
-        let brandProfile = null;
-        let creatorProfile = null;
+    // Format all valid bookings in bulk without N+1 sequential database roundtrips
+    const brandUserIds = allValidBookings
+        .map((b) => b.brand?._id)
+        .filter(Boolean);
+    const creatorUserIds = allValidBookings
+        .map((b) => b.creator?._id)
+        .filter(Boolean);
 
-        if (booking.brand?._id) {
-            brandProfile = await BrandProfile.findOne({
-                user: booking.brand._id
-            }).lean();
-        }
-        if (booking.creator?._id) {
-            creatorProfile = await CreatorProfile.findOne({
-                user: booking.creator._id
-            }).lean();
-        }
+    const [brandProfiles, creatorProfiles] = await Promise.all([
+        brandUserIds.length > 0
+            ? BrandProfile.find({ user: { $in: brandUserIds } }).lean()
+            : [],
+        creatorUserIds.length > 0
+            ? CreatorProfile.find({ user: { $in: creatorUserIds } }).lean()
+            : []
+    ]);
 
-        const formatted = formatCollaborationRecord(booking, brandProfile, creatorProfile);
-        allCollaborations.push({
-            record: formatted,
+    const brandProfileMap = new Map(
+        brandProfiles.map((bp) => [bp.user.toString(), bp])
+    );
+    const creatorProfileMap = new Map(
+        creatorProfiles.map((cp) => [cp.user.toString(), cp])
+    );
+
+    const allCollaborations = allValidBookings.map((booking) => {
+        const brandProfile = booking.brand?._id
+            ? brandProfileMap.get(booking.brand._id.toString()) || null
+            : null;
+        const creatorProfile = booking.creator?._id
+            ? creatorProfileMap.get(booking.creator._id.toString()) || null
+            : null;
+
+        return {
+            record: formatCollaborationRecord(booking, brandProfile, creatorProfile),
             createdAt: booking.createdAt
-        });
-    }
+        };
+    });
 
     let latestCollaboration = null;
     let relatedCollaborations = [];
@@ -606,11 +628,16 @@ export const getHomepageFeaturedService = async () => {
         relatedCollaborations = scoredCandidates.slice(0, 6).map((c) => c.record);
     }
 
-    return {
+    const result = {
         topCreators,
         latestCreators,
         totalCreatorsCount,
         latestCollaboration,
         relatedCollaborations
     };
+
+    cachedFeaturedData = result;
+    lastCacheTimestamp = Date.now();
+
+    return result;
 };

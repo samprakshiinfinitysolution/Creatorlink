@@ -7,83 +7,84 @@ import ScrollReveal from "@/components/theme/ScrollReveal";
 const STAGES = [
   {
     id: "01",
-    label: "The Brief (Idea)",
+    label: "Create Your Brief",
     stageBadge: "STAGE 01",
-    stageTitle: "Target Aesthetic & Campaign DNA",
+    stageTitle: "Start With a Clear Campaign Idea.",
   },
   {
     id: "02",
-    label: "Creator Discovery",
+    label: "Discover Creators",
     stageBadge: "STAGE 02",
-    stageTitle: "Intelligent Tastemaker Discovery",
+    stageTitle: "Explore Creators That Fit Your Brand.",
   },
   {
     id: "03",
-    label: "The Match",
+    label: "Connect With Creators",
     stageBadge: "STAGE 03",
-    stageTitle: "The Match & Smart Invite",
+    stageTitle: "Start a Conversation With the Right Creators.",
   },
   {
     id: "04",
-    label: "Collaboration Workspace",
+    label: "Finalize the Details",
     stageBadge: "STAGE 04",
-    stageTitle: "Collaboration Workspace",
+    stageTitle: "Make Sure Everyone Is on the Same Page.",
   },
   {
     id: "05",
-    label: "Creator Creates",
+    label: "Content Creation",
     stageBadge: "STAGE 05",
-    stageTitle: "Creator Creates & Submits",
+    stageTitle: "Let Creators Bring Your Campaign to Life.",
   },
   {
     id: "06",
-    label: "Review & Approval",
+    label: "Review Content",
     stageBadge: "STAGE 06",
-    stageTitle: "Side-by-Side Review & Approval",
+    stageTitle: "Review the Work and Share Feedback.",
   },
   {
     id: "07",
-    label: "Campaign Complete",
+    label: "Complete the Campaign",
     stageBadge: "STAGE 07",
-    stageTitle: "Campaign Complete & Growth",
+    stageTitle: "Complete Your Campaign and Build Lasting Connections.",
   },
 ];
 
-const DISCOVERY_CREATORS = [
+const DISCOVERY_CATEGORIES = [
   {
-    name: "Aarohi Mehta",
-    category: "Beauty • 98% Match",
-    fee: "₹30,000",
+    title: "Fashion & Beauty",
+    desc: "Aesthetic styling, skincare, makeup and fashion routines.",
+    icon: "✦",
+    creatorName: "Aarohi Mehta",
+    creatorCategory: "Beauty • 98% Match",
     image:
       "https://res.cloudinary.com/atr5osne/image/upload/v1792054698/creatorlink/public/avatars/gye9m9prpdv81gc9ipkp.webp",
   },
   {
-    name: "Riya Sharma",
-    category: "Wellness • 92% Match",
-    fee: "₹25,000",
-    image:
-      "https://res.cloudinary.com/atr5osne/image/upload/v1792054701/creatorlink/public/avatars/qooau1mzc4okikpsrqri.webp",
-  },
-  {
-    name: "Maya Kapoor",
-    category: "Lifestyle • 89% Match",
-    fee: "₹32,000",
+    title: "Food & Lifestyle",
+    desc: "Culinary arts, morning rituals, home and living experiences.",
+    icon: "✦",
+    creatorName: "Maya Kapoor",
+    creatorCategory: "Lifestyle • 89% Match",
     image:
       "https://res.cloudinary.com/atr5osne/image/upload/v1792054710/creatorlink/public/avatars/ra9dirifievmiawd57yl.webp",
   },
   {
-    name: "Anaya Shah",
-    category: "Design • 87% Match",
-    fee: "₹18,000",
+    title: "Travel & Experiences",
+    desc: "Destination stories, hospitality, architecture and journeys.",
+    icon: "✦",
+    creatorName: "Riya Sharma",
+    creatorCategory: "Wellness • 92% Match",
     image:
-      "https://res.cloudinary.com/atr5osne/image/upload/v1792054706/creatorlink/public/avatars/qvmu4uqdqpexdchfnvys.webp",
+      "https://res.cloudinary.com/atr5osne/image/upload/v1792054701/creatorlink/public/avatars/qooau1mzc4okikpsrqri.webp",
   },
   {
-    name: "Kiara Jain",
-    category: "Skincare • 94% Match",
-    fee: "₹28,000",
+    title: "Technology & Digital Content",
+    desc: "Tech storytelling, creative digital tools and reviews.",
+    icon: "✦",
+    creatorName: "Anaya Shah",
+    creatorCategory: "Design • 87% Match",
     image:
-      "https://res.cloudinary.com/atr5osne/image/upload/v1792054726/creatorlink/public/avatars/ygxg39zcf4is7tn711ez.webp",
+      "https://res.cloudinary.com/atr5osne/image/upload/v1792054706/creatorlink/public/avatars/qvmu4uqdqpexdchfnvys.webp",
   },
 ];
 
@@ -126,15 +127,15 @@ export default function InteractiveJourney() {
           ========================================================= */}
           <ScrollReveal direction="up" delay={0} className="lg:col-span-5 xl:col-span-4 text-left">
             <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-secondary block mb-3 font-sans">
-              INTERACTIVE JOURNEY
+              YOUR CAMPAIGN JOURNEY
             </span>
 
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-medium tracking-tight text-foreground leading-tight mb-4">
-              Your campaign, step by step.
+              From Campaign Idea to Creator Collaboration.
             </h2>
 
             <p className="text-base text-text-secondary font-sans leading-relaxed mb-8">
-              Explore how effortless creator collaborations become when discovery, messaging, escrow, and review sit within one unified digital workspace.
+              Turn your marketing ideas into creator collaborations through a clear, simple journey. Discover creators, share your campaign requirements, connect with the right people and manage the work together.
             </p>
 
             {/* 7 Vertical Stage Navigation Items */}
@@ -187,7 +188,7 @@ export default function InteractiveJourney() {
               })}
             </div>
 
-            {/* Step Progression Control Button & Info Text */}
+            {/* Step Progression Control Button */}
             <div className="flex items-center gap-3 text-xs text-text-secondary font-sans">
               <button
                 type="button"
@@ -195,9 +196,9 @@ export default function InteractiveJourney() {
                 title="Next Stage"
                 className="w-8 h-8 rounded-full bg-surface border border-border-theme hover:border-secondary hover:text-secondary text-foreground flex items-center justify-center transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-xs"
               >
-                <span className="text-sm font-bold">↻</span>
+                <span className="text-sm font-bold">→</span>
               </button>
-              <span>Step navigation auto-cycles or click to jump.</span>
+              <span>Click to navigate through each collaboration step.</span>
             </div>
           </ScrollReveal>
 
@@ -229,329 +230,459 @@ export default function InteractiveJourney() {
                     : "opacity-100 translate-y-0"
                   }`}
               >
-                {/* STAGE 01: Target Aesthetic & Campaign DNA */}
+                {/* STAGE 01: Create Your Brief */}
                 {activeStageIndex === 0 && (
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-                    <div className="md:col-span-6 space-y-4">
+                  <div className="text-left space-y-6">
+                    <p className="text-sm text-text-secondary font-sans leading-relaxed">
+                      Tell creators what your brand wants to promote and what you want to achieve. Share your campaign details, target audience, content requirements, budget and expected timeline.
+                    </p>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="p-4 rounded-2xl bg-surface-muted border border-border-theme/60">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-text-secondary block mb-1 font-sans">
-                          CAMPAIGN SCOPE
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-secondary block mb-1 font-sans">
+                          CAMPAIGN GOAL
                         </span>
                         <p className="text-sm font-bold text-foreground font-sans">
-                          Sunlit Organic Skincare Serum
+                          What do you want to promote?
                         </p>
                         <p className="text-xs text-text-secondary font-sans mt-1">
-                          Targeting women 24–38 seeking clean beauty and understated routines.
+                          Define product launch, brand awareness, or seasonal campaign goals.
                         </p>
                       </div>
 
-                      <div className="p-4 rounded-2xl bg-surface-muted border border-border-theme/60 flex items-center justify-between">
-                        <div>
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-text-secondary block mb-1 font-sans">
-                            BUDGET RESERVE
-                          </span>
-                          <p className="text-base font-bold text-foreground font-sans">
-                            ₹50,000 INR
-                          </p>
-                        </div>
-                        <span className="text-xs font-semibold text-secondary font-sans px-3 py-1 rounded-full bg-secondary/10 border border-secondary/20">
-                          2 Reels + 3 Stories
+                      <div className="p-4 rounded-2xl bg-surface-muted border border-border-theme/60">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-secondary block mb-1 font-sans">
+                          CONTENT REQUIREMENTS
                         </span>
+                        <p className="text-sm font-bold text-foreground font-sans">
+                          Deliverables &amp; Formats
+                        </p>
+                        <p className="text-xs text-text-secondary font-sans mt-1">
+                          Reels, videos, photographs or other agreed deliverables.
+                        </p>
                       </div>
 
-                      <div className="flex flex-wrap gap-2 pt-1">
-                        <span className="px-2.5 py-1 rounded-full bg-secondary/10 text-secondary text-[11px] font-medium font-sans border border-secondary/20">
-                          Instagram High-Res
+                      <div className="p-4 rounded-2xl bg-surface-muted border border-border-theme/60">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-secondary block mb-1 font-sans">
+                          CAMPAIGN TIMELINE
                         </span>
-                        <span className="px-2.5 py-1 rounded-full bg-secondary/10 text-secondary text-[11px] font-medium font-sans border border-secondary/20">
-                          Organic TikTok Stitch
-                        </span>
+                        <p className="text-sm font-bold text-foreground font-sans">
+                          Expected Dates
+                        </p>
+                        <p className="text-xs text-text-secondary font-sans mt-1">
+                          Share your expected start and completion dates.
+                        </p>
                       </div>
-                    </div>
 
-                    <div className="md:col-span-6">
-                      <div className="relative rounded-2xl overflow-hidden border border-border-theme bg-surface-muted aspect-[4/3] group shadow-xs">
-                        <Image src="https://res.cloudinary.com/atr5osne/image/upload/v1792054714/creatorlink/public/editorial/se3wpecdot8jphnowzci.webp" alt="Moodboard" fill className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" sizes="(max-width: 768px) 100vw, 50vw" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                        <div className="absolute bottom-4 left-4 right-4 text-left">
-                          <p className="text-xs font-semibold text-white font-sans tracking-wide">
-                            Moodboard: Quiet Radiance & Morning Rituals
-                          </p>
-                        </div>
+                      <div className="p-4 rounded-2xl bg-surface-muted border border-border-theme/60">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-secondary block mb-1 font-sans">
+                          CAMPAIGN BUDGET
+                        </span>
+                        <p className="text-sm font-bold text-foreground font-sans">
+                          Planned Compensation
+                        </p>
+                        <p className="text-xs text-text-secondary font-sans mt-1">
+                          Set the budget you have planned for the collaboration.
+                        </p>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* STAGE 02: Intelligent Tastemaker Discovery */}
+                {/* STAGE 02: Discover Creators */}
                 {activeStageIndex === 1 && (
-                  <div>
-                    <p className="text-xs text-text-secondary font-sans mb-4">
-                      Matched creators based on audience affinity, engagement rate, and campaign DNA.
-                    </p>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                      {DISCOVERY_CREATORS.map((c) => (
+                  <div className="text-left space-y-6">
+                    <div>
+                      <h4 className="font-serif text-lg font-medium text-foreground mb-1">
+                        Explore Creative Talent.
+                      </h4>
+                      <p className="text-xs sm:text-sm text-text-secondary font-sans leading-relaxed">
+                        Discover creators across different niches and content styles. Explore creator profiles and understand their niche, content style, social presence and services.
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {DISCOVERY_CATEGORIES.map((item, idx) => (
                         <div
-                          key={c.name}
-                          className="p-3 rounded-2xl bg-surface-muted border border-border-theme/80 hover:border-secondary/40 transition-all text-left flex flex-col justify-between"
+                          key={idx}
+                          className="p-4 rounded-2xl bg-surface-muted border border-border-theme/80 hover:border-secondary/40 transition-all text-left flex flex-col justify-between"
                         >
-                          <div className="flex items-center gap-2 mb-2">
-                            <Image src={c.image} alt={c.name} width={32} height={32} className="w-8 h-8 rounded-full object-cover border border-border-theme shrink-0" />
-                            <div className="min-w-0">
-                              <p className="text-xs font-bold text-foreground font-sans truncate">
-                                {c.name}
-                              </p>
-                              <p className="text-[10px] text-secondary font-medium font-sans truncate">
-                                {c.category}
-                              </p>
+                          <div>
+                            <div className="flex items-center gap-2 mb-1.5">
+                              <span className="text-secondary text-xs">{item.icon}</span>
+                              <h5 className="text-sm font-bold text-foreground font-sans">
+                                {item.title}
+                              </h5>
                             </div>
+                            <p className="text-xs text-text-secondary font-sans leading-relaxed mb-3">
+                              {item.desc}
+                            </p>
                           </div>
-                          <p className="text-xs font-bold text-foreground font-sans">
-                            {c.fee}
-                          </p>
+                          {item.image && (
+                            <div className="pt-2.5 border-t border-border-theme/60 flex items-center gap-2">
+                              <Image
+                                src={item.image}
+                                alt={item.creatorName || item.title}
+                                width={24}
+                                height={24}
+                                className="w-6 h-6 rounded-full object-cover border border-border-theme shrink-0"
+                              />
+                              <div className="min-w-0 flex items-center gap-1.5 text-[11px] font-sans">
+                                <span className="font-semibold text-foreground truncate">
+                                  {item.creatorName}
+                                </span>
+                                <span className="text-secondary font-medium truncate">
+                                  • {item.creatorCategory}
+                                </span>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       ))}
-
-                      {/* Final +18 More Card */}
-                      <div className="p-3 rounded-2xl bg-secondary/10 border border-secondary/30 text-center flex flex-col items-center justify-center">
-                        <span className="text-sm font-bold text-secondary font-sans">
-                          +18 More
-                        </span>
-                        <span className="text-[10px] text-text-secondary font-sans mt-0.5">
-                          Trained on brief
-                        </span>
-                      </div>
                     </div>
                   </div>
                 )}
 
-                {/* STAGE 03: The Match & Smart Invite */}
+                {/* STAGE 03: Connect With Creators */}
                 {activeStageIndex === 2 && (
-                  <div className="space-y-4">
-                    <div className="p-5 rounded-2xl bg-surface-muted border border-border-theme flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-secondary/15 text-secondary font-bold text-xs flex items-center justify-center font-sans border border-secondary/30">
-                          GB
-                        </div>
-                        <div>
-                          <p className="text-sm font-bold text-foreground font-sans leading-none">
-                            Glow Beauty
-                          </p>
-                          <span className="text-[10px] text-text-secondary font-sans">
-                            Verified Brand Client
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="text-center">
-                        <span className="px-3 py-1 rounded-full bg-secondary/15 text-secondary text-xs font-bold font-sans">
-                          98% Synergy Score
-                        </span>
-                        <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mt-1 font-sans">
-                          Invitation Accepted ✓
-                        </p>
-                      </div>
-
-                      <div className="flex items-center gap-3 text-right">
-                        <div>
-                          <p className="text-sm font-bold text-foreground font-sans leading-none">
-                            Aarohi Mehta
-                          </p>
-                          <span className="text-[10px] text-text-secondary font-sans">
-                            82% Audience Relevance
-                          </span>
-                        </div>
-                        <Image src="https://res.cloudinary.com/atr5osne/image/upload/v1792054698/creatorlink/public/avatars/gye9m9prpdv81gc9ipkp.webp" alt="Aarohi Mehta" width={40} height={40} className="w-10 h-10 rounded-full object-cover border border-border-theme" />
-                      </div>
+                  <div className="text-left space-y-6">
+                    <div>
+                      <h4 className="font-serif text-lg font-medium text-foreground mb-1">
+                        Build the Right Connection.
+                      </h4>
+                      <p className="text-xs sm:text-sm text-text-secondary font-sans leading-relaxed">
+                        Start meaningful conversations and explore collaboration possibilities. Once you find creators you are interested in, reach out and share your campaign opportunity.
+                      </p>
                     </div>
 
-                    <div className="p-4 rounded-2xl bg-surface border border-secondary/30 flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-3">
-                        <span className="w-7 h-7 rounded-full bg-emerald-500/15 text-emerald-500 flex items-center justify-center font-bold text-xs">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="p-4 rounded-2xl bg-surface-muted border border-border-theme/60 flex items-start gap-3">
+                        <div className="w-6 h-6 rounded-full bg-secondary/15 text-secondary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
                           ✓
-                        </span>
-                        <p className="text-xs font-medium text-foreground font-sans">
-                          Brief locked: 2 High-Res Reels & 3 Story Slides. Escrow funded ₹30,000.
-                        </p>
-                      </div>
-                      <span className="px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-xs font-bold font-sans shrink-0">
-                        Status: In Production
-                      </span>
-                    </div>
-                  </div>
-                )}
-
-                {/* STAGE 04: Collaboration Workspace */}
-                {activeStageIndex === 3 && (
-                  <div className="space-y-4">
-                    <div className="p-3 px-4 rounded-xl bg-surface-muted border border-border-theme/60 flex items-center justify-between text-xs font-sans">
-                      <span className="font-semibold text-foreground">
-                        Terms: ₹30,000 • 2 Reels • 3 Stories
-                      </span>
-                      <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                        🔒 Escrow Secured
-                      </span>
-                    </div>
-
-                    {/* Conversation Interface */}
-                    <div className="p-4 rounded-2xl bg-surface-muted border border-border-theme/60 space-y-3">
-                      {/* Brand Message */}
-                      <div className="flex flex-col items-start max-w-[85%]">
-                        <span className="text-[10px] font-bold text-text-secondary mb-1 font-sans">
-                          Glow Beauty (Campaign Director)
-                        </span>
-                        <div className="p-3 rounded-2xl rounded-tl-xs bg-surface border border-border-theme text-xs text-foreground font-sans shadow-2xs">
-                          Could we focus the first Reel around the morning golden hour light on the serum dropper?
+                        </div>
+                        <div>
+                          <h5 className="font-sans font-bold text-sm text-foreground">
+                            Share campaign details.
+                          </h5>
+                          <p className="text-xs text-text-secondary font-sans mt-0.5">
+                            Communicate your vision, timeline, and deliverables clearly.
+                          </p>
                         </div>
                       </div>
 
-                      {/* Creator Response */}
-                      <div className="flex flex-col items-end max-w-[85%] ml-auto">
-                        <span className="text-[10px] font-bold text-secondary mb-1 font-sans">
-                          Aarohi Mehta
-                        </span>
-                        <div className="p-3 rounded-2xl rounded-tr-xs bg-secondary text-white text-xs font-sans shadow-2xs">
-                          Absolutely! I have an idea for the opening sun-catcher frame. Filming tomorrow morning! ✨
+                      <div className="p-4 rounded-2xl bg-surface-muted border border-border-theme/60 flex items-start gap-3">
+                        <div className="w-6 h-6 rounded-full bg-secondary/15 text-secondary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+                          ✓
+                        </div>
+                        <div>
+                          <h5 className="font-sans font-bold text-sm text-foreground">
+                            Discuss creative ideas.
+                          </h5>
+                          <p className="text-xs text-text-secondary font-sans mt-0.5">
+                            Listen to the creator&apos;s perspective on format and presentation.
+                          </p>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                )}
 
-                {/* STAGE 05: Creator Creates & Submits */}
-                {activeStageIndex === 4 && (
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-                    {/* Left Creator Video Preview Card */}
-                    <div className="md:col-span-5">
-                      <div className="relative rounded-2xl overflow-hidden border border-border-theme aspect-[3/4] bg-surface-muted group shadow-xs">
-                        <Image src="https://res.cloudinary.com/atr5osne/image/upload/v1792054698/creatorlink/public/avatars/gye9m9prpdv81gc9ipkp.webp" alt="Content Preview" fill className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" sizes="(max-width: 768px) 100vw, 50vw" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                        <div className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-white text-[10px] font-bold font-sans">
-                          Reel 01 (Draft 4K)
+                      <div className="p-4 rounded-2xl bg-surface-muted border border-border-theme/60 flex items-start gap-3">
+                        <div className="w-6 h-6 rounded-full bg-secondary/15 text-secondary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+                          ✓
                         </div>
-                        <div className="absolute bottom-3 left-3 right-3 text-left text-white font-sans">
-                          <p className="text-xs font-bold">Aarohi Mehta</p>
-                          <p className="text-[10px] text-secondary mt-0.5 font-medium">
-                            #MorningGlow #CleanBeautyLaunch
+                        <div>
+                          <h5 className="font-sans font-bold text-sm text-foreground">
+                            Understand availability.
+                          </h5>
+                          <p className="text-xs text-text-secondary font-sans mt-0.5">
+                            Ensure schedules and production dates align with your launch.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="p-4 rounded-2xl bg-surface-muted border border-border-theme/60 flex items-start gap-3">
+                        <div className="w-6 h-6 rounded-full bg-secondary/15 text-secondary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+                          ✓
+                        </div>
+                        <div>
+                          <h5 className="font-sans font-bold text-sm text-foreground">
+                            Explore collaboration interest.
+                          </h5>
+                          <p className="text-xs text-text-secondary font-sans mt-0.5">
+                            Build partnerships where both brand and creator are invested.
                           </p>
                         </div>
                       </div>
                     </div>
+                  </div>
+                )}
 
-                    {/* Right Asset Submission Cards */}
-                    <div className="md:col-span-7 space-y-4">
-                      <div className="p-4 rounded-2xl bg-surface-muted border border-border-theme/80 text-left">
+                {/* STAGE 04: Finalize the Details */}
+                {activeStageIndex === 3 && (
+                  <div className="text-left space-y-6">
+                    <div>
+                      <h4 className="font-serif text-lg font-medium text-foreground mb-1">
+                        Clear Expectations. Smooth Collaboration.
+                      </h4>
+                      <p className="text-xs sm:text-sm text-text-secondary font-sans leading-relaxed">
+                        A shared understanding helps brands and creators work together effectively. Discuss and agree on the important details before the campaign begins.
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+                      <div className="p-4 rounded-2xl bg-surface-muted border border-border-theme/60 text-center">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-secondary block mb-1 font-sans">
-                          CONTENT DELIVERED
+                          ITEM 01
                         </span>
-                        <p className="text-sm font-bold text-foreground font-sans">
-                          Reel 01: Morning Skincare Ritual
+                        <h5 className="font-sans font-bold text-sm text-foreground">
+                          Deliverables
+                        </h5>
+                        <p className="text-[11px] text-text-secondary font-sans mt-1">
+                          Agreed formats &amp; assets
                         </p>
+                      </div>
+
+                      <div className="p-4 rounded-2xl bg-surface-muted border border-border-theme/60 text-center">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-secondary block mb-1 font-sans">
+                          ITEM 02
+                        </span>
+                        <h5 className="font-sans font-bold text-sm text-foreground">
+                          Budget &amp; Compensation
+                        </h5>
+                        <p className="text-[11px] text-text-secondary font-sans mt-1">
+                          Transparent pricing
+                        </p>
+                      </div>
+
+                      <div className="p-4 rounded-2xl bg-surface-muted border border-border-theme/60 text-center">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-secondary block mb-1 font-sans">
+                          ITEM 03
+                        </span>
+                        <h5 className="font-sans font-bold text-sm text-foreground">
+                          Timeline
+                        </h5>
+                        <p className="text-[11px] text-text-secondary font-sans mt-1">
+                          Agreed deadlines
+                        </p>
+                      </div>
+
+                      <div className="p-4 rounded-2xl bg-surface-muted border border-border-theme/60 text-center">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-secondary block mb-1 font-sans">
+                          ITEM 04
+                        </span>
+                        <h5 className="font-sans font-bold text-sm text-foreground">
+                          Content Requirements
+                        </h5>
+                        <p className="text-[11px] text-text-secondary font-sans mt-1">
+                          Guidelines &amp; usage
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* STAGE 05: Content Creation */}
+                {activeStageIndex === 4 && (
+                  <div className="text-left space-y-6">
+                    <div>
+                      <h4 className="font-serif text-lg font-medium text-foreground mb-1">
+                        Your Brief Becomes Creative Content.
+                      </h4>
+                      <p className="text-xs sm:text-sm text-text-secondary font-sans leading-relaxed">
+                        Give creators the direction they need while allowing their unique content style to shine. Their creativity and your brand&apos;s direction come together to create content for your campaign.
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+                      <div className="p-4 rounded-2xl bg-surface-muted border border-border-theme/60">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-secondary block mb-1 font-sans">
+                          PHASE 01
+                        </span>
+                        <h5 className="font-sans font-bold text-sm text-foreground">
+                          Concept Development
+                        </h5>
                         <p className="text-xs text-text-secondary font-sans mt-1">
-                          Uploaded today at 10:42 AM • 4K 60fps ProRes
+                          Aligning on aesthetic and key talking points.
                         </p>
                       </div>
 
-                      <div className="p-4 rounded-2xl bg-surface-muted border border-border-theme/80 text-left">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-text-secondary block mb-1 font-sans">
-                          ASSET LIBRARY
+                      <div className="p-4 rounded-2xl bg-surface-muted border border-border-theme/60">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-secondary block mb-1 font-sans">
+                          PHASE 02
                         </span>
-                        <p className="text-sm font-semibold text-foreground font-sans">
-                          3× Raw Story B-Roll Clips Attached
+                        <h5 className="font-sans font-bold text-sm text-foreground">
+                          Content Creation
+                        </h5>
+                        <p className="text-xs text-text-secondary font-sans mt-1">
+                          Filming, shooting and authentic production.
+                        </p>
+                      </div>
+
+                      <div className="p-4 rounded-2xl bg-surface-muted border border-border-theme/60">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-secondary block mb-1 font-sans">
+                          PHASE 03
+                        </span>
+                        <h5 className="font-sans font-bold text-sm text-foreground">
+                          Editing &amp; Refinement
+                        </h5>
+                        <p className="text-xs text-text-secondary font-sans mt-1">
+                          Color grading, audio and pacing.
+                        </p>
+                      </div>
+
+                      <div className="p-4 rounded-2xl bg-surface-muted border border-border-theme/60">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-secondary block mb-1 font-sans">
+                          PHASE 04
+                        </span>
+                        <h5 className="font-sans font-bold text-sm text-foreground">
+                          Deliverable Submission
+                        </h5>
+                        <p className="text-xs text-text-secondary font-sans mt-1">
+                          Uploading ready deliverables for brand review.
                         </p>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* STAGE 06: Side-by-Side Review & Approval */}
+                {/* STAGE 06: Review & Approval */}
                 {activeStageIndex === 5 && (
-                  <div className="space-y-4">
-                    <div className="p-5 rounded-2xl bg-surface-muted border border-border-theme text-left">
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-xs font-bold uppercase tracking-wider text-foreground font-sans">
-                          Timestamped Feedback Review
-                        </span>
-                        <span className="text-xs font-semibold text-secondary font-sans">
-                          0:14 / 0:45 min
-                        </span>
-                      </div>
-
-                      <div className="p-3.5 rounded-xl bg-surface border border-secondary/30 text-xs text-foreground font-sans leading-relaxed">
-                        <span className="font-bold text-secondary mr-2">Brand Note [0:08]:</span>
-                        &quot;The lighting transition when showing the ingredients label is flawless. No revisions needed!&quot;
-                      </div>
+                  <div className="text-left space-y-6">
+                    <div>
+                      <h4 className="font-serif text-lg font-medium text-foreground mb-1">
+                        Review. Refine. Finalize.
+                      </h4>
+                      <p className="text-xs sm:text-sm text-text-secondary font-sans leading-relaxed">
+                        Work together to bring the campaign content to its final form. Review the submitted content against your campaign requirements, share clear feedback, and approve final deliverables.
+                      </p>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
-                      <button
-                        type="button"
-                        className="w-full sm:w-auto px-6 py-3 rounded-full bg-secondary hover:bg-secondary-dark text-white font-sans font-semibold text-xs tracking-wide shadow-md transition-all cursor-pointer"
-                      >
-                        ✓ Approve Content
-                      </button>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="p-4 rounded-2xl bg-surface-muted border border-border-theme/60 flex items-start gap-3">
+                        <div className="w-6 h-6 rounded-full bg-secondary/15 text-secondary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+                          1
+                        </div>
+                        <div>
+                          <h5 className="font-sans font-bold text-sm text-foreground">
+                            Review submitted content.
+                          </h5>
+                          <p className="text-xs text-text-secondary font-sans mt-0.5">
+                            Inspect video drafts, photo sets and supporting captions.
+                          </p>
+                        </div>
+                      </div>
 
-                      <button
-                        type="button"
-                        className="w-full sm:w-auto px-6 py-3 rounded-full bg-surface hover:bg-surface-muted border border-border-theme text-foreground font-sans font-semibold text-xs tracking-wide transition-all cursor-pointer"
-                      >
-                        Request Minor Tweak
-                      </button>
+                      <div className="p-4 rounded-2xl bg-surface-muted border border-border-theme/60 flex items-start gap-3">
+                        <div className="w-6 h-6 rounded-full bg-secondary/15 text-secondary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+                          2
+                        </div>
+                        <div>
+                          <h5 className="font-sans font-bold text-sm text-foreground">
+                            Check agreed requirements.
+                          </h5>
+                          <p className="text-xs text-text-secondary font-sans mt-0.5">
+                            Ensure brand tags, hashtags and core messaging are present.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="p-4 rounded-2xl bg-surface-muted border border-border-theme/60 flex items-start gap-3">
+                        <div className="w-6 h-6 rounded-full bg-secondary/15 text-secondary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+                          3
+                        </div>
+                        <div>
+                          <h5 className="font-sans font-bold text-sm text-foreground">
+                            Share feedback if needed.
+                          </h5>
+                          <p className="text-xs text-text-secondary font-sans mt-0.5">
+                            Provide clear, actionable feedback directly to the creator.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="p-4 rounded-2xl bg-surface-muted border border-border-theme/60 flex items-start gap-3">
+                        <div className="w-6 h-6 rounded-full bg-secondary/15 text-secondary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+                          4
+                        </div>
+                        <div>
+                          <h5 className="font-sans font-bold text-sm text-foreground">
+                            Approve final deliverables.
+                          </h5>
+                          <p className="text-xs text-text-secondary font-sans mt-0.5">
+                            Sign off on the finished content ready for publication.
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 )}
 
-                {/* STAGE 07: Campaign Complete & Growth */}
+                {/* STAGE 07: Complete the Campaign */}
                 {activeStageIndex === 6 && (
-                  <div className="space-y-6">
-                    {/* 3 Metric Cards */}
-                    <div className="grid grid-cols-3 gap-3">
-                      <div className="p-4 rounded-2xl bg-surface-muted border border-border-theme text-center">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-text-secondary block mb-1 font-sans">
-                          Total Reach
-                        </span>
-                        <p className="text-xl font-serif font-bold text-foreground">
-                          142.6K
-                        </p>
-                      </div>
-
-                      <div className="p-4 rounded-2xl bg-surface-muted border border-border-theme text-center">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-text-secondary block mb-1 font-sans">
-                          Engagement
-                        </span>
-                        <p className="text-xl font-serif font-bold text-secondary">
-                          7.4%
-                        </p>
-                      </div>
-
-                      <div className="p-4 rounded-2xl bg-surface-muted border border-border-theme text-center">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-text-secondary block mb-1 font-sans">
-                          Escrow Released
-                        </span>
-                        <p className="text-xl font-serif font-bold text-emerald-600 dark:text-emerald-400">
-                          ✓ ₹30K
-                        </p>
-                      </div>
+                  <div className="text-left space-y-6">
+                    <div>
+                      <h4 className="font-serif text-lg font-medium text-foreground mb-1">
+                        One Campaign Can Start a Long-Term Partnership.
+                      </h4>
+                      <p className="text-xs sm:text-sm text-text-secondary font-sans leading-relaxed">
+                        Build relationships with creative partners who understand your brand. Once the agreed deliverables are completed, wrap up the collaboration and explore future opportunities together.
+                      </p>
                     </div>
 
-                    {/* Rating & Review Quote */}
-                    <div className="p-5 rounded-2xl bg-surface-muted border border-border-theme/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-left">
-                      <div>
-                        <div className="flex items-center gap-1 text-amber-500 text-xs font-bold font-sans mb-1">
-                          <span>★★★★★</span>
-                          <span className="text-foreground ml-1">4.9 Creator Rating</span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="p-4 rounded-2xl bg-surface-muted border border-border-theme/60 flex items-start gap-3">
+                        <div className="w-6 h-6 rounded-full bg-secondary/15 text-secondary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+                          ✓
                         </div>
-                        <p className="text-xs italic text-text-secondary font-sans">
-                          &quot;Incredible storytelling, delivered 2 days ahead of schedule.&quot;
-                        </p>
+                        <div>
+                          <h5 className="font-sans font-bold text-sm text-foreground">
+                            Complete agreed deliverables.
+                          </h5>
+                          <p className="text-xs text-text-secondary font-sans mt-0.5">
+                            All content assets are archived and ready for your campaign.
+                          </p>
+                        </div>
                       </div>
 
-                      <button
-                        type="button"
-                        className="shrink-0 px-5 py-2.5 rounded-full bg-secondary hover:bg-secondary-dark text-white font-sans font-semibold text-xs tracking-wide shadow-md transition-all cursor-pointer"
-                      >
-                        Re-Book Creator
-                      </button>
+                      <div className="p-4 rounded-2xl bg-surface-muted border border-border-theme/60 flex items-start gap-3">
+                        <div className="w-6 h-6 rounded-full bg-secondary/15 text-secondary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+                          ✓
+                        </div>
+                        <div>
+                          <h5 className="font-sans font-bold text-sm text-foreground">
+                            Close the collaboration.
+                          </h5>
+                          <p className="text-xs text-text-secondary font-sans mt-0.5">
+                            Conclude the collaboration according to pre-agreed terms.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="p-4 rounded-2xl bg-surface-muted border border-border-theme/60 flex items-start gap-3">
+                        <div className="w-6 h-6 rounded-full bg-secondary/15 text-secondary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+                          ✓
+                        </div>
+                        <div>
+                          <h5 className="font-sans font-bold text-sm text-foreground">
+                            Maintain creator relationships.
+                          </h5>
+                          <p className="text-xs text-text-secondary font-sans mt-0.5">
+                            Keep in touch with creators whose content performed well.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="p-4 rounded-2xl bg-surface-muted border border-border-theme/60 flex items-start gap-3">
+                        <div className="w-6 h-6 rounded-full bg-secondary/15 text-secondary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+                          ✓
+                        </div>
+                        <div>
+                          <h5 className="font-sans font-bold text-sm text-foreground">
+                            Explore future campaigns.
+                          </h5>
+                          <p className="text-xs text-text-secondary font-sans mt-0.5">
+                            Re-engage trusted creators for upcoming product launches.
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 )}

@@ -5,107 +5,86 @@ import Image from "next/image";
 import Link from "next/link";
 import ScrollReveal from "@/components/theme/ScrollReveal";
 
-const allCreators = [
-  // COLUMN 1 CREATORS
+const sampleCreators = [
+  // COLUMN 1
   {
-    id: "amara",
-    name: "Amara Deshmukh",
-    price: "₹28K",
-    location: "Mumbai",
-    category: "Architectural Fashion",
-    filterCategory: "High Fashion",
-    followers: "52.1K",
-    rating: "4.9 ★",
+    id: "creator-1",
+    label: "Fashion & Editorial",
+    category: "Fashion & Lifestyle",
+    services: "Reels & Photography",
+    style: "Architectural & Minimalist Style",
     image: "https://res.cloudinary.com/atr5osne/image/upload/v1792054698/creatorlink/public/avatars/gye9m9prpdv81gc9ipkp.webp",
     imgHeight: "h-[380px] sm:h-[420px]",
     tiltClass: "md:-rotate-[1deg]",
     column: 1,
   },
   {
-    id: "tanya",
-    name: "Tanya Sen",
-    price: "₹15K",
-    location: "Bengaluru",
-    category: "Morning Rituals",
-    filterCategory: "Culinary Art",
-    followers: "36.5K",
-    rating: "4.7 ★",
+    id: "creator-2",
+    label: "Culinary & Lifestyle",
+    category: "Food & Travel",
+    services: "Morning Rituals & Recipes",
+    style: "Slow Living & Aesthetic Details",
     image: "https://res.cloudinary.com/atr5osne/image/upload/v1792054745/creatorlink/public/campaigns/tt4slqpoo1tprmx7ndss.webp",
     imgHeight: "h-[250px] sm:h-[270px]",
     tiltClass: "md:rotate-[0.5deg]",
     column: 1,
   },
 
-  // COLUMN 2 CREATORS
+  // COLUMN 2
   {
-    id: "rhea",
-    name: "Rhea Pillai",
-    price: "₹35K",
-    location: "Delhi",
-    category: "Clean Skincare",
-    filterCategory: "Beauty & Care",
-    followers: "88.4K",
-    rating: "5.0 ★",
+    id: "creator-3",
+    label: "Clean Skincare",
+    category: "Beauty & Care",
+    services: "Product Features & Tutorials",
+    style: "Natural Light & Close-ups",
     image: "https://res.cloudinary.com/atr5osne/image/upload/v1792054701/creatorlink/public/avatars/qooau1mzc4okikpsrqri.webp",
     imgHeight: "h-[280px] sm:h-[310px]",
     tiltClass: "md:rotate-[1deg]",
     column: 2,
   },
   {
-    id: "dev",
-    name: "Dev Patel",
-    price: "₹20K",
-    location: "Goa",
-    category: "Gastronomy & Tablescapes",
-    filterCategory: "Culinary Art",
-    followers: "64.2K",
-    rating: "4.9 ★",
+    id: "creator-4",
+    label: "Gastronomy & Stays",
+    category: "Food & Travel",
+    services: "Destination & Dining Features",
+    style: "Warm Earthy Tones",
     image: "https://res.cloudinary.com/atr5osne/image/upload/v1792054791/creatorlink/public/editorial/dedtikmndkhx27kdw1f0.webp",
     imgHeight: "h-[360px] sm:h-[400px]",
     tiltClass: "md:-rotate-[0.5deg]",
     column: 2,
   },
 
-  // COLUMN 3 CREATORS
+  // COLUMN 3
   {
-    id: "kabir",
-    name: "Kabir Singhania",
-    price: "₹40K",
-    location: "Jaipur",
-    category: "Heritage Leisure",
-    filterCategory: "High Fashion",
-    followers: "110K",
-    rating: "4.9 ★",
+    id: "creator-5",
+    label: "Travel & Heritage",
+    category: "Fashion & Lifestyle",
+    services: "Editorial Shoots & Stories",
+    style: "Cinematic Travel Visuals",
     image: "https://res.cloudinary.com/atr5osne/image/upload/v1792054795/creatorlink/public/avatars/tqkymtysvusyyu0sydzr.webp",
     imgHeight: "h-[230px] sm:h-[250px]",
     tiltClass: "md:-rotate-[0.8deg]",
     column: 3,
   },
   {
-    id: "nandini",
-    name: "Nandini Rao",
-    price: "₹18K",
-    location: "Hyderabad",
-    category: "Spatial Design",
-    filterCategory: "High Fashion",
-    followers: "41.0K",
-    rating: "4.8 ★",
+    id: "creator-6",
+    label: "Digital & Design",
+    category: "Technology & More",
+    services: "Creative Workflows & Reviews",
+    style: "Clean Spatial Layouts",
     image: "https://res.cloudinary.com/atr5osne/image/upload/v1792054798/creatorlink/public/editorial/phnhdibguvjhruowm7ba.webp",
     imgHeight: "h-[260px] sm:h-[280px]",
     tiltClass: "md:rotate-[1deg]",
     column: 3,
   },
 
-  // COLUMN 4 CREATORS
+  // COLUMN 4
   {
-    id: "zoya",
-    name: "Zoya Merchant",
-    price: "₹24K",
-    location: "Pune",
-    category: "Mindful Wellness",
-    filterCategory: "Beauty & Care",
-    followers: "42.8K",
-    rating: "4.8 ★",
+    id: "creator-7",
+    label: "Mindful Wellness",
+    category: "Beauty & Care",
+    services: "Routine Videos & Guides",
+    style: "Organic Wellness & Care",
     image: "https://res.cloudinary.com/atr5osne/image/upload/v1792054803/creatorlink/public/editorial/n33uuvvvrnbnhth7qzbf.webp",
     imgHeight: "h-[330px] sm:h-[360px]",
     tiltClass: "md:rotate-[0.5deg]",
@@ -113,14 +92,20 @@ const allCreators = [
   },
 ];
 
-const filters = ["All Vetted", "Beauty & Care", "High Fashion", "Culinary Art"];
+const filters = [
+  "All Creators",
+  "Beauty & Care",
+  "Fashion & Lifestyle",
+  "Food & Travel",
+  "Technology & More",
+];
 
 export default function CreatorDiscovery() {
-  const [activeFilter, setActiveFilter] = useState("All Vetted");
+  const [activeFilter, setActiveFilter] = useState("All Creators");
 
-  const filteredCreators = allCreators.filter((creator) => {
-    if (activeFilter === "All Vetted") return true;
-    return creator.filterCategory === activeFilter;
+  const filteredCreators = sampleCreators.filter((creator) => {
+    if (activeFilter === "All Creators") return true;
+    return creator.category === activeFilter;
   });
 
   // Group filtered creators into 4 columns for desktop layout
@@ -159,15 +144,15 @@ export default function CreatorDiscovery() {
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10 sm:mb-12">
             
             {/* Left Text Intro */}
-            <div className="max-w-2xl">
-              <span className="text-[11px] font-bold tracking-[0.22em] uppercase text-[#947870] dark:text-secondary font-sans block mb-3">
-                CURATED ROSTER
+            <div className="max-w-2xl text-left">
+              <span className="text-[11px] font-bold tracking-[0.22em] uppercase text-secondary font-sans block mb-3">
+                EXPLORE CREATIVE TALENT
               </span>
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-normal tracking-tight text-slate-900 dark:text-foreground leading-[1.15] mb-4">
-                Your next collaboration could be here.
+                Meet the Creators Behind Your Next Great Campaign.
               </h2>
               <p className="text-sm sm:text-base text-slate-600 dark:text-text-secondary font-sans leading-relaxed">
-                Discover vetted, high-engagement tastemakers across fashion, beauty, architecture, travel, and culinary lifestyle.
+                Every brand needs a creative voice that connects with its audience. Explore creator profiles across different niches, understand their content style and discover potential partners for your next campaign.
               </p>
             </div>
 
@@ -179,10 +164,10 @@ export default function CreatorDiscovery() {
                   <button
                     key={filter}
                     onClick={() => setActiveFilter(filter)}
-                    className={`px-4 py-2 rounded-full text-xs font-sans font-medium transition-all duration-300 ${
+                    className={`px-4 py-2 rounded-full text-xs font-sans font-medium transition-all duration-300 cursor-pointer ${
                       isActive
-                        ? "bg-[#F5D8CE] dark:bg-secondary text-slate-900 dark:text-white font-semibold shadow-sm"
-                        : "bg-white dark:bg-surface text-slate-700 dark:text-text-secondary border border-slate-200 dark:border-white/10 hover:border-slate-300 hover:bg-slate-50 dark:hover:bg-surface-muted"
+                        ? "bg-secondary text-white font-semibold shadow-sm"
+                        : "bg-white dark:bg-surface text-slate-700 dark:text-text-secondary border border-slate-200 dark:border-white/10 hover:border-secondary/40 hover:bg-slate-50 dark:hover:bg-surface-muted"
                     }`}
                   >
                     {filter}
@@ -234,38 +219,38 @@ export default function CreatorDiscovery() {
               <CreatorCard key={creator.id} creator={creator} />
             ))}
 
-            {/* COMPACT EXCLUSIVE ACCESS PANEL */}
-            <div className="bg-[#FCEFEF] dark:bg-secondary/10 border border-[#F7D8DF] dark:border-secondary/30 rounded-3xl p-6 sm:p-7 shadow-sm">
+            {/* BRAND INVITE PANEL */}
+            <div className="bg-[#FCEFEF] dark:bg-secondary/10 border border-[#F7D8DF] dark:border-secondary/30 rounded-3xl p-6 sm:p-7 shadow-sm text-left">
               <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-secondary font-sans block mb-2">
-                EXCLUSIVE ACCESS
+                READY TO FIND YOUR CREATIVE PARTNER?
               </span>
               <h3 className="text-xl sm:text-2xl font-serif font-medium tracking-tight text-slate-900 dark:text-foreground leading-tight mb-3">
-                Access 4,500+<br />Curated Tastemakers
+                Your Next Creator Collaboration Starts Here.
               </h3>
               <p className="text-xs text-slate-600 dark:text-text-secondary font-sans leading-relaxed mb-5">
-                Filter by audience geographic distribution, real engagement, and aesthetic genre.
+                Explore creator profiles, understand their creative style and find potential partners for your next campaign.
               </p>
 
-              <div className="space-y-2 mb-6">
+              <div className="space-y-2.5 mb-6">
                 <div className="flex items-center gap-2 text-xs font-sans text-slate-700 dark:text-foreground">
                   <span className="text-secondary font-bold">✓</span>
-                  Audience authenticity verified
+                  Explore different creative niches.
                 </div>
                 <div className="flex items-center gap-2 text-xs font-sans text-slate-700 dark:text-foreground">
                   <span className="text-secondary font-bold">✓</span>
-                  Custom brand aesthetic matching
+                  Discover unique content styles.
                 </div>
                 <div className="flex items-center gap-2 text-xs font-sans text-slate-700 dark:text-foreground">
                   <span className="text-secondary font-bold">✓</span>
-                  Direct escrow & rights management
+                  Find potential collaboration partners.
                 </div>
               </div>
 
               <Link
-                href="/signup"
-                className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-[#1C1917] hover:bg-black text-white font-sans font-semibold text-xs tracking-wide shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
+                href="/signup?role=brand"
+                className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-[#1C1917] dark:bg-white text-white dark:text-slate-900 hover:bg-secondary dark:hover:bg-secondary dark:hover:text-white font-sans font-semibold text-xs tracking-wide shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
               >
-                <span>Request Brand Invite</span>
+                <span>Join as a Brand</span>
                 <span>→</span>
               </Link>
             </div>
@@ -283,13 +268,13 @@ export default function CreatorDiscovery() {
 function CreatorCard({ creator }) {
   return (
     <div
-      className={`group bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 rounded-3xl p-3.5 sm:p-4 shadow-sm hover:shadow-xl hover:shadow-pink-900/10 dark:hover:shadow-secondary/20 creator-card-hover ${creator.tiltClass}`}
+      className={`group bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 rounded-3xl p-3.5 sm:p-4 shadow-sm hover:shadow-xl hover:shadow-pink-900/10 dark:hover:shadow-secondary/20 creator-card-hover text-left ${creator.tiltClass}`}
     >
       {/* Image Container */}
       <div className={`relative w-full ${creator.imgHeight} rounded-2xl overflow-hidden mb-3.5 bg-slate-100 dark:bg-surface-muted`}>
         <Image
           src={creator.image}
-          alt={creator.name}
+          alt={creator.label}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 320px"
           className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
@@ -298,29 +283,22 @@ function CreatorCard({ creator }) {
 
       {/* Details Container */}
       <div className="px-1">
-        {/* Name & Price */}
         <div className="flex items-baseline justify-between mb-1 gap-2">
-          <h3 className="text-base sm:text-lg font-sans font-bold text-slate-900 dark:text-foreground truncate group-hover:text-secondary transition-colors duration-200">
-            {creator.name}
+          <h3 className="text-base font-sans font-bold text-slate-900 dark:text-foreground truncate group-hover:text-secondary transition-colors duration-200">
+            {creator.label}
           </h3>
-          <span className="text-xs font-sans font-bold text-slate-600 dark:text-text-muted flex-shrink-0">
-            {creator.price}
+          <span className="text-[10px] font-sans font-bold uppercase tracking-wider text-secondary flex-shrink-0">
+            {creator.category}
           </span>
         </div>
 
-        {/* Location & Category */}
-        <p className="text-xs font-sans text-slate-500 dark:text-text-secondary mb-3 truncate">
-          {creator.location} • {creator.category}
+        <p className="text-xs font-sans text-slate-600 dark:text-text-secondary mb-2 truncate">
+          {creator.style}
         </p>
 
-        {/* Footer info: Followers & Rating */}
         <div className="pt-2.5 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-xs text-slate-500 dark:text-text-muted font-sans">
-          <span>{creator.followers} Followers</span>
-          {creator.rating && (
-            <span className="px-2 py-0.5 rounded-full bg-[#FCEFEF] dark:bg-secondary/20 text-secondary text-[11px] font-bold">
-              {creator.rating}
-            </span>
-          )}
+          <span>{creator.services}</span>
+          <span className="text-secondary font-bold text-xs">Explore →</span>
         </div>
       </div>
     </div>

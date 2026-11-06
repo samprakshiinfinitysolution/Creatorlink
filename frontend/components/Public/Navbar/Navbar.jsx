@@ -98,6 +98,7 @@ function HeartIcon() {
 }
 
 const navItems = [
+  { label: "Home", href: "/" },
   { label: "Creators", href: "/creators" },
   { label: "Brands", href: "/brands" },
   { label: "How it Works", href: "/how-it-works" },

@@ -5,6 +5,33 @@ import Image from "next/image";
 import ScrollReveal from "@/components/theme/ScrollReveal";
 
 export default function HowItWorksMosaic() {
+  const cards = [
+    {
+      id: 1,
+      badge: "CREATOR IDENTITY",
+      title: "Creative Freedom",
+      description: "Bring your unique style and ideas to every collaboration.",
+      image: "https://res.cloudinary.com/atr5osne/image/upload/v1792056018/creatorlink/public/campaigns/kplj9loopnrtw679uypx.webp",
+      alt: "Creative Freedom Showcase",
+    },
+    {
+      id: 2,
+      badge: "ALIGNMENT",
+      title: "Clear Communication",
+      description: "Keep brands and creators aligned from the first conversation to the final deliverable.",
+      image: "https://res.cloudinary.com/atr5osne/image/upload/v1792056035/creatorlink/public/creators/ivls2e0jr20rlu4kncza.webp",
+      alt: "Clear Communication Showcase",
+    },
+    {
+      id: 3,
+      badge: "COLLABORATIVE SUCCESS",
+      title: "Shared Goals",
+      description: "Work together towards campaign outcomes that matter to both sides.",
+      image: "https://res.cloudinary.com/atr5osne/image/upload/v1792054733/creatorlink/public/campaigns/cru8rs8ckm8iszusol6z.webp",
+      alt: "Shared Goals Showcase",
+    },
+  ];
+
   return (
     <section className="relative overflow-hidden bg-background text-foreground py-16 sm:py-20 lg:py-28 px-4 sm:px-6 lg:px-10 xl:px-12 border-b border-border-theme/60 transition-colors duration-300">
       
@@ -18,140 +45,64 @@ export default function HowItWorksMosaic() {
         ------------------------------------------------------- */}
         <ScrollReveal direction="up" delay={0} className="max-w-xl mx-auto mb-10 sm:mb-14">
           {/* Eyebrow */}
-          <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-slate-500 dark:text-text-muted block mb-3 font-sans text-center">
-            LOOKBOOK CANVAS
+          <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-secondary block mb-3 font-sans text-center">
+            THE CREATORLINK COMMUNITY
           </span>
 
           {/* Editorial Main Heading */}
           <h2 className="text-3xl sm:text-4xl lg:text-[44px] font-serif font-medium tracking-tight text-slate-900 dark:text-foreground leading-[1.15] mb-4 text-center">
-            The Living Mosaic of <br className="hidden sm:inline" />
-            Collaborative Culture
+            Better Connections Create Better Work.
           </h2>
 
           {/* Description */}
           <p className="text-xs sm:text-sm text-slate-600 dark:text-text-secondary font-sans leading-relaxed max-w-lg mx-auto text-center">
-            Every piece of content created through Creator Hub reflects timeless craftsmanship and commercial impact.
+            Great collaborations happen when creativity, clear communication and shared expectations come together.
           </p>
         </ScrollReveal>
 
 
         {/* -------------------------------------------------------
-            COMPACT CENTERED MOSAIC GRID (850px MAX WIDTH)
+            3 PILLAR CARDS GRID
         ------------------------------------------------------- */}
-        <div className="max-w-[860px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 items-start">
-          
-          {/* COLUMN 1: Campaign Still + Agency Directors */}
-          <ScrollReveal direction="up" delay={80} className="space-y-4 sm:space-y-5">
-            
-            {/* Card 1: Campaign Still */}
-            <div className="bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 rounded-2xl overflow-hidden shadow-2xs hover:-translate-y-1 hover:scale-[1.01] hover:border-pink-200 dark:hover:border-pink-500/30 hover:shadow-md transition-all duration-300 ease-out cursor-pointer group text-left">
-              <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
-                <Image src="https://res.cloudinary.com/atr5osne/image/upload/v1792056018/creatorlink/public/campaigns/kplj9loopnrtw679uypx.webp" alt="Botanical Silk Serum Macro Campaign still" fill className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500 ease-out" sizes="(max-width: 768px) 100vw, 33vw" />
-              </div>
-
-              <div className="p-4 sm:p-5 bg-white dark:bg-surface border-t border-slate-100 dark:border-white/10">
-                <span className="text-[10px] font-bold tracking-widest uppercase text-slate-400 dark:text-text-muted font-sans block mb-1">
-                  CAMPAIGN STILL
-                </span>
-                <h3 className="font-sans font-bold text-xs sm:text-sm text-slate-900 dark:text-foreground leading-snug">
-                  Botanical Silk Serum Macro Campaign
-                </h3>
-              </div>
-            </div>
-
-            {/* Card 4: Agency Directors Testimonial */}
-            <div className="bg-[#FDF2F5] dark:bg-secondary/[0.08] border border-pink-100/90 dark:border-pink-500/20 rounded-2xl p-5 sm:p-6 shadow-2xs hover:-translate-y-1 hover:scale-[1.01] hover:border-pink-200 dark:hover:border-pink-500/30 hover:shadow-md transition-all duration-300 ease-out cursor-pointer text-left">
-              <span className="bg-white/90 dark:bg-slate-900/70 border border-slate-200/60 dark:border-white/10 text-slate-800 dark:text-slate-200 font-sans font-bold text-[9px] tracking-wider uppercase px-2.5 py-0.5 rounded-full inline-block shadow-2xs mb-4">
-                AGENCY DIRECTORS
-              </span>
-
-              <p className="font-serif text-sm sm:text-base italic font-medium text-slate-900 dark:text-foreground leading-relaxed mb-5">
-                “Creator Hub converted our quarterly influencer chaos into an automated luxury production house.”
-              </p>
-
-              <div className="flex items-center">
-                <div className="w-8 h-8 rounded-full bg-[#FCE7F3] dark:bg-secondary/30 text-secondary dark:text-pink-100 font-sans font-bold text-[11px] flex items-center justify-center border border-pink-200/60 dark:border-pink-500/20 flex-shrink-0 mr-2.5 shadow-2xs">
-                  VL
+        <div className="max-w-[1100px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+          {cards.map((card, idx) => (
+            <ScrollReveal
+              key={card.id}
+              direction="up"
+              delay={idx * 80}
+              className="bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 rounded-2xl overflow-hidden shadow-2xs hover:-translate-y-1 hover:scale-[1.01] hover:border-pink-200 dark:hover:border-pink-500/30 hover:shadow-md transition-all duration-300 ease-out text-left flex flex-col justify-between group"
+            >
+              <div>
+                <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
+                  <Image
+                    src={card.image}
+                    alt={card.alt}
+                    fill
+                    className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500 ease-out"
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                  />
+                  <div className="absolute top-3 left-3 z-10 pointer-events-none">
+                    <span className="bg-white/90 dark:bg-slate-900/80 text-slate-900 dark:text-white border border-slate-200/60 dark:border-white/10 text-[9px] font-bold tracking-wider uppercase px-2.5 py-0.5 rounded-full font-sans shadow-2xs inline-block backdrop-blur-xs">
+                      {card.badge}
+                    </span>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-sans font-bold text-xs text-slate-900 dark:text-foreground mb-0.2">
-                    Vogue Labs Asia
-                  </h4>
-                  <span className="font-sans text-[10px] text-slate-500 dark:text-text-muted font-medium block">
-                    Brand Guild Member
-                  </span>
+
+                <div className="p-5 sm:p-6">
+                  <h3 className="font-serif text-xl sm:text-2xl font-medium text-slate-900 dark:text-foreground mb-2 leading-snug">
+                    {card.title}
+                  </h3>
+                  <p className="font-sans text-xs sm:text-sm text-slate-600 dark:text-text-secondary leading-relaxed">
+                    {card.description}
+                  </p>
                 </div>
               </div>
-            </div>
 
-          </ScrollReveal>
-
-
-          {/* COLUMN 2: Featured Artist (Taller Center) + Trust & Governance */}
-          <ScrollReveal direction="up" delay={160} className="space-y-4 sm:space-y-5">
-            
-            {/* Card 2: Featured Artist */}
-            <div className="bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 rounded-2xl overflow-hidden shadow-2xs hover:-translate-y-1 hover:scale-[1.01] hover:border-pink-200 dark:hover:border-pink-500/30 hover:shadow-md transition-all duration-300 ease-out cursor-pointer group text-left relative">
-              
-              {/* Badge Top Right */}
-              <div className="absolute top-3 right-3 z-10 pointer-events-none">
-                <span className="bg-[#FCE7F3] dark:bg-secondary/40 text-slate-900 dark:text-pink-100 border border-pink-200/60 dark:border-pink-500/20 text-[9px] font-bold tracking-wider uppercase px-2.5 py-0.5 rounded-full font-sans shadow-2xs inline-block">
-                  FEATURED ARTIST
-                </span>
+              <div className="px-5 pb-5 sm:px-6 sm:pb-6 pt-0">
+                <div className="h-1 w-10 bg-secondary/30 rounded-full group-hover:w-16 group-hover:bg-secondary transition-all duration-300" />
               </div>
-
-              {/* Taller Portrait Image */}
-              <div className="relative aspect-[3/3.8] w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
-                <Image src="https://res.cloudinary.com/atr5osne/image/upload/v1792056035/creatorlink/public/creators/ivls2e0jr20rlu4kncza.webp" alt="Devika Rao featured artist editorial" fill className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500 ease-out" sizes="(max-width: 768px) 100vw, 33vw" />
-              </div>
-
-              <div className="p-4 sm:p-5 bg-white dark:bg-surface border-t border-slate-100 dark:border-white/10">
-                <h3 className="font-sans font-bold text-sm sm:text-base text-slate-900 dark:text-foreground mb-0.5 leading-snug">
-                  Devika Rao
-                </h3>
-                <span className="font-sans text-[11px] text-slate-500 dark:text-text-muted block font-medium">
-                  Architectural Stylist &amp; Storyteller · 64K
-                </span>
-              </div>
-            </div>
-
-            {/* Card 5: Trust & Governance */}
-            <div className="bg-[#FDF2F5] dark:bg-secondary/[0.08] border border-pink-100/90 dark:border-pink-500/20 rounded-2xl p-5 sm:p-6 shadow-2xs hover:-translate-y-1 hover:scale-[1.01] hover:border-pink-200 dark:hover:border-pink-500/30 hover:shadow-md transition-all duration-300 ease-out cursor-pointer text-left">
-              <span className="text-[10px] font-bold tracking-widest uppercase text-slate-400 dark:text-text-muted font-sans block mb-1.5">
-                TRUST &amp; GOVERNANCE
-              </span>
-              <span className="font-serif text-2xl sm:text-3xl font-bold text-slate-900 dark:text-foreground block mb-1 leading-none">
-                100%
-              </span>
-              <p className="font-sans text-[11px] sm:text-xs text-slate-600 dark:text-text-secondary leading-relaxed">
-                Funds safeguarded in institutional-grade escrow until dual-party creative validation.
-              </p>
-            </div>
-
-          </ScrollReveal>
-
-
-          {/* COLUMN 3: Verified Production */}
-          <ScrollReveal direction="up" delay={240} className="space-y-4 sm:space-y-5 md:col-span-2 lg:col-span-1">
-            
-            {/* Card 3: Verified Production */}
-            <div className="bg-white dark:bg-surface border border-slate-200/80 dark:border-white/10 rounded-2xl overflow-hidden shadow-2xs hover:-translate-y-1 hover:scale-[1.01] hover:border-pink-200 dark:hover:border-pink-500/30 hover:shadow-md transition-all duration-300 ease-out cursor-pointer group text-left">
-              <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
-                <Image src="https://res.cloudinary.com/atr5osne/image/upload/v1792054733/creatorlink/public/campaigns/cru8rs8ckm8iszusol6z.webp" alt="Water and Radiance production scene" fill className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500 ease-out" sizes="(max-width: 768px) 100vw, 33vw" />
-              </div>
-
-              <div className="p-4 sm:p-5 bg-white dark:bg-surface border-t border-slate-100 dark:border-white/10">
-                <span className="text-[10px] font-bold tracking-widest uppercase text-slate-400 dark:text-text-muted font-sans block mb-1">
-                  VERIFIED PRODUCTION
-                </span>
-                <h3 className="font-sans font-bold text-xs sm:text-sm text-slate-900 dark:text-foreground leading-snug">
-                  Water &amp; Radiance Story Reel
-                </h3>
-              </div>
-            </div>
-
-          </ScrollReveal>
-
+            </ScrollReveal>
+          ))}
         </div>
 
       </div>

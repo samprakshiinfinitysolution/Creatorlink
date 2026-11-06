@@ -9,6 +9,7 @@ import BrandProfile from "../brand/profile/profile.model.js";
 import CreatorProfile from "../creator/profile/profile.model.js";
 import CreatorService from "../creator/services/services.model.js";
 import { createNotificationSafe } from "../notifications/notification.service.js";
+import { emitWorkspaceEvent } from "../../socket/socket.js";
 import createApiError from "../../utils/ApiError.js";
 import {
     getPagination,
@@ -85,12 +86,29 @@ const attachWorkspaceProfiles = async (workspaces) => {
                 ? (wsObj.brand.toObject ? wsObj.brand.toObject() : { ...wsObj.brand })
                 : { _id: wsObj.brand };
 
+            const resolvedLogo = bp.logo || brandBase.logo || brandBase.avatar || "";
+            const resolvedName = bp.companyName || brandBase.companyName || brandBase.name || "Brand Partner";
+
             wsObj.brand = {
                 ...brandBase,
-                logo: bp.logo || brandBase.logo || "",
-                avatar: bp.logo || brandBase.avatar || "",
-                profileImage: bp.logo || brandBase.profileImage || "",
-                ...(bp.companyName ? { companyName: bp.companyName } : {})
+                name: resolvedName,
+                companyName: resolvedName,
+                logo: resolvedLogo,
+                avatar: resolvedLogo,
+                profileImage: resolvedLogo
+            };
+        } else if (wsObj.brand && typeof wsObj.brand === "object") {
+            const brandBase = wsObj.brand.toObject ? wsObj.brand.toObject() : { ...wsObj.brand };
+            const resolvedLogo = brandBase.logo || brandBase.avatar || brandBase.profileImage || "";
+            const resolvedName = brandBase.companyName || brandBase.name || "Brand Partner";
+
+            wsObj.brand = {
+                ...brandBase,
+                name: resolvedName,
+                companyName: resolvedName,
+                logo: resolvedLogo,
+                avatar: resolvedLogo,
+                profileImage: resolvedLogo
             };
         }
 
@@ -344,8 +362,8 @@ const getCreatorWorkspacesService = async (creatorId, query = {}) => {
 
     const [workspaces, totalItems] = await Promise.all([
         Workspace.find(filter)
-            .populate("brand", "name email")
-            .populate("creator", "name email")
+            .populate("brand", "name email avatar")
+            .populate("creator", "name email avatar")
             .populate(
                 "campaign",
                 "title category budget minBudget maxBudget currency deadline platform coverImage"
@@ -393,8 +411,8 @@ const getCreatorWorkspaceByIdService = async (
             { booking: workspaceId }
         ]
     })
-        .populate("brand", "name email")
-        .populate("creator", "name email")
+        .populate("brand", "name email avatar")
+        .populate("creator", "name email avatar")
         .populate("campaign")
         .populate("service")
         .populate("booking");
@@ -629,12 +647,25 @@ const notificationSubmissionId =
     });
 
     const updated = await Workspace.findById(workspace._id)
-        .populate("brand", "name email")
+        .populate("brand", "name email avatar")
+        .populate("creator", "name email avatar")
         .populate("campaign")
         .populate("service")
         .populate("booking");
 
-    return await attachWorkspaceProfiles(updated);
+    const enriched = await attachWorkspaceProfiles(updated);
+
+    emitWorkspaceEvent(workspace._id, "workspace:deliverable_submitted", {
+        workspaceId: workspace._id.toString(),
+        deliverableId: deliverable._id.toString(),
+        deliverableTitle: deliverable.title,
+        status: deliverable.status,
+        submission: subObj,
+        actionBy: creatorId,
+        workspace: enriched
+    });
+
+    return enriched;
 };
 
 // Submits work for a workspace by creator (legacy wrapper / fallback).
@@ -683,8 +714,8 @@ const getBrandWorkspacesService = async (
 
     const [workspaces, totalItems, statusAgg] = await Promise.all([
         Workspace.find(filter)
-            .populate("brand", "name email")
-            .populate("creator", "name email")
+            .populate("brand", "name email avatar")
+            .populate("creator", "name email avatar")
             .populate(
                 "campaign",
                 "title category budget minBudget maxBudget currency deadline platform coverImage"
@@ -818,8 +849,8 @@ const getBrandWorkspaceByIdService = async (
             { booking: workspaceId }
         ]
     })
-        .populate("brand", "name email")
-        .populate("creator", "name email")
+        .populate("brand", "name email avatar")
+        .populate("creator", "name email avatar")
         .populate("campaign")
         .populate("service")
         .populate("booking");
@@ -1076,7 +1107,32 @@ const reviewBrandWorkspaceDeliverableService = async (
         .populate("service")
         .populate("booking");
 
-    return await attachWorkspaceProfiles(updated);
+    const enriched = await attachWorkspaceProfiles(updated);
+
+    if (targetAction === "completed" || targetAction === "approve") {
+        emitWorkspaceEvent(workspace._id, "workspace:approved", {
+            workspaceId: workspace._id.toString(),
+            deliverableId: deliverable._id.toString(),
+            deliverableTitle: deliverable.title,
+            status: deliverable.status,
+            workspaceStatus: workspace.status,
+            actionBy: brandId,
+            workspace: enriched
+        });
+    } else if (targetAction === "revision_requested" || targetAction === "revision") {
+        emitWorkspaceEvent(workspace._id, "workspace:revision_requested", {
+            workspaceId: workspace._id.toString(),
+            deliverableId: deliverable._id.toString(),
+            deliverableTitle: deliverable.title,
+            status: deliverable.status,
+            feedback: feedback ? feedback.trim() : "",
+            revisionCount: deliverable.revisionCount,
+            actionBy: brandId,
+            workspace: enriched
+        });
+    }
+
+    return enriched;
 };
 
 // Reviews workspace by brand (legacy wrapper / fallback).

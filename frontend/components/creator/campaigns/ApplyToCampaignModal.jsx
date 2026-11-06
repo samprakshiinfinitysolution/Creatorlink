@@ -48,12 +48,17 @@ export default function ApplyToCampaignModal({
   campaignBudget,
   minBudget,
   maxBudget,
+  brand,
   onContinue = () => {},
   submitting = false,
   submitError = null,
 }) {
   const dispatch = useDispatch();
   const { services, loading, error } = useSelector((state) => state.services);
+
+  const brandName = brand?.companyName || brand?.name || "Brand Partner";
+  const brandLogo = brand?.logo || brand?.avatar || brand?.profileImage || "";
+  const brandInitial = (brandName.trim()[0] || "B").toUpperCase();
 
   const [selectedServiceId, setSelectedServiceId] = useState("");
   const [proposedPrice, setProposedPrice] = useState("");
@@ -178,11 +183,29 @@ export default function ApplyToCampaignModal({
             <h2 className="font-serif font-semibold text-xl text-foreground mt-1">
               Apply to Campaign
             </h2>
-            {campaignTitle && (
-              <p className="text-xs text-text-secondary mt-0.5 line-clamp-1">
-                Campaign: <span className="text-foreground font-medium">{campaignTitle}</span>
+            <div className="flex items-center gap-2 mt-1">
+              {brandLogo ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={brandLogo}
+                  alt={brandName}
+                  className="w-4 h-4 rounded-full object-cover shrink-0 border border-border-theme"
+                />
+              ) : (
+                <div className="w-4 h-4 rounded-full bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 flex items-center justify-center text-[8px] font-sans font-semibold shrink-0">
+                  {brandInitial}
+                </div>
+              )}
+              <p className="text-xs text-text-secondary truncate">
+                <span className="font-medium text-foreground">{brandName}</span>
+                {campaignTitle && (
+                  <>
+                    <span className="mx-1">•</span>
+                    <span>{campaignTitle}</span>
+                  </>
+                )}
               </p>
-            )}
+            </div>
           </div>
           <button
             type="button"
@@ -196,6 +219,44 @@ export default function ApplyToCampaignModal({
 
         {/* Modal Body */}
         <div className="p-5 sm:p-6 overflow-y-auto space-y-6 flex-1 custom-scrollbar">
+          {/* Brand & Campaign Summary Banner */}
+          <div className="p-3.5 rounded-xl bg-surface-muted/50 border border-border-theme flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              {brandLogo ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={brandLogo}
+                  alt={brandName}
+                  className="w-10 h-10 rounded-xl object-cover shrink-0 border border-border-theme"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-xl bg-pink-100/70 dark:bg-pink-950/40 text-black dark:text-white border border-pink-200/60 dark:border-pink-800/40 flex items-center justify-center text-sm font-sans font-semibold shrink-0">
+                  {brandInitial}
+                </div>
+              )}
+              <div className="min-w-0">
+                <span className="text-[10px] font-bold tracking-wider uppercase text-pink-500 dark:text-pink-400 block">
+                  Target Brand
+                </span>
+                <span className="text-sm font-semibold text-foreground block truncate">
+                  {brandName}
+                </span>
+                <span className="text-xs text-text-secondary block truncate">
+                  {campaignTitle || "Brand Campaign"}
+                </span>
+              </div>
+            </div>
+            <div className="text-right shrink-0">
+              <span className="text-[10px] text-text-secondary font-medium block">
+                Budget
+              </span>
+              <span className="text-xs sm:text-sm font-semibold text-foreground block">
+                {minBudget && maxBudget && minBudget !== maxBudget
+                  ? `₹${new Intl.NumberFormat("en-IN").format(minBudget)} – ₹${new Intl.NumberFormat("en-IN").format(maxBudget)}`
+                  : `₹${new Intl.NumberFormat("en-IN").format(maxBudget || campaignBudget || minBudget || 0)}`}
+              </span>
+            </div>
+          </div>
           {/* Error Banner for Fetching Services */}
           {error && (
             <div className="bg-red-500/10 border border-red-500/30 text-red-500 p-4 rounded-xl text-xs font-medium flex items-center justify-between gap-3">

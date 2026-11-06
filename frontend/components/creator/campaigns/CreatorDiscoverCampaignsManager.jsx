@@ -662,8 +662,9 @@ export default function CreatorDiscoverCampaignsManager() {
               {campaignsList.map((campaign) => {
                 const campaignId = String(campaign._id || campaign.id);
                 const isApplied = appliedCampaignIds.has(campaignId);
-                const brandName = campaign.brand?.name || "Brand Partner";
-                const brandInitial = brandName.charAt(0).toUpperCase() || "B";
+                const brandName = campaign.brand?.companyName || campaign.brand?.name || "Brand Partner";
+                const brandLogo = campaign.brand?.logo || campaign.brand?.avatar || campaign.brand?.profileImage || "";
+                const brandInitial = (brandName.trim()[0] || "B").toUpperCase();
 
                 const validDeliverables = Array.isArray(campaign.deliverables)
                   ? campaign.deliverables.map(formatDeliverableItem).filter(Boolean)
@@ -724,9 +725,18 @@ export default function CreatorDiscoverCampaignsManager() {
 
                         {/* Floating Brand Badge Bottom-Left */}
                         <div className="absolute bottom-2 left-2 bg-white/95 dark:bg-surface/95 backdrop-blur-xs px-2 py-0.5 rounded-lg shadow-xs border border-border-theme/60 flex items-center gap-1.5 max-w-[85%]">
-                          <div className="w-3.5 h-3.5 rounded-full bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 flex items-center justify-center text-[8px] font-sans font-semibold shrink-0">
-                            {brandInitial}
-                          </div>
+                          {brandLogo ? (
+                            /* eslint-disable-next-line @next/next/no-img-element */
+                            <img
+                              src={brandLogo}
+                              alt={brandName}
+                              className="w-3.5 h-3.5 rounded-full object-cover shrink-0"
+                            />
+                          ) : (
+                            <div className="w-3.5 h-3.5 rounded-full bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 flex items-center justify-center text-[8px] font-sans font-semibold shrink-0">
+                              {brandInitial}
+                            </div>
+                          )}
                           <span className="text-[10px] sm:text-[11px] font-sans font-semibold text-foreground truncate">
                             {brandName}
                           </span>
@@ -739,9 +749,18 @@ export default function CreatorDiscoverCampaignsManager() {
                           {campaign.title}
                         </h2>
                         <div className="flex items-center gap-1.5 mt-0.5">
-                          <div className="w-3.5 h-3.5 rounded-full bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 flex items-center justify-center text-[8px] font-sans font-semibold shrink-0">
-                            {brandInitial}
-                          </div>
+                          {brandLogo ? (
+                            /* eslint-disable-next-line @next/next/no-img-element */
+                            <img
+                              src={brandLogo}
+                              alt={brandName}
+                              className="w-3.5 h-3.5 rounded-full object-cover shrink-0"
+                            />
+                          ) : (
+                            <div className="w-3.5 h-3.5 rounded-full bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 flex items-center justify-center text-[8px] font-sans font-semibold shrink-0">
+                              {brandInitial}
+                            </div>
+                          )}
                           <span className="text-xs font-sans text-text-secondary truncate">
                             by {brandName}
                           </span>

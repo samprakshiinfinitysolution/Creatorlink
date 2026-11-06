@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 import Campaign from "../../brand/campaigns/campaign.model.js";
 import Booking from "../../booking/booking.model.js";
+import BrandProfile from "../../brand/profile/profile.model.js";
 import createApiError from "../../../utils/ApiError.js";
 
 import {
@@ -60,8 +61,12 @@ const formatAppliedCampaignItem = (b) => {
         } : null,
         brand: b.brand ? {
             _id: b.brand._id,
-            name: b.brand.name,
-            email: b.brand.email
+            name: b.brand.companyName || b.brand.name || "Brand Partner",
+            companyName: b.brand.companyName || b.brand.name || "Brand Partner",
+            email: b.brand.email,
+            avatar: b.brand.logo || b.brand.avatar || "",
+            logo: b.brand.logo || b.brand.avatar || "",
+            profileImage: b.brand.logo || b.brand.avatar || ""
         } : null,
         service: b.service ? {
             _id: b.service._id,
@@ -70,6 +75,84 @@ const formatAppliedCampaignItem = (b) => {
             deliveryTime: b.service.deliveryTime
         } : null
     };
+};
+
+
+// Helper to attach BrandProfile details (companyName, logo) and Auth details to campaign brand
+const attachCampaignBrandProfiles = async (campaigns) => {
+    if (!campaigns) return campaigns;
+    const isSingle = !Array.isArray(campaigns);
+    const campaignList = isSingle ? [campaigns] : campaigns;
+    if (campaignList.length === 0) return campaigns;
+
+    const brandIds = new Set();
+    campaignList.forEach((c) => {
+        const cObj = c?.toObject ? c.toObject() : c;
+        if (!cObj?.brand) return;
+        const bId = cObj.brand._id
+            ? (cObj.brand._id.toString ? cObj.brand._id.toString() : String(cObj.brand._id))
+            : (mongoose.Types.ObjectId.isValid(cObj.brand)
+                ? (cObj.brand.toString ? cObj.brand.toString() : String(cObj.brand))
+                : null);
+        if (bId) brandIds.add(bId);
+    });
+
+    const isDbConnected = mongoose.connection?.readyState === 1;
+    const brandProfiles = brandIds.size > 0 && isDbConnected
+        ? await BrandProfile.find({
+            user: { $in: Array.from(brandIds).map((id) => new mongoose.Types.ObjectId(id)) }
+        })
+            .select("user logo companyName")
+            .lean()
+        : [];
+
+    const brandProfileMap = new Map();
+    brandProfiles.forEach((bp) => {
+        if (bp?.user) brandProfileMap.set(bp.user.toString(), bp);
+    });
+
+    const enriched = campaignList.map((c) => {
+        const cObj = c?.toObject ? c.toObject() : { ...c };
+        if (!cObj.brand) return cObj;
+
+        const bId = cObj.brand._id
+            ? (cObj.brand._id.toString ? cObj.brand._id.toString() : String(cObj.brand._id))
+            : (mongoose.Types.ObjectId.isValid(cObj.brand)
+                ? (cObj.brand.toString ? cObj.brand.toString() : String(cObj.brand))
+                : null);
+
+        const bp = bId ? brandProfileMap.get(bId) : null;
+        const brandLogo = bp?.logo || "";
+        const companyName = bp?.companyName || "";
+
+        if (typeof cObj.brand === "object" && cObj.brand !== null) {
+            const brandBase = cObj.brand.toObject ? cObj.brand.toObject() : { ...cObj.brand };
+            const resolvedName = companyName || brandBase.companyName || brandBase.name || "Brand Partner";
+            const resolvedAvatar = brandLogo || brandBase.logo || brandBase.avatar || "";
+            cObj.brand = {
+                ...brandBase,
+                name: resolvedName,
+                companyName: resolvedName,
+                logo: resolvedAvatar,
+                avatar: resolvedAvatar,
+                profileImage: resolvedAvatar
+            };
+        } else if (bId) {
+            const resolvedName = companyName || "Brand Partner";
+            cObj.brand = {
+                _id: cObj.brand,
+                name: resolvedName,
+                companyName: resolvedName,
+                logo: brandLogo,
+                avatar: brandLogo,
+                profileImage: brandLogo
+            };
+        }
+
+        return cObj;
+    });
+
+    return isSingle ? enriched[0] : enriched;
 };
 
 
@@ -191,6 +274,7 @@ const getDiscoverCampaignsService = async (query = {}) => {
     const [campaigns, totalItems] = await Promise.all([
         Campaign
             .find(filter)
+            .populate("brand", "name email avatar")
             .sort(sort)
             .skip(skip)
             .limit(itemsPerPage),
@@ -198,9 +282,10 @@ const getDiscoverCampaignsService = async (query = {}) => {
         Campaign.countDocuments(filter)
     ]);
 
+    const enrichedCampaigns = await attachCampaignBrandProfiles(campaigns);
 
     return {
-        campaigns,
+        campaigns: enrichedCampaigns,
         pagination: getPaginationData(
             currentPage,
             itemsPerPage,
@@ -225,7 +310,7 @@ const getDiscoverCampaignByIdService = async (campaignId) => {
         _id: campaignId,
         status: "published",
         "moderation.isRestricted": { $ne: true }
-    });
+    }).populate("brand", "name email avatar");
 
 
     if (!campaign) {
@@ -236,7 +321,7 @@ const getDiscoverCampaignByIdService = async (campaignId) => {
     }
 
 
-    return campaign;
+    return await attachCampaignBrandProfiles(campaign);
 };
 
 
@@ -306,7 +391,7 @@ const getAppliedCampaignsService = async (creatorId, query = {}) => {
 
     const [bookings, totalItems] = await Promise.all([
         Booking.find(filter)
-            .populate("brand", "name email")
+            .populate("brand", "name email avatar")
             .populate("campaign", "title description category platform budget minBudget maxBudget currency deadline coverImage requiredCreators audienceTargeting usageRights creatorRequirements")
             .populate("service", "title price deliveryTime")
             .sort({ createdAt: -1 })
@@ -316,8 +401,8 @@ const getAppliedCampaignsService = async (creatorId, query = {}) => {
         Booking.countDocuments(filter)
     ]);
 
-
-    const formattedCampaigns = bookings.map(formatAppliedCampaignItem);
+    const enrichedBookings = await attachCampaignBrandProfiles(bookings);
+    const formattedCampaigns = enrichedBookings.map(formatAppliedCampaignItem);
 
 
     return {
@@ -346,7 +431,7 @@ const getAppliedCampaignByIdService = async (creatorId, bookingId) => {
         _id: bookingId,
         creator: creatorId
     })
-        .populate("brand", "name email")
+        .populate("brand", "name email avatar")
         .populate("campaign")
         .populate("service");
 
@@ -359,7 +444,8 @@ const getAppliedCampaignByIdService = async (creatorId, bookingId) => {
     }
 
 
-    return formatAppliedCampaignItem(booking);
+    const enrichedBooking = await attachCampaignBrandProfiles(booking);
+    return formatAppliedCampaignItem(enrichedBooking);
 };
 
 

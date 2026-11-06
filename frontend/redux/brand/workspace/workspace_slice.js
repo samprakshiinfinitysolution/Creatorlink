@@ -138,6 +138,25 @@ const brandWorkspaceSlice = createSlice({
 
         clearSuccessMessage: (state) => {
             state.successMessage = null;
+        },
+
+        updateWorkspaceFromSocket: (state, action) => {
+            const updated = action.payload;
+            if (!updated) return;
+            const targetId = updated._id ? String(updated._id) : (updated.id ? String(updated.id) : null);
+            if (!targetId) return;
+
+            const currentId = state.selectedWorkspace?._id ? String(state.selectedWorkspace._id) : (state.selectedWorkspace?.id ? String(state.selectedWorkspace.id) : null);
+            if (currentId === targetId) {
+                state.selectedWorkspace = updated;
+            }
+
+            if (Array.isArray(state.workspaces)) {
+                const idx = state.workspaces.findIndex((w) => String(w._id || w.id) === targetId);
+                if (idx !== -1) {
+                    state.workspaces[idx] = updated;
+                }
+            }
         }
     },
 
@@ -363,7 +382,8 @@ const brandWorkspaceSlice = createSlice({
 export const {
     clearSelectedWorkspace,
     clearWorkspaceState,
-    clearSuccessMessage
+    clearSuccessMessage,
+    updateWorkspaceFromSocket
 } = brandWorkspaceSlice.actions;
 
 

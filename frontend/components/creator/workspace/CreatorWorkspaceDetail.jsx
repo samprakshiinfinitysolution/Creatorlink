@@ -3,7 +3,18 @@
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchCreatorWorkspaceById } from "@/redux/creator/workspace/workspace_slice";
+import {
+  fetchCreatorWorkspaceById,
+  updateWorkspaceFromSocket
+} from "@/redux/creator/workspace/workspace_slice";
+import {
+  socket,
+  registerSocketConsumer,
+  unregisterSocketConsumer,
+  confirmSocketAuthSuccess,
+  handleSocketConnectionError
+} from "@/lib/socket";
+import { refreshToken } from "@/redux/auth/auth_slice";
 import CreatorSidebar from "@/components/creator/dashboard/CreatorSidebar";
 import CreatorHeader from "@/components/creator/dashboard/CreatorHeader";
 import CreatorSubmitWorkModal from "./CreatorSubmitWorkModal";
@@ -515,6 +526,8 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
   const { selectedWorkspace, loading, error } = useSelector(
     (state) => state.creatorWorkspace
   );
+  const { user } = useSelector((state) => state.auth || {});
+  const authenticatedUserId = user?._id || user?.id || null;
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
@@ -522,14 +535,79 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
   const [deliverableFilter, setDeliverableFilter] = useState("all"); // 'all' | 'submitted' | 'pending'
   const [isOlderSubmissionsOpen, setIsOlderSubmissionsOpen] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [failedBrandLogo, setFailedBrandLogo] = useState(false);
+
+  // Register socket consumer for the active creator workspace session
+  useEffect(() => {
+    const consumerId = `creator-workspace-${workspaceId}`;
+    registerSocketConsumer(consumerId, authenticatedUserId);
+    return () => {
+      unregisterSocketConsumer(consumerId);
+    };
+  }, [workspaceId, authenticatedUserId]);
+
+  // Join workspace room and subscribe to real-time deliverable synchronization events
+  useEffect(() => {
+    if (!workspaceId) return;
+
+    const joinWorkspace = () => {
+      socket.emit("workspace:join", String(workspaceId), (result) => {
+        if (!result?.success) {
+          console.error("Failed to join workspace room:", result?.message);
+        }
+      });
+    };
+
+    if (socket.connected) {
+      joinWorkspace();
+    }
+
+    const handleConnectSuccess = () => {
+      confirmSocketAuthSuccess();
+      joinWorkspace();
+    };
+
+    const handleConnectError = (err) => {
+      handleSocketConnectionError(err, dispatch, refreshToken);
+    };
+
+    const handleWorkspaceRealtimeUpdate = (data) => {
+      if (!data?.workspaceId || String(data.workspaceId) !== String(workspaceId)) return;
+
+      if (data.workspace) {
+        dispatch(updateWorkspaceFromSocket(data.workspace));
+      }
+      dispatch(fetchCreatorWorkspaceById(workspaceId));
+    };
+
+    socket.on("connect", handleConnectSuccess);
+    socket.on("connect_error", handleConnectError);
+    socket.on("workspace:deliverable_submitted", handleWorkspaceRealtimeUpdate);
+    socket.on("workspace:revision_requested", handleWorkspaceRealtimeUpdate);
+    socket.on("workspace:approved", handleWorkspaceRealtimeUpdate);
+
+    return () => {
+      socket.off("connect", handleConnectSuccess);
+      socket.off("connect_error", handleConnectError);
+      socket.off("workspace:deliverable_submitted", handleWorkspaceRealtimeUpdate);
+      socket.off("workspace:revision_requested", handleWorkspaceRealtimeUpdate);
+      socket.off("workspace:approved", handleWorkspaceRealtimeUpdate);
+
+      if (socket.connected) {
+        socket.emit("workspace:leave", String(workspaceId));
+      }
+    };
+  }, [dispatch, workspaceId]);
 
   useEffect(() => {
+    setFailedBrandLogo(false);
     if (workspaceId) {
       dispatch(fetchCreatorWorkspaceById(workspaceId));
     }
   }, [dispatch, workspaceId]);
 
   const handleRetry = () => {
+    setFailedBrandLogo(false);
     if (workspaceId) {
       dispatch(fetchCreatorWorkspaceById(workspaceId));
     }
@@ -550,8 +628,9 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
   const campaign = workspace?.campaign;
   const brand = workspace?.brand;
   const service = workspace?.service;
-  const brandName = brand?.name || brand?.email?.split("@")[0] || "Brand Partner";
-  const brandLogo = campaign?.coverImage || brand?.avatar || brand?.logo || null;
+  const brandName = brand?.companyName || brand?.name || brand?.email?.split("@")[0] || "Brand Partner";
+  const brandLogo = brand?.logo || brand?.avatar || brand?.profileImage || null;
+  const brandInitial = ((brandName || "B").trim()[0] || "B").toUpperCase();
   const deadlineFormatted = formatDate(workspace?.deadline || campaign?.deadline);
   const platformLabel = formatPlatform(workspace?.platform || campaign?.platform || service?.platform);
 
@@ -1094,18 +1173,19 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                   {/* Left: Brand/Campaign Logo + Info */}
                   <div className="flex items-start gap-4">
-                    {/* Brand / Campaign Logo Card (Clean Black Styling) */}
+                    {/* Brand Logo Card */}
                     <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white dark:bg-zinc-850 border border-gray-100 dark:border-zinc-700 shadow-xs flex items-center justify-center p-2 shrink-0 overflow-hidden">
-                      {brandLogo ? (
+                      {brandLogo && !failedBrandLogo ? (
                         /* eslint-disable-next-line @next/next/no-img-element */
                         <img
                           src={brandLogo}
                           alt={brandName}
-                          className="w-full h-full object-contain filter grayscale contrast-125 dark:invert"
+                          className="w-full h-full object-cover rounded-xl transition-transform duration-300 ease-out hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
+                          onError={() => setFailedBrandLogo(true)}
                         />
                       ) : (
                         <span className="w-10 h-10 rounded-xl bg-black text-white dark:bg-white dark:text-black flex items-center justify-center font-bold text-base shadow-2xs">
-                          {((brandName || "B")[0]).toUpperCase()}
+                          {brandInitial}
                         </span>
                       )}
                     </div>

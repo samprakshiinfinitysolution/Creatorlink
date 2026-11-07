@@ -705,6 +705,8 @@ export default function CreatorCampaignDetail({ campaignId }) {
         campaignBudget={campaign?.budget}
         minBudget={campaign?.minBudget}
         maxBudget={campaign?.maxBudget}
+        campaignCategory={campaign?.category}
+        campaignPlatform={campaign?.platform}
         brand={campaign?.brand}
         onContinue={handleApplySubmit}
         submitting={submitting}

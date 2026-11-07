@@ -212,6 +212,14 @@ function LinkIcon({ className = "w-4 h-4" }) {
   );
 }
 
+function LockClosedIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+    </svg>
+  );
+}
+
 function RefreshIcon({ className = "w-4 h-4" }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
@@ -266,7 +274,11 @@ export function ServiceCardCover({ coverImage, title, children }) {
   );
 }
 
-function getInitialFormData(service, defaultCategory) {
+function getInitialFormData(
+  service,
+  defaultCategory,
+  defaultPlatform = "instagram"
+) {
   if (service) {
     const platform = service.platform || "instagram";
     const availableTypes =
@@ -296,9 +308,19 @@ function getInitialFormData(service, defaultCategory) {
         typeof service.isActive === "boolean" ? service.isActive : true,
     };
   }
+  const platform = (defaultPlatform || "instagram").toLowerCase();
+  const validPlatform = PLATFORM_OPTIONS.some((p) => p.value === platform)
+    ? platform
+    : "instagram";
+  const availableTypes =
+    PLATFORM_CONTENT_TYPES[validPlatform] || PLATFORM_CONTENT_TYPES.other;
+  const defaultContentType = availableTypes[0]?.value || "other";
+
   return {
     ...initialFormState,
     category: defaultCategory || "Social Media Campaign",
+    platform: validPlatform,
+    contentType: defaultContentType,
   };
 }
 
@@ -307,12 +329,14 @@ function ServiceFormModalContent({
   onClose,
   service = null,
   defaultCategory = "Social Media Campaign",
+  defaultPlatform = "instagram",
   onSuccess,
+  zIndex = "z-50",
 }) {
   const dispatch = useDispatch();
 
   const [formData, setFormData] = useState(() =>
-    getInitialFormData(service, defaultCategory)
+    getInitialFormData(service, defaultCategory, defaultPlatform)
   );
   const [deliverableInput, setDeliverableInput] = useState("");
   const [formError, setFormError] = useState(null);
@@ -322,6 +346,13 @@ function ServiceFormModalContent({
   const fileInputRef = useRef(null);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
   const [isDraggingCover, setIsDraggingCover] = useState(false);
+  const [isCoverUploaded, setIsCoverUploaded] = useState(() =>
+    Boolean(
+      service?.coverImage &&
+        (service.coverImage.includes("cloudinary.com") ||
+          service.coverImage.includes("res.cloudinary.com"))
+    )
+  );
   const [uploadError, setUploadError] = useState(null);
   const [previewErrorUrl, setPreviewErrorUrl] = useState(null);
 
@@ -368,6 +399,7 @@ function ServiceFormModalContent({
           ...prev,
           coverImage: uploadedUrl,
         }));
+        setIsCoverUploaded(true);
       } else {
         setUploadError("Could not retrieve uploaded image URL.");
       }
@@ -418,12 +450,20 @@ function ServiceFormModalContent({
   const handleRemoveCover = () => {
     if (isUploadingCover) return;
     setFormData((prev) => ({ ...prev, coverImage: "" }));
+    setIsCoverUploaded(false);
     setUploadError(null);
     setPreviewErrorUrl(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   };
+
+  const isCoverLocked = Boolean(
+    formData.coverImage &&
+      (isCoverUploaded ||
+        formData.coverImage.includes("cloudinary.com") ||
+        formData.coverImage.includes("res.cloudinary.com"))
+  );
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -620,7 +660,7 @@ function ServiceFormModalContent({
   const serviceId = service?._id || service?.id;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+    <div className={`fixed inset-0 ${zIndex || "z-50"} flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200`}>
       <div className="fixed inset-0" onClick={handleClose} />
       <div className="relative z-10 bg-surface border border-border-theme rounded-2xl sm:rounded-3xl max-w-2xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[92vh] sm:max-h-[90vh]">
         {/* Modal Header */}
@@ -818,27 +858,48 @@ function ServiceFormModalContent({
 
               {/* Manual Image URL Input */}
               <div>
-                <label className="block font-semibold text-foreground mb-1 text-xs">
-                  Image URL
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block font-semibold text-foreground text-xs">
+                    Image URL
+                  </label>
+                  {isCoverLocked && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-secondary bg-secondary/10 px-2 py-0.5 rounded-md border border-secondary/20">
+                      <LockClosedIcon className="w-3 h-3" />
+                      <span>Locked (Uploaded)</span>
+                    </span>
+                  )}
+                </div>
                 <div className="relative flex items-center">
                   <LinkIcon className="w-3.5 h-3.5 text-text-secondary absolute left-3.5 pointer-events-none" />
                   <input
                     type="url"
                     name="coverImage"
+                    readOnly={isCoverLocked}
                     disabled={isUploadingCover}
                     value={formData.coverImage}
                     onChange={(e) => {
+                      if (isCoverLocked) return;
                       handleInputChange(e);
                       setUploadError(null);
                       setPreviewErrorUrl(null);
                     }}
                     placeholder="https://images.unsplash.com/photo-..."
-                    className="w-full pl-9 pr-3.5 py-2.5 text-xs rounded-xl bg-surface-muted/60 border border-border-theme text-foreground placeholder:text-text-secondary/50 focus:outline-none focus:border-secondary transition-colors disabled:opacity-50"
+                    className={`w-full pl-9 pr-9 py-2.5 text-xs rounded-xl border text-foreground placeholder:text-text-secondary/50 focus:outline-none transition-colors disabled:opacity-50 ${
+                      isCoverLocked
+                        ? "bg-surface-muted/90 border-border-theme font-mono text-[11px] cursor-not-allowed select-all"
+                        : "bg-surface-muted/60 border-border-theme focus:border-secondary"
+                    }`}
                   />
+                  {isCoverLocked && (
+                    <div className="absolute right-3 text-text-secondary pointer-events-none" title="URL locked after upload">
+                      <LockClosedIcon className="w-3.5 h-3.5 text-secondary" />
+                    </div>
+                  )}
                 </div>
                 <p className="text-[11px] text-text-secondary mt-1">
-                  Paste a valid image URL instead of uploading
+                  {isCoverLocked
+                    ? "🔒 Uploaded via Cloudinary (locked against accidental editing). Use Change Image or Remove Image to replace."
+                    : "Paste a valid image URL instead of uploading"}
                 </p>
               </div>
 
@@ -1173,7 +1234,9 @@ export default function ServiceFormModal({
   onClose,
   service = null,
   defaultCategory = "Social Media Campaign",
+  defaultPlatform = "instagram",
   onSuccess,
+  zIndex = "z-50",
 }) {
   if (!isOpen) return null;
 
@@ -1183,7 +1246,9 @@ export default function ServiceFormModal({
       onClose={onClose}
       service={service}
       defaultCategory={defaultCategory}
+      defaultPlatform={defaultPlatform}
       onSuccess={onSuccess}
+      zIndex={zIndex}
     />
   );
 }

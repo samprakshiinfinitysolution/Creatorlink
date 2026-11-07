@@ -3,6 +3,7 @@ import createApiError from "../ApiError.js";
 
 /**
  * Sends an email using the configured Nodemailer SMTP transporter.
+ * All sender metadata and SMTP credentials are read dynamically from environment variables.
  *
  * @param {Object} options
  * @param {string} options.to - Recipient email address
@@ -33,7 +34,13 @@ const sendEmail = async ({ to, subject, html, text }) => {
         );
     }
 
-    const from = process.env.EMAIL_FROM || `CreatorLink <${process.env.EMAIL}>`;
+    const fromEmail = process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER || process.env.EMAIL;
+    const fromName = process.env.SMTP_FROM_NAME;
+    const defaultFrom = fromName && fromEmail 
+        ? `"${fromName}" <${fromEmail}>` 
+        : (fromEmail || "no-reply@creatorlink.com");
+
+    const from = process.env.EMAIL_FROM || defaultFrom;
 
     const mailOptions = {
         from,

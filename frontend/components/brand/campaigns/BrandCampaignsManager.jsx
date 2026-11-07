@@ -515,6 +515,14 @@ function LinkIcon({ className = "w-4 h-4" }) {
   );
 }
 
+function LockClosedIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+    </svg>
+  );
+}
+
 function TrashIcon({ className = "w-4 h-4" }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
@@ -534,6 +542,13 @@ function CampaignCoverUpload({
 }) {
   const [isUploading, setIsUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [isUploaded, setIsUploaded] = useState(() =>
+    Boolean(
+      coverImage &&
+        (coverImage.includes("cloudinary.com") ||
+          coverImage.includes("res.cloudinary.com"))
+    )
+  );
   const [uploadError, setUploadError] = useState(null);
   const [previewError, setPreviewError] = useState(false);
   const fileInputRef = useRef(null);
@@ -578,6 +593,7 @@ function CampaignCoverUpload({
 
       if (uploadedUrl) {
         onChange(uploadedUrl);
+        setIsUploaded(true);
       } else {
         setUploadError("Could not retrieve uploaded image URL.");
       }
@@ -629,12 +645,20 @@ function CampaignCoverUpload({
   const handleRemove = (e) => {
     e?.stopPropagation();
     onChange("");
+    setIsUploaded(false);
     setUploadError(null);
     setPreviewError(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   };
+
+  const isCoverLocked = Boolean(
+    coverImage &&
+      (isUploaded ||
+        coverImage.includes("cloudinary.com") ||
+        coverImage.includes("res.cloudinary.com"))
+  );
 
   const hasImage = Boolean(coverImage && coverImage.trim());
 
@@ -791,16 +815,26 @@ function CampaignCoverUpload({
 
       {/* Manual Image URL Input */}
       <div>
-        <label className="block text-[11px] font-semibold text-foreground mb-1">
-          Paste Image URL
-        </label>
+        <div className="flex items-center justify-between mb-1">
+          <label className="block text-[11px] font-semibold text-foreground">
+            Paste Image URL
+          </label>
+          {isCoverLocked && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-secondary bg-secondary/10 px-2 py-0.5 rounded-md border border-secondary/20">
+              <LockClosedIcon className="w-3 h-3" />
+              <span>Locked (Uploaded)</span>
+            </span>
+          )}
+        </div>
         <div className="relative flex items-center">
           <LinkIcon className="w-3.5 h-3.5 text-text-secondary absolute left-3.5 pointer-events-none" />
           <input
             type="url"
+            readOnly={isCoverLocked}
             disabled={isUploading || disabled}
             value={coverImage}
             onChange={(e) => {
+              if (isCoverLocked) return;
               const val = e.target.value;
               onChange(val);
               setPreviewError(false);
@@ -809,6 +843,7 @@ function CampaignCoverUpload({
               }
             }}
             onPaste={(e) => {
+              if (isCoverLocked) return;
               const pasted = e.clipboardData?.getData("text")?.trim();
               if (pasted && !isValidImageUrl(pasted)) {
                 setUploadError("Please enter a valid HTTP or HTTPS URL.");
@@ -817,15 +852,30 @@ function CampaignCoverUpload({
               }
             }}
             onBlur={(e) => {
+              if (isCoverLocked) return;
               const val = e.target.value?.trim();
               if (val && !isValidImageUrl(val)) {
                 setUploadError("Please enter a valid HTTP or HTTPS URL.");
               }
             }}
             placeholder="https://images.unsplash.com/photo-..."
-            className="w-full pl-9 pr-3.5 py-2 text-xs rounded-xl bg-surface-muted/60 border border-border-theme text-foreground placeholder:text-text-secondary/50 focus:outline-none focus:border-secondary transition-colors disabled:opacity-50"
+            className={`w-full pl-9 pr-9 py-2 text-xs rounded-xl border text-foreground placeholder:text-text-secondary/50 focus:outline-none transition-colors disabled:opacity-50 ${
+              isCoverLocked
+                ? "bg-surface-muted/90 border-border-theme font-mono text-[11px] cursor-not-allowed select-all"
+                : "bg-surface-muted/60 border-border-theme focus:border-secondary"
+            }`}
           />
+          {isCoverLocked && (
+            <div className="absolute right-3 text-text-secondary pointer-events-none" title="URL locked after upload">
+              <LockClosedIcon className="w-3.5 h-3.5 text-secondary" />
+            </div>
+          )}
         </div>
+        <p className="text-[11px] text-text-secondary mt-1">
+          {isCoverLocked
+            ? "🔒 Uploaded via Cloudinary (locked against accidental editing). Use Change Image or Remove Image to replace."
+            : "Paste a valid image URL instead of uploading"}
+        </p>
       </div>
 
       {uploadError && (

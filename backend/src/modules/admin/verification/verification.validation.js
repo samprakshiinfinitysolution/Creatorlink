@@ -58,49 +58,75 @@ export const validateVerificationIdParam = (req, res, next) => {
     next();
 };
 
-// Validates payload when admin rejects a verification request.
-export const validateRejectVerificationBody = (req, res, next) => {
-    const { rejectionReason } = req.body;
+// Validates payload when admin approves a verification request (optional reason/notes).
+export const validateApproveVerificationBody = (req, res, next) => {
+    const { reason, notes } = req.body || {};
 
-    if (!rejectionReason || typeof rejectionReason !== "string" || rejectionReason.trim().length < 5) {
-        throw createApiError(400, "A valid rejectionReason of at least 5 characters is required");
-    }
-
-    if (rejectionReason.trim().length > 1000) {
-        throw createApiError(400, "rejectionReason cannot exceed 1000 characters");
+    const text = reason || notes;
+    if (text !== undefined && text !== null && text !== "") {
+        if (typeof text !== "string") {
+            throw createApiError(400, "Approval reason must be a string");
+        }
+        if (text.trim().length > 1000) {
+            throw createApiError(400, "Approval reason cannot exceed 1000 characters");
+        }
     }
 
     next();
 };
 
-// Validates payload when user (creator or brand) submits a verification request.
+// Validates payload when admin rejects a verification request.
+export const validateRejectVerificationBody = (req, res, next) => {
+    const { rejectionReason, reason } = req.body || {};
+    const text = rejectionReason || reason;
+
+    if (text !== undefined && text !== null && text !== "") {
+        if (typeof text !== "string") {
+            throw createApiError(400, "rejectionReason must be a string");
+        }
+        if (text.trim().length > 1000) {
+            throw createApiError(400, "rejectionReason cannot exceed 1000 characters");
+        }
+    }
+
+    next();
+};
+
+// Validates payload when admin revokes an approved verification.
+export const validateRevokeVerificationBody = (req, res, next) => {
+    const { reason, rejectionReason } = req.body || {};
+    const text = reason || rejectionReason;
+
+    if (!text || typeof text !== "string" || text.trim().length < 3) {
+        throw createApiError(400, "A reason of at least 3 characters is required to revoke verification status");
+    }
+
+    if (text.trim().length > 1000) {
+        throw createApiError(400, "Revocation reason cannot exceed 1000 characters");
+    }
+
+    next();
+};
+
+// Validates payload when user (creator or brand) submits a verification request (documents now optional).
 export const validateSubmitVerificationBody = (req, res, next) => {
     const { documentType, documentUrls, documentNumber, notes } = req.body;
 
-    const allowedTypes = [
-        "national_id",
-        "passport",
-        "drivers_license",
-        "business_registration",
-        "tax_id",
-        "other"
-    ];
-
-    if (!documentType || !allowedTypes.includes(documentType)) {
-        throw createApiError(400, `documentType is required and must be one of: ${allowedTypes.join(", ")}`);
+    if (documentType !== undefined && typeof documentType !== "string") {
+        throw createApiError(400, "documentType must be a string");
     }
 
-    if (!Array.isArray(documentUrls) || documentUrls.length === 0) {
-        throw createApiError(400, "documentUrls must be a non-empty array of file URLs");
-    }
-
-    if (documentUrls.length > 5) {
-        throw createApiError(400, "Maximum of 5 verification documents can be submitted");
-    }
-
-    for (const url of documentUrls) {
-        if (typeof url !== "string" || !url.trim().startsWith("http")) {
-            throw createApiError(400, "Each item in documentUrls must be a valid HTTP/HTTPS URL");
+    if (documentUrls !== undefined) {
+        if (!Array.isArray(documentUrls)) {
+            throw createApiError(400, "documentUrls must be an array of file URLs");
+        }
+        if (documentUrls.length > 5) {
+            throw createApiError(400, "Maximum of 5 verification documents can be submitted");
+        }
+        for (const url of documentUrls) {
+            if (typeof url !== "string" || !url.trim().startsWith("http")) {
+                throw createApiError(400, "Each item in documentUrls must be a valid HTTP/HTTPS URL");
+            }
         }
     }
 

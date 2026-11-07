@@ -3,7 +3,8 @@ import {
     getAdminVerifications as getAdminVerificationsApi,
     getAdminVerificationById as getAdminVerificationByIdApi,
     approveVerification as approveVerificationApi,
-    rejectVerification as rejectVerificationApi
+    rejectVerification as rejectVerificationApi,
+    revokeVerification as revokeVerificationApi
 } from "./verification_api";
 import { logout, clearAuth } from "../../auth/auth_slice";
 
@@ -35,12 +36,14 @@ export const fetchVerificationDetails = createAsyncThunk(
     }
 );
 
-// Handles approving a verification request
+// Handles approving a verification request (supports string ID or { id, reason } object)
 export const approveVerificationRequest = createAsyncThunk(
     "adminVerification/approveVerificationRequest",
-    async (id, { rejectWithValue }) => {
+    async (payload, { rejectWithValue }) => {
         try {
-            return await approveVerificationApi(id);
+            const id = typeof payload === "string" ? payload : payload?.id;
+            const reason = typeof payload === "object" ? payload?.reason : undefined;
+            return await approveVerificationApi(id, reason);
         } catch (error) {
             return rejectWithValue(
                 error.response?.data?.message || "Failed to approve verification request"
@@ -58,6 +61,20 @@ export const rejectVerificationRequest = createAsyncThunk(
         } catch (error) {
             return rejectWithValue(
                 error.response?.data?.message || "Failed to reject verification request"
+            );
+        }
+    }
+);
+
+// Handles revoking an approved verification status with reason
+export const revokeVerificationRequest = createAsyncThunk(
+    "adminVerification/revokeVerificationRequest",
+    async ({ id, reason }, { rejectWithValue }) => {
+        try {
+            return await revokeVerificationApi(id, reason);
+        } catch (error) {
+            return rejectWithValue(
+                error.response?.data?.message || "Failed to revoke verification status"
             );
         }
     }
@@ -135,7 +152,12 @@ const adminVerificationSlice = createSlice({
                 if (updated) {
                     state.verifications = state.verifications.map((item) =>
                         item._id === updated._id
-                            ? { ...item, status: "approved", reviewedAt: updated.reviewedAt }
+                            ? {
+                                  ...item,
+                                  status: "approved",
+                                  reviewedAt: updated.reviewedAt,
+                                  reviewHistory: updated.reviewHistory || item.reviewHistory
+                              }
                             : item
                     );
                     if (state.selectedVerification?._id === updated._id) {
@@ -166,7 +188,8 @@ const adminVerificationSlice = createSlice({
                                   ...item,
                                   status: "rejected",
                                   reviewedAt: updated.reviewedAt,
-                                  rejectionReason: updated.rejectionReason
+                                  rejectionReason: updated.rejectionReason,
+                                  reviewHistory: updated.reviewHistory || item.reviewHistory
                               }
                             : item
                     );
@@ -179,6 +202,40 @@ const adminVerificationSlice = createSlice({
                 }
             })
             .addCase(rejectVerificationRequest.rejected, (state, action) => {
+                state.actionLoading = false;
+                state.actionError = action.payload;
+            })
+
+            // Revoke
+            .addCase(revokeVerificationRequest.pending, (state) => {
+                state.actionLoading = true;
+                state.actionError = null;
+            })
+            .addCase(revokeVerificationRequest.fulfilled, (state, action) => {
+                state.actionLoading = false;
+                const updated = action.payload.data;
+                if (updated) {
+                    state.verifications = state.verifications.map((item) =>
+                        item._id === updated._id
+                            ? {
+                                  ...item,
+                                  status: "rejected",
+                                  reviewedAt: updated.reviewedAt,
+                                  rejectionReason: updated.rejectionReason,
+                                  reviewHistory: updated.reviewHistory || item.reviewHistory,
+                                  reviewHistory: updated.reviewHistory || item.reviewHistory
+                              }
+                            : item
+                    );
+                    if (state.selectedVerification?._id === updated._id) {
+                        state.selectedVerification = {
+                            ...state.selectedVerification,
+                            ...updated
+                        };
+                    }
+                }
+            })
+            .addCase(revokeVerificationRequest.rejected, (state, action) => {
                 state.actionLoading = false;
                 state.actionError = action.payload;
             })

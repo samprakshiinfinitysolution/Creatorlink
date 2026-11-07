@@ -13,9 +13,9 @@ import AboutPinboardWall from "@/components/Public/About/AboutPinboardWall";
 import AboutHorizon from "@/components/Public/About/AboutHorizon";
 
 export const metadata = {
-  title: "About Us | Creator Hub",
+  title: "About Us | CreatorLink",
   description:
-    "Where visionary minds pin culture into reality. An art-directed sanctuary for prestige brands and auteur creators.",
+    "Bringing brands and creators together to create more. CreatorLink connects brands with creative talent for meaningful collaborations.",
 };
 
 export default function AboutPage() {

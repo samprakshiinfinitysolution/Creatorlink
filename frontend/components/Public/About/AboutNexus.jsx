@@ -5,225 +5,127 @@ import Image from 'next/image';
 import ScrollReveal from '@/components/theme/ScrollReveal';
 
 export default function AboutNexus() {
+  const ecosystemCards = [
+    {
+      id: 'creators',
+      category: 'CREATORS',
+      subtitle: 'Creative Talent',
+      title: 'FOR CREATORS',
+      description:
+        'Showcase your talent, highlight your content style and explore opportunities to collaborate with brands that match your interests.',
+      image:
+        'https://res.cloudinary.com/atr5osne/image/upload/v1792054698/creatorlink/public/avatars/gye9m9prpdv81gc9ipkp.webp',
+      badge: 'Talent Showcase',
+    },
+    {
+      id: 'brands',
+      category: 'BRANDS',
+      subtitle: 'Campaign Opportunities',
+      title: 'FOR BRANDS',
+      description:
+        'Discover creative talent, share campaign ideas and connect with creators who can help bring your brand story to life.',
+      image:
+        'https://res.cloudinary.com/atr5osne/image/upload/v1792054740/creatorlink/public/editorial/hwajtuk9gwkhujb9glj8.webp',
+      badge: 'Brand Vision',
+    },
+    {
+      id: 'collaborations',
+      category: 'COLLABORATIONS',
+      subtitle: 'Working Together',
+      title: 'FOR COLLABORATIONS',
+      description:
+        'Bring both sides together to discuss requirements, align expectations and work towards meaningful campaign outcomes.',
+      image:
+        'https://res.cloudinary.com/atr5osne/image/upload/v1792054714/creatorlink/public/editorial/se3wpecdot8jphnowzci.webp',
+      badge: 'Direct Alignment',
+    },
+  ];
+
   return (
     <section className="relative py-16 sm:py-20 lg:py-28 bg-background text-foreground overflow-hidden border-t border-border-theme">
-      {/* Local Component Keyframes for Subtle Continuous Node Floating */}
-      <style>{`
-        @keyframes nexusFloat1 {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-3.5px); }
-        }
-        @keyframes nexusFloat2 {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-2.5px); }
-        }
-        @keyframes nexusFloat3 {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-4px); }
-        }
-      `}</style>
-
       {/* Background Ambient Glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] sm:w-[500px] lg:w-[700px] h-[320px] sm:h-[500px] lg:h-[700px] bg-secondary/10 blur-[100px] sm:blur-[150px] rounded-full pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] sm:w-[500px] lg:w-[700px] h-[320px] sm:h-[500px] lg:h-[700px] bg-secondary/10 blur-[140px] rounded-full pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 relative z-10">
-
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        
         {/* ====================================================
             1. SECTION HEADER CONTENT
         ==================================================== */}
         <ScrollReveal direction="up" delay={0}>
-          <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-8 sm:mb-12 lg:mb-16 gap-5 sm:gap-6">
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-12 sm:mb-16 gap-6 text-left">
             <div className="max-w-2xl">
               {/* Eyebrow Pill */}
-              <div className="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-full bg-surface border border-border-theme text-[10px] sm:text-xs font-mono font-bold tracking-wider text-secondary uppercase mb-3 sm:mb-6 shadow-sm">
-                <span className="text-secondary text-xs sm:text-sm">✢</span>
-                <span>THE GUILD ARCHITECTURE</span>
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface border border-border-theme text-xs font-bold tracking-wider text-secondary uppercase mb-4 shadow-xs font-sans">
+                <span className="text-secondary text-sm">✦</span>
+                <span>THE CREATORLINK ECOSYSTEM</span>
               </div>
 
               {/* Main Heading */}
-              <h2 className="text-2xl sm:text-4xl lg:text-6xl font-serif font-medium tracking-tight text-foreground leading-[1.15]">
-                An interconnected board of creative exchange.
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-medium tracking-tight text-foreground leading-[1.15]">
+                A Place Where Creative Talent Meets Brand Vision.
               </h2>
             </div>
 
             {/* Supporting Text */}
-            <p className="text-sm sm:text-lg font-sans text-text-secondary leading-relaxed max-w-md">
-              Every interaction is pinned, authenticated, and secured in an open ecosystem engineered for high-trust partnerships.
+            <p className="text-sm sm:text-base font-sans text-text-secondary leading-relaxed max-w-md">
+              Great collaborations happen when the right people come together. CreatorLink brings brands and creators into one connected space where they can discover each other, share ideas and explore opportunities to work together.
             </p>
           </div>
         </ScrollReveal>
 
         {/* ====================================================
-            2. MAIN ARCHITECTURE CANVAS
+            2. THREE CLEAR ECOSYSTEM CARDS
         ==================================================== */}
-        <ScrollReveal direction="scale" delay={80}>
-          <div className="relative p-3.5 sm:p-8 lg:p-16 rounded-[20px] sm:rounded-[32px] lg:rounded-[40px] bg-surface border border-border-theme shadow-xl min-h-0 lg:min-h-[640px] flex flex-col lg:block items-center justify-center overflow-hidden">
-            
-            {/* Concentric Background Dashed Rings (Desktop/Tablet) */}
-            <div className="hidden sm:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[520px] h-[520px] rounded-full border border-dashed border-secondary/20 pointer-events-none" />
-            <div className="hidden sm:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] h-[340px] rounded-full border border-dashed border-secondary/25 pointer-events-none" />
-
-            {/* Connecting SVG Overlay Lines (Desktop) */}
-            <svg className="hidden lg:block absolute inset-0 w-full h-full pointer-events-none z-0 stroke-secondary/25" strokeWidth="1" strokeDasharray="4 4">
-              {/* Top Left -> Center */}
-              <line x1="22%" y1="20%" x2="50%" y2="50%" />
-              {/* Top Right -> Center */}
-              <line x1="78%" y1="20%" x2="50%" y2="50%" />
-              {/* Mid Left -> Center */}
-              <line x1="18%" y1="50%" x2="50%" y2="50%" />
-              {/* Mid Right -> Center */}
-              <line x1="82%" y1="50%" x2="50%" y2="50%" />
-              {/* Bottom Left -> Center */}
-              <line x1="24%" y1="80%" x2="50%" y2="50%" />
-              {/* Bottom Right -> Center */}
-              <line x1="76%" y1="80%" x2="50%" y2="50%" />
-            </svg>
-
-            {/* --------------------------------------------------
-                NEXUS CONTAINER FOR MOBILE & DESKTOP
-                Desktop: Floating absolute positions via lg:contents
-                Mobile: Clean vertical mobile architecture stack
-            -------------------------------------------------- */}
-            <div className="flex flex-col items-center gap-3 sm:gap-4 w-full max-w-sm sm:max-w-md mx-auto lg:contents">
-
-              {/* 1. TOP LEFT: CREATORS */}
-              <div className="w-full lg:w-auto relative lg:absolute lg:top-14 lg:left-14 z-20 transition-all duration-500 ease-out -rotate-[0.5deg] lg:-rotate-[2deg] hover:rotate-0 hover:-translate-y-1.5 hover:scale-[1.02] hover:border-secondary hover:shadow-xl group">
-                <div
-                  className="flex items-center gap-2.5 sm:gap-3 px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl sm:rounded-2xl bg-surface border border-border-theme shadow-md backdrop-blur-sm group-hover:border-secondary transition-colors w-full"
-                  style={{ animation: 'nexusFloat1 5.2s ease-in-out 0s infinite' }}
-                >
-                  <Image
-                    src="https://res.cloudinary.com/atr5osne/image/upload/v1792054698/creatorlink/public/avatars/gye9m9prpdv81gc9ipkp.webp"
-                    alt="Creators"
-                    width={32}
-                    height={32}
-                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover border border-secondary/30 shrink-0"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <h4 className="font-sans text-[11px] sm:text-xs font-bold text-foreground tracking-wider uppercase group-hover:text-secondary transition-colors truncate">
-                      CREATORS
-                    </h4>
-                    <p className="font-sans text-[9px] sm:text-[10px] text-text-secondary truncate">
-                      Independent Talent Guild
-                    </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-stretch">
+          {ecosystemCards.map((card, idx) => (
+            <ScrollReveal
+              key={card.id}
+              direction="up"
+              delay={idx * 60}
+              className="h-full"
+            >
+              <div className="group h-full bg-surface border border-border-theme hover:border-secondary/60 rounded-[28px] p-6 sm:p-7 flex flex-col justify-between shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-left">
+                <div>
+                  {/* Top Meta Header */}
+                  <div className="flex items-center justify-between mb-4 pb-3 border-b border-border-theme">
+                    <div>
+                      <span className="text-xs font-extrabold tracking-wider uppercase text-secondary font-sans block">
+                        {card.category}
+                      </span>
+                      <span className="text-[11px] text-text-secondary font-sans">
+                        {card.subtitle}
+                      </span>
+                    </div>
+                    <span className="px-2.5 py-1 rounded-full bg-secondary/15 text-secondary border border-secondary/20 text-[10px] font-sans font-bold uppercase">
+                      {card.badge}
+                    </span>
                   </div>
-                </div>
-              </div>
 
-              {/* 2. TOP RIGHT: BRANDS */}
-              <div className="w-full lg:w-auto relative lg:absolute lg:top-14 lg:right-14 z-20 transition-all duration-500 ease-out rotate-[0.5deg] lg:rotate-[2deg] hover:rotate-0 hover:-translate-y-1.5 hover:scale-[1.02] hover:border-secondary hover:shadow-xl group">
-                <div
-                  className="flex items-center gap-2.5 sm:gap-3 px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl sm:rounded-2xl bg-surface border border-border-theme shadow-md backdrop-blur-sm group-hover:border-secondary transition-colors w-full"
-                  style={{ animation: 'nexusFloat2 5.8s ease-in-out 0.8s infinite' }}
-                >
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-secondary/15 border border-secondary/30 flex items-center justify-center text-secondary text-xs font-bold shrink-0">
-                    ✦
+                  {/* Image Frame */}
+                  <div className="relative w-full h-48 sm:h-52 rounded-2xl overflow-hidden mb-5 bg-surface-muted">
+                    <Image
+                      src={card.image}
+                      alt={card.title}
+                      fill
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                    />
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <h4 className="font-sans text-[11px] sm:text-xs font-bold text-foreground tracking-wider uppercase group-hover:text-secondary transition-colors truncate">
-                      BRANDS
-                    </h4>
-                    <p className="font-sans text-[9px] sm:text-[10px] text-text-secondary truncate">
-                      Visionary Houses
-                    </p>
-                  </div>
-                </div>
-              </div>
 
-              {/* 3. MIDDLE LEFT: PEER REVIEWS */}
-              <div className="w-full lg:w-auto relative lg:absolute lg:top-1/2 lg:-translate-y-1/2 lg:left-10 z-20 transition-all duration-300 hover:-translate-y-1 hover:scale-105 hover:border-secondary group">
-                <div
-                  className="flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-full bg-surface border border-border-theme shadow-md text-[10px] sm:text-xs font-mono font-bold text-foreground tracking-wider uppercase group-hover:border-secondary group-hover:text-secondary transition-colors w-full"
-                  style={{ animation: 'nexusFloat3 4.8s ease-in-out 1.5s infinite' }}
-                >
-                  <span className="text-secondary text-xs">★</span>
-                  <span>PEER REVIEWS</span>
-                </div>
-              </div>
-
-              {/* --------------------------------------------------
-                  CENTER CREATOR HUB
-                  Positioned in center of vertical stack on mobile,
-                  and absolute center on desktop.
-              -------------------------------------------------- */}
-              <div className="relative z-20 my-2 sm:my-4 lg:my-0 lg:absolute lg:top-1/2 lg:left-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2">
-                {/* Ambient Pulse Glow */}
-                <div className="absolute inset-0 rounded-full bg-secondary/15 blur-xl animate-pulse pointer-events-none" />
-
-                {/* Central Circle */}
-                <div className="relative w-32 h-32 sm:w-40 sm:h-40 lg:w-52 lg:h-52 rounded-full bg-surface border-2 border-secondary/40 shadow-2xl backdrop-blur-md flex flex-col items-center justify-center text-center p-3 sm:p-4 group cursor-pointer transition-all duration-500 ease-out hover:scale-105 hover:border-secondary hover:shadow-secondary/25">
-                  <span className="text-secondary text-xs sm:text-sm lg:text-base mb-0.5 sm:mb-1">📌</span>
-                  <h3 className="font-serif text-xs sm:text-base lg:text-lg font-bold tracking-wider text-foreground leading-tight uppercase">
-                    CREATOR HUB
+                  {/* Title */}
+                  <h3 className="text-lg sm:text-xl font-serif font-bold text-foreground mb-2">
+                    {card.title}
                   </h3>
-                  <span className="font-mono text-[7.5px] sm:text-[9px] font-bold text-text-secondary tracking-widest uppercase mt-0.5">
-                    THE CENTRAL NEXUS
-                  </span>
-                  <span className="font-serif italic text-[7.5px] sm:text-[9px] text-secondary mt-0.5 sm:mt-1">
-                    pins · contracts · escrow
-                  </span>
+
+                  {/* Description */}
+                  <p className="text-xs sm:text-sm text-text-secondary font-sans leading-relaxed">
+                    {card.description}
+                  </p>
                 </div>
               </div>
-
-              {/* 4. MIDDLE RIGHT: SHARED BOARDS */}
-              <div className="w-full lg:w-auto relative lg:absolute lg:top-1/2 lg:-translate-y-1/2 lg:right-10 z-20 transition-all duration-300 hover:-translate-y-1 hover:scale-105 hover:border-secondary group">
-                <div
-                  className="flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-full bg-surface border border-border-theme shadow-md text-[10px] sm:text-xs font-mono font-bold text-foreground tracking-wider uppercase group-hover:border-secondary group-hover:text-secondary transition-colors w-full"
-                  style={{ animation: 'nexusFloat1 5.5s ease-in-out 2.1s infinite' }}
-                >
-                  <span className="w-2 h-2 rounded-full bg-secondary shrink-0" />
-                  <span>SHARED BOARDS</span>
-                </div>
-              </div>
-
-              {/* 5. BOTTOM LEFT: CURATED ASSETS */}
-              <div className="w-full lg:w-auto relative lg:absolute lg:bottom-14 lg:left-16 z-20 transition-all duration-500 ease-out -rotate-[0.5deg] lg:-rotate-[1.5deg] hover:rotate-0 hover:-translate-y-1.5 hover:scale-[1.02] hover:border-secondary hover:shadow-xl group">
-                <div
-                  className="flex items-center gap-2.5 sm:gap-3 px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl sm:rounded-2xl bg-surface border border-border-theme shadow-md backdrop-blur-sm group-hover:border-secondary transition-colors w-full"
-                  style={{ animation: 'nexusFloat2 6.0s ease-in-out 1.1s infinite' }}
-                >
-                  <Image
-                    src="https://res.cloudinary.com/atr5osne/image/upload/v1792054714/creatorlink/public/editorial/se3wpecdot8jphnowzci.webp"
-                    alt="Curated Assets"
-                    width={32}
-                    height={32}
-                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover border border-secondary/30 shrink-0"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <h4 className="font-sans text-[11px] sm:text-xs font-bold text-foreground tracking-wider uppercase group-hover:text-secondary transition-colors truncate">
-                      CURATED ASSETS
-                    </h4>
-                    <p className="font-sans text-[9px] sm:text-[10px] text-text-secondary truncate">
-                      Original Master Files
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* 6. BOTTOM RIGHT: ESCROW MILESTONES */}
-              <div className="w-full lg:w-auto relative lg:absolute lg:bottom-14 lg:right-16 z-20 transition-all duration-500 ease-out rotate-[0.5deg] lg:rotate-[1.5deg] hover:rotate-0 hover:-translate-y-1.5 hover:scale-[1.02] hover:border-secondary hover:shadow-xl group">
-                <div
-                  className="flex items-center gap-2.5 sm:gap-3 px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl sm:rounded-2xl bg-surface border border-border-theme shadow-md backdrop-blur-sm group-hover:border-secondary transition-colors w-full"
-                  style={{ animation: 'nexusFloat3 5.0s ease-in-out 0.4s infinite' }}
-                >
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-secondary/15 border border-secondary/30 flex items-center justify-center text-secondary text-xs shrink-0">
-                    🔒
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <h4 className="font-sans text-[11px] sm:text-xs font-bold text-foreground tracking-wider uppercase group-hover:text-secondary transition-colors truncate">
-                      ESCROW MILESTONES
-                    </h4>
-                    <p className="font-sans text-[9px] sm:text-[10px] text-text-secondary truncate">
-                      Secure Automated Payout
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-
-          </div>
-        </ScrollReveal>
+            </ScrollReveal>
+          ))}
+        </div>
 
       </div>
     </section>

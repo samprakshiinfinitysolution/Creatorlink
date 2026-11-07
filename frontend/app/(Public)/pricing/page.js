@@ -13,7 +13,7 @@ import PricingGrowthCTA from "@/components/Public/Pricing/PricingGrowthCTA";
 export const metadata = {
   title: "Pricing | Creatorlink",
   description:
-    "Transparent pricing tiers built for digital tastemakers and forward-thinking luxury brands.",
+    "Simple and transparent pricing plans for brands and flexible access for creators on CreatorLink.",
 };
 
 export default function PricingPage() {

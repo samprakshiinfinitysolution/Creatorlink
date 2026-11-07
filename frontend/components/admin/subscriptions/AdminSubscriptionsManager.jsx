@@ -101,7 +101,7 @@ export default function AdminSubscriptionsManager() {
         priceMonthly: Number(planForm.priceMonthly),
         priceYearly: Number(planForm.priceYearly),
         monthlyContactQuota: Number(planForm.monthlyContactQuota),
-        features: planForm.features.split("\n").map((f) => f.trim()).filter(Boolean),
+        features: (planForm.features || "").split("\n").map((f) => f.trim()).filter(Boolean),
       };
       const res = await axiosInstance.post("/admin/subscriptions/plans", payload);
       if (res.data?.success) {
@@ -136,7 +136,7 @@ export default function AdminSubscriptionsManager() {
         priceMonthly: Number(planForm.priceMonthly),
         priceYearly: Number(planForm.priceYearly),
         monthlyContactQuota: Number(planForm.monthlyContactQuota),
-        features: planForm.features.split("\n").map((f) => f.trim()).filter(Boolean),
+        features: (planForm.features || "").split("\n").map((f) => f.trim()).filter(Boolean),
         reason: "Admin updated plan parameters",
       };
       const res = await axiosInstance.patch(`/admin/subscriptions/plans/${editingPlan._id}`, payload);
@@ -468,15 +468,15 @@ export default function AdminSubscriptionsManager() {
                       onClick={() => {
                         setEditingPlan(p);
                         setPlanForm({
-                          name: p.name,
-                          slug: p.slug,
-                          description: p.description,
-                          priceMonthly: p.priceMonthly,
-                          priceYearly: p.priceYearly,
-                          currency: p.currency,
-                          monthlyContactQuota: p.monthlyContactQuota,
-                          features: (p.features || []).join("\n"),
-                          trialAllowed: p.trialAllowed,
+                          name: p.name || "",
+                          slug: p.slug || "",
+                          description: p.description || "",
+                          priceMonthly: p.priceMonthly !== undefined ? p.priceMonthly : "",
+                          priceYearly: p.priceYearly !== undefined ? p.priceYearly : "",
+                          currency: p.currency || "INR",
+                          monthlyContactQuota: p.monthlyContactQuota !== undefined ? p.monthlyContactQuota : "",
+                          features: Array.isArray(p.features) ? p.features.join("\n") : (p.features || ""),
+                          trialAllowed: p.trialAllowed !== undefined ? p.trialAllowed : true,
                         });
                         setIsEditPlanOpen(true);
                       }}
@@ -698,6 +698,15 @@ export default function AdminSubscriptionsManager() {
                       className="w-full px-3 py-2 rounded-xl border border-border-theme bg-surface-muted/60 text-foreground placeholder:text-text-secondary focus:outline-hidden focus:border-secondary"
                     />
                   </div>
+                  <label className="flex items-center gap-2 cursor-pointer pt-1">
+                    <input
+                      type="checkbox"
+                      checked={planForm.trialAllowed}
+                      onChange={(e) => setPlanForm({ ...planForm, trialAllowed: e.target.checked })}
+                      className="rounded border-border-theme text-secondary focus:ring-secondary w-4 h-4 cursor-pointer"
+                    />
+                    <span className="text-foreground font-medium">Eligible for 5-Day Free Trial</span>
+                  </label>
                   <div className="flex items-center justify-end gap-2 pt-2">
                     <button
                       type="button"
@@ -740,12 +749,23 @@ export default function AdminSubscriptionsManager() {
                       className="w-full px-3 py-2 rounded-xl border border-border-theme bg-surface-muted/60 text-foreground focus:outline-hidden focus:border-secondary"
                     />
                   </div>
+                  <div>
+                    <label className="block text-text-secondary font-medium mb-1">Description</label>
+                    <textarea
+                      rows={2}
+                      value={planForm.description}
+                      onChange={(e) => setPlanForm({ ...planForm, description: e.target.value })}
+                      placeholder="Brief description of the plan..."
+                      className="w-full px-3 py-2 rounded-xl border border-border-theme bg-surface-muted/60 text-foreground placeholder:text-text-secondary focus:outline-hidden focus:border-secondary"
+                    />
+                  </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-text-secondary font-medium mb-1">Monthly Price</label>
                       <input
                         type="number"
                         required
+                        min={0}
                         value={planForm.priceMonthly}
                         onChange={(e) => setPlanForm({ ...planForm, priceMonthly: e.target.value })}
                         className="w-full px-3 py-2 rounded-xl border border-border-theme bg-surface-muted/60 text-foreground focus:outline-hidden focus:border-secondary"
@@ -756,6 +776,7 @@ export default function AdminSubscriptionsManager() {
                       <input
                         type="number"
                         required
+                        min={0}
                         value={planForm.priceYearly}
                         onChange={(e) => setPlanForm({ ...planForm, priceYearly: e.target.value })}
                         className="w-full px-3 py-2 rounded-xl border border-border-theme bg-surface-muted/60 text-foreground focus:outline-hidden focus:border-secondary"
@@ -767,11 +788,31 @@ export default function AdminSubscriptionsManager() {
                     <input
                       type="number"
                       required
+                      min={1}
                       value={planForm.monthlyContactQuota}
                       onChange={(e) => setPlanForm({ ...planForm, monthlyContactQuota: e.target.value })}
                       className="w-full px-3 py-2 rounded-xl border border-border-theme bg-surface-muted/60 text-foreground focus:outline-hidden focus:border-secondary"
                     />
                   </div>
+                  <div>
+                    <label className="block text-text-secondary font-medium mb-1">Features (One per line)</label>
+                    <textarea
+                      rows={4}
+                      value={planForm.features}
+                      onChange={(e) => setPlanForm({ ...planForm, features: e.target.value })}
+                      placeholder="Unlimited Campaigns&#10;Workspace Collaborations&#10;Priority Support"
+                      className="w-full px-3 py-2 rounded-xl border border-border-theme bg-surface-muted/60 text-foreground placeholder:text-text-secondary focus:outline-hidden focus:border-secondary"
+                    />
+                  </div>
+                  <label className="flex items-center gap-2 cursor-pointer pt-1">
+                    <input
+                      type="checkbox"
+                      checked={planForm.trialAllowed}
+                      onChange={(e) => setPlanForm({ ...planForm, trialAllowed: e.target.checked })}
+                      className="rounded border-border-theme text-secondary focus:ring-secondary w-4 h-4 cursor-pointer"
+                    />
+                    <span className="text-foreground font-medium">Eligible for 5-Day Free Trial</span>
+                  </label>
                   <div className="flex items-center justify-end gap-2 pt-2">
                     <button
                       type="button"

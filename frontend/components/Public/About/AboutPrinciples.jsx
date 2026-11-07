@@ -7,118 +7,105 @@ export default function AboutPrinciples() {
   const principles = [
     {
       number: '01',
-      badge: 'PRINCIPLE',
       title: 'AUTHENTICITY',
-      quote: '"Creators know their audience best."',
+      quote: '"Real creativity starts with being yourself."',
       description:
-        'Audiences immediately sense forced placement. When brands give creative liberty and honor a creator\'s visual voice, passive engagement turns into enduring loyalty.',
-      footerRef: 'board ref: 01-trust',
+        'Creators have their own voice, perspective and relationship with their audience. We believe collaborations should respect that individuality and encourage authentic content.',
       icon: '✓',
-      rotation: 'lg:-rotate-[1deg]',
     },
     {
       number: '02',
-      badge: 'PRINCIPLE',
-      title: 'CREATIVITY',
-      quote: '"Brands bring ideas. Creators bring perspective."',
+      title: 'TRANSPARENCY',
+      quote: '"Clear expectations create stronger partnerships."',
       description:
-        'Potent work happens at the crossroads. When strategic objectives merge with distinctive auteur signatures, the campaign transforms into collector-worthy storytelling.',
-      footerRef: 'board ref: 02-craft',
+        'From campaign requirements to deliverables and compensation, both sides should understand what is expected before starting a collaboration.',
       icon: '✦',
-      rotation: 'lg:rotate-[0.5deg]',
     },
     {
       number: '03',
-      badge: 'PRINCIPLE',
-      title: 'RELATIONSHIPS',
-      quote: '"Great partnerships grow beyond one campaign."',
+      title: 'COLLABORATION',
+      quote: '"Better work happens when people work together."',
       description:
-        'One-off sponsorships fade instantly. We build pinboards for recurring ambassadorships, long-term creative councils, and compounding brand equity.',
-      footerRef: 'board ref: 03-guild',
+        'Brands and creators bring different strengths to the table. Open communication and shared goals can turn creative ideas into meaningful work.',
       icon: '∞',
-      rotation: 'lg:rotate-[1deg]',
+    },
+    {
+      number: '04',
+      title: 'GROWTH',
+      quote: '"Every connection can open a new opportunity."',
+      description:
+        'We believe in building professional relationships that encourage creators and brands to learn, improve and explore future possibilities.',
+      icon: '↗',
     },
   ];
 
   return (
-    <section className="relative py-20 lg:py-28 bg-background text-foreground overflow-hidden border-t border-border-theme">
+    <section className="relative py-16 sm:py-20 lg:py-28 bg-background text-foreground overflow-hidden border-t border-border-theme">
       {/* Background Ambient Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-secondary/10 blur-[150px] rounded-full pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-
+        
         {/* ====================================================
             1. HEADER CONTENT
         ==================================================== */}
         <ScrollReveal direction="up" delay={0}>
-          <div className="flex flex-col items-center text-center max-w-3xl mx-auto mb-16 sm:mb-20">
+          <div className="flex flex-col items-center text-center max-w-3xl mx-auto mb-14 sm:mb-18">
             {/* Eyebrow Pill */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface border border-border-theme text-xs font-mono font-bold tracking-wider text-secondary uppercase mb-6 shadow-sm">
-              <span className="text-secondary text-sm">✢</span>
-              <span>OUR MANIFESTO</span>
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface border border-border-theme text-xs font-bold tracking-wider text-secondary uppercase mb-4 shadow-xs font-sans">
+              <span className="text-secondary text-sm">✦</span>
+              <span>WHAT WE BELIEVE</span>
             </div>
 
             {/* Main Heading */}
-            <h2 className="text-3xl sm:text-5xl lg:text-6xl font-serif font-medium tracking-tight text-foreground leading-[1.15] mb-6">
-              Authentic collaboration creates enduring culture.
+            <h2 className="text-3xl sm:text-5xl lg:text-6xl font-serif font-medium tracking-tight text-foreground leading-[1.15] mb-5">
+              The Principles Behind Better Collaborations.
             </h2>
 
             {/* Supporting Paragraph */}
-            <p className="text-base sm:text-lg font-sans text-text-secondary leading-relaxed">
-              We set aside disposable influencer feeds in favor of intentional, pinned partnerships rooted in shared taste and creative trust.
+            <p className="text-base sm:text-lg font-sans text-text-secondary leading-relaxed max-w-2xl">
+              We believe meaningful creator-brand partnerships begin with trust, respect and clear communication. These principles guide the experience we want to build through CreatorLink.
             </p>
           </div>
         </ScrollReveal>
 
         {/* ====================================================
-            2. THE 3 PRINCIPLE CARDS GRID
+            2. FOUR PRINCIPLE CARDS GRID
         ==================================================== */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 items-stretch">
-          {principles.map((principle, index) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+          {principles.map((p, idx) => (
             <ScrollReveal
-              key={index}
+              key={p.number}
               direction="up"
-              delay={index * 80}
+              delay={idx * 60}
               className="h-full"
             >
-              <div
-                className={`group relative p-6 sm:p-8 rounded-[28px] bg-surface border border-border-theme shadow-lg backdrop-blur-sm flex flex-col justify-between h-full transition-all duration-500 ease-out ${principle.rotation} hover:rotate-0 hover:-translate-y-2 hover:scale-[1.01] hover:border-secondary hover:shadow-2xl hover:shadow-secondary/15`}
-              >
-                {/* Card Top Row: Number & Principle Badge */}
+              <div className="group h-full bg-surface border border-border-theme hover:border-secondary/60 rounded-[28px] p-6 sm:p-7 flex flex-col justify-between shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-left">
                 <div>
-                  <div className="flex items-center justify-between mb-6">
-                    <span className="text-3xl sm:text-4xl font-serif font-bold text-secondary/40 group-hover:text-secondary group-hover:-translate-y-0.5 transition-all duration-300">
-                      {principle.number}
+                  {/* Top Bar: Number & Icon */}
+                  <div className="flex items-center justify-between mb-5 pb-3 border-b border-border-theme">
+                    <span className="font-mono text-2xl font-bold text-secondary">
+                      {p.number}
                     </span>
-                    <span className="px-2.5 py-1 rounded-full bg-surface-muted border border-border-theme text-[10px] font-mono font-bold tracking-wider text-text-secondary uppercase group-hover:border-secondary/30 transition-colors">
-                      {principle.badge}
+                    <span className="w-8 h-8 rounded-full bg-secondary/15 text-secondary flex items-center justify-center text-xs font-bold">
+                      {p.icon}
                     </span>
                   </div>
 
                   {/* Title */}
-                  <h3 className="text-xl sm:text-2xl font-serif font-bold text-foreground tracking-tight mb-3 group-hover:text-secondary transition-colors duration-300">
-                    {principle.title}
+                  <h3 className="text-lg font-serif font-bold text-foreground mb-2">
+                    {p.title}
                   </h3>
 
-                  {/* Italic Quote */}
-                  <p className="text-sm font-serif italic text-text-secondary mb-4 leading-snug">
-                    {principle.quote}
+                  {/* Quote */}
+                  <p className="text-xs sm:text-sm font-serif italic text-secondary dark:text-pink-300 mb-3 leading-snug">
+                    {p.quote}
                   </p>
 
                   {/* Description */}
-                  <p className="text-sm font-sans text-text-secondary leading-relaxed">
-                    {principle.description}
+                  <p className="text-xs sm:text-sm font-sans text-text-secondary leading-relaxed">
+                    {p.description}
                   </p>
-                </div>
-
-                {/* Card Bottom Divider & Footer */}
-                <div className="mt-8 pt-4 border-t border-border-theme flex items-center justify-between text-xs font-mono group-hover:border-secondary/30 transition-colors">
-                  <span className="font-serif italic text-text-secondary/70">
-                    {principle.footerRef}
-                  </span>
-                  <span className="text-text-secondary group-hover:text-secondary transition-colors text-sm">
-                    {principle.icon}
-                  </span>
                 </div>
               </div>
             </ScrollReveal>

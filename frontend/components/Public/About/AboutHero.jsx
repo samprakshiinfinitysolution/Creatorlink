@@ -1,306 +1,280 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import ScrollReveal from '@/components/theme/ScrollReveal';
 
 export default function AboutHero() {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+
+  // 3-Stage Growth & Journey Slides
+  const journeySlides = [
+    {
+      id: 1,
+      phase: 'PHASE 01 · THE FOUNDATION',
+      title: 'Where We Started: The Creative Spark',
+      subtitle: 'Breaking down opaque agency barriers so genuine creators could be recognized directly.',
+      image: 'https://res.cloudinary.com/atr5osne/image/upload/v1792054714/creatorlink/public/editorial/se3wpecdot8jphnowzci.webp',
+      badge: 'Authentic Craft',
+      stat: '0% Middleman Fees',
+    },
+    {
+      id: 2,
+      phase: 'PHASE 02 · THE CONNECTION',
+      title: 'How We Evolved: The Direct Bridge',
+      subtitle: 'Building a transparent collaboration pipeline connecting brands and creators with mutual clarity.',
+      image: 'https://res.cloudinary.com/atr5osne/image/upload/v1792054740/creatorlink/public/editorial/hwajtuk9gwkhujb9glj8.webp',
+      badge: 'Direct Partnerships',
+      stat: 'Verified Briefs & Milestones',
+    },
+    {
+      id: 3,
+      phase: 'PHASE 03 · THE EXPANSION',
+      title: 'Where We Are Heading: Scaled Impact',
+      subtitle: 'Nurturing a modern ecosystem where creator businesses scale and brands build lasting relationships.',
+      image: 'https://res.cloudinary.com/atr5osne/image/upload/v1792054730/creatorlink/public/editorial/kerribvpkxjoqrecd56w.webp',
+      badge: 'Ecosystem Growth',
+      stat: 'Built for Scale',
+    },
+  ];
+
+  // Auto-play sliding timer (4.5s)
+  useEffect(() => {
+    if (isPaused) return;
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % journeySlides.length);
+    }, 4500);
+
+    return () => clearInterval(interval);
+  }, [isPaused, journeySlides.length]);
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % journeySlides.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + journeySlides.length) % journeySlides.length);
+  };
+
   return (
-    <section className="relative pt-32 pb-20 sm:pt-40 sm:pb-28 lg:pt-44 lg:pb-36 bg-background text-foreground overflow-hidden">
+    <section className="relative pt-24 sm:pt-28 lg:pt-32 pb-16 sm:pb-24 px-2 sm:px-4 lg:px-6 bg-background text-foreground overflow-hidden border-b border-border-theme/60 transition-colors duration-300">
       {/* Background Decorative Ambient Glows */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-secondary/10 blur-[140px] rounded-full pointer-events-none" />
-      <div className="absolute top-1/3 left-1/4 w-72 h-72 bg-tertiary/10 blur-[100px] rounded-full pointer-events-none" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-secondary/10 blur-[160px] rounded-full pointer-events-none" />
+      <div className="absolute top-1/3 left-1/4 w-72 h-72 bg-tertiary/10 blur-[130px] rounded-full pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-
+      <div className="w-full max-w-[1536px] mx-auto relative z-10 px-1 sm:px-2">
+        
         {/* ====================================================
-            1. HERO TOP STATUS PILL & HEADLINE CONTENT
+            FULL-WIDTH 2-COLUMN STAGE:
+            LEFT = SLIDING JOURNEY CAROUSEL (~50%)
+            RIGHT = HEADLINE, STORY & DUAL CTAS (~50%)
         ==================================================== */}
-        <ScrollReveal direction="up" delay={0}>
-          <div className="flex flex-col items-center text-center max-w-4xl mx-auto space-y-6 sm:space-y-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 xl:gap-14 items-center">
 
+          {/* ==================================================
+              LEFT SIDE: JOURNEY & GROWTH IMAGE SLIDER (50%)
+          ================================================== */}
+          <ScrollReveal
+            direction="up"
+            delay={0}
+            className="lg:col-span-6 w-full order-2 lg:order-1"
+          >
+            <div
+              className="relative w-full rounded-[28px] sm:rounded-[36px] overflow-hidden border border-slate-200/90 dark:border-white/10 shadow-2xl bg-slate-950 min-h-[440px] sm:min-h-[520px] lg:min-h-[580px] xl:min-h-[620px] flex flex-col justify-between p-6 sm:p-8 select-none group"
+              onMouseEnter={() => setIsPaused(true)}
+              onMouseLeave={() => setIsPaused(false)}
+            >
+              {/* Sliding Background Images */}
+              {journeySlides.map((slide, idx) => (
+                <div
+                  key={slide.id}
+                  className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+                    idx === currentSlide ? 'opacity-100 z-0' : 'opacity-0 pointer-events-none -z-10'
+                  }`}
+                >
+                  <Image
+                    src={slide.image}
+                    alt={slide.title}
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    className="object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
+                    priority={idx === 0}
+                  />
+                  {/* High-Contrast Vignette Gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-slate-950/60 pointer-events-none" />
+                </div>
+              ))}
+
+              {/* TOP BAR: Status Tag + Slide Step Count */}
+              <div className="relative z-10 flex items-center justify-between">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/20 backdrop-blur-md border border-white/25 text-white text-[11px] font-extrabold uppercase tracking-wider font-sans shadow-sm">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>OUR GROWTH JOURNEY</span>
+                </div>
+
+                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/40 backdrop-blur-md border border-white/15 text-white/90 text-xs font-mono font-bold">
+                  <span>0{currentSlide + 1}</span>
+                  <span className="text-white/40">/</span>
+                  <span className="text-white/60">0{journeySlides.length}</span>
+                </div>
+              </div>
+
+              {/* BOTTOM CARD: Active Slide Details + Progress Indicator */}
+              <div className="relative z-10 bg-white/10 dark:bg-white/5 backdrop-blur-xl border border-white/20 rounded-2xl sm:rounded-3xl p-5 sm:p-6 text-white text-left shadow-2xl">
+                
+                {/* Phase Tag & Metric Badge */}
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <span className="text-[10px] sm:text-[11px] font-sans font-bold uppercase tracking-widest text-pink-200">
+                    {journeySlides[currentSlide].phase}
+                  </span>
+                  <span className="px-2.5 py-0.5 rounded-full bg-secondary/30 border border-secondary/40 text-[10px] font-sans font-bold text-white uppercase tracking-wider">
+                    {journeySlides[currentSlide].badge}
+                  </span>
+                </div>
+
+                {/* Title */}
+                <h3 className="font-serif text-xl sm:text-2xl font-bold leading-tight mb-2 text-white">
+                  {journeySlides[currentSlide].title}
+                </h3>
+
+                {/* Subtitle / Story */}
+                <p className="text-xs sm:text-sm text-slate-200 font-sans leading-relaxed mb-4">
+                  {journeySlides[currentSlide].subtitle}
+                </p>
+
+                {/* Footer Controls: Dots & Navigation Arrows */}
+                <div className="flex items-center justify-between pt-3 border-t border-white/15">
+                  {/* Carousel Progress Dots */}
+                  <div className="flex items-center gap-2">
+                    {journeySlides.map((_, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setCurrentSlide(idx)}
+                        aria-label={`Go to slide ${idx + 1}`}
+                        className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
+                          idx === currentSlide
+                            ? 'w-7 bg-secondary shadow-sm'
+                            : 'w-2 bg-white/40 hover:bg-white/70'
+                        }`}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Previous & Next Arrows */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={prevSlide}
+                      aria-label="Previous slide"
+                      className="w-8 h-8 rounded-full bg-white/15 hover:bg-white/30 border border-white/20 flex items-center justify-center text-white text-xs font-bold transition-all cursor-pointer"
+                    >
+                      ←
+                    </button>
+                    <button
+                      type="button"
+                      onClick={nextSlide}
+                      aria-label="Next slide"
+                      className="w-8 h-8 rounded-full bg-white/15 hover:bg-white/30 border border-white/20 flex items-center justify-center text-white text-xs font-bold transition-all cursor-pointer"
+                    >
+                      →
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          </ScrollReveal>
+
+          {/* ==================================================
+              RIGHT SIDE: HERO CONTENT & CTAS (~50%)
+          ================================================== */}
+          <ScrollReveal
+            direction="up"
+            delay={40}
+            className="lg:col-span-6 w-full flex flex-col justify-center text-left order-1 lg:order-2"
+          >
             {/* Top Status Pill */}
-            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-surface border border-border-theme shadow-sm backdrop-blur-md">
+            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-surface border border-border-theme shadow-xs backdrop-blur-md mb-5 self-start">
               <span className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
-              <span className="text-[11px] sm:text-xs font-mono font-semibold tracking-wider text-text-secondary uppercase">
-                LIVING MOODBOARD &nbsp;·&nbsp; CURATED ISSUE N° 04 &nbsp;·&nbsp; 12.8K PINS
+              <span className="text-xs font-bold tracking-wider text-secondary uppercase font-sans">
+                ABOUT CREATORLINK
               </span>
             </div>
 
             {/* Main Heading */}
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-serif font-medium tracking-tight leading-[1.15] text-foreground">
-              Where{' '}
-              <span className="relative inline-block font-serif italic text-secondary px-3 sm:px-4 py-0.5 rounded-full bg-secondary/15 border border-secondary/20">
-                visionary
+            <h1 className="text-3xl sm:text-5xl lg:text-[54px] xl:text-6xl font-serif font-medium tracking-tight leading-[1.12] text-foreground mb-4">
+              Bringing Brands and Creators{' '}
+              <span className="relative inline-block font-serif italic text-secondary px-3 sm:px-5 py-0.5 rounded-full bg-secondary/15 border border-secondary/20">
+                Together
               </span>{' '}
-              minds pin culture into{' '}
-              <span className="font-serif italic text-secondary-dark font-normal">
-                reality.
-              </span>
+              to Create More.
             </h1>
 
-            {/* Supporting Text */}
-            <p className="text-base sm:text-lg lg:text-xl font-sans text-text-secondary leading-relaxed max-w-2xl">
-              An art-directed sanctuary where prestige brands and auteur creators pin, collect, and orchestrate singular narratives beyond transactional sponsorship.
+            {/* Supporting Description */}
+            <p className="text-base sm:text-lg text-slate-600 dark:text-text-secondary font-sans leading-relaxed mb-4 max-w-xl">
+              CreatorLink is a platform built to connect brands with creative talent. We make it easier to discover creators, explore collaboration opportunities and bring great ideas to life through meaningful partnerships.
             </p>
 
-            {/* Action Button & Supporting Pill */}
-            <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto">
-              {/* Primary Button */}
+            {/* Supporting Line */}
+            <p className="text-xs sm:text-sm font-semibold text-secondary dark:text-pink-300 font-sans mb-6">
+              One platform. Two sides. More opportunities to create together.
+            </p>
+
+            {/* Dual Action CTAs */}
+            <div className="flex flex-col sm:flex-row items-center gap-3.5 sm:gap-4 mb-7 w-full sm:w-auto">
               <Link
                 href="/creators"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-full bg-primary text-background font-sans font-semibold text-xs tracking-wider uppercase shadow-md transition-all duration-300 ease-out hover:bg-secondary hover:text-white hover:-translate-y-0.5 hover:shadow-lg hover:shadow-secondary/20"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full bg-slate-950 dark:bg-white dark:text-slate-950 text-white font-sans font-semibold text-xs tracking-wider uppercase shadow-md hover:bg-secondary dark:hover:bg-secondary dark:hover:text-white transition-all duration-300 hover:-translate-y-0.5 cursor-pointer"
               >
-                <span>⚡</span>
-                <span>EXPLORE THE GUILD BOARDS</span>
+                <span>Explore Creators</span>
+                <span>→</span>
               </Link>
 
-              {/* Supporting Pill */}
-              <div className="inline-flex items-center gap-2 px-4 py-3 rounded-full bg-surface border border-border-theme text-xs font-sans font-medium text-text-secondary shadow-sm">
-                <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                <span>1,400+ Curated Tastemakers</span>
-                <span className="text-text-secondary/50">|</span>
-                <span className="font-mono text-[11px]">paris • nyc • tokyo</span>
+              <Link
+                href="/brands"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full bg-surface border border-border-theme hover:border-secondary text-foreground font-sans font-semibold text-xs tracking-wider uppercase shadow-xs transition-all duration-300 hover:-translate-y-0.5 cursor-pointer"
+              >
+                <span>For Brands</span>
+              </Link>
+            </div>
+
+            {/* 3 Value Pillars */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-5 border-t border-slate-200/80 dark:border-white/10 font-sans">
+              <div className="flex items-center gap-2 bg-surface border border-border-theme rounded-2xl p-3 shadow-2xs">
+                <span className="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0">
+                  ✓
+                </span>
+                <span className="text-xs font-semibold text-foreground">
+                  5-Day Brand Trial
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2 bg-surface border border-border-theme rounded-2xl p-3 shadow-2xs">
+                <span className="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0">
+                  ✓
+                </span>
+                <span className="text-xs font-semibold text-foreground">
+                  Free Creator Access
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2 bg-surface border border-border-theme rounded-2xl p-3 shadow-2xs">
+                <span className="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0">
+                  ✓
+                </span>
+                <span className="text-xs font-semibold text-foreground">
+                  100% Direct Collabs
+                </span>
               </div>
             </div>
 
-          </div>
-        </ScrollReveal>
+          </ScrollReveal>
 
-        {/* ====================================================
-            2. MAIN VISUAL COMPOSITION (STAGGERED EDITORIAL MOODBOARD)
-        ==================================================== */}
-        <ScrollReveal direction="up" delay={120}>
-          <div className="mt-16 sm:mt-20 lg:mt-24 relative max-w-7xl mx-auto min-h-[640px] lg:min-h-[680px] flex flex-col lg:block items-center justify-center gap-12">
-
-            {/* --------------------------------------------------
-                A. OFFICIAL GUILD PIN (FLOATING CIRCULAR STAMP)
-                Positioned near upper-right of composition.
-                Tilted by default (rotate-[14deg]), straightens on hover.
-            -------------------------------------------------- */}
-            <div className="order-4 lg:order-none lg:absolute lg:top-12 lg:right-28 z-30 creator-float group">
-              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-surface/90 dark:bg-surface-muted/90 backdrop-blur-md border-2 border-dashed border-secondary/40 p-1.5 shadow-xl flex flex-col items-center justify-center text-center rotate-[14deg] transition-all duration-500 ease-out group-hover:rotate-0 group-hover:scale-[1.03] group-hover:border-secondary group-hover:shadow-secondary/20 cursor-pointer">
-                <div className="w-full h-full rounded-full border border-border-theme flex flex-col items-center justify-center p-1">
-                  <span className="text-[8px] font-mono font-bold tracking-widest text-secondary uppercase leading-none mb-0.5">
-                    OFFICIAL
-                  </span>
-                  <span className="text-[10px] font-serif font-bold tracking-tight text-foreground leading-none">
-                    GUILD
-                  </span>
-                  <span className="text-[8px] font-mono font-semibold text-text-secondary leading-none mt-0.5">
-                    PIN N° 04
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* --------------------------------------------------
-                B. LEFT FLOATING CREATOR CARD
-                HIGHEST position in the staggered layout.
-                Positioned with comfortable horizontal spacing.
-            -------------------------------------------------- */}
-            <div className="order-1 sm:order-none lg:absolute lg:left-0 lg:top-0 z-20 w-full max-w-xs lg:w-[270px] group">
-              <div className="relative p-3.5 rounded-2xl bg-surface border border-border-theme shadow-xl lg:-rotate-[4deg] transition-all duration-500 ease-out group-hover:rotate-0 group-hover:-translate-y-2 group-hover:scale-[1.02] group-hover:border-secondary group-hover:shadow-2xl group-hover:shadow-secondary/20">
-
-                {/* Top Pink Pin Accent */}
-                <div className="absolute -top-3 right-6 w-6 h-6 rounded-full bg-secondary/20 border border-secondary/40 flex items-center justify-center shadow-sm z-30">
-                  <span className="text-xs">📌</span>
-                </div>
-
-                {/* Header Badge */}
-                <div className="flex items-center justify-between mb-2 px-1">
-                  <span className="px-2 py-0.5 rounded-md bg-surface-muted text-[10px] font-mono font-bold text-text-secondary tracking-wider uppercase">
-                    AUTEUR #12
-                  </span>
-                  <span className="text-[10px] font-mono text-secondary font-semibold">
-                    LIVE PORTFOLIO
-                  </span>
-                </div>
-
-                {/* Creator Image */}
-                <div className="relative rounded-xl overflow-hidden aspect-[4/5] bg-surface-muted">
-                  <Image
-                    src="https://res.cloudinary.com/atr5osne/image/upload/v1792054698/creatorlink/public/avatars/gye9m9prpdv81gc9ipkp.webp"
-                    alt="Aarohi M. Tokyo Studio"
-                    fill
-                    preload
-                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                    sizes="(max-width: 768px) 100vw, 300px"
-                  />
-
-                  {/* Engagement Overlay Badge */}
-                  <div className="absolute bottom-2.5 right-2.5 px-2.5 py-1 rounded-full bg-background/85 backdrop-blur-md border border-border-theme text-[10px] font-mono font-medium text-foreground flex items-center gap-1 shadow-md">
-                    <span className="text-secondary">♡</span>
-                    <span>3.4k</span>
-                  </div>
-                </div>
-
-                {/* Card Footer Info */}
-                <div className="mt-3 px-1 flex items-end justify-between">
-                  <div>
-                    <h4 className="text-sm font-serif font-bold text-foreground leading-tight group-hover:text-secondary transition-colors">
-                      Aarohi M. Tokyo Studio
-                    </h4>
-                    <p className="text-[10px] font-mono text-text-secondary mt-0.5 tracking-wider uppercase">
-                      35MM ANALOG LOOKBOOK
-                    </p>
-                  </div>
-                  <span className="px-2 py-0.5 rounded-md bg-secondary/15 text-secondary text-[9px] font-mono font-bold uppercase border border-secondary/20">
-                    PIN
-                  </span>
-                </div>
-
-              </div>
-            </div>
-
-            {/* --------------------------------------------------
-                C. CENTER BOARD CARD (MAIN GUILD BOARD DASHBOARD)
-                MIDDLE position in the staggered layout.
-                Generous horizontal gap from left and right cards.
-            -------------------------------------------------- */}
-            <div className="order-2 sm:order-none relative lg:mx-auto lg:top-36 z-10 w-full max-w-xl lg:max-w-[540px] group">
-              <div className="p-4 sm:p-6 rounded-3xl bg-surface border border-border-theme shadow-2xl transition-all duration-500 ease-out group-hover:-translate-y-2 group-hover:scale-[1.015] group-hover:border-secondary group-hover:shadow-2xl group-hover:shadow-secondary/15">
-
-                {/* Board Header Bar */}
-                <div className="flex items-center justify-between pb-3.5 mb-4 border-b border-border-theme">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-secondary animate-pulse" />
-                    <span className="text-xs font-mono font-bold tracking-wider text-foreground uppercase">
-                      BOARD: AUTUMN CAMPAIGN 2026
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="px-2.5 py-1 rounded-full bg-secondary/15 text-secondary border border-secondary/20 text-[10px] font-mono font-bold tracking-wider uppercase">
-                      99.4% MATCH
-                    </span>
-                    <span className="text-text-secondary text-xs">•••</span>
-                  </div>
-                </div>
-
-                {/* Dual Visual Tile Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 relative">
-
-                  {/* Center Connector Badge */}
-                  <div className="hidden sm:flex absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-surface border border-border-theme shadow-lg z-20 items-center justify-center text-[9px] font-mono font-bold text-secondary">
-                    OR
-                  </div>
-
-                  {/* Left Tile (Luxury Skincare / Beauty Campaign) */}
-                  <div className="relative rounded-2xl overflow-hidden aspect-[4/3] bg-surface-muted group/tile">
-                    <Image
-                      src="https://res.cloudinary.com/atr5osne/image/upload/v1792054714/creatorlink/public/editorial/se3wpecdot8jphnowzci.webp"
-                      alt="Brand Campaign Still"
-                      fill
-                      className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover/tile:scale-105"
-                      sizes="(max-width: 768px) 100vw, 250px"
-                    />
-                    <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-md bg-background/85 backdrop-blur-md text-[9px] font-mono font-bold text-text-secondary tracking-wider uppercase border border-border-theme">
-                      BRAND STILL
-                    </div>
-                  </div>
-
-                  {/* Right Tile (Luxury Architectural Interior View) */}
-                  <div className="relative rounded-2xl overflow-hidden aspect-[4/3] bg-surface-muted group/tile">
-                    <Image
-                      src="https://res.cloudinary.com/atr5osne/image/upload/v1792054730/creatorlink/public/editorial/kerribvpkxjoqrecd56w.webp"
-                      alt="Set Visual"
-                      fill
-                      className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover/tile:scale-105"
-                      sizes="(max-width: 768px) 100vw, 250px"
-                    />
-                    <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-md bg-background/85 backdrop-blur-md text-[9px] font-mono font-bold text-text-secondary tracking-wider uppercase border border-border-theme">
-                      SET VISUAL
-                    </div>
-                  </div>
-
-                </div>
-
-                {/* Bottom Metadata & Color Indicators */}
-                <div className="mt-4 pt-3.5 border-t border-border-theme flex items-center justify-between text-[11px] font-mono">
-                  {/* Palette */}
-                  <div className="flex items-center gap-2">
-                    <span className="text-text-secondary uppercase text-[10px] font-bold">PALETTE:</span>
-                    <div className="flex items-center gap-1.5">
-                      <span className="w-3.5 h-3.5 rounded-full bg-[#E5C5B5] border border-black/10 inline-block" />
-                      <span className="w-3.5 h-3.5 rounded-full bg-[#4A5568] border border-black/10 inline-block" />
-                      <span className="w-3.5 h-3.5 rounded-full bg-[#2D3748] border border-black/10 inline-block" />
-                      <span className="w-3.5 h-3.5 rounded-full bg-[#E2E8F0] border border-black/10 inline-block" />
-                    </div>
-                  </div>
-
-                  {/* Verification Tag */}
-                  <div className="flex items-center gap-1.5 text-text-secondary font-semibold uppercase text-[10px]">
-                    <span className="text-emerald-500 font-bold">✓</span>
-                    <span>VERIFIED GUILD COLLAB</span>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-
-            {/* --------------------------------------------------
-                D. RIGHT FLOATING PRODUCTION CARD
-                LOWEST position in the staggered layout.
-                Positioned with comfortable horizontal spacing.
-            -------------------------------------------------- */}
-            <div className="order-3 sm:order-none lg:absolute lg:right-0 lg:top-72 z-20 w-full max-w-xs lg:w-[270px] group">
-              <div className="relative p-3.5 rounded-2xl bg-surface border border-border-theme shadow-xl lg:rotate-[4deg] transition-all duration-500 ease-out group-hover:rotate-0 group-hover:-translate-y-2 group-hover:scale-[1.02] group-hover:border-secondary group-hover:shadow-2xl group-hover:shadow-secondary/20">
-
-                {/* Header Washi Tape Accent */}
-                <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 w-16 h-3 bg-secondary/30 rounded-sm border border-secondary/40 backdrop-blur-sm z-30" />
-
-                {/* Image Container */}
-                <div className="relative rounded-xl overflow-hidden aspect-[4/3] bg-surface-muted mt-1">
-                  <Image
-                    src="https://res.cloudinary.com/atr5osne/image/upload/v1792054717/creatorlink/public/editorial/ir7hxl0x2guq9j4yoxto.webp"
-                    alt="Paris Set 16mm"
-                    fill
-                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                    sizes="(max-width: 768px) 100vw, 270px"
-                  />
-
-                  {/* Badge Overlay */}
-                  <div className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-background/90 backdrop-blur-md text-[9px] font-mono font-bold text-foreground tracking-wider uppercase border border-border-theme">
-                    PARIS SET · 16MM
-                  </div>
-
-                  <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded-full bg-secondary/85 text-white text-[9px] font-mono font-semibold uppercase backdrop-blur-sm shadow-sm">
-                    Pinned to Board
-                  </div>
-                </div>
-
-                {/* Bottom Editorial Note */}
-                <div className="mt-3 p-2.5 rounded-xl bg-secondary/10 border border-secondary/20">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-[9px] font-mono font-bold tracking-widest text-secondary uppercase">
-                      DIRECTOR CUT
-                    </span>
-                    <span className="px-1.5 py-0.2 rounded text-[8px] font-mono bg-secondary/20 text-secondary uppercase font-bold">
-                      NOTE
-                    </span>
-                  </div>
-                  <p className="text-xs font-serif italic text-foreground leading-snug">
-                    &ldquo;Where brand feels like cinema, not sponsorship.&rdquo;
-                  </p>
-                </div>
-
-              </div>
-            </div>
-
-            {/* --------------------------------------------------
-                E. DIRECT DIALOGUE STATUS PILL
-                Positioned directly below the Center Board Card, aligned toward its lower-left edge.
-            -------------------------------------------------- */}
-            <div className="order-5 sm:order-none lg:absolute lg:top-[534px] lg:left-[26%] z-30 transition-all duration-300 hover:-translate-y-1">
-              <div className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-surface border border-border-theme text-xs font-mono font-bold tracking-widest text-text-secondary uppercase shadow-sm backdrop-blur-sm hover:border-secondary hover:text-foreground">
-                <span className="text-secondary font-serif text-sm">✣</span>
-                <span>DIRECT DIALOGUE &nbsp;·&nbsp; ZERO BROKERAGE</span>
-              </div>
-            </div>
-
-          </div>
-        </ScrollReveal>
+        </div>
 
       </div>
     </section>

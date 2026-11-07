@@ -4,58 +4,46 @@ import React from "react";
 import ScrollReveal from "@/components/theme/ScrollReveal";
 
 export default function TrustedBrands() {
-  const brands = [
-    {
-      name: "Acne Studios",
-      className: "font-sans font-semibold tracking-tight text-slate-800 dark:text-text-secondary",
-    },
-    {
-      name: "BYREDO",
-      className: "font-mono tracking-[0.28em] font-normal uppercase text-slate-700 dark:text-text-secondary",
-    },
-    {
-      name: "GANNI",
-      className: "font-sans font-black tracking-wider uppercase text-slate-900 dark:text-foreground",
-    },
-    {
-      name: "Glossier.",
-      className: "font-serif italic font-medium tracking-normal text-slate-800 dark:text-text-secondary",
-    },
-    {
-      name: "REFORMATION",
-      className: "font-sans tracking-[0.32em] font-light uppercase text-slate-700 dark:text-text-secondary",
-    },
-    {
-      name: "Aēsop",
-      className: "font-serif font-normal tracking-wide text-slate-800 dark:text-text-secondary",
-    },
+  const categories = [
+    { name: "Fashion & Beauty" },
+    { name: "Lifestyle" },
+    { name: "Food & Beverage" },
+    { name: "Travel" },
+    { name: "Technology" },
+    { name: "Health & Wellness" },
   ];
 
   return (
-    <section className="w-full bg-background text-foreground py-10 sm:py-12 lg:py-14 px-4 sm:px-6 lg:px-10 border-t border-b border-border-theme/60 transition-colors duration-300">
+    <section className="w-full bg-background text-foreground py-12 sm:py-14 lg:py-16 px-4 sm:px-6 lg:px-10 border-t border-b border-border-theme/60 transition-colors duration-300">
       <ScrollReveal direction="up" delay={0} className="mx-auto max-w-[1320px] text-center">
-        
         {/* Eyebrow */}
-        <span className="text-[10px] sm:text-[11px] font-bold tracking-[0.22em] uppercase text-secondary font-sans block mb-6 sm:mb-8">
-          TRUSTED BY MODERN BRANDS
+        <span className="text-[10px] sm:text-[11px] font-bold tracking-[0.22em] uppercase text-secondary font-sans block mb-3">
+          ECOSYSTEM &amp; NICHES
         </span>
 
-        {/* Brand Names Grid / Horizontal Row */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:flex lg:flex-row lg:items-center lg:justify-between gap-y-6 gap-x-4 sm:gap-6 lg:gap-8 items-center text-center">
-          {brands.map((brand) => (
+        {/* Heading */}
+        <h2 className="text-2xl sm:text-3xl font-serif font-medium text-slate-900 dark:text-foreground mb-3">
+          Built for Brands and Creators to Work Together.
+        </h2>
+
+        {/* Description */}
+        <p className="text-xs sm:text-sm text-slate-600 dark:text-text-secondary max-w-xl mx-auto mb-8 font-sans">
+          CreatorLink brings businesses and creative professionals together to build meaningful collaborations across diverse industries.
+        </p>
+
+        {/* Category Labels Row */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 items-center text-center">
+          {categories.map((cat) => (
             <div
-              key={brand.name}
-              className="flex items-center justify-center py-1 group"
+              key={cat.name}
+              className="bg-slate-100/70 dark:bg-surface border border-slate-200/80 dark:border-white/10 rounded-2xl py-3 px-4 shadow-2xs hover:border-secondary/50 transition-colors"
             >
-              <span
-                className={`text-sm sm:text-base md:text-lg lg:text-xl transition-all duration-300 ease-out hover:text-secondary dark:hover:text-secondary hover:-translate-y-[2px] hover:scale-[1.02] cursor-pointer inline-block ${brand.className}`}
-              >
-                {brand.name}
+              <span className="text-xs sm:text-sm font-sans font-semibold text-slate-800 dark:text-slate-200">
+                {cat.name}
               </span>
             </div>
           ))}
         </div>
-
       </ScrollReveal>
     </section>
   );

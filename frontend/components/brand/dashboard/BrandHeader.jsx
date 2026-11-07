@@ -129,7 +129,7 @@ export default function BrandHeader({ setMobileOpen = () => { } }) {
     profile?.email ||
     "emma.hoyer@brand.com";
 
-  const isVerified = Boolean(profile?.isVerifiedBusiness || userObj?.isVerified || authUser?.isVerified);
+  const isVerified = Boolean(profile?.isVerifiedBusiness);
 
   // Initial letter (matching the user's reference image avatar: pink circle with "E")
   const initial = (displayName && displayName.trim().length > 0)

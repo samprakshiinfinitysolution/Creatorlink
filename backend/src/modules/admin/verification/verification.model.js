@@ -106,6 +106,29 @@ const verificationRequestSchema = new mongoose.Schema(
             default: null
         },
 
+        // Dedicated timestamp for when an account was re-submitted following rejection or review
+        resubmittedAt: {
+            type: Date,
+            default: null,
+            index: true
+        },
+
+        // Historical record of all resubmission timestamps and notes
+        resubmissionHistory: [
+            {
+                resubmittedAt: {
+                    type: Date,
+                    default: Date.now
+                },
+                notes: {
+                    type: String,
+                    trim: true,
+                    maxlength: 1000,
+                    default: ""
+                }
+            }
+        ],
+
         // Justification provided by the admin if the request is rejected or revoked
         rejectionReason: {
             type: String,
@@ -127,6 +150,7 @@ const verificationRequestSchema = new mongoose.Schema(
 
 // Compound indexes for administrative queue queries
 verificationRequestSchema.index({ status: 1, createdAt: -1 });
+verificationRequestSchema.index({ status: 1, resubmittedAt: -1 });
 verificationRequestSchema.index({ role: 1, status: 1 });
 
 const VerificationRequest = mongoose.model(

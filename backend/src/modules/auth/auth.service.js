@@ -148,6 +148,13 @@ const registerUser = async ({ name, email, password, role }) => {
         throw error;
     }
 
+    // Ensure pending Admin Verification record exists for registered Creator or Brand
+    try {
+        await ensureUserVerificationRecord(user);
+    } catch (verifErr) {
+        console.error("Failed to ensure verification record in registerUser:", verifErr);
+    }
+
     return {
         message: "Verification code sent to your email. Please check your inbox.",
         email: user.email

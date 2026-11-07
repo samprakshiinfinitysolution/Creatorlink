@@ -27,7 +27,7 @@ export const validateGetVerificationsQuery = (req, res, next) => {
     }
 
     if (status !== undefined && status !== "all") {
-        const allowedStatus = ["pending", "approved", "rejected"];
+        const allowedStatus = ["pending", "resubmitted", "approved", "rejected"];
         if (!allowedStatus.includes(status.toLowerCase())) {
             throw createApiError(400, `status must be one of: ${allowedStatus.join(", ")}, or all`);
         }
@@ -75,36 +75,39 @@ export const validateApproveVerificationBody = (req, res, next) => {
     next();
 };
 
-// Validates payload when admin rejects a verification request.
+// Validates payload when admin rejects a verification request (mandatory reason).
 export const validateRejectVerificationBody = (req, res, next) => {
     const { rejectionReason, reason } = req.body || {};
-    const text = rejectionReason || reason;
+    const text = typeof rejectionReason === "string" ? rejectionReason : typeof reason === "string" ? reason : "";
+    const cleanText = text.trim();
 
-    if (text !== undefined && text !== null && text !== "") {
-        if (typeof text !== "string") {
-            throw createApiError(400, "rejectionReason must be a string");
-        }
-        if (text.trim().length > 1000) {
-            throw createApiError(400, "rejectionReason cannot exceed 1000 characters");
-        }
+    if (!cleanText || cleanText.length < 3) {
+        throw createApiError(400, "A rejection reason of at least 3 characters is required");
     }
 
+    if (cleanText.length > 1000) {
+        throw createApiError(400, "rejectionReason cannot exceed 1000 characters");
+    }
+
+    req.body.rejectionReason = cleanText;
     next();
 };
 
-// Validates payload when admin revokes an approved verification.
+// Validates payload when admin revokes an approved verification (mandatory reason).
 export const validateRevokeVerificationBody = (req, res, next) => {
     const { reason, rejectionReason } = req.body || {};
-    const text = reason || rejectionReason;
+    const text = typeof reason === "string" ? reason : typeof rejectionReason === "string" ? rejectionReason : "";
+    const cleanText = text.trim();
 
-    if (!text || typeof text !== "string" || text.trim().length < 3) {
+    if (!cleanText || cleanText.length < 3) {
         throw createApiError(400, "A reason of at least 3 characters is required to revoke verification status");
     }
 
-    if (text.trim().length > 1000) {
+    if (cleanText.length > 1000) {
         throw createApiError(400, "Revocation reason cannot exceed 1000 characters");
     }
 
+    req.body.reason = cleanText;
     next();
 };
 

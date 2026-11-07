@@ -35,9 +35,28 @@ const completeOnboardingApi = async (profileData) => {
     return response.data;
 };
 
+// Gets creator's verification status and history.
+const getVerificationStatusApi = async () => {
+    const response = await axiosInstance.get(
+        "/creator/profile/verification"
+    );
+    return response.data;
+};
+
+// Submits or re-submits creator verification request.
+const submitVerificationApi = async (data = {}) => {
+    const response = await axiosInstance.post(
+        "/creator/profile/verification",
+        data
+    );
+    return response.data;
+};
+
 export {
     createProfile,
     getMyProfile,
     updateMyProfile,
-    completeOnboardingApi
+    completeOnboardingApi,
+    getVerificationStatusApi,
+    submitVerificationApi
 };

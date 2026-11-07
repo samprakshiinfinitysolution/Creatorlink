@@ -86,7 +86,29 @@ export default function AdminVerificationQueue() {
     loadVerifications();
   }, [loadVerifications]);
 
+  // Deep-linking: auto-open review modal when URL query (?id=...) matches an item
+  useEffect(() => {
+    if (typeof window !== "undefined" && verifications?.length > 0 && !modalOpen) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const targetId = urlParams.get("id");
+      if (targetId) {
+        const found = verifications.find((v) => v._id === targetId);
+        if (found) {
+          handleOpenReview(found);
+        }
+      }
+    }
+  }, [verifications, modalOpen]);
+
   const [actionLoadingId, setActionLoadingId] = useState(null);
+  const [decisionModal, setDecisionModal] = useState({
+    open: false,
+    item: null,
+    action: null, // "reject" or "revoke"
+    reason: "",
+    error: "",
+    submitting: false
+  });
 
   const handleOpenReview = async (item) => {
     await dispatch(fetchVerificationDetails(item._id));
@@ -103,33 +125,68 @@ export default function AdminVerificationQueue() {
     }
   };
 
-  const handleQuickReject = async (item) => {
-    setActionLoadingId(item._id);
-    try {
-      await dispatch(
-        rejectVerificationRequest({
-          id: item._id,
-          rejectionReason: "Rejected by administrator from verification queue"
-        })
-      );
-      loadVerifications();
-    } finally {
-      setActionLoadingId(null);
-    }
+  const handleOpenDecisionPrompt = (item, action) => {
+    setDecisionModal({
+      open: true,
+      item,
+      action,
+      reason: "",
+      error: "",
+      submitting: false
+    });
   };
 
-  const handleQuickRevoke = async (item) => {
-    setActionLoadingId(item._id);
+  const handleConfirmDecision = async () => {
+    const cleanReason = (decisionModal.reason || "").trim();
+    if (!cleanReason || cleanReason.length < 3) {
+      setDecisionModal((prev) => ({
+        ...prev,
+        error: "Please provide a reason of at least 3 characters."
+      }));
+      return;
+    }
+    if (cleanReason.length > 1000) {
+      setDecisionModal((prev) => ({
+        ...prev,
+        error: "Reason cannot exceed 1000 characters."
+      }));
+      return;
+    }
+
+    setDecisionModal((prev) => ({ ...prev, submitting: true, error: "" }));
+
     try {
-      await dispatch(
-        revokeVerificationRequest({
-          id: item._id,
-          reason: "Revoked by administrator from verification queue"
-        })
-      );
+      if (decisionModal.action === "revoke") {
+        await dispatch(
+          revokeVerificationRequest({
+            id: decisionModal.item._id,
+            reason: cleanReason
+          })
+        ).unwrap();
+      } else {
+        await dispatch(
+          rejectVerificationRequest({
+            id: decisionModal.item._id,
+            rejectionReason: cleanReason
+          })
+        ).unwrap();
+      }
+
+      setDecisionModal({
+        open: false,
+        item: null,
+        action: null,
+        reason: "",
+        error: "",
+        submitting: false
+      });
       loadVerifications();
-    } finally {
-      setActionLoadingId(null);
+    } catch (err) {
+      setDecisionModal((prev) => ({
+        ...prev,
+        submitting: false,
+        error: typeof err === "string" ? err : "Failed to record decision."
+      }));
     }
   };
 
@@ -181,7 +238,7 @@ export default function AdminVerificationQueue() {
           <div className="flex flex-wrap items-center gap-2.5">
             {/* Status Tabs */}
             <div className="flex items-center bg-surface-muted/60 p-1 rounded-xl border border-border-theme text-xs">
-              {["all", "pending", "approved", "rejected"].map((st) => (
+              {["all", "pending", "resubmitted", "approved", "rejected"].map((st) => (
                 <button
                   key={st}
                   type="button"
@@ -310,6 +367,9 @@ export default function AdminVerificationQueue() {
                   const applicantName =
                     item.user?.name || item.user?.fullName || "Unnamed User";
                   const initial = applicantName.charAt(0)?.toUpperCase() || "U";
+                  const hasReviewHistory = Array.isArray(item.reviewHistory) && item.reviewHistory.length > 0;
+                  const isResubmitted = item.status === "pending" && (Boolean(item.resubmittedAt) || hasReviewHistory);
+                  const latestResubmission = item.resubmittedAt || (isResubmitted ? item.updatedAt : null);
 
                   return (
                     <tr
@@ -355,22 +415,43 @@ export default function AdminVerificationQueue() {
 
                       {/* Registered Date */}
                       <td className="px-5 py-4 text-text-secondary">
-                        {new Date(item.user?.createdAt || item.createdAt).toLocaleDateString()}
+                        <p className="font-medium text-foreground">
+                          {new Date(item.user?.createdAt || item.createdAt).toLocaleDateString()}
+                        </p>
+                        {isResubmitted && latestResubmission && (
+                          <p className="text-[10px] text-purple-600 dark:text-purple-400 font-medium">
+                            Re-sub: {new Date(latestResubmission).toLocaleDateString()}
+                          </p>
+                        )}
                       </td>
 
                       {/* Status */}
                       <td className="px-5 py-4">
-                        <span
-                          className={`text-[11px] px-2.5 py-0.5 rounded-full font-medium ${
-                            item.status === "approved"
-                              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
-                              : item.status === "rejected"
-                              ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20"
-                              : "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
-                          }`}
-                        >
-                          {item.status.toUpperCase()}
-                        </span>
+                        {isResubmitted ? (
+                          <div className="space-y-1">
+                            <span className="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-0.5 rounded-full font-semibold bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/30">
+                              <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse" />
+                              RESUBMITTED
+                            </span>
+                            {latestResubmission && (
+                              <p className="text-[10px] text-text-secondary">
+                                {new Date(latestResubmission).toLocaleDateString()} {new Date(latestResubmission).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                              </p>
+                            )}
+                          </div>
+                        ) : item.status === "approved" ? (
+                          <span className="text-[11px] px-2.5 py-0.5 rounded-full font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                            APPROVED
+                          </span>
+                        ) : item.status === "rejected" ? (
+                          <span className="text-[11px] px-2.5 py-0.5 rounded-full font-medium bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+                            REJECTED
+                          </span>
+                        ) : (
+                          <span className="text-[11px] px-2.5 py-0.5 rounded-full font-medium bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                            PENDING
+                          </span>
+                        )}
                       </td>
 
                       {/* Actions */}
@@ -379,12 +460,12 @@ export default function AdminVerificationQueue() {
                           {item.status === "approved" ? (
                             <button
                               type="button"
-                              onClick={() => handleQuickRevoke(item)}
+                              onClick={() => handleOpenDecisionPrompt(item, "revoke")}
                               disabled={actionLoadingId === item._id}
                               className="inline-flex items-center px-2.5 py-1 text-[11px] font-semibold text-rose-600 hover:text-white bg-rose-500/10 hover:bg-rose-600 rounded-lg border border-rose-500/20 transition cursor-pointer disabled:opacity-50"
-                              title="Revoke Verification Badge"
+                              title="Revoke Verification Badge with Reason"
                             >
-                              {actionLoadingId === item._id ? "..." : "Revoke"}
+                              Revoke
                             </button>
                           ) : item.status === "pending" ? (
                             <>
@@ -399,12 +480,12 @@ export default function AdminVerificationQueue() {
                               </button>
                               <button
                                 type="button"
-                                onClick={() => handleQuickReject(item)}
+                                onClick={() => handleOpenDecisionPrompt(item, "reject")}
                                 disabled={actionLoadingId === item._id}
                                 className="inline-flex items-center px-2.5 py-1 text-[11px] font-semibold text-rose-600 hover:text-white bg-rose-500/10 hover:bg-rose-600 rounded-lg border border-rose-500/20 transition cursor-pointer disabled:opacity-50"
-                                title="Reject Verification"
+                                title="Reject Verification with Reason"
                               >
-                                {actionLoadingId === item._id ? "..." : "Reject"}
+                                Reject
                               </button>
                             </>
                           ) : (
@@ -478,6 +559,114 @@ export default function AdminVerificationQueue() {
           onClose={() => setModalOpen(false)}
           onSuccess={loadVerifications}
         />
+      )}
+
+      {/* Action Reason Confirmation Modal (Reject or Revoke) */}
+      {decisionModal.open && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
+        >
+          <div
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity"
+            onClick={() =>
+              !decisionModal.submitting &&
+              setDecisionModal({ open: false, item: null, action: null, reason: "", error: "", submitting: false })
+            }
+            aria-hidden="true"
+          />
+
+          <div className="relative w-full max-w-lg bg-surface border border-border-theme rounded-2xl shadow-2xl overflow-hidden z-10 p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-border-theme pb-4">
+              <div>
+                <h3 className="text-base font-bold text-foreground">
+                  {decisionModal.action === "revoke" ? "Revoke Verification Status" : "Reject Verification Request"}
+                </h3>
+                <p className="text-xs text-text-secondary mt-0.5">
+                  Target Account:{" "}
+                  <span className="font-semibold text-foreground">
+                    {decisionModal.item?.user?.name || decisionModal.item?.user?.email || "User"}
+                  </span>{" "}
+                  ({decisionModal.item?.role})
+                </p>
+              </div>
+              <span
+                className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${
+                  decisionModal.action === "revoke"
+                    ? "bg-amber-500/10 text-amber-600 border border-amber-500/20"
+                    : "bg-rose-500/10 text-rose-600 border border-rose-500/20"
+                }`}
+              >
+                {decisionModal.action === "revoke" ? "REVOKE BADGE" : "REJECT"}
+              </span>
+            </div>
+
+            <div className="p-3 bg-surface-muted/50 rounded-xl border border-border-theme text-xs text-text-secondary leading-relaxed">
+              <span className="font-medium text-foreground block mb-1">
+                {decisionModal.action === "revoke"
+                  ? "Verified badge will be removed immediately."
+                  : "Verification request will be marked as rejected."}
+              </span>
+              The reason entered below is permanent, preserved in review audit history, notified in real-time, and displayed on the user&apos;s profile verification center.
+            </div>
+
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold text-foreground">
+                  Official Justification Reason (Required):
+                </label>
+                <span className="text-[10px] text-text-secondary">
+                  {decisionModal.reason.trim().length} / 1000
+                </span>
+              </div>
+              <textarea
+                value={decisionModal.reason}
+                maxLength={1000}
+                onChange={(e) =>
+                  setDecisionModal((prev) => ({ ...prev, reason: e.target.value, error: "" }))
+                }
+                placeholder={
+                  decisionModal.action === "revoke"
+                    ? "Explain why verified status is being revoked (e.g. Terms violation, inaccurate follower count, business inactive)..."
+                    : "Explain why this request is rejected (e.g. Incomplete portfolio, missing required business registration, unverified social reach)..."
+                }
+                rows={4}
+                className="w-full text-xs bg-surface border border-border-theme rounded-xl p-3 text-foreground placeholder:text-text-secondary focus:outline-hidden focus:border-rose-500"
+              />
+              {decisionModal.error && (
+                <p className="text-xs text-rose-600 dark:text-rose-400 font-medium">
+                  {decisionModal.error}
+                </p>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-border-theme">
+              <button
+                type="button"
+                disabled={decisionModal.submitting}
+                onClick={() =>
+                  setDecisionModal({ open: false, item: null, action: null, reason: "", error: "", submitting: false })
+                }
+                className="px-4 py-2 text-xs font-medium text-text-secondary hover:text-foreground rounded-xl border border-border-theme hover:bg-surface-muted transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={decisionModal.submitting}
+                onClick={handleConfirmDecision}
+                className="px-5 py-2 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-500 rounded-xl shadow-xs transition disabled:opacity-50 cursor-pointer"
+              >
+                {decisionModal.submitting
+                  ? "Recording Decision..."
+                  : decisionModal.action === "revoke"
+                  ? "Confirm Revocation"
+                  : "Confirm Rejection"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

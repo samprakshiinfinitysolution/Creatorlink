@@ -125,7 +125,7 @@ export default function CreatorHeader({ setMobileOpen = () => {} }) {
     profile?.email ||
     "";
 
-  const isVerified = Boolean(profile?.isVerifiedBadge || userObj?.isVerified || authUser?.isVerified);
+  const isVerified = Boolean(profile?.isVerifiedBadge);
 
   // Initial letter (matching the reference pink circular avatar styling)
   const initial = (displayName && displayName.trim().length > 0)

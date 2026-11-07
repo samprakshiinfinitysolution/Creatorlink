@@ -21,7 +21,7 @@ export const ensureUserVerificationRecord = async (user) => {
             return await VerificationRequest.create({
                 user: user._id,
                 role: user.role,
-                status: user.isVerified ? "approved" : "pending",
+                status: "pending",
                 createdAt: user.createdAt || new Date(),
                 reviewHistory: []
             });
@@ -36,91 +36,10 @@ export const ensureUserVerificationRecord = async (user) => {
 };
 
 /**
- * Fetches a paginated list of verification requests for the admin queue.
- * Automatically synchronizes all registered creators and brands from Auth so every user is reviewable,
- * resolves duplicate entries, and applies role, status, and search filters.
+ * Fetches a paginated list of verification requests for the admin queue (strictly read-only).
+ * Applies role, status, search, and sorting filters without mutating database records.
  */
 export const getAdminVerificationsService = async (queryParams) => {
-    // 1. Auto-sync and deduplicate registered Creator and Brand users from Auth
-    try {
-        const allRegisteredUsers = await Auth.find({
-            role: { $in: ["creator", "brand"] }
-        }).select("_id role isVerified name email avatar createdAt").lean();
-
-        if (allRegisteredUsers.length > 0) {
-            const registeredUserIds = allRegisteredUsers.map((u) => u._id);
-            const registeredUserIdSet = new Set(allRegisteredUsers.map((u) => u._id.toString()));
-
-            // Purge orphaned verification requests whose user no longer exists in Auth
-            await VerificationRequest.deleteMany({
-                $or: [
-                    { user: null },
-                    { user: { $nin: registeredUserIds } }
-                ]
-            });
-
-            // Fetch current valid requests
-            const allExistingRequests = await VerificationRequest.find({
-                user: { $in: registeredUserIds }
-            }).sort({ createdAt: -1 });
-
-            // Group requests by user ID to detect and resolve duplicates
-            const requestMap = new Map();
-            const duplicateIdsToDelete = [];
-
-            for (const req of allExistingRequests) {
-                const uIdStr = req.user.toString();
-                if (!requestMap.has(uIdStr)) {
-                    requestMap.set(uIdStr, req);
-                } else {
-                    // Duplicate found: keep the first (most authoritative) or approved one, discard extra
-                    const kept = requestMap.get(uIdStr);
-                    if (req.status === "approved" && kept.status !== "approved") {
-                        duplicateIdsToDelete.push(kept._id);
-                        requestMap.set(uIdStr, req);
-                    } else {
-                        duplicateIdsToDelete.push(req._id);
-                    }
-                }
-            }
-
-            if (duplicateIdsToDelete.length > 0) {
-                await VerificationRequest.deleteMany({ _id: { $in: duplicateIdsToDelete } });
-            }
-
-            // Sync verification status for existing users (if Auth is verified, request must be approved)
-            for (const u of allRegisteredUsers) {
-                const existing = requestMap.get(u._id.toString());
-                if (existing && u.isVerified && existing.status !== "approved") {
-                    await VerificationRequest.findByIdAndUpdate(existing._id, { status: "approved" });
-                    existing.status = "approved";
-                }
-            }
-
-            // Create canonical verification request for any user missing one
-            const missingUsers = allRegisteredUsers.filter(
-                (u) => !requestMap.has(u._id.toString())
-            );
-
-            if (missingUsers.length > 0) {
-                const newRecords = missingUsers.map((u) => ({
-                    user: u._id,
-                    role: u.role,
-                    documentType: "profile_verification",
-                    documentNumber: "",
-                    documentUrls: [],
-                    notes: "Auto-synced registered user account",
-                    status: u.isVerified ? "approved" : "pending",
-                    createdAt: u.createdAt || new Date(),
-                    reviewHistory: []
-                }));
-                await VerificationRequest.insertMany(newRecords, { ordered: false });
-            }
-        }
-    } catch (syncErr) {
-        console.error("Auto-sync verification queue error:", syncErr);
-    }
-
     const {
         page = 1,
         limit = 10,
@@ -143,7 +62,16 @@ export const getAdminVerificationsService = async (queryParams) => {
 
     // Filter by status
     if (status && status !== "all") {
-        filter.status = status.toLowerCase();
+        if (status.toLowerCase() === "resubmitted") {
+            // Must be pending and have been resubmitted (either resubmittedAt is populated OR reviewHistory has prior reviews)
+            filter.status = "pending";
+            filter.$or = [
+                { resubmittedAt: { $ne: null } },
+                { "reviewHistory.0": { $exists: true } }
+            ];
+        } else {
+            filter.status = status.toLowerCase();
+        }
     }
 
     // Search by user name or email in Auth collection
@@ -163,13 +91,16 @@ export const getAdminVerificationsService = async (queryParams) => {
     }
 
     const sortOrder = sortBy.toLowerCase() === "oldest" ? 1 : -1;
+    const sortCriteria = status && status.toLowerCase() === "resubmitted"
+        ? { resubmittedAt: sortOrder, updatedAt: sortOrder, createdAt: sortOrder }
+        : { createdAt: sortOrder };
 
     const [requests, totalItems] = await Promise.all([
         VerificationRequest.find(filter)
             .populate("user", "name email role isVerified avatar createdAt")
             .populate("reviewedBy", "name email role avatar")
             .populate("reviewHistory.reviewedBy", "name email role avatar")
-            .sort({ createdAt: sortOrder })
+            .sort(sortCriteria)
             .skip(skip)
             .limit(parsedLimit)
             .lean(),
@@ -273,8 +204,7 @@ export const approveVerificationService = async (id, adminId, reason = "") => {
 
     await request.save();
 
-    // Persist verified badge on Auth and specific Profile collection
-    await Auth.findByIdAndUpdate(request.user, { isVerified: true });
+    // Persist verified badge on specific Profile collection (Auth.isVerified remains independent email verification)
     if (request.role === "creator") {
         await CreatorProfile.findOneAndUpdate(
             { user: request.user },
@@ -328,9 +258,17 @@ export const rejectVerificationService = async (id, adminId, rejectionReason) =>
     }
 
     const previousStatus = request.status || "pending";
-    const cleanReason = (rejectionReason && typeof rejectionReason === "string" && rejectionReason.trim())
+    const cleanReason = (rejectionReason && typeof rejectionReason === "string")
         ? rejectionReason.trim()
-        : "Verification request rejected by administrator.";
+        : "";
+
+    if (!cleanReason || cleanReason.length < 3) {
+        throw createApiError(400, "A rejection reason of at least 3 characters is required");
+    }
+
+    if (cleanReason.length > 1000) {
+        throw createApiError(400, "Rejection reason cannot exceed 1000 characters");
+    }
 
     const decisionTimestamp = new Date();
 
@@ -355,8 +293,7 @@ export const rejectVerificationService = async (id, adminId, rejectionReason) =>
 
     await request.save();
 
-    // Ensure verified badge is disabled
-    await Auth.findByIdAndUpdate(request.user, { isVerified: false });
+    // Ensure verified badge is disabled on Profile (Auth.isVerified remains independent email verification)
     if (request.role === "creator") {
         await CreatorProfile.findOneAndUpdate(
             { user: request.user },
@@ -407,9 +344,17 @@ export const revokeVerificationService = async (id, adminId, reason) => {
     }
 
     const previousStatus = request.status || "approved";
-    const cleanReason = (reason && typeof reason === "string" && reason.trim())
+    const cleanReason = (reason && typeof reason === "string")
         ? reason.trim()
-        : "Verification status revoked by administrator.";
+        : "";
+
+    if (!cleanReason || cleanReason.length < 3) {
+        throw createApiError(400, "A reason of at least 3 characters is required to revoke verification status");
+    }
+
+    if (cleanReason.length > 1000) {
+        throw createApiError(400, "Revocation reason cannot exceed 1000 characters");
+    }
 
     const decisionTimestamp = new Date();
 
@@ -434,8 +379,7 @@ export const revokeVerificationService = async (id, adminId, reason) => {
 
     await request.save();
 
-    // Deactivate verified badges
-    await Auth.findByIdAndUpdate(request.user, { isVerified: false });
+    // Deactivate verified badges on Profile (Auth.isVerified remains independent email verification)
     if (request.role === "creator") {
         await CreatorProfile.findOneAndUpdate(
             { user: request.user },
@@ -481,19 +425,81 @@ export const revokeVerificationService = async (id, adminId, reason) => {
 export const submitUserVerificationService = async (userId, role, data = {}) => {
     let existing = await VerificationRequest.findOne({ user: userId });
 
-    if (existing && existing.status === "pending") {
-        throw createApiError(
-            400,
-            "You already have a pending verification request currently under review."
-        );
+    if (existing) {
+        if (existing.status === "pending") {
+            throw createApiError(
+                400,
+                "You already have a pending verification request currently under review."
+            );
+        }
+
+        if (existing.status === "approved") {
+            throw createApiError(
+                400,
+                "Your account is already officially verified. Re-submission is not allowed."
+            );
+        }
     }
 
+    const now = new Date();
+
     if (existing) {
+        const isResubmission =
+            existing.status !== "pending" ||
+            (Array.isArray(existing.reviewHistory) && existing.reviewHistory.length > 0) ||
+            Boolean(existing.resubmittedAt);
+
         existing.status = "pending";
         existing.role = role;
         existing.notes = data.notes ? data.notes.trim() : "";
         existing.rejectionReason = null;
+
+        if (isResubmission) {
+            existing.resubmittedAt = now;
+            if (!Array.isArray(existing.resubmissionHistory)) {
+                existing.resubmissionHistory = [];
+            }
+            existing.resubmissionHistory.push({
+                resubmittedAt: now,
+                notes: data.notes ? data.notes.trim() : ""
+            });
+        }
+
         await existing.save();
+
+        // Dispatch persistent notification & Socket.IO event to all Administrators on resubmission
+        if (isResubmission) {
+            try {
+                const applicant = await Auth.findById(userId).select("name email role").lean();
+                const applicantName = applicant?.name || (role === "creator" ? "Creator" : "Brand");
+                const roleLabel = role === "creator" ? "Creator" : "Brand";
+
+                const admins = await Auth.find({ role: "admin" }).select("_id").lean();
+
+                for (const admin of admins) {
+                    await createNotificationService({
+                        recipient: admin._id,
+                        sender: userId,
+                        type: "verification_resubmitted",
+                        title: "Verification Re-submitted",
+                        message: `${applicantName} (${roleLabel}) has re-submitted their verification application for administrative review.`,
+                        entityType: "verification",
+                        entityId: existing._id,
+                        destination: `/admin/verification?id=${existing._id}`,
+                        metadata: {
+                            action: "resubmitted",
+                            userId: userId,
+                            role: role,
+                            resubmittedAt: now
+                        },
+                        idempotencyKey: `verif_resubmit_${existing._id}_${now.getTime()}_${admin._id}`
+                    });
+                }
+            } catch (notifErr) {
+                console.error("Failed to dispatch admin notification for verification resubmission:", notifErr);
+            }
+        }
+
         return existing;
     }
 
@@ -515,13 +521,56 @@ export const submitUserVerificationService = async (userId, role, data = {}) => 
  * Fetches the current verification status and decision history for the authenticated user.
  */
 export const getUserVerificationStatusService = async (userId) => {
-    const request = await VerificationRequest.findOne({ user: userId })
-        .populate("reviewedBy", "name email role")
-        .populate("reviewHistory.reviewedBy", "name email role")
+    let request = await VerificationRequest.findOne({ user: userId })
+        .populate("reviewedBy", "name email role avatar")
+        .populate("reviewHistory.reviewedBy", "name email role avatar")
         .lean();
+
+    if (!request) {
+        const user = await Auth.findById(userId).select("_id role isVerified createdAt");
+        if (user && ["creator", "brand"].includes(user.role)) {
+            await ensureUserVerificationRecord(user);
+            request = await VerificationRequest.findOne({ user: userId })
+                .populate("reviewedBy", "name email role avatar")
+                .populate("reviewHistory.reviewedBy", "name email role avatar")
+                .lean();
+        }
+    }
+
+    const history = Array.isArray(request?.reviewHistory) ? request.reviewHistory : [];
+    const latestHistory = history.length > 0 ? history[history.length - 1] : null;
+    const latestAction = latestHistory?.action || (request?.status === "approved" ? "approved" : request?.status === "rejected" ? "rejected" : "pending");
+
+    // Differentiate between rejected vs revoked:
+    // If request.status is "rejected" and the latest historical action was "revoked", effective status is "revoked".
+    let effectiveStatus = "pending";
+    if (request?.status === "approved") {
+        effectiveStatus = "approved";
+    } else if (request?.status === "rejected") {
+        effectiveStatus = latestAction === "revoked" ? "revoked" : "rejected";
+    }
+
+    // Determine current authoritative reason:
+    // If approved: no rejection reason. Any note is in request.notes.
+    // If rejected or revoked: rejectionReason from request or latest history reason.
+    const effectiveReason = effectiveStatus === "approved"
+        ? (request?.notes || null)
+        : (effectiveStatus === "rejected" || effectiveStatus === "revoked")
+        ? (request?.rejectionReason || latestHistory?.reason || "Verification not approved by administrator.")
+        : null;
+
+    const reviewDate = request?.reviewedAt || latestHistory?.reviewedAt || null;
+    const reviewerName = request?.reviewedBy?.name || latestHistory?.reviewedBy?.name || "Administrator";
 
     return {
         current: request,
-        history: request?.reviewHistory || []
+        status: effectiveStatus,
+        rawStatus: request?.status || "pending",
+        reason: effectiveReason,
+        reviewedAt: reviewDate,
+        reviewerName,
+        latestDecision: latestHistory,
+        history,
+        resubmittedAt: request?.resubmittedAt || null
     };
 };

@@ -618,9 +618,9 @@ export default function CreatorReviewsManager() {
                   null;
 
                 const isVerified = Boolean(
-                  partnerObj?.isVerified ||
-                  partnerObj?.verified ||
-                  review.brand?.isVerified
+                  review.brandProfile?.isVerifiedBusiness ||
+                  partnerObj?.isVerifiedBusiness ||
+                  partnerObj?.isVerifiedBadge
                 );
 
                 const targetWorkspaceId =

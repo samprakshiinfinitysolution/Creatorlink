@@ -1,12 +1,49 @@
 import mongoose from "mongoose";
 
-const verificationRequestSchema = new mongoose.Schema(
+// Permanent historical audit record for every administrative decision
+const reviewHistoryItemSchema = new mongoose.Schema(
     {
-        // Reference to the user requesting verification (Creator or Brand)
-        user: {
+        reviewedBy: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Auth",
             required: true
+        },
+        action: {
+            type: String,
+            enum: ["approved", "rejected", "revoked"],
+            required: true
+        },
+        previousStatus: {
+            type: String,
+            required: true
+        },
+        newStatus: {
+            type: String,
+            required: true
+        },
+        reason: {
+            type: String,
+            trim: true,
+            maxlength: 1000,
+            default: ""
+        },
+        reviewedAt: {
+            type: Date,
+            default: Date.now
+        }
+    },
+    { _id: true }
+);
+
+const verificationRequestSchema = new mongoose.Schema(
+    {
+        // Reference to the user requesting verification (Creator or Brand) - unique per account
+        user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Auth",
+            required: true,
+            unique: true,
+            index: true
         },
 
         // Role of the user at the time of submission
@@ -17,22 +54,15 @@ const verificationRequestSchema = new mongoose.Schema(
             index: true
         },
 
-        // Type of identification or business documentation provided
+        // Type of identification or verification reference (optional, legacy support)
         documentType: {
             type: String,
-            required: true,
+            required: false,
             trim: true,
-            enum: [
-                "national_id",
-                "passport",
-                "drivers_license",
-                "business_registration",
-                "tax_id",
-                "other"
-            ]
+            default: "profile_verification"
         },
 
-        // Optional document identification number
+        // Optional document identification number (optional, legacy support)
         documentNumber: {
             type: String,
             trim: true,
@@ -40,17 +70,14 @@ const verificationRequestSchema = new mongoose.Schema(
             default: ""
         },
 
-        // Cloudinary URLs for uploaded identification documents
+        // Uploaded identification documents (optional, legacy support)
         documentUrls: {
             type: [String],
-            required: true,
-            validate: {
-                validator: (urls) => Array.isArray(urls) && urls.length > 0,
-                message: "At least one document URL is required for verification"
-            }
+            required: false,
+            default: []
         },
 
-        // Optional notes or remarks submitted by the user
+        // Optional notes or remarks submitted by the user or reviewer
         notes: {
             type: String,
             trim: true,
@@ -66,25 +93,31 @@ const verificationRequestSchema = new mongoose.Schema(
             index: true
         },
 
-        // Admin who reviewed this request
+        // Most recent Admin who reviewed this request
         reviewedBy: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Auth",
             default: null
         },
 
-        // Timestamp when the admin made the decision
+        // Timestamp when the admin made the most recent decision
         reviewedAt: {
             type: Date,
             default: null
         },
 
-        // Justification provided by the admin if the request is rejected
+        // Justification provided by the admin if the request is rejected or revoked
         rejectionReason: {
             type: String,
             trim: true,
             maxlength: 1000,
             default: null
+        },
+
+        // Complete audit history of all administrative decisions for this user
+        reviewHistory: {
+            type: [reviewHistoryItemSchema],
+            default: []
         }
     },
     {
@@ -95,16 +128,6 @@ const verificationRequestSchema = new mongoose.Schema(
 // Compound indexes for administrative queue queries
 verificationRequestSchema.index({ status: 1, createdAt: -1 });
 verificationRequestSchema.index({ role: 1, status: 1 });
-
-// Partial unique index: A user can have at most ONE "pending" verification request at any given time.
-// Approved and rejected requests remain preserved as immutable historical records.
-verificationRequestSchema.index(
-    { user: 1 },
-    {
-        unique: true,
-        partialFilterExpression: { status: "pending" }
-    }
-);
 
 const VerificationRequest = mongoose.model(
     "VerificationRequest",

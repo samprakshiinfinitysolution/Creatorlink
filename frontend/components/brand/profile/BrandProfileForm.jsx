@@ -292,6 +292,9 @@ export default function BrandProfileForm() {
   const { profile, loading, error } = useSelector(
     (state) => state.brandProfile || {}
   );
+  const { user: authUser } = useSelector(
+    (state) => state.auth || {}
+  );
 
   const [formData, setFormData] = useState({
     companyName: "",
@@ -766,7 +769,7 @@ export default function BrandProfileForm() {
                         <h2 className="font-serif font-semibold text-2xl sm:text-[26px] text-slate-900 dark:text-foreground tracking-wide break-words">
                           {brandName}
                         </h2>
-                        {Boolean(profile?.isVerifiedBusiness) && (
+                        {Boolean(profile?.isVerifiedBusiness || profile?.user?.isVerified || authUser?.isVerified) && (
                           <span
                             className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-secondary/10 text-secondary border border-secondary/20 shadow-xs"
                             title="Official Verified Business"

@@ -5,12 +5,15 @@ import {
     getAdminVerifications,
     getAdminVerificationById,
     approveVerification,
-    rejectVerification
+    rejectVerification,
+    revokeVerification
 } from "./verification.controller.js";
 import {
     validateGetVerificationsQuery,
     validateVerificationIdParam,
-    validateRejectVerificationBody
+    validateApproveVerificationBody,
+    validateRejectVerificationBody,
+    validateRevokeVerificationBody
 } from "./verification.validation.js";
 
 const router = express.Router();
@@ -39,6 +42,7 @@ router.get(
 router.patch(
     "/:id/approve",
     validateVerificationIdParam,
+    validateApproveVerificationBody,
     approveVerification
 );
 
@@ -48,6 +52,14 @@ router.patch(
     validateVerificationIdParam,
     validateRejectVerificationBody,
     rejectVerification
+);
+
+// Revoke an approved verification request with reason
+router.patch(
+    "/:id/revoke",
+    validateVerificationIdParam,
+    validateRevokeVerificationBody,
+    revokeVerification
 );
 
 export default router;

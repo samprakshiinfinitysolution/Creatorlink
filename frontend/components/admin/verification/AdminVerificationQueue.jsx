@@ -4,7 +4,10 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchVerifications,
-  fetchVerificationDetails
+  fetchVerificationDetails,
+  approveVerificationRequest,
+  rejectVerificationRequest,
+  revokeVerificationRequest
 } from "@/redux/admin/verification/verification_slice";
 import AdminVerificationDetailModal from "./AdminVerificationDetailModal";
 import AdminAvatar from "@/components/admin/AdminAvatar";
@@ -63,28 +66,71 @@ export default function AdminVerificationQueue() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
   const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
   const [modalOpen, setModalOpen] = useState(false);
 
   const loadVerifications = useCallback(() => {
     dispatch(
       fetchVerifications({
         page,
-        limit: 10,
+        limit,
         role: roleFilter,
         status: statusFilter,
         sortBy,
         search: search.trim()
       })
     );
-  }, [dispatch, page, roleFilter, statusFilter, sortBy, search]);
+  }, [dispatch, page, limit, roleFilter, statusFilter, sortBy, search]);
 
   useEffect(() => {
     loadVerifications();
   }, [loadVerifications]);
 
+  const [actionLoadingId, setActionLoadingId] = useState(null);
+
   const handleOpenReview = async (item) => {
     await dispatch(fetchVerificationDetails(item._id));
     setModalOpen(true);
+  };
+
+  const handleQuickApprove = async (item) => {
+    setActionLoadingId(item._id);
+    try {
+      await dispatch(approveVerificationRequest(item._id));
+      loadVerifications();
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  const handleQuickReject = async (item) => {
+    setActionLoadingId(item._id);
+    try {
+      await dispatch(
+        rejectVerificationRequest({
+          id: item._id,
+          rejectionReason: "Rejected by administrator from verification queue"
+        })
+      );
+      loadVerifications();
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  const handleQuickRevoke = async (item) => {
+    setActionLoadingId(item._id);
+    try {
+      await dispatch(
+        revokeVerificationRequest({
+          id: item._id,
+          reason: "Revoked by administrator from verification queue"
+        })
+      );
+      loadVerifications();
+    } finally {
+      setActionLoadingId(null);
+    }
   };
 
   const handleSearchSubmit = (e) => {
@@ -108,7 +154,7 @@ export default function AdminVerificationQueue() {
             </span>
           </div>
           <p className="text-xs sm:text-sm text-text-secondary mt-1">
-            Review identity proofs and business credentials to grant official verified status.
+            Manage creator and brand accounts, review profiles, and grant or revoke official verified badges.
           </p>
         </div>
       </div>
@@ -126,7 +172,7 @@ export default function AdminVerificationQueue() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by name, email, or doc number..."
+              placeholder="Search by name or email..."
               className="w-full pl-10 pr-4 py-2 text-xs bg-surface-muted/60 border border-border-theme rounded-xl text-foreground placeholder:text-text-secondary focus:outline-hidden focus:border-secondary transition"
             />
           </form>
@@ -180,6 +226,21 @@ export default function AdminVerificationQueue() {
               <option value="newest">Newest First</option>
               <option value="oldest">Oldest First</option>
             </select>
+
+            {/* Per Page Limit */}
+            <select
+              value={limit}
+              onChange={(e) => {
+                setLimit(Number(e.target.value));
+                setPage(1);
+              }}
+              className="text-xs bg-surface-muted/60 border border-border-theme rounded-xl px-3 py-2 text-foreground focus:outline-hidden focus:border-secondary cursor-pointer"
+              title="Items per page"
+            >
+              <option value={10}>10 / page</option>
+              <option value={25}>25 / page</option>
+              <option value={50}>50 / page</option>
+            </select>
           </div>
         </div>
       </div>
@@ -199,8 +260,7 @@ export default function AdminVerificationQueue() {
               <tr>
                 <th className="px-5 py-3.5">Applicant</th>
                 <th className="px-5 py-3.5">Role</th>
-                <th className="px-5 py-3.5">Document Type</th>
-                <th className="px-5 py-3.5">Submitted</th>
+                <th className="px-5 py-3.5">Registered Date</th>
                 <th className="px-5 py-3.5">Status</th>
                 <th className="px-5 py-3.5 text-right">Actions</th>
               </tr>
@@ -223,9 +283,6 @@ export default function AdminVerificationQueue() {
                       <div className="h-4 w-16 bg-surface-muted rounded" />
                     </td>
                     <td className="px-5 py-4">
-                      <div className="h-4 w-24 bg-surface-muted rounded" />
-                    </td>
-                    <td className="px-5 py-4">
                       <div className="h-3 w-20 bg-surface-muted rounded" />
                     </td>
                     <td className="px-5 py-4">
@@ -238,7 +295,7 @@ export default function AdminVerificationQueue() {
                 ))
               ) : verifications.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-5 py-12 text-center">
+                  <td colSpan={5} className="px-5 py-12 text-center">
                     <ShieldCheckIcon className="w-8 h-8 text-text-secondary mx-auto mb-2 opacity-50" />
                     <p className="text-sm font-medium text-foreground">
                       No verification requests found
@@ -296,21 +353,9 @@ export default function AdminVerificationQueue() {
                         </span>
                       </td>
 
-                      {/* Document Type */}
-                      <td className="px-5 py-4">
-                        <p className="font-medium text-foreground capitalize">
-                          {item.documentType
-                            ? item.documentType.replace(/_/g, " ")
-                            : "General"}
-                        </p>
-                        <p className="text-[11px] text-text-secondary">
-                          {item.documentUrls?.length || 0} file(s) attached
-                        </p>
-                      </td>
-
-                      {/* Submitted */}
+                      {/* Registered Date */}
                       <td className="px-5 py-4 text-text-secondary">
-                        {new Date(item.createdAt).toLocaleDateString()}
+                        {new Date(item.user?.createdAt || item.createdAt).toLocaleDateString()}
                       </td>
 
                       {/* Status */}
@@ -330,14 +375,58 @@ export default function AdminVerificationQueue() {
 
                       {/* Actions */}
                       <td className="px-5 py-4 text-right">
-                        <button
-                          type="button"
-                          onClick={() => handleOpenReview(item)}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-secondary hover:text-white bg-secondary/10 hover:bg-secondary rounded-xl border border-secondary/20 transition cursor-pointer"
-                        >
-                          <EyeIcon className="w-3.5 h-3.5" />
-                          Review
-                        </button>
+                        <div className="flex items-center justify-end gap-1.5 flex-wrap">
+                          {item.status === "approved" ? (
+                            <button
+                              type="button"
+                              onClick={() => handleQuickRevoke(item)}
+                              disabled={actionLoadingId === item._id}
+                              className="inline-flex items-center px-2.5 py-1 text-[11px] font-semibold text-rose-600 hover:text-white bg-rose-500/10 hover:bg-rose-600 rounded-lg border border-rose-500/20 transition cursor-pointer disabled:opacity-50"
+                              title="Revoke Verification Badge"
+                            >
+                              {actionLoadingId === item._id ? "..." : "Revoke"}
+                            </button>
+                          ) : item.status === "pending" ? (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => handleQuickApprove(item)}
+                                disabled={actionLoadingId === item._id}
+                                className="inline-flex items-center px-2.5 py-1 text-[11px] font-semibold text-emerald-600 hover:text-white bg-emerald-500/10 hover:bg-emerald-600 rounded-lg border border-emerald-500/20 transition cursor-pointer disabled:opacity-50"
+                                title="Approve & Grant Badge"
+                              >
+                                {actionLoadingId === item._id ? "..." : "Approve"}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleQuickReject(item)}
+                                disabled={actionLoadingId === item._id}
+                                className="inline-flex items-center px-2.5 py-1 text-[11px] font-semibold text-rose-600 hover:text-white bg-rose-500/10 hover:bg-rose-600 rounded-lg border border-rose-500/20 transition cursor-pointer disabled:opacity-50"
+                                title="Reject Verification"
+                              >
+                                {actionLoadingId === item._id ? "..." : "Reject"}
+                              </button>
+                            </>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => handleQuickApprove(item)}
+                              disabled={actionLoadingId === item._id}
+                              className="inline-flex items-center px-2.5 py-1 text-[11px] font-semibold text-emerald-600 hover:text-white bg-emerald-500/10 hover:bg-emerald-600 rounded-lg border border-emerald-500/20 transition cursor-pointer disabled:opacity-50"
+                              title="Re-Approve & Grant Badge"
+                            >
+                              {actionLoadingId === item._id ? "..." : "Approve"}
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => handleOpenReview(item)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-secondary hover:text-white bg-secondary/10 hover:bg-secondary rounded-lg border border-secondary/20 transition cursor-pointer"
+                          >
+                            <EyeIcon className="w-3.5 h-3.5" />
+                            Review
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -349,24 +438,31 @@ export default function AdminVerificationQueue() {
 
         {/* Pagination Footer */}
         {pagination && pagination.totalPages > 1 && (
-          <div className="flex items-center justify-between px-5 py-3.5 bg-surface-muted/40 border-t border-border-theme text-xs text-text-secondary">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-5 py-3.5 bg-surface-muted/40 border-t border-border-theme text-xs text-text-secondary">
             <div>
-              Showing page {pagination.page} of {pagination.totalPages} ({pagination.totalItems} requests)
+              Showing {Math.min((pagination.page - 1) * pagination.limit + 1, pagination.totalItems)} to {Math.min(pagination.page * pagination.limit, pagination.totalItems)} of {pagination.totalItems} requests
             </div>
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                disabled={!pagination.hasPrev}
+                disabled={pagination.page <= 1}
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 className="p-1.5 rounded-lg border border-border-theme hover:bg-surface-muted disabled:opacity-40 disabled:hover:bg-transparent text-foreground cursor-pointer"
+                title="Previous Page"
               >
                 <ChevronLeftIcon className="w-4 h-4" />
               </button>
+              
+              <span className="px-2 font-medium text-foreground">
+                Page {pagination.page} of {pagination.totalPages}
+              </span>
+
               <button
                 type="button"
-                disabled={!pagination.hasNext}
-                onClick={() => setPage((p) => p + 1)}
+                disabled={pagination.page >= pagination.totalPages}
+                onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
                 className="p-1.5 rounded-lg border border-border-theme hover:bg-surface-muted disabled:opacity-40 disabled:hover:bg-transparent text-foreground cursor-pointer"
+                title="Next Page"
               >
                 <ChevronRightIcon className="w-4 h-4" />
               </button>

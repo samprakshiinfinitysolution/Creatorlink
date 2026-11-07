@@ -19,6 +19,7 @@ import {
 import { sendEmail } from "../../utils/helpers/email.helper.js";
 import { createBrandTrialSubscriptionService } from "../subscriptions/trial.service.js";
 import BrandProfile from "../brand/profile/profile.model.js";
+import { ensureUserVerificationRecord } from "../admin/verification/verification.service.js";
 
 
 // Helper to hash verification OTP consistently with SHA-256.
@@ -727,6 +728,13 @@ const googleAuthUser = async ({ idToken, credential, code, role = "creator" }) =
         }
     }
 
+    // Ensure user appears in Admin Verification Queue immediately upon registration
+    try {
+        await ensureUserVerificationRecord(user);
+    } catch (verifErr) {
+        console.error("Failed to ensure verification record in Google Auth:", verifErr);
+    }
+
     const userData = user.toObject();
     delete userData.password;
     delete userData.sessions;
@@ -845,6 +853,13 @@ const verifyEmailOtp = async ({ email, otp }) => {
         } catch (profileError) {
             console.error("Failed to initialize brand profile in verifyEmailOtp:", profileError);
         }
+    }
+
+    // Ensure user appears in Admin Verification Queue immediately upon verified registration
+    try {
+        await ensureUserVerificationRecord(user);
+    } catch (verifErr) {
+        console.error("Failed to ensure verification record in verifyEmailOtp:", verifErr);
     }
 
     const userData = user.toObject();

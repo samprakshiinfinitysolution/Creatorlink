@@ -1656,7 +1656,7 @@ const collaborationsCount = profile?.collaborationsCount || profile?.completedCa
                         <h2 className="font-serif font-semibold text-2xl sm:text-[26px] text-slate-900 dark:text-foreground tracking-wide break-words">
                           {creatorName}
                         </h2>
-                        {Boolean(profile?.isVerifiedBadge) && (
+                        {Boolean(profile?.isVerifiedBadge || profile?.user?.isVerified || authUser?.isVerified) && (
                           <span
                             className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-secondary/10 text-secondary border border-secondary/20 shadow-xs"
                             title="Official Verified Creator"

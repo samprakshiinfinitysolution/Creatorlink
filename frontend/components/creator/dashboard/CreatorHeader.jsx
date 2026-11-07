@@ -125,6 +125,8 @@ export default function CreatorHeader({ setMobileOpen = () => {} }) {
     profile?.email ||
     "";
 
+  const isVerified = Boolean(profile?.isVerifiedBadge || userObj?.isVerified || authUser?.isVerified);
+
   // Initial letter (matching the reference pink circular avatar styling)
   const initial = (displayName && displayName.trim().length > 0)
     ? displayName.trim()[0].toUpperCase()
@@ -301,8 +303,13 @@ export default function CreatorHeader({ setMobileOpen = () => {} }) {
 
             {/* Profile Name & Role (Hidden on small mobile) */}
             <div className="hidden md:flex flex-col text-left leading-tight">
-              <span className="text-xs sm:text-sm font-semibold text-foreground group-hover:text-[#ff2d6c] transition-colors truncate max-w-[110px] lg:max-w-[150px]">
-                {displayName}
+              <span className="text-xs sm:text-sm font-semibold text-foreground group-hover:text-[#ff2d6c] transition-colors truncate max-w-[110px] lg:max-w-[150px] flex items-center gap-1">
+                <span className="truncate">{displayName}</span>
+                {isVerified && (
+                  <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-[#ff2d6c] text-white text-[9px] font-bold shrink-0" title="Verified Creator">
+                    ✓
+                  </span>
+                )}
               </span>
               <span className="text-[10px] sm:text-[11px] text-slate-400 dark:text-text-secondary truncate max-w-[110px] lg:max-w-[150px]">
                 {displayRole}
@@ -322,8 +329,13 @@ export default function CreatorHeader({ setMobileOpen = () => {} }) {
             <div className="absolute right-0 top-full mt-2 w-52 bg-surface border border-border-theme rounded-2xl shadow-xl p-2 z-50 text-foreground font-sans select-none animate-in fade-in slide-in-from-top-1 duration-150">
               {/* User Summary Header */}
               <div className="px-3 py-2 border-b border-border-theme mb-1">
-                <span className="block text-xs font-semibold text-foreground truncate">
-                  {displayName}
+                <span className="text-xs font-semibold text-foreground truncate flex items-center gap-1.5">
+                  <span className="truncate">{displayName}</span>
+                  {isVerified && (
+                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-[#ff2d6c]/10 text-[#ff2d6c] border border-[#ff2d6c]/20 shrink-0">
+                      ✓ Verified
+                    </span>
+                  )}
                 </span>
                 <span className="block text-[11px] text-text-secondary truncate mt-0.5">
                   {displayRole}

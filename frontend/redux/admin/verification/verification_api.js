@@ -12,9 +12,10 @@ export const getAdminVerificationById = async (id) => {
     return response.data;
 };
 
-// Approves a verification request
-export const approveVerification = async (id) => {
-    const response = await axiosInstance.patch(`/admin/verifications/${id}/approve`);
+// Approves a verification request (optionally with an approval note/reason)
+export const approveVerification = async (id, reason) => {
+    const payload = reason ? { reason } : {};
+    const response = await axiosInstance.patch(`/admin/verifications/${id}/approve`, payload);
     return response.data;
 };
 
@@ -22,6 +23,14 @@ export const approveVerification = async (id) => {
 export const rejectVerification = async (id, rejectionReason) => {
     const response = await axiosInstance.patch(`/admin/verifications/${id}/reject`, {
         rejectionReason
+    });
+    return response.data;
+};
+
+// Revokes an approved verification with a reason
+export const revokeVerification = async (id, reason) => {
+    const response = await axiosInstance.patch(`/admin/verifications/${id}/revoke`, {
+        reason
     });
     return response.data;
 };

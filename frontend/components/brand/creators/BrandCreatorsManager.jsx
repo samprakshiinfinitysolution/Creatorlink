@@ -200,7 +200,7 @@ function CreatorCard({ creator, onViewProfile, isSaved, isSaving, onToggleSave, 
 
   const name = creator.user?.name || "Creator";
   const initials = getInitials(name);
-  const isVerified = Boolean(creator?.isVerifiedBadge ?? creator?.user?.isVerified);
+  const isVerified = Boolean(creator?.isVerifiedBadge ?? creator?.user?.isVerified ?? creator?.isVerified);
   const location = creator.location || "Global";
   const category = creator.category || "General";
   const bio = creator.bio || "Content Creator & Collaborator";

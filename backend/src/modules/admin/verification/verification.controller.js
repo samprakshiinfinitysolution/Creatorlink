@@ -5,6 +5,7 @@ import {
     getAdminVerificationByIdService,
     approveVerificationService,
     rejectVerificationService,
+    revokeVerificationService,
     submitUserVerificationService,
     getUserVerificationStatusService
 } from "./verification.service.js";
@@ -45,7 +46,8 @@ export const getAdminVerificationById = asyncHandler(async (req, res) => {
  */
 export const approveVerification = asyncHandler(async (req, res) => {
     const adminId = req.user.userId || req.user._id;
-    const result = await approveVerificationService(req.params.id, adminId);
+    const reason = req.body?.reason || req.body?.notes || "";
+    const result = await approveVerificationService(req.params.id, adminId, reason);
 
     return sendResponse(
         res,
@@ -71,6 +73,27 @@ export const rejectVerification = asyncHandler(async (req, res) => {
         res,
         200,
         "Verification request rejected successfully",
+        result
+    );
+});
+
+/**
+ * Controller: Revokes an active verification status and badge with justification.
+ * PATCH /api/admin/verifications/:id/revoke
+ */
+export const revokeVerification = asyncHandler(async (req, res) => {
+    const adminId = req.user.userId || req.user._id;
+    const reason = req.body?.reason || req.body?.rejectionReason || "";
+    const result = await revokeVerificationService(
+        req.params.id,
+        adminId,
+        reason
+    );
+
+    return sendResponse(
+        res,
+        200,
+        "Verification status revoked successfully",
         result
     );
 });

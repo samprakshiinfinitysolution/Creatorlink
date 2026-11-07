@@ -381,7 +381,7 @@ export default function AdminCollaborationsManager() {
                             <span className="truncate">
                               {collab.brandProfile?.companyName || collab.brand?.name || "Brand"}
                             </span>
-                            {(collab.brandProfile?.isVerifiedBusiness || collab.brand?.isVerified) && (
+                            {Boolean(collab.brandProfile?.isVerifiedBusiness) && (
                               <CheckBadgeIcon className="w-3.5 h-3.5 shrink-0" />
                             )}
                           </div>
@@ -406,7 +406,7 @@ export default function AdminCollaborationsManager() {
                             <span className="truncate">
                               {collab.creatorProfile?.displayName || collab.creator?.name || "Creator"}
                             </span>
-                            {(collab.creatorProfile?.isVerifiedBadge || collab.creator?.isVerified) && (
+                            {Boolean(collab.creatorProfile?.isVerifiedBadge) && (
                               <CheckBadgeIcon className="w-3.5 h-3.5 shrink-0" />
                             )}
                           </div>

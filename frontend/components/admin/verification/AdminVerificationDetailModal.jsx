@@ -92,6 +92,8 @@ export default function AdminVerificationDetailModal({
     notes,
     status,
     createdAt,
+    resubmittedAt,
+    resubmissionHistory = [],
     reviewedAt,
     reviewedBy,
     rejectionReason: existingRejectionReason,
@@ -101,6 +103,10 @@ export default function AdminVerificationDetailModal({
 
   const displayName = user?.name || user?.fullName || "Unnamed User";
   const reviewerName = reviewedBy?.name || reviewedBy?.fullName || reviewedBy?.email || "Administrator";
+  const hasHistory = Array.isArray(reviewHistory) && reviewHistory.length > 0;
+  const isResubmitted = status === "pending" && (Boolean(resubmittedAt) || hasHistory);
+  const latestResubmissionDate = resubmittedAt || (isResubmitted ? request.updatedAt : null);
+  const latestPriorReview = hasHistory ? reviewHistory[reviewHistory.length - 1] : null;
 
   const handleApprove = async () => {
     const res = await dispatch(approveVerificationRequest(_id));
@@ -111,8 +117,13 @@ export default function AdminVerificationDetailModal({
   };
 
   const handleConfirmAction = async () => {
-    if (!reasonText || reasonText.trim().length < 3) {
+    const cleanReason = (reasonText || "").trim();
+    if (!cleanReason || cleanReason.length < 3) {
       setReasonError("Please provide a reason (minimum 3 characters).");
+      return;
+    }
+    if (cleanReason.length > 1000) {
+      setReasonError("Reason cannot exceed 1000 characters.");
       return;
     }
     setReasonError("");
@@ -122,14 +133,14 @@ export default function AdminVerificationDetailModal({
       res = await dispatch(
         revokeVerificationRequest({
           id: _id,
-          reason: reasonText.trim()
+          reason: cleanReason
         })
       );
     } else {
       res = await dispatch(
         rejectVerificationRequest({
           id: _id,
-          rejectionReason: reasonText.trim()
+          rejectionReason: cleanReason
         })
       );
     }
@@ -217,7 +228,7 @@ export default function AdminVerificationDetailModal({
                   <h3 className="text-base font-semibold text-foreground">
                     {displayName}
                   </h3>
-                  {(user?.isVerified || profile?.isVerifiedBadge || profile?.isVerifiedBusiness) && (
+                  {(status === "approved" || profile?.isVerifiedBadge || profile?.isVerifiedBusiness) && (
                     <span className="text-blue-500" title="Verified Badge Active">
                       <ShieldCheckIcon className="w-4 h-4 inline" />
                     </span>
@@ -250,13 +261,66 @@ export default function AdminVerificationDetailModal({
                     ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
                     : status === "rejected"
                     ? "bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30"
+                    : isResubmitted
+                    ? "bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/30"
                     : "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30"
                 }`}
               >
-                {status === "approved" ? "Verified Active" : status === "rejected" ? "Unverified / Revoked" : "Pending Review"}
+                {status === "approved"
+                  ? "Verified Active"
+                  : status === "rejected"
+                  ? "Unverified / Revoked"
+                  : isResubmitted
+                  ? "Resubmitted (Pending Review)"
+                  : "Pending Review"}
               </span>
             </div>
           </div>
+
+          {/* Resubmission & Prior Decision Banner */}
+          {isResubmitted && (
+            <div className="bg-purple-500/10 border border-purple-500/30 rounded-2xl p-4 space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-purple-500/20 pb-3">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-purple-500 animate-pulse shrink-0" />
+                  <span className="font-semibold text-sm text-purple-700 dark:text-purple-300">
+                    Resubmitted Verification Request
+                  </span>
+                </div>
+                {latestResubmissionDate && (
+                  <span className="text-xs text-text-secondary font-medium">
+                    Resubmitted: <span className="text-foreground font-semibold">{new Date(latestResubmissionDate).toLocaleString()}</span>
+                  </span>
+                )}
+              </div>
+
+              {latestPriorReview && (
+                <div className="bg-surface/80 rounded-xl p-3 border border-border-theme text-xs space-y-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-semibold text-rose-600 dark:text-rose-400 uppercase text-[11px]">
+                      Previous Decision: {latestPriorReview.action.toUpperCase()}
+                    </span>
+                    <span className="text-[11px] text-text-secondary">
+                      {new Date(latestPriorReview.reviewedAt).toLocaleString()}
+                    </span>
+                  </div>
+                  {latestPriorReview.reason && (
+                    <p className="text-text-secondary">
+                      <span className="font-medium text-foreground">Previous Feedback / Reason: </span>
+                      {latestPriorReview.reason}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {notes && (
+                <p className="text-xs text-text-secondary">
+                  <span className="font-medium text-foreground">Applicant Notes with Resubmission: </span>
+                  {notes}
+                </p>
+              )}
+            </div>
+          )}
 
           {/* Profile Details Section */}
           <div className="space-y-4">
@@ -496,18 +560,24 @@ export default function AdminVerificationDetailModal({
           {/* Action Drawer for Reject or Revoke */}
           {activeAction && (
             <div className="p-4 bg-rose-500/5 border border-rose-500/20 rounded-xl space-y-3">
-              <label className="block text-xs font-semibold text-rose-600 dark:text-rose-300">
-                {activeAction === "revoke"
-                  ? "Reason for Revoking Verification (Required, notified to user):"
-                  : "Reason for Rejection (Required, notified to user):"}
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-semibold text-rose-600 dark:text-rose-300">
+                  {activeAction === "revoke"
+                    ? "Reason for Revoking Verification (Required, notified to user):"
+                    : "Reason for Rejection (Required, notified to user):"}
+                </label>
+                <span className="text-[10px] text-text-secondary">
+                  {reasonText.trim().length} / 1000
+                </span>
+              </div>
               <textarea
                 value={reasonText}
+                maxLength={1000}
                 onChange={(e) => setReasonText(e.target.value)}
                 placeholder={
                   activeAction === "revoke"
-                    ? "Explain why verified status is being revoked..."
-                    : "Explain why this request is rejected..."
+                    ? "Explain why verified status is being revoked (e.g. Terms violation, unverified account activity)..."
+                    : "Explain why this request is rejected (e.g. Incomplete profile, invalid links, guideline mismatch)..."
                 }
                 rows={3}
                 className="w-full text-xs bg-surface border border-border-theme rounded-xl p-2.5 text-foreground placeholder:text-text-secondary focus:outline-hidden focus:border-rose-500"

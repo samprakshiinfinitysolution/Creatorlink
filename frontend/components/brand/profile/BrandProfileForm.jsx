@@ -11,6 +11,7 @@ import {
   updateBrandProfile,
 } from "@/redux/brand/profile/profile_slice";
 import { uploadSingleImageApi } from "@/lib/upload";
+import ProfileVerificationStatusCard from "@/components/common/ProfileVerificationStatusCard";
 
 // =========================================================
 // HELPER FOR INITIALS & DATE
@@ -769,7 +770,7 @@ export default function BrandProfileForm() {
                         <h2 className="font-serif font-semibold text-2xl sm:text-[26px] text-slate-900 dark:text-foreground tracking-wide break-words">
                           {brandName}
                         </h2>
-                        {Boolean(profile?.isVerifiedBusiness || profile?.user?.isVerified || authUser?.isVerified) && (
+                        {Boolean(profile?.isVerifiedBusiness) && (
                           <span
                             className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-secondary/10 text-secondary border border-secondary/20 shadow-xs"
                             title="Official Verified Business"
@@ -835,6 +836,13 @@ export default function BrandProfileForm() {
                   </div>
                 </div>
               </div>
+
+              {/* Administrative Verification Status & Feedback */}
+              <ProfileVerificationStatusCard
+                role="brand"
+                verification={profile?.verification}
+                onRefresh={() => dispatch(getBrandProfile())}
+              />
 
               {/* 2. TWO-COLUMN MAIN CONTENT GRID */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-start">
@@ -1106,6 +1114,29 @@ export default function BrandProfileForm() {
           {/* ========================================================= */}
           {isEditing && (
             <form onSubmit={handleSubmit} className="space-y-6">
+
+              {/* Admin Verification Feedback Banner (visible while editing) */}
+              {(profile?.verification?.status === "rejected" || profile?.verification?.status === "revoked") && (
+                <div className="p-4 sm:p-5 bg-rose-500/10 border border-rose-500/25 rounded-2xl sm:rounded-3xl flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-rose-500/20 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0 mt-0.5">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                    </svg>
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="text-xs sm:text-sm font-semibold text-rose-700 dark:text-rose-300">
+                      Admin Verification Feedback — Action Required Before Re-submitting
+                    </h4>
+                    <p className="text-xs text-text-secondary leading-relaxed">
+                      <span className="font-semibold text-foreground">Feedback / Reason: </span>
+                      {profile.verification.reason || "Please update your company details according to platform verification standards."}
+                    </p>
+                    <p className="text-[11px] text-text-secondary">
+                      Update the relevant details below and click &ldquo;Save Profile&rdquo;. Once saved, you can re-submit your verification request for administrative review.
+                    </p>
+                  </div>
+                </div>
+              )}
 
               {/* 1. Company Details Card */}
               <div className="bg-white dark:bg-surface border border-border-theme rounded-2xl p-6 sm:p-7 shadow-xs space-y-6">

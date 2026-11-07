@@ -48,9 +48,28 @@ const completeOnboardingApi = async (profileData) => {
 };
 
 
+// Gets brand's verification status and history.
+const getVerificationStatusApi = async () => {
+    const response = await axiosInstance.get(
+        "/brand/profile/verification"
+    );
+    return response.data;
+};
+
+// Submits or re-submits brand verification request.
+const submitVerificationApi = async (data = {}) => {
+    const response = await axiosInstance.post(
+        "/brand/profile/verification",
+        data
+    );
+    return response.data;
+};
+
 export {
     createProfile,
     getMyProfile,
     updateMyProfile,
-    completeOnboardingApi
+    completeOnboardingApi,
+    getVerificationStatusApi,
+    submitVerificationApi
 };

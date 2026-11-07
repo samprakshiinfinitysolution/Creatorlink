@@ -241,7 +241,7 @@ export default function AdminCollaborationDetailModal({
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5 text-foreground font-semibold text-sm">
                     <span className="truncate">{brandProfile?.companyName || workspace.brand?.name}</span>
-                    {(brandProfile?.isVerifiedBusiness || workspace.brand?.isVerified) && (
+                    {Boolean(brandProfile?.isVerifiedBusiness) && (
                       <CheckBadgeIcon className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
                     )}
                   </div>
@@ -278,7 +278,7 @@ export default function AdminCollaborationDetailModal({
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5 text-foreground font-semibold text-sm">
                     <span className="truncate">{creatorProfile?.displayName || workspace.creator?.name}</span>
-                    {(creatorProfile?.isVerifiedBadge || workspace.creator?.isVerified) && (
+                    {Boolean(creatorProfile?.isVerifiedBadge) && (
                       <CheckBadgeIcon className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
                     )}
                   </div>

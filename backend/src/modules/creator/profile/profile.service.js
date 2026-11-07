@@ -3,6 +3,7 @@ import Auth from "../../auth/auth.model.js";
 import createApiError from "../../../utils/ApiError.js";
 import Portfolio from "../portfolio/portfolio.model.js";
 import CreatorService from "../services/services.model.js";
+import { getUserVerificationStatusService } from "../../admin/verification/verification.service.js";
 
 
 // Create a creator profile for the authenticated user.
@@ -81,7 +82,15 @@ const getMyProfileService = async (userId) => {
         );
     }
 
-    return profile;
+    const profileObj = profile.toObject();
+
+    try {
+        profileObj.verification = await getUserVerificationStatusService(userId);
+    } catch (verifErr) {
+        console.error("Failed to attach verification status to creator profile:", verifErr);
+    }
+
+    return profileObj;
 };
 
 
@@ -166,7 +175,15 @@ const updateProfileService = async (userId, profileData) => {
         );
     }
 
-    return profile;
+    const profileObj = profile.toObject();
+
+    try {
+        profileObj.verification = await getUserVerificationStatusService(userId);
+    } catch (verifErr) {
+        console.error("Failed to attach verification status to creator profile:", verifErr);
+    }
+
+    return profileObj;
 };
 
 

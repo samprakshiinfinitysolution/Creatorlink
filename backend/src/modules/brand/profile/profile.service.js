@@ -2,6 +2,7 @@ import { reEvaluateBrandTrialEligibilityService } from "../../subscriptions/tria
 import BrandProfile from "./profile.model.js";
 import Auth from "../../auth/auth.model.js";
 import createApiError from "../../../utils/ApiError.js";
+import { getUserVerificationStatusService } from "../../admin/verification/verification.service.js";
 
 
 // Create a brand profile for the authenticated user.
@@ -33,7 +34,15 @@ const createProfileService = async (userId, profileData) => {
         console.error("Trial eligibility check failed during brand profile creation:", err);
     }
 
-    return profile;
+    const profileObj = profile.toObject ? profile.toObject() : profile;
+
+    try {
+        profileObj.verification = await getUserVerificationStatusService(userId);
+    } catch (verifErr) {
+        console.error("Failed to attach verification status to brand profile:", verifErr);
+    }
+
+    return profileObj;
 };
 
 
@@ -73,7 +82,15 @@ const getMyProfileService = async (userId) => {
         await profile.save();
     }
 
-    return profile;
+    const profileObj = profile.toObject ? profile.toObject() : profile;
+
+    try {
+        profileObj.verification = await getUserVerificationStatusService(userId);
+    } catch (verifErr) {
+        console.error("Failed to attach verification status to brand profile:", verifErr);
+    }
+
+    return profileObj;
 };
 
 
@@ -146,7 +163,15 @@ const updateProfileService = async (userId, profileData = {}) => {
         console.error("Trial eligibility check failed during brand profile update:", err);
     }
 
-    return profile;
+    const profileObj = profile.toObject ? profile.toObject() : profile;
+
+    try {
+        profileObj.verification = await getUserVerificationStatusService(userId);
+    } catch (verifErr) {
+        console.error("Failed to attach verification status to brand profile:", verifErr);
+    }
+
+    return profileObj;
 };
 
 

@@ -511,7 +511,7 @@ export default function AdminCampaignDetailModal({
                       <span className="truncate">
                         {brandProfile?.companyName || campaign.brand?.name || "Brand User"}
                       </span>
-                      {(brandProfile?.isVerifiedBusiness || campaign.brand?.isVerified) && (
+                      {Boolean(brandProfile?.isVerifiedBusiness) && (
                         <CheckBadgeIcon className="w-4 h-4 text-emerald-500 shrink-0" />
                       )}
                     </div>

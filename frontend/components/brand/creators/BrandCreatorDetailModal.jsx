@@ -420,7 +420,7 @@ export default function BrandCreatorDetailModal({
 
   const name = creator?.user?.name || "Creator";
   const initials = getInitials(name);
-  const isVerified = Boolean(creator?.isVerifiedBadge ?? creator?.user?.isVerified ?? creator?.isVerified);
+  const isVerified = Boolean(creator?.isVerifiedBadge);
   const location = creator?.location || "Global";
   const category = creator?.category || "General";
   const bio = creator?.bio || "No bio description provided.";

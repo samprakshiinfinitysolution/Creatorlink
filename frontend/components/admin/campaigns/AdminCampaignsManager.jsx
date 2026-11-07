@@ -414,7 +414,7 @@ export default function AdminCampaignsManager() {
                             <span className="truncate">
                               {c.brandProfile?.companyName || c.brand?.name || "Brand User"}
                             </span>
-                            {(c.brandProfile?.isVerifiedBusiness || c.brand?.isVerified) && (
+                            {Boolean(c.brandProfile?.isVerifiedBusiness) && (
                               <CheckBadgeIcon className="w-3.5 h-3.5 shrink-0" />
                             )}
                           </div>

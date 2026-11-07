@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import { getServices } from "@/redux/creator/services/services_slice";
+import ServiceFormModal from "@/components/creator/services/ServiceFormModal";
 
 // =========================================================
 // SVG ICONS
@@ -12,6 +13,14 @@ function CloseIcon({ className = "w-5 h-5" }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  );
+}
+
+function PlusIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
     </svg>
   );
 }
@@ -48,6 +57,8 @@ export default function ApplyToCampaignModal({
   campaignBudget,
   minBudget,
   maxBudget,
+  campaignCategory = "Social Media Campaign",
+  campaignPlatform = "instagram",
   brand,
   onContinue = () => {},
   submitting = false,
@@ -65,6 +76,8 @@ export default function ApplyToCampaignModal({
   const [message, setMessage] = useState("");
   const [validationError, setValidationError] = useState(null);
   const [isStepValidated, setIsStepValidated] = useState(false);
+  const [isCreateServiceOpen, setIsCreateServiceOpen] = useState(false);
+  const [successBannerMsg, setSuccessBannerMsg] = useState(null);
 
   const handleClose = () => {
     if (submitting) return;
@@ -73,6 +86,8 @@ export default function ApplyToCampaignModal({
     setMessage("");
     setValidationError(null);
     setIsStepValidated(false);
+    setIsCreateServiceOpen(false);
+    setSuccessBannerMsg(null);
     onClose();
   };
 
@@ -107,6 +122,26 @@ export default function ApplyToCampaignModal({
     }
     setValidationError(null);
     setIsStepValidated(false);
+  };
+
+  const handleServiceCreated = (response) => {
+    const newService = response?.data || response;
+    const newId = newService?._id || newService?.id;
+
+    // Refresh active services in Redux
+    dispatch(getServices({ isActive: "true" }));
+
+    if (newId) {
+      setSelectedServiceId(newId);
+      if (typeof newService.price === "number") {
+        setProposedPrice(newService.price);
+      }
+      setSuccessBannerMsg(
+        `"${newService.title || "New Service"}" created and selected for this proposal!`
+      );
+    }
+    setIsCreateServiceOpen(false);
+    setValidationError(null);
   };
 
   const handlePriceChange = (e) => {
@@ -257,6 +292,23 @@ export default function ApplyToCampaignModal({
               </span>
             </div>
           </div>
+          {/* Success Banner when service is created */}
+          {successBannerMsg && (
+            <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 p-3 rounded-xl text-xs font-medium flex items-center justify-between gap-2 animate-in fade-in">
+              <span className="flex items-center gap-2">
+                <span className="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] shrink-0 font-bold">✓</span>
+                <span>{successBannerMsg}</span>
+              </span>
+              <button
+                type="button"
+                onClick={() => setSuccessBannerMsg(null)}
+                className="text-text-secondary hover:text-foreground p-1 cursor-pointer"
+              >
+                <CloseIcon className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+
           {/* Error Banner for Fetching Services */}
           {error && (
             <div className="bg-red-500/10 border border-red-500/30 text-red-500 p-4 rounded-xl text-xs font-medium flex items-center justify-between gap-3">
@@ -297,26 +349,45 @@ export default function ApplyToCampaignModal({
                   No active services found
                 </h3>
                 <p className="text-xs text-text-secondary max-w-xs mx-auto">
-                  You need at least one active service package before applying to brand campaigns.
+                  You need a service package to apply. Create a new service tailored for this campaign now.
                 </p>
               </div>
-              <div className="pt-1">
+              <div className="pt-2 flex flex-wrap items-center justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsCreateServiceOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-secondary text-white text-xs font-semibold tracking-wide shadow-xs hover:bg-secondary/90 active:scale-[0.99] transition-all duration-200 cursor-pointer"
+                >
+                  <PlusIcon className="w-3.5 h-3.5" />
+                  <span>+ Create Service for Campaign</span>
+                </button>
                 <Link
                   href="/creator/services"
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-neutral-950 text-white text-xs font-semibold tracking-wide border border-neutral-900 shadow-xs hover:bg-neutral-900 hover:border-neutral-800 hover:shadow-xs hover:shadow-pink-500/10 active:scale-[0.99] transition-all duration-200 ease-out cursor-pointer dark:bg-neutral-100 dark:text-neutral-950 dark:border-neutral-200 dark:hover:bg-neutral-200"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-border-theme bg-surface hover:bg-surface-muted text-foreground text-xs font-semibold transition-colors"
                 >
-                  <span>Go to Creator Services</span>
+                  <span>Go to Services</span>
                 </Link>
               </div>
             </div>
           ) : (
             /* Active Services Selection */
             <div className="space-y-5">
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-foreground block">
-                  Select Service Package <span className="text-red-500">*</span>
-                </label>
-                <div className="grid grid-cols-1 gap-3">
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between gap-2">
+                  <label className="text-xs font-semibold text-foreground block">
+                    Select Service Package <span className="text-red-500">*</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setIsCreateServiceOpen(true)}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-secondary hover:text-white bg-secondary/10 hover:bg-secondary border border-secondary/30 transition-all cursor-pointer shadow-2xs"
+                  >
+                    <PlusIcon className="w-3.5 h-3.5" />
+                    <span>+ Create New Service</span>
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 gap-2.5">
                   {activeServices.map((service) => {
                     const serviceId = service._id || service.id;
                     const isSelected = Boolean(selectedServiceId) && String(selectedServiceId) === String(serviceId);
@@ -325,7 +396,7 @@ export default function ApplyToCampaignModal({
                       <div
                         key={serviceId}
                         onClick={() => handleSelectService(service)}
-                        className={`p-4 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
+                        className={`p-3.5 sm:p-4 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
                           isSelected
                             ? "border-secondary bg-secondary/10 shadow-xs"
                             : "border-border-theme bg-surface hover:border-secondary/40"
@@ -345,10 +416,16 @@ export default function ApplyToCampaignModal({
                             <span className="font-medium text-xs text-foreground block truncate">
                               {service.title}
                             </span>
-                            <div className="flex items-center gap-3 text-[11px] text-text-secondary">
+                            <div className="flex items-center gap-2 sm:gap-3 text-[11px] text-text-secondary flex-wrap">
                               <span>Platform: {service.platform || "General"}</span>
                               <span>•</span>
                               <span>{service.deliveryTime || 7} Days Delivery</span>
+                              {service.contentType && (
+                                <>
+                                  <span>•</span>
+                                  <span className="capitalize">{service.contentType.replace(/_/g, " ")}</span>
+                                </>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -361,6 +438,18 @@ export default function ApplyToCampaignModal({
                       </div>
                     );
                   })}
+
+                  {/* Create New Service Inline Card */}
+                  <button
+                    type="button"
+                    onClick={() => setIsCreateServiceOpen(true)}
+                    className="p-3 rounded-xl border border-dashed border-border-theme hover:border-secondary bg-surface-muted/20 hover:bg-secondary/5 transition-all flex items-center justify-center gap-2 text-xs font-semibold text-text-secondary hover:text-secondary cursor-pointer group"
+                  >
+                    <span className="w-5 h-5 rounded-lg bg-surface border border-border-theme group-hover:border-secondary/50 group-hover:bg-secondary/10 flex items-center justify-center text-xs text-foreground group-hover:text-secondary transition-colors">
+                      +
+                    </span>
+                    <span>Want a different package? Create a new service specifically for this campaign</span>
+                  </button>
                 </div>
               </div>
 
@@ -457,6 +546,16 @@ export default function ApplyToCampaignModal({
           )}
         </div>
       </div>
+
+      {/* Create New Service Package Modal */}
+      <ServiceFormModal
+        isOpen={isCreateServiceOpen}
+        onClose={() => setIsCreateServiceOpen(false)}
+        defaultCategory={campaignCategory || "Social Media Campaign"}
+        defaultPlatform={campaignPlatform || "instagram"}
+        onSuccess={handleServiceCreated}
+        zIndex="z-[70]"
+      />
     </div>
   );
 }

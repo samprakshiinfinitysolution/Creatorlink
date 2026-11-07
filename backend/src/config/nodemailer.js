@@ -5,60 +5,51 @@ dotenv.config();
 
 /**
  * Validates environment variables and builds the configuration for Nodemailer.
- * Reads SMTP host, port, secure flag, or service dynamically from environment variables.
+ * Reads SMTP host, port, secure flag, credentials, and service dynamically from .env.
+ * No credentials, host, or ports are hardcoded.
  */
 const getTransporterConfig = () => {
-    const user = process.env.EMAIL;
-    const pass = process.env.EMAIL_PASS;
+    const user = process.env.SMTP_USER || process.env.EMAIL;
+    const pass = process.env.SMTP_PASS || process.env.EMAIL_PASS;
+    const host = process.env.SMTP_HOST;
+    const port = process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : undefined;
+    const service = process.env.SMTP_SERVICE;
+    const secure = process.env.SMTP_SECURE !== undefined
+        ? (process.env.SMTP_SECURE === "true" || process.env.SMTP_SECURE === "1")
+        : (port === 465);
 
     if (!user || !pass) {
         throw new Error(
-            "Nodemailer configuration error: Missing required email credentials. Please define EMAIL and EMAIL_PASS in your environment."
+            "Nodemailer configuration error: Missing required email credentials in .env. Please set SMTP_USER (or EMAIL) and SMTP_PASS (or EMAIL_PASS)."
         );
     }
 
-    // 1. Explicit custom SMTP host and port configuration
-    if (process.env.SMTP_HOST) {
-        const port = process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 587;
-        const secure = process.env.SMTP_SECURE !== undefined
-            ? process.env.SMTP_SECURE === "true"
-            : port === 465;
-
+    // 1. If explicit service is set in .env (e.g. SMTP_SERVICE=gmail, sendgrid, mailgun)
+    if (service) {
         return {
-            host: process.env.SMTP_HOST,
-            port,
-            secure,
+            service,
             auth: { user, pass }
         };
     }
 
-    // 2. Explicit SMTP service configuration (e.g., SendGrid, Mailgun)
-    if (process.env.SMTP_SERVICE) {
+    // 2. If host is set in .env
+    if (host) {
         return {
-            service: process.env.SMTP_SERVICE,
+            host,
+            port: port || 587,
+            secure: Boolean(secure),
             auth: { user, pass }
         };
     }
 
-    // 3. Provider detection: use Gmail service if sender address is on Gmail
-    if (typeof user === "string" && user.toLowerCase().endsWith("@gmail.com")) {
-        return {
-            service: "gmail",
-            auth: { user, pass }
-        };
-    }
-
-    // 4. Default standard SMTP fallback
-    return {
-        host: "smtp.gmail.com",
-        port: 465,
-        secure: true,
-        auth: { user, pass }
-    };
+    // 3. Fallback to user email domain detection if host is omitted
+    throw new Error(
+        "Nodemailer configuration error: Missing SMTP_HOST in .env. Please configure SMTP_HOST and SMTP_PORT."
+    );
 };
 
-// Create reusable SMTP transporter without initiating network calls or auto-verification
+// Create reusable SMTP transporter
 const transporter = nodemailer.createTransport(getTransporterConfig());
 
-export { transporter };
+export { transporter, getTransporterConfig };
 export default transporter;

@@ -59,6 +59,14 @@ function LinkIcon({ className = "w-4 h-4" }) {
   );
 }
 
+function LockClosedIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+    </svg>
+  );
+}
+
 // =========================================================
 // REUSABLE PORTFOLIO CARD COVER COMPONENT
 // =========================================================
@@ -155,6 +163,7 @@ export default function PortfolioFormModal({
   // Cover Image Upload State
   const [isUploadingCover, setIsUploadingCover] = useState(false);
   const [isDraggingCover, setIsDraggingCover] = useState(false);
+  const [isCoverUploaded, setIsCoverUploaded] = useState(false);
   const [uploadError, setUploadError] = useState(null);
 
   const editingPortfolioId = portfolio?._id || portfolio?.id || null;
@@ -179,11 +188,19 @@ export default function PortfolioFormModal({
               }))
             : [],
         });
+        setIsCoverUploaded(
+          Boolean(
+            portfolio.coverImage &&
+              (portfolio.coverImage.includes("cloudinary.com") ||
+                portfolio.coverImage.includes("res.cloudinary.com"))
+          )
+        );
       } else {
         setFormData({
           ...initialFormState,
           category: defaultCategory || "Fashion & Luxury",
         });
+        setIsCoverUploaded(false);
       }
       setFormError(null);
       setUploadError(null);
@@ -246,6 +263,7 @@ export default function PortfolioFormModal({
           ...prev,
           coverImage: uploadedUrl,
         }));
+        setIsCoverUploaded(true);
       } else {
         setUploadError("Could not retrieve uploaded image URL.");
       }
@@ -296,11 +314,19 @@ export default function PortfolioFormModal({
   const handleRemoveCover = () => {
     if (isUploadingCover) return;
     setFormData((prev) => ({ ...prev, coverImage: "" }));
+    setIsCoverUploaded(false);
     setUploadError(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   };
+
+  const isCoverLocked = Boolean(
+    formData.coverImage &&
+      (isCoverUploaded ||
+        formData.coverImage.includes("cloudinary.com") ||
+        formData.coverImage.includes("res.cloudinary.com"))
+  );
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -623,26 +649,47 @@ export default function PortfolioFormModal({
 
               {/* Manual Image URL Input */}
               <div>
-                <label className="block font-semibold text-foreground mb-1.5 text-xs">
-                  Image URL
-                </label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block font-semibold text-foreground text-xs">
+                    Image URL
+                  </label>
+                  {isCoverLocked && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-secondary bg-secondary/10 px-2 py-0.5 rounded-md border border-secondary/20">
+                      <LockClosedIcon className="w-3 h-3" />
+                      <span>Locked (Uploaded)</span>
+                    </span>
+                  )}
+                </div>
                 <div className="relative flex items-center">
                   <LinkIcon className="w-3.5 h-3.5 text-text-secondary absolute left-3.5 pointer-events-none" />
                   <input
                     type="url"
                     name="coverImage"
+                    readOnly={isCoverLocked}
                     disabled={isUploadingCover}
                     value={formData.coverImage}
                     onChange={(e) => {
+                      if (isCoverLocked) return;
                       handleInputChange(e);
                       setUploadError(null);
                     }}
                     placeholder="https://images.unsplash.com/photo-1539109126782-8b01035bbbb0"
-                    className="w-full pl-9 pr-3.5 py-2.5 text-xs rounded-xl bg-surface-muted/60 border border-border-theme text-foreground placeholder:text-text-secondary/50 focus:outline-none focus:border-secondary transition-colors disabled:opacity-50"
+                    className={`w-full pl-9 pr-9 py-2.5 text-xs rounded-xl border text-foreground placeholder:text-text-secondary/50 focus:outline-none transition-colors disabled:opacity-50 ${
+                      isCoverLocked
+                        ? "bg-surface-muted/90 border-border-theme font-mono text-[11px] cursor-not-allowed select-all"
+                        : "bg-surface-muted/60 border-border-theme focus:border-secondary"
+                    }`}
                   />
+                  {isCoverLocked && (
+                    <div className="absolute right-3 text-text-secondary pointer-events-none" title="URL locked after upload">
+                      <LockClosedIcon className="w-3.5 h-3.5 text-secondary" />
+                    </div>
+                  )}
                 </div>
                 <p className="text-[11px] text-text-secondary mt-1">
-                  Paste a valid image URL instead of uploading
+                  {isCoverLocked
+                    ? "🔒 Uploaded via Cloudinary (locked against accidental editing). Use Change Image or Remove Image to replace."
+                    : "Paste a valid image URL instead of uploading"}
                 </p>
               </div>
 

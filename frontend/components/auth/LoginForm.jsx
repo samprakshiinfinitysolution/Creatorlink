@@ -13,6 +13,14 @@ import { requestGoogleAuthCode } from "@/lib/googleAuth";
 // =========================================================
 // SVG ICONS
 // =========================================================
+function CloseIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  );
+}
+
 function MailIcon({ className = "w-5 h-5" }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
@@ -80,9 +88,12 @@ export default function LoginForm() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
+  const [selectedRole, setSelectedRole] = useState("creator");
   const [errorMsg, setErrorMsg] = useState(null);
 
-  const handleGoogleLogin = async () => {
+  const executeGoogleLogin = async (roleToUse) => {
+    const role = roleToUse || selectedRole || "creator";
     if (isLoading || isGoogleLoading) return;
     setErrorMsg(null);
     setIsGoogleLoading(true);
@@ -101,13 +112,14 @@ export default function LoginForm() {
       }
 
       const code = await requestGoogleAuthCode(clientId);
-      const resultAction = await dispatch(loginWithGoogle({ code }));
+      const resultAction = await dispatch(loginWithGoogle({ code, role }));
 
       if (loginWithGoogle.fulfilled.match(resultAction)) {
+        setIsRoleModalOpen(false);
         const user = resultAction.payload?.data?.user;
-        const role = user?.role;
+        const assignedRole = user?.role || role;
 
-        if (role === "creator") {
+        if (assignedRole === "creator") {
           try {
             const profileAction = await dispatch(getCreatorProfile());
             if (getCreatorProfile.fulfilled.match(profileAction)) {
@@ -123,7 +135,7 @@ export default function LoginForm() {
           } catch {
             router.push("/creator/onboarding");
           }
-        } else if (role === "brand") {
+        } else if (assignedRole === "brand") {
           try {
             const profileAction = await dispatch(getBrandProfile());
             if (getBrandProfile.fulfilled.match(profileAction)) {
@@ -139,7 +151,7 @@ export default function LoginForm() {
           } catch {
             router.push("/brand/onboarding");
           }
-        } else if (role === "admin") {
+        } else if (assignedRole === "admin") {
           router.push("/admin/dashboard");
         } else {
           setErrorMsg("Account role not recognized. Please contact support.");
@@ -370,7 +382,10 @@ export default function LoginForm() {
             {/* Google Button */}
             <button
               type="button"
-              onClick={handleGoogleLogin}
+              onClick={() => {
+                setErrorMsg(null);
+                setIsRoleModalOpen(true);
+              }}
               disabled={isLoading || isGoogleLoading}
               className="w-full inline-flex items-center justify-center gap-3 px-6 py-3 rounded-xl bg-background hover:bg-surface-muted disabled:opacity-60 disabled:cursor-not-allowed border border-border-theme text-foreground font-sans font-semibold text-xs sm:text-sm transition-all duration-200 cursor-pointer"
             >
@@ -412,6 +427,158 @@ export default function LoginForm() {
           </div>
         </div>
       </div>
+
+      {/* =========================================================
+          ROLE SELECTION MODAL FOR GOOGLE SIGN-IN
+      ========================================================= */}
+      {isRoleModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div
+            className="fixed inset-0"
+            onClick={() => !isGoogleLoading && setIsRoleModalOpen(false)}
+          />
+          <div className="relative z-10 bg-surface border border-border-theme rounded-2xl sm:rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl space-y-5 animate-in zoom-in-95 duration-200">
+            {/* Header */}
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-secondary/15 text-secondary border border-secondary/20 uppercase tracking-wide">
+                  Continue with Google
+                </span>
+                <h3 className="font-serif font-semibold text-xl text-foreground mt-1.5">
+                  Choose Account Type
+                </h3>
+                <p className="text-xs text-text-secondary mt-1">
+                  Are you continuing as a Brand or a Creator?
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsRoleModalOpen(false)}
+                disabled={isGoogleLoading}
+                className="p-1.5 rounded-xl text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors cursor-pointer disabled:opacity-50"
+              >
+                <CloseIcon className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Role Options */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Creator Card */}
+              <div
+                onClick={() => setSelectedRole("creator")}
+                className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between text-left ${
+                  selectedRole === "creator"
+                    ? "border-secondary bg-secondary/10 shadow-sm"
+                    : "border-border-theme bg-background hover:border-secondary/40"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-secondary/15 text-secondary flex items-center justify-center font-bold text-lg">
+                    🎨
+                  </div>
+                  <div
+                    className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                      selectedRole === "creator"
+                        ? "border-secondary bg-secondary text-white"
+                        : "border-border-theme bg-surface"
+                    }`}
+                  >
+                    {selectedRole === "creator" && (
+                      <span className="text-[10px] font-bold">✓</span>
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <h4 className="font-serif font-semibold text-sm text-foreground">
+                    I&apos;m a Creator
+                  </h4>
+                  <p className="text-[11px] text-text-secondary mt-1 leading-snug">
+                    Monetize content, apply to campaigns & showcase portfolio.
+                  </p>
+                </div>
+              </div>
+
+              {/* Brand Card */}
+              <div
+                onClick={() => setSelectedRole("brand")}
+                className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between text-left ${
+                  selectedRole === "brand"
+                    ? "border-secondary bg-secondary/10 shadow-sm"
+                    : "border-border-theme bg-background hover:border-secondary/40"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-lg">
+                    🏢
+                  </div>
+                  <div
+                    className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                      selectedRole === "brand"
+                        ? "border-secondary bg-secondary text-white"
+                        : "border-border-theme bg-surface"
+                    }`}
+                  >
+                    {selectedRole === "brand" && (
+                      <span className="text-[10px] font-bold">✓</span>
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <h4 className="font-serif font-semibold text-sm text-foreground">
+                    I&apos;m a Brand
+                  </h4>
+                  <p className="text-[11px] text-text-secondary mt-1 leading-snug">
+                    Discover creators, launch campaigns & manage collabs.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Error Message inside modal if Google fails */}
+            {errorMsg && (
+              <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-sans">
+                {errorMsg}
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="space-y-2 pt-1">
+              <button
+                type="button"
+                onClick={() => executeGoogleLogin(selectedRole)}
+                disabled={isGoogleLoading}
+                className="w-full inline-flex items-center justify-center gap-3 px-6 py-3.5 rounded-xl bg-foreground text-background hover:opacity-90 disabled:opacity-60 text-xs sm:text-sm font-semibold shadow-md transition-all cursor-pointer"
+              >
+                {isGoogleLoading ? (
+                  <span className="inline-flex items-center gap-2">
+                    <svg className="animate-spin h-4 w-4 text-secondary" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    <span>Connecting to Google...</span>
+                  </span>
+                ) : (
+                  <>
+                    <GoogleIcon className="w-4 h-4" />
+                    <span>
+                      Continue with Google as {selectedRole === "brand" ? "Brand" : "Creator"}
+                    </span>
+                  </>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsRoleModalOpen(false)}
+                disabled={isGoogleLoading}
+                className="w-full py-2 text-center text-xs text-text-secondary hover:text-foreground transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* =========================================================
           BOTTOM TERMS & PRIVACY POLICY FOOTER

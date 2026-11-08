@@ -14,6 +14,7 @@ import {
 } from "../../../utils/pagination.js";
 
 import createSearchQuery from "../../../utils/helpers/search.helper.js";
+import { notifyAdminsSafe } from "../../notifications/notification.service.js";
 
 
 // Create a new campaign for the authenticated brand.
@@ -38,6 +39,25 @@ const createCampaignService = async (brandId, campaignData) => {
         brand: brandId,
         ...campaignData
     });
+
+    if (campaign.status === "published") {
+        notifyAdminsSafe({
+            sender: brandId,
+            type: "campaign_created",
+            title: "New Campaign Published",
+            message: `A new campaign "${campaign.title}" was published.`,
+            entityType: "campaign",
+            entityId: campaign._id,
+            destination: `/admin/campaigns?id=${campaign._id}`,
+            metadata: {
+                campaignId: campaign._id,
+                brandId,
+                title: campaign.title,
+                budget: campaign.budget
+            },
+            idempotencyKey: `admin_campaign_created_${campaign._id}`
+        });
+    }
 
     return campaign;
 };
@@ -334,6 +354,24 @@ const updateCampaignService = async (
             }
         );
 
+    if (updatedCampaign && updatedCampaign.status === "published" && campaign.status !== "published") {
+        notifyAdminsSafe({
+            sender: brandId,
+            type: "campaign_published",
+            title: "Campaign Published",
+            message: `Campaign "${updatedCampaign.title}" has been published.`,
+            entityType: "campaign",
+            entityId: updatedCampaign._id,
+            destination: `/admin/campaigns?id=${updatedCampaign._id}`,
+            metadata: {
+                campaignId: updatedCampaign._id,
+                brandId,
+                title: updatedCampaign.title,
+                budget: updatedCampaign.budget
+            },
+            idempotencyKey: `admin_campaign_pub_${updatedCampaign._id}`
+        });
+    }
 
     return updatedCampaign;
 };

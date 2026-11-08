@@ -123,6 +123,7 @@ const initialState = {
     service: null,
     pagination: null,
     loading: false,
+    updatingServiceId: null,
     error: null
 };
 
@@ -137,12 +138,14 @@ const servicesSlice = createSlice({
 
         clearService: (state) => {
             state.service = null;
+            state.updatingServiceId = null;
             state.error = null;
         },
 
         clearServices: (state) => {
             state.services = [];
             state.pagination = null;
+            state.updatingServiceId = null;
             state.error = null;
         }
     },
@@ -258,12 +261,13 @@ const servicesSlice = createSlice({
             )
 
 
-            // Update service started.
+            // Update service started (item-specific loading).
             .addCase(
                 updateCreatorService.pending,
-                (state) => {
+                (state, action) => {
 
-                    state.loading = true;
+                    state.updatingServiceId =
+                        action.meta.arg?.serviceId || null;
                     state.error = null;
                 }
             )
@@ -273,7 +277,7 @@ const servicesSlice = createSlice({
                 updateCreatorService.fulfilled,
                 (state, action) => {
 
-                    state.loading = false;
+                    state.updatingServiceId = null;
 
                     const updatedService =
                         action.payload.data;
@@ -301,7 +305,7 @@ const servicesSlice = createSlice({
                 updateCreatorService.rejected,
                 (state, action) => {
 
-                    state.loading = false;
+                    state.updatingServiceId = null;
                     state.error = action.payload;
                 }
             )

@@ -137,6 +137,33 @@ const bookingsSlice = createSlice({
         },
         clearBookingError: (state) => {
             state.error = null;
+        },
+        updateBookingFromSocket: (state, action) => {
+            const updated = action.payload;
+            if (!updated) return;
+            const targetId = updated._id ? String(updated._id) : (updated.id ? String(updated.id) : null);
+            if (!targetId) return;
+
+            const currentId = state.selectedBooking?._id
+                ? String(state.selectedBooking._id)
+                : (state.selectedBooking?.id ? String(state.selectedBooking.id) : null);
+
+            if (currentId === targetId) {
+                state.selectedBooking = {
+                    ...state.selectedBooking,
+                    ...updated
+                };
+            }
+
+            if (Array.isArray(state.bookings)) {
+                const idx = state.bookings.findIndex((b) => String(b._id || b.id) === targetId);
+                if (idx !== -1) {
+                    state.bookings[idx] = {
+                        ...state.bookings[idx],
+                        ...updated
+                    };
+                }
+            }
         }
     },
     extraReducers: (builder) => {
@@ -164,7 +191,14 @@ const bookingsSlice = createSlice({
             })
             .addCase(fetchCreatorBookingById.fulfilled, (state, action) => {
                 state.loading = false;
-                state.selectedBooking = action.payload?.data || null;
+                const fetched = action.payload?.data;
+                state.selectedBooking = fetched || null;
+                if (fetched && Array.isArray(state.bookings)) {
+                    const idx = state.bookings.findIndex((b) => String(b._id || b.id) === String(fetched._id || fetched.id));
+                    if (idx !== -1) {
+                        state.bookings[idx] = fetched;
+                    }
+                }
                 state.error = null;
             })
             .addCase(fetchCreatorBookingById.rejected, (state, action) => {
@@ -271,7 +305,8 @@ export const {
     clearSelectedBooking,
     clearBookingState,
     clearSuccessMessage,
-    clearBookingError
+    clearBookingError,
+    updateBookingFromSocket
 } = bookingsSlice.actions;
 
 export {

@@ -21,7 +21,10 @@ const ALLOWED_ENTITY_TYPES = [
     "campaign",
     "payment",
     "review",
-    "message"
+    "message",
+    "verification",
+    "user",
+    "subscription"
 ];
 
 // Validates query parameters for fetching notifications feed.

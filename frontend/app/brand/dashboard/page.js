@@ -14,6 +14,7 @@ import BrandUpcomingDeadlines from "@/components/brand/dashboard/BrandUpcomingDe
 import DashboardSkeleton from "@/components/brand/dashboard/DashboardSkeleton";
 import { getBrandDashboardOverview } from "@/redux/brand/dashboard/dashboard_slice";
 import { getBrandProfile } from "@/redux/brand/profile/profile_slice";
+import { socket, registerSocketConsumer, unregisterSocketConsumer } from "@/lib/socket";
 
 function BrandDashboardContent() {
   const router = useRouter();
@@ -120,6 +121,32 @@ function BrandDashboardContent() {
       handleFetchDashboard();
     }
   }, [isOnboardedVerified, handleFetchDashboard]);
+
+  // Real-time synchronization for dashboard metrics, campaign applicants, and deadlines
+  useEffect(() => {
+    const brandId = authUser?._id || authUser?.id;
+    if (!brandId || !isOnboardedVerified) return;
+
+    const consumerId = "brand_dashboard_overview_consumer";
+    registerSocketConsumer(consumerId, brandId);
+
+    const handleRealtimeUpdate = () => {
+      handleFetchDashboard();
+    };
+
+    socket.on("notification:new", handleRealtimeUpdate);
+    socket.on("workspace:approved", handleRealtimeUpdate);
+    socket.on("workspace:deliverable_submitted", handleRealtimeUpdate);
+    socket.on("workspace:revision_requested", handleRealtimeUpdate);
+
+    return () => {
+      unregisterSocketConsumer(consumerId);
+      socket.off("notification:new", handleRealtimeUpdate);
+      socket.off("workspace:approved", handleRealtimeUpdate);
+      socket.off("workspace:deliverable_submitted", handleRealtimeUpdate);
+      socket.off("workspace:revision_requested", handleRealtimeUpdate);
+    };
+  }, [authUser, isOnboardedVerified, handleFetchDashboard]);
 
   // If dashboard overview API returns 403 or onboarding rejection, redirect immediately
   useEffect(() => {

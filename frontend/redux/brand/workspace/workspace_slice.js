@@ -306,12 +306,14 @@ const brandWorkspaceSlice = createSlice({
                     );
                     if (workspaceItem) {
                         workspaceItem.review = reviewData;
+                        workspaceItem.myReview = reviewData;
                     }
                     if (
                         state.selectedWorkspace &&
                         String(state.selectedWorkspace._id) === submittedWsId
                     ) {
                         state.selectedWorkspace.review = reviewData;
+                        state.selectedWorkspace.myReview = reviewData;
                     }
                 }
             })

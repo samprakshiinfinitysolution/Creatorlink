@@ -8,6 +8,7 @@ import {
 } from "@/redux/admin/users/users_slice";
 import AdminUserDetailModal from "./AdminUserDetailModal";
 import AdminAvatar from "@/components/admin/AdminAvatar";
+import { socket, registerSocketConsumer, unregisterSocketConsumer } from "@/lib/socket";
 
 // =========================================================
 // SVG ICONS
@@ -50,6 +51,7 @@ export default function AdminUsersManager() {
   const { users, pagination, loading, error } = useSelector(
     (state) => state.adminUsers || {}
   );
+  const { adminUser } = useSelector((state) => state.adminAuth || {});
 
   const [search, setSearch] = useState("");
   const [selectedRole, setSelectedRole] = useState("all");
@@ -71,6 +73,26 @@ export default function AdminUsersManager() {
 
     dispatch(fetchAdminUsers(params));
   }, [dispatch, page, search, selectedRole, selectedVerification, sortBy]);
+
+  // Real-time synchronization for verification and profile updates
+  useEffect(() => {
+    const adminId = adminUser?._id || adminUser?.id || "admin_session";
+    const consumerId = "admin_users_manager_consumer";
+    registerSocketConsumer(consumerId, adminId);
+
+    const handleRealtimeUpdate = () => {
+      loadUsers();
+    };
+
+    socket.on("verification:queue_updated", handleRealtimeUpdate);
+    socket.on("verification:applicant_profile_updated", handleRealtimeUpdate);
+
+    return () => {
+      unregisterSocketConsumer(consumerId);
+      socket.off("verification:queue_updated", handleRealtimeUpdate);
+      socket.off("verification:applicant_profile_updated", handleRealtimeUpdate);
+    };
+  }, [adminUser, loadUsers]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {

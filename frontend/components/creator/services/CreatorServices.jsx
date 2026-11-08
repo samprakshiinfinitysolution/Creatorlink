@@ -226,7 +226,7 @@ function PlatformBadgeIcon({ platform, className = "w-3.5 h-3.5" }) {
 
 export default function CreatorServices() {
   const dispatch = useDispatch();
-  const { services, pagination, loading, error } = useSelector((state) => state.services);
+  const { services, pagination, loading, updatingServiceId, error } = useSelector((state) => state.services);
 
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -637,7 +637,7 @@ export default function CreatorServices() {
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {serviceItems.map((service) => {
                 const serviceId = service._id || service.id;
-                const isToggling = togglingStatusId === serviceId;
+                const isItemUpdating = togglingStatusId === serviceId || updatingServiceId === serviceId;
                 const validDeliverables = getDeliverablesList(service.deliverables);
 
                 const normPlatform = (service.platform || "").toLowerCase();
@@ -662,26 +662,32 @@ export default function CreatorServices() {
                         <div className="absolute top-3.5 right-3.5 z-10 flex items-center gap-1.5">
                           <button
                             type="button"
-                            disabled={isToggling}
+                            disabled={isItemUpdating}
                             onClick={() => handleToggleActive(service)}
                             className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/95 dark:bg-neutral-900/90 backdrop-blur-xs shadow-xs border border-white/20 text-xs font-semibold cursor-pointer transition-all hover:scale-105 ${
-                              isToggling ? "opacity-60 cursor-not-allowed" : ""
+                              isItemUpdating ? "opacity-75 cursor-not-allowed" : ""
                             }`}
-                            title="Click to toggle active status"
+                            title={isItemUpdating ? "Updating service..." : "Click to toggle active status"}
                           >
                             <span
                               className={`w-2 h-2 rounded-full shrink-0 ${
-                                service.isActive ? "bg-emerald-500" : "bg-amber-500"
+                                isItemUpdating
+                                  ? "bg-amber-400 animate-pulse"
+                                  : service.isActive
+                                  ? "bg-emerald-500"
+                                  : "bg-amber-500"
                               }`}
                             />
                             <span
                               className={
-                                service.isActive
+                                isItemUpdating
+                                  ? "text-text-secondary font-medium text-xs"
+                                  : service.isActive
                                   ? "text-emerald-600 dark:text-emerald-400 font-semibold text-xs"
                                   : "text-amber-600 dark:text-amber-400 font-semibold text-xs"
                               }
                             >
-                              {service.isActive ? "Active" : "Inactive"}
+                              {isItemUpdating ? "Updating..." : service.isActive ? "Active" : "Inactive"}
                             </span>
                           </button>
 
@@ -691,10 +697,13 @@ export default function CreatorServices() {
                               aria-label="Service actions"
                               aria-haspopup="true"
                               aria-expanded={openMenuId === serviceId}
+                              disabled={isItemUpdating}
                               onClick={() =>
                                 setOpenMenuId((prev) => (prev === serviceId ? null : serviceId))
                               }
-                              className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/95 dark:bg-neutral-900/90 backdrop-blur-xs shadow-xs border border-white/20 text-text-secondary hover:text-foreground flex items-center justify-center transition-all hover:scale-105 cursor-pointer"
+                              className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/95 dark:bg-neutral-900/90 backdrop-blur-xs shadow-xs border border-white/20 text-text-secondary hover:text-foreground flex items-center justify-center transition-all hover:scale-105 cursor-pointer ${
+                                isItemUpdating ? "opacity-50 cursor-not-allowed pointer-events-none" : ""
+                              }`}
                             >
                               <EllipsisVerticalIcon className="w-3.5 h-3.5" />
                             </button>
@@ -933,18 +942,22 @@ export default function CreatorServices() {
         onClose={handleCloseModal}
         service={editingService}
         onSuccess={() => {
-          dispatch(
-            getServices({
-              page: currentPage,
-              limit: 9,
-              sortBy,
-              sortOrder,
-              ...(searchQuery.trim() ? { search: searchQuery.trim() } : {}),
-              ...(selectedCategory !== "All" ? { category: selectedCategory } : {}),
-              ...(selectedPlatform !== "All" ? { platform: selectedPlatform } : {}),
-              ...(selectedStatus !== "All" ? { isActive: selectedStatus } : {}),
-            })
-          );
+          if (!editingService) {
+            // Only refetch on new service creation to update total count and pagination.
+            // On edit, updateCreatorService.fulfilled already updates the service in-place in Redux state.
+            dispatch(
+              getServices({
+                page: 1,
+                limit: 9,
+                sortBy,
+                sortOrder,
+                ...(searchQuery.trim() ? { search: searchQuery.trim() } : {}),
+                ...(selectedCategory !== "All" ? { category: selectedCategory } : {}),
+                ...(selectedPlatform !== "All" ? { platform: selectedPlatform } : {}),
+                ...(selectedStatus !== "All" ? { isActive: selectedStatus } : {}),
+              })
+            );
+          }
         }}
       />
 

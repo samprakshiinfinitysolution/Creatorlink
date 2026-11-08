@@ -3,6 +3,7 @@ import BrandProfile from "./profile.model.js";
 import Auth from "../../auth/auth.model.js";
 import createApiError from "../../../utils/ApiError.js";
 import { getUserVerificationStatusService } from "../../admin/verification/verification.service.js";
+import { emitVerificationEventToAdmins } from "../../../socket/socket.js";
 
 
 // Create a brand profile for the authenticated user.
@@ -169,6 +170,17 @@ const updateProfileService = async (userId, profileData = {}) => {
         profileObj.verification = await getUserVerificationStatusService(userId);
     } catch (verifErr) {
         console.error("Failed to attach verification status to brand profile:", verifErr);
+    }
+
+    // Emit live profile update to admins so open verification detail modals show fresh data
+    try {
+        emitVerificationEventToAdmins("verification:applicant_profile_updated", {
+            userId: userId.toString(),
+            role: "brand",
+            profile: profileObj
+        });
+    } catch (socketErr) {
+        console.error("Failed to emit brand profile update to admins:", socketErr);
     }
 
     return profileObj;

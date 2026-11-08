@@ -104,6 +104,28 @@ const brandReviewsSlice = createSlice({
             state.submitting = false;
             state.error = null;
             state.successMessage = null;
+        },
+        addReviewFromSocket: (state, action) => {
+            const newReview = action.payload;
+            if (!newReview?._id) return;
+
+            const existingIdx = state.reviews.findIndex(
+                (r) => String(r._id) === String(newReview._id)
+            );
+            if (existingIdx !== -1) {
+                state.reviews[existingIdx] = {
+                    ...state.reviews[existingIdx],
+                    ...newReview
+                };
+            } else {
+                state.reviews.unshift(newReview);
+                if (state.stats) {
+                    state.stats.totalReviews = (state.stats.totalReviews || 0) + 1;
+                }
+                if (state.pagination) {
+                    state.pagination.totalItems = (state.pagination.totalItems || 0) + 1;
+                }
+            }
         }
     },
     extraReducers: (builder) => {
@@ -174,13 +196,33 @@ const brandReviewsSlice = createSlice({
                     action.payload?.message ||
                     "Review submitted successfully";
                 const submittedWsId = action.meta.arg?.workspaceId ? String(action.meta.arg.workspaceId) : null;
+                const newReview = action.payload?.data;
                 if (
-                    action.payload?.data &&
+                    newReview &&
                     state.workspaceReviewWorkspaceId &&
                     submittedWsId === state.workspaceReviewWorkspaceId
                 ) {
-                    state.workspaceReview = action.payload.data;
+                    state.workspaceReview = newReview;
                     state.workspaceReviewError = null;
+                }
+                if (newReview?._id) {
+                    const existingIdx = state.reviews.findIndex(
+                        (r) => String(r._id) === String(newReview._id)
+                    );
+                    if (existingIdx !== -1) {
+                        state.reviews[existingIdx] = {
+                            ...state.reviews[existingIdx],
+                            ...newReview
+                        };
+                    } else {
+                        state.reviews.unshift(newReview);
+                        if (state.stats) {
+                            state.stats.totalReviews = (state.stats.totalReviews || 0) + 1;
+                        }
+                        if (state.pagination) {
+                            state.pagination.totalItems = (state.pagination.totalItems || 0) + 1;
+                        }
+                    }
                 }
                 state.error = null;
             })
@@ -239,7 +281,8 @@ export const {
     clearReviewError,
     clearReviewSuccess,
     clearWorkspaceReview,
-    clearReviewsState
+    clearReviewsState,
+    addReviewFromSocket
 } = brandReviewsSlice.actions;
 
 export {

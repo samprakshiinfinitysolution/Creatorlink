@@ -585,12 +585,12 @@ function CampaignPerformanceChart({
     };
   }, [timelineMonths, monthlyBudgets, recentCampaigns, paymentsHistory, timeframeStartDate]);
 
-  // Enhanced chart dimensions giving ample horizontal room for Y-axis currency labels and vertical room for both series
-  const svgWidth = 680;
-  const svgHeight = 210;
-  const paddingLeft = 92;
-  const paddingRight = 32;
-  const paddingTop = 20;
+  // Enhanced responsive chart dimensions giving ample horizontal room for Y-axis currency labels and vertical room for both series
+  const svgWidth = 660;
+  const svgHeight = 220;
+  const paddingLeft = 86;
+  const paddingRight = 28;
+  const paddingTop = 22;
   const paddingBottom = 28;
   const innerWidth = svgWidth - paddingLeft - paddingRight;
   const innerHeight = svgHeight - paddingTop - paddingBottom;
@@ -720,10 +720,11 @@ function CampaignPerformanceChart({
   return (
     <div className="w-full flex flex-col justify-between h-full space-y-3 min-w-0">
       {/* Responsive SVG Chart Canvas */}
-      <div className="relative w-full overflow-hidden">
+      <div className="relative w-full aspect-[660/220] min-h-[160px] sm:min-h-[200px] select-none">
         <svg
           viewBox={`0 0 ${svgWidth} ${svgHeight}`}
-          className="w-full h-56 sm:h-64 lg:h-72 select-none"
+          className="w-full h-full block select-none"
+          preserveAspectRatio="xMidYMid meet"
           onMouseLeave={() => {
             if (!isRecentTouch()) {
               setActiveTooltip(null);
@@ -1003,7 +1004,7 @@ function CampaignPerformanceChart({
                 isNearTop ? "translate-y-3" : "-translate-y-full -mt-2"
               } px-3 py-2 rounded-xl bg-surface border border-border-theme shadow-lg text-[11px] font-sans z-20 transition-opacity`}
               style={{
-                left: `${Math.max(14, Math.min(86, (activeTooltip.x / svgWidth) * 100))}%`,
+                left: `${Math.max(16, Math.min(84, (activeTooltip.x / svgWidth) * 100))}%`,
                 top: `${(minY / svgHeight) * 100}%`,
               }}
             >
@@ -1070,11 +1071,11 @@ function CampaignPerformanceChart({
       )}
 
       {/* Summary Row */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-[11px] text-text-secondary pt-2 border-t border-border-theme font-sans">
-        <span>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2 text-[11px] sm:text-xs text-text-secondary pt-2.5 sm:pt-3 border-t border-border-theme font-sans">
+        <span className="truncate">
           Confirmed Paid Spend: <strong className="text-foreground font-semibold">{formatCurrency(totalSpending, "INR")}</strong>
         </span>
-        <span>
+        <span className="sm:text-right truncate">
           {totalCampaignBudget !== null && totalCampaignBudget !== undefined
             ? `Total Campaign Budget (${totalCampaigns} total): `
             : isPartialCampaignList
@@ -1159,18 +1160,26 @@ export default function BrandCampaignAnalytics({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-stretch min-w-0">
       {/* Left Card: Campaign Performance Line Chart */}
-      <div className="lg:col-span-8 bg-white dark:bg-surface border border-border-theme rounded-2xl sm:rounded-3xl p-5 sm:p-6 lg:p-7 shadow-xs flex flex-col justify-between transition-colors min-w-0 overflow-hidden">
-        <div className="mb-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5 min-w-0">
+      <div className="lg:col-span-8 bg-white dark:bg-surface border border-border-theme rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-7 shadow-xs flex flex-col justify-between transition-colors min-w-0 overflow-hidden">
+        <div className="mb-3 sm:mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+            {/* Heading & Mobile Timeframe Dropdown */}
+            <div className="flex items-center justify-between sm:justify-start gap-2.5 min-w-0">
               <h2 className="font-serif font-semibold text-lg sm:text-xl text-foreground tracking-tight truncate">
                 Campaign Performance
               </h2>
+              <div className="sm:hidden shrink-0">
+                <TimeframeSelector
+                  value={activeTimeframe}
+                  onChange={onTimeframeChange}
+                  disabled={dashboardLoading}
+                />
+              </div>
             </div>
 
-            {/* Right Group: Legend & Compact Timeframe Selector */}
-            <div className="flex flex-wrap items-center gap-2.5 sm:gap-4 text-xs font-sans">
-              <div className="flex items-center gap-2 sm:gap-3.5">
+            {/* Right Group: Legend & Desktop Timeframe Selector */}
+            <div className="flex flex-wrap items-center justify-between sm:justify-end gap-2.5 sm:gap-4 text-xs font-sans">
+              <div className="flex items-center gap-3 sm:gap-3.5 flex-wrap">
                 <div className="flex items-center gap-1.5">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#ff2d6c] shrink-0" />
                   <span className="text-text-secondary font-medium">Spends:</span>
@@ -1189,12 +1198,14 @@ export default function BrandCampaignAnalytics({
                 </div>
               </div>
 
-              {/* Premium Timeframe Dropdown */}
-              <TimeframeSelector
-                value={activeTimeframe}
-                onChange={onTimeframeChange}
-                disabled={dashboardLoading}
-              />
+              {/* Desktop/Tablet Timeframe Dropdown */}
+              <div className="hidden sm:block shrink-0">
+                <TimeframeSelector
+                  value={activeTimeframe}
+                  onChange={onTimeframeChange}
+                  disabled={dashboardLoading}
+                />
+              </div>
             </div>
           </div>
         </div>

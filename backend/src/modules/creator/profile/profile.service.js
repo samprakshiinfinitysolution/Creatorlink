@@ -3,7 +3,10 @@ import Auth from "../../auth/auth.model.js";
 import createApiError from "../../../utils/ApiError.js";
 import Portfolio from "../portfolio/portfolio.model.js";
 import CreatorService from "../services/services.model.js";
+import Workspace from "../../workspace/workspace.model.js";
+import Booking from "../../booking/booking.model.js";
 import { getUserVerificationStatusService } from "../../admin/verification/verification.service.js";
+import { emitVerificationEventToAdmins } from "../../../socket/socket.js";
 
 
 // Create a creator profile for the authenticated user.
@@ -88,6 +91,17 @@ const getMyProfileService = async (userId) => {
         profileObj.verification = await getUserVerificationStatusService(userId);
     } catch (verifErr) {
         console.error("Failed to attach verification status to creator profile:", verifErr);
+    }
+
+    try {
+        const [wsCount, bookingCount] = await Promise.all([
+            Workspace.countDocuments({ creator: userId }),
+            Booking.countDocuments({ creator: userId, status: { $in: ["accepted", "completed"] } })
+        ]);
+        profileObj.collaborationsCount = Math.max(wsCount, bookingCount);
+        profileObj.completedCampaignsCount = await Workspace.countDocuments({ creator: userId, status: "completed" });
+    } catch (collabErr) {
+        console.error("Failed to attach collaborationsCount to creator profile:", collabErr);
     }
 
     return profileObj;
@@ -181,6 +195,28 @@ const updateProfileService = async (userId, profileData) => {
         profileObj.verification = await getUserVerificationStatusService(userId);
     } catch (verifErr) {
         console.error("Failed to attach verification status to creator profile:", verifErr);
+    }
+
+    try {
+        const [wsCount, bookingCount] = await Promise.all([
+            Workspace.countDocuments({ creator: userId }),
+            Booking.countDocuments({ creator: userId, status: { $in: ["accepted", "completed"] } })
+        ]);
+        profileObj.collaborationsCount = Math.max(wsCount, bookingCount);
+        profileObj.completedCampaignsCount = await Workspace.countDocuments({ creator: userId, status: "completed" });
+    } catch (collabErr) {
+        console.error("Failed to attach collaborationsCount to creator profile:", collabErr);
+    }
+
+    // Emit live profile update to admins so open verification detail modals show fresh data
+    try {
+        emitVerificationEventToAdmins("verification:applicant_profile_updated", {
+            userId: userId.toString(),
+            role: "creator",
+            profile: profileObj
+        });
+    } catch (socketErr) {
+        console.error("Failed to emit creator profile update to admins:", socketErr);
     }
 
     return profileObj;

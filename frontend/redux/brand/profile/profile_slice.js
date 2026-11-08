@@ -129,6 +129,38 @@ const profileSlice = createSlice({
             state.loading = false;
             state.fetchLoading = false;
             state.error = null;
+        },
+
+        updateRealtimeBrandVerification: (state, action) => {
+            if (state.profile) {
+                const { status, effectiveStatus, reason, reviewedAt, reviewerName, isVerifiedBusiness, resubmittedAt, request } = action.payload || {};
+                if (!state.profile.verification) {
+                    state.profile.verification = {};
+                }
+                const newStatus = effectiveStatus || status;
+                if (newStatus !== undefined) {
+                    state.profile.verification.status = newStatus;
+                    state.profile.verification.rawStatus = status || newStatus;
+                }
+                if (reason !== undefined) {
+                    state.profile.verification.reason = reason;
+                }
+                if (reviewedAt !== undefined) {
+                    state.profile.verification.reviewedAt = reviewedAt;
+                }
+                if (reviewerName !== undefined) {
+                    state.profile.verification.reviewerName = reviewerName;
+                }
+                if (resubmittedAt !== undefined) {
+                    state.profile.verification.resubmittedAt = resubmittedAt;
+                }
+                if (isVerifiedBusiness !== undefined) {
+                    state.profile.isVerifiedBusiness = Boolean(isVerifiedBusiness);
+                }
+                if (request) {
+                    state.profile.verification.current = request;
+                }
+            }
         }
     },
 
@@ -266,7 +298,8 @@ const profileSlice = createSlice({
 
 
 export const {
-    clearBrandProfile
+    clearBrandProfile,
+    updateRealtimeBrandVerification
 } = profileSlice.actions;
 
 

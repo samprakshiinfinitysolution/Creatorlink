@@ -10,6 +10,7 @@ import {
   createCreatorProfile,
   updateCreatorProfile,
 } from "@/redux/creator/profile/profile_slice";
+import { fetchCreatorWorkspaces } from "@/redux/creator/workspace/workspace_slice";
 import { updateAuthUserName } from "@/redux/auth/auth_slice";
 import { uploadSingleImageApi } from "@/lib/upload";
 import ProfileVerificationStatusCard from "@/components/common/ProfileVerificationStatusCard";
@@ -27,9 +28,9 @@ function getCreatorDisplayInitial(name) {
 }
 
 function formatJoinedDate(dateStr) {
-  if (!dateStr) return "12 Aug 2024";
+  if (!dateStr) return null;
   const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return "12 Aug 2024";
+  if (isNaN(d.getTime())) return null;
   return d.toLocaleDateString("en-GB", {
     day: "numeric",
     month: "short",
@@ -730,6 +731,9 @@ export default function CreatorProfile() {
     (state) => state.profile || {}
   );
   const authUser = useSelector((state) => state.auth?.user);
+  const { workspaces, pagination: workspacePagination } = useSelector(
+    (state) => state.creatorWorkspace || {}
+  );
 
   const [formData, setFormData] = useState({
     name: "",
@@ -759,7 +763,7 @@ export default function CreatorProfile() {
   const [keywordInput, setKeywordInput] = useState("");
   const [languageInput, setLanguageInput] = useState("");
 
-  // Fetch creator profile on mount
+  // Fetch creator profile and collaborations on mount
   useEffect(() => {
     let isMounted = true;
     dispatch(getCreatorProfile()).finally(() => {
@@ -767,6 +771,7 @@ export default function CreatorProfile() {
         setInitialFetchDone(true);
       }
     });
+    dispatch(fetchCreatorWorkspaces({ page: 1, limit: 10 }));
     return () => {
       isMounted = false;
     };
@@ -1253,11 +1258,43 @@ export default function CreatorProfile() {
   const youtubeUrl = profile?.socialLinks?.youtube || formData.socialLinks?.youtube || "";
   const tiktokUrl = profile?.socialLinks?.tiktok || formData.socialLinks?.tiktok || "";
   const facebookUrl = profile?.socialLinks?.facebook || formData.socialLinks?.facebook || "";
-const collaborationsCount = profile?.collaborationsCount || profile?.completedCampaignsCount || 0;
+  const dynamicWorkspacesCount =
+    workspacePagination?.totalItems ??
+    workspacePagination?.totalWorkspaces ??
+    (Array.isArray(workspaces) ? workspaces.length : 0);
+
+  const collaborationsCount =
+    typeof profile?.collaborationsCount === "number" && profile.collaborationsCount > 0
+      ? profile.collaborationsCount
+      : dynamicWorkspacesCount || profile?.collaborationsCount || profile?.completedCampaignsCount || 0;
   const followerCount = typeof profile?.followerCount === "number" ? profile.followerCount : null;
   const engagementRate = typeof profile?.engagementRate === "number" ? profile.engagementRate : null;
   const isPublic = profile?.isPublic ?? formData.isPublic ?? true;
-  const joinedOn = formatJoinedDate(profile?.createdAt || authUser?.createdAt);
+  const joinedOn = formatJoinedDate(profile?.createdAt || profile?.user?.createdAt || authUser?.createdAt);
+
+  // Creator type/platform label based on profile title or connected social platforms
+  const creatorPlatformLabel = useMemo(() => {
+    if (title && typeof title === "string" && title.trim()) {
+      return title.trim();
+    }
+    const platforms = [];
+    if (instagramUrl) platforms.push("Instagram");
+    if (youtubeUrl) platforms.push("YouTube");
+    if (tiktokUrl) platforms.push("TikTok");
+    if (twitterUrl) platforms.push("X");
+    if (facebookUrl) platforms.push("Facebook");
+
+    if (platforms.length >= 3) {
+      return "All Platform Creator";
+    }
+    if (platforms.length === 2) {
+      return `${platforms[0]} & ${platforms[1]} Creator`;
+    }
+    if (platforms.length === 1) {
+      return `${platforms[0]} Creator`;
+    }
+    return "All Platform Creator";
+  }, [title, instagramUrl, youtubeUrl, tiktokUrl, twitterUrl, facebookUrl]);
 
   // Profile completion calculation (strictly independent of isOnboarded)
   const completionStats = useMemo(() => {
@@ -1440,19 +1477,33 @@ const collaborationsCount = profile?.collaborationsCount || profile?.completedCa
               </div>
             </div>
           ) : (
-            <div>
-              <div className="mb-2">
-                <span className="font-semibold text-[11px] tracking-wider uppercase text-text-secondary font-sans inline-flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-secondary"></span>
-                  <span>ACCOUNT MANAGEMENT</span>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <span className="inline-block px-3 py-1 rounded-full text-[10px] font-semibold tracking-wider uppercase bg-[#fff0f4] dark:bg-[#2a171f] text-[#ff2d6c] border border-[#ff2d6c]/20 mb-2 font-sans">
+                  ACCOUNT MANAGEMENT
                 </span>
+                <h1 className="font-serif font-semibold text-2xl sm:text-3xl text-slate-900 dark:text-foreground tracking-wide">
+                  Creator Profile
+                </h1>
+                <p className="text-xs sm:text-sm text-text-secondary mt-1 font-sans">
+                  Manage your public creator identity, social channels, and marketplace visibility.
+                </p>
               </div>
-              <h1 className="font-serif font-medium text-2xl sm:text-3xl text-slate-900 dark:text-foreground tracking-wide">
-                Creator Profile
-              </h1>
-              <p className="text-xs sm:text-sm text-text-secondary mt-1 font-sans">
-                Manage your public creator identity, social channels, and marketplace visibility.
-              </p>
+
+              {/* Edit / View Profile Button */}
+              <button
+                type="button"
+                onClick={() => {
+                  setSuccessMessage("");
+                  setSaveError("");
+                  setUploadError("");
+                  setIsEditing(!isEditing);
+                }}
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#252525] hover:bg-[#111111] text-white text-xs font-semibold tracking-wide transition-all shadow-xs hover:shadow-md cursor-pointer shrink-0"
+              >
+                <PencilIcon className="w-4 h-4" />
+                <span>{isEditing ? "View Profile" : "Edit Profile"}</span>
+              </button>
             </div>
           )}
 
@@ -1545,99 +1596,34 @@ const collaborationsCount = profile?.collaborationsCount || profile?.completedCa
           {!isEditing && (
             <div className="space-y-6">
 
-              {/* PROFILE COMPLETION INDICATOR CARD */}
-              <div className="bg-white dark:bg-[#131318] border border-border-theme dark:border-[#22222e] rounded-3xl p-5 sm:p-6 shadow-xs relative overflow-hidden">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-border-theme/40">
-                  <div className="flex items-start sm:items-center gap-3.5">
-                    <div className="w-10 h-10 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center shrink-0 border border-secondary/20">
-                      <SparklesIcon className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2.5 flex-wrap">
-                        <h2 className="font-semibold text-sm sm:text-base text-slate-900 dark:text-foreground">
-                          Profile Completion
-                        </h2>
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-secondary/10 text-secondary border border-secondary/20">
-                          {completionStats.percentage}% Complete
-                        </span>
-                        {profile?.isOnboarded ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
-                            <CheckIcon className="w-3 h-3" />
-                            <span>Onboarded Creator</span>
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/10 text-amber-500 border border-amber-500/20">
-                            Onboarding In Progress
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-xs text-text-secondary mt-1">
-                        {completionStats.isFullyComplete
-                          ? "Your profile is fully optimized to maximize discovery by premium brands."
-                          : "Complete your profile details to improve matchmaking and receive more campaign invitations."}
-                      </p>
-                    </div>
-                  </div>
-
-                  {!completionStats.isFullyComplete && (
-                    <button
-                      type="button"
-                      onClick={() => setIsEditing(true)}
-                      className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-neutral-950 dark:bg-white text-white dark:text-black hover:bg-neutral-800 dark:hover:bg-neutral-100 text-xs font-semibold shadow-xs transition-colors cursor-pointer shrink-0 self-start md:self-auto"
-                    >
-                      <PencilIcon className="w-3.5 h-3.5" />
-                      <span>Complete Profile</span>
-                    </button>
-                  )}
-                </div>
-
-                {/* Progress Bar */}
-                <div className="pt-4 space-y-3">
-                  <div className="w-full h-2.5 bg-surface-muted rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-secondary to-pink-500 rounded-full transition-all duration-500"
-                      style={{ width: `${completionStats.percentage}%` }}
+              {/* 1. HERO BANNER CARD (MATCHING BRAND PROFILE LAYOUT) */}
+              <div className="bg-white dark:bg-surface border border-border-theme rounded-2xl p-6 sm:p-7 relative overflow-hidden shadow-xs">
+                {/* Dreamy subtle pastel wave accent in corner */}
+                <div className="absolute right-0 top-0 bottom-0 w-full sm:w-1/2 pointer-events-none opacity-40 dark:opacity-10 overflow-hidden select-none">
+                  <svg
+                    viewBox="0 0 400 200"
+                    preserveAspectRatio="none"
+                    className="w-full h-full text-pink-100 dark:text-pink-950"
+                  >
+                    <path
+                      d="M100,0 C220,130 180,180 400,200 L400,0 Z"
+                      fill="currentColor"
+                      fillOpacity="0.5"
                     />
-                  </div>
-
-                  {/* Missing Fields Chips & Guidance */}
-                  {completionStats.missingItems.length > 0 && (
-                    <div className="flex flex-wrap items-center gap-2 pt-1">
-                      <span className="text-[11px] font-medium text-text-secondary">
-                        Suggested additions:
-                      </span>
-                      {completionStats.missingItems.map((item) => (
-                        <button
-                          key={item.id}
-                          type="button"
-                          onClick={() => setIsEditing(true)}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-surface-muted text-text-secondary hover:text-secondary hover:bg-secondary/10 border border-border-theme hover:border-secondary/30 transition-all cursor-pointer"
-                        >
-                          <PlusIcon className="w-3 h-3 text-secondary" />
-                          <span>{item.label}</span>
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                  </svg>
                 </div>
-              </div>
 
-              {/* 1. HERO BANNER CARD */}
-              <div className="bg-white dark:bg-[#131318] border border-border-theme dark:border-[#22222e] rounded-3xl p-6 sm:p-7 relative overflow-hidden shadow-xs">
-                {/* Ambient pink accent glow in top right corner */}
-                <div className="pointer-events-none absolute -top-16 -right-16 w-80 h-80 bg-gradient-to-br from-secondary/20 via-secondary/5 to-transparent blur-3xl rounded-full" />
-
-                <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                  {/* Left: Avatar + Details */}
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-5 min-w-0">
+                <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                  {/* Left: Avatar + Title + Category + Location + Website + Social Media Links */}
+                  <div className="flex items-start sm:items-center gap-4 sm:gap-5 min-w-0">
                     {/* Creator Avatar with Camera Button */}
-                    <div className="relative shrink-0 self-start sm:self-auto">
+                    <div className="relative shrink-0">
                       <CreatorAvatarPreview
                         url={profile?.profileImage}
                         alt={creatorName}
                         initials={displayInitial}
                         isUploading={isUploadingImage}
-                        className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl"
+                        className="w-20 h-20 sm:w-22 sm:h-22"
                       />
                       <button
                         type="button"
@@ -1645,88 +1631,193 @@ const collaborationsCount = profile?.collaborationsCount || profile?.completedCa
                         disabled={isUploadingImage}
                         aria-label="Change profile picture"
                         title="Change profile picture"
-                        className={`absolute -bottom-1 -right-1 p-2 rounded-xl bg-[#111111] hover:bg-black text-white border border-[#2a2a36] hover:border-secondary/50 shadow-md transition-all cursor-pointer ${isUploadingImage ? "opacity-50 cursor-not-allowed" : ""
-                          }`}
+                        className={`absolute -bottom-1 -right-1 p-1.5 rounded-lg bg-surface border border-border-theme text-text-secondary hover:text-foreground hover:bg-surface-muted shadow-xs transition-colors cursor-pointer ${
+                          isUploadingImage ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
                       >
-                        <CameraIcon className="w-4 h-4 text-white" />
+                        <CameraIcon className="w-3.5 h-3.5 text-secondary" />
                       </button>
                     </div>
 
-                    <div className="min-w-0 flex-1 space-y-1">
+                    <div className="min-w-0 flex-1 space-y-1.5">
                       <div className="flex items-center gap-2 flex-wrap">
                         <h2 className="font-serif font-semibold text-2xl sm:text-[26px] text-slate-900 dark:text-foreground tracking-wide break-words">
                           {creatorName}
                         </h2>
-                        {Boolean(profile?.isVerifiedBadge) && (
+                        {Boolean(profile?.verification ? profile.verification.status === "approved" : profile?.isVerifiedBadge) && (
                           <span
                             className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-secondary/10 text-secondary border border-secondary/20 shadow-xs"
                             title="Official Verified Creator"
                           >
                             <CheckBadgeIcon className="w-3.5 h-3.5" />
-                            Verified
+                            Verified Creator
                           </span>
                         )}
                       </div>
-                      <div>
-                        <span className="inline-block px-3 py-0.5 rounded-full text-xs font-medium bg-[#fff0f4] dark:bg-[#ff2d6c]/10 text-[#ff2d6c] border border-[#ff2d6c]/20 font-sans">
-                          {category}
-                        </span>
-                      </div>
 
-                      {title && (
+
+                      {/* Creator type / platform label */}
+                      {creatorPlatformLabel && (
                         <p className="text-sm sm:text-base font-normal text-text-secondary font-sans leading-snug">
-                          {title}
+                          {creatorPlatformLabel}
                         </p>
                       )}
 
-                      <div className="flex flex-wrap items-center gap-3 text-xs font-sans text-text-secondary pt-0.5">
-                        <span className="inline-flex items-center gap-1.5">
-                          <MapPinIcon className="w-3.5 h-3.5 text-black dark:text-white shrink-0" />
-                          <span>{location || "Location not set"}</span>
-                        </span>
-                        <span className="text-border-theme">•</span>
-                        <span className="inline-flex items-center gap-1.5">
-                          <CalendarIcon className="w-3.5 h-3.5 text-black dark:text-white shrink-0" />
-                          <span>Joined {joinedOn}</span>
-                        </span>
+                      {/* Location, Joined Date, Website & Social Channels */}
+                      <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 text-xs font-sans text-text-secondary pt-0.5">
+                        {location && (
+                          <span className="inline-flex items-center gap-1.5 text-text-secondary">
+                            <MapPinIcon className="w-3.5 h-3.5 text-text-secondary shrink-0" />
+                            <span>{location}</span>
+                          </span>
+                        )}
+
+                        {location && joinedOn && (
+                          <span className="text-border-theme">•</span>
+                        )}
+
+                        {joinedOn && (
+                          <span className="inline-flex items-center gap-1.5 text-text-secondary">
+                            <CalendarIcon className="w-3.5 h-3.5 text-text-secondary shrink-0" />
+                            <span>Joined {joinedOn}</span>
+                          </span>
+                        )}
+
+                        {(location || joinedOn) && (websiteUrl || instagramUrl || youtubeUrl || twitterUrl || tiktokUrl || facebookUrl) && (
+                          <span className="text-border-theme hidden sm:inline">|</span>
+                        )}
+
+                        {websiteUrl && (
+                          <a
+                            href={websiteUrl.startsWith("http") ? websiteUrl : `https://${websiteUrl}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-[#ff2d6c] hover:underline font-medium truncate max-w-[220px]"
+                            title={websiteUrl}
+                          >
+                            <GlobeIcon className="w-3.5 h-3.5 text-[#ff2d6c] shrink-0" />
+                            <span className="truncate">{websiteUrl.replace(/^https?:\/\/(www\.)?/, "")}</span>
+                            <ExternalLinkIcon className="w-3 h-3 text-[#ff2d6c] shrink-0" />
+                          </a>
+                        )}
+
+                        {(instagramUrl || youtubeUrl || twitterUrl || tiktokUrl || facebookUrl) && (
+                          <div className="flex items-center gap-1.5 ml-0.5">
+                            {instagramUrl && (
+                              <a
+                                href={instagramUrl.startsWith("http") ? instagramUrl : `https://${instagramUrl}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-1 rounded-md text-text-secondary hover:text-[#ff2d6c] hover:bg-[#fff0f4] dark:hover:bg-[#ff2d6c]/10 transition-colors"
+                                title="Instagram"
+                              >
+                                <InstagramIcon className="w-3.5 h-3.5" />
+                              </a>
+                            )}
+                            {youtubeUrl && (
+                              <a
+                                href={youtubeUrl.startsWith("http") ? youtubeUrl : `https://${youtubeUrl}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-1 rounded-md text-text-secondary hover:text-[#ff2d6c] hover:bg-[#fff0f4] dark:hover:bg-[#ff2d6c]/10 transition-colors"
+                                title="YouTube"
+                              >
+                                <YoutubeIcon className="w-3.5 h-3.5" />
+                              </a>
+                            )}
+                            {twitterUrl && (
+                              <a
+                                href={twitterUrl.startsWith("http") ? twitterUrl : `https://${twitterUrl}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-1 rounded-md text-text-secondary hover:text-[#ff2d6c] hover:bg-[#fff0f4] dark:hover:bg-[#ff2d6c]/10 transition-colors"
+                                title="X (Twitter)"
+                              >
+                                <XTwitterIcon className="w-3.5 h-3.5" />
+                              </a>
+                            )}
+                            {tiktokUrl && (
+                              <a
+                                href={tiktokUrl.startsWith("http") ? tiktokUrl : `https://${tiktokUrl}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-1 rounded-md text-text-secondary hover:text-[#ff2d6c] hover:bg-[#fff0f4] dark:hover:bg-[#ff2d6c]/10 transition-colors"
+                                title="TikTok"
+                              >
+                                <TiktokIcon className="w-3.5 h-3.5" />
+                              </a>
+                            )}
+                            {facebookUrl && (
+                              <a
+                                href={facebookUrl.startsWith("http") ? facebookUrl : `https://${facebookUrl}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-1 rounded-md text-text-secondary hover:text-[#ff2d6c] hover:bg-[#fff0f4] dark:hover:bg-[#ff2d6c]/10 transition-colors"
+                                title="Facebook"
+                              >
+                                <FacebookIcon className="w-3.5 h-3.5" />
+                              </a>
+                            )}
+                          </div>
+                        )}
+                        {!location && !joinedOn && !websiteUrl && !instagramUrl && !youtubeUrl && !twitterUrl && !tiktokUrl && !facebookUrl && (
+                          <span className="text-text-secondary/60 italic">Location and social links not set</span>
+                        )}
                       </div>
 
+                      {/* Bottom Badges Row: Profile Active + Highlighted Category / Niche Badge */}
                       <div className="flex flex-wrap items-center gap-2 pt-1">
-                        {/* Status Badge */}
+                        {/* Profile Active Badge */}
                         <span
-                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${isPublic
-                              ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
-                              : "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30"
-                            }`}
+                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
+                            isPublic
+                              ? "bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
+                              : "bg-amber-500/10 dark:bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30"
+                          }`}
                         >
                           <CheckIcon className="w-3 h-3 shrink-0" />
                           <span>{isPublic ? "Profile Active" : "Profile Private"}</span>
                         </span>
 
-                        {/* Role / Category Badge */}
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-secondary/15 text-secondary border border-secondary/30">
-                          <SparklesIcon className="w-3.5 h-3.5 shrink-0" />
-                          <span>{category || "Creator"}</span>
-                        </span>
+                        {/* Highlighted Category / Niche Badge with Sparkles */}
+                        {category && (
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#fff0f4] dark:bg-[#ff2d6c]/10 text-[#ff2d6c] border border-[#ff2d6c]/20">
+                            <SparklesIcon className="w-3.5 h-3.5 text-[#ff2d6c] shrink-0" />
+                            <span>{category}</span>
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
 
-                  {/* Right: Edit Profile Button */}
-                  <div className="shrink-0 self-start md:self-center">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSuccessMessage("");
-                        setSaveError("");
-                        setUploadError("");
-                        setIsEditing(!isEditing);
-                      }}
-                      className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#111111] hover:bg-black text-white border border-[#2a2a36] hover:border-secondary/50 text-xs font-semibold tracking-wide transition-all shadow-xs hover:shadow-md cursor-pointer"
-                    >
-                      <PencilIcon className="w-4 h-4 text-white" />
-                      <span>Edit Profile</span>
-                    </button>
+                  {/* Right: 3 Creator Statistics Columns (Followers, Engagement, Collaborations) */}
+                  <div className="flex items-center justify-around sm:justify-end gap-6 sm:gap-8 shrink-0 pt-4 lg:pt-0 border-t lg:border-t-0 border-border-theme/60">
+                    <div className="text-center sm:text-left">
+                      <span className="block text-[22px] sm:text-[24px] font-semibold font-sans text-slate-900 dark:text-foreground leading-none">
+                        {followerCount !== null ? formatNumber(followerCount) : "0"}
+                      </span>
+                      <span className="block text-[10px] sm:text-[11px] text-text-secondary mt-1.5 font-sans leading-tight">
+                        Followers
+                      </span>
+                    </div>
+                    <div className="h-10 w-px bg-border-theme" />
+                    <div className="text-center sm:text-left">
+                      <span className="block text-[22px] sm:text-[24px] font-semibold font-sans text-slate-900 dark:text-foreground leading-none">
+                        {engagementRate !== null ? `${engagementRate}%` : "0%"}
+                      </span>
+                      <span className="block text-[10px] sm:text-[11px] text-text-secondary mt-1.5 font-sans leading-tight">
+                        Engagement
+                      </span>
+                    </div>
+                    <div className="h-10 w-px bg-border-theme" />
+                    <div className="text-center sm:text-left">
+                      <span className="block text-[22px] sm:text-[24px] font-semibold font-sans text-slate-900 dark:text-foreground leading-none">
+                        {collaborationsCount}
+                      </span>
+                      <span className="block text-[10px] sm:text-[11px] text-text-secondary mt-1.5 font-sans leading-tight">
+                        Collaborations
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1865,43 +1956,6 @@ const collaborationsCount = profile?.collaborationsCount || profile?.completedCa
                     </Link>
                   </div>
 
-                  {/* Card 2: Stats Grid Card */}
-                  <div className="bg-white dark:bg-[#131318] border border-border-theme dark:border-[#22222e] rounded-3xl p-5 sm:p-6 shadow-xs">
-                    <div className="grid grid-cols-3 divide-x divide-border-theme">
-                      {/* Followers */}
-                      <div className="text-center px-2">
-                        <div className="w-8 h-8 mx-auto mb-2 rounded-xl bg-secondary/10 flex items-center justify-center text-black dark:text-white">
-                          <UsersIcon className="w-4 h-4" />
-                        </div>
-                        <span className="block text-xl sm:text-2xl font-bold font-sans text-slate-900 dark:text-foreground">
-                          {followerCount !== null ? formatNumber(followerCount) : "Not added"}
-                        </span>
-                        <span className="block text-xs text-text-secondary mt-1 font-sans">Followers</span>
-                      </div>
-
-                      {/* Engagement */}
-                      <div className="text-center px-2">
-                        <div className="w-8 h-8 mx-auto mb-2 rounded-xl bg-secondary/10 flex items-center justify-center text-black dark:text-white">
-                          <ChartBarIcon className="w-4 h-4" />
-                        </div>
-                        <span className="block text-xl sm:text-2xl font-bold font-sans text-slate-900 dark:text-foreground">
-                          {engagementRate !== null ? `${engagementRate}%` : "Not added"}
-                        </span>
-                        <span className="block text-xs text-text-secondary mt-1 font-sans">Engagement</span>
-                      </div>
-
-                      {/* Collaborations */}
-                      <div className="text-center px-2">
-                        <div className="w-8 h-8 mx-auto mb-2 rounded-xl bg-secondary/10 flex items-center justify-center text-black dark:text-white">
-                          <HandshakeIcon className="w-4 h-4" />
-                        </div>
-                        <span className="block text-xl sm:text-2xl font-bold font-sans text-slate-900 dark:text-foreground">
-                          {collaborationsCount}
-                        </span>
-                        <span className="block text-xs text-text-secondary mt-1 font-sans">Collaborations</span>
-                      </div>
-                    </div>
-                  </div>
 
                 </div>
 

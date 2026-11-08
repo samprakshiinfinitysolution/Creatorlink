@@ -65,7 +65,7 @@ const initializeSocket = (httpServer) => {
         try {
             const headerCookie = socket.handshake.headers.cookie || "";
             const cookies = parseCookie(headerCookie);
-            const token = cookies.accessToken || socket.handshake.auth?.token;
+            const token = cookies.adminAccessToken || cookies.accessToken || socket.handshake.auth?.token;
 
             let decodedToken = null;
 
@@ -106,7 +106,7 @@ const initializeSocket = (httpServer) => {
                 // Therefore, user.sessions.length > 0 cannot be treated as proof that this access token is active.
                 // The safest compatible approach without weakening authentication is to require the session's
                 // refreshToken and verify that it matches an active session in user.sessions.
-                const refreshToken = cookies.refreshToken || socket.handshake.auth?.refreshToken;
+                const refreshToken = cookies.adminRefreshToken || cookies.refreshToken || socket.handshake.auth?.refreshToken;
                 if (!refreshToken) {
                     return next(new Error("Invalid or expired session"));
                 }
@@ -146,7 +146,7 @@ const initializeSocket = (httpServer) => {
             }
 
             // 2. If access token is missing, authenticate via active refresh token session (fallback)
-            const refreshToken = cookies.refreshToken || socket.handshake.auth?.refreshToken;
+            const refreshToken = cookies.adminRefreshToken || cookies.refreshToken || socket.handshake.auth?.refreshToken;
             if (!refreshToken) {
                 return next(new Error("Authentication required"));
             }
@@ -210,6 +210,9 @@ const initializeSocket = (httpServer) => {
 
         if (socket.data?.user?.userId) {
             socket.join(`user:${socket.data.user.userId}`);
+            if (socket.data.user.role === "admin") {
+                socket.join("role:admin");
+            }
         }
 
         // Join only if the authenticated user is a participant.
@@ -275,13 +278,18 @@ const initializeSocket = (httpServer) => {
                     });
                 }
 
-                const workspace = await Workspace.findOne({
-                    _id: workspaceId,
-                    $or: [
-                        { creator: socket.data.user.userId },
-                        { brand: socket.data.user.userId }
-                    ]
-                }).select("_id");
+                let workspace;
+                if (socket.data?.user?.role === "admin") {
+                    workspace = await Workspace.findById(workspaceId).select("_id");
+                } else {
+                    workspace = await Workspace.findOne({
+                        _id: workspaceId,
+                        $or: [
+                            { creator: socket.data.user.userId },
+                            { brand: socket.data.user.userId }
+                        ]
+                    }).select("_id");
+                }
 
                 if (!workspace) {
                     return callback?.({
@@ -342,6 +350,32 @@ const emitNotificationToUser = (userId, notificationData) => {
     }
 };
 
+const emitNotificationToAdmins = (notificationData, excludeAdminId = null) => {
+    if (!ioInstance) {
+        return false;
+    }
+
+    try {
+        if (excludeAdminId) {
+            const sockets = ioInstance.sockets?.adapter?.rooms?.get("role:admin");
+            if (sockets) {
+                for (const socketId of sockets) {
+                    const clientSocket = ioInstance.sockets.sockets.get(socketId);
+                    if (clientSocket && clientSocket.data?.user?.userId !== excludeAdminId.toString()) {
+                        clientSocket.emit("notification:new", notificationData);
+                    }
+                }
+            }
+        } else {
+            ioInstance.to("role:admin").emit("notification:new", notificationData);
+        }
+        return true;
+    } catch (error) {
+        console.error("Socket admin notification broadcast failed:", error?.message || error);
+        return false;
+    }
+};
+
 const emitWorkspaceEvent = (workspaceId, eventName, payload) => {
     if (!ioInstance || !workspaceId) {
         return false;
@@ -349,9 +383,67 @@ const emitWorkspaceEvent = (workspaceId, eventName, payload) => {
 
     try {
         ioInstance.to(`workspace:${workspaceId.toString()}`).emit(eventName, payload);
+        // Also emit to all connected admins monitoring collaborations and platform telemetry
+        ioInstance.to("role:admin").emit(eventName, payload);
         return true;
     } catch (error) {
         console.error(`Socket workspace event emission failed (${eventName}):`, error?.message || error);
+        return false;
+    }
+};
+
+const emitVerificationEventToUser = (userId, eventName, payload) => {
+    if (!ioInstance || !userId) {
+        return false;
+    }
+
+    try {
+        ioInstance.to(`user:${userId.toString()}`).emit(eventName, payload);
+        return true;
+    } catch (error) {
+        console.error(`Socket verification event emission failed (${eventName}) for user ${userId}:`, error?.message || error);
+        return false;
+    }
+};
+
+const emitVerificationEventToAdmins = (eventName, payload) => {
+    if (!ioInstance) {
+        return false;
+    }
+
+    try {
+        ioInstance.to("role:admin").emit(eventName, payload);
+        return true;
+    } catch (error) {
+        console.error(`Socket verification event emission failed (${eventName}) for admins:`, error?.message || error);
+        return false;
+    }
+};
+
+const emitReviewEventToUser = (userId, eventName, payload) => {
+    if (!ioInstance || !userId) {
+        return false;
+    }
+
+    try {
+        ioInstance.to(`user:${userId.toString()}`).emit(eventName, payload);
+        return true;
+    } catch (error) {
+        console.error(`Socket review event emission failed (${eventName}) for user ${userId}:`, error?.message || error);
+        return false;
+    }
+};
+
+const emitPaymentEventToUser = (userId, eventName, payload) => {
+    if (!ioInstance || !userId) {
+        return false;
+    }
+
+    try {
+        ioInstance.to(`user:${userId.toString()}`).emit(eventName, payload);
+        return true;
+    } catch (error) {
+        console.error(`Socket payment event emission failed (${eventName}) for user ${userId}:`, error?.message || error);
         return false;
     }
 };
@@ -360,7 +452,12 @@ export {
     initializeSocket,
     getIO,
     emitNotificationToUser,
-    emitWorkspaceEvent
+    emitNotificationToAdmins,
+    emitWorkspaceEvent,
+    emitVerificationEventToUser,
+    emitVerificationEventToAdmins,
+    emitReviewEventToUser,
+    emitPaymentEventToUser
 };
 
 export default initializeSocket;

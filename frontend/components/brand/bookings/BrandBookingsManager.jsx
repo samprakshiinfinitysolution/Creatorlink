@@ -5,7 +5,8 @@ import { useDispatch, useSelector } from "react-redux";
 import BrandSidebar from "@/components/brand/dashboard/BrandSidebar";
 import BrandHeader from "@/components/brand/dashboard/BrandHeader";
 import BrandBookingDetailModal from "@/components/brand/bookings/BrandBookingDetailModal";
-import { fetchBrandBookings } from "@/redux/brand/bookings/bookings_slice";
+import { fetchBrandBookings, updateBookingFromSocket } from "@/redux/brand/bookings/bookings_slice";
+import { socket, registerSocketConsumer, unregisterSocketConsumer } from "@/lib/socket";
 
 // =========================================================
 // HELPER FORMATTERS & BADGES
@@ -170,6 +171,9 @@ export default function BrandBookingsManager() {
   const { bookings: rawBookings, pagination, loading, error } = useSelector(
     (state) => state.brandBookings || {}
   );
+  const { user } = useSelector(
+    (state) => state.auth || {}
+  );
   const bookings = Array.isArray(rawBookings) ? rawBookings : [];
 
   // Helper to fetch bookings with current or overridden params
@@ -191,6 +195,50 @@ export default function BrandBookingsManager() {
     },
     [dispatch, page, statusFilter]
   );
+
+  // Real-time synchronization for creator applications, proposal acceptances, and booking status updates
+  useEffect(() => {
+    const brandId = user?._id || user?.id;
+    if (!brandId) return;
+
+    const consumerId = "brand_bookings_manager_consumer";
+    registerSocketConsumer(consumerId, brandId);
+
+    const handleRealtimeBookingNotification = (notification) => {
+      if (!notification) return;
+      if (
+        notification.entityType === "booking" ||
+        (typeof notification.type === "string" && notification.type.startsWith("booking:"))
+      ) {
+        // Self-echo guard: If this action was triggered by the current user, ignore it.
+        const senderId = notification.sender?._id || notification.sender;
+        if (senderId && String(senderId) === String(brandId)) {
+          return;
+        }
+
+        const bookingId = notification.entityId || notification.bookingId || notification.metadata?.bookingId;
+
+        // If it's a status transition on an existing booking, update it in-place in Redux
+        if (notification.type === "booking:accepted" && bookingId) {
+          dispatch(updateBookingFromSocket({ _id: bookingId, status: "accepted" }));
+        } else if (notification.type === "booking:rejected" && bookingId) {
+          dispatch(updateBookingFromSocket({ _id: bookingId, status: "rejected" }));
+        } else if (notification.type === "booking:cancelled" && bookingId) {
+          dispatch(updateBookingFromSocket({ _id: bookingId, status: "cancelled" }));
+        } else {
+          // If a new booking application came in (e.g. booking:application_received or unknown type), fetch list
+          fetchBookingsList();
+        }
+      }
+    };
+
+    socket.on("notification:new", handleRealtimeBookingNotification);
+
+    return () => {
+      unregisterSocketConsumer(consumerId);
+      socket.off("notification:new", handleRealtimeBookingNotification);
+    };
+  }, [user, fetchBookingsList]);
 
   // Initial fetch on mount
   useEffect(() => {
@@ -336,7 +384,7 @@ export default function BrandBookingsManager() {
           <div className="bg-surface border border-border-theme rounded-2xl shadow-xs overflow-hidden min-w-0">
 
             {/* Loading Skeleton State */}
-            {loading && (
+            {loading && rawBookings.length === 0 && (
               <div className="p-6 space-y-4">
                 {[1, 2, 3, 4, 5].map((i) => (
                   <div key={i} className="h-16 bg-surface-muted rounded-xl animate-pulse w-full" />
@@ -345,7 +393,7 @@ export default function BrandBookingsManager() {
             )}
 
             {/* Empty State */}
-            {!loading && !error && bookings.length === 0 && (
+            {(!loading || rawBookings.length > 0) && !error && bookings.length === 0 && (
               <div className="text-center py-16 px-4 border-dashed border-border-theme space-y-3">
                 <div className="w-12 h-12 mx-auto rounded-full bg-secondary/8 text-[#252525] dark:text-white flex items-center justify-center">
                   <BookingsIcon />
@@ -362,7 +410,7 @@ export default function BrandBookingsManager() {
             )}
 
             {/* Booking List Table (Desktop / Tablet / Mobile Responsive) */}
-            {!loading && !error && bookings.length > 0 && (
+            {(!loading || rawBookings.length > 0) && !error && bookings.length > 0 && (
               <div className="overflow-x-auto no-scrollbar">
                 <table className="w-full text-left text-xs border-collapse min-w-[760px]">
                   <thead>
@@ -521,7 +569,7 @@ export default function BrandBookingsManager() {
             )}
 
             {/* Pagination Controls */}
-            {!loading && !error && bookings.length > 0 && (
+            {(!loading || rawBookings.length > 0) && !error && bookings.length > 0 && (
               <div className="border-t border-border-theme px-5 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <span className="text-xs text-text-secondary">
                   Showing page <span className="font-semibold text-foreground">{currentPage}</span> of{" "}

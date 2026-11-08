@@ -7,8 +7,10 @@ import {
   fetchBrandReviews,
   clearReviewError,
   clearReviewSuccess,
+  addReviewFromSocket,
 } from "@/redux/brand/reviews/reviews_slice";
 import { fetchBrandWorkspaces } from "@/redux/brand/workspace/workspace_slice";
+import { socket, registerSocketConsumer, unregisterSocketConsumer } from "@/lib/socket";
 import BrandSidebar from "@/components/brand/dashboard/BrandSidebar";
 import BrandHeader from "@/components/brand/dashboard/BrandHeader";
 import BrandSubmitReviewModal from "./BrandSubmitReviewModal";
@@ -276,6 +278,52 @@ export default function BrandReviewsManager() {
   useEffect(() => {
     dispatch(fetchBrandReviews({ page: currentPage, limit: 10, type: reviewType }));
   }, [dispatch, currentPage, reviewType]);
+
+  // Socket.IO real-time consumer for reviews
+  useEffect(() => {
+    registerSocketConsumer("brand_reviews_manager_consumer");
+
+    const handleReviewReceived = (data) => {
+      const reviewObj = data?.review;
+      if (reviewObj?._id) {
+        if (reviewType === "received") {
+          dispatch(addReviewFromSocket(reviewObj));
+        }
+      } else {
+        dispatch(fetchBrandReviews({ page: currentPage, limit: 10, type: reviewType }));
+      }
+    };
+
+    const handleNotification = (notif) => {
+      if (!notif) return;
+      // Self-echo guard: If review notification was triggered by this brand, ignore it.
+      const senderId = notif.sender?._id || notif.sender;
+      if (senderId && brandId && String(senderId) === String(brandId)) {
+        return;
+      }
+
+      const notifType = String(notif?.type || "").toLowerCase();
+      // If this is a review:received event, the socket listener handleReviewReceived already processed it.
+      // Avoid duplicate API call.
+      if (notifType === "review:received") {
+        return;
+      }
+
+      const entity = String(notif?.entityType || notifType).toLowerCase();
+      if (entity.includes("review")) {
+        dispatch(fetchBrandReviews({ page: currentPage, limit: 10, type: reviewType }));
+      }
+    };
+
+    socket.on("review:received", handleReviewReceived);
+    socket.on("notification:new", handleNotification);
+
+    return () => {
+      socket.off("review:received", handleReviewReceived);
+      socket.off("notification:new", handleNotification);
+      unregisterSocketConsumer("brand_reviews_manager_consumer");
+    };
+  }, [dispatch, currentPage, reviewType, brandId]);
 
   // When modal is opened, fetch workspaces to get completed collaborations
   useEffect(() => {
@@ -921,12 +969,10 @@ export default function BrandReviewsManager() {
         workspaces={unreviewedCompletedWorkspaces}
         workspacesLoading={workspacesLoading}
         onSuccess={() => {
-          if (currentPage === 1) {
-            dispatch(fetchBrandReviews({ page: 1, limit: 10, type: reviewType }));
-          } else {
+          // In-place updates in reviews_slice and workspace_slice handle state sync without refetching.
+          if (reviewType === "given" && currentPage !== 1) {
             setCurrentPage(1);
           }
-          dispatch(fetchBrandWorkspaces({ status: "completed", limit: 50 }));
         }}
       />
     </div>

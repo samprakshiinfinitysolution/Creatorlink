@@ -29,6 +29,7 @@ import adminUsersReducer from "./admin/users/users_slice";
 import adminVerificationReducer from "./admin/verification/verification_slice";
 import adminCampaignsReducer from "./admin/campaigns/campaigns_slice";
 import adminCollaborationsReducer from "./admin/collaborations/collaborations_slice";
+import adminNotificationsReducer from "./admin/notifications/notifications_slice";
 
 const rootReducer = combineReducers({
     auth: authReducer,
@@ -57,7 +58,8 @@ const rootReducer = combineReducers({
     adminUsers: adminUsersReducer,
     adminVerification: adminVerificationReducer,
     adminCampaigns: adminCampaignsReducer,
-    adminCollaborations: adminCollaborationsReducer
+    adminCollaborations: adminCollaborationsReducer,
+    adminNotifications: adminNotificationsReducer
 });
 
 export default rootReducer;

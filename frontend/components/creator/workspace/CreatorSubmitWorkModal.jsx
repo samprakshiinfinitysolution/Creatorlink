@@ -317,10 +317,18 @@ export default function CreatorSubmitWorkModal({
         setFileUrl(previousFileUrl);
       }
 
-      setUploadError(
+      const rawMessage =
         err?.response?.data?.message ||
         err?.message ||
-        "Failed to upload media. Please try again."
+        "";
+      const isTimeout =
+        err?.code === "ECONNABORTED" ||
+        rawMessage.toLowerCase().includes("timeout");
+
+      setUploadError(
+        isTimeout
+          ? "Upload timed out. The video file is large or the connection is slow. Please try again or paste an external Drive/Dropbox link below."
+          : rawMessage || "Failed to upload media. Please try again."
       );
     } finally {
       setIsUploading(false);

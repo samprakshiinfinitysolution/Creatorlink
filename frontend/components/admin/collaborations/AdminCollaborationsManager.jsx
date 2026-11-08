@@ -10,6 +10,7 @@ import {
 } from "@/redux/admin/collaborations/collaborations_slice";
 import AdminCollaborationDetailModal from "./AdminCollaborationDetailModal";
 import AdminAvatar from "@/components/admin/AdminAvatar";
+import { socket, registerSocketConsumer, unregisterSocketConsumer } from "@/lib/socket";
 
 // =========================================================
 // SVG ICONS
@@ -65,6 +66,7 @@ export default function AdminCollaborationsManager() {
     error,
     selectedCollaboration
   } = useSelector((state) => state.adminCollaborations || {});
+  const { adminUser } = useSelector((state) => state.adminAuth || {});
 
   const [search, setSearch] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("all");
@@ -84,6 +86,32 @@ export default function AdminCollaborationsManager() {
       })
     );
   }, [dispatch, page, selectedStatus, selectedOverdue, sortBy, search]);
+
+  // Real-time synchronization for collaborations lifecycle (submissions, revisions, approvals)
+  useEffect(() => {
+    const adminId = adminUser?._id || adminUser?.id || "admin_session";
+    const consumerId = "admin_collaborations_consumer";
+    registerSocketConsumer(consumerId, adminId);
+
+    const handleRealtimeWorkspaceEvent = (data) => {
+      loadData();
+      dispatch(fetchCollaborationStats());
+      if (selectedCollaboration?._id && data?.workspaceId && String(selectedCollaboration._id) === String(data.workspaceId)) {
+        dispatch(fetchCollaborationDetails(selectedCollaboration._id));
+      }
+    };
+
+    socket.on("workspace:deliverable_submitted", handleRealtimeWorkspaceEvent);
+    socket.on("workspace:revision_requested", handleRealtimeWorkspaceEvent);
+    socket.on("workspace:approved", handleRealtimeWorkspaceEvent);
+
+    return () => {
+      unregisterSocketConsumer(consumerId);
+      socket.off("workspace:deliverable_submitted", handleRealtimeWorkspaceEvent);
+      socket.off("workspace:revision_requested", handleRealtimeWorkspaceEvent);
+      socket.off("workspace:approved", handleRealtimeWorkspaceEvent);
+    };
+  }, [adminUser, loadData, dispatch, selectedCollaboration]);
 
   useEffect(() => {
     dispatch(fetchCollaborationStats());

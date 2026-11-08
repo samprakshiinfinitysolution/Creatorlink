@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSelector } from "react-redux";
 import axiosInstance from "@/lib/axios";
 import AdminAvatar from "@/components/admin/AdminAvatar";
+import { socket, registerSocketConsumer, unregisterSocketConsumer } from "@/lib/socket";
 
 // =========================================================
 // SVG ICONS
@@ -75,6 +76,7 @@ function AlertTriangleIcon({ className = "w-5 h-5" }) {
 
 export default function AdminDashboardPage() {
   const { user } = useSelector((state) => state.auth || {});
+  const { adminUser } = useSelector((state) => state.adminAuth || {});
 
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState(null);
@@ -83,6 +85,32 @@ export default function AdminDashboardPage() {
   const [activeTab, setActiveTab] = useState("signups"); // "signups" | "payments" | "subscriptions" | "campaigns"
 
   const [reloadKey, setReloadKey] = useState(0);
+
+  // Subscribe to real-time events for live platform telemetry and action counters
+  useEffect(() => {
+    const adminId = adminUser?._id || adminUser?.id || "admin_session";
+    const consumerId = "admin_dashboard_consumer";
+    registerSocketConsumer(consumerId, adminId);
+
+    const handleRealtimeUpdate = () => {
+      setReloadKey((prev) => prev + 1);
+    };
+
+    socket.on("verification:queue_updated", handleRealtimeUpdate);
+    socket.on("verification:applicant_profile_updated", handleRealtimeUpdate);
+    socket.on("workspace:deliverable_submitted", handleRealtimeUpdate);
+    socket.on("workspace:approved", handleRealtimeUpdate);
+    socket.on("workspace:revision_requested", handleRealtimeUpdate);
+
+    return () => {
+      unregisterSocketConsumer(consumerId);
+      socket.off("verification:queue_updated", handleRealtimeUpdate);
+      socket.off("verification:applicant_profile_updated", handleRealtimeUpdate);
+      socket.off("workspace:deliverable_submitted", handleRealtimeUpdate);
+      socket.off("workspace:approved", handleRealtimeUpdate);
+      socket.off("workspace:revision_requested", handleRealtimeUpdate);
+    };
+  }, [adminUser]);
 
   useEffect(() => {
     let isMounted = true;

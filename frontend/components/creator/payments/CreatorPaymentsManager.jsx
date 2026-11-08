@@ -10,6 +10,7 @@ import {
 import CreatorSidebar from "@/components/creator/dashboard/CreatorSidebar";
 import CreatorHeader from "@/components/creator/dashboard/CreatorHeader";
 import CreatorPaymentDetailModal from "./CreatorPaymentDetailModal";
+import { socket, registerSocketConsumer, unregisterSocketConsumer } from "@/lib/socket";
 
 // =========================================================
 // SVG ICONS
@@ -218,6 +219,7 @@ export default function CreatorPaymentsManager() {
   const { payments, pagination, loading, error } = useSelector(
     (state) => state.creatorPayments
   );
+  const { user } = useSelector((state) => state.auth || {});
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState("all");
@@ -235,6 +237,54 @@ export default function CreatorPaymentsManager() {
     }
     dispatch(fetchCreatorPayments(params));
   }, [dispatch, currentPage, selectedStatus]);
+
+  // Real-time synchronization for payments received, completed or failed
+  useEffect(() => {
+    const creatorId = user?._id || user?.id;
+    if (!creatorId) return;
+
+    const consumerId = "creator_payments_manager_consumer";
+    registerSocketConsumer(consumerId, creatorId);
+
+    const handleRealtimePayment = () => {
+      const params = {
+        page: currentPage,
+        limit: 10,
+      };
+      if (selectedStatus !== "all") {
+        params.status = selectedStatus;
+      }
+      dispatch(fetchCreatorPayments(params));
+    };
+
+    const handleRealtimeNotification = (notification) => {
+      if (!notification) return;
+      if (
+        notification.entityType === "payment" ||
+        (typeof notification.type === "string" && notification.type.startsWith("payment:"))
+      ) {
+        const params = {
+          page: currentPage,
+          limit: 10,
+        };
+        if (selectedStatus !== "all") {
+          params.status = selectedStatus;
+        }
+        dispatch(fetchCreatorPayments(params));
+      }
+    };
+
+    socket.on("payment:received", handleRealtimePayment);
+    socket.on("payment:failed", handleRealtimePayment);
+    socket.on("notification:new", handleRealtimeNotification);
+
+    return () => {
+      unregisterSocketConsumer(consumerId);
+      socket.off("payment:received", handleRealtimePayment);
+      socket.off("payment:failed", handleRealtimePayment);
+      socket.off("notification:new", handleRealtimeNotification);
+    };
+  }, [user, currentPage, selectedStatus, dispatch]);
 
   const handleRefresh = () => {
     const params = {

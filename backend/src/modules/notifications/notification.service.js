@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import Notification from "./notification.model.js";
+import Auth from "../auth/auth.model.js";
 import { emitNotificationToUser } from "../../socket/socket.js";
 import createApiError from "../../utils/ApiError.js";
 import {
@@ -134,6 +135,74 @@ const createNotificationSafe = async (payload) => {
     }
 };
 
+/**
+ * Dispatches a notification to all active Administrators in the system.
+ * Creates an individual, persistent Notification document per admin (for independent read tracking)
+ * and emits real-time events via Socket.IO.
+ * 
+ * @param {Object} payload - Notification payload (type, title, message, entityType, entityId, destination, metadata, idempotencyKey)
+ * @param {Object} [options]
+ * @param {string|mongoose.Types.ObjectId} [options.excludeAdminId] - Optional admin ID to exclude (e.g. the acting admin who performed the action)
+ */
+const notifyAdminsService = async (payload, options = {}) => {
+    const { excludeAdminId = null } = options;
+    const adminFilter = { role: "admin" };
+    if (excludeAdminId && mongoose.Types.ObjectId.isValid(excludeAdminId)) {
+        adminFilter._id = { $ne: excludeAdminId };
+    }
+    const admins = await Auth.find(adminFilter).select("_id name email").lean();
+    if (!admins || admins.length === 0) {
+        return [];
+    }
+
+    const {
+        sender = null,
+        type,
+        title,
+        message,
+        entityType,
+        entityId,
+        destination,
+        metadata = {},
+        idempotencyKey = null
+    } = payload;
+
+    const createdNotifications = [];
+
+    for (const admin of admins) {
+        try {
+            const adminIdempotencyKey = idempotencyKey ? `${idempotencyKey}_${admin._id}` : null;
+            const notif = await createNotificationService({
+                recipient: admin._id,
+                sender,
+                type,
+                title,
+                message,
+                entityType,
+                entityId,
+                destination,
+                metadata,
+                idempotencyKey: adminIdempotencyKey
+            });
+            createdNotifications.push(notif);
+        } catch (err) {
+            console.error(`Failed to create admin notification for admin ${admin._id}:`, err?.message || err);
+        }
+    }
+
+    return createdNotifications;
+};
+
+// Safe wrapper for notifying admins without breaking business transactions
+const notifyAdminsSafe = async (payload, options = {}) => {
+    try {
+        return await notifyAdminsService(payload, options);
+    } catch (error) {
+        console.error("Non-fatal notifyAdmins error:", error?.message || error);
+        return [];
+    }
+};
+
 // Gets paginated notifications for the authenticated user, newest first.
 const getNotificationsService = async (userId, query = {}) => {
     const { page = 1, limit = 10, isRead, entityType } = query;
@@ -220,7 +289,10 @@ const getUnreadNotificationCountService = async (userId) => {
         campaign: 0,
         payment: 0,
         review: 0,
-        message: 0
+        message: 0,
+        verification: 0,
+        user: 0,
+        subscription: 0
     };
 
     if (Array.isArray(groupedCounts)) {
@@ -276,7 +348,10 @@ const markAllNotificationsReadService = async (userId, category = null) => {
         "campaign",
         "payment",
         "review",
-        "message"
+        "message",
+        "verification",
+        "user",
+        "subscription"
     ];
 
     if (category && category !== "all") {
@@ -290,7 +365,10 @@ const markAllNotificationsReadService = async (userId, category = null) => {
             workspaces: "workspace",
             payments: "payment",
             reviews: "review",
-            messages: "message"
+            messages: "message",
+            verifications: "verification",
+            users: "user",
+            subscriptions: "subscription"
         };
 
         const resolvedList = rawList.map((item) => aliasMap[item] || item);
@@ -337,6 +415,8 @@ const markAllNotificationsReadService = async (userId, category = null) => {
 export {
     createNotificationService,
     createNotificationSafe,
+    notifyAdminsService,
+    notifyAdminsSafe,
     getNotificationsService,
     getUnreadNotificationCountService,
     markNotificationReadService,

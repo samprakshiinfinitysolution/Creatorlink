@@ -108,6 +108,69 @@ const adminVerificationSlice = createSlice({
         clearVerificationError: (state) => {
             state.error = null;
             state.actionError = null;
+        },
+        updateRealtimeVerificationItem: (state, action) => {
+            const updated = action.payload;
+            if (!updated || !updated._id) return;
+            const updatedId = String(updated._id);
+            const index = state.verifications.findIndex(
+                (item) => String(item._id) === updatedId
+            );
+            if (index !== -1) {
+                // Update existing queue item
+                state.verifications[index] = {
+                    ...state.verifications[index],
+                    ...updated,
+                    user: updated.user || state.verifications[index].user,
+                    profile: updated.profile || state.verifications[index].profile
+                };
+            } else {
+                // Prepend new submission to top of queue
+                state.verifications.unshift(updated);
+                if (state.pagination && typeof state.pagination.totalItems === "number") {
+                    state.pagination.totalItems += 1;
+                }
+            }
+            if (state.selectedVerification && String(state.selectedVerification._id) === updatedId) {
+                state.selectedVerification = {
+                    ...state.selectedVerification,
+                    ...updated,
+                    user: updated.user || state.selectedVerification.user,
+                    profile: updated.profile || state.selectedVerification.profile
+                };
+            }
+        },
+        updateRealtimeApplicantProfile: (state, action) => {
+            const { userId, profile } = action.payload || {};
+            if (!userId || !profile) return;
+            const userIdStr = String(userId);
+            // Update selected verification modal if active
+            const selectedUserId = String(
+                state.selectedVerification?.user?._id || state.selectedVerification?.user || ""
+            );
+            if (selectedUserId === userIdStr) {
+                state.selectedVerification = {
+                    ...state.selectedVerification,
+                    profile: {
+                        ...state.selectedVerification.profile,
+                        ...profile
+                    }
+                };
+            }
+            // Update any matching item in queue
+            state.verifications = state.verifications.map((item) => {
+                const itemUserId = String(item.user?._id || item.user || "");
+                if (itemUserId === userIdStr) {
+                    return {
+                        ...item,
+                        profile: {
+                            ...item.profile,
+                            ...profile
+                        }
+                    };
+                }
+                return item;
+            });
         }
     },
     extraReducers: (builder) => {
@@ -248,7 +311,9 @@ const adminVerificationSlice = createSlice({
 
 export const {
     clearSelectedVerification,
-    clearVerificationError
+    clearVerificationError,
+    updateRealtimeVerificationItem,
+    updateRealtimeApplicantProfile
 } = adminVerificationSlice.actions;
 
 export default adminVerificationSlice.reducer;

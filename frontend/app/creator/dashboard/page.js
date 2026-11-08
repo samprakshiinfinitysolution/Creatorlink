@@ -15,6 +15,7 @@ import CreatorQuickActions from "@/components/creator/dashboard/CreatorQuickActi
 import CreatorDashboardSkeleton from "@/components/creator/dashboard/CreatorDashboardSkeleton";
 import { getCreatorDashboardOverview } from "@/redux/creator/dashboard/dashboard_slice";
 import { getCreatorProfile } from "@/redux/creator/profile/profile_slice";
+import { socket, registerSocketConsumer, unregisterSocketConsumer } from "@/lib/socket";
 
 function CreatorDashboardContent() {
   const router = useRouter();
@@ -103,6 +104,33 @@ function CreatorDashboardContent() {
       handleFetchDashboard();
     }
   }, [isOnboardedVerified, handleFetchDashboard]);
+
+  // Real-time synchronization for dashboard metrics, recent collaborations, and reviews
+  useEffect(() => {
+    const creatorId = user?._id || user?.id;
+    if (!creatorId || !isOnboardedVerified) return;
+
+    const consumerId = "creator_dashboard_overview_consumer";
+    registerSocketConsumer(consumerId, creatorId);
+
+    const handleRealtimeUpdate = (data) => {
+      // Re-fetch overview when relevant notifications, deliverables or status events occur
+      handleFetchDashboard();
+    };
+
+    socket.on("notification:new", handleRealtimeUpdate);
+    socket.on("workspace:approved", handleRealtimeUpdate);
+    socket.on("workspace:deliverable_submitted", handleRealtimeUpdate);
+    socket.on("workspace:revision_requested", handleRealtimeUpdate);
+
+    return () => {
+      unregisterSocketConsumer(consumerId);
+      socket.off("notification:new", handleRealtimeUpdate);
+      socket.off("workspace:approved", handleRealtimeUpdate);
+      socket.off("workspace:deliverable_submitted", handleRealtimeUpdate);
+      socket.off("workspace:revision_requested", handleRealtimeUpdate);
+    };
+  }, [user, isOnboardedVerified, handleFetchDashboard]);
 
   // If dashboard overview API returns 403 or onboarding rejection, redirect immediately
   useEffect(() => {

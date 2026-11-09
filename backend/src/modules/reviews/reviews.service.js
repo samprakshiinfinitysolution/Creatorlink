@@ -4,6 +4,7 @@ import Workspace from "../workspace/workspace.model.js";
 import BrandProfile from "../brand/profile/profile.model.js";
 import Profile from "../creator/profile/profile.model.js";
 import { createNotificationSafe } from "../notifications/notification.service.js";
+import { emitReviewEventToUser } from "../../socket/socket.js";
 import createApiError from "../../utils/ApiError.js";
 import {
     getPagination,
@@ -214,6 +215,17 @@ const createBrandReviewService = async (brandId, payload) => {
     });
 
     const enrichedReview = await attachReviewProfiles(populatedReview);
+
+    try {
+        emitReviewEventToUser(newReview.reviewee, "review:received", {
+            review: enrichedReview || populatedReview,
+            rating: newReview.rating,
+            workspaceId: newReview.workspace
+        });
+    } catch (socketErr) {
+        console.error("Failed to emit review socket event:", socketErr);
+    }
+
     return enrichedReview;
 };
 
@@ -505,6 +517,17 @@ const createCreatorReviewService = async (creatorId, payload) => {
     });
 
     const enrichedReview = await attachReviewProfiles(populatedReview);
+
+    try {
+        emitReviewEventToUser(newReview.reviewee, "review:received", {
+            review: enrichedReview || populatedReview,
+            rating: newReview.rating,
+            workspaceId: newReview.workspace
+        });
+    } catch (socketErr) {
+        console.error("Failed to emit review socket event:", socketErr);
+    }
+
     return enrichedReview;
 };
 

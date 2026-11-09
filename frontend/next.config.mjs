@@ -2,8 +2,8 @@ import os from "os";
 
 function getLocalDevOrigins() {
   const origins = [
-    "10.169.141.175",
-    "10.169.141.175:3005",
+    "192.168.1.21",
+    "192.168.1.21:3005",
     "192.168.1.21",
     "192.168.1.21:3005",
     "localhost",

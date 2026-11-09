@@ -1,14 +1,17 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchAppliedCampaigns,
   updateCreatorBookingStatus,
+  cancelCampaignBooking,
+  updateAppliedCampaignFromSocket,
 } from "@/redux/creator/campaigns/campaigns_slice";
 import CreatorSidebar from "@/components/creator/dashboard/CreatorSidebar";
 import CreatorHeader from "@/components/creator/dashboard/CreatorHeader";
+import { socket, registerSocketConsumer, unregisterSocketConsumer } from "@/lib/socket";
 
 // =========================================================
 // SVG ICONS
@@ -258,6 +261,7 @@ export default function CreatorAppliedCampaignsManager() {
   const { appliedCampaigns, appliedPagination, loading, error } = useSelector(
     (state) => state.creatorCampaigns
   );
+  const { user } = useSelector((state) => state.auth || {});
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState("All");
@@ -267,8 +271,8 @@ export default function CreatorAppliedCampaignsManager() {
   const [actionFeedback, setActionFeedback] = useState(null);
   const [failedImgUrls, setFailedImgUrls] = useState({});
 
-  // Fetch applied campaigns on mount and when filters/page change
-  useEffect(() => {
+  // Helper to load applied campaigns list
+  const loadAppliedCampaigns = useCallback(() => {
     const params = {
       page: currentPage,
       limit: 9,
@@ -284,6 +288,55 @@ export default function CreatorAppliedCampaignsManager() {
 
     dispatch(fetchAppliedCampaigns(params));
   }, [dispatch, currentPage, selectedStatus, searchQuery]);
+
+  // Fetch applied campaigns on mount and when filters/page change
+  useEffect(() => {
+    loadAppliedCampaigns();
+  }, [loadAppliedCampaigns]);
+
+  // Real-time synchronization for application proposals, acceptances, and status changes
+  useEffect(() => {
+    const creatorId = user?._id || user?.id;
+    if (!creatorId) return;
+
+    const consumerId = "creator_applied_campaigns_consumer";
+    registerSocketConsumer(consumerId, creatorId);
+
+    const handleRealtimeNotification = (notification) => {
+      if (!notification) return;
+      if (
+        notification.entityType === "booking" ||
+        notification.entityType === "campaign" ||
+        (typeof notification.type === "string" && (notification.type.startsWith("booking:") || notification.type.startsWith("campaign:")))
+      ) {
+        // Self-echo guard: If action was triggered by the current user, ignore it.
+        const senderId = notification.sender?._id || notification.sender;
+        if (senderId && String(senderId) === String(creatorId)) {
+          return;
+        }
+
+        const bookingId = notification.entityId || notification.bookingId || notification.metadata?.bookingId;
+
+        // In-place status updates for existing campaign applications
+        if (notification.type === "booking:accepted" && bookingId) {
+          dispatch(updateAppliedCampaignFromSocket({ bookingId, status: "accepted" }));
+        } else if (notification.type === "booking:rejected" && bookingId) {
+          dispatch(updateAppliedCampaignFromSocket({ bookingId, status: "rejected" }));
+        } else if (notification.type === "booking:cancelled" && bookingId) {
+          dispatch(updateAppliedCampaignFromSocket({ bookingId, status: "cancelled" }));
+        } else {
+          loadAppliedCampaigns();
+        }
+      }
+    };
+
+    socket.on("notification:new", handleRealtimeNotification);
+
+    return () => {
+      unregisterSocketConsumer(consumerId);
+      socket.off("notification:new", handleRealtimeNotification);
+    };
+  }, [user, loadAppliedCampaigns]);
 
   const campaignsList = Array.isArray(appliedCampaigns) ? appliedCampaigns : [];
 
@@ -324,21 +377,7 @@ export default function CreatorAppliedCampaignsManager() {
           actionResult.payload?.message ||
           `Booking proposal ${status} successfully`;
         setActionFeedback({ type: "success", message });
-
-        const params = {
-          page: currentPage,
-          limit: 9,
-        };
-
-        if (selectedStatus && selectedStatus !== "All") {
-          params.status = selectedStatus;
-        }
-
-        if (searchQuery.trim()) {
-          params.search = searchQuery.trim();
-        }
-
-        dispatch(fetchAppliedCampaigns(params));
+        // Redundant fetchAppliedCampaigns removed - updateCreatorBookingStatus updates appliedCampaigns in-place in Redux.
       } else if (updateCreatorBookingStatus.rejected.match(actionResult)) {
         setActionFeedback({
           type: "error",
@@ -351,6 +390,38 @@ export default function CreatorAppliedCampaignsManager() {
       setActionFeedback({
         type: "error",
         message: err.message || `Failed to ${status} booking proposal.`,
+      });
+    } finally {
+      setProcessingBookingId(null);
+    }
+  };
+
+  const handleWithdrawApplication = async (bookingId) => {
+    if (!bookingId || processingBookingId) return;
+    setProcessingBookingId(bookingId);
+    setActionFeedback(null);
+
+    try {
+      const actionResult = await dispatch(cancelCampaignBooking(bookingId));
+
+      if (cancelCampaignBooking.fulfilled.match(actionResult)) {
+        setActionFeedback({
+          type: "success",
+          message: actionResult.payload?.message || "Application withdrawn successfully.",
+        });
+        // Redundant fetchAppliedCampaigns removed - cancelCampaignBooking updates appliedCampaigns in-place in Redux.
+      } else if (cancelCampaignBooking.rejected.match(actionResult)) {
+        setActionFeedback({
+          type: "error",
+          message:
+            actionResult.payload ||
+            "Failed to withdraw application.",
+        });
+      }
+    } catch (err) {
+      setActionFeedback({
+        type: "error",
+        message: err.message || "Failed to withdraw application.",
       });
     } finally {
       setProcessingBookingId(null);
@@ -915,7 +986,7 @@ export default function CreatorAppliedCampaignsManager() {
                       )}
 
                       {item.initiatedBy !== "brand" && item.status === "pending" && (
-                        <div className="pt-0.5 text-center">
+                        <div className="pt-0.5 flex items-center justify-between gap-2">
                           <Link
                             href={campaignObj._id ? `/creator/campaigns/${campaignObj._id}` : `/creator/campaigns`}
                             className="inline-flex items-center justify-center gap-1 text-xs font-sans font-semibold text-black dark:text-white hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors"
@@ -923,6 +994,14 @@ export default function CreatorAppliedCampaignsManager() {
                             <span>View Details</span>
                             <ArrowRightIcon className="w-3.5 h-3.5" />
                           </Link>
+                          <button
+                            type="button"
+                            disabled={processingBookingId === bookingId}
+                            onClick={() => handleWithdrawApplication(bookingId)}
+                            className="text-xs font-sans font-medium text-red-500 hover:text-red-600 transition-colors disabled:opacity-50 cursor-pointer"
+                          >
+                            {processingBookingId === bookingId ? "Withdrawing..." : "Withdraw"}
+                          </button>
                         </div>
                       )}
                     </div>

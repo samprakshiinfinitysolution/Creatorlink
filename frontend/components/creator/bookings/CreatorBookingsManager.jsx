@@ -8,10 +8,13 @@ import CreatorHeader from "@/components/creator/dashboard/CreatorHeader";
 import CreatorBookingDetailModal from "./CreatorBookingDetailModal";
 import {
   fetchCreatorBookings,
+  fetchCreatorBookingById,
   updateCreatorBookingStatus,
   cancelCreatorBooking,
+  updateBookingFromSocket,
   clearSuccessMessage,
 } from "@/redux/creator/bookings/bookings_slice";
+import { socket, registerSocketConsumer, unregisterSocketConsumer } from "@/lib/socket";
 
 // =========================================================
 // HELPER FORMATTERS & BADGES
@@ -238,6 +241,7 @@ export default function CreatorBookingsManager() {
   const { bookings: rawBookings, pagination, loading, error, successMessage } = useSelector(
     (state) => state.creatorBookings || {}
   );
+  const { user } = useSelector((state) => state.auth || {});
   const bookings = Array.isArray(rawBookings) ? rawBookings : [];
 
   // Fetch bookings helper
@@ -259,6 +263,54 @@ export default function CreatorBookingsManager() {
     },
     [dispatch, page, statusFilter]
   );
+
+  // Real-time synchronization for booking proposals, acceptances, and status updates
+  useEffect(() => {
+    const creatorId = user?._id || user?.id;
+    if (!creatorId) return;
+
+    const consumerId = "creator_bookings_manager_consumer";
+    registerSocketConsumer(consumerId, creatorId);
+
+    const handleRealtimeBookingNotification = (notification) => {
+      if (!notification) return;
+      if (
+        notification.entityType === "booking" ||
+        (typeof notification.type === "string" && notification.type.startsWith("booking:"))
+      ) {
+        // Self-echo guard: If this action was triggered by the current user, ignore it.
+        const senderId = notification.sender?._id || notification.sender;
+        if (senderId && String(senderId) === String(creatorId)) {
+          return;
+        }
+
+        const bookingId = notification.entityId || notification.bookingId || notification.metadata?.bookingId;
+
+        // If it's a status transition on an existing booking, update it in-place in Redux
+        if (notification.type === "booking:accepted" && bookingId) {
+          dispatch(updateBookingFromSocket({ _id: bookingId, status: "accepted" }));
+        } else if (notification.type === "booking:rejected" && bookingId) {
+          dispatch(updateBookingFromSocket({ _id: bookingId, status: "rejected" }));
+        } else if (notification.type === "booking:cancelled" && bookingId) {
+          dispatch(updateBookingFromSocket({ _id: bookingId, status: "cancelled" }));
+        } else {
+          // If a new booking proposal came in (e.g. booking:proposal_received or unknown type), fetch list
+          fetchList();
+        }
+
+        if (selectedBookingId && (!bookingId || String(selectedBookingId) === String(bookingId))) {
+          dispatch(fetchCreatorBookingById(selectedBookingId));
+        }
+      }
+    };
+
+    socket.on("notification:new", handleRealtimeBookingNotification);
+
+    return () => {
+      unregisterSocketConsumer(consumerId);
+      socket.off("notification:new", handleRealtimeBookingNotification);
+    };
+  }, [user, fetchList, selectedBookingId, dispatch]);
 
   // Fetch on mount
   useEffect(() => {
@@ -561,7 +613,7 @@ export default function CreatorBookingsManager() {
           {/* Bookings Container */}
           <div className="bg-surface border border-border-theme rounded-2xl sm:rounded-3xl shadow-xs overflow-hidden min-w-0">
             {/* Loading Skeletons */}
-            {loading && (
+            {loading && rawBookings.length === 0 && (
               <div className="p-4 sm:p-6 space-y-4">
                 {[1, 2, 3, 4, 5].map((i) => (
                   <div key={i} className="h-16 sm:h-20 bg-surface-muted rounded-2xl animate-pulse w-full" />
@@ -570,7 +622,7 @@ export default function CreatorBookingsManager() {
             )}
 
             {/* Empty State */}
-            {!loading && !error && filteredBookings.length === 0 && (
+            {(!loading || rawBookings.length > 0) && !error && filteredBookings.length === 0 && (
               <div className="text-center py-12 sm:py-16 px-4 space-y-3">
                 <div className="w-12 h-12 mx-auto rounded-full bg-pink-500/10 text-[#ff2d6c] flex items-center justify-center">
                   <BookingsIcon className="w-6 h-6" />
@@ -595,7 +647,7 @@ export default function CreatorBookingsManager() {
             )}
 
             {/* 1. Desktop Table View (hidden lg:block) */}
-            {!loading && !error && filteredBookings.length > 0 && (
+            {(!loading || rawBookings.length > 0) && !error && filteredBookings.length > 0 && (
               <div className="hidden lg:block overflow-x-auto custom-scrollbar min-w-0">
                 <table className="w-full text-left text-xs border-collapse min-w-[800px]">
                   <thead>
@@ -815,7 +867,7 @@ export default function CreatorBookingsManager() {
             )}
 
             {/* 2. Mobile & Tablet Responsive Cards Layout (block lg:hidden) */}
-            {!loading && !error && filteredBookings.length > 0 && (
+            {(!loading || rawBookings.length > 0) && !error && filteredBookings.length > 0 && (
               <div className="block lg:hidden divide-y divide-border-theme">
                 {filteredBookings.map((booking) => {
                   const brandName =
@@ -1014,7 +1066,7 @@ export default function CreatorBookingsManager() {
             )}
 
             {/* Pagination Controls */}
-            {!loading && !error && filteredBookings.length > 0 && (
+            {(!loading || rawBookings.length > 0) && !error && filteredBookings.length > 0 && (
               <div className="border-t border-border-theme px-4 sm:px-5 py-3.5 sm:py-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
                 <span className="text-xs text-text-secondary">
                   Showing page <span className="font-semibold text-foreground">{currentPage}</span> of{" "}

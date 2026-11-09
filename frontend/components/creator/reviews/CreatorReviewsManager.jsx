@@ -9,6 +9,7 @@ import {
 } from "@/redux/creator/reviews/reviews_slice";
 import CreatorSidebar from "@/components/creator/dashboard/CreatorSidebar";
 import CreatorHeader from "@/components/creator/dashboard/CreatorHeader";
+import { socket, registerSocketConsumer, unregisterSocketConsumer } from "@/lib/socket";
 
 // =========================================================
 // SVG ICONS
@@ -273,6 +274,7 @@ export default function CreatorReviewsManager() {
   const { reviews, stats, pagination, loading, error } = useSelector(
     (state) => state.creatorReviews || {}
   );
+  const { user } = useSelector((state) => state.auth || {});
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -284,6 +286,38 @@ export default function CreatorReviewsManager() {
   useEffect(() => {
     dispatch(fetchCreatorReviews({ page: currentPage, limit: 10, type: reviewType }));
   }, [dispatch, currentPage, reviewType]);
+
+  // Real-time synchronization for new reviews and rating changes
+  useEffect(() => {
+    const creatorId = user?._id || user?.id;
+    if (!creatorId) return;
+
+    const consumerId = "creator_reviews_manager_consumer";
+    registerSocketConsumer(consumerId, creatorId);
+
+    const handleRealtimeReview = () => {
+      dispatch(fetchCreatorReviews({ page: currentPage, limit: 10, type: reviewType }));
+    };
+
+    const handleRealtimeNotification = (notification) => {
+      if (!notification) return;
+      if (
+        notification.entityType === "review" ||
+        (typeof notification.type === "string" && notification.type.startsWith("review:"))
+      ) {
+        dispatch(fetchCreatorReviews({ page: currentPage, limit: 10, type: reviewType }));
+      }
+    };
+
+    socket.on("review:received", handleRealtimeReview);
+    socket.on("notification:new", handleRealtimeNotification);
+
+    return () => {
+      unregisterSocketConsumer(consumerId);
+      socket.off("review:received", handleRealtimeReview);
+      socket.off("notification:new", handleRealtimeNotification);
+    };
+  }, [user, currentPage, reviewType, dispatch]);
 
   const handleRefresh = () => {
     dispatch(fetchCreatorReviews({ page: currentPage, limit: 10, type: reviewType }));

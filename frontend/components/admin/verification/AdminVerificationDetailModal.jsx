@@ -83,6 +83,17 @@ export default function AdminVerificationDetailModal({
   const [reasonText, setReasonText] = useState("");
   const [reasonError, setReasonError] = useState("");
 
+  // Handle Escape key to dismiss modal
+  React.useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
   if (!request) return null;
 
   const {

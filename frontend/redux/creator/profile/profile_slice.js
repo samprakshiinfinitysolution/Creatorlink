@@ -117,6 +117,38 @@ const profileSlice = createSlice({
         clearProfile: (state) => {
             state.profile = null;
             state.error = null;
+        },
+
+        updateRealtimeCreatorVerification: (state, action) => {
+            if (state.profile) {
+                const { status, effectiveStatus, reason, reviewedAt, reviewerName, isVerifiedBadge, resubmittedAt, request } = action.payload || {};
+                if (!state.profile.verification) {
+                    state.profile.verification = {};
+                }
+                const newStatus = effectiveStatus || status;
+                if (newStatus !== undefined) {
+                    state.profile.verification.status = newStatus;
+                    state.profile.verification.rawStatus = status || newStatus;
+                }
+                if (reason !== undefined) {
+                    state.profile.verification.reason = reason;
+                }
+                if (reviewedAt !== undefined) {
+                    state.profile.verification.reviewedAt = reviewedAt;
+                }
+                if (reviewerName !== undefined) {
+                    state.profile.verification.reviewerName = reviewerName;
+                }
+                if (resubmittedAt !== undefined) {
+                    state.profile.verification.resubmittedAt = resubmittedAt;
+                }
+                if (isVerifiedBadge !== undefined) {
+                    state.profile.isVerifiedBadge = Boolean(isVerifiedBadge);
+                }
+                if (request) {
+                    state.profile.verification.current = request;
+                }
+            }
         }
     },
 
@@ -247,7 +279,8 @@ const profileSlice = createSlice({
 
 
 export const {
-    clearProfile
+    clearProfile,
+    updateRealtimeCreatorVerification
 } = profileSlice.actions;
 
 

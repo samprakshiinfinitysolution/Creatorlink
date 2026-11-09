@@ -146,6 +146,34 @@ const bookingsSlice = createSlice({
 
         clearSuccessMessage: (state) => {
             state.successMessage = null;
+        },
+
+        updateBookingFromSocket: (state, action) => {
+            const updated = action.payload;
+            if (!updated) return;
+            const targetId = updated._id ? String(updated._id) : (updated.id ? String(updated.id) : null);
+            if (!targetId) return;
+
+            const currentId = state.selectedBooking?._id
+                ? String(state.selectedBooking._id)
+                : (state.selectedBooking?.id ? String(state.selectedBooking.id) : null);
+
+            if (currentId === targetId) {
+                state.selectedBooking = {
+                    ...state.selectedBooking,
+                    ...updated
+                };
+            }
+
+            if (Array.isArray(state.bookings)) {
+                const idx = state.bookings.findIndex((b) => String(b._id || b.id) === targetId);
+                if (idx !== -1) {
+                    state.bookings[idx] = {
+                        ...state.bookings[idx],
+                        ...updated
+                    };
+                }
+            }
         }
     },
 
@@ -188,7 +216,22 @@ const bookingsSlice = createSlice({
             .addCase(fetchBrandBookingById.fulfilled, (state, action) => {
 
                 state.loading = false;
-                state.selectedBooking = action.payload?.data || null;
+                const bookingData = action.payload?.data || null;
+                state.selectedBooking = bookingData;
+
+                if (bookingData && Array.isArray(state.bookings)) {
+                    const targetId = bookingData._id ? String(bookingData._id) : (bookingData.id ? String(bookingData.id) : null);
+                    if (targetId) {
+                        const idx = state.bookings.findIndex((b) => String(b._id || b.id) === targetId);
+                        if (idx !== -1) {
+                            state.bookings[idx] = {
+                                ...state.bookings[idx],
+                                ...bookingData
+                            };
+                        }
+                    }
+                }
+
                 state.error = null;
             })
 
@@ -305,7 +348,8 @@ const bookingsSlice = createSlice({
 export const {
     clearSelectedBooking,
     clearBookingState,
-    clearSuccessMessage
+    clearSuccessMessage,
+    updateBookingFromSocket
 } = bookingsSlice.actions;
 
 

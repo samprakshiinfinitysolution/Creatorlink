@@ -207,6 +207,32 @@ const creatorCampaignsSlice = createSlice({
 
         clearSuccessMessage: (state) => {
             state.successMessage = null;
+        },
+
+        updateAppliedCampaignFromSocket: (state, action) => {
+            const { bookingId, status } = action.payload || {};
+            if (!bookingId || !status) return;
+
+            const targetId = String(bookingId);
+            const index = state.appliedCampaigns.findIndex(
+                (item) => String(item._id) === targetId || String(item.bookingId) === targetId
+            );
+            if (index !== -1) {
+                state.appliedCampaigns[index] = {
+                    ...state.appliedCampaigns[index],
+                    status
+                };
+            }
+            if (
+                state.selectedAppliedCampaign &&
+                (String(state.selectedAppliedCampaign._id) === targetId ||
+                 String(state.selectedAppliedCampaign.bookingId) === targetId)
+            ) {
+                state.selectedAppliedCampaign = {
+                    ...state.selectedAppliedCampaign,
+                    status
+                };
+            }
         }
     },
 
@@ -347,21 +373,30 @@ const creatorCampaignsSlice = createSlice({
                 state.successMessage = action.payload?.message || "Booking cancelled successfully";
 
                 const updatedBooking = action.payload?.data;
+                const bookingId = updatedBooking?._id || action.meta?.arg;
 
-                if (updatedBooking) {
+                if (bookingId) {
+                    const targetId = String(bookingId);
                     const index = state.appliedCampaigns.findIndex(
-                        (item) => item._id === updatedBooking._id || item.bookingId === updatedBooking._id
+                        (item) => String(item._id) === targetId || String(item.bookingId) === targetId
                     );
 
                     if (index !== -1) {
-                        state.appliedCampaigns[index].status = "cancelled";
+                        state.appliedCampaigns[index] = {
+                            ...state.appliedCampaigns[index],
+                            status: "cancelled"
+                        };
                     }
 
                     if (
-                        state.selectedAppliedCampaign?._id === updatedBooking._id ||
-                        state.selectedAppliedCampaign?.bookingId === updatedBooking._id
+                        state.selectedAppliedCampaign &&
+                        (String(state.selectedAppliedCampaign._id) === targetId ||
+                         String(state.selectedAppliedCampaign.bookingId) === targetId)
                     ) {
-                        state.selectedAppliedCampaign.status = "cancelled";
+                        state.selectedAppliedCampaign = {
+                            ...state.selectedAppliedCampaign,
+                            status: "cancelled"
+                        };
                     }
                 }
 
@@ -391,21 +426,31 @@ const creatorCampaignsSlice = createSlice({
                 state.successMessage = action.payload?.message || "Booking status updated successfully";
 
                 const updatedBooking = action.payload?.data;
+                const bookingId = updatedBooking?._id || action.meta?.arg?.bookingId;
+                const newStatus = updatedBooking?.status || action.meta?.arg?.status;
 
-                if (updatedBooking) {
+                if (bookingId && newStatus) {
+                    const targetId = String(bookingId);
                     const index = state.appliedCampaigns.findIndex(
-                        (item) => item._id === updatedBooking._id || item.bookingId === updatedBooking._id
+                        (item) => String(item._id) === targetId || String(item.bookingId) === targetId
                     );
 
                     if (index !== -1) {
-                        state.appliedCampaigns[index].status = updatedBooking.status;
+                        state.appliedCampaigns[index] = {
+                            ...state.appliedCampaigns[index],
+                            status: newStatus
+                        };
                     }
 
                     if (
-                        state.selectedAppliedCampaign?._id === updatedBooking._id ||
-                        state.selectedAppliedCampaign?.bookingId === updatedBooking._id
+                        state.selectedAppliedCampaign &&
+                        (String(state.selectedAppliedCampaign._id) === targetId ||
+                         String(state.selectedAppliedCampaign.bookingId) === targetId)
                     ) {
-                        state.selectedAppliedCampaign.status = updatedBooking.status;
+                        state.selectedAppliedCampaign = {
+                            ...state.selectedAppliedCampaign,
+                            status: newStatus
+                        };
                     }
                 }
 
@@ -470,7 +515,8 @@ export const {
     clearSelectedDiscoverCampaign,
     clearSelectedAppliedCampaign,
     clearCampaignState,
-    clearSuccessMessage
+    clearSuccessMessage,
+    updateAppliedCampaignFromSocket
 } = creatorCampaignsSlice.actions;
 
 

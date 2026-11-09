@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { adminLogout } from "@/redux/admin/auth/admin_auth_slice";
 import ThemeToggle from "@/components/common/ThemeToggle/ThemeToggle";
 import AdminAvatar from "@/components/admin/AdminAvatar";
+import AdminNotificationDropdown from "@/components/admin/notifications/AdminNotificationDropdown";
 
 // =========================================================
 // SVG ICONS
@@ -91,8 +92,11 @@ export default function AdminHeader({ setMobileOpen = () => {} }) {
         </button>
       </div>
 
-      {/* Right: Theme Toggle & Admin Profile Dropdown */}
+      {/* Right: Notifications, Theme Toggle & Admin Profile Dropdown */}
       <div className="flex items-center gap-3">
+        {/* Admin Notification Bell with Dropdown */}
+        <AdminNotificationDropdown />
+
         {/* Dark/Light Mode Theme Toggle */}
         <ThemeToggle />
 

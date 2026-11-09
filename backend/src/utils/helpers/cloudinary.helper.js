@@ -199,7 +199,8 @@ const uploadVideoToCloudinary = async (buffer, folder) => {
         const uploadStream = cloudinary.uploader.upload_stream(
             {
                 folder: folder.trim(),
-                resource_type: "video"
+                resource_type: "video",
+                timeout: 300000
             },
             (error, result) => {
                 if (isSettled) return;

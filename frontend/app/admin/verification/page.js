@@ -1,4 +1,5 @@
 
+import { Suspense } from "react";
 import AdminVerificationQueue from "@/components/admin/verification/AdminVerificationQueue";
 
 export const metadata = {
@@ -7,5 +8,9 @@ export const metadata = {
 };
 
 export default function VerificationPage() {
-  return <AdminVerificationQueue />;
+  return (
+    <Suspense fallback={null}>
+      <AdminVerificationQueue />
+    </Suspense>
+  );
 }

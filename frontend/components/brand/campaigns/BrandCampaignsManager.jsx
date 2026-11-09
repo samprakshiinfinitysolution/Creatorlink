@@ -17,6 +17,7 @@ import {
 } from "@/redux/brand/campaigns/campaigns_slice";
 import { getBrandBookings as getBrandBookingsApi } from "@/redux/brand/bookings/bookings_api";
 import { updateBrandBookingStatus } from "@/redux/brand/bookings/bookings_slice";
+import { socket, registerSocketConsumer, unregisterSocketConsumer } from "@/lib/socket";
 
 // =========================================================
 // HELPER FORMATTERS & BADGES
@@ -998,6 +999,9 @@ export default function BrandCampaignsManager() {
   const { profile } = useSelector(
     (state) => state.brandProfile || {}
   );
+  const { user } = useSelector(
+    (state) => state.auth || {}
+  );
   const [dismissCampaignGuidance, setDismissCampaignGuidance] = useState(false);
 
   // Helper to trigger API dispatch with current filters + overrides
@@ -1272,6 +1276,36 @@ export default function BrandCampaignsManager() {
     }
   }, []);
 
+  // Real-time synchronization for new applicants and campaign booking status updates
+  useEffect(() => {
+    const brandId = user?._id || user?.id;
+    if (!brandId) return;
+
+    const consumerId = "brand_campaigns_manager_consumer";
+    registerSocketConsumer(consumerId, brandId);
+
+    const handleRealtimeNotification = (notification) => {
+      if (!notification) return;
+      if (
+        notification.entityType === "booking" ||
+        notification.entityType === "campaign" ||
+        (typeof notification.type === "string" && (notification.type.startsWith("booking:") || notification.type.startsWith("campaign:")))
+      ) {
+        fetchCampaignsWithFilters();
+        if (activeCampaignId) {
+          fetchCampaignApplicants(activeCampaignId);
+        }
+      }
+    };
+
+    socket.on("notification:new", handleRealtimeNotification);
+
+    return () => {
+      unregisterSocketConsumer(consumerId);
+      socket.off("notification:new", handleRealtimeNotification);
+    };
+  }, [user, fetchCampaignsWithFilters, activeCampaignId, fetchCampaignApplicants]);
+
   // Handle Accept or Decline for an applicant
   const handleConfirmApplicantStatus = async (applicant, targetStatus) => {
     if (!applicant?._id || !targetStatus || updatingBookingId) return;
@@ -1465,7 +1499,8 @@ export default function BrandCampaignsManager() {
       dispatch(clearSelectedCampaign());
       setSuccessMsg("Campaign updated successfully!");
       setTimeout(() => setSuccessMsg(""), 4000);
-      fetchCampaignsWithFilters();
+      // Removed redundant fetchCampaignsWithFilters() call because updateCampaign.fulfilled
+      // already updates state.campaigns[index] in-place, preventing unnecessary full table skeleton loading.
     } else {
       setFormError(
         typeof actionResult.payload === "string"

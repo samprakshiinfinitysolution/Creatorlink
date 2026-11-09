@@ -10,6 +10,7 @@ import {
 import BrandSidebar from "@/components/brand/dashboard/BrandSidebar";
 import BrandHeader from "@/components/brand/dashboard/BrandHeader";
 import BrandPaymentDetailModal from "./BrandPaymentDetailModal";
+import { socket, registerSocketConsumer, unregisterSocketConsumer } from "@/lib/socket";
 
 // =========================================================
 // SVG ICONS
@@ -154,6 +155,9 @@ export default function BrandPaymentsManager() {
   const { payments, pagination, loading, error } = useSelector(
     (state) => state.brandPayments
   );
+  const { user } = useSelector(
+    (state) => state.auth || {}
+  );
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState("all");
@@ -171,6 +175,54 @@ export default function BrandPaymentsManager() {
     }
     dispatch(fetchBrandPayments(params));
   }, [dispatch, currentPage, selectedStatus]);
+
+  // Real-time synchronization for payments completed, failed or received
+  useEffect(() => {
+    const brandId = user?._id || user?.id;
+    if (!brandId) return;
+
+    const consumerId = "brand_payments_manager_consumer";
+    registerSocketConsumer(consumerId, brandId);
+
+    const handleRealtimePayment = () => {
+      const params = {
+        page: currentPage,
+        limit: 10,
+      };
+      if (selectedStatus !== "all") {
+        params.status = selectedStatus;
+      }
+      dispatch(fetchBrandPayments(params));
+    };
+
+    const handleRealtimeNotification = (notification) => {
+      if (!notification) return;
+      if (
+        notification.entityType === "payment" ||
+        (typeof notification.type === "string" && notification.type.startsWith("payment:"))
+      ) {
+        const params = {
+          page: currentPage,
+          limit: 10,
+        };
+        if (selectedStatus !== "all") {
+          params.status = selectedStatus;
+        }
+        dispatch(fetchBrandPayments(params));
+      }
+    };
+
+    socket.on("payment:received", handleRealtimePayment);
+    socket.on("payment:failed", handleRealtimePayment);
+    socket.on("notification:new", handleRealtimeNotification);
+
+    return () => {
+      unregisterSocketConsumer(consumerId);
+      socket.off("payment:received", handleRealtimePayment);
+      socket.off("payment:failed", handleRealtimePayment);
+      socket.off("notification:new", handleRealtimeNotification);
+    };
+  }, [user, currentPage, selectedStatus, dispatch]);
 
   const handleRefresh = () => {
     const params = {

@@ -49,6 +49,11 @@ const resolveUploadFolder = (requestedFolder, defaultFolder = DEFAULT_FOLDER) =>
  * Default folder for videos is "creatorlink/deliverables".
  */
 const uploadSingleVideoHandler = asyncHandler(async (req, res) => {
+    // Extend socket timeout for large video uploads (up to 50 MB)
+    if (req.socket && typeof req.socket.setTimeout === "function") {
+        req.socket.setTimeout(300000);
+    }
+
     if (!req.file || !req.file.buffer) {
         throw createApiError(
             400,

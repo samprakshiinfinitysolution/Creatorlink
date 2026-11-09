@@ -43,6 +43,8 @@ import subscriptionRoutes from "../modules/subscriptions/subscription.route.js";
 import adminSubscriptionRoutes from "../modules/subscriptions/adminSubscription.route.js";
 import adminSettingsRoutes from "../modules/admin/settings/settings.route.js";
 import adminReportsRoutes from "../modules/admin/reports/reports.route.js";
+import authenticateUser from "../middleware/auth.middleware.js";
+import authorizeRoles from "../middleware/role.middleware.js";
 
 const router = Router();
 
@@ -86,6 +88,7 @@ router.use("/brand/reviews", brandReviewRouter);
 
 // Admin routes.
 router.use("/admin/auth", adminAuthRoutes);
+router.use("/admin/notifications", authenticateUser, authorizeRoles("admin"), notificationRouter);
 router.use("/admin/dashboard", adminDashboardRoutes);
 router.use("/admin/users", adminUsersRoutes);
 router.use("/admin/verification", adminVerificationRoutes);

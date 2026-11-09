@@ -1,7 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import axiosInstance from "@/lib/axios";
+import { socket, registerSocketConsumer, unregisterSocketConsumer } from "@/lib/socket";
+import { updateRealtimeCreatorVerification } from "@/redux/creator/profile/profile_slice";
+import { updateRealtimeBrandVerification } from "@/redux/brand/profile/profile_slice";
 
 function ShieldCheckIcon({ className = "w-5 h-5" }) {
   return (
@@ -66,11 +70,42 @@ export default function ProfileVerificationStatusCard({
   verification = null,
   onRefresh = () => {}
 }) {
+  const dispatch = useDispatch();
+  const { user: authUser } = useSelector((state) => state.auth || {});
+
   const [submitting, setSubmitting] = useState(false);
   const [resubmitSuccess, setResubmitSuccess] = useState("");
   const [resubmitError, setResubmitError] = useState("");
   const [userNote, setUserNote] = useState("");
   const [showNoteInput, setShowNoteInput] = useState(false);
+
+  // Real-time listener for live status updates from administrator (Approve, Reject, Revoke)
+  useEffect(() => {
+    const userId = authUser?._id || authUser?.id;
+    if (!userId) return;
+
+    const consumerId = `profile_verification_${role}_${userId}`;
+    registerSocketConsumer(consumerId, userId);
+
+    const handleStatusChanged = (payload) => {
+      if (!payload) return;
+      if (role === "creator") {
+        dispatch(updateRealtimeCreatorVerification(payload));
+      } else if (role === "brand") {
+        dispatch(updateRealtimeBrandVerification(payload));
+      }
+      if (onRefresh) {
+        onRefresh();
+      }
+    };
+
+    socket.on("verification:status_changed", handleStatusChanged);
+
+    return () => {
+      unregisterSocketConsumer(consumerId);
+      socket.off("verification:status_changed", handleStatusChanged);
+    };
+  }, [dispatch, authUser, role, onRefresh]);
 
   const status = verification?.status || "pending";
   const reason = verification?.reason || "";

@@ -4,7 +4,8 @@ import Razorpay from "razorpay";
 
 import Payment from "./payment.model.js";
 import Workspace from "../workspace/workspace.model.js";
-import { createNotificationSafe } from "../notifications/notification.service.js";
+import { createNotificationSafe, notifyAdminsSafe } from "../notifications/notification.service.js";
+import { emitPaymentEventToUser } from "../../socket/socket.js";
 import createApiError from "../../utils/ApiError.js";
 import {
     getPagination,
@@ -649,6 +650,17 @@ const verifyBrandPaymentService = async (brandId, payload = {}) => {
         idempotencyKey: `payment:received:${updatedPayment._id}`
     });
 
+    try {
+        emitPaymentEventToUser(updatedPayment.creator, "payment:received", {
+            payment: updatedPayment,
+            amount: updatedPayment.amount,
+            currency: updatedPayment.currency,
+            workspaceId: updatedPayment.workspace
+        });
+    } catch (socketErr) {
+        console.error("Failed to emit payment received socket event to creator:", socketErr);
+    }
+
     return {
         message: "Payment successfully verified and completed",
         payment: updatedPayment
@@ -810,6 +822,36 @@ const reportBrandPaymentFailureService = async (brandId, payload = {}) => {
         },
         idempotencyKey: `payment:failed:${updatedPayment._id}:${paymentIdVal || updatedPayment.razorpayOrderId || updatedPayment._id}`
     });
+
+    // Notify administrators about the gateway payment failure
+    await notifyAdminsSafe({
+        sender: brandId,
+        type: "payment_failed",
+        title: "Payment Failure Detected",
+        message: `Payment attempt of ₹${updatedPayment.amount} failed on gateway for workspace ${updatedPayment.workspace}.`,
+        entityType: "payment",
+        entityId: updatedPayment._id,
+        destination: `/admin/collaborations?workspaceId=${updatedPayment.workspace}`,
+        metadata: {
+            paymentId: updatedPayment._id,
+            amount: updatedPayment.amount,
+            currency: updatedPayment.currency,
+            workspaceId: updatedPayment.workspace,
+            brandId
+        },
+        idempotencyKey: `admin_payment_failed_${updatedPayment._id}_${Date.now()}`
+    });
+
+    try {
+        emitPaymentEventToUser(brandId, "payment:failed", {
+            payment: updatedPayment,
+            amount: updatedPayment.amount,
+            currency: updatedPayment.currency,
+            workspaceId: updatedPayment.workspace
+        });
+    } catch (socketErr) {
+        console.error("Failed to emit payment failed socket event to brand:", socketErr);
+    }
 
     return {
         message: "Payment status updated to failed based on gateway verification",

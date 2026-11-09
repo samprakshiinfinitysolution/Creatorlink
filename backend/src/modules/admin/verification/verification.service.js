@@ -3,7 +3,8 @@ import VerificationRequest from "./verification.model.js";
 import Auth from "../../auth/auth.model.js";
 import CreatorProfile from "../../creator/profile/profile.model.js";
 import BrandProfile from "../../brand/profile/profile.model.js";
-import { createNotificationService } from "../../notifications/notification.service.js";
+import { createNotificationService, notifyAdminsSafe } from "../../notifications/notification.service.js";
+import { emitVerificationEventToUser, emitVerificationEventToAdmins } from "../../../socket/socket.js";
 import createApiError from "../../../utils/ApiError.js";
 import { getPagination, getPaginationData } from "../../../utils/pagination.js";
 
@@ -239,8 +240,55 @@ export const approveVerificationService = async (id, adminId, reason = "") => {
                 reason: cleanReason || null
             }
         });
+
+        // Notify peer admins about this approval (excluding the acting reviewer admin)
+        const reviewer = await Auth.findById(adminId).select("name email role").lean();
+        const reviewerName = reviewer?.name || "Administrator";
+        const applicant = await Auth.findById(request.user).select("name email role").lean();
+        const applicantName = applicant?.name || (request.role === "creator" ? "Creator" : "Brand");
+        const roleLabel = request.role === "creator" ? "Creator" : "Brand";
+
+        await notifyAdminsSafe({
+            sender: adminId,
+            type: "verification_approved",
+            title: "Verification Approved",
+            message: `${reviewerName} approved verification for ${applicantName} (${roleLabel}).`,
+            entityType: "verification",
+            entityId: request._id,
+            destination: `/admin/verification?id=${request._id}`,
+            metadata: {
+                action: "approved",
+                applicantId: request.user,
+                reviewerId: adminId,
+                role: request.role
+            },
+            idempotencyKey: `peer_verif_approved_${request._id}_${decisionTimestamp.getTime()}`
+        }, { excludeAdminId: adminId });
     } catch (notifErr) {
         console.error("Failed to dispatch verification approval notification:", notifErr);
+    }
+
+    // Emit real-time verification status change to applicant and queue update to admins
+    try {
+        const reviewer = await Auth.findById(adminId).select("name email role").lean();
+        const reviewerName = reviewer?.name || "Administrator";
+        emitVerificationEventToUser(request.user, "verification:status_changed", {
+            status: "approved",
+            effectiveStatus: "approved",
+            reason: cleanReason || null,
+            isVerifiedBadge: true,
+            reviewedAt: decisionTimestamp,
+            reviewerName,
+            role: request.role,
+            request: request.toObject ? request.toObject() : request
+        });
+        emitVerificationEventToAdmins("verification:queue_updated", {
+            action: "approved",
+            requestId: request._id,
+            request: request.toObject ? request.toObject() : request
+        });
+    } catch (socketErr) {
+        console.error("Failed to emit approval verification socket events:", socketErr);
     }
 
     return request;
@@ -325,8 +373,55 @@ export const rejectVerificationService = async (id, adminId, rejectionReason) =>
                 rejectionReason: cleanReason
             }
         });
+
+        // Notify peer admins about this rejection (excluding the acting reviewer admin)
+        const reviewer = await Auth.findById(adminId).select("name email role").lean();
+        const reviewerName = reviewer?.name || "Administrator";
+        const applicant = await Auth.findById(request.user).select("name email role").lean();
+        const applicantName = applicant?.name || (request.role === "creator" ? "Creator" : "Brand");
+
+        await notifyAdminsSafe({
+            sender: adminId,
+            type: "verification_rejected",
+            title: "Verification Rejected",
+            message: `${reviewerName} rejected verification for ${applicantName}. Reason: ${cleanReason}`,
+            entityType: "verification",
+            entityId: request._id,
+            destination: `/admin/verification?id=${request._id}`,
+            metadata: {
+                action: "rejected",
+                applicantId: request.user,
+                reviewerId: adminId,
+                role: request.role,
+                reason: cleanReason
+            },
+            idempotencyKey: `peer_verif_rejected_${request._id}_${decisionTimestamp.getTime()}`
+        }, { excludeAdminId: adminId });
     } catch (notifErr) {
         console.error("Failed to dispatch verification rejection notification:", notifErr);
+    }
+
+    // Emit real-time verification status change to applicant and queue update to admins
+    try {
+        const reviewer = await Auth.findById(adminId).select("name email role").lean();
+        const reviewerName = reviewer?.name || "Administrator";
+        emitVerificationEventToUser(request.user, "verification:status_changed", {
+            status: "rejected",
+            effectiveStatus: "rejected",
+            reason: cleanReason,
+            isVerifiedBadge: false,
+            reviewedAt: decisionTimestamp,
+            reviewerName,
+            role: request.role,
+            request: request.toObject ? request.toObject() : request
+        });
+        emitVerificationEventToAdmins("verification:queue_updated", {
+            action: "rejected",
+            requestId: request._id,
+            request: request.toObject ? request.toObject() : request
+        });
+    } catch (socketErr) {
+        console.error("Failed to emit rejection verification socket events:", socketErr);
     }
 
     return request;
@@ -411,8 +506,55 @@ export const revokeVerificationService = async (id, adminId, reason) => {
                 reason: cleanReason
             }
         });
+
+        // Notify peer admins about this revocation (excluding the acting reviewer admin)
+        const reviewer = await Auth.findById(adminId).select("name email role").lean();
+        const reviewerName = reviewer?.name || "Administrator";
+        const applicant = await Auth.findById(request.user).select("name email role").lean();
+        const applicantName = applicant?.name || (request.role === "creator" ? "Creator" : "Brand");
+
+        await notifyAdminsSafe({
+            sender: adminId,
+            type: "verification_revoked",
+            title: "Verification Status Revoked",
+            message: `${reviewerName} revoked verified status for ${applicantName}. Reason: ${cleanReason}`,
+            entityType: "verification",
+            entityId: request._id,
+            destination: `/admin/verification?id=${request._id}`,
+            metadata: {
+                action: "revoked",
+                applicantId: request.user,
+                reviewerId: adminId,
+                role: request.role,
+                reason: cleanReason
+            },
+            idempotencyKey: `peer_verif_revoked_${request._id}_${decisionTimestamp.getTime()}`
+        }, { excludeAdminId: adminId });
     } catch (notifErr) {
         console.error("Failed to dispatch verification revocation notification:", notifErr);
+    }
+
+    // Emit real-time verification status change to applicant and queue update to admins
+    try {
+        const reviewer = await Auth.findById(adminId).select("name email role").lean();
+        const reviewerName = reviewer?.name || "Administrator";
+        emitVerificationEventToUser(request.user, "verification:status_changed", {
+            status: "rejected",
+            effectiveStatus: "revoked",
+            reason: cleanReason,
+            isVerifiedBadge: false,
+            reviewedAt: decisionTimestamp,
+            reviewerName,
+            role: request.role,
+            request: request.toObject ? request.toObject() : request
+        });
+        emitVerificationEventToAdmins("verification:queue_updated", {
+            action: "revoked",
+            requestId: request._id,
+            request: request.toObject ? request.toObject() : request
+        });
+    } catch (socketErr) {
+        console.error("Failed to emit revocation verification socket events:", socketErr);
     }
 
     return request;
@@ -500,6 +642,32 @@ export const submitUserVerificationService = async (userId, role, data = {}) => 
             }
         }
 
+        // Emit real-time verification event to admins (queue update) and applicant
+        try {
+            const enrichedRequest = await VerificationRequest.findById(existing._id)
+                .populate("user", "name email role isVerified avatar createdAt")
+                .populate("reviewedBy", "name email role avatar")
+                .populate("reviewHistory.reviewedBy", "name email role avatar")
+                .lean();
+
+            emitVerificationEventToAdmins("verification:queue_updated", {
+                action: isResubmission ? "resubmitted" : "updated",
+                requestId: existing._id,
+                request: enrichedRequest || existing
+            });
+
+            emitVerificationEventToUser(userId, "verification:status_changed", {
+                status: "pending",
+                effectiveStatus: "pending",
+                resubmittedAt: now,
+                isVerifiedBadge: false,
+                role,
+                request: enrichedRequest || existing
+            });
+        } catch (socketErr) {
+            console.error("Failed to emit resubmission verification socket events:", socketErr);
+        }
+
         return existing;
     }
 
@@ -513,6 +681,60 @@ export const submitUserVerificationService = async (userId, role, data = {}) => 
         status: "pending",
         reviewHistory: []
     });
+
+    // Dispatch persistent notification & Socket.IO event to all Administrators for first-time submission
+    try {
+        const applicant = await Auth.findById(userId).select("name email role").lean();
+        const applicantName = applicant?.name || (role === "creator" ? "Creator" : "Brand");
+        const roleLabel = role === "creator" ? "Creator" : "Brand";
+
+        const admins = await Auth.find({ role: "admin" }).select("_id").lean();
+
+        for (const admin of admins) {
+            await createNotificationService({
+                recipient: admin._id,
+                sender: userId,
+                type: "verification_submitted",
+                title: "New Verification Request",
+                message: `${applicantName} (${roleLabel}) has submitted a new verification application for administrative review.`,
+                entityType: "verification",
+                entityId: newRequest._id,
+                destination: `/admin/verification?id=${newRequest._id}`,
+                metadata: {
+                    action: "submitted",
+                    userId: userId,
+                    role: role,
+                    submittedAt: new Date()
+                },
+                idempotencyKey: `verif_submit_${newRequest._id}_${admin._id}`
+            });
+        }
+    } catch (notifErr) {
+        console.error("Failed to dispatch admin notification for new verification submission:", notifErr);
+    }
+
+    // Emit real-time verification event to admins (new submission in queue) and applicant
+    try {
+        const enrichedNew = await VerificationRequest.findById(newRequest._id)
+            .populate("user", "name email role isVerified avatar createdAt")
+            .lean();
+
+        emitVerificationEventToAdmins("verification:queue_updated", {
+            action: "submitted",
+            requestId: newRequest._id,
+            request: enrichedNew || newRequest
+        });
+
+        emitVerificationEventToUser(userId, "verification:status_changed", {
+            status: "pending",
+            effectiveStatus: "pending",
+            isVerifiedBadge: false,
+            role,
+            request: enrichedNew || newRequest
+        });
+    } catch (socketErr) {
+        console.error("Failed to emit new submission verification socket events:", socketErr);
+    }
 
     return newRequest;
 };

@@ -4,7 +4,7 @@ import Auth from "../../auth/auth.model.js";
 import BrandProfile from "../../brand/profile/profile.model.js";
 import Booking from "../../booking/booking.model.js";
 import AuditLog from "../audit/audit.model.js";
-import { createNotificationService } from "../../notifications/notification.service.js";
+import { createNotificationService, notifyAdminsSafe } from "../../notifications/notification.service.js";
 import createApiError from "../../../utils/ApiError.js";
 import { getPagination, getPaginationData } from "../../../utils/pagination.js";
 
@@ -361,6 +361,26 @@ export const moderateCampaignPauseService = async (campaignId, reason, adminId) 
             entityId: campaign._id,
             destination: `/brand/campaigns`
         });
+
+        // Notify peer admins about the campaign moderation restriction
+        const adminUser = await Auth.findById(adminId).select("name email").lean();
+        const adminName = adminUser?.name || "Administrator";
+        await notifyAdminsSafe({
+            sender: adminId,
+            type: "campaign_moderated_paused",
+            title: "Campaign Paused by Admin",
+            message: `${adminName} paused campaign "${campaign.title}". Reason: ${reason.trim()}`,
+            entityType: "campaign",
+            entityId: campaign._id,
+            destination: `/admin/campaigns?id=${campaign._id}`,
+            metadata: {
+                campaignId: campaign._id,
+                action: "paused",
+                restrictedBy: adminId,
+                reason: reason.trim()
+            },
+            idempotencyKey: `peer_camp_pause_${campaign._id}_${Date.now()}`
+        }, { excludeAdminId: adminId });
     } catch (notifErr) {
         console.error("Failed to dispatch admin pause notification:", notifErr);
     }
@@ -427,6 +447,25 @@ export const moderateCampaignResumeService = async (campaignId, reason, adminId)
             entityId: campaign._id,
             destination: `/brand/campaigns`
         });
+
+        // Notify peer admins about the campaign restoration
+        const adminUser = await Auth.findById(adminId).select("name email").lean();
+        const adminName = adminUser?.name || "Administrator";
+        await notifyAdminsSafe({
+            sender: adminId,
+            type: "campaign_moderated_resumed",
+            title: "Campaign Resumed by Admin",
+            message: `${adminName} restored campaign "${campaign.title}".`,
+            entityType: "campaign",
+            entityId: campaign._id,
+            destination: `/admin/campaigns?id=${campaign._id}`,
+            metadata: {
+                campaignId: campaign._id,
+                action: "resumed",
+                resolvedBy: adminId
+            },
+            idempotencyKey: `peer_camp_resume_${campaign._id}_${Date.now()}`
+        }, { excludeAdminId: adminId });
     } catch (notifErr) {
         console.error("Failed to dispatch admin resume notification:", notifErr);
     }
@@ -491,6 +530,26 @@ export const moderateCampaignCloseService = async (campaignId, reason, adminId) 
             entityId: campaign._id,
             destination: `/brand/campaigns`
         });
+
+        // Notify peer admins about the campaign closure
+        const adminUser = await Auth.findById(adminId).select("name email").lean();
+        const adminName = adminUser?.name || "Administrator";
+        await notifyAdminsSafe({
+            sender: adminId,
+            type: "campaign_moderated_closed",
+            title: "Campaign Closed by Admin",
+            message: `${adminName} closed campaign "${campaign.title}".${reason ? ` Reason: ${reason.trim()}` : ""}`,
+            entityType: "campaign",
+            entityId: campaign._id,
+            destination: `/admin/campaigns?id=${campaign._id}`,
+            metadata: {
+                campaignId: campaign._id,
+                action: "closed",
+                closedBy: adminId,
+                reason: reason ? reason.trim() : ""
+            },
+            idempotencyKey: `peer_camp_close_${campaign._id}_${Date.now()}`
+        }, { excludeAdminId: adminId });
     } catch (notifErr) {
         console.error("Failed to dispatch admin close notification:", notifErr);
     }

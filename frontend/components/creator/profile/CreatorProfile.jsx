@@ -2258,11 +2258,24 @@ export default function CreatorProfile() {
                             type="url"
                             name="profileImage"
                             value={formData.profileImage}
-                            onChange={handleInputChange}
+                            readOnly={Boolean(formData.profileImage && (formData.profileImage.includes("cloudinary.com") || formData.profileImage.includes("res.cloudinary.com")))}
+                            onChange={(e) => {
+                              if (formData.profileImage && (formData.profileImage.includes("cloudinary.com") || formData.profileImage.includes("res.cloudinary.com"))) return;
+                              handleInputChange(e);
+                            }}
                             placeholder="Paste image URL"
                             disabled={isUploadingImage}
-                            className="w-full pl-8 pr-3 py-2 rounded-xl bg-white dark:bg-surface border border-slate-300 dark:border-border-theme text-foreground text-xs focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/40 transition-colors"
+                            className={`w-full pl-8 pr-9 py-2 rounded-xl text-xs focus:outline-none transition-colors ${
+                              Boolean(formData.profileImage && (formData.profileImage.includes("cloudinary.com") || formData.profileImage.includes("res.cloudinary.com")))
+                                ? "bg-slate-100 dark:bg-surface-muted/90 border border-slate-300 dark:border-border-theme font-mono text-[11px] cursor-not-allowed select-all"
+                                : "bg-white dark:bg-surface border border-slate-300 dark:border-border-theme text-foreground focus:border-secondary focus:ring-1 focus:ring-secondary/40"
+                            }`}
                           />
+                          {Boolean(formData.profileImage && (formData.profileImage.includes("cloudinary.com") || formData.profileImage.includes("res.cloudinary.com"))) && (
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-secondary pointer-events-none" title="URL locked after upload">
+                              <LockClosedIcon className="w-3.5 h-3.5" />
+                            </div>
+                          )}
                         </div>
 
                         {formData.profileImage ? (

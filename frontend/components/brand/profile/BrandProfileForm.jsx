@@ -247,6 +247,14 @@ function StarIcon({ className = "w-4 h-4", filled = true }) {
   );
 }
 
+function LockClosedIcon({ className = "w-3.5 h-3.5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+    </svg>
+  );
+}
+
 // =========================================================
 // SHARED LOGO PREVIEW COMPONENT
 // =========================================================
@@ -1455,6 +1463,52 @@ export default function BrandProfileForm() {
                         <p className="text-[11px] text-text-secondary">
                           JPEG, PNG or WebP (max 5 MB)
                         </p>
+                        <div>
+                          <div className="flex items-center justify-between mb-1">
+                            <label
+                              htmlFor="logo-url-input"
+                              className="block text-[11px] font-medium text-text-secondary"
+                            >
+                              Or enter Logo Image URL:
+                            </label>
+                            {Boolean(formData.logo && (formData.logo.includes("cloudinary.com") || formData.logo.includes("res.cloudinary.com"))) && (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-secondary bg-secondary/10 px-2 py-0.5 rounded-md border border-secondary/20">
+                                <LockClosedIcon className="w-3 h-3" />
+                                <span>Locked (Uploaded)</span>
+                              </span>
+                            )}
+                          </div>
+                          <div className="relative flex items-center">
+                            <input
+                              id="logo-url-input"
+                              type="url"
+                              name="logo"
+                              value={formData.logo}
+                              readOnly={Boolean(formData.logo && (formData.logo.includes("cloudinary.com") || formData.logo.includes("res.cloudinary.com")))}
+                              onChange={(e) => {
+                                if (formData.logo && (formData.logo.includes("cloudinary.com") || formData.logo.includes("res.cloudinary.com"))) return;
+                                handleInputChange(e);
+                              }}
+                              placeholder="https://example.com/logo.png"
+                              disabled={isUploadingLogo}
+                              className={`w-full text-xs sm:text-sm rounded-xl px-3.5 py-2.5 focus:outline-none transition-colors disabled:opacity-60 ${
+                                formData.logo && (formData.logo.includes("cloudinary.com") || formData.logo.includes("res.cloudinary.com"))
+                                  ? "bg-surface-muted/90 border border-border-theme font-mono text-[11px] cursor-not-allowed select-all pr-9"
+                                  : "bg-surface border border-border-theme text-foreground focus:border-secondary"
+                              }`}
+                            />
+                            {Boolean(formData.logo && (formData.logo.includes("cloudinary.com") || formData.logo.includes("res.cloudinary.com"))) && (
+                              <div className="absolute right-3 text-secondary pointer-events-none" title="URL locked after upload">
+                                <LockClosedIcon className="w-3.5 h-3.5" />
+                              </div>
+                            )}
+                          </div>
+                          {Boolean(formData.logo && (formData.logo.includes("cloudinary.com") || formData.logo.includes("res.cloudinary.com"))) && (
+                            <p className="text-[10px] text-text-secondary mt-1">
+                              🔒 Uploaded via Cloudinary (locked against accidental editing).
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>

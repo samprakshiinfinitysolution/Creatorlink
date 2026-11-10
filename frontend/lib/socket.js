@@ -55,25 +55,25 @@ export const confirmSocketAuthSuccess = () => {
 /**
  * Starts a new authenticated session.
  * Resets failure state, establishes new session user ID, and connects if active consumers exist.
- * Does NOT invalidate an in-flight refresh or increment generation if the same user is re-hydrating.
+ * Does NOT invalidate an in-flight refresh or increment generation if the same user is re-hydrating unless forceReset is true.
  */
-export const startNewSocketSession = (sessionUserId = null) => {
+export const startNewSocketSession = (sessionUserId = null, options = {}) => {
+    const { forceReset = false } = options;
     const isDifferentUser = Boolean(
         (sessionUserId && sessionUserId !== currentSessionUserId) ||
         (!sessionUserId && currentSessionUserId)
     );
     const isInitialSession = currentSessionUserId === null && sessionUserId !== null;
 
-    if (isDifferentUser || isInitialSession) {
+    if (forceReset || isDifferentUser || isInitialSession) {
         currentSessionGeneration += 1;
         socketRefreshPromise = null;
         socketRetryPromise = null;
         socketAuthRetryCount = 0;
         socketAuthFailed = false;
-        const previousUserId = currentSessionUserId;
         currentSessionUserId = sessionUserId;
 
-        if (previousUserId && (socket.connected || socket.active)) {
+        if (socket.connected || socket.active) {
             socket.disconnect();
         }
 
@@ -97,6 +97,15 @@ export const startNewSocketSession = (sessionUserId = null) => {
     ) {
         socket.connect();
     }
+};
+
+/**
+ * Initiates a fresh socket session upon successful explicit authentication (login, Google login, OTP verification).
+ * Always resets authentication failure states, resets retry counters, disconnects any stale/failed socket connection,
+ * increments session generation, and establishes a clean connection if active consumers are mounted.
+ */
+export const initiateLoginSocketSession = (sessionUserId = null) => {
+    return startNewSocketSession(sessionUserId, { forceReset: true });
 };
 
 /**

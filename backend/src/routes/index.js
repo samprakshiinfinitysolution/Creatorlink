@@ -91,7 +91,6 @@ router.use("/admin/auth", adminAuthRoutes);
 router.use("/admin/notifications", authenticateUser, authorizeRoles("admin"), notificationRouter);
 router.use("/admin/dashboard", adminDashboardRoutes);
 router.use("/admin/users", adminUsersRoutes);
-router.use("/admin/verification", adminVerificationRoutes);
 router.use("/admin/verifications", adminVerificationRoutes);
 router.use("/admin/campaigns", adminCampaignRoutes);
 router.use("/admin/collaborations", adminCollaborationRoutes);

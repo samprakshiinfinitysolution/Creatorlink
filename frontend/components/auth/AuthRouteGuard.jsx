@@ -29,18 +29,25 @@ export default function AuthRouteGuard({
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
   const hasDispatchedRef = useRef(false);
+  const prevUserRef = useRef(null);
+
+  // Helper to redirect to login
+  const redirectToLogin = () => {
+    if (pathname?.startsWith("/login")) return;
+    const fallbackTarget = allowedRole === "creator" ? "/creator/dashboard" : "/brand/dashboard";
+    router.replace(`/login?redirect=${encodeURIComponent(pathname || fallbackTarget)}`);
+  };
 
   // Helper to redirect users with mismatched roles to their authorized panels
   const redirectToAppropriatePanel = (userRole) => {
     if (userRole === "creator") {
-      router.replace("/creator/dashboard");
+      if (pathname !== "/creator/dashboard") router.replace("/creator/dashboard");
     } else if (userRole === "brand") {
-      router.replace("/brand/dashboard");
+      if (pathname !== "/brand/dashboard") router.replace("/brand/dashboard");
     } else if (userRole === "admin") {
-      router.replace("/admin/dashboard");
+      if (pathname !== "/admin/dashboard") router.replace("/admin/dashboard");
     } else {
-      const fallbackTarget = allowedRole === "creator" ? "/creator/dashboard" : "/brand/dashboard";
-      router.replace(`/login?redirect=${encodeURIComponent(pathname || fallbackTarget)}`);
+      redirectToLogin();
     }
   };
 
@@ -49,6 +56,9 @@ export default function AuthRouteGuard({
 
     // 1. If Redux already has an authenticated user in memory
     if (user && isAuthenticated) {
+      prevUserRef.current = user;
+      hasDispatchedRef.current = false;
+
       if (user.role === allowedRole) {
         setIsAuthorized(true);
         setIsChecking(false);
@@ -62,7 +72,17 @@ export default function AuthRouteGuard({
       return;
     }
 
-    // 2. If no user in Redux store (page reload / fresh tab), verify session via /api/auth/me
+    // 2. If user was previously authenticated/authorized and is now unauthenticated (logout / session expiry)
+    if (prevUserRef.current || isAuthorized) {
+      prevUserRef.current = null;
+      hasDispatchedRef.current = true;
+      setIsAuthorized(false);
+      setIsChecking(false);
+      redirectToLogin();
+      return;
+    }
+
+    // 3. If no user in Redux store (page reload / fresh tab), verify session via /api/auth/me
     if (!hasDispatchedRef.current) {
       hasDispatchedRef.current = true;
 
@@ -71,8 +91,7 @@ export default function AuthRouteGuard({
         if (isMounted) {
           setIsChecking(false);
           setIsAuthorized(false);
-          const fallbackTarget = allowedRole === "creator" ? "/creator/dashboard" : "/brand/dashboard";
-          router.replace(`/login?redirect=${encodeURIComponent(pathname || fallbackTarget)}`);
+          redirectToLogin();
         }
       }, 5000);
 
@@ -87,6 +106,9 @@ export default function AuthRouteGuard({
             const fetchedUser =
               actionResult.payload?.data?.user || actionResult.payload?.user;
 
+            prevUserRef.current = fetchedUser;
+            hasDispatchedRef.current = false;
+
             if (fetchedUser?.role === allowedRole) {
               setIsAuthorized(true);
               setIsChecking(false);
@@ -99,18 +121,18 @@ export default function AuthRouteGuard({
             redirectToAppropriatePanel(fetchedUser?.role);
           } else {
             // Unauthenticated or expired session
+            prevUserRef.current = null;
             setIsAuthorized(false);
             setIsChecking(false);
-            const fallbackTarget = allowedRole === "creator" ? "/creator/dashboard" : "/brand/dashboard";
-            router.replace(`/login?redirect=${encodeURIComponent(pathname || fallbackTarget)}`);
+            redirectToLogin();
           }
         } catch {
           clearTimeout(safetyTimer);
           if (isMounted) {
+            prevUserRef.current = null;
             setIsAuthorized(false);
             setIsChecking(false);
-            const fallbackTarget = allowedRole === "creator" ? "/creator/dashboard" : "/brand/dashboard";
-            router.replace(`/login?redirect=${encodeURIComponent(pathname || fallbackTarget)}`);
+            redirectToLogin();
           }
         }
       };
@@ -121,8 +143,13 @@ export default function AuthRouteGuard({
         isMounted = false;
         clearTimeout(safetyTimer);
       };
+    } else {
+      // 4. Initial check already dispatched and failed/unauthenticated
+      setIsAuthorized(false);
+      setIsChecking(false);
+      redirectToLogin();
     }
-  }, [user, isAuthenticated, allowedRole, dispatch, pathname, router]);
+  }, [user, isAuthenticated, allowedRole, isAuthorized, dispatch, pathname, router]);
 
   // While checking authentication, render accessible centered loader
   if (isChecking) {
@@ -178,8 +205,8 @@ export default function AuthRouteGuard({
     );
   }
 
-  // Prevent flash of protected page content when unauthorized
-  if (!isAuthorized) {
+  // Prevent flash of protected page content when unauthorized or during session clearance
+  if (!isAuthorized || !user || !isAuthenticated || user.role !== allowedRole) {
     return null;
   }
 

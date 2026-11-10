@@ -60,95 +60,52 @@ const initializeSocket = (httpServer) => {
 
     ioInstance = io;
 
-    // Authenticate Socket.IO using HttpOnly cookies (with fallback to valid refresh token session).
-    io.use(async (socket, next) => {
-        try {
-            const headerCookie = socket.handshake.headers.cookie || "";
-            const cookies = parseCookie(headerCookie);
-            const token = cookies.adminAccessToken || cookies.accessToken || socket.handshake.auth?.token;
+    // Helper to authenticate a single credential candidate pair (Admin or Standard).
+    // Eliminates cross-role token mixing by ensuring access token and refresh token always belong to the same context.
+    const authenticateCandidate = async (candidate) => {
+        const { token, refreshToken, isExplicitAdmin } = candidate;
 
-            let decodedToken = null;
+        if (!token && !refreshToken) {
+            return { status: "missing_credentials" };
+        }
 
-            // 1. Try validating access token first
-            if (token) {
-                try {
-                    decodedToken = verifyAccessToken(token);
-                } catch (tokenErr) {
-                    if (tokenErr.name === "TokenExpiredError") {
-                        // Access token expired: return expected authentication error so the frontend
-                        // triggers its refresh-token flow to obtain and send a fresh access-token cookie.
-                        return next(new Error("Invalid or expired access token"));
-                    } else if (
-                        tokenErr.name === "JsonWebTokenError" ||
-                        tokenErr.name === "NotBeforeError"
-                    ) {
-                        // Unrelated verification error: do NOT silently fall back to refresh token
-                        return next(new Error("Invalid access token"));
-                    } else {
-                        // Unexpected token verification error: log on backend and do NOT leak details
-                        console.error(`[SocketAuth Diagnostic] Unexpected access token verification error: ${tokenErr?.name}: ${tokenErr?.message}`);
-                        return next(new Error("Socket authentication failed"));
-                    }
+        let decodedToken = null;
+
+        // 1. Try validating access token first if present
+        if (token) {
+            try {
+                decodedToken = verifyAccessToken(token);
+            } catch (tokenErr) {
+                if (tokenErr.name === "TokenExpiredError") {
+                    // Access token expired: return expected authentication error so the frontend
+                    // triggers its refresh-token flow to obtain and send a fresh access-token cookie.
+                    return { status: "error", error: new Error("Invalid or expired access token") };
+                } else if (
+                    tokenErr.name === "JsonWebTokenError" ||
+                    tokenErr.name === "NotBeforeError"
+                ) {
+                    return { status: "error", error: new Error("Invalid access token") };
+                } else {
+                    console.error(`[SocketAuth Diagnostic] Unexpected access token verification error: ${tokenErr?.name}: ${tokenErr?.message}`);
+                    return { status: "error", error: new Error("Socket authentication failed") };
                 }
             }
+        }
 
-            if (decodedToken) {
-                // Ensure user still exists in the database
-                const user = await Auth.findById(decodedToken.userId).select("_id role sessions");
-                if (!user) {
-                    return next(new Error("Invalid or expired session"));
-                }
-
-                // Compatible session-revocation check:
-                // Limitation: The access token schema only embeds { userId, role } without a session ID (jti/sessionId),
-                // while Auth.sessions tracks sessions strictly by hashed refresh tokens.
-                // A standalone access token cannot identify which session it belongs to in user.sessions.
-                // Therefore, user.sessions.length > 0 cannot be treated as proof that this access token is active.
-                // The safest compatible approach without weakening authentication is to require the session's
-                // refreshToken and verify that it matches an active session in user.sessions.
-                const refreshToken = cookies.adminRefreshToken || cookies.refreshToken || socket.handshake.auth?.refreshToken;
-                if (!refreshToken) {
-                    return next(new Error("Invalid or expired session"));
-                }
-
-                let decodedRefresh;
-                try {
-                    decodedRefresh = verifyRefreshToken(refreshToken);
-                } catch (refreshErr) {
-                    if (
-                        refreshErr.name === "TokenExpiredError" ||
-                        refreshErr.name === "JsonWebTokenError" ||
-                        refreshErr.name === "NotBeforeError"
-                    ) {
-                        return next(new Error("Invalid or expired session"));
-                    }
-                    console.error(`[SocketAuth Diagnostic] Unexpected refresh token verification error: ${refreshErr?.name}: ${refreshErr?.message}`);
-                    return next(new Error("Socket authentication failed"));
-                }
-
-                if (decodedRefresh.userId !== decodedToken.userId) {
-                    return next(new Error("Invalid or expired session"));
-                }
-
-                const hashedToken = hashRefreshToken(refreshToken);
-                const hasActiveSession = user.sessions?.some(
-                    (s) => s.refreshToken === hashedToken
-                );
-                if (!hasActiveSession) {
-                    return next(new Error("Invalid or expired session"));
-                }
-
-                socket.data.user = {
-                    userId: user._id.toString(),
-                    role: user.role
-                };
-                return next();
+        if (decodedToken) {
+            const user = await Auth.findById(decodedToken.userId).select("_id role sessions");
+            if (!user) {
+                return { status: "error", error: new Error("Invalid or expired session") };
             }
 
-            // 2. If access token is missing, authenticate via active refresh token session (fallback)
-            const refreshToken = cookies.adminRefreshToken || cookies.refreshToken || socket.handshake.auth?.refreshToken;
+            // Explicit admin context requires admin role
+            if (isExplicitAdmin && user.role !== "admin") {
+                return { status: "error", error: new Error("Invalid or expired session") };
+            }
+
+            // Both access token and refresh token must come from the same candidate pair
             if (!refreshToken) {
-                return next(new Error("Authentication required"));
+                return { status: "error", error: new Error("Invalid or expired session") };
             }
 
             let decodedRefresh;
@@ -160,28 +117,131 @@ const initializeSocket = (httpServer) => {
                     refreshErr.name === "JsonWebTokenError" ||
                     refreshErr.name === "NotBeforeError"
                 ) {
-                    return next(new Error("Invalid or expired session"));
+                    return { status: "error", error: new Error("Invalid or expired session") };
                 }
-                console.error(`[SocketAuth Diagnostic] Unexpected fallback refresh token verification error: ${refreshErr?.name}: ${refreshErr?.message}`);
-                return next(new Error("Socket authentication failed"));
+                console.error(`[SocketAuth Diagnostic] Unexpected refresh token verification error: ${refreshErr?.name}: ${refreshErr?.message}`);
+                return { status: "error", error: new Error("Socket authentication failed") };
+            }
+
+            if (decodedRefresh.userId !== decodedToken.userId) {
+                return { status: "error", error: new Error("Invalid or expired session") };
             }
 
             const hashedToken = hashRefreshToken(refreshToken);
-            const user = await Auth.findOne({
-                _id: decodedRefresh.userId,
-                "sessions.refreshToken": hashedToken
-            }).select("_id role");
-
-            if (!user) {
-                return next(new Error("Invalid or expired session"));
+            const hasActiveSession = user.sessions?.some(
+                (s) => s.refreshToken === hashedToken
+            );
+            if (!hasActiveSession) {
+                return { status: "error", error: new Error("Invalid or expired session") };
             }
 
-            socket.data.user = {
+            return {
+                status: "success",
+                user: {
+                    userId: user._id.toString(),
+                    role: user.role
+                }
+            };
+        }
+
+        // 2. If access token is missing, authenticate via active refresh token session (fallback)
+        if (!refreshToken) {
+            return { status: "missing_credentials" };
+        }
+
+        let decodedRefresh;
+        try {
+            decodedRefresh = verifyRefreshToken(refreshToken);
+        } catch (refreshErr) {
+            if (
+                refreshErr.name === "TokenExpiredError" ||
+                refreshErr.name === "JsonWebTokenError" ||
+                refreshErr.name === "NotBeforeError"
+            ) {
+                return { status: "error", error: new Error("Invalid or expired session") };
+            }
+            console.error(`[SocketAuth Diagnostic] Unexpected fallback refresh token verification error: ${refreshErr?.name}: ${refreshErr?.message}`);
+            return { status: "error", error: new Error("Socket authentication failed") };
+        }
+
+        const hashedToken = hashRefreshToken(refreshToken);
+        const user = await Auth.findOne({
+            _id: decodedRefresh.userId,
+            "sessions.refreshToken": hashedToken
+        }).select("_id role");
+
+        if (!user) {
+            return { status: "error", error: new Error("Invalid or expired session") };
+        }
+
+        if (isExplicitAdmin && user.role !== "admin") {
+            return { status: "error", error: new Error("Invalid or expired session") };
+        }
+
+        return {
+            status: "success",
+            user: {
                 userId: user._id.toString(),
                 role: user.role
+            }
+        };
+    };
+
+    // Authenticate Socket.IO using HttpOnly cookies with strict context isolation.
+    io.use(async (socket, next) => {
+        try {
+            const headerCookie = socket.handshake.headers?.cookie || "";
+            const cookies = parseCookie(headerCookie);
+            const referer = socket.handshake.headers?.referer || "";
+            const authRole = socket.handshake.auth?.role || socket.handshake.query?.role;
+            const isAdminContext = authRole === "admin" || referer.includes("/admin");
+
+            // Separate credential pairs strictly to prevent cross-role token mixing:
+            // Admin tokens are never paired with standard tokens, and vice versa.
+            const adminCandidate = {
+                token: cookies.adminAccessToken || (authRole === "admin" ? socket.handshake.auth?.token : undefined),
+                refreshToken: cookies.adminRefreshToken || (authRole === "admin" ? socket.handshake.auth?.refreshToken : undefined),
+                isExplicitAdmin: true
             };
 
-            return next();
+            const standardCandidate = {
+                token: cookies.accessToken || (authRole !== "admin" ? socket.handshake.auth?.token : undefined),
+                refreshToken: cookies.refreshToken || (authRole !== "admin" ? socket.handshake.auth?.refreshToken : undefined),
+                isExplicitAdmin: false
+            };
+
+            // Enforce strict authorization isolation between Admin and Standard contexts:
+            // - If in Admin context: ONLY admin credentials may authenticate. Never fall back to standard tokens (prevents authorization bypass).
+            // - If in Standard context (Brand/Creator): ONLY standard credentials may authenticate. Never fall back to admin tokens.
+            // - If neutral context (no referer or role hint): check standard first, then admin.
+            const isNeutralContext = !referer && !authRole;
+            const candidates = isAdminContext
+                ? [adminCandidate]
+                : isNeutralContext
+                    ? [standardCandidate, adminCandidate]
+                    : [standardCandidate];
+
+            let lastError = null;
+
+            for (const candidate of candidates) {
+                const result = await authenticateCandidate(candidate);
+
+                if (result.status === "success") {
+                    socket.data.user = result.user;
+                    return next();
+                }
+
+                if (result.status === "error") {
+                    // Immediately halt and return the error for the active candidate
+                    // so that frontend can refresh expired access tokens properly.
+                    return next(result.error);
+                }
+
+                // If candidate had missing_credentials, record fallback and check next candidate
+                lastError = new Error("Authentication required");
+            }
+
+            return next(lastError || new Error("Authentication required"));
         } catch (error) {
             const errorCategory =
                 error?.name === "CastError" ? "DATABASE_CAST_ERROR"

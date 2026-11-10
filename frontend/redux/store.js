@@ -1,16 +1,40 @@
 import { configureStore, createListenerMiddleware, isAnyOf } from "@reduxjs/toolkit";
 
 import rootReducer from "./root_reducer.js";
-import { clearAuth, login, logout, getMe, refreshToken } from "./auth/auth_slice.js";
-import { clearSocketSession, startNewSocketSession } from "@/lib/socket";
+import {
+    clearAuth,
+    login,
+    logout,
+    getMe,
+    refreshToken,
+    loginWithGoogle,
+    verifyOtp
+} from "./auth/auth_slice.js";
+import {
+    clearSocketSession,
+    startNewSocketSession,
+    initiateLoginSocketSession
+} from "@/lib/socket";
 
 const authSocketListenerMiddleware = createListenerMiddleware();
 
-// Session initiation on successful login or getMe hydration
+// Fresh session initiation on explicit login or authentication (login, Google login, OTP verification)
 authSocketListenerMiddleware.startListening({
-    matcher: isAnyOf(login.fulfilled, getMe.fulfilled),
+    matcher: isAnyOf(login.fulfilled, loginWithGoogle.fulfilled, verifyOtp.fulfilled),
     effect: (action) => {
-        const user = action.payload?.data?.user || action.payload?.data;
+        const user = action.payload?.data?.user || action.payload?.user || action.payload?.data;
+        const userId = user?._id || user?.id;
+        if (userId) {
+            initiateLoginSocketSession(userId);
+        }
+    }
+});
+
+// Passive session hydration on getMe
+authSocketListenerMiddleware.startListening({
+    actionCreator: getMe.fulfilled,
+    effect: (action) => {
+        const user = action.payload?.data?.user || action.payload?.user || action.payload?.data;
         const userId = user?._id || user?.id;
         if (userId) {
             startNewSocketSession(userId);

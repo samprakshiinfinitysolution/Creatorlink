@@ -238,31 +238,9 @@ export default function BrandHeader({ setMobileOpen = () => { } }) {
         </div>
       </div>
 
-      {/* Right Section: Announcements, Divider, Settings, Notifications, Theme Toggle, Profile */}
+      {/* Right Section: Notifications, Theme Toggle, Profile */}
       <div className="flex items-center gap-1 sm:gap-3 shrink-0">
-        {/* 1. Megaphone / Announcement Icon */}
-        <button
-          type="button"
-          onClick={() => router.push("/brand/notifications")}
-          title="Announcements & Updates"
-          className="hidden sm:flex p-1.5 sm:p-2 rounded-xl text-slate-500 dark:text-text-secondary hover:text-[#ff2d6c] hover:bg-slate-100 dark:hover:bg-surface-muted transition-colors cursor-pointer"
-        >
-          <MegaphoneIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-        </button>
-
-        {/* 2. Vertical Divider */}
-        <div className="hidden sm:block h-4 sm:h-5 w-[1px] bg-slate-200 dark:bg-border-theme shrink-0 mx-0.5" />
-
-        {/* 3. Settings Gear Icon */}
-        <Link
-          href="/brand/settings"
-          title="Settings"
-          className="hidden sm:flex p-1.5 sm:p-2 rounded-xl text-slate-500 dark:text-text-secondary hover:text-[#ff2d6c] hover:bg-slate-100 dark:hover:bg-surface-muted transition-colors cursor-pointer"
-        >
-          <SettingsIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-        </Link>
-
-        {/* 4. Notification Bell Dropdown */}
+        {/* Notification Bell Dropdown */}
         <BrandNotificationDropdown
           isOpen={notificationOpen}
           onToggle={() => {

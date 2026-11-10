@@ -26,7 +26,9 @@ import {
     validateVerifyOtp,
     validateResendOtp
 } from "./auth.validation.js";
+
 import authenticateUser from "../../middleware/auth.middleware.js";
+
 import {
     changePasswordLimiter,
     forgotPasswordLimiter,

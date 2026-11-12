@@ -579,6 +579,54 @@ export default function CreatorOnboarding() {
   const [languageInput, setLanguageInput] = useState("");
 
   const [validationError, setValidationError] = useState(null);
+  const [errorScrollTrigger, setErrorScrollTrigger] = useState(0);
+  const errorBannerRef = useRef(null);
+  const errorAnchorRef = useRef(null);
+
+  const scrollToErrorBanner = useCallback(() => {
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        const target = errorBannerRef.current || errorAnchorRef.current;
+        if (!target) return;
+
+        try {
+          const rect = target.getBoundingClientRect();
+          const headerOffset = 100; // ensures clearance below any sticky/fixed header
+          const currentY =
+            window.pageYOffset !== undefined ? window.pageYOffset : window.scrollY;
+          const targetY = currentY + rect.top - headerOffset;
+
+          window.scrollTo({
+            top: Math.max(0, targetY),
+            behavior: "smooth",
+          });
+        } catch {
+          target.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        }
+      }, 50);
+    });
+  }, []);
+
+  const triggerValidationError = useCallback(
+    (message) => {
+      setValidationError(message);
+      if (message) {
+        setErrorScrollTrigger((prev) => prev + 1);
+        scrollToErrorBanner();
+      }
+    },
+    [scrollToErrorBanner]
+  );
+
+  useEffect(() => {
+    if (validationError) {
+      scrollToErrorBanner();
+    }
+  }, [validationError, errorScrollTrigger, scrollToErrorBanner]);
+
   const [saveSuccessMessage, setSaveSuccessMessage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -988,44 +1036,44 @@ export default function CreatorOnboarding() {
     if (currentStep === 1) {
       const cleanName = formData.name ? formData.name.trim() : "";
       if (!cleanName || cleanName.length < 2) {
-        setValidationError("Please enter your full name (at least 2 characters).");
+        triggerValidationError("Please enter your full name (at least 2 characters).");
         return;
       }
       if (cleanName.length > 70) {
-        setValidationError("Full name must not exceed 70 characters.");
+        triggerValidationError("Full name must not exceed 70 characters.");
         return;
       }
 
       if (!formData.title || !formData.title.trim()) {
-        setValidationError("Please enter your professional headline / title.");
+        triggerValidationError("Please enter your professional headline / title.");
         return;
       }
       if (formData.title.trim().length > 150) {
-        setValidationError("Headline must not exceed 150 characters.");
+        triggerValidationError("Headline must not exceed 150 characters.");
         return;
       }
 
       if (!formData.bio || !formData.bio.trim()) {
-        setValidationError("Please enter a bio or description.");
+        triggerValidationError("Please enter a bio or description.");
         return;
       }
       if (formData.bio.trim().length > 1000) {
-        setValidationError("Bio must not exceed 1000 characters.");
+        triggerValidationError("Bio must not exceed 1000 characters.");
         return;
       }
 
       if (!formData.category || !formData.category.trim()) {
-        setValidationError("Please select your primary category.");
+        triggerValidationError("Please select your primary category.");
         return;
       }
 
       if (!Array.isArray(formData.keywords) || formData.keywords.length === 0) {
-        setValidationError("Please add at least 1 content keyword or tag.");
+        triggerValidationError("Please add at least 1 content keyword or tag.");
         return;
       }
 
       if (!formData.location || !formData.location.trim()) {
-        setValidationError("Please enter your location or city.");
+        triggerValidationError("Please enter your location or city.");
         return;
       }
 
@@ -1033,27 +1081,27 @@ export default function CreatorOnboarding() {
         (link) => typeof link === "string" && link.trim().length > 0
       );
       if (!hasAtLeastOneSocialLink) {
-        setValidationError("Please provide at least one social media handle or link.");
+        triggerValidationError("Please provide at least one social media handle or link.");
         return;
       }
 
       if (!formData.dob || !formData.dob.trim()) {
-        setValidationError("Please enter your date of birth.");
+        triggerValidationError("Please enter your date of birth.");
         return;
       }
       const dobDate = new Date(formData.dob);
       if (Number.isNaN(dobDate.getTime()) || dobDate > new Date()) {
-        setValidationError("Please enter a valid date of birth.");
+        triggerValidationError("Please enter a valid date of birth.");
         return;
       }
 
       if (!formData.gender) {
-        setValidationError("Please select your gender identity.");
+        triggerValidationError("Please select your gender identity.");
         return;
       }
 
       if (!Array.isArray(formData.languages) || formData.languages.length === 0) {
-        setValidationError("Please select or add at least one language.");
+        triggerValidationError("Please select or add at least one language.");
         return;
       }
 
@@ -1107,7 +1155,7 @@ export default function CreatorOnboarding() {
         setValidationError(null);
         setCurrentStep(2);
       } catch (err) {
-        setValidationError(
+        triggerValidationError(
           formatErrorMessage(err, "Failed to save profile. Please check your inputs.")
         );
       } finally {
@@ -1121,7 +1169,7 @@ export default function CreatorOnboarding() {
     // ==========================================
     if (currentStep === 2) {
       if (!Array.isArray(portfolios) || portfolios.length === 0) {
-        setValidationError("Please add at least 1 portfolio project before continuing.");
+        triggerValidationError("Please add at least 1 portfolio project before continuing.");
         return;
       }
       setCurrentStep(3);
@@ -1137,7 +1185,7 @@ export default function CreatorOnboarding() {
       const activeServices = serviceList.filter((s) => s.isActive !== false);
 
       if (serviceList.length === 0 || activeServices.length === 0) {
-        setValidationError("Please add at least 1 active service offering before continuing.");
+        triggerValidationError("Please add at least 1 active service offering before continuing.");
         return;
       }
       setCurrentStep(4);
@@ -1151,18 +1199,18 @@ export default function CreatorOnboarding() {
     if (currentStep === 4) {
       // Cross-step verification
       if (!isStep1Done && (!formData.title || !formData.bio || !formData.dob)) {
-        setValidationError("Profile information is incomplete. Please return to Step 1.");
+        triggerValidationError("Profile information is incomplete. Please return to Step 1.");
         return;
       }
       if (!Array.isArray(portfolios) || portfolios.length === 0) {
-        setValidationError("At least 1 portfolio project is required. Please return to Step 2.");
+        triggerValidationError("At least 1 portfolio project is required. Please return to Step 2.");
         return;
       }
       const activeServices = (Array.isArray(services) ? services : []).filter(
         (s) => s.isActive !== false
       );
       if (activeServices.length === 0) {
-        setValidationError("At least 1 active service is required. Please return to Step 3.");
+        triggerValidationError("At least 1 active service is required. Please return to Step 3.");
         return;
       }
 
@@ -1198,7 +1246,7 @@ export default function CreatorOnboarding() {
         }
         router.replace("/creator/dashboard");
       } catch (err) {
-        setValidationError(
+        triggerValidationError(
           formatErrorMessage(err, "Failed to complete onboarding. Please try again.")
         );
       } finally {
@@ -1293,6 +1341,9 @@ export default function CreatorOnboarding() {
 
         {/* Main Card Surface */}
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200/80 dark:border-neutral-800 rounded-3xl p-6 sm:p-10 shadow-sm transition-colors duration-300">
+          {/* Scroll anchor for validation errors */}
+          <div ref={errorAnchorRef} className="scroll-mt-24 sm:scroll-mt-28" />
+
           {/* Alerts */}
           {initialLoadError && (
             <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs sm:text-sm font-sans font-medium flex items-center justify-between gap-3">
@@ -1324,7 +1375,10 @@ export default function CreatorOnboarding() {
           )}
 
           {validationError && (
-            <div className="mb-6 p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs sm:text-sm font-sans font-medium flex items-center justify-between gap-2">
+            <div
+              ref={errorBannerRef}
+              className="mb-6 p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs sm:text-sm font-sans font-medium flex items-center justify-between gap-2 scroll-mt-24 sm:scroll-mt-28"
+            >
               <div className="flex items-center gap-2">
                 <span>⚠</span>
                 <span>{validationError}</span>

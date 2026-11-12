@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -150,6 +150,24 @@ function formatTime(dateStr) {
   });
 }
 
+function getDateKey(dateStr) {
+  if (!dateStr) return "unknown";
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return "unknown";
+  return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+}
+
+function formatMessageDate(dateStr) {
+  if (!dateStr) return "";
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return "";
+  return date.toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "long",
+    year: "numeric"
+  });
+}
+
 function formatTimestampLabel(dateStr) {
   if (!dateStr) return "";
   const date = new Date(dateStr);
@@ -229,6 +247,28 @@ export default function CreatorMessages() {
 
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+
+  // Group messages by sent date so date separators appear only when the date changes
+  const messageGroups = useMemo(() => {
+    const groups = [];
+    let currentGroup = null;
+
+    messages.forEach((msg) => {
+      const key = getDateKey(msg.createdAt);
+      if (!currentGroup || currentGroup.dateKey !== key) {
+        currentGroup = {
+          dateKey: key,
+          dateLabel: formatMessageDate(msg.createdAt),
+          messages: [msg]
+        };
+        groups.push(currentGroup);
+      } else {
+        currentGroup.messages.push(msg);
+      }
+    });
+
+    return groups;
+  }, [messages]);
 
   // Initial load: Fetch creator conversations list
   useEffect(() => {
@@ -726,66 +766,81 @@ export default function CreatorMessages() {
                     </p>
                   </div>
                 ) : (
-                  // Message Bubble Items
-                  messages.map((msg) => {
-                    const senderId = typeof msg.sender === "string" ? msg.sender : (msg.sender?._id || msg.sender?.id);
-                    const isCreatorSender = Boolean(currentCreatorId && senderId && String(senderId) === String(currentCreatorId));
-
-                    return (
-                      <div
-                        key={msg._id || msg.createdAt}
-                        className={`flex flex-col ${isCreatorSender ? "items-end" : "items-start"} w-full min-w-0`}
-                      >
-                        {/* Bubble Container */}
-                        <div
-                          className={`max-w-[85%] sm:max-w-[70%] px-3.5 sm:px-4 py-0.5 sm:py-0.5 rounded-2xl text-xs font-sans leading-relaxed break-words [overflow-wrap:anywhere] shadow-xs ${
-                            isCreatorSender
-                              ? "bg-neutral-950 text-white rounded-tr-xs dark:bg-neutral-900"
-                              : "bg-surface text-foreground border border-border-theme rounded-tl-xs"
-                          }`}
-                        >
-                          <p className="whitespace-pre-wrap break-words [overflow-wrap:anywhere]">{msg.message}</p>
-
-                          {/* Attachments if any */}
-                          {Array.isArray(msg.attachments) && msg.attachments.length > 0 && (
-                            <div className="mt-2 space-y-1">
-                              {msg.attachments.map((url, idx) => (
-                                <a
-                                  key={idx}
-                                  href={url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className={`block underline text-[11px] truncate ${
-                                    isCreatorSender ? "text-neutral-300 hover:text-white" : "text-neutral-900 dark:text-neutral-100 hover:underline"
-                                  }`}
-                                >
-                                  Attachment {idx + 1}
-                                </a>
-                              ))}
-                            </div>
-                          )}
-
-                          {/* Timestamp & Read Indicator */}
-                          <div
-                            className={`flex items-center justify-end gap-1 text-[10px] mt-1 ${
-                              isCreatorSender ? "text-neutral-400" : "text-text-secondary"
-                            }`}
-                          >
-                            <span>{formatTime(msg.createdAt)}</span>
-                            {isCreatorSender && (
-                              <span>
-                                {msg.isRead ? (
-                                  <CheckCheckIcon className="w-3.5 h-3.5 text-neutral-300" />
-                                ) : (
-                                  <CheckIcon className="w-3.5 h-3.5 text-neutral-400" />
-                                )}
-                              </span>
-                            )}
-                          </div>
+                  // Grouped Message Bubble Items with Date Separators
+                  messageGroups.map((group) => (
+                    <div key={group.dateKey} className="space-y-3 sm:space-y-3.5">
+                      {/* Date Separator */}
+                      {group.dateLabel && (
+                        <div className="flex items-center my-3 sm:my-4">
+                          <div className="flex-1 border-t border-border-theme/60" />
+                          <span className="px-3 py-1 mx-3 rounded-full text-[11px] font-medium bg-surface text-text-secondary border border-border-theme shadow-2xs shrink-0 select-none">
+                            {group.dateLabel}
+                          </span>
+                          <div className="flex-1 border-t border-border-theme/60" />
                         </div>
-                      </div>
-                    );
-                  })
+                      )}
+
+                      {group.messages.map((msg) => {
+                        const senderId = typeof msg.sender === "string" ? msg.sender : (msg.sender?._id || msg.sender?.id);
+                        const isCreatorSender = Boolean(currentCreatorId && senderId && String(senderId) === String(currentCreatorId));
+
+                        return (
+                          <div
+                            key={msg._id || msg.createdAt}
+                            className={`flex flex-col ${isCreatorSender ? "items-end" : "items-start"} w-full min-w-0`}
+                          >
+                            {/* Bubble Container */}
+                            <div
+                              className={`max-w-[85%] sm:max-w-[70%] px-3.5 sm:px-4 py-0.5 sm:py-0.5 rounded-2xl text-xs font-sans leading-relaxed break-words [overflow-wrap:anywhere] shadow-xs ${
+                                isCreatorSender
+                                  ? "bg-neutral-950 text-white rounded-tr-xs dark:bg-neutral-900"
+                                  : "bg-surface text-foreground border border-border-theme rounded-tl-xs"
+                              }`}
+                            >
+                              <p className="whitespace-pre-wrap break-words [overflow-wrap:anywhere]">{msg.message}</p>
+
+                              {/* Attachments if any */}
+                              {Array.isArray(msg.attachments) && msg.attachments.length > 0 && (
+                                <div className="mt-2 space-y-1">
+                                  {msg.attachments.map((url, idx) => (
+                                    <a
+                                      key={idx}
+                                      href={url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className={`block underline text-[11px] truncate ${
+                                        isCreatorSender ? "text-neutral-300 hover:text-white" : "text-neutral-900 dark:text-neutral-100 hover:underline"
+                                      }`}
+                                    >
+                                      Attachment {idx + 1}
+                                    </a>
+                                  ))}
+                                </div>
+                              )}
+
+                              {/* Timestamp & Read Indicator */}
+                              <div
+                                className={`flex items-center justify-end gap-1 text-[10px] mt-1 ${
+                                  isCreatorSender ? "text-neutral-400" : "text-text-secondary"
+                                }`}
+                              >
+                                <span>{formatTime(msg.createdAt)}</span>
+                                {isCreatorSender && (
+                                  <span>
+                                    {msg.isRead ? (
+                                      <CheckCheckIcon className="w-3.5 h-3.5 text-neutral-300" />
+                                    ) : (
+                                      <CheckIcon className="w-3.5 h-3.5 text-neutral-400" />
+                                    )}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ))
                 )}
                 <div ref={messagesEndRef} />
               </div>

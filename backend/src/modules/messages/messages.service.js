@@ -284,7 +284,7 @@ const getConversationsService = async (userId, query = {}) => {
     const [conversations, totalItems] = await Promise.all([
         Conversation.find(filter)
             .populate("participants", "name email role")
-            .populate("booking", "agreedPrice status deliverables startDate deadline")
+            .populate("booking", "brand creator agreedPrice status deliverables startDate deadline")
             .populate("campaign", "title category platform budget")
             .sort({ lastMessageAt: -1, updatedAt: -1 })
             .skip(skip)

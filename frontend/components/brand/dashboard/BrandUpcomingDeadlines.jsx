@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { formatCampaignPlatforms } from "@/lib/campaignPlatforms";
 
 function formatDate(dateStr) {
   if (!dateStr) return "N/A";
@@ -140,12 +141,8 @@ export default function BrandUpcomingDeadlines({ deadlines = [] }) {
             const itemId = item.id || item._id;
             const targetLink = getSourceLink(item.sourceType, itemId);
 
-            // Platform display name (e.g. "Instagram", "YouTube")
-            const platformName = item.platform
-              ? String(item.platform)
-                  .replace(/_/g, " ")
-                  .replace(/\b\w/g, (l) => l.toUpperCase())
-              : "Multiple";
+            // Platform display name (e.g. "Instagram, YouTube")
+            const platformName = formatCampaignPlatforms(item.platform, "Multiple");
 
             // Creator count: only when real count is available (e.g. campaign.requiredCreators)
             const creatorCount =

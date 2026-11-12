@@ -10,6 +10,7 @@ import {
 import { socket, registerSocketConsumer, unregisterSocketConsumer } from "@/lib/socket";
 import BrandSidebar from "@/components/brand/dashboard/BrandSidebar";
 import BrandHeader from "@/components/brand/dashboard/BrandHeader";
+import { formatCampaignPlatforms } from "@/lib/campaignPlatforms";
 
 // =========================================================
 // SVG ICONS
@@ -173,18 +174,7 @@ const STATUS_TABS = [
   { id: "cancelled", label: "Cancelled" },
 ];
 
-const PLATFORM_MAP = {
-  instagram: "Instagram",
-  facebook: "Facebook",
-  youtube: "YouTube",
-  tiktok: "TikTok",
-  website: "Website",
-};
-
-const formatPlatform = (val) => {
-  if (!val) return "";
-  return PLATFORM_MAP[val.toLowerCase()] || val;
-};
+const formatPlatform = (val) => formatCampaignPlatforms(val, "");
 
 const formatPrice = (amount, currency = "INR") => {
   if (typeof amount !== "number" || isNaN(amount)) return "N/A";

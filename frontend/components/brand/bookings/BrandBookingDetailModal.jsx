@@ -9,6 +9,7 @@ import {
   updateBrandBookingStatus,
   clearSelectedBooking,
 } from "@/redux/brand/bookings/bookings_slice";
+import { formatCampaignPlatforms } from "@/lib/campaignPlatforms";
 
 // =========================================================
 // HELPER FORMATTERS & BADGES
@@ -273,7 +274,7 @@ export default function BrandBookingDetailModal({
 
   const campaignTitle = booking?.campaign?.title || "N/A";
   const campaignCategory = booking?.campaign?.category || "N/A";
-  const campaignPlatform = booking?.campaign?.platform || "N/A";
+  const campaignPlatform = formatCampaignPlatforms(booking?.campaign?.platform, "N/A");
   const campaignBudget = booking?.campaign?.budget;
   const campaignDeadline = booking?.campaign?.deadline;
 

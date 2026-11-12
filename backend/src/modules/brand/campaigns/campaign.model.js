@@ -67,7 +67,7 @@ const campaignSchema = new mongoose.Schema(
         },
 
         platform: {
-            type: String,
+            type: [String],
             enum: [
                 "instagram",
                 "facebook",
@@ -75,7 +75,13 @@ const campaignSchema = new mongoose.Schema(
                 "tiktok",
                 "website"
             ],
-            required: true
+            required: true,
+            validate: {
+                validator: function (arr) {
+                    return Array.isArray(arr) && arr.length > 0;
+                },
+                message: "At least one target platform is required"
+            }
         },
 
         budget: {

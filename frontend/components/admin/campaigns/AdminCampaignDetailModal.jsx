@@ -9,6 +9,7 @@ import {
   removeCampaign
 } from "@/redux/admin/campaigns/campaigns_slice";
 import AdminAvatar from "@/components/admin/AdminAvatar";
+import { normalizeCampaignPlatforms, formatCampaignPlatforms } from "@/lib/campaignPlatforms";
 
 // =========================================================
 // SVG ICONS
@@ -206,9 +207,16 @@ export default function AdminCampaignDetailModal({
                 Moderation Restricted
               </span>
             )}
-            <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 capitalize">
-              {campaign.platform}
-            </span>
+            <div className="flex flex-wrap items-center gap-1.5">
+              {normalizeCampaignPlatforms(campaign.platform).map((plat) => (
+                <span
+                  key={plat}
+                  className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 capitalize"
+                >
+                  {formatCampaignPlatforms(plat)}
+                </span>
+              ))}
+            </div>
           </div>
 
           <button

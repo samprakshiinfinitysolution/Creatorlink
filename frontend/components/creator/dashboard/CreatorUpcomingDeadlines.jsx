@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Link from "next/link";
+import { formatCampaignPlatforms } from "@/lib/campaignPlatforms";
 
 function getInitials(title, fallback = "DL") {
   if (!title || typeof title !== "string") return fallback;
@@ -213,7 +214,7 @@ export default function CreatorUpcomingDeadlines({ deadlines = [] }) {
                 ? "Campaign Pitch"
                 : "Milestone Deliverable");
             const brandName = item.brandName || item.brand?.name || "";
-            const platform = item.platform || item.campaign?.platform || "";
+            const platform = formatCampaignPlatforms(item.platform || item.campaign?.platform, "");
             const deliverablesCount = item.deliverablesCount;
 
             // Subtle urgency pill

@@ -12,6 +12,7 @@ import {
 import CreatorSidebar from "@/components/creator/dashboard/CreatorSidebar";
 import CreatorHeader from "@/components/creator/dashboard/CreatorHeader";
 import { socket, registerSocketConsumer, unregisterSocketConsumer } from "@/lib/socket";
+import { normalizeCampaignPlatforms, formatCampaignPlatforms } from "@/lib/campaignPlatforms";
 
 // =========================================================
 // SVG ICONS
@@ -99,7 +100,7 @@ function YouTubeIcon({ className = "w-4 h-4" }) {
 }
 
 function PlatformIcon({ platform, className = "w-4 h-4" }) {
-  const norm = (platform || "").toLowerCase();
+  const norm = typeof platform === "string" ? platform.toLowerCase() : "";
   if (norm.includes("youtube")) {
     return <YouTubeIcon className={`${className} text-black dark:text-white`} />;
   }
@@ -165,18 +166,7 @@ const STATUS_TABS = [
   { id: "cancelled", label: "Cancelled" },
 ];
 
-const PLATFORM_LABELS = {
-  instagram: "Instagram",
-  facebook: "Facebook",
-  youtube: "YouTube",
-  tiktok: "TikTok",
-  website: "Website",
-};
-
-const formatPlatform = (val) => {
-  if (!val) return "General";
-  return PLATFORM_LABELS[val.toLowerCase()] || val;
-};
+const formatPlatform = (val) => formatCampaignPlatforms(val, "General");
 
 const formatPrice = (amount, currency = "INR") => {
   if (typeof amount !== "number" || isNaN(amount)) return "N/A";
@@ -909,12 +899,23 @@ export default function CreatorAppliedCampaignsManager() {
                     {/* 9. BOTTOM METADATA & ACTIONS FOOTER */}
                     <div className="space-y-2 pt-2.5 border-t border-border-theme/40 mt-2.5">
                       {/* Quiet Metadata Footer: Platform & ID */}
-                      <div className="flex items-center justify-between text-[11px] sm:text-xs font-sans text-text-secondary">
-                        <div className="flex items-center gap-1.5">
-                          <PlatformIcon platform={campaignObj.platform} className="w-3.5 h-3.5 shrink-0" />
-                          <span>Platform: {formatPlatform(campaignObj.platform)}</span>
+                      <div className="flex items-center justify-between gap-2 text-[11px] sm:text-xs font-sans text-text-secondary">
+                        <div className="flex items-center flex-wrap gap-1.5">
+                          {normalizeCampaignPlatforms(campaignObj.platform).length > 0 ? (
+                            normalizeCampaignPlatforms(campaignObj.platform).map((plat) => (
+                              <span key={plat} className="inline-flex items-center gap-1">
+                                <PlatformIcon platform={plat} className="w-3.5 h-3.5 shrink-0" />
+                                <span>{formatPlatform(plat)}</span>
+                              </span>
+                            ))
+                          ) : (
+                            <span className="inline-flex items-center gap-1">
+                              <PlatformIcon platform="general" className="w-3.5 h-3.5 shrink-0" />
+                              <span>General</span>
+                            </span>
+                          )}
                         </div>
-                        <span className="text-[10px] sm:text-[11px] font-mono text-text-secondary">
+                        <span className="text-[10px] sm:text-[11px] font-mono text-text-secondary shrink-0">
                           ID: {bookingId ? String(bookingId).slice(-6) : ""}
                         </span>
                       </div>

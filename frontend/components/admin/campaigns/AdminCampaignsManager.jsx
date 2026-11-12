@@ -11,6 +11,7 @@ import {
 } from "@/redux/admin/campaigns/campaigns_slice";
 import AdminCampaignDetailModal from "./AdminCampaignDetailModal";
 import AdminAvatar from "@/components/admin/AdminAvatar";
+import { formatCampaignPlatforms } from "@/lib/campaignPlatforms";
 
 // =========================================================
 // SVG ICONS
@@ -394,7 +395,7 @@ export default function AdminCampaignsManager() {
                           <div className="flex items-center gap-1.5 mt-0.5">
                             <span className="text-[10px] text-text-secondary capitalize">{c.category}</span>
                             <span className="text-text-secondary">•</span>
-                            <span className="text-[10px] text-blue-600 dark:text-blue-400 capitalize">{c.platform}</span>
+                            <span className="text-[10px] text-blue-600 dark:text-blue-400 capitalize">{formatCampaignPlatforms(c.platform)}</span>
                           </div>
                         </div>
                       </div>

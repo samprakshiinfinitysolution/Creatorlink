@@ -1,4 +1,5 @@
 import React from "react";
+import { formatCampaignPlatforms } from "@/lib/campaignPlatforms";
 import Link from "next/link";
 
 function formatCurrency(amount, currency = "INR") {
@@ -159,7 +160,7 @@ export default function BrandRecentCollaborations({ collaborations = [] }) {
                   </h4>
                   <p className="text-[11px] text-text-secondary flex flex-wrap items-center gap-x-1.5 gap-y-0.5 break-words">
                     <span className="font-medium text-foreground">{creatorName}</span>
-                    {collab.platform ? ` · ${collab.platform}` : ""}
+                    {collab.platform ? ` · ${formatCampaignPlatforms(collab.platform)}` : ""}
                     {collab.deadline ? ` · Due ${formatDate(collab.deadline)}` : ""}
                   </p>
                 </div>

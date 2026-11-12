@@ -9,6 +9,7 @@ import {
 } from "@/redux/creator/campaigns/campaigns_slice";
 import CreatorSidebar from "@/components/creator/dashboard/CreatorSidebar";
 import CreatorHeader from "@/components/creator/dashboard/CreatorHeader";
+import { normalizeCampaignPlatforms, formatCampaignPlatforms } from "@/lib/campaignPlatforms";
 
 // =========================================================
 // SVG ICONS
@@ -139,7 +140,7 @@ function YouTubeIcon({ className = "w-4 h-4" }) {
 }
 
 function PlatformIcon({ platform, className = "w-4 h-4" }) {
-  const norm = (platform || "").toLowerCase();
+  const norm = typeof platform === "string" ? platform.toLowerCase() : "";
   if (norm.includes("youtube")) {
     return <YouTubeIcon className={`${className} text-black dark:text-white`} />;
   }
@@ -167,18 +168,7 @@ const DEFAULT_CATEGORIES = [
   "Travel",
 ];
 
-const PLATFORM_LABELS = {
-  instagram: "Instagram",
-  facebook: "Facebook",
-  youtube: "YouTube",
-  tiktok: "TikTok",
-  website: "Website",
-};
-
-const formatPlatform = (val) => {
-  if (!val) return "General";
-  return PLATFORM_LABELS[val.toLowerCase()] || val;
-};
+const formatPlatform = (val) => formatCampaignPlatforms(val, "General");
 
 const formatBudget = (amount, currency = "INR") => {
   if (typeof amount !== "number" || isNaN(amount)) return "N/A";
@@ -690,10 +680,24 @@ export default function CreatorDiscoverCampaignsManager() {
                           )}
                         </div>
 
-                        <span className="text-[10px] sm:text-[11px] font-sans font-bold tracking-wider uppercase flex items-center gap-1 text-neutral-600 dark:text-neutral-300 shrink-0">
-                          <PlatformIcon platform={campaign.platform} className="w-3.5 h-3.5 shrink-0" />
-                          <span>{formatPlatform(campaign.platform)}</span>
-                        </span>
+                        <div className="flex items-center flex-wrap gap-1.5 justify-end">
+                          {normalizeCampaignPlatforms(campaign.platform).length > 0 ? (
+                            normalizeCampaignPlatforms(campaign.platform).map((plat) => (
+                              <span
+                                key={plat}
+                                className="text-[10px] sm:text-[11px] font-sans font-bold tracking-wider uppercase inline-flex items-center gap-1 text-neutral-600 dark:text-neutral-300 bg-neutral-100/70 dark:bg-surface-muted/60 px-1.5 py-0.5 rounded-md"
+                              >
+                                <PlatformIcon platform={plat} className="w-3 h-3 shrink-0" />
+                                <span>{formatPlatform(plat)}</span>
+                              </span>
+                            ))
+                          ) : (
+                            <span className="text-[10px] sm:text-[11px] font-sans font-bold tracking-wider uppercase flex items-center gap-1 text-neutral-600 dark:text-neutral-300 shrink-0">
+                              <PlatformIcon platform="general" className="w-3.5 h-3.5 shrink-0" />
+                              <span>General</span>
+                            </span>
+                          )}
+                        </div>
                       </div>
 
                       {/* Campaign Visual Banner with Subtle Ambient Fallback */}

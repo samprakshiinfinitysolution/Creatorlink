@@ -7,6 +7,7 @@ import BrandHeader from "@/components/brand/dashboard/BrandHeader";
 import BrandBookingDetailModal from "@/components/brand/bookings/BrandBookingDetailModal";
 import { fetchBrandBookings, updateBookingFromSocket } from "@/redux/brand/bookings/bookings_slice";
 import { socket, registerSocketConsumer, unregisterSocketConsumer } from "@/lib/socket";
+import { formatCampaignPlatforms } from "@/lib/campaignPlatforms";
 
 // =========================================================
 // HELPER FORMATTERS & BADGES
@@ -452,11 +453,12 @@ export default function BrandBookingsManager() {
 
                       const campaignTitle = booking.campaign?.title || "Campaign";
                       const campaignCategory = booking.campaign?.category || "N/A";
-                      const platform =
+                      const platform = formatCampaignPlatforms(
                         booking.campaign?.platform ||
-                        booking.service?.platform ||
-                        booking.platform ||
-                        "N/A";
+                          booking.service?.platform ||
+                          booking.platform,
+                        "N/A"
+                      );
 
                       const serviceTitle =
                         booking.service?.title || booking.serviceTitle || "Selected Service";

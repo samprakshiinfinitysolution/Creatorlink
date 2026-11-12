@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Link from "next/link";
+import { formatCampaignPlatforms } from "@/lib/campaignPlatforms";
 
 function WorkspaceCoverBadge({ title, coverImage, fallbackText }) {
   const [hasError, setHasError] = useState(false);
@@ -217,7 +218,7 @@ export default function CreatorRecentCollaborations({ collaborations = [] }) {
                     </h4>
                     <div className="text-[11px] text-text-secondary font-sans flex flex-wrap items-center gap-x-1.5 gap-y-0.5 break-words">
                       <span className="font-medium text-foreground">{brandName}</span>
-                      {collab.platform && <span>· {collab.platform}</span>}
+                      {collab.platform && <span>· {formatCampaignPlatforms(collab.platform)}</span>}
                       {collab.deadline && <span>· Due {formatDate(collab.deadline)}</span>}
                     </div>
                   </div>

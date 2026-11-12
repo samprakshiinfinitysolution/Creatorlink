@@ -13,6 +13,7 @@ import { getCreatorProfile } from "@/redux/creator/profile/profile_slice";
 import CreatorSidebar from "@/components/creator/dashboard/CreatorSidebar";
 import CreatorHeader from "@/components/creator/dashboard/CreatorHeader";
 import ApplyToCampaignModal from "@/components/creator/campaigns/ApplyToCampaignModal";
+import { normalizeCampaignPlatforms, formatCampaignPlatforms } from "@/lib/campaignPlatforms";
 
 // =========================================================
 // SVG ICONS
@@ -92,18 +93,7 @@ function CalendarIcon({ className = "w-5 h-5" }) {
 // =========================================================
 // HELPER UTILITIES
 // =========================================================
-const PLATFORM_LABELS = {
-  instagram: "Instagram",
-  facebook: "Facebook",
-  youtube: "YouTube",
-  tiktok: "TikTok",
-  website: "Website",
-};
-
-const formatPlatform = (val) => {
-  if (!val) return "General";
-  return PLATFORM_LABELS[val.toLowerCase()] || val;
-};
+const formatPlatform = (val) => formatCampaignPlatforms(val, "General");
 
 const formatBudget = (amount, currency = "INR") => {
   if (typeof amount !== "number" || isNaN(amount)) return "N/A";
@@ -486,14 +476,27 @@ export default function CreatorCampaignDetail({ campaignId }) {
                 </div>
 
                 {/* Platform */}
-                <div className="bg-surface-muted/60 border border-border-theme rounded-2xl p-4 space-y-1">
+                <div className="bg-surface-muted/60 border border-border-theme rounded-2xl p-4 space-y-1.5">
                   <div className="flex items-center gap-1.5 text-text-secondary text-xs">
                     <CalendarIcon className="w-4 h-4 text-secondary shrink-0" />
-                    <span className="font-medium">Target Platform</span>
+                    <span className="font-medium">Target Platforms</span>
                   </div>
-                  <span className="font-sans font-semibold text-sm text-foreground block truncate">
-                    {formatPlatform(campaign.platform)}
-                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {normalizeCampaignPlatforms(campaign.platform).length > 0 ? (
+                      normalizeCampaignPlatforms(campaign.platform).map((plat) => (
+                        <span
+                          key={plat}
+                          className="font-sans font-semibold text-xs text-foreground bg-surface px-2 py-0.5 rounded-md border border-border-theme"
+                        >
+                          {formatPlatform(plat)}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="font-sans font-semibold text-sm text-foreground">
+                        General
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -706,7 +709,7 @@ export default function CreatorCampaignDetail({ campaignId }) {
         minBudget={campaign?.minBudget}
         maxBudget={campaign?.maxBudget}
         campaignCategory={campaign?.category}
-        campaignPlatform={campaign?.platform}
+        campaignPlatform={normalizeCampaignPlatforms(campaign?.platform)[0] || "instagram"}
         brand={campaign?.brand}
         onContinue={handleApplySubmit}
         submitting={submitting}

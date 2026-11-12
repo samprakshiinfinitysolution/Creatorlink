@@ -110,7 +110,7 @@ function BrandAvatar({ brand, name, className = "w-11 h-11 sm:w-12 sm:h-12 text-
         <img
           src={imageUrl}
           alt={displayName}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain object-center"
           onError={() => setImageError(true)}
           loading="lazy"
         />
@@ -417,12 +417,12 @@ export default function CreatorBookingDetailModal({
 
               {/* Campaign Cover Image Banner (if available) */}
               {Boolean(booking?.campaign?.coverImage) && (
-                <div className="w-full h-32 sm:h-44 rounded-2xl overflow-hidden relative border border-border-theme bg-surface-muted/30 shrink-0">
+                <div className="w-full h-32 sm:h-44 rounded-2xl overflow-hidden relative border border-border-theme bg-surface-muted/30 shrink-0 flex items-center justify-center">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={booking.campaign.coverImage}
                     alt={campaignTitle}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain object-center"
                     loading="lazy"
                     onError={(e) => {
                       e.currentTarget.parentElement.style.display = "none";

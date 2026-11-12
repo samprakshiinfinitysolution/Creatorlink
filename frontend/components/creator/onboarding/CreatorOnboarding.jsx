@@ -1383,7 +1383,7 @@ export default function CreatorOnboarding() {
                               <img
                                 src={formData.profileImage}
                                 alt="Profile Avatar"
-                                className="w-full h-full object-cover"
+                                className="w-full h-full object-contain object-center"
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center text-pink-500 font-bold text-xl uppercase bg-pink-50 dark:bg-pink-950/30">

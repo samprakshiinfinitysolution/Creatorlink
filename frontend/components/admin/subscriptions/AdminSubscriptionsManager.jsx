@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axiosInstance from "@/lib/axios";
 import AdminAvatar from "@/components/admin/AdminAvatar";
 
@@ -34,8 +34,19 @@ export default function AdminSubscriptionsManager() {
   const [subscribers, setSubscribers] = useState([]);
   const [subscriberPagination, setSubscriberPagination] = useState({ page: 1, limit: 10, totalPages: 1 });
   const [subFilter, setSubFilter] = useState({ status: "all", billingCycle: "all", search: "" });
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedSubDetail, setSelectedSubDetail] = useState(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
+
+  // 400ms debounced search for subscribers
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(subFilter.search.trim());
+      setSubscriberPagination((prev) => ({ ...prev, page: 1 }));
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [subFilter.search]);
 
   // Action Modals State
   const [actionType, setActionType] = useState(null); // "extend_trial" | "complimentary" | "suspend" | "reinstate" | "cancel"
@@ -50,47 +61,43 @@ export default function AdminSubscriptionsManager() {
     setTimeout(() => setSuccessMsg(null), 4000);
   };
 
-  // Fetch data on tab change
-  useEffect(() => {
-    let isMounted = true;
-    const fetchTabData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+  // Fetch data on tab, filter, pagination, or debounced search change
+  const fetchTabData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-        if (activeTab === "dashboard") {
-          const res = await axiosInstance.get("/admin/subscriptions/analytics");
-          if (res.data?.success && isMounted) setAnalytics(res.data.data);
-        } else if (activeTab === "plans") {
-          const res = await axiosInstance.get("/admin/subscriptions/plans");
-          if (res.data?.success && isMounted) setPlans(res.data.data || []);
-        } else if (activeTab === "subscribers") {
-          const params = new URLSearchParams({
-            page: subscriberPagination.page,
-            limit: subscriberPagination.limit,
-            status: subFilter.status,
-            billingCycle: subFilter.billingCycle,
-            search: subFilter.search,
-          });
-          const res = await axiosInstance.get(`/admin/subscriptions/subscribers?${params.toString()}`);
-          if (res.data?.success && isMounted) {
-            setSubscribers(res.data.data?.subscribers || []);
-            setSubscriberPagination(res.data.data?.pagination || { page: 1, limit: 10, totalPages: 1 });
-          }
+      if (activeTab === "dashboard") {
+        const res = await axiosInstance.get("/admin/subscriptions/analytics");
+        if (res.data?.success) setAnalytics(res.data.data);
+      } else if (activeTab === "plans") {
+        const res = await axiosInstance.get("/admin/subscriptions/plans");
+        if (res.data?.success) setPlans(res.data.data || []);
+      } else if (activeTab === "subscribers") {
+        const params = new URLSearchParams({
+          page: subscriberPagination.page,
+          limit: subscriberPagination.limit,
+          status: subFilter.status,
+          billingCycle: subFilter.billingCycle,
+          search: debouncedSearch,
+        });
+        const res = await axiosInstance.get(`/admin/subscriptions/subscribers?${params.toString()}`);
+        if (res.data?.success) {
+          setSubscribers(res.data.data?.subscribers || []);
+          setSubscriberPagination(res.data.data?.pagination || { page: 1, limit: 10, totalPages: 1 });
         }
-      } catch (err) {
-        console.error("Admin subscriptions fetch error:", err);
-        if (isMounted) setError(err.response?.data?.message || "Failed to load subscription data");
-      } finally {
-        if (isMounted) setLoading(false);
       }
-    };
+    } catch (err) {
+      console.error("Admin subscriptions fetch error:", err);
+      setError(err.response?.data?.message || "Failed to load subscription data");
+    } finally {
+      setLoading(false);
+    }
+  }, [activeTab, subscriberPagination.page, subscriberPagination.limit, subFilter.status, subFilter.billingCycle, debouncedSearch]);
 
+  useEffect(() => {
     fetchTabData();
-    return () => {
-      isMounted = false;
-    };
-  }, [activeTab, subscriberPagination.page, subFilter.status, subFilter.billingCycle]);
+  }, [fetchTabData]);
 
   // Handle plan create submit
   const handleCreatePlanSubmit = async (e) => {
@@ -241,7 +248,7 @@ export default function AdminSubscriptionsManager() {
           limit: subscriberPagination.limit,
           status: subFilter.status,
           billingCycle: subFilter.billingCycle,
-          search: subFilter.search,
+          search: debouncedSearch,
         });
         const res = await axiosInstance.get(`/admin/subscriptions/subscribers?${params.toString()}`);
         setSubscribers(res.data?.data?.subscribers || []);
@@ -287,8 +294,15 @@ export default function AdminSubscriptionsManager() {
         </div>
       )}
       {error && (
-        <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-xs sm:text-sm text-rose-600 dark:text-rose-400 font-medium">
-          {error}
+        <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-xs sm:text-sm text-rose-600 dark:text-rose-400 font-medium flex items-center justify-between gap-3">
+          <span>{error}</span>
+          <button
+            type="button"
+            onClick={fetchTabData}
+            className="underline hover:no-underline font-semibold ml-4 cursor-pointer shrink-0"
+          >
+            Retry
+          </button>
         </div>
       )}
 
@@ -513,7 +527,10 @@ export default function AdminSubscriptionsManager() {
                 />
                 <select
                   value={subFilter.status}
-                  onChange={(e) => setSubFilter((prev) => ({ ...prev, status: e.target.value }))}
+                  onChange={(e) => {
+                    setSubFilter((prev) => ({ ...prev, status: e.target.value }));
+                    setSubscriberPagination((prev) => ({ ...prev, page: 1 }));
+                  }}
                   className="px-3 py-2 rounded-xl border border-border-theme text-xs bg-surface-muted/60 text-foreground focus:outline-hidden focus:border-secondary cursor-pointer"
                 >
                   <option value="all">All Statuses</option>
@@ -525,7 +542,10 @@ export default function AdminSubscriptionsManager() {
                 </select>
                 <select
                   value={subFilter.billingCycle}
-                  onChange={(e) => setSubFilter((prev) => ({ ...prev, billingCycle: e.target.value }))}
+                  onChange={(e) => {
+                    setSubFilter((prev) => ({ ...prev, billingCycle: e.target.value }));
+                    setSubscriberPagination((prev) => ({ ...prev, page: 1 }));
+                  }}
                   className="px-3 py-2 rounded-xl border border-border-theme text-xs bg-surface-muted/60 text-foreground focus:outline-hidden focus:border-secondary cursor-pointer"
                 >
                   <option value="all">All Cycles</option>

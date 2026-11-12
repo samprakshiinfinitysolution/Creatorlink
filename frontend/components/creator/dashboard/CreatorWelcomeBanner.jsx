@@ -258,7 +258,7 @@ export default function CreatorWelcomeBanner({ user, creator, profile, metrics }
             <img
               src={rawAvatar}
               alt={welcomeName}
-              className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover/creator:scale-105 group-focus/creator:scale-105 motion-reduce:transform-none"
+              className="w-full h-full object-contain object-center transition-transform duration-500 ease-out group-hover/creator:scale-105 group-focus/creator:scale-105 motion-reduce:transform-none"
               onError={() => setImgError(true)}
             />
           ) : (

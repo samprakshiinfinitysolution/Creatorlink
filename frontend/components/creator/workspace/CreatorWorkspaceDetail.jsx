@@ -855,7 +855,7 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                       <img
                         src={validFileUrl}
                         alt={submission.title || title || "Deliverable asset"}
-                        className="w-full h-full object-cover rounded-2xl"
+                        className="w-full h-full object-contain object-center rounded-2xl"
                         loading="lazy"
                       />
                     </div>
@@ -1180,7 +1180,7 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                         <img
                           src={brandLogo}
                           alt={brandName}
-                          className="w-full h-full object-cover rounded-xl transition-transform duration-300 ease-out hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
+                          className="w-full h-full object-contain object-center rounded-xl transition-transform duration-300 ease-out hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
                           onError={() => setFailedBrandLogo(true)}
                         />
                       ) : (
@@ -1415,7 +1415,7 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                                     <img
                                       src={bRev.reviewer.logo || bRev.reviewer.avatar || bRev.reviewer.profileImage}
                                       alt={bRev.reviewer?.companyName || bRev.reviewer?.name || brandName}
-                                      className="w-9 h-9 rounded-xl object-cover border border-gray-200 dark:border-zinc-700"
+                                      className="w-9 h-9 rounded-xl object-contain object-center border border-gray-200 dark:border-zinc-700"
                                     />
                                   ) : (
                                     <div className="w-9 h-9 rounded-xl bg-amber-500/15 text-amber-700 dark:text-amber-300 font-bold text-xs flex items-center justify-center">
@@ -1700,7 +1700,7 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                                       <img
                                         src={validFileUrl}
                                         alt={subTitle}
-                                        className="w-full h-full object-cover"
+                                        className="w-full h-full object-contain object-center"
                                         loading="lazy"
                                       />
                                     </div>
@@ -1836,7 +1836,7 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                                       <img
                                         src={validFileUrl}
                                         alt={subTitle}
-                                        className="w-full h-full object-cover"
+                                        className="w-full h-full object-contain object-center"
                                         loading="lazy"
                                       />
                                     </div>

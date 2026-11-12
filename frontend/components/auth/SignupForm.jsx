@@ -89,6 +89,47 @@ function AppleIcon({ className = "w-5 h-5" }) {
 }
 
 // =========================================================
+// PENDING OTP SESSION STORAGE HELPERS (FOR REFRESH RECOVERY)
+// =========================================================
+const PENDING_SIGNUP_STORAGE_KEY = "creatorlink_pending_signup";
+
+const saveStoredPendingSignup = (data) => {
+  if (typeof window === "undefined") return;
+  try {
+    const payload = JSON.stringify(data);
+    sessionStorage.setItem(PENDING_SIGNUP_STORAGE_KEY, payload);
+    localStorage.setItem(PENDING_SIGNUP_STORAGE_KEY, payload);
+  } catch {}
+};
+
+const clearStoredPendingSignup = () => {
+  if (typeof window === "undefined") return;
+  try {
+    sessionStorage.removeItem(PENDING_SIGNUP_STORAGE_KEY);
+    localStorage.removeItem(PENDING_SIGNUP_STORAGE_KEY);
+  } catch {}
+};
+
+const getStoredPendingSignup = () => {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw =
+      sessionStorage.getItem(PENDING_SIGNUP_STORAGE_KEY) ||
+      localStorage.getItem(PENDING_SIGNUP_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || !parsed.email) return null;
+    if (parsed.expiresAt && Date.now() > parsed.expiresAt) {
+      clearStoredPendingSignup();
+      return { isExpired: true, email: parsed.email };
+    }
+    return parsed;
+  } catch {
+    return null;
+  }
+};
+
+// =========================================================
 // MAIN SIGNUP FORM COMPONENT
 // =========================================================
 export default function SignupForm() {
@@ -113,6 +154,33 @@ export default function SignupForm() {
       setSelectedRole(paramRole);
     }
   }, [paramRole]);
+
+  // Restore pending OTP verification session upon page refresh
+  useEffect(() => {
+    const pending = getStoredPendingSignup();
+    if (!pending) return;
+
+    if (pending.isExpired) {
+      setErrorMsg("Your previous verification session has expired. Please submit registration again.");
+      return;
+    }
+
+    if (pending.email) {
+      setEmail(pending.email);
+      if (pending.role) {
+        setRole(pending.role);
+        setSelectedRole(pending.role);
+      }
+      setStep("otp");
+      const remaining = pending.resendAvailableAt
+        ? Math.max(0, Math.ceil((pending.resendAvailableAt - Date.now()) / 1000))
+        : 0;
+      setResendCooldown(remaining);
+      setSuccessMsg(
+        `Pending verification for ${pending.email}. Please enter your 6-digit code.`
+      );
+    }
+  }, []);
 
   const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -251,6 +319,15 @@ export default function SignupForm() {
         setOtp("");
         setStep("otp");
         setResendCooldown(60);
+
+        // Persist minimal non-sensitive OTP session state for page refresh recovery
+        saveStoredPendingSignup({
+          email: cleanEmail,
+          role,
+          resendAvailableAt: Date.now() + 60 * 1000,
+          expiresAt: Date.now() + 10 * 60 * 1000
+        });
+
         setSuccessMsg(
           resultAction.payload?.message ||
           `Verification code sent to ${cleanEmail}. Please enter the 6-digit code.`
@@ -293,6 +370,7 @@ export default function SignupForm() {
       );
 
       if (verifyOtp.fulfilled.match(resultAction)) {
+        clearStoredPendingSignup();
         setSuccessMsg("Email verified successfully! Welcome to CreatorLink.");
         const user = resultAction.payload?.data?.user;
         const userRole = user?.role || role;
@@ -313,6 +391,12 @@ export default function SignupForm() {
           resultAction.payload ||
           resultAction.error?.message ||
           "Verification failed. Please check the code and try again.";
+        if (
+          message.toLowerCase().includes("not found") ||
+          message.toLowerCase().includes("expired")
+        ) {
+          clearStoredPendingSignup();
+        }
         setErrorMsg(message);
       }
     } catch (err) {
@@ -332,6 +416,15 @@ export default function SignupForm() {
     try {
       const response = await resendVerificationOtp(email.trim());
       setResendCooldown(60);
+
+      // Refresh cooldown and expiry in storage
+      saveStoredPendingSignup({
+        email: email.trim(),
+        role,
+        resendAvailableAt: Date.now() + 60 * 1000,
+        expiresAt: Date.now() + 10 * 60 * 1000
+      });
+
       setSuccessMsg(
         response?.message || "A new verification code has been sent to your email."
       );
@@ -340,6 +433,13 @@ export default function SignupForm() {
         err.response?.data?.message ||
         err.message ||
         "Failed to resend verification code. Please try again.";
+      if (
+        err.response?.status === 404 ||
+        message.toLowerCase().includes("not found") ||
+        message.toLowerCase().includes("expired")
+      ) {
+        clearStoredPendingSignup();
+      }
       setErrorMsg(message);
     } finally {
       setIsResending(false);
@@ -382,6 +482,7 @@ export default function SignupForm() {
                 <button
                   type="button"
                   onClick={() => {
+                    clearStoredPendingSignup();
                     setStep("form");
                     setErrorMsg(null);
                     setSuccessMsg(null);
@@ -686,6 +787,7 @@ export default function SignupForm() {
                 <button
                   type="button"
                   onClick={() => {
+                    clearStoredPendingSignup();
                     setStep("form");
                     setErrorMsg(null);
                     setSuccessMsg(null);

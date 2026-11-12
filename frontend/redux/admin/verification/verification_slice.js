@@ -6,7 +6,7 @@ import {
     rejectVerification as rejectVerificationApi,
     revokeVerification as revokeVerificationApi
 } from "./verification_api";
-import { logout, clearAuth } from "../../auth/auth_slice";
+import { adminLogout, clearAdminAuth } from "../auth/admin_auth_slice";
 
 // Handles fetching verification requests with query parameters
 export const fetchVerifications = createAsyncThunk(
@@ -285,7 +285,6 @@ const adminVerificationSlice = createSlice({
                                   status: "rejected",
                                   reviewedAt: updated.reviewedAt,
                                   rejectionReason: updated.rejectionReason,
-                                  reviewHistory: updated.reviewHistory || item.reviewHistory,
                                   reviewHistory: updated.reviewHistory || item.reviewHistory
                               }
                             : item
@@ -303,9 +302,9 @@ const adminVerificationSlice = createSlice({
                 state.actionError = action.payload;
             })
 
-            // Reset on logout
-            .addCase(logout.fulfilled, () => initialState)
-            .addCase(clearAuth, () => initialState);
+            // Reset on admin logout
+            .addCase(adminLogout.fulfilled, () => initialState)
+            .addCase(clearAdminAuth, () => initialState);
     }
 });
 

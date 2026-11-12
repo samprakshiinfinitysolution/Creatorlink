@@ -1098,7 +1098,7 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
                     <img
                       src={validFileUrl}
                       alt={submission.title || title || "Deliverable asset"}
-                      className="w-full h-full object-cover rounded-2xl transition-transform duration-300 ease-out hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
+                      className="w-full h-full object-contain object-center rounded-2xl transition-transform duration-300 ease-out hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
                       loading="lazy"
                     />
                   </div>
@@ -1351,7 +1351,7 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
                         <img
                           src={activeAvatarImage}
                           alt={creator?.name || campaign?.title || "Workspace avatar"}
-                          className="w-full h-full object-cover rounded-xl transition-transform duration-300 ease-out hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
+                          className="w-full h-full object-contain object-center rounded-xl transition-transform duration-300 ease-out hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
                           onError={() => {
                             if (activeAvatarImage) {
                               setFailedAvatarImages((prev) => ({
@@ -1669,7 +1669,7 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
                                 <img
                                   src={creatorReview.reviewer.profileImage || creatorReview.reviewer.avatar}
                                   alt={creatorReview.reviewer?.name || "Creator"}
-                                  className="w-9 h-9 rounded-xl object-cover border border-gray-200 dark:border-zinc-700"
+                                  className="w-9 h-9 rounded-xl object-contain object-center border border-gray-200 dark:border-zinc-700"
                                 />
                               ) : (
                                 <div className="w-9 h-9 rounded-xl bg-secondary/15 text-secondary font-bold text-xs flex items-center justify-center">
@@ -1946,7 +1946,7 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
                                       <img
                                         src={validFileUrl}
                                         alt={subTitle}
-                                        className="w-full h-full object-cover transition-transform duration-300 ease-out hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
+                                        className="w-full h-full object-contain object-center transition-transform duration-300 ease-out hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
                                         loading="lazy"
                                       />
                                     </div>
@@ -2082,7 +2082,7 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
                                       <img
                                         src={validFileUrl}
                                         alt={subTitle}
-                                        className="w-full h-full object-cover transition-transform duration-300 ease-out hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
+                                        className="w-full h-full object-contain object-center transition-transform duration-300 ease-out hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
                                         loading="lazy"
                                       />
                                     </div>

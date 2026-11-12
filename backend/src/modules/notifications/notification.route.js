@@ -1,5 +1,4 @@
 import express from "express";
-import authenticateUser from "../../middleware/auth.middleware.js";
 import {
     getNotifications,
     getUnreadNotificationCount,
@@ -12,9 +11,6 @@ import {
 } from "./notification.validation.js";
 
 const notificationRouter = express.Router();
-
-// Enforce authentication on all notification endpoints.
-notificationRouter.use(authenticateUser);
 
 // Fetch paginated notification feed.
 notificationRouter.get(

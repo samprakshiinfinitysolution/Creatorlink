@@ -1052,7 +1052,7 @@ export default function BrandOnboarding() {
                             <img
                               src={formData.logo}
                               alt="Brand Logo Preview"
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-contain object-center"
                             />
                           ) : (
                             <span className="text-2xl font-serif font-bold text-pink-500">
@@ -1663,7 +1663,7 @@ export default function BrandOnboarding() {
                             <img
                               src={formData.logo}
                               alt="Brand Logo"
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-contain object-center"
                             />
                           ) : (
                             <span className="text-xl font-serif font-bold text-pink-500">

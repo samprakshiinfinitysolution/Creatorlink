@@ -478,7 +478,7 @@ export default function BrandBookingsManager() {
                                   <img
                                     src={creatorPhoto}
                                     alt={creatorName}
-                                    className="w-full h-full object-cover"
+                                    className="w-full h-full object-contain object-center"
                                     onError={() =>
                                       setFailedCreatorAvatars((prev) => ({
                                         ...prev,

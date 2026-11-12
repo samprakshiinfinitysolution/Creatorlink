@@ -9,7 +9,7 @@ import {
     updateAdminCampaignStatus as updateAdminCampaignStatusApi,
     deleteAdminCampaign as deleteAdminCampaignApi
 } from "./campaigns_api";
-import { logout, clearAuth } from "../../auth/auth_slice";
+import { adminLogout, clearAdminAuth } from "../auth/admin_auth_slice";
 
 // Handles fetching campaigns with query parameters
 export const fetchCampaigns = createAsyncThunk(
@@ -329,9 +329,9 @@ const adminCampaignsSlice = createSlice({
                 state.actionError = action.payload || "Failed to remove campaign";
             })
 
-            // Clear on logout
-            .addCase(logout.fulfilled, () => initialState)
-            .addCase(clearAuth, () => initialState);
+            // Clear on admin logout
+            .addCase(adminLogout.fulfilled, () => initialState)
+            .addCase(clearAdminAuth, () => initialState);
     }
 });
 

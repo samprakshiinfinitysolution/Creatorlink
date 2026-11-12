@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useSelector } from "react-redux";
 import axiosInstance from "@/lib/axios";
@@ -85,6 +85,7 @@ export default function AdminDashboardPage() {
   const [activeTab, setActiveTab] = useState("signups"); // "signups" | "payments" | "subscriptions" | "campaigns"
 
   const [reloadKey, setReloadKey] = useState(0);
+  const socketDebounceRef = useRef(null);
 
   // Subscribe to real-time events for live platform telemetry and action counters
   useEffect(() => {
@@ -93,7 +94,12 @@ export default function AdminDashboardPage() {
     registerSocketConsumer(consumerId, adminId);
 
     const handleRealtimeUpdate = () => {
-      setReloadKey((prev) => prev + 1);
+      if (socketDebounceRef.current) {
+        clearTimeout(socketDebounceRef.current);
+      }
+      socketDebounceRef.current = setTimeout(() => {
+        setReloadKey((prev) => prev + 1);
+      }, 500);
     };
 
     socket.on("verification:queue_updated", handleRealtimeUpdate);
@@ -103,6 +109,9 @@ export default function AdminDashboardPage() {
     socket.on("workspace:revision_requested", handleRealtimeUpdate);
 
     return () => {
+      if (socketDebounceRef.current) {
+        clearTimeout(socketDebounceRef.current);
+      }
       unregisterSocketConsumer(consumerId);
       socket.off("verification:queue_updated", handleRealtimeUpdate);
       socket.off("verification:applicant_profile_updated", handleRealtimeUpdate);
@@ -165,7 +174,7 @@ export default function AdminDashboardPage() {
               <span>Platform Control Center</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-serif font-bold text-foreground tracking-tight">
-              Welcome back, {user?.name || "Administrator"}
+              Welcome back, {adminUser?.name || user?.name || "Administrator"}
             </h1>
             <p className="text-xs sm:text-sm text-text-secondary max-w-xl">
               Real-time platform telemetry, user verification queue, campaign moderation, subscriptions, and financial volume.
@@ -406,7 +415,14 @@ export default function AdminDashboardPage() {
 
         {/* Tab Content Box */}
         <div className="rounded-2xl bg-surface border border-border-theme shadow-xs overflow-hidden">
-          {/* TAB 1: SIGNUPS */}
+          {loading ? (
+            <div className="py-16 flex flex-col items-center justify-center gap-2 text-text-secondary">
+              <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+              <span className="text-xs">Loading activity feed...</span>
+            </div>
+          ) : (
+            <>
+              {/* TAB 1: SIGNUPS */}
           {activeTab === "signups" && (
             <div className="divide-y divide-border-theme">
               {(!recentActivity.signups || recentActivity.signups.length === 0) ? (
@@ -425,7 +441,7 @@ export default function AdminDashboardPage() {
                         <div className="flex items-center gap-2">
                           <p className="text-sm font-semibold text-foreground truncate">{usr.name || "Unnamed User"}</p>
                           {usr.isVerified && (
-                            <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-blue-500/10 text-blue-500 border border-blue-500/20">
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-500 border border-blue-500/20">
                               VERIFIED
                             </span>
                           )}
@@ -565,6 +581,8 @@ export default function AdminDashboardPage() {
                 ))
               )}
             </div>
+          )}
+            </>
           )}
         </div>
       </div>

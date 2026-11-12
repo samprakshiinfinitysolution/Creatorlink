@@ -55,9 +55,9 @@ router.use("/homepage", homepageRoutes);
 router.use("/auth", authRoutes);
 
 // Notification routes (shared endpoints and role aliases).
-router.use("/notifications", notificationRouter);
-router.use("/creator/notifications", notificationRouter);
-router.use("/brand/notifications", notificationRouter);
+router.use("/notifications", authenticateUser, notificationRouter);
+router.use("/creator/notifications", authenticateUser, notificationRouter);
+router.use("/brand/notifications", authenticateUser, notificationRouter);
 
 // Creator routes.
 router.use("/creator/dashboard", creatorDashboardRoutes);

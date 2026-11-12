@@ -295,7 +295,7 @@ function BrandLogoPreview({
             onError={() => {
               setFailedUrl(cleanUrl);
             }}
-            className={`w-full h-full object-cover transition-opacity duration-300 ${isLoaded ? "opacity-100" : "opacity-0"
+            className={`w-full h-full object-contain object-center transition-opacity duration-300 ${isLoaded ? "opacity-100" : "opacity-0"
               }`}
           />
         </>

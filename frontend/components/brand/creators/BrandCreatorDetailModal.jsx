@@ -247,7 +247,7 @@ function ModalPortfolioCover({ cover, title, category }) {
             decoding="async"
             onLoad={() => setLoadedUrl(cleanCover)}
             onError={() => setFailedUrl(cleanCover)}
-            className={`w-full h-full object-cover transition-opacity duration-300 ${
+            className={`w-full h-full object-contain object-center transition-opacity duration-300 ${
               isImgLoaded ? "opacity-100" : "opacity-0"
             }`}
           />
@@ -303,7 +303,7 @@ function ModalServiceCover({ cover, title, platform, category, contentType }) {
             decoding="async"
             onLoad={() => setLoadedUrl(cleanCover)}
             onError={() => setFailedUrl(cleanCover)}
-            className={`w-full h-full object-cover transition-opacity duration-300 ${
+            className={`w-full h-full object-contain object-center transition-opacity duration-300 ${
               isImgLoaded ? "opacity-100" : "opacity-0"
             }`}
           />
@@ -481,7 +481,7 @@ export default function BrandCreatorDetailModal({
                       alt={name}
                       onLoad={() => setLoadedAvatarUrl(cleanAvatarUrl)}
                       onError={() => setFailedAvatarUrl(cleanAvatarUrl)}
-                      className={`w-full h-full object-cover transition-opacity duration-300 ${isProfileImgLoaded ? "opacity-100" : "opacity-0"
+                      className={`w-full h-full object-contain object-center transition-opacity duration-300 ${isProfileImgLoaded ? "opacity-100" : "opacity-0"
                         }`}
                     />
                   </>

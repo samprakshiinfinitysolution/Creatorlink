@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axiosInstance from "@/lib/axios";
 import AdminAvatar from "@/components/admin/AdminAvatar";
 
@@ -45,34 +45,22 @@ export default function AdminReportsManager() {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    let isMounted = true;
-
-    const loadReports = async () => {
-      try {
-        setLoading(true);
-        const res = await axiosInstance.get(`/admin/reports/overview?months=${months}`);
-        if (isMounted) {
-          setData(res.data?.data || null);
-          setError(null);
-        }
-      } catch (err) {
-        if (isMounted) {
-          setError(err.response?.data?.message || "Failed to load platform reports");
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    loadReports();
-
-    return () => {
-      isMounted = false;
-    };
+  const loadReports = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await axiosInstance.get(`/admin/reports/overview?months=${months}`);
+      setData(res.data?.data || null);
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to load platform reports");
+    } finally {
+      setLoading(false);
+    }
   }, [months]);
+
+  useEffect(() => {
+    loadReports();
+  }, [loadReports]);
 
   // Export summary as JSON download
   const handleExportData = () => {
@@ -154,8 +142,16 @@ export default function AdminReportsManager() {
 
       {/* Error Alert */}
       {error && (
-        <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs sm:text-sm font-medium">
-          {error}
+        <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs sm:text-sm font-medium flex items-center justify-between gap-3">
+          <span>{error}</span>
+          <button
+            type="button"
+            onClick={loadReports}
+            disabled={loading}
+            className="underline hover:no-underline font-semibold ml-4 cursor-pointer shrink-0 disabled:opacity-50"
+          >
+            {loading ? "Retrying..." : "Retry"}
+          </button>
         </div>
       )}
 

@@ -780,13 +780,13 @@ export default function BrandReviewsManager() {
                   >
                     <div className="space-y-3.5">
                       {/* Top Cover-Image Banner */}
-                      <div className="h-28 sm:h-32 rounded-xl sm:rounded-2xl overflow-hidden relative border border-neutral-200/70 dark:border-border-theme/40 bg-neutral-100 dark:bg-surface-muted group/banner">
+                      <div className="h-28 sm:h-32 rounded-xl sm:rounded-2xl overflow-hidden relative border border-neutral-200/70 dark:border-border-theme/40 bg-neutral-100 dark:bg-surface-muted group/banner flex items-center justify-center">
                         {coverImage && !failedCoverUrls[review._id] ? (
                           /* eslint-disable-next-line @next/next/no-img-element */
                           <img
                             src={coverImage}
                             alt={campaignTitle}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover/banner:scale-105"
+                            className="w-full h-full object-contain object-center transition-transform duration-500 group-hover/banner:scale-105"
                             onError={() =>
                               setFailedCoverUrls((prev) => ({
                                 ...prev,
@@ -834,7 +834,7 @@ export default function BrandReviewsManager() {
                                 const fallback = e.currentTarget.parentElement?.querySelector(".avatar-fallback");
                                 if (fallback) fallback.classList.remove("hidden");
                               }}
-                              className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover border border-neutral-200 dark:border-neutral-700 shrink-0 shadow-2xs"
+                              className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-contain object-center border border-neutral-200 dark:border-neutral-700 shrink-0 shadow-2xs"
                             />
                           ) : null}
                           <div

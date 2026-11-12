@@ -3,7 +3,7 @@ import {
     getAdminUsers as getAdminUsersApi,
     getAdminUserById as getAdminUserByIdApi
 } from "./users_api";
-import { logout, clearAuth } from "../../auth/auth_slice";
+import { adminLogout, clearAdminAuth } from "../auth/admin_auth_slice";
 
 // Handles fetching users list with query parameters
 const fetchAdminUsers = createAsyncThunk(
@@ -94,9 +94,9 @@ const adminUsersSlice = createSlice({
                 state.detailError = action.payload;
             })
 
-            // Reset state upon logout
-            .addCase(logout.fulfilled, () => initialState)
-            .addCase(clearAuth, () => initialState);
+            // Reset state upon admin logout
+            .addCase(adminLogout.fulfilled, () => initialState)
+            .addCase(clearAdminAuth, () => initialState);
     }
 });
 

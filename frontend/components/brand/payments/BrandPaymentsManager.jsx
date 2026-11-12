@@ -134,7 +134,7 @@ function CampaignAvatar({ image, title }) {
           src={image}
           alt={title || "Campaign"}
           onError={() => setFailedUrl(image)}
-          className="w-full h-full object-cover transition-transform duration-300 ease-out hover:scale-[1.08] motion-reduce:transform-none motion-reduce:transition-none"
+          className="w-full h-full object-contain object-center transition-transform duration-300 ease-out hover:scale-[1.08] motion-reduce:transform-none motion-reduce:transition-none"
         />
       </div>
     );

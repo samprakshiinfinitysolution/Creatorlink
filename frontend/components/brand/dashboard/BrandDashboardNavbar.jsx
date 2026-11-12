@@ -383,7 +383,7 @@ export default function BrandDashboardNavbar() {
                         alt={profile?.companyName || displayName || "Brand logo"}
                         onLoad={() => setLoadedLogoUrl(cleanLogoUrl)}
                         onError={() => setFailedLogoUrl(cleanLogoUrl)}
-                        className={`w-full h-full object-cover transition-opacity duration-200 ${
+                        className={`w-full h-full object-contain object-center transition-opacity duration-200 ${
                           isLoaded ? "opacity-100" : "opacity-0 absolute inset-0"
                         }`}
                       />

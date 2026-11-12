@@ -264,7 +264,7 @@ export default function CreatorHeader({ setMobileOpen = () => {} }) {
                   src={cleanAvatarUrl}
                   alt={displayName}
                   onError={() => setFailedAvatarUrl(cleanAvatarUrl)}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain object-center"
                 />
               ) : (
                 <span>{initial}</span>

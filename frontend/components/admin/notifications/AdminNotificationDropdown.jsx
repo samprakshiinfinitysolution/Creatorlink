@@ -11,6 +11,7 @@ import {
   markAllAdminNotificationsRead,
   addRealtimeAdminNotification
 } from "@/redux/admin/notifications/notifications_slice";
+import { adminRefreshToken } from "@/redux/admin/auth/admin_auth_slice";
 import {
   socket,
   confirmSocketAuthSuccess,
@@ -103,6 +104,11 @@ export default function AdminNotificationDropdown() {
   const dropdownRef = useRef(null);
   const consumerId = useId();
 
+  const isOpenRef = useRef(isOpen);
+  useEffect(() => {
+    isOpenRef.current = isOpen;
+  }, [isOpen]);
+
   const { adminUser } = useSelector((state) => state.adminAuth || {});
   const currentAdminId = adminUser?._id || adminUser?.id;
   const currentAdminIdRef = useRef(currentAdminId);
@@ -128,6 +134,8 @@ export default function AdminNotificationDropdown() {
 
     registerSocketConsumer(consumerId, currentAdminId);
 
+    const wasDisconnectedRef = { current: false };
+
     const handleNewNotification = (notification) => {
       if (!notification || !notification._id) return;
 
@@ -148,23 +156,54 @@ export default function AdminNotificationDropdown() {
       dispatch(addRealtimeAdminNotification(notification));
     };
 
-    const handleConnectSuccess = () => {
-      confirmSocketAuthSuccess();
+    const handleDisconnect = () => {
+      wasDisconnectedRef.current = true;
     };
 
+    const handleConnectSuccess = () => {
+      confirmSocketAuthSuccess();
+
+      // Only perform catch-up synchronization on genuine reconnection after disconnection
+      if (wasDisconnectedRef.current) {
+        wasDisconnectedRef.current = false;
+
+        const isManagerView =
+          typeof window !== "undefined" &&
+          window.location.pathname === "/admin/notifications";
+
+        if (!isManagerView) {
+          dispatch(fetchAdminUnreadNotificationCount());
+        }
+
+        if (isOpenRef.current) {
+          dispatch(fetchAdminDropdownNotifications());
+        }
+      }
+    };
+
+    const handleConnectError = async (err) => {
+      await handleSocketConnectionError(err, dispatch, adminRefreshToken);
+    };
+
+    socket.on("disconnect", handleDisconnect);
     socket.on("connect", handleConnectSuccess);
+    socket.on("connect_error", handleConnectError);
     socket.on("notification:new", handleNewNotification);
 
     return () => {
       unregisterSocketConsumer(consumerId);
+      socket.off("disconnect", handleDisconnect);
       socket.off("connect", handleConnectSuccess);
+      socket.off("connect_error", handleConnectError);
       socket.off("notification:new", handleNewNotification);
     };
   }, [dispatch, currentAdminId, consumerId]);
 
-  // Fetch unread count on mount
+  // Fetch unread count on mount (deduplicated for React Strict Mode)
+  const lastFetchedAdminIdRef = useRef(null);
   useEffect(() => {
-    if (currentAdminId) {
+    if (currentAdminId && lastFetchedAdminIdRef.current !== currentAdminId) {
+      lastFetchedAdminIdRef.current = currentAdminId;
       dispatch(fetchAdminUnreadNotificationCount());
     }
   }, [dispatch, currentAdminId]);
@@ -174,7 +213,6 @@ export default function AdminNotificationDropdown() {
     if (isOpen) {
       setActionError(null);
       dispatch(fetchAdminDropdownNotifications());
-      dispatch(fetchAdminUnreadNotificationCount());
     }
   }, [dispatch, isOpen]);
 

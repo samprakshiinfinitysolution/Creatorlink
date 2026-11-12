@@ -14,7 +14,7 @@ function WorkspaceCoverBadge({ title, coverImage, fallbackText }) {
           key={rawSrc}
           src={rawSrc}
           alt={title || "Campaign"}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain object-center"
           onError={() => setHasError(true)}
         />
       </div>

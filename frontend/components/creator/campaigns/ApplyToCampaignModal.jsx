@@ -224,7 +224,7 @@ export default function ApplyToCampaignModal({
                 <img
                   src={brandLogo}
                   alt={brandName}
-                  className="w-4 h-4 rounded-full object-cover shrink-0 border border-border-theme"
+                  className="w-4 h-4 rounded-full object-contain object-center shrink-0 border border-border-theme"
                 />
               ) : (
                 <div className="w-4 h-4 rounded-full bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 flex items-center justify-center text-[8px] font-sans font-semibold shrink-0">
@@ -262,7 +262,7 @@ export default function ApplyToCampaignModal({
                 <img
                   src={brandLogo}
                   alt={brandName}
-                  className="w-10 h-10 rounded-xl object-cover shrink-0 border border-border-theme"
+                  className="w-10 h-10 rounded-xl object-contain object-center shrink-0 border border-border-theme"
                 />
               ) : (
                 <div className="w-10 h-10 rounded-xl bg-pink-100/70 dark:bg-pink-950/40 text-black dark:text-white border border-pink-200/60 dark:border-pink-800/40 flex items-center justify-center text-sm font-sans font-semibold shrink-0">

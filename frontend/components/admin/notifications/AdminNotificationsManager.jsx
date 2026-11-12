@@ -1,16 +1,16 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchAdminNotifications,
-  fetchAdminUnreadNotificationCount,
   markAdminNotificationRead,
   markAllAdminNotificationsRead,
   markAdminCategoryNotificationsRead
 } from "@/redux/admin/notifications/notifications_slice";
+import { socket } from "@/lib/socket";
 
 // Relative time formatting helper
 function formatTimeAgo(dateString) {
@@ -145,8 +145,38 @@ export default function AdminNotificationsManager() {
     }
 
     dispatch(fetchAdminNotifications(params));
-    dispatch(fetchAdminUnreadNotificationCount());
   }, [dispatch, currentPage, activeTab, selectedEntityType]);
+
+  const loadNotificationsRef = useRef(loadNotifications);
+  useEffect(() => {
+    loadNotificationsRef.current = loadNotifications;
+  }, [loadNotifications]);
+
+  // Re-sync active notifications query upon genuine socket reconnection without resetting filters/page
+  useEffect(() => {
+    let wasDisconnected = false;
+
+    const handleDisconnect = () => {
+      wasDisconnected = true;
+    };
+
+    const handleConnect = () => {
+      if (wasDisconnected) {
+        wasDisconnected = false;
+        if (typeof loadNotificationsRef.current === "function") {
+          loadNotificationsRef.current();
+        }
+      }
+    };
+
+    socket.on("disconnect", handleDisconnect);
+    socket.on("connect", handleConnect);
+
+    return () => {
+      socket.off("disconnect", handleDisconnect);
+      socket.off("connect", handleConnect);
+    };
+  }, []);
 
   useEffect(() => {
     loadNotifications();

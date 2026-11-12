@@ -40,7 +40,7 @@ export default function AdminAvatar({
   shape,
   fallbackColor,
   className = "",
-  imgClassName = "w-full h-full object-cover",
+  imgClassName = "w-full h-full object-contain object-center",
   fallback
 }) {
   const [failedSrc, setFailedSrc] = useState(null);

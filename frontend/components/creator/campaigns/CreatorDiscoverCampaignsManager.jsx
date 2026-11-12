@@ -701,13 +701,13 @@ export default function CreatorDiscoverCampaignsManager() {
                       </div>
 
                       {/* Campaign Visual Banner with Subtle Ambient Fallback */}
-                      <div className="h-28 sm:h-32 rounded-xl sm:rounded-2xl overflow-hidden relative border border-neutral-100 dark:border-border-theme/40 bg-surface-muted/60 dark:bg-surface-muted/20 flex items-center justify-center">
+                      <div className="h-28 sm:h-32 rounded-xl sm:rounded-2xl overflow-hidden relative border border-neutral-100 dark:border-border-theme/40 bg-surface-muted/60 dark:bg-surface-muted/20">
                         {(campaign.coverImage || campaign.image) && !failedCampaignImgUrls[campaign._id || campaign.id] ? (
                           /* eslint-disable-next-line @next/next/no-img-element */
                           <img
                             src={campaign.coverImage || campaign.image}
                             alt={campaign.title || "Campaign brief banner"}
-                            className="w-full h-full object-contain object-center group-hover:scale-105 transition-transform duration-500"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                             onError={() =>
                               setFailedCampaignImgUrls((prev) => ({
                                 ...prev,

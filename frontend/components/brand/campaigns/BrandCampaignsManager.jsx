@@ -232,7 +232,7 @@ function CreatorApplicantAvatar({ name, image }) {
         <img
           src={image}
           alt={name || "Creator"}
-          className="w-full h-full object-contain object-center"
+          className="w-full h-full object-cover object-center"
           onError={() => setHasFailed(true)}
         />
       </div>
@@ -272,7 +272,7 @@ function CampaignAvatar({ title, coverImage, thumbnail, image }) {
         <img
           src={imgUrl}
           alt={title || "Campaign"}
-          className="w-full h-full object-contain object-center"
+          className="w-full h-full object-cover object-center"
           onError={() => setFailedUrl(imgUrl)}
         />
       </div>
@@ -694,7 +694,7 @@ function CampaignCoverUpload({
               <img
                 src={coverImage}
                 alt="Campaign Cover Preview"
-                className="w-full h-full object-contain object-center transition-transform duration-300 group-hover:scale-105"
+                className="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
                 onError={() => setPreviewError(true)}
               />
             ) : (
@@ -2467,12 +2467,12 @@ export default function BrandCampaignsManager() {
                     <>
                       {/* Campaign Cover Banner (if present) */}
                       {(selectedCampaign.coverImage || selectedCampaign.image) && (
-                        <div className="relative h-44 sm:h-52 w-full rounded-2xl overflow-hidden border border-border-theme bg-surface-muted/60 shrink-0 flex items-center justify-center">
+                        <div className="relative h-44 sm:h-52 w-full rounded-2xl overflow-hidden border border-border-theme bg-surface-muted/60 shrink-0">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={selectedCampaign.coverImage || selectedCampaign.image}
                             alt={selectedCampaign.title || "Campaign banner"}
-                            className="w-full h-full object-contain object-center"
+                            className="w-full h-full object-cover object-center"
                           />
                         </div>
                       )}

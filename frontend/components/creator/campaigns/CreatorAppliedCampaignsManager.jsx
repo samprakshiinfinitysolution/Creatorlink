@@ -753,13 +753,13 @@ export default function CreatorAppliedCampaignsManager() {
                       </div>
 
                       {/* 2. CAMPAIGN VISUAL BANNER WITH FLOATING BRAND BADGE */}
-                      <div className="h-28 sm:h-32 rounded-xl sm:rounded-2xl overflow-hidden relative border border-neutral-100 dark:border-border-theme/40 bg-surface-muted/60 dark:bg-surface-muted/20 flex items-center justify-center">
+                      <div className="h-28 sm:h-32 rounded-xl sm:rounded-2xl overflow-hidden relative border border-neutral-100 dark:border-border-theme/40 bg-surface-muted/60 dark:bg-surface-muted/20">
                         {(campaignObj.coverImage || campaignObj.image) && !failedImgUrls[bookingId] ? (
                           /* eslint-disable-next-line @next/next/no-img-element */
                           <img
                             src={campaignObj.coverImage || campaignObj.image}
                             alt={campaignObj.title || "Campaign banner"}
-                            className="w-full h-full object-contain object-center group-hover:scale-105 transition-transform duration-500"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                             onError={() => setFailedImgUrls((prev) => ({ ...prev, [bookingId]: true }))}
                           />
                         ) : (

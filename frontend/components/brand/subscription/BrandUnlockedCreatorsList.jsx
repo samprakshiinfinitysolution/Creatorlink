@@ -129,7 +129,7 @@ export default function BrandUnlockedCreatorsList() {
                         <div className="flex items-center gap-3">
                           <div className="w-11 h-11 rounded-full bg-surface-muted border border-border-theme overflow-hidden shrink-0 flex items-center justify-center font-bold text-sm text-foreground">
                             {creator.profileImage ? (
-                              <img src={creator.profileImage} alt={creator.name} className="w-full h-full object-contain object-center" />
+                              <img src={creator.profileImage} alt={creator.name} className="w-full h-full object-cover object-center" />
                             ) : (
                               creator.name?.charAt(0) || "C"
                             )}

@@ -825,12 +825,12 @@ export default function CreatorWorkspaceManager() {
 
                       {/* Campaign Cover Image or Title Banner */}
                       {coverImage && !failedCoverUrls[ws._id] ? (
-                        <div className="h-24 sm:h-28 rounded-xl overflow-hidden relative border border-neutral-100 dark:border-border-theme/40 mt-3 flex items-center justify-center">
+                        <div className="h-24 sm:h-28 rounded-xl overflow-hidden relative border border-neutral-100 dark:border-border-theme/40 mt-3">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={coverImage}
                             alt={campaignTitle}
-                            className="w-full h-full object-contain object-center transition-transform duration-300 ease-out hover:scale-105 group-hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
+                            className="w-full h-full object-cover transition-transform duration-300 ease-out hover:scale-105 group-hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
                             onError={() =>
                               setFailedCoverUrls((prev) => ({
                                 ...prev,

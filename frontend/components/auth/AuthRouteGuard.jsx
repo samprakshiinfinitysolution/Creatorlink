@@ -104,7 +104,9 @@ export default function AuthRouteGuard({
 
           if (getMe.fulfilled.match(actionResult)) {
             const fetchedUser =
-              actionResult.payload?.data?.user || actionResult.payload?.user;
+              actionResult.payload?.data?.user ||
+              actionResult.payload?.data ||
+              actionResult.payload?.user;
 
             prevUserRef.current = fetchedUser;
             hasDispatchedRef.current = false;
@@ -143,11 +145,6 @@ export default function AuthRouteGuard({
         isMounted = false;
         clearTimeout(safetyTimer);
       };
-    } else {
-      // 4. Initial check already dispatched and failed/unauthenticated
-      setIsAuthorized(false);
-      setIsChecking(false);
-      redirectToLogin();
     }
   }, [user, isAuthenticated, allowedRole, isAuthorized, dispatch, pathname, router]);
 

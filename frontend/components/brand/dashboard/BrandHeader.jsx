@@ -77,7 +77,6 @@ export default function BrandHeader({ setMobileOpen = () => { } }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
-  const [loadedLogoUrl, setLoadedLogoUrl] = useState(null);
   const [failedLogoUrl, setFailedLogoUrl] = useState(null);
   const dropdownRef = useRef(null);
 
@@ -138,7 +137,6 @@ export default function BrandHeader({ setMobileOpen = () => { } }) {
 
   // Logo URL and safe image states
   const cleanLogoUrl = typeof profile?.logo === "string" ? profile.logo.trim() : "";
-  const isLoaded = Boolean(cleanLogoUrl) && loadedLogoUrl === cleanLogoUrl;
   const isFailed = Boolean(cleanLogoUrl) && failedLogoUrl === cleanLogoUrl;
   const hasValidLogo = Boolean(cleanLogoUrl) && !isFailed;
 
@@ -267,19 +265,14 @@ export default function BrandHeader({ setMobileOpen = () => { } }) {
             {/* Circular Pink Avatar */}
             <div className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#ff2d6c] text-white font-bold font-sans text-xs sm:text-sm flex items-center justify-center shrink-0 uppercase shadow-xs overflow-hidden">
               {hasValidLogo ? (
-                <>
-                  {!isLoaded && <span>{initial}</span>}
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    key={cleanLogoUrl}
-                    src={cleanLogoUrl}
-                    alt={displayName}
-                    onLoad={() => setLoadedLogoUrl(cleanLogoUrl)}
-                    onError={() => setFailedLogoUrl(cleanLogoUrl)}
-                    className={`w-full h-full object-cover transition-opacity duration-200 ${isLoaded ? "opacity-100" : "opacity-0 absolute inset-0"
-                      }`}
-                  />
-                </>
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  key={cleanLogoUrl}
+                  src={cleanLogoUrl}
+                  alt={displayName}
+                  onError={() => setFailedLogoUrl(cleanLogoUrl)}
+                  className="w-full h-full object-cover"
+                />
               ) : (
                 <span>{initial}</span>
               )}

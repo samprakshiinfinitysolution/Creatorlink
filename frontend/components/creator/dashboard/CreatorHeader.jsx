@@ -77,7 +77,6 @@ export default function CreatorHeader({ setMobileOpen = () => {} }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
-  const [loadedAvatarUrl, setLoadedAvatarUrl] = useState(null);
   const [failedAvatarUrl, setFailedAvatarUrl] = useState(null);
   const dropdownRef = useRef(null);
 
@@ -135,7 +134,6 @@ export default function CreatorHeader({ setMobileOpen = () => {} }) {
   // Avatar URL and safe image states
   const rawAvatarUrl = profile?.profileImage || profile?.avatar || userObj?.avatar || "";
   const cleanAvatarUrl = typeof rawAvatarUrl === "string" ? rawAvatarUrl.trim() : "";
-  const isLoaded = Boolean(cleanAvatarUrl) && loadedAvatarUrl === cleanAvatarUrl;
   const isFailed = Boolean(cleanAvatarUrl) && failedAvatarUrl === cleanAvatarUrl;
   const hasValidAvatar = Boolean(cleanAvatarUrl) && !isFailed;
 
@@ -260,20 +258,14 @@ export default function CreatorHeader({ setMobileOpen = () => {} }) {
             {/* Circular Pink Avatar */}
             <div className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#ff2d6c] text-white font-bold font-sans text-xs sm:text-sm flex items-center justify-center shrink-0 uppercase shadow-xs overflow-hidden">
               {hasValidAvatar ? (
-                <>
-                  {!isLoaded && <span>{initial}</span>}
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    key={cleanAvatarUrl}
-                    src={cleanAvatarUrl}
-                    alt={displayName}
-                    onLoad={() => setLoadedAvatarUrl(cleanAvatarUrl)}
-                    onError={() => setFailedAvatarUrl(cleanAvatarUrl)}
-                    className={`w-full h-full object-cover transition-opacity duration-200 ${
-                      isLoaded ? "opacity-100" : "opacity-0 absolute inset-0"
-                    }`}
-                  />
-                </>
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  key={cleanAvatarUrl}
+                  src={cleanAvatarUrl}
+                  alt={displayName}
+                  onError={() => setFailedAvatarUrl(cleanAvatarUrl)}
+                  className="w-full h-full object-cover"
+                />
               ) : (
                 <span>{initial}</span>
               )}

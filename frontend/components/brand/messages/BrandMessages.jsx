@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -150,6 +150,24 @@ function formatTime(dateStr) {
   });
 }
 
+function getDateKey(dateStr) {
+  if (!dateStr) return "unknown";
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return "unknown";
+  return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+}
+
+function formatMessageDate(dateStr) {
+  if (!dateStr) return "";
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return "";
+  return date.toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "long",
+    year: "numeric"
+  });
+}
+
 function formatTimestampLabel(dateStr) {
   if (!dateStr) return "";
   const date = new Date(dateStr);
@@ -178,6 +196,73 @@ function formatCurrency(amount) {
     currency: "INR",
     maximumFractionDigits: 0
   }).format(Number(amount));
+}
+
+/**
+ * Safely resolves the Creator participant from a conversation's participants list.
+ * Guarantees that the logged-in Brand is NEVER returned as the Creator.
+ *
+ * @param {Array} participants - List of conversation participant objects
+ * @param {string} currentBrandId - Authenticated Brand's Auth._id
+ * @param {string} [bookingCreatorId] - Auth._id of creator from the linked booking
+ * @returns {Object|null} - Creator participant object, or null if unresolved
+ */
+function resolveCreatorParticipant(participants, currentBrandId, bookingCreatorId) {
+  if (!Array.isArray(participants) || participants.length === 0) {
+    return null;
+  }
+
+  // 1. Direct match by booking's creator Auth ID if available
+  if (bookingCreatorId) {
+    const matchedByBooking = participants.find((p) => {
+      const pId = p?._id || p?.id || (typeof p === "string" ? p : null);
+      return pId && String(pId) === String(bookingCreatorId);
+    });
+    if (matchedByBooking && typeof matchedByBooking === "object") {
+      return matchedByBooking;
+    }
+  }
+
+  // 2. Direct match by explicit creator role
+  const matchedByRole = participants.find((p) => {
+    return p && typeof p === "object" && p.role && p.role.toLowerCase() === "creator";
+  });
+  if (matchedByRole) {
+    return matchedByRole;
+  }
+
+  // 3. Exclude the current brand ID
+  if (currentBrandId) {
+    const notCurrentBrand = participants.find((p) => {
+      const pId = p?._id || p?.id || (typeof p === "string" ? p : null);
+      return pId && String(pId) !== String(currentBrandId);
+    });
+    if (notCurrentBrand && typeof notCurrentBrand === "object") {
+      return notCurrentBrand;
+    }
+  }
+
+  // 4. Exclude participant with role === "brand"
+  const notBrandRole = participants.find((p) => {
+    return p && typeof p === "object" && p.role && p.role.toLowerCase() !== "brand";
+  });
+  if (notBrandRole) {
+    return notBrandRole;
+  }
+
+  // 5. If participants has 2 members and the first is brand, safely check second member
+  if (participants.length > 1) {
+    const secondParticipant = participants[1];
+    if (secondParticipant && typeof secondParticipant === "object") {
+      const secondId = secondParticipant._id || secondParticipant.id;
+      if (!currentBrandId || String(secondId) !== String(currentBrandId)) {
+        return secondParticipant;
+      }
+    }
+  }
+
+  // Never fall back to participants[0] if it matches brand or has role "brand"
+  return null;
 }
 
 // =========================================================
@@ -219,17 +304,37 @@ export default function BrandMessages() {
     profile?.user?._id ||
     profile?.user?.id ||
     (typeof profile?.user === "string" ? profile.user : null) ||
-    profile?._id ||
-    profile?.id ||
+    bookingBrandId ||
     brandParticipant?._id ||
-    brandParticipant?.id ||
-    bookingBrandId;
+    brandParticipant?.id;
 
   const [searchQuery, setSearchQuery] = useState("");
   const [messageInput, setMessageInput] = useState("");
 
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+
+  // Group messages by sent date so date separators appear only when the date changes
+  const messageGroups = useMemo(() => {
+    const groups = [];
+    let currentGroup = null;
+
+    messages.forEach((msg) => {
+      const key = getDateKey(msg.createdAt);
+      if (!currentGroup || currentGroup.dateKey !== key) {
+        currentGroup = {
+          dateKey: key,
+          dateLabel: formatMessageDate(msg.createdAt),
+          messages: [msg]
+        };
+        groups.push(currentGroup);
+      } else {
+        currentGroup.messages.push(msg);
+      }
+    });
+
+    return groups;
+  }, [messages]);
 
   // Initial load: Fetch conversations list
   useEffect(() => {
@@ -418,20 +523,26 @@ export default function BrandMessages() {
     const trimmedMessage = messageInput.trim();
     if (!trimmedMessage || sending || !selectedConversation) return;
 
-    // Identify recipient creator participant
-    const recipient = selectedConversation.participants?.find(
-      (p) =>
-        (p.role && p.role.toLowerCase() === "creator") ||
-        (currentBrandId && String(p._id || p.id) !== String(currentBrandId))
-    ) || selectedConversation.participants?.find(
-      (p) => String(p._id || p.id) !== String(currentBrandId)
-    ) || selectedConversation.participants?.[0];
+    const bookingCreatorId =
+      typeof selectedConversation?.booking?.creator === "string"
+        ? selectedConversation.booking.creator
+        : (selectedConversation?.booking?.creator?._id || selectedConversation?.booking?.creator?.id);
 
-    const recipientId = recipient?._id || recipient?.id;
+    // Identify recipient creator participant
+    const recipient = resolveCreatorParticipant(
+      selectedConversation.participants,
+      currentBrandId,
+      bookingCreatorId
+    );
+
+    const recipientId = recipient?._id || recipient?.id || bookingCreatorId;
     const bookingId = selectedConversation.booking?._id || selectedConversation.booking;
     const campaignId = selectedConversation.campaign?._id || selectedConversation.campaign;
 
-    if (!recipientId || !bookingId) return;
+    // Safety check: Never send message to self or with missing recipient/booking
+    if (!recipientId || !bookingId || (currentBrandId && String(recipientId) === String(currentBrandId))) {
+      return;
+    }
 
     const payload = {
       recipientId,
@@ -448,11 +559,16 @@ export default function BrandMessages() {
 
   // Filter conversations by search term
   const filteredConversations = conversations.filter((item) => {
-    const creator = item.participants?.find(
-      (p) =>
-        (p.role && p.role.toLowerCase() === "creator") ||
-        (currentBrandId && String(p._id || p.id) !== String(currentBrandId))
-    ) || item.participants?.[0];
+    const itemBookingCreatorId =
+      typeof item?.booking?.creator === "string"
+        ? item.booking.creator
+        : (item?.booking?.creator?._id || item?.booking?.creator?.id);
+
+    const creator = resolveCreatorParticipant(
+      item.participants,
+      currentBrandId,
+      itemBookingCreatorId
+    );
 
     const creatorName = creator?.name || "";
     const campaignTitle = item.campaign?.title || "";
@@ -466,13 +582,16 @@ export default function BrandMessages() {
   });
 
   // Extract selected thread's creator participant details
-  const activeCreator = selectedConversation?.participants?.find(
-    (p) =>
-      (p.role && p.role.toLowerCase() === "creator") ||
-      (currentBrandId && String(p._id || p.id) !== String(currentBrandId))
-  ) || selectedConversation?.participants?.find(
-    (p) => String(p._id || p.id) !== String(currentBrandId)
-  ) || selectedConversation?.participants?.[0];
+  const bookingCreatorId =
+    typeof selectedConversation?.booking?.creator === "string"
+      ? selectedConversation.booking.creator
+      : (selectedConversation?.booking?.creator?._id || selectedConversation?.booking?.creator?.id);
+
+  const activeCreator = resolveCreatorParticipant(
+    selectedConversation?.participants,
+    currentBrandId,
+    bookingCreatorId
+  );
 
   const activeCreatorName = activeCreator?.name || "Creator";
   const activeCreatorEmail = activeCreator?.email || "";
@@ -480,11 +599,18 @@ export default function BrandMessages() {
   const selectedConvFromList = conversations.find(
     (c) => String(c._id) === String(selectedConversation?._id)
   );
-  const activeCreatorFromList = selectedConvFromList?.participants?.find(
-    (p) =>
-      (p.role && p.role.toLowerCase() === "creator") ||
-      (currentBrandId && String(p._id || p.id) !== String(currentBrandId))
+
+  const listBookingCreatorId =
+    typeof selectedConvFromList?.booking?.creator === "string"
+      ? selectedConvFromList.booking.creator
+      : (selectedConvFromList?.booking?.creator?._id || selectedConvFromList?.booking?.creator?.id);
+
+  const activeCreatorFromList = resolveCreatorParticipant(
+    selectedConvFromList?.participants,
+    currentBrandId,
+    bookingCreatorId || listBookingCreatorId
   );
+
   const activeCreatorImage =
     activeCreator?.profileImage ||
     activeCreator?.avatar ||
@@ -582,11 +708,16 @@ export default function BrandMessages() {
             ) : (
               // Conversation Item Rows
               filteredConversations.map((item) => {
-                const creator = item.participants?.find(
-                  (p) =>
-                    (p.role && p.role.toLowerCase() === "creator") ||
-                    (currentBrandId && String(p._id || p.id) !== String(currentBrandId))
-                ) || item.participants?.[0];
+                const itemBookingCreatorId =
+                  typeof item?.booking?.creator === "string"
+                    ? item.booking.creator
+                    : (item?.booking?.creator?._id || item?.booking?.creator?.id);
+
+                const creator = resolveCreatorParticipant(
+                  item.participants,
+                  currentBrandId,
+                  itemBookingCreatorId
+                );
 
                 const creatorName = creator?.name || "Creator";
                 const creatorInitials = getInitials(creatorName, creator?.email);
@@ -729,66 +860,81 @@ export default function BrandMessages() {
                     </p>
                   </div>
                 ) : (
-                  // Message Bubble Items
-                  messages.map((msg) => {
-                    const senderId = typeof msg.sender === "string" ? msg.sender : (msg.sender?._id || msg.sender?.id);
-                    const isBrandSender = Boolean(currentBrandId && senderId && String(senderId) === String(currentBrandId));
-
-                    return (
-                      <div
-                        key={msg._id || msg.createdAt}
-                        className={`flex flex-col ${isBrandSender ? "items-end" : "items-start"} w-full min-w-0`}
-                      >
-                        {/* Bubble Container */}
-                        <div
-                          className={`max-w-[85%] sm:max-w-[70%] px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl text-xs font-sans leading-relaxed break-words [overflow-wrap:anywhere] shadow-xs ${
-                            isBrandSender
-                              ? "bg-neutral-950 text-white rounded-tr-xs dark:bg-neutral-900"
-                              : "bg-surface text-foreground border border-border-theme rounded-tl-xs"
-                          }`}
-                        >
-                          <p className="whitespace-pre-wrap break-words [overflow-wrap:anywhere]">{msg.message}</p>
-
-                          {/* Attachments if any */}
-                          {Array.isArray(msg.attachments) && msg.attachments.length > 0 && (
-                            <div className="mt-2 space-y-1">
-                              {msg.attachments.map((url, idx) => (
-                                <a
-                                  key={idx}
-                                  href={url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className={`block underline text-[11px] truncate ${
-                                    isBrandSender ? "text-neutral-300 hover:text-white" : "text-neutral-900 dark:text-neutral-100 hover:underline"
-                                  }`}
-                                >
-                                  Attachment {idx + 1}
-                                </a>
-                              ))}
-                            </div>
-                          )}
-
-                          {/* Timestamp & Read Indicator */}
-                          <div
-                            className={`flex items-center justify-end gap-1 text-[10px] mt-1 ${
-                              isBrandSender ? "text-neutral-400" : "text-text-secondary"
-                            }`}
-                          >
-                            <span>{formatTime(msg.createdAt)}</span>
-                            {isBrandSender && (
-                              <span>
-                                {msg.isRead ? (
-                                  <CheckCheckIcon className="w-3.5 h-3.5 text-neutral-300" />
-                                ) : (
-                                  <CheckIcon className="w-3.5 h-3.5 text-neutral-400" />
-                                )}
-                              </span>
-                            )}
-                          </div>
+                  // Grouped Message Bubble Items with Date Separators
+                  messageGroups.map((group) => (
+                    <div key={group.dateKey} className="space-y-3 sm:space-y-3.5">
+                      {/* Date Separator */}
+                      {group.dateLabel && (
+                        <div className="flex items-center my-3 sm:my-4">
+                          <div className="flex-1 border-t border-border-theme/60" />
+                          <span className="px-3 py-1 mx-3 rounded-full text-[11px] font-medium bg-surface text-text-secondary border border-border-theme shadow-2xs shrink-0 select-none">
+                            {group.dateLabel}
+                          </span>
+                          <div className="flex-1 border-t border-border-theme/60" />
                         </div>
-                      </div>
-                    );
-                  })
+                      )}
+
+                      {group.messages.map((msg) => {
+                        const senderId = typeof msg.sender === "string" ? msg.sender : (msg.sender?._id || msg.sender?.id);
+                        const isBrandSender = Boolean(currentBrandId && senderId && String(senderId) === String(currentBrandId));
+
+                        return (
+                          <div
+                            key={msg._id || msg.createdAt}
+                            className={`flex flex-col ${isBrandSender ? "items-end" : "items-start"} w-full min-w-0`}
+                          >
+                            {/* Bubble Container */}
+                            <div
+                              className={`max-w-[85%] sm:max-w-[70%] px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl text-xs font-sans leading-relaxed break-words [overflow-wrap:anywhere] shadow-xs ${
+                                isBrandSender
+                                  ? "bg-neutral-950 text-white rounded-tr-xs dark:bg-neutral-900"
+                                  : "bg-surface text-foreground border border-border-theme rounded-tl-xs"
+                              }`}
+                            >
+                              <p className="whitespace-pre-wrap break-words [overflow-wrap:anywhere]">{msg.message}</p>
+
+                              {/* Attachments if any */}
+                              {Array.isArray(msg.attachments) && msg.attachments.length > 0 && (
+                                <div className="mt-2 space-y-1">
+                                  {msg.attachments.map((url, idx) => (
+                                    <a
+                                      key={idx}
+                                      href={url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className={`block underline text-[11px] truncate ${
+                                        isBrandSender ? "text-neutral-300 hover:text-white" : "text-neutral-900 dark:text-neutral-100 hover:underline"
+                                      }`}
+                                    >
+                                      Attachment {idx + 1}
+                                    </a>
+                                  ))}
+                                </div>
+                              )}
+
+                              {/* Timestamp & Read Indicator */}
+                              <div
+                                className={`flex items-center justify-end gap-1 text-[10px] mt-1 ${
+                                  isBrandSender ? "text-neutral-400" : "text-text-secondary"
+                                }`}
+                              >
+                                <span>{formatTime(msg.createdAt)}</span>
+                                {isBrandSender && (
+                                  <span>
+                                    {msg.isRead ? (
+                                      <CheckCheckIcon className="w-3.5 h-3.5 text-neutral-300" />
+                                    ) : (
+                                      <CheckIcon className="w-3.5 h-3.5 text-neutral-400" />
+                                    )}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ))
                 )}
                 <div ref={messagesEndRef} />
               </div>

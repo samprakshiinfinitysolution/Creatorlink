@@ -400,12 +400,12 @@ export default function CreatorCampaignDetail({ campaignId }) {
               </div>
               {/* Campaign Cover Banner (if present) */}
               {(campaign.coverImage || campaign.image) && failedCoverUrl !== (campaign.coverImage || campaign.image) && (
-                <div className="relative h-48 sm:h-64 lg:h-72 w-full rounded-2xl overflow-hidden border border-border-theme bg-surface-muted/60 shrink-0 flex items-center justify-center">
+                <div className="relative h-48 sm:h-64 lg:h-72 w-full rounded-2xl overflow-hidden border border-border-theme bg-surface-muted/60 shrink-0">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={campaign.coverImage || campaign.image}
                     alt={campaign.title || "Campaign banner"}
-                    className="w-full h-full object-contain object-center"
+                    className="w-full h-full object-cover"
                     onError={() => setFailedCoverUrl(campaign.coverImage || campaign.image)}
                   />
                 </div>

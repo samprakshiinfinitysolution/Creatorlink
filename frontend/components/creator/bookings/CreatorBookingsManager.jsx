@@ -647,12 +647,12 @@ export default function CreatorBookingsManager() {
               </div>
             )}
 
-            {/* 1. Desktop Table View (hidden lg:block) */}
+            {/* Unified Table View (all viewports with horizontal scroll on mobile/tablet) */}
             {(!loading || rawBookings.length > 0) && !error && filteredBookings.length > 0 && (
-              <div className="hidden lg:block overflow-x-auto custom-scrollbar min-w-0">
-                <table className="w-full text-left text-xs border-collapse min-w-[800px]">
+              <div className="w-full overflow-x-auto custom-scrollbar min-w-0">
+                <table className="w-full text-left text-xs border-collapse min-w-[900px]">
                   <thead>
-                    <tr className="border-b border-border-theme bg-surface-muted/40 text-text-secondary uppercase tracking-wider text-[10px] font-semibold">
+                    <tr className="border-b border-border-theme bg-surface-muted/40 text-text-secondary uppercase tracking-wider text-[10px] font-semibold whitespace-nowrap">
                       <th className="py-3.5 px-5">Brand Client</th>
                       <th className="py-3.5 px-4">Campaign Title</th>
                       <th className="py-3.5 px-4">Type</th>
@@ -722,12 +722,12 @@ export default function CreatorBookingsManager() {
                           <td className="py-4 px-4">
                             <div className="flex items-center gap-2.5 max-w-[220px]">
                               {Boolean(booking.campaign?.coverImage) && (
-                                <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-border-theme bg-neutral-100 dark:bg-surface-muted flex items-center justify-center">
+                                <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-border-theme bg-neutral-100 dark:bg-surface-muted">
                                   {/* eslint-disable-next-line @next/next/no-img-element */}
                                   <img
                                     src={booking.campaign.coverImage}
                                     alt={campaignTitle}
-                                    className="w-full h-full object-contain object-center"
+                                    className="w-full h-full object-cover object-center"
                                     loading="lazy"
                                     onError={(e) => {
                                       e.currentTarget.parentElement.style.display = "none";
@@ -864,205 +864,6 @@ export default function CreatorBookingsManager() {
                     })}
                   </tbody>
                 </table>
-              </div>
-            )}
-
-            {/* 2. Mobile & Tablet Responsive Cards Layout (block lg:hidden) */}
-            {(!loading || rawBookings.length > 0) && !error && filteredBookings.length > 0 && (
-              <div className="block lg:hidden divide-y divide-border-theme">
-                {filteredBookings.map((booking) => {
-                  const brandName =
-                    booking.brand?.companyName ||
-                    booking.brand?.name ||
-                    booking.brand?.displayName ||
-                    booking.brand?.email ||
-                    "Brand Client";
-
-                  const brandEmail = booking.brand?.email || "N/A";
-                  const campaignTitle = booking.campaign?.title || "Campaign Collaboration";
-                  const category = booking.campaign?.category || "General";
-                  const platform = formatCampaignPlatforms(
-                    booking.campaign?.platform || booking.service?.platform,
-                    "General"
-                  );
-
-                  const serviceTitle =
-                    booking.service?.title || booking.serviceTitle || "Service Package";
-
-                  const agreedPrice = booking.agreedPrice;
-                  const currency = booking.currency || "INR";
-                  const badge = getStatusBadge(booking.status);
-
-                  const isBrandProposal = booking.initiatedBy === "brand";
-                  const isPending = booking.status === "pending";
-                  const isAcceptedOrActive =
-                    booking.status === "accepted" || booking.status === "in_progress";
-
-                  const isThisProcessing = quickProcessingId === booking._id;
-
-                  return (
-                    <div
-                      key={booking._id}
-                      className="p-3.5 sm:p-5 space-y-3 hover:bg-surface-muted/20 transition-colors"
-                    >
-                      {/* Card Header: Brand Profile & Status */}
-                      <div className="flex items-start justify-between gap-2.5">
-                        <div className="flex items-center gap-3 min-w-0 flex-1">
-                          <BrandAvatar
-                            brand={booking.brand}
-                            name={brandName}
-                            className="w-10 h-10 sm:w-11 sm:h-11 text-xs sm:text-sm shrink-0"
-                          />
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <span className="font-semibold text-foreground text-sm font-sans break-words" title={brandName}>
-                                {brandName}
-                              </span>
-                              {isBrandProposal ? (
-                                <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-500/10 text-blue-500 border border-blue-500/20 whitespace-nowrap">
-                                  Direct Proposal
-                                </span>
-                              ) : (
-                                <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-medium bg-neutral-500/10 text-neutral-400 border border-neutral-500/20 whitespace-nowrap">
-                                  Application
-                                </span>
-                              )}
-                            </div>
-                            <div className="text-[11px] text-text-secondary truncate mt-0.5" title={brandEmail}>
-                              {brandEmail}
-                            </div>
-                          </div>
-                        </div>
-
-                        <span
-                          className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-bold border shrink-0 whitespace-nowrap ${badge.color}`}
-                        >
-                          {badge.label}
-                        </span>
-                      </div>
-
-                      {/* Card Body: Campaign & Service Information */}
-                      <div className="p-3 rounded-2xl bg-surface-muted/40 border border-border-theme space-y-2 text-xs">
-                        {Boolean(booking.campaign?.coverImage) && (
-                          <div className="w-full h-24 sm:h-28 rounded-xl overflow-hidden relative border border-border-theme/70 bg-surface-muted/50 shrink-0">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              src={booking.campaign.coverImage}
-                              alt={campaignTitle}
-                              className="w-full h-full object-contain object-center"
-                              loading="lazy"
-                              onError={(e) => {
-                                e.currentTarget.parentElement.style.display = "none";
-                              }}
-                            />
-                          </div>
-                        )}
-                        <div>
-                          <div className="font-semibold text-foreground text-xs sm:text-sm line-clamp-2 break-words" title={campaignTitle}>
-                            {campaignTitle}
-                          </div>
-                          <div className="text-[11px] text-text-secondary mt-0.5 flex items-center gap-1.5 capitalize">
-                            <span>{category}</span>
-                            <span>•</span>
-                            <span>{platform}</span>
-                          </div>
-                        </div>
-
-                        <div className="pt-2 border-t border-border-theme flex items-center justify-between gap-2 text-[11px]">
-                          <div className="text-text-secondary break-words">
-                            <span className="font-medium text-foreground">Service:</span> {serviceTitle}
-                            {booking.service?.deliveryTime && (
-                              <span className="ml-1 text-text-secondary/70">
-                                ({booking.service.deliveryTime}d delivery)
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Card Price & Date Bar */}
-                      <div className="flex items-center justify-between text-xs pt-0.5">
-                        <div>
-                          <span className="text-[10px] uppercase font-bold tracking-wider text-text-secondary block">
-                            Agreed Price
-                          </span>
-                          <span className="text-sm sm:text-base font-bold text-foreground">
-                            {formatCurrency(agreedPrice, currency)}
-                          </span>
-                        </div>
-                        <div className="text-right">
-                          <span className="text-[10px] uppercase font-bold tracking-wider text-text-secondary block">
-                            Booking Date
-                          </span>
-                          <span className="text-xs text-text-secondary font-medium">
-                            {formatDate(booking.createdAt)}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Card Actions Footer */}
-                      <div className="pt-2 border-t border-border-theme flex items-center justify-end gap-2 flex-wrap sm:flex-nowrap">
-                        {/* Quick Accept/Reject for Brand Proposals */}
-                        {isPending && isBrandProposal && (
-                          <>
-                            <button
-                              type="button"
-                              onClick={() => handleQuickStatusUpdate(booking._id, "accepted")}
-                              disabled={isThisProcessing}
-                              className="flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition-colors shadow-2xs disabled:opacity-50 cursor-pointer text-center"
-                            >
-                              Accept
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleQuickStatusUpdate(booking._id, "rejected")}
-                              disabled={isThisProcessing}
-                              className="flex-1 sm:flex-none px-3.5 py-2 rounded-xl border border-red-500/20 bg-red-500/10 text-red-500 hover:bg-red-500/20 text-xs font-semibold transition-colors disabled:opacity-50 cursor-pointer text-center"
-                            >
-                              Decline
-                            </button>
-                          </>
-                        )}
-
-                        {/* Quick Withdraw for Pending Applications */}
-                        {isPending && !isBrandProposal && (
-                          <button
-                            type="button"
-                            onClick={() => handleQuickCancel(booking._id)}
-                            disabled={isThisProcessing}
-                            className="flex-1 sm:flex-none px-3.5 py-2 rounded-xl border border-red-500/20 bg-red-500/10 text-red-500 hover:bg-red-500/20 text-xs font-semibold transition-colors disabled:opacity-50 cursor-pointer text-center"
-                          >
-                            Withdraw
-                          </button>
-                        )}
-
-                        {/* Workspace Link if Active */}
-                        {isAcceptedOrActive && (
-                          <Link
-                            href="/creator/workspace"
-                            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-white dark:bg-surface text-neutral-800 dark:text-neutral-200 border border-neutral-200/90 dark:border-border-theme text-xs font-semibold shadow-2xs hover:bg-black hover:text-white hover:border-black dark:hover:bg-white dark:hover:text-black dark:hover:border-white transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-neutral-400/20"
-                          >
-                            <WorkspaceIcon className="w-3.5 h-3.5" />
-                            <span>Workspace</span>
-                          </Link>
-                        )}
-
-                        {/* Details Modal Trigger */}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSelectedBookingId(booking._id);
-                            setIsModalOpen(true);
-                          }}
-                          className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-white dark:bg-surface text-neutral-800 dark:text-neutral-200 border border-neutral-200/90 dark:border-border-theme text-xs font-semibold shadow-2xs hover:bg-black hover:text-white hover:border-black dark:hover:bg-white dark:hover:text-black dark:hover:border-white transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-neutral-400/20"
-                        >
-                          <EyeIcon className="w-3.5 h-3.5" />
-                          <span>Details</span>
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
               </div>
             )}
 

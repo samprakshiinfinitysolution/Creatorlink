@@ -271,7 +271,7 @@ export default function BrandHeader({ setMobileOpen = () => { } }) {
                   src={cleanLogoUrl}
                   alt={displayName}
                   onError={() => setFailedLogoUrl(cleanLogoUrl)}
-                  className="w-full h-full object-contain object-center"
+                  className="w-full h-full object-cover object-center"
                 />
               ) : (
                 <span>{initial}</span>

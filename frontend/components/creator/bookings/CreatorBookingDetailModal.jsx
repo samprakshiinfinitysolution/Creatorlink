@@ -419,12 +419,12 @@ export default function CreatorBookingDetailModal({
 
               {/* Campaign Cover Image Banner (if available) */}
               {Boolean(booking?.campaign?.coverImage) && (
-                <div className="w-full h-32 sm:h-44 rounded-2xl overflow-hidden relative border border-border-theme bg-surface-muted/30 shrink-0 flex items-center justify-center">
+                <div className="w-full h-32 sm:h-44 rounded-2xl overflow-hidden relative border border-border-theme bg-surface-muted/30 shrink-0">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={booking.campaign.coverImage}
                     alt={campaignTitle}
-                    className="w-full h-full object-contain object-center"
+                    className="w-full h-full object-cover object-center"
                     loading="lazy"
                     onError={(e) => {
                       e.currentTarget.parentElement.style.display = "none";

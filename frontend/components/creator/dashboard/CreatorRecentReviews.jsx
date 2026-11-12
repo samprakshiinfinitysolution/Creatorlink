@@ -14,7 +14,7 @@ function ReviewerAvatar({ name, image, initial }) {
           key={rawSrc}
           src={rawSrc}
           alt={name || "Reviewer"}
-          className="w-full h-full object-contain object-center"
+          className="w-full h-full object-cover object-center"
           onError={() => setHasError(true)}
         />
       ) : (

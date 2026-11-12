@@ -236,7 +236,7 @@ function CreatorCard({ creator, onViewProfile, isSaved, isSaving, onToggleSave, 
                   decoding="async"
                   onLoad={() => setLoadedUrl(cleanAvatarUrl)}
                   onError={() => setFailedUrl(cleanAvatarUrl)}
-                  className={`w-full h-full object-contain object-center transition-opacity duration-300 ${isImgLoaded ? "opacity-100" : "opacity-0"
+                  className={`w-full h-full object-cover object-center transition-opacity duration-300 ${isImgLoaded ? "opacity-100" : "opacity-0"
                     }`}
                 />
               </>

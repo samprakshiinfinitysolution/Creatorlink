@@ -400,12 +400,12 @@ export default function CreatorCampaignDetail({ campaignId }) {
               </div>
               {/* Campaign Cover Banner (if present) */}
               {(campaign.coverImage || campaign.image) && failedCoverUrl !== (campaign.coverImage || campaign.image) && (
-                <div className="relative h-48 sm:h-64 lg:h-72 w-full rounded-2xl overflow-hidden border border-border-theme bg-surface-muted/60 shrink-0">
+                <div className="relative h-48 sm:h-64 lg:h-72 w-full rounded-2xl overflow-hidden border border-border-theme bg-surface-muted/60 shrink-0 flex items-center justify-center">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={campaign.coverImage || campaign.image}
                     alt={campaign.title || "Campaign banner"}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain object-center"
                     onError={() => setFailedCoverUrl(campaign.coverImage || campaign.image)}
                   />
                 </div>
@@ -423,7 +423,7 @@ export default function CreatorCampaignDetail({ campaignId }) {
                       <img
                         src={campaign.brand.logo || campaign.brand.avatar}
                         alt={campaign.brand.companyName || campaign.brand.name}
-                        className="w-5 h-5 rounded-full object-cover shrink-0 border border-border-theme"
+                        className="w-5 h-5 rounded-full object-contain object-center shrink-0 border border-border-theme"
                       />
                     ) : (
                       <div className="w-5 h-5 rounded-full bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 flex items-center justify-center text-[10px] font-sans font-semibold shrink-0">

@@ -6,7 +6,7 @@ import {
     overrideCollaborationStatus as overrideCollaborationStatusApi,
     extendCollaborationDeadline as extendCollaborationDeadlineApi
 } from "./collaborations_api";
-import { logout, clearAuth } from "../../auth/auth_slice";
+import { adminLogout, clearAdminAuth } from "../auth/admin_auth_slice";
 
 // Handles fetching collaborations with query parameters
 export const fetchCollaborations = createAsyncThunk(
@@ -209,9 +209,9 @@ const adminCollaborationsSlice = createSlice({
                 state.actionError = action.payload || "Failed to extend deadline";
             })
 
-            // Clear on logout
-            .addCase(logout.fulfilled, () => initialState)
-            .addCase(clearAuth, () => initialState);
+            // Clear on admin logout
+            .addCase(adminLogout.fulfilled, () => initialState)
+            .addCase(clearAdminAuth, () => initialState);
     }
 });
 

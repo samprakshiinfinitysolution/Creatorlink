@@ -95,8 +95,11 @@ export const markAdminCategoryNotificationsRead = createAsyncThunk(
     async (category, { dispatch, rejectWithValue }) => {
         try {
             const response = await markAdminCategoryNotificationsReadApi(category);
-            await dispatch(fetchAdminUnreadNotificationCount());
-            return { category, response };
+            const countResult = await dispatch(fetchAdminUnreadNotificationCount());
+            const unreadCount =
+                countResult?.payload?.data?.unreadCount ??
+                countResult?.payload?.unreadCount;
+            return { category, response, unreadCount };
         } catch (error) {
             return rejectWithValue(
                 error.response?.data?.message ||
@@ -133,6 +136,7 @@ const initialState = {
         hasPrevPage: false,
         hasNextPage: false
     },
+    currentFilter: null,
     loading: false,
     dropdownLoading: false,
     markingRead: false,
@@ -157,13 +161,62 @@ const adminNotificationsSlice = createSlice({
 
             const isAlreadyPresent = existingIdx !== -1 || existingDropdownIdx !== -1;
 
-            if (existingIdx === -1) {
+            // Check if notification matches the active filter in notifications view
+            const filter = state.currentFilter;
+            let shouldIncludeInList = true;
+
+            if (filter) {
+                // If filter specifies isRead (boolean), check matching
+                if (typeof filter.isRead === "boolean") {
+                    const notifIsRead = Boolean(newNotif.isRead);
+                    if (notifIsRead !== filter.isRead) {
+                        shouldIncludeInList = false;
+                    }
+                }
+
+                // If filter specifies entityType, check matching
+                if (shouldIncludeInList && filter.entityType && filter.entityType !== "all") {
+                    const targetType = String(filter.entityType).toLowerCase().trim();
+                    const notifType = String(newNotif.entityType || "").toLowerCase().trim();
+                    const notifCat = String(newNotif.category || "").toLowerCase().trim();
+
+                    const matchesCategory =
+                        notifType === targetType ||
+                        notifCat === targetType ||
+                        `${notifType}s` === targetType ||
+                        `${targetType}s` === notifType ||
+                        `${notifCat}s` === targetType ||
+                        `${targetType}s` === notifCat;
+
+                    if (!matchesCategory) {
+                        shouldIncludeInList = false;
+                    }
+                }
+
+                // Only insert new items on page 1 of active list
+                if (shouldIncludeInList && filter.page && Number(filter.page) > 1 && existingIdx === -1) {
+                    shouldIncludeInList = false;
+                }
+            }
+
+            if (existingIdx !== -1) {
+                if (shouldIncludeInList) {
+                    state.notifications[existingIdx] = newNotif;
+                } else {
+                    state.notifications.splice(existingIdx, 1);
+                    if (state.pagination?.totalItems) {
+                        state.pagination.totalItems = Math.max(0, state.pagination.totalItems - 1);
+                    }
+                }
+            } else if (shouldIncludeInList) {
                 state.notifications.unshift(newNotif);
                 if (state.pagination) {
                     state.pagination.totalItems = (state.pagination.totalItems || 0) + 1;
+                    const limit = Number(state.pagination.limit) || 10;
+                    if (state.notifications.length > limit) {
+                        state.notifications.pop();
+                    }
                 }
-            } else {
-                state.notifications[existingIdx] = newNotif;
             }
 
             if (existingDropdownIdx === -1) {
@@ -188,12 +241,18 @@ const adminNotificationsSlice = createSlice({
     extraReducers: (builder) => {
         builder
             // Fetch notifications
-            .addCase(fetchAdminNotifications.pending, (state) => {
+            .addCase(fetchAdminNotifications.pending, (state, action) => {
                 state.loading = true;
                 state.error = null;
+                if (action.meta?.arg) {
+                    state.currentFilter = action.meta.arg;
+                }
             })
             .addCase(fetchAdminNotifications.fulfilled, (state, action) => {
                 state.loading = false;
+                if (action.meta?.arg) {
+                    state.currentFilter = action.meta.arg;
+                }
                 const payload = action.payload?.data || action.payload || {};
                 state.notifications = Array.isArray(payload.notifications) ? payload.notifications : [];
                 state.pagination = payload.pagination || initialState.pagination;
@@ -259,6 +318,76 @@ const adminNotificationsSlice = createSlice({
             .addCase(markAdminNotificationRead.rejected, (state, action) => {
                 state.markingRead = false;
                 state.error = action.payload || "Failed to mark notification read";
+            })
+
+            // Mark category notifications read
+            .addCase(markAdminCategoryNotificationsRead.pending, (state) => {
+                state.markingAllRead = true;
+            })
+            .addCase(markAdminCategoryNotificationsRead.fulfilled, (state, action) => {
+                state.markingAllRead = false;
+                const category = action.payload?.category || action.meta?.arg;
+                const responseData = action.payload?.response?.data || action.payload?.response;
+                const markedIds = Array.isArray(responseData?.markedNotificationIds)
+                    ? responseData.markedNotificationIds.map(String)
+                    : [];
+                const markedIdSet = new Set(markedIds);
+
+                const nowIso = new Date().toISOString();
+                const targetCat = category && typeof category === "string" ? category.toLowerCase().trim() : "";
+
+                const isMatch = (item) => {
+                    if (!item) return false;
+                    if (markedIdSet.has(String(item._id))) return true;
+                    if (!targetCat || targetCat === "all") return true;
+
+                    const entityType = String(item.entityType || "").toLowerCase().trim();
+                    const itemCat = String(item.category || "").toLowerCase().trim();
+
+                    if (entityType === targetCat || itemCat === targetCat) return true;
+                    if (`${entityType}s` === targetCat || `${targetCat}s` === entityType) return true;
+                    if (`${itemCat}s` === targetCat || `${targetCat}s` === itemCat) return true;
+
+                    return false;
+                };
+
+                let flippedCount = 0;
+
+                state.notifications = state.notifications.map((item) => {
+                    if (isMatch(item) && !item.isRead) {
+                        flippedCount += 1;
+                        return {
+                            ...item,
+                            isRead: true,
+                            readAt: item.readAt || nowIso
+                        };
+                    }
+                    return item;
+                });
+
+                state.dropdownNotifications = state.dropdownNotifications.map((item) => {
+                    if (isMatch(item) && !item.isRead) {
+                        return {
+                            ...item,
+                            isRead: true,
+                            readAt: item.readAt || nowIso
+                        };
+                    }
+                    return item;
+                });
+
+                if (typeof action.payload?.unreadCount === "number") {
+                    state.unreadCount = action.payload.unreadCount;
+                } else {
+                    const decrementBy = typeof responseData?.modifiedCount === "number"
+                        ? responseData.modifiedCount
+                        : flippedCount;
+                    state.unreadCount = Math.max(0, (Number(state.unreadCount) || 0) - decrementBy);
+                }
+            })
+            .addCase(markAdminCategoryNotificationsRead.rejected, (state, action) => {
+                state.markingAllRead = false;
+                state.error = action.payload || "Failed to mark category notifications read";
             })
 
             // Mark all read

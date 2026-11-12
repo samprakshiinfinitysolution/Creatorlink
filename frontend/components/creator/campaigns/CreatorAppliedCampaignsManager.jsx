@@ -753,13 +753,13 @@ export default function CreatorAppliedCampaignsManager() {
                       </div>
 
                       {/* 2. CAMPAIGN VISUAL BANNER WITH FLOATING BRAND BADGE */}
-                      <div className="h-28 sm:h-32 rounded-xl sm:rounded-2xl overflow-hidden relative border border-neutral-100 dark:border-border-theme/40 bg-surface-muted/60 dark:bg-surface-muted/20">
+                      <div className="h-28 sm:h-32 rounded-xl sm:rounded-2xl overflow-hidden relative border border-neutral-100 dark:border-border-theme/40 bg-surface-muted/60 dark:bg-surface-muted/20 flex items-center justify-center">
                         {(campaignObj.coverImage || campaignObj.image) && !failedImgUrls[bookingId] ? (
                           /* eslint-disable-next-line @next/next/no-img-element */
                           <img
                             src={campaignObj.coverImage || campaignObj.image}
                             alt={campaignObj.title || "Campaign banner"}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            className="w-full h-full object-contain object-center group-hover:scale-105 transition-transform duration-500"
                             onError={() => setFailedImgUrls((prev) => ({ ...prev, [bookingId]: true }))}
                           />
                         ) : (
@@ -781,7 +781,7 @@ export default function CreatorAppliedCampaignsManager() {
                             <img
                               src={brandLogo}
                               alt={brandName}
-                              className="w-3.5 h-3.5 rounded-full object-cover shrink-0"
+                              className="w-3.5 h-3.5 rounded-full object-contain object-center shrink-0"
                             />
                           ) : (
                             <div className="w-3.5 h-3.5 rounded-full bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 flex items-center justify-center text-[8px] font-sans font-semibold shrink-0">
@@ -805,7 +805,7 @@ export default function CreatorAppliedCampaignsManager() {
                             <img
                               src={brandLogo}
                               alt={brandName}
-                              className="w-3.5 h-3.5 rounded-full object-cover shrink-0"
+                              className="w-3.5 h-3.5 rounded-full object-contain object-center shrink-0"
                             />
                           ) : (
                             <div className="w-3.5 h-3.5 rounded-full bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 flex items-center justify-center text-[8px] font-sans font-semibold shrink-0">

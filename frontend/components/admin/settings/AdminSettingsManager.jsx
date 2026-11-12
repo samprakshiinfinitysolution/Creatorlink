@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import axiosInstance from "@/lib/axios";
 import { updateAdminUser } from "@/redux/admin/auth/admin_auth_slice";
@@ -88,6 +88,14 @@ export default function AdminSettingsManager() {
   const [avatarLoading, setAvatarLoading] = useState(false);
   const [profileSuccess, setProfileSuccess] = useState("");
   const [profileError, setProfileError] = useState("");
+  const isNameDirtyRef = useRef(false);
+
+  // Synchronize local name state when adminUser is asynchronously hydrated
+  useEffect(() => {
+    if (adminUser?.name && !isNameDirtyRef.current) {
+      setName(adminUser.name);
+    }
+  }, [adminUser?.name]);
 
   // Password Form State
   const [currentPassword, setCurrentPassword] = useState("");
@@ -102,27 +110,28 @@ export default function AdminSettingsManager() {
 
   // System Info State
   const [systemInfo, setSystemInfo] = useState(null);
+  const [systemLoading, setSystemLoading] = useState(false);
+  const [systemError, setSystemError] = useState("");
+
+  const fetchSystemInfo = useCallback(async () => {
+    try {
+      setSystemLoading(true);
+      setSystemError("");
+      const res = await axiosInstance.get("/admin/settings/system");
+      setSystemInfo(res.data?.data || null);
+    } catch (err) {
+      setSystemError(err.response?.data?.message || "Failed to load platform system telemetry");
+    } finally {
+      setSystemLoading(false);
+    }
+  }, []);
 
   // Load system info when tab is active
   useEffect(() => {
-    let isMounted = true;
     if (activeTab === "system" && !systemInfo) {
-      const fetchSystemInfo = async () => {
-        try {
-          const res = await axiosInstance.get("/admin/settings/system");
-          if (isMounted) {
-            setSystemInfo(res.data?.data || null);
-          }
-        } catch {
-          // Fallback gracefully
-        }
-      };
       fetchSystemInfo();
     }
-    return () => {
-      isMounted = false;
-    };
-  }, [activeTab, systemInfo]);
+  }, [activeTab, systemInfo, fetchSystemInfo]);
 
   // Handle Name update (Email locked)
   const handleUpdateProfile = async (e) => {
@@ -143,6 +152,8 @@ export default function AdminSettingsManager() {
       const updatedUser = res.data?.data;
       if (updatedUser) {
         dispatch(updateAdminUser(updatedUser));
+        isNameDirtyRef.current = false;
+        setName(updatedUser.name);
       }
       setProfileSuccess("Admin profile updated successfully.");
       setTimeout(() => setProfileSuccess(""), 4000);
@@ -183,6 +194,8 @@ export default function AdminSettingsManager() {
       const updatedUser = res.data?.data;
       if (updatedUser) {
         dispatch(updateAdminUser(updatedUser));
+        isNameDirtyRef.current = false;
+        setName(updatedUser.name);
       }
       setProfileSuccess("Profile picture uploaded successfully.");
       setTimeout(() => setProfileSuccess(""), 4000);
@@ -205,6 +218,8 @@ export default function AdminSettingsManager() {
       const updatedUser = res.data?.data;
       if (updatedUser) {
         dispatch(updateAdminUser(updatedUser));
+        isNameDirtyRef.current = false;
+        setName(updatedUser.name);
       }
       setProfileSuccess("Profile picture removed successfully.");
       setTimeout(() => setProfileSuccess(""), 4000);
@@ -411,7 +426,10 @@ export default function AdminSettingsManager() {
                 <input
                   type="text"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={(e) => {
+                    isNameDirtyRef.current = true;
+                    setName(e.target.value);
+                  }}
                   placeholder="e.g. Sakshi"
                   required
                   className="w-full px-4 py-2.5 rounded-xl bg-surface-muted border border-border-theme text-foreground text-sm focus:outline-none focus:border-secondary transition-colors"
@@ -593,25 +611,57 @@ export default function AdminSettingsManager() {
       {/* TAB 3: SYSTEM TELEMETRY */}
       {activeTab === "system" && (
         <div className="p-6 sm:p-8 rounded-3xl bg-surface border border-border-theme shadow-xs space-y-6">
-          <div>
-            <h3 className="text-base font-bold text-foreground">Platform Telemetry & Infrastructure</h3>
-            <p className="text-xs text-text-secondary">Core server runtime status, cloud services, and environment config.</p>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h3 className="text-base font-bold text-foreground">Platform Telemetry & Infrastructure</h3>
+              <p className="text-xs text-text-secondary">Core server runtime status, cloud services, and environment config.</p>
+            </div>
+            {systemInfo && (
+              <button
+                type="button"
+                onClick={fetchSystemInfo}
+                disabled={systemLoading}
+                className="px-3 py-1.5 rounded-xl border border-border-theme text-xs font-semibold hover:bg-surface-muted transition-colors cursor-pointer self-start sm:self-auto disabled:opacity-50"
+              >
+                {systemLoading ? "Refreshing..." : "Refresh"}
+              </button>
+            )}
           </div>
+
+          {systemError && (
+            <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-xs sm:text-sm text-rose-600 dark:text-rose-400 font-medium flex items-center justify-between gap-3">
+              <span>{systemError}</span>
+              <button
+                type="button"
+                onClick={fetchSystemInfo}
+                disabled={systemLoading}
+                className="underline hover:no-underline font-semibold ml-4 cursor-pointer shrink-0 disabled:opacity-50"
+              >
+                {systemLoading ? "Retrying..." : "Retry"}
+              </button>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="p-5 rounded-2xl bg-surface-muted border border-border-theme space-y-1">
               <span className="text-[11px] font-semibold uppercase tracking-wider text-text-secondary">Server Environment</span>
-              <p className="text-sm font-bold text-foreground capitalize">{systemInfo?.environment || "Development"}</p>
+              <p className="text-sm font-bold text-foreground capitalize">
+                {systemLoading && !systemInfo ? "Loading..." : (systemInfo?.environment || "Development")}
+              </p>
             </div>
 
             <div className="p-5 rounded-2xl bg-surface-muted border border-border-theme space-y-1">
               <span className="text-[11px] font-semibold uppercase tracking-wider text-text-secondary">Node.js Runtime</span>
-              <p className="text-sm font-bold text-foreground">{systemInfo?.nodeVersion || process.version || "v24.x"}</p>
+              <p className="text-sm font-bold text-foreground">
+                {systemLoading && !systemInfo ? "Loading..." : (systemInfo?.nodeVersion || process.version || "v24.x")}
+              </p>
             </div>
 
             <div className="p-5 rounded-2xl bg-surface-muted border border-border-theme space-y-1">
               <span className="text-[11px] font-semibold uppercase tracking-wider text-text-secondary">Memory RSS</span>
-              <p className="text-sm font-bold text-foreground">{systemInfo?.memoryUsageMB ? `${systemInfo.memoryUsageMB} MB` : "Active"}</p>
+              <p className="text-sm font-bold text-foreground">
+                {systemLoading && !systemInfo ? "Loading..." : (systemInfo?.memoryUsageMB ? `${systemInfo.memoryUsageMB} MB` : "Active")}
+              </p>
             </div>
 
             <div className="p-5 rounded-2xl bg-surface-muted border border-border-theme space-y-1">

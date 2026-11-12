@@ -96,7 +96,7 @@ export function PortfolioCardCover({ coverImage, title, category, isPublic, chil
             decoding="async"
             onLoad={() => setLoadedUrl(coverImage)}
             onError={() => setFailedUrl(coverImage)}
-            className={`w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-out ${
+            className={`w-full h-full object-contain object-center group-hover:scale-105 transition-transform duration-500 ease-out ${
               isImgLoaded ? "opacity-100" : "opacity-0"
             }`}
           />
@@ -528,7 +528,7 @@ export default function PortfolioFormModal({
                       key={formData.coverImage}
                       src={formData.coverImage}
                       alt="Cover preview"
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain object-center"
                       onError={(e) => {
                         e.currentTarget.style.display = "none";
                       }}

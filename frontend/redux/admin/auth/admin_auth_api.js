@@ -12,6 +12,12 @@ export const getAdminMeApi = async () => {
     return response.data;
 };
 
+// Refreshes admin access token via dedicated Admin /refresh endpoint
+export const adminRefreshTokenApi = async () => {
+    const response = await axiosInstance.post("/admin/auth/refresh");
+    return response.data;
+};
+
 // Logs out Admin and clears dedicated admin cookies
 export const adminLogoutApi = async () => {
     const response = await axiosInstance.post("/admin/auth/logout");

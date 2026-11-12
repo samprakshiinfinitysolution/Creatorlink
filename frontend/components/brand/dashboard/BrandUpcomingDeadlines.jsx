@@ -57,7 +57,7 @@ function DeliverableAvatar({ title, coverImage, thumbnail, fallbackText = "DL" }
           key={imageSrc}
           src={imageSrc}
           alt={title || "Deliverable"}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain object-center"
           onError={() => setFailedUrl(imageSrc)}
         />
       </div>

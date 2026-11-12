@@ -258,7 +258,7 @@ export function ServiceCardCover({ coverImage, title, children }) {
           key={coverImage}
           src={coverImage}
           alt={title || "Service cover preview"}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+          className="w-full h-full object-contain object-center group-hover:scale-105 transition-transform duration-500 ease-out"
           onError={() => setFailedUrl(coverImage)}
         />
       ) : (
@@ -736,7 +736,7 @@ function ServiceFormModalContent({
                         key={formData.coverImage}
                         src={formData.coverImage}
                         alt="Service cover preview"
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-contain object-center"
                         onError={() => setPreviewErrorUrl(formData.coverImage)}
                       />
                     )}

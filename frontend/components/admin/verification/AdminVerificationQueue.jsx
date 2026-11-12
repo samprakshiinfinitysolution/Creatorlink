@@ -68,12 +68,23 @@ export default function AdminVerificationQueue() {
   const { adminUser } = useSelector((state) => state.adminAuth || {});
 
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [modalOpen, setModalOpen] = useState(false);
+
+  // Debounce search input by 400ms to prevent network requests on every keystroke
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search.trim());
+      setPage(1);
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [search]);
 
   const loadVerifications = useCallback(() => {
     dispatch(
@@ -83,10 +94,15 @@ export default function AdminVerificationQueue() {
         role: roleFilter,
         status: statusFilter,
         sortBy,
-        search: search.trim()
+        search: debouncedSearch
       })
     );
-  }, [dispatch, page, limit, roleFilter, statusFilter, sortBy, search]);
+  }, [dispatch, page, limit, roleFilter, statusFilter, sortBy, debouncedSearch]);
+
+  const loadVerificationsRef = useRef(loadVerifications);
+  useEffect(() => {
+    loadVerificationsRef.current = loadVerifications;
+  }, [loadVerifications]);
 
   useEffect(() => {
     loadVerifications();
@@ -103,7 +119,9 @@ export default function AdminVerificationQueue() {
       if (payload.request) {
         dispatch(updateRealtimeVerificationItem(payload.request));
       }
-      loadVerifications();
+      if (typeof loadVerificationsRef.current === "function") {
+        loadVerificationsRef.current();
+      }
     };
 
     const handleApplicantProfileUpdated = (payload) => {
@@ -119,7 +137,7 @@ export default function AdminVerificationQueue() {
       socket.off("verification:queue_updated", handleQueueUpdated);
       socket.off("verification:applicant_profile_updated", handleApplicantProfileUpdated);
     };
-  }, [dispatch, adminUser, loadVerifications]);
+  }, [dispatch, adminUser]);
 
   const router = useRouter();
   const pathname = usePathname();
@@ -256,8 +274,13 @@ export default function AdminVerificationQueue() {
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    setPage(1);
-    loadVerifications();
+    const cleanSearch = search.trim();
+    if (cleanSearch !== debouncedSearch) {
+      setDebouncedSearch(cleanSearch);
+      setPage(1);
+    } else {
+      loadVerifications();
+    }
   };
 
   return (
@@ -371,8 +394,15 @@ export default function AdminVerificationQueue() {
 
       {/* Error Alert */}
       {error && (
-        <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-600 dark:text-rose-400 text-sm">
-          {error}
+        <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-600 dark:text-rose-400 text-sm flex items-center justify-between gap-3">
+          <span>{error}</span>
+          <button
+            type="button"
+            onClick={loadVerifications}
+            className="underline hover:no-underline font-semibold ml-4 cursor-pointer shrink-0"
+          >
+            Retry
+          </button>
         </div>
       )}
 

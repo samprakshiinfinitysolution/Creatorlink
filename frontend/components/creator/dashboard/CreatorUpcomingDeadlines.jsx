@@ -29,7 +29,7 @@ function DeliverableCoverBadge({ title, coverImage, fallbackText = "DL" }) {
           key={rawSrc}
           src={rawSrc}
           alt={title || "Deliverable"}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain object-center"
           onError={() => setHasError(true)}
         />
       </div>

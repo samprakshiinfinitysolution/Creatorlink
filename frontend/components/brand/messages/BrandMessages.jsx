@@ -123,7 +123,7 @@ function ProfileAvatar({ image, name, initials, sizeClassName = "w-10 h-10", cla
           src={image}
           alt={name || "Profile avatar"}
           onError={() => setFailedUrl(image)}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain object-center"
         />
       </div>
     );

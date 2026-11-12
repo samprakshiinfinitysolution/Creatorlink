@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchAdminUsers,
@@ -74,6 +74,11 @@ export default function AdminUsersManager() {
     dispatch(fetchAdminUsers(params));
   }, [dispatch, page, search, selectedRole, selectedVerification, sortBy]);
 
+  const loadUsersRef = useRef(loadUsers);
+  useEffect(() => {
+    loadUsersRef.current = loadUsers;
+  }, [loadUsers]);
+
   // Real-time synchronization for verification and profile updates
   useEffect(() => {
     const adminId = adminUser?._id || adminUser?.id || "admin_session";
@@ -81,7 +86,9 @@ export default function AdminUsersManager() {
     registerSocketConsumer(consumerId, adminId);
 
     const handleRealtimeUpdate = () => {
-      loadUsers();
+      if (typeof loadUsersRef.current === "function") {
+        loadUsersRef.current();
+      }
     };
 
     socket.on("verification:queue_updated", handleRealtimeUpdate);
@@ -92,7 +99,7 @@ export default function AdminUsersManager() {
       socket.off("verification:queue_updated", handleRealtimeUpdate);
       socket.off("verification:applicant_profile_updated", handleRealtimeUpdate);
     };
-  }, [adminUser, loadUsers]);
+  }, [adminUser]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -206,8 +213,15 @@ export default function AdminUsersManager() {
 
       {/* Error Alert */}
       {error && (
-        <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-medium">
-          {error}
+        <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-medium flex items-center justify-between">
+          <span>{error}</span>
+          <button
+            type="button"
+            onClick={loadUsers}
+            className="underline hover:no-underline font-semibold ml-4 cursor-pointer"
+          >
+            Retry
+          </button>
         </div>
       )}
 
@@ -220,7 +234,7 @@ export default function AdminUsersManager() {
                 <th className="py-3.5 px-4 sm:px-6">User</th>
                 <th className="py-3.5 px-4">Role</th>
                 <th className="py-3.5 px-4">Profile Info</th>
-                <th className="py-3.5 px-4">Status</th>
+                <th className="py-3.5 px-4">Verification</th>
                 <th className="py-3.5 px-4">Joined</th>
                 <th className="py-3.5 px-4 sm:px-6 text-right">Action</th>
               </tr>

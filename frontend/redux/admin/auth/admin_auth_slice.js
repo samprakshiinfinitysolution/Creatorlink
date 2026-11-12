@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import {
     adminLoginApi,
     getAdminMeApi,
+    adminRefreshTokenApi,
     adminLogoutApi
 } from "./admin_auth_api";
 
@@ -28,6 +29,25 @@ export const getAdminMe = createAsyncThunk(
         } catch (error) {
             return rejectWithValue(
                 error.response?.data?.message || "Failed to restore admin session"
+            );
+        }
+    }
+);
+
+// Async thunk for Admin Token Refresh
+export const adminRefreshToken = createAsyncThunk(
+    "adminAuth/adminRefreshToken",
+    async (_, { rejectWithValue }) => {
+        try {
+            return await adminRefreshTokenApi();
+        } catch (error) {
+            const isAuthFailure =
+                error.response?.status === 401 ||
+                error.response?.status === 403;
+            return rejectWithValue(
+                error.response?.data?.message ||
+                (isAuthFailure ? "Admin session expired" : "Failed to refresh admin token"),
+                { isAuthFailure }
             );
         }
     }
@@ -107,6 +127,19 @@ const adminAuthSlice = createSlice({
                 state.adminUser = null;
                 state.isChecking = false;
                 state.error = null;
+            })
+
+            // Admin Token Refresh
+            .addCase(adminRefreshToken.fulfilled, (state, action) => {
+                const user = action.payload?.data?.user || action.payload?.user;
+                if (user) {
+                    state.adminUser = user;
+                }
+            })
+            .addCase(adminRefreshToken.rejected, (state, action) => {
+                if (action.payload?.isAuthFailure) {
+                    state.adminUser = null;
+                }
             });
     }
 });

@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import { OAuth2Client } from "google-auth-library";
 import Auth from "./auth.model.js";
+import PendingRegistration from "./pendingRegistration.model.js";
 
 import createApiError from "../../utils/ApiError.js";
 
@@ -33,11 +34,13 @@ const hashOtp = (otp) => {
 
 
 // Registers a new creator or brand user and sends an email verification OTP.
+// Pending registration is temporarily stored in PendingRegistration without creating an Auth document.
 
 const registerUser = async ({ name, email, password, role }) => {
 
     const normalizedEmail = (email || "").trim().toLowerCase();
 
+    // 1. Verify account is not already registered and verified
     const existingUser = await Auth.findOne({ email: normalizedEmail });
 
     if (existingUser && existingUser.isVerified) {
@@ -47,15 +50,16 @@ const registerUser = async ({ name, email, password, role }) => {
         );
     }
 
-    // Prevent repeated signup requests from bypassing the 60s resend cooldown.
+    // 2. Prevent repeated signup requests from bypassing the 60s resend cooldown.
+    const existingPending = await PendingRegistration.findOne({ email: normalizedEmail });
+
     if (
-        existingUser &&
-        !existingUser.isVerified &&
-        existingUser.emailVerificationOtpResendAvailableAt &&
-        existingUser.emailVerificationOtpResendAvailableAt > new Date()
+        existingPending &&
+        existingPending.resendAvailableAt &&
+        existingPending.resendAvailableAt > new Date()
     ) {
         const remainingSec = Math.ceil(
-            (existingUser.emailVerificationOtpResendAvailableAt.getTime() - Date.now()) / 1000
+            (existingPending.resendAvailableAt.getTime() - Date.now()) / 1000
         );
         throw createApiError(
             429,
@@ -68,39 +72,48 @@ const registerUser = async ({ name, email, password, role }) => {
     const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
     const resendCooldown = new Date(Date.now() + 60 * 1000);  // 60 seconds
 
-    let user;
-    let isNewUser = false;
+    let pending;
+    let isNewPending = false;
     let previousState = null;
 
-    if (existingUser && !existingUser.isVerified) {
+    const hashedPassword = await hashPassword(password);
+
+    if (existingPending) {
         // Capture previous unverified OTP state for safe rollback on email failure
         previousState = {
-            emailVerificationOtp: existingUser.emailVerificationOtp,
-            emailVerificationOtpExpire: existingUser.emailVerificationOtpExpire,
-            emailVerificationOtpAttempts: existingUser.emailVerificationOtpAttempts,
-            emailVerificationOtpResendAvailableAt: existingUser.emailVerificationOtpResendAvailableAt
+            name: existingPending.name,
+            password: existingPending.password,
+            role: existingPending.role,
+            otpHash: existingPending.otpHash,
+            otpExpire: existingPending.otpExpire,
+            attempts: existingPending.attempts,
+            resendAvailableAt: existingPending.resendAvailableAt,
+            expiresAt: existingPending.expiresAt
         };
 
-        // Reuse unverified pending registration: refresh OTP without overwriting original name, password, or role
-        existingUser.emailVerificationOtp = hashedOtp;
-        existingUser.emailVerificationOtpExpire = otpExpiry;
-        existingUser.emailVerificationOtpAttempts = 0;
-        existingUser.emailVerificationOtpResendAvailableAt = resendCooldown;
-        await existingUser.save();
-        user = existingUser;
+        // Reuse existing pending registration: refresh OTP, name, role and hashed password
+        existingPending.name = name.trim();
+        existingPending.password = hashedPassword;
+        existingPending.role = role;
+        existingPending.otpHash = hashedOtp;
+        existingPending.otpExpire = otpExpiry;
+        existingPending.attempts = 0;
+        existingPending.resendAvailableAt = resendCooldown;
+        existingPending.expiresAt = otpExpiry;
+        await existingPending.save();
+        pending = existingPending;
     } else {
-        isNewUser = true;
-        const hashedPassword = await hashPassword(password);
-        user = await Auth.create({
+        isNewPending = true;
+        pending = await PendingRegistration.create({
             name: name.trim(),
             email: normalizedEmail,
             password: hashedPassword,
             role,
-            isVerified: false,
-            emailVerificationOtp: hashedOtp,
-            emailVerificationOtpExpire: otpExpiry,
-            emailVerificationOtpAttempts: 0,
-            emailVerificationOtpResendAvailableAt: resendCooldown
+            otpHash: hashedOtp,
+            otpExpire: otpExpiry,
+            attempts: 0,
+            resendAvailableAt: resendCooldown,
+            expiresAt: otpExpiry
         });
     }
 
@@ -130,34 +143,31 @@ const registerUser = async ({ name, email, password, role }) => {
 
     try {
         await sendEmail({
-            to: user.email,
+            to: normalizedEmail,
             subject,
             text,
             html
         });
     } catch (error) {
-        if (isNewUser) {
-            await Auth.findByIdAndDelete(user._id);
+        if (isNewPending) {
+            await PendingRegistration.findByIdAndDelete(pending._id);
         } else if (previousState) {
-            user.emailVerificationOtp = previousState.emailVerificationOtp;
-            user.emailVerificationOtpExpire = previousState.emailVerificationOtpExpire;
-            user.emailVerificationOtpAttempts = previousState.emailVerificationOtpAttempts;
-            user.emailVerificationOtpResendAvailableAt = previousState.emailVerificationOtpResendAvailableAt;
-            await user.save();
+            pending.name = previousState.name;
+            pending.password = previousState.password;
+            pending.role = previousState.role;
+            pending.otpHash = previousState.otpHash;
+            pending.otpExpire = previousState.otpExpire;
+            pending.attempts = previousState.attempts;
+            pending.resendAvailableAt = previousState.resendAvailableAt;
+            pending.expiresAt = previousState.expiresAt;
+            await pending.save();
         }
         throw error;
     }
 
-    // Ensure pending Admin Verification record exists for registered Creator or Brand
-    try {
-        await ensureUserVerificationRecord(user);
-    } catch (verifErr) {
-        console.error("Failed to ensure verification record in registerUser:", verifErr);
-    }
-
     return {
         message: "Verification code sent to your email. Please check your inbox.",
-        email: user.email
+        email: normalizedEmail
     };
 };
 
@@ -754,70 +764,8 @@ const googleAuthUser = async ({ idToken, credential, code, role = "creator" }) =
 };
 
 
-// Verifies the user's email OTP and activates their account.
-
-const verifyEmailOtp = async ({ email, otp }) => {
-
-    const normalizedEmail = (email || "").trim().toLowerCase();
-
-    const user = await Auth.findOne({ email: normalizedEmail });
-
-    if (!user) {
-        throw createApiError(
-            404,
-            "Registration record not found for this email"
-        );
-    }
-
-    if (user.isVerified) {
-        throw createApiError(
-            400,
-            "Account is already verified. Please log in."
-        );
-    }
-
-    if (!user.emailVerificationOtp || !user.emailVerificationOtpExpire) {
-        throw createApiError(
-            400,
-            "No pending verification code found. Please request a new code."
-        );
-    }
-
-    if (user.emailVerificationOtpExpire < new Date()) {
-        throw createApiError(
-            400,
-            "Verification code has expired. Please request a new code."
-        );
-    }
-
-    if (user.emailVerificationOtpAttempts >= 5) {
-        throw createApiError(
-            429,
-            "Maximum verification attempts exceeded. Please request a new verification code."
-        );
-    }
-
-    const hashedInput = hashOtp(otp);
-
-    if (hashedInput !== user.emailVerificationOtp) {
-        user.emailVerificationOtpAttempts = (user.emailVerificationOtpAttempts || 0) + 1;
-        await user.save();
-        const attemptsLeft = 5 - user.emailVerificationOtpAttempts;
-        throw createApiError(
-            400,
-            attemptsLeft > 0
-                ? `Invalid verification code. ${attemptsLeft} attempt${attemptsLeft === 1 ? "" : "s"} remaining.`
-                : "Invalid verification code. Maximum attempts exceeded. Please request a new code."
-        );
-    }
-
-    // Success: mark verified and invalidate OTP
-    user.isVerified = true;
-    user.emailVerificationOtp = undefined;
-    user.emailVerificationOtpExpire = undefined;
-    user.emailVerificationOtpAttempts = 0;
-    user.emailVerificationOtpResendAvailableAt = undefined;
-
+// Finalizes session and profiles for a verified Auth document.
+const finalizeVerifiedAuthSession = async (user) => {
     // Issue access and refresh tokens
     const tokenPayload = {
         userId: user._id.toString(),
@@ -886,30 +834,191 @@ const verifyEmailOtp = async ({ email, otp }) => {
 };
 
 
+// Verifies the user's email OTP and creates/activates their account in MongoDB only upon success.
+
+const verifyEmailOtp = async ({ email, otp }) => {
+
+    const normalizedEmail = (email || "").trim().toLowerCase();
+
+    // 1. Check if already registered and verified
+    const existingVerifiedUser = await Auth.findOne({ email: normalizedEmail, isVerified: true });
+    if (existingVerifiedUser) {
+        throw createApiError(
+            400,
+            "Account is already verified. Please log in."
+        );
+    }
+
+    // 2. Lookup pending registration
+    const pending = await PendingRegistration.findOne({ email: normalizedEmail });
+
+    // Handle legacy unverified Auth record if pending does not exist
+    if (!pending) {
+        const legacyUser = await Auth.findOne({ email: normalizedEmail, isVerified: false });
+        if (legacyUser) {
+            if (!legacyUser.emailVerificationOtp || !legacyUser.emailVerificationOtpExpire) {
+                throw createApiError(
+                    400,
+                    "No pending verification code found. Please request a new code."
+                );
+            }
+            if (legacyUser.emailVerificationOtpExpire < new Date()) {
+                throw createApiError(
+                    400,
+                    "Verification code has expired. Please request a new code."
+                );
+            }
+            if (legacyUser.emailVerificationOtpAttempts >= 5) {
+                throw createApiError(
+                    429,
+                    "Maximum verification attempts exceeded. Please request a new verification code."
+                );
+            }
+            const hashedInput = hashOtp(otp);
+            if (hashedInput !== legacyUser.emailVerificationOtp) {
+                legacyUser.emailVerificationOtpAttempts = (legacyUser.emailVerificationOtpAttempts || 0) + 1;
+                await legacyUser.save();
+                const attemptsLeft = 5 - legacyUser.emailVerificationOtpAttempts;
+                throw createApiError(
+                    400,
+                    attemptsLeft > 0
+                        ? `Invalid verification code. ${attemptsLeft} attempt${attemptsLeft === 1 ? "" : "s"} remaining.`
+                        : "Invalid verification code. Maximum attempts exceeded. Please request a new code."
+                );
+            }
+            legacyUser.isVerified = true;
+            legacyUser.emailVerificationOtp = undefined;
+            legacyUser.emailVerificationOtpExpire = undefined;
+            legacyUser.emailVerificationOtpAttempts = 0;
+            legacyUser.emailVerificationOtpResendAvailableAt = undefined;
+            await legacyUser.save();
+            return finalizeVerifiedAuthSession(legacyUser);
+        }
+
+        throw createApiError(
+            404,
+            "Registration record not found or expired. Please sign up again."
+        );
+    }
+
+    if (pending.otpExpire < new Date()) {
+        await PendingRegistration.findByIdAndDelete(pending._id);
+        throw createApiError(
+            400,
+            "Verification code has expired. Please request a new code."
+        );
+    }
+
+    if (pending.attempts >= 5) {
+        throw createApiError(
+            429,
+            "Maximum verification attempts exceeded. Please request a new verification code."
+        );
+    }
+
+    const hashedInput = hashOtp(otp);
+
+    if (hashedInput !== pending.otpHash) {
+        pending.attempts = (pending.attempts || 0) + 1;
+        await pending.save();
+        const attemptsLeft = 5 - pending.attempts;
+        throw createApiError(
+            400,
+            attemptsLeft > 0
+                ? `Invalid verification code. ${attemptsLeft} attempt${attemptsLeft === 1 ? "" : "s"} remaining.`
+                : "Invalid verification code. Maximum attempts exceeded. Please request a new code."
+        );
+    }
+
+    // Create verified Auth document (or update if legacy unverified exists)
+    // Pending registration is preserved until Auth creation/confirmation succeeds
+    let user = await Auth.findOne({ email: normalizedEmail });
+
+    if (user) {
+        if (user.isVerified) {
+            // Already verified: delete pending registration and return session
+            await PendingRegistration.findByIdAndDelete(pending._id);
+            return finalizeVerifiedAuthSession(user);
+        }
+
+        // Legacy unverified account: update in-place to verified
+        user.name = pending.name;
+        user.password = pending.password;
+        user.role = pending.role;
+        user.isVerified = true;
+        user.emailVerificationOtp = undefined;
+        user.emailVerificationOtpExpire = undefined;
+        user.emailVerificationOtpAttempts = 0;
+        user.emailVerificationOtpResendAvailableAt = undefined;
+        await user.save();
+    } else {
+        // Standard flow: create new verified Auth document
+        try {
+            user = await Auth.create({
+                name: pending.name,
+                email: pending.email,
+                password: pending.password, // Already bcrypt-hashed
+                role: pending.role,
+                isVerified: true
+            });
+        } catch (createErr) {
+            // Handle concurrent verification request duplicate key collision gracefully
+            if (createErr.code === 11000) {
+                const existingCreatedUser = await Auth.findOne({ email: normalizedEmail });
+                if (
+                    existingCreatedUser &&
+                    existingCreatedUser.email === normalizedEmail &&
+                    existingCreatedUser.isVerified
+                ) {
+                    user = existingCreatedUser;
+                } else {
+                    throw createErr;
+                }
+            } else {
+                // Genuine database failure: DO NOT delete pending registration so user can retry
+                throw createErr;
+            }
+        }
+    }
+
+    // Delete pending registration ONLY after Auth creation or confirmation succeeds
+    await PendingRegistration.findByIdAndDelete(pending._id);
+
+    return finalizeVerifiedAuthSession(user);
+};
+
+
 // Resends email verification OTP to pending unverified accounts.
 
 const resendVerificationOtp = async (email) => {
 
     const normalizedEmail = (email || "").trim().toLowerCase();
 
-    const user = await Auth.findOne({ email: normalizedEmail });
-
-    if (!user) {
-        throw createApiError(
-            404,
-            "No pending registration found for this email"
-        );
-    }
-
-    if (user.isVerified) {
+    // 1. Check if already verified
+    const verifiedUser = await Auth.findOne({ email: normalizedEmail, isVerified: true });
+    if (verifiedUser) {
         throw createApiError(
             400,
             "This account is already verified. Please log in."
         );
     }
 
-    if (user.emailVerificationOtpResendAvailableAt && user.emailVerificationOtpResendAvailableAt > new Date()) {
-        const remainingSec = Math.ceil((user.emailVerificationOtpResendAvailableAt.getTime() - Date.now()) / 1000);
+    // 2. Find pending registration (or legacy unverified user)
+    const pending = await PendingRegistration.findOne({ email: normalizedEmail });
+    const legacyUser = !pending ? await Auth.findOne({ email: normalizedEmail, isVerified: false }) : null;
+
+    if (!pending && !legacyUser) {
+        throw createApiError(
+            404,
+            "No pending registration found for this email. Please sign up first."
+        );
+    }
+
+    const targetRecord = pending || legacyUser;
+    const cooldownField = pending ? targetRecord.resendAvailableAt : targetRecord.emailVerificationOtpResendAvailableAt;
+
+    if (cooldownField && cooldownField > new Date()) {
+        const remainingSec = Math.ceil((cooldownField.getTime() - Date.now()) / 1000);
         throw createApiError(
             429,
             `Please wait ${remainingSec} seconds before requesting a new code.`
@@ -920,19 +1029,6 @@ const resendVerificationOtp = async (email) => {
     const hashedOtp = hashOtp(rawOtp);
     const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
     const resendCooldown = new Date(Date.now() + 60 * 1000);  // 60 seconds
-
-    // Snapshot existing OTP state for rollback if email delivery fails
-    const previousOtp = user.emailVerificationOtp;
-    const previousExpire = user.emailVerificationOtpExpire;
-    const previousAttempts = user.emailVerificationOtpAttempts;
-    const previousResendAvailableAt = user.emailVerificationOtpResendAvailableAt;
-
-    user.emailVerificationOtp = hashedOtp;
-    user.emailVerificationOtpExpire = otpExpiry;
-    user.emailVerificationOtpAttempts = 0;
-    user.emailVerificationOtpResendAvailableAt = resendCooldown;
-
-    await user.save();
 
     const subject = "Your New CreatorLink Verification Code";
     const text = `Your new CreatorLink email verification code is: ${rawOtp}\n\nThis code will expire in 10 minutes.\n\nIf you did not request this, please ignore this email.`;
@@ -958,22 +1054,65 @@ const resendVerificationOtp = async (email) => {
         </div>
     `;
 
-    try {
-        await sendEmail({
-            to: user.email,
-            subject,
-            text,
-            html
-        });
-    } catch (error) {
+    if (pending) {
+        const previousState = {
+            otpHash: pending.otpHash,
+            otpExpire: pending.otpExpire,
+            attempts: pending.attempts,
+            resendAvailableAt: pending.resendAvailableAt,
+            expiresAt: pending.expiresAt
+        };
 
-        // Roll back to previous OTP state so the user is not left with an undelivered code
-        user.emailVerificationOtp = previousOtp;
-        user.emailVerificationOtpExpire = previousExpire;
-        user.emailVerificationOtpAttempts = previousAttempts;
-        user.emailVerificationOtpResendAvailableAt = previousResendAvailableAt;
-        await user.save();
-        throw error;
+        pending.otpHash = hashedOtp;
+        pending.otpExpire = otpExpiry;
+        pending.attempts = 0;
+        pending.resendAvailableAt = resendCooldown;
+        pending.expiresAt = otpExpiry;
+        await pending.save();
+
+        try {
+            await sendEmail({
+                to: pending.email,
+                subject,
+                text,
+                html
+            });
+        } catch (error) {
+            pending.otpHash = previousState.otpHash;
+            pending.otpExpire = previousState.otpExpire;
+            pending.attempts = previousState.attempts;
+            pending.resendAvailableAt = previousState.resendAvailableAt;
+            pending.expiresAt = previousState.expiresAt;
+            await pending.save();
+            throw error;
+        }
+    } else {
+        const previousOtp = legacyUser.emailVerificationOtp;
+        const previousExpire = legacyUser.emailVerificationOtpExpire;
+        const previousAttempts = legacyUser.emailVerificationOtpAttempts;
+        const previousResendAvailableAt = legacyUser.emailVerificationOtpResendAvailableAt;
+
+        legacyUser.emailVerificationOtp = hashedOtp;
+        legacyUser.emailVerificationOtpExpire = otpExpiry;
+        legacyUser.emailVerificationOtpAttempts = 0;
+        legacyUser.emailVerificationOtpResendAvailableAt = resendCooldown;
+        await legacyUser.save();
+
+        try {
+            await sendEmail({
+                to: legacyUser.email,
+                subject,
+                text,
+                html
+            });
+        } catch (error) {
+            legacyUser.emailVerificationOtp = previousOtp;
+            legacyUser.emailVerificationOtpExpire = previousExpire;
+            legacyUser.emailVerificationOtpAttempts = previousAttempts;
+            legacyUser.emailVerificationOtpResendAvailableAt = previousResendAvailableAt;
+            await legacyUser.save();
+            throw error;
+        }
     }
 
     return {

@@ -272,6 +272,7 @@ const initializeSocket = (httpServer) => {
             socket.join(`user:${socket.data.user.userId}`);
             if (socket.data.user.role === "admin") {
                 socket.join("role:admin");
+                socket.join("admin");
             }
         }
 

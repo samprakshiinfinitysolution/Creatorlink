@@ -701,13 +701,13 @@ export default function CreatorDiscoverCampaignsManager() {
                       </div>
 
                       {/* Campaign Visual Banner with Subtle Ambient Fallback */}
-                      <div className="h-28 sm:h-32 rounded-xl sm:rounded-2xl overflow-hidden relative border border-neutral-100 dark:border-border-theme/40 bg-surface-muted/60 dark:bg-surface-muted/20">
+                      <div className="h-28 sm:h-32 rounded-xl sm:rounded-2xl overflow-hidden relative border border-neutral-100 dark:border-border-theme/40 bg-surface-muted/60 dark:bg-surface-muted/20 flex items-center justify-center">
                         {(campaign.coverImage || campaign.image) && !failedCampaignImgUrls[campaign._id || campaign.id] ? (
                           /* eslint-disable-next-line @next/next/no-img-element */
                           <img
                             src={campaign.coverImage || campaign.image}
                             alt={campaign.title || "Campaign brief banner"}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            className="w-full h-full object-contain object-center group-hover:scale-105 transition-transform duration-500"
                             onError={() =>
                               setFailedCampaignImgUrls((prev) => ({
                                 ...prev,
@@ -734,7 +734,7 @@ export default function CreatorDiscoverCampaignsManager() {
                             <img
                               src={brandLogo}
                               alt={brandName}
-                              className="w-3.5 h-3.5 rounded-full object-cover shrink-0"
+                              className="w-3.5 h-3.5 rounded-full object-contain object-center shrink-0"
                             />
                           ) : (
                             <div className="w-3.5 h-3.5 rounded-full bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 flex items-center justify-center text-[8px] font-sans font-semibold shrink-0">
@@ -758,7 +758,7 @@ export default function CreatorDiscoverCampaignsManager() {
                             <img
                               src={brandLogo}
                               alt={brandName}
-                              className="w-3.5 h-3.5 rounded-full object-cover shrink-0"
+                              className="w-3.5 h-3.5 rounded-full object-contain object-center shrink-0"
                             />
                           ) : (
                             <div className="w-3.5 h-3.5 rounded-full bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 flex items-center justify-center text-[8px] font-sans font-semibold shrink-0">

@@ -86,10 +86,21 @@ export default function AdminCampaignsManager() {
   } = useSelector((state) => state.adminCampaigns || {});
 
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [selectedPlatform, setSelectedPlatform] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
   const [page, setPage] = useState(1);
+
+  // 300ms debounced search to decouple typing from filter & pagination changes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search.trim());
+      setPage(1);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [search]);
 
   // Load campaigns with query params
   const loadData = useCallback(() => {
@@ -100,20 +111,17 @@ export default function AdminCampaignsManager() {
         status: selectedStatus,
         platform: selectedPlatform,
         sortBy,
-        search: search.trim() || undefined
+        search: debouncedSearch || undefined
       })
     );
-  }, [dispatch, page, selectedStatus, selectedPlatform, sortBy, search]);
+  }, [dispatch, page, selectedStatus, selectedPlatform, sortBy, debouncedSearch]);
 
   useEffect(() => {
     dispatch(fetchCampaignStats());
   }, [dispatch]);
 
   useEffect(() => {
-    const handler = setTimeout(() => {
-      loadData();
-    }, 300);
-    return () => clearTimeout(handler);
+    loadData();
   }, [loadData]);
 
   const handleOpenModal = (campaignId) => {
@@ -139,6 +147,7 @@ export default function AdminCampaignsManager() {
 
   const resetFilters = () => {
     setSearch("");
+    setDebouncedSearch("");
     setSelectedStatus("all");
     setSelectedPlatform("all");
     setSortBy("newest");
@@ -314,8 +323,18 @@ export default function AdminCampaignsManager() {
 
       {/* ERROR BANNER */}
       {error && (
-        <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl text-xs sm:text-sm text-rose-600 dark:text-rose-400 font-medium">
-          {error}
+        <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl text-xs sm:text-sm text-rose-600 dark:text-rose-400 font-medium flex items-center justify-between gap-3">
+          <span>{error}</span>
+          <button
+            type="button"
+            onClick={() => {
+              loadData();
+              dispatch(fetchCampaignStats());
+            }}
+            className="underline hover:no-underline font-semibold ml-4 cursor-pointer shrink-0"
+          >
+            Retry
+          </button>
         </div>
       )}
 

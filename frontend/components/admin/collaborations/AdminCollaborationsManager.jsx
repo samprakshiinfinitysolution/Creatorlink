@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchCollaborations,
@@ -88,6 +88,16 @@ export default function AdminCollaborationsManager() {
     );
   }, [dispatch, page, selectedStatus, selectedOverdue, sortBy, search]);
 
+  const loadDataRef = useRef(loadData);
+  useEffect(() => {
+    loadDataRef.current = loadData;
+  }, [loadData]);
+
+  const selectedCollaborationRef = useRef(selectedCollaboration);
+  useEffect(() => {
+    selectedCollaborationRef.current = selectedCollaboration;
+  }, [selectedCollaboration]);
+
   // Real-time synchronization for collaborations lifecycle (submissions, revisions, approvals)
   useEffect(() => {
     const adminId = adminUser?._id || adminUser?.id || "admin_session";
@@ -95,10 +105,13 @@ export default function AdminCollaborationsManager() {
     registerSocketConsumer(consumerId, adminId);
 
     const handleRealtimeWorkspaceEvent = (data) => {
-      loadData();
+      if (typeof loadDataRef.current === "function") {
+        loadDataRef.current();
+      }
       dispatch(fetchCollaborationStats());
-      if (selectedCollaboration?._id && data?.workspaceId && String(selectedCollaboration._id) === String(data.workspaceId)) {
-        dispatch(fetchCollaborationDetails(selectedCollaboration._id));
+      const currentSelected = selectedCollaborationRef.current;
+      if (currentSelected?._id && data?.workspaceId && String(currentSelected._id) === String(data.workspaceId)) {
+        dispatch(fetchCollaborationDetails(currentSelected._id));
       }
     };
 
@@ -112,7 +125,7 @@ export default function AdminCollaborationsManager() {
       socket.off("workspace:revision_requested", handleRealtimeWorkspaceEvent);
       socket.off("workspace:approved", handleRealtimeWorkspaceEvent);
     };
-  }, [adminUser, loadData, dispatch, selectedCollaboration]);
+  }, [adminUser, dispatch]);
 
   useEffect(() => {
     dispatch(fetchCollaborationStats());
@@ -304,8 +317,15 @@ export default function AdminCollaborationsManager() {
 
       {/* ERROR */}
       {error && (
-        <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl text-xs sm:text-sm text-rose-600 dark:text-rose-400 font-medium">
-          {error}
+        <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl text-xs sm:text-sm text-rose-600 dark:text-rose-400 font-medium flex items-center justify-between gap-3">
+          <span>{error}</span>
+          <button
+            type="button"
+            onClick={loadData}
+            className="underline hover:no-underline font-semibold ml-4 cursor-pointer shrink-0"
+          >
+            Retry
+          </button>
         </div>
       )}
 

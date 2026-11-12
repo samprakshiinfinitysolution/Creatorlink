@@ -117,7 +117,7 @@ function BrandAvatar({ brand, name, className = "w-9 h-9 sm:w-10 sm:h-10 text-xs
         <img
           src={imageUrl}
           alt={displayName}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain object-center"
           onError={() => setImageError(true)}
           loading="lazy"
         />
@@ -722,12 +722,12 @@ export default function CreatorBookingsManager() {
                           <td className="py-4 px-4">
                             <div className="flex items-center gap-2.5 max-w-[220px]">
                               {Boolean(booking.campaign?.coverImage) && (
-                                <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-border-theme bg-neutral-100 dark:bg-surface-muted">
+                                <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-border-theme bg-neutral-100 dark:bg-surface-muted flex items-center justify-center">
                                   {/* eslint-disable-next-line @next/next/no-img-element */}
                                   <img
                                     src={booking.campaign.coverImage}
                                     alt={campaignTitle}
-                                    className="w-full h-full object-cover"
+                                    className="w-full h-full object-contain object-center"
                                     loading="lazy"
                                     onError={(e) => {
                                       e.currentTarget.parentElement.style.display = "none";
@@ -949,7 +949,7 @@ export default function CreatorBookingsManager() {
                             <img
                               src={booking.campaign.coverImage}
                               alt={campaignTitle}
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-contain object-center"
                               loading="lazy"
                               onError={(e) => {
                                 e.currentTarget.parentElement.style.display = "none";

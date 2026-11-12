@@ -11,6 +11,7 @@ import {
 import AdminCollaborationDetailModal from "./AdminCollaborationDetailModal";
 import AdminAvatar from "@/components/admin/AdminAvatar";
 import { socket, registerSocketConsumer, unregisterSocketConsumer } from "@/lib/socket";
+import { formatCampaignPlatforms } from "@/lib/campaignPlatforms";
 
 // =========================================================
 // SVG ICONS
@@ -389,7 +390,7 @@ export default function AdminCollaborationsManager() {
                             {collab.campaign?.title || collab.service?.title || "Direct Collaboration"}
                           </div>
                           <div className="text-[10px] text-text-secondary capitalize mt-0.5">
-                            {collab.campaign?.platform || "Direct"} • {collab.campaign?.category || "Services"}
+                            {collab.campaign?.platform ? formatCampaignPlatforms(collab.campaign.platform) : "Direct"} • {collab.campaign?.category || "Services"}
                           </div>
                         </div>
                       </div>

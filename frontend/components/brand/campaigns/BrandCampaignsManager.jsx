@@ -7,6 +7,8 @@ import BrandSidebar from "@/components/brand/dashboard/BrandSidebar";
 import BrandHeader from "@/components/brand/dashboard/BrandHeader";
 import BrandCampaignsHero from "@/components/brand/campaigns/BrandCampaignsHero";
 import BrandBookingDetailModal from "@/components/brand/bookings/BrandBookingDetailModal";
+import TargetPlatformSelector from "@/components/brand/campaigns/TargetPlatformSelector";
+import { normalizeCampaignPlatforms, formatCampaignPlatforms } from "@/lib/campaignPlatforms";
 import { uploadSingleImageApi } from "@/lib/upload";
 import {
   getBrandCampaigns,
@@ -944,7 +946,7 @@ export default function BrandCampaignsManager() {
     description: "",
     category: "",
     coverImage: "",
-    platform: "instagram",
+    platform: ["instagram"],
     budget: "",
     minBudget: "",
     maxBudget: "",
@@ -970,7 +972,7 @@ export default function BrandCampaignsManager() {
     description: "",
     category: "",
     coverImage: "",
-    platform: "instagram",
+    platform: ["instagram"],
     budget: "",
     minBudget: "",
     maxBudget: "",
@@ -1062,7 +1064,7 @@ export default function BrandCampaignsManager() {
           description: selectedCampaign.description || "",
           category: selectedCampaign.category || "",
           coverImage: selectedCampaign.coverImage || selectedCampaign.image || "",
-          platform: selectedCampaign.platform || "instagram",
+          platform: normalizeCampaignPlatforms(selectedCampaign.platform, ["instagram"]),
           budget: selectedCampaign.budget !== undefined ? String(selectedCampaign.budget) : "",
           deadline: formatDateForInput(selectedCampaign.deadline),
           requiredCreators: selectedCampaign.requiredCreators !== undefined ? String(selectedCampaign.requiredCreators) : "1",
@@ -1147,7 +1149,7 @@ export default function BrandCampaignsManager() {
         return "Cover image must be a valid HTTP or HTTPS URL.";
       }
     }
-    if (!data.platform) return "Platform is required.";
+    if (normalizeCampaignPlatforms(data.platform).length === 0) return "At least one target platform is required.";
     const effBudget = data.maxBudget || data.budget;
     if (effBudget === "" || isNaN(Number(effBudget)) || Number(effBudget) < 0) {
       return "Budget (or Max Budget) must be a number greater than or equal to 0.";
@@ -1201,7 +1203,7 @@ export default function BrandCampaignsManager() {
       description: createForm.description.trim(),
       category: createForm.category.trim(),
       coverImage: createForm.coverImage ? createForm.coverImage.trim() : "",
-      platform: createForm.platform,
+      platform: normalizeCampaignPlatforms(createForm.platform),
       budget: effMaxBudget,
       minBudget: effMinBudget,
       maxBudget: effMaxBudget,
@@ -1406,7 +1408,7 @@ export default function BrandCampaignsManager() {
         description: campaign.description || "",
         category: campaign.category || "",
         coverImage: campaign.coverImage || campaign.image || "",
-        platform: campaign.platform || "instagram",
+        platform: normalizeCampaignPlatforms(campaign.platform, ["instagram"]),
         budget: campaign.budget !== undefined ? String(campaign.budget) : "",
         minBudget: campaign.minBudget !== undefined && campaign.minBudget !== null ? String(campaign.minBudget) : (campaign.budget !== undefined ? String(campaign.budget) : ""),
         maxBudget: campaign.maxBudget !== undefined && campaign.maxBudget !== null ? String(campaign.maxBudget) : (campaign.budget !== undefined ? String(campaign.budget) : ""),
@@ -1463,7 +1465,7 @@ export default function BrandCampaignsManager() {
         description: editForm.description.trim(),
         category: editForm.category.trim(),
         coverImage: editForm.coverImage ? editForm.coverImage.trim() : "",
-        platform: editForm.platform,
+        platform: normalizeCampaignPlatforms(editForm.platform),
         budget: effEditMaxBudget,
         minBudget: effEditMinBudget,
         maxBudget: effEditMaxBudget,
@@ -1802,8 +1804,7 @@ export default function BrandCampaignsManager() {
                     {campaigns.map((c) => {
                       const id = c._id || c.id;
                       const badge = getStatusBadge(c.status);
-                      const platformInfo = getPlatformBadge(c.platform);
-                      const PlatformIcon = platformInfo.icon;
+                      const platformList = normalizeCampaignPlatforms(c.platform);
                       const reqCreators =
                         typeof c.requiredCreators === "number"
                           ? c.requiredCreators
@@ -1839,10 +1840,25 @@ export default function BrandCampaignsManager() {
                           </td>
 
                           {/* Platform */}
-                          <td className="py-4 px-4 whitespace-nowrap">
-                            <div className="inline-flex items-center gap-1.5 text-xs font-medium text-foreground">
-                              <PlatformIcon className={`w-3.5 h-3.5 shrink-0 ${platformInfo.iconColor || "text-text-secondary"}`} />
-                              <span>{platformInfo.label}</span>
+                          <td className="py-4 px-4">
+                            <div className="flex flex-wrap items-center gap-1.5 max-w-[200px]">
+                              {platformList.length > 0 ? (
+                                platformList.map((plat) => {
+                                  const info = getPlatformBadge(plat);
+                                  const PlatIcon = info.icon;
+                                  return (
+                                    <span
+                                      key={plat}
+                                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface-muted/70 border border-border-theme text-[11px] font-medium text-foreground"
+                                    >
+                                      <PlatIcon className={`w-3 h-3 shrink-0 ${info.iconColor || "text-text-secondary"}`} />
+                                      <span>{info.label}</span>
+                                    </span>
+                                  );
+                                })
+                              ) : (
+                                <span className="text-xs text-text-secondary">General</span>
+                              )}
                             </div>
                           </td>
 
@@ -2054,17 +2070,13 @@ export default function BrandCampaignsManager() {
                   <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
                     Target Platform *
                   </label>
-                  <select
+                  <TargetPlatformSelector
                     value={createForm.platform}
-                    onChange={(e) => setCreateForm({ ...createForm, platform: e.target.value })}
-                    className="w-full bg-surface-muted/60 border border-border-theme text-foreground text-xs sm:text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-secondary transition-colors cursor-pointer"
-                  >
-                    <option value="instagram">Instagram</option>
-                    <option value="facebook">Facebook</option>
-                    <option value="youtube">YouTube</option>
-                    <option value="tiktok">TikTok</option>
-                    <option value="website">Website</option>
-                  </select>
+                    onChange={(selectedPlatforms) =>
+                      setCreateForm({ ...createForm, platform: selectedPlatforms })
+                    }
+                    disabled={submitting}
+                  />
                 </div>
 
               </div>
@@ -2489,11 +2501,27 @@ export default function BrandCampaignsManager() {
 
                         <div>
                           <span className="text-[10px] text-text-secondary uppercase tracking-wider block font-semibold">
-                            Platform
+                            Target Platforms
                           </span>
-                          <span className="font-semibold text-foreground capitalize mt-0.5 block">
-                            {selectedCampaign.platform || "Multi-Platform"}
-                          </span>
+                          <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                            {normalizeCampaignPlatforms(selectedCampaign.platform).length > 0 ? (
+                              normalizeCampaignPlatforms(selectedCampaign.platform).map((plat) => {
+                                const info = getPlatformBadge(plat);
+                                const PlatIcon = info.icon;
+                                return (
+                                  <span
+                                    key={plat}
+                                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface-muted border border-border-theme text-[11px] font-semibold text-foreground"
+                                  >
+                                    <PlatIcon className={`w-3 h-3 shrink-0 ${info.iconColor || "text-text-secondary"}`} />
+                                    <span>{info.label}</span>
+                                  </span>
+                                );
+                              })
+                            ) : (
+                              <span className="font-semibold text-foreground">Multi-Platform</span>
+                            )}
+                          </div>
                         </div>
 
                         <div>
@@ -3111,17 +3139,13 @@ export default function BrandCampaignsManager() {
                   <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
                     Target Platform *
                   </label>
-                  <select
+                  <TargetPlatformSelector
                     value={editForm.platform}
-                    onChange={(e) => setEditForm({ ...editForm, platform: e.target.value })}
-                    className="w-full bg-surface-muted/60 border border-border-theme text-foreground text-xs sm:text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-secondary transition-colors cursor-pointer"
-                  >
-                    <option value="instagram">Instagram</option>
-                    <option value="facebook">Facebook</option>
-                    <option value="youtube">YouTube</option>
-                    <option value="tiktok">TikTok</option>
-                    <option value="website">Website</option>
-                  </select>
+                    onChange={(selectedPlatforms) =>
+                      setEditForm({ ...editForm, platform: selectedPlatforms })
+                    }
+                    disabled={submitting}
+                  />
                 </div>
 
                 {/* Status Transition dropdown */}

@@ -9,6 +9,7 @@ import {
   cancelCreatorBooking,
   clearSelectedBooking,
 } from "@/redux/creator/bookings/bookings_slice";
+import { formatCampaignPlatforms } from "@/lib/campaignPlatforms";
 
 // =========================================================
 // HELPER FORMATTERS & BADGES
@@ -277,11 +278,12 @@ export default function CreatorBookingDetailModal({
   const brandEmail = booking?.brand?.email || "N/A";
   const campaignTitle = booking?.campaign?.title || "Collaboration Campaign";
   const campaignCategory = booking?.campaign?.category || "General";
-  const platform =
+  const platform = formatCampaignPlatforms(
     booking?.campaign?.platform ||
-    booking?.service?.platform ||
-    booking?.platform ||
-    "General";
+      booking?.service?.platform ||
+      booking?.platform,
+    "General"
+  );
 
   const serviceTitle =
     booking?.service?.title || booking?.serviceTitle || "Requested Service";

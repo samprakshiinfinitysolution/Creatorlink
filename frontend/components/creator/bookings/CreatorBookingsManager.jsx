@@ -15,6 +15,7 @@ import {
   clearSuccessMessage,
 } from "@/redux/creator/bookings/bookings_slice";
 import { socket, registerSocketConsumer, unregisterSocketConsumer } from "@/lib/socket";
+import { formatCampaignPlatforms } from "@/lib/campaignPlatforms";
 
 // =========================================================
 // HELPER FORMATTERS & BADGES
@@ -674,10 +675,10 @@ export default function CreatorBookingsManager() {
                       const brandEmail = booking.brand?.email || "N/A";
                       const campaignTitle = booking.campaign?.title || "Campaign Collaboration";
                       const category = booking.campaign?.category || "General";
-                      const platform =
-                        booking.campaign?.platform ||
-                        booking.service?.platform ||
-                        "General";
+                      const platform = formatCampaignPlatforms(
+                        booking.campaign?.platform || booking.service?.platform,
+                        "General"
+                      );
 
                       const serviceTitle =
                         booking.service?.title || booking.serviceTitle || "Service Package";
@@ -880,10 +881,10 @@ export default function CreatorBookingsManager() {
                   const brandEmail = booking.brand?.email || "N/A";
                   const campaignTitle = booking.campaign?.title || "Campaign Collaboration";
                   const category = booking.campaign?.category || "General";
-                  const platform =
-                    booking.campaign?.platform ||
-                    booking.service?.platform ||
-                    "General";
+                  const platform = formatCampaignPlatforms(
+                    booking.campaign?.platform || booking.service?.platform,
+                    "General"
+                  );
 
                   const serviceTitle =
                     booking.service?.title || booking.serviceTitle || "Service Package";

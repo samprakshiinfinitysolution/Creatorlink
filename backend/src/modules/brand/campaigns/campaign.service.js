@@ -123,7 +123,7 @@ const getMyCampaignsService = async (brandId, query) => {
 
     // Filter by platform.
     if (platform && platform.trim()) {
-        filter.platform = platform.trim();
+        filter.platform = platform.trim().toLowerCase();
     }
 
 

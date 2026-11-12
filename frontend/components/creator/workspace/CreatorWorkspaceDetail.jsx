@@ -19,6 +19,7 @@ import CreatorSidebar from "@/components/creator/dashboard/CreatorSidebar";
 import CreatorHeader from "@/components/creator/dashboard/CreatorHeader";
 import CreatorSubmitWorkModal from "./CreatorSubmitWorkModal";
 import CreatorSubmitReviewModal from "@/components/creator/reviews/CreatorSubmitReviewModal";
+import { formatCampaignPlatforms } from "@/lib/campaignPlatforms";
 
 // =========================================================
 // SVG ICONS
@@ -219,17 +220,7 @@ const formatDateTime = (dateString) => {
   }
 };
 
-const formatPlatform = (val) => {
-  if (!val) return "Not specified";
-  const map = {
-    instagram: "Instagram",
-    facebook: "Facebook",
-    youtube: "YouTube",
-    tiktok: "TikTok",
-    website: "Website",
-  };
-  return map[val.toLowerCase()] || val;
-};
+const formatPlatform = (val) => formatCampaignPlatforms(val, "Not specified");
 
 const isValidExternalUrl = (url) => {
   if (!url || typeof url !== "string") return false;

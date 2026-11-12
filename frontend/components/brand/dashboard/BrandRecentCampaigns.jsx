@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { normalizeCampaignPlatforms } from "@/lib/campaignPlatforms";
 
 function formatCurrency(amount, currency = "INR") {
   const numericAmount =
@@ -343,8 +344,7 @@ export default function BrandRecentCampaigns({ campaigns = [] }) {
               {safeCampaigns.map((c, idx) => {
                 const campaignId = c._id || c.id;
                 const badge = getStatusBadge(c.status);
-                const platformInfo = getPlatformBadge(c.platform);
-                const PlatformIcon = platformInfo.icon;
+                const platformList = normalizeCampaignPlatforms(c.platform);
                 const reqCreators =
                   typeof c.requiredCreators === "number"
                     ? c.requiredCreators
@@ -379,12 +379,27 @@ export default function BrandRecentCampaigns({ campaigns = [] }) {
                     </td>
 
                     {/* Platform */}
-                    <td className="py-4 px-4 whitespace-nowrap">
-                      <div className="inline-flex items-center gap-1.5 text-xs font-medium text-foreground">
-                        <PlatformIcon
-                          className={`w-3.5 h-3.5 shrink-0 ${platformInfo.iconColor || "text-text-secondary"}`}
-                        />
-                        <span>{platformInfo.label}</span>
+                    <td className="py-4 px-4">
+                      <div className="flex flex-wrap items-center gap-1.5 max-w-[180px]">
+                        {platformList.length > 0 ? (
+                          platformList.map((plat) => {
+                            const info = getPlatformBadge(plat);
+                            const PlatIcon = info.icon;
+                            return (
+                              <span
+                                key={plat}
+                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface-muted/70 border border-border-theme text-[11px] font-medium text-foreground"
+                              >
+                                <PlatIcon
+                                  className={`w-3 h-3 shrink-0 ${info.iconColor || "text-text-secondary"}`}
+                                />
+                                <span>{info.label}</span>
+                              </span>
+                            );
+                          })
+                        ) : (
+                          <span className="text-xs text-text-secondary">General</span>
+                        )}
                       </div>
                     </td>
 

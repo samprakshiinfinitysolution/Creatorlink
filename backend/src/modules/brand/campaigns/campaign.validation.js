@@ -10,6 +10,24 @@ const allowedPlatforms = [
     "website"
 ];
 
+// Helper to normalize platform input (supports string, comma-separated string, or array)
+const normalizePlatformInput = (value) => {
+    let rawList = [];
+    if (Array.isArray(value)) {
+        rawList = value;
+    } else if (typeof value === "string") {
+        rawList = value.split(",");
+    } else {
+        return [];
+    }
+
+    const normalized = rawList
+        .map((item) => (typeof item === "string" ? item.trim().toLowerCase() : ""))
+        .filter(Boolean);
+
+    return Array.from(new Set(normalized));
+};
+
 
 // Allowed campaign statuses.
 const allowedStatuses = [
@@ -108,6 +126,12 @@ const validateCreateCampaign = (req, res, next) => {
         req.body.maxBudget = req.body.budget;
     }
 
+    // Support either platform or platforms alias and normalize to array
+    if (req.body.platform === undefined && req.body.platforms !== undefined) {
+        req.body.platform = req.body.platforms;
+        delete req.body.platforms;
+    }
+
     const {
         title,
         description,
@@ -132,7 +156,8 @@ const validateCreateCampaign = (req, res, next) => {
         !title ||
         !description ||
         !category ||
-        !platform ||
+        platform === undefined ||
+        platform === null ||
         budget === undefined ||
         Number.isNaN(budget) ||
         !deadline ||
@@ -197,13 +222,18 @@ const validateCreateCampaign = (req, res, next) => {
     }
 
 
-    // Validate platform.
-    if (!allowedPlatforms.includes(platform)) {
+    // Validate platform (supports single or multiple platforms).
+    const normalizedPlatforms = normalizePlatformInput(platform);
+    if (
+        normalizedPlatforms.length === 0 ||
+        normalizedPlatforms.some((p) => !allowedPlatforms.includes(p))
+    ) {
         throw createApiError(
             400,
-            "Invalid platform"
+            "Invalid platform. Select at least one valid target platform."
         );
     }
+    req.body.platform = normalizedPlatforms;
 
 
     // Validate budget.
@@ -304,6 +334,11 @@ const validateCreateCampaign = (req, res, next) => {
 
 // Validates campaign update data.
 const validateUpdateCampaign = (req, res, next) => {
+
+    if (req.body.platform === undefined && req.body.platforms !== undefined) {
+        req.body.platform = req.body.platforms;
+        delete req.body.platforms;
+    }
 
     const allowedFields = [
         "title",
@@ -459,15 +494,19 @@ const validateUpdateCampaign = (req, res, next) => {
     }
 
 
-    // Validate platform if provided.
-    if (
-        platform !== undefined &&
-        !allowedPlatforms.includes(platform)
-    ) {
-        throw createApiError(
-            400,
-            "Invalid platform"
-        );
+    // Validate platform if provided (supports single or multiple platforms).
+    if (platform !== undefined) {
+        const normalizedPlatforms = normalizePlatformInput(platform);
+        if (
+            normalizedPlatforms.length === 0 ||
+            normalizedPlatforms.some((p) => !allowedPlatforms.includes(p))
+        ) {
+            throw createApiError(
+                400,
+                "Invalid platform. Select at least one valid target platform."
+            );
+        }
+        req.body.platform = normalizedPlatforms;
     }
 
 

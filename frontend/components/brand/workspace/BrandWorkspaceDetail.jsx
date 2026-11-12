@@ -16,6 +16,7 @@ import {
   handleSocketConnectionError,
 } from "@/lib/socket";
 import { refreshToken } from "@/redux/auth/auth_slice";
+import { formatCampaignPlatforms } from "@/lib/campaignPlatforms";
 import {
   createPaymentOrder,
   verifyPayment,
@@ -1582,7 +1583,7 @@ export default function BrandWorkspaceDetail({ workspaceId }) {
                         Platform
                       </span>
                       <span className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white mt-0.5 capitalize block break-words">
-                        {campaign?.platform || service?.platform || "Not specified"}
+                        {formatCampaignPlatforms(campaign?.platform || service?.platform, "Not specified")}
                       </span>
                     </div>
                   </div>

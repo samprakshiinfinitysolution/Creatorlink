@@ -79,7 +79,12 @@ export default function BrandMetricsGrid({ metrics }) {
 
   const activeWorkspaces = metrics?.collaborations?.active ?? 0;
   const completedWorkspaces = metrics?.collaborations?.completed ?? 0;
-  const hiredCreatorsCount = activeWorkspaces + completedWorkspaces;
+  const hiredCreatorsCount =
+    metrics?.collaborations?.uniqueCreators ??
+    metrics?.collaborations?.hiredCreators ??
+    metrics?.hiredCreators?.total ??
+    metrics?.hiredCreators?.uniqueCount ??
+    (activeWorkspaces + completedWorkspaces);
 
   const cards = [
     {
@@ -101,44 +106,41 @@ export default function BrandMetricsGrid({ metrics }) {
       icon: RupeeIcon,
     },
     {
-      title: "CREATORS HIRED",
+      title: "HIRED CREATORS",
       value: hiredCreatorsCount.toString(),
-      subtitle: `${activeWorkspaces} active · ${completedWorkspaces} completed`,
+      subtitle: `${activeWorkspaces} Active Collaborations · ${completedWorkspaces} Completed Collaborations`,
       icon: UserIcon,
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-3.5 sm:gap-4">
       {cards.map((c) => {
         const Icon = c.icon;
         return (
           <div
             key={c.title}
-            className="bg-white dark:bg-surface border border-border-theme rounded-xl p-3.5 sm:p-4 shadow-xs hover:shadow-md hover:border-secondary/40 transition-all duration-200 flex items-center justify-between sm:justify-start gap-2.5 sm:gap-3.5 h-full"
+            className="bg-white dark:bg-surface border border-border-theme rounded-xl p-3.5 sm:p-4 shadow-xs hover:shadow-md hover:border-secondary/40 transition-all duration-200 flex items-start sm:items-center gap-3 sm:gap-3.5 h-full"
           >
             {/* Left Icon Container */}
-            <div className="w-11 h-11 sm:w-12 sm:h-12 lg:w-[50px] lg:h-[50px] rounded-xl bg-[#fff0f4]/50 dark:bg-[#2a171f]/50 text-black dark:text-white flex items-center justify-center shrink-0 transition-transform duration-200 hover:scale-105">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 lg:w-12 lg:h-12 rounded-xl bg-[#fff0f4]/50 dark:bg-[#2a171f]/50 text-black dark:text-white flex items-center justify-center shrink-0 transition-transform duration-200 hover:scale-105 mt-0.5 sm:mt-0">
               <Icon className="w-5 h-5 sm:w-5.5 sm:h-5.5" />
             </div>
 
-            {/* Metric Content (Centered on Mobile, Left-aligned on Desktop) */}
-            <div className="flex-1 min-w-0 flex flex-col items-center sm:items-start justify-center text-center sm:text-left">
-              <span className="text-[10px] sm:text-[10.5px] font-semibold text-slate-400 dark:text-neutral-400 tracking-wider uppercase font-sans truncate w-full">
+            {/* Metric Content */}
+            <div className="flex-1 min-w-0 flex flex-col items-start justify-center text-left">
+              <span className="text-[10px] sm:text-[10.5px] font-semibold text-slate-400 dark:text-neutral-400 tracking-wider uppercase font-sans break-words w-full">
                 {c.title}
               </span>
-              <span className="text-[19px] sm:text-[23px] lg:text-[24px] font-semibold text-slate-900 dark:text-foreground font-sans tracking-tight block mt-0.5 leading-none truncate w-full">
+              <span className="text-xl sm:text-2xl lg:text-[24px] font-semibold text-slate-900 dark:text-foreground font-sans tracking-tight block mt-0.5 leading-tight break-words w-full">
                 {c.value}
               </span>
               {c.subtitle && (
-                <span className="text-[10.5px] sm:text-[11px] text-text-secondary mt-1 block truncate font-medium w-full">
+                <span className="text-[10.5px] sm:text-[11px] text-text-secondary mt-1 block font-medium w-full break-words whitespace-normal leading-normal">
                   {c.subtitle}
                 </span>
               )}
             </div>
-
-            {/* Right Invisible Spacer for Symmetrical Mobile Centering */}
-            <div className="w-11 h-11 shrink-0 invisible sm:hidden" aria-hidden="true" />
           </div>
         );
       })}

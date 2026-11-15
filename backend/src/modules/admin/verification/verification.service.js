@@ -75,20 +75,44 @@ export const getAdminVerificationsService = async (queryParams) => {
         }
     }
 
-    // Search by user name or email in Auth collection
+    // Search by user name, email, brand company name, or creator profile title/category
     const trimmedSearch = search.trim();
     if (trimmedSearch) {
-        const searchRegex = new RegExp(trimmedSearch, "i");
-        const matchingUsers = await Auth.find({
-            role: { $in: ["creator", "brand"] },
-            $or: [
-                { name: searchRegex },
-                { email: searchRegex }
-            ]
-        }).select("_id").lean();
+        const escapedSearch = trimmedSearch.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const searchRegex = new RegExp(escapedSearch, "i");
 
-        const matchingUserIds = matchingUsers.map((u) => u._id);
-        filter.user = { $in: matchingUserIds };
+        const [matchingUsers, matchingCreators, matchingBrands] = await Promise.all([
+            Auth.find({
+                role: { $in: ["creator", "brand"] },
+                $or: [
+                    { name: searchRegex },
+                    { email: searchRegex }
+                ]
+            }).select("_id").lean(),
+            CreatorProfile.find({
+                $or: [
+                    { title: searchRegex },
+                    { category: searchRegex },
+                    { bio: searchRegex }
+                ]
+            }).select("user").lean(),
+            BrandProfile.find({
+                $or: [
+                    { companyName: searchRegex },
+                    { industry: searchRegex },
+                    { "contactInfo.name": searchRegex },
+                    { "contactInfo.email": searchRegex }
+                ]
+            }).select("user").lean()
+        ]);
+
+        const matchingUserIds = new Set([
+            ...matchingUsers.map((u) => u._id.toString()),
+            ...matchingCreators.map((c) => c.user?.toString()).filter(Boolean),
+            ...matchingBrands.map((b) => b.user?.toString()).filter(Boolean)
+        ]);
+
+        filter.user = { $in: Array.from(matchingUserIds).map((id) => new mongoose.Types.ObjectId(id)) };
     }
 
     const sortOrder = sortBy.toLowerCase() === "oldest" ? 1 : -1;
@@ -108,21 +132,57 @@ export const getAdminVerificationsService = async (queryParams) => {
         VerificationRequest.countDocuments(filter)
     ]);
 
-    // Attach profile snippets for fast queue rendering
+    // Recover raw user ObjectIds for any requests where Mongoose populate returned null (e.g. deleted Auth records)
+    const nullUserReqIds = requests.filter((r) => !r.user).map((r) => r._id);
+    const rawUserMap = new Map();
+    if (nullUserReqIds.length > 0) {
+        const rawDocs = await VerificationRequest.find({ _id: { $in: nullUserReqIds } }).select("_id user").lean();
+        rawDocs.forEach((d) => {
+            if (d.user) rawUserMap.set(d._id.toString(), d.user);
+        });
+    }
+
+    // Attach profile snippets and provide safe, comprehensive fallback user data
     const enrichedRequests = await Promise.all(
         requests.map(async (req) => {
+            const rawUserId = req.user?._id || rawUserMap.get(req._id.toString());
             let profileData = null;
-            if (req.role === "creator" && req.user?._id) {
-                profileData = await CreatorProfile.findOne({ user: req.user._id })
+
+            if (req.role === "creator" && rawUserId) {
+                profileData = await CreatorProfile.findOne({ user: rawUserId })
                     .select("category title bio profileImage location followerCount isVerifiedBadge")
                     .lean();
-            } else if (req.role === "brand" && req.user?._id) {
-                profileData = await BrandProfile.findOne({ user: req.user._id })
-                    .select("companyName industry description website logo location isVerifiedBusiness")
+            } else if (req.role === "brand" && rawUserId) {
+                profileData = await BrandProfile.findOne({ user: rawUserId })
+                    .select("companyName industry description website logo location isVerifiedBusiness contactInfo")
                     .lean();
             }
+
+            // Safe user object construction: never let req.user be null or missing
+            let safeUser = req.user;
+            if (!safeUser) {
+                safeUser = {
+                    _id: rawUserId || req._id,
+                    name: profileData?.companyName || profileData?.title || "Deleted User",
+                    email: profileData?.contactInfo?.email || "Account Deleted",
+                    role: req.role,
+                    avatar: profileData?.profileImage || profileData?.logo || "",
+                    isDeleted: true,
+                    createdAt: req.createdAt
+                };
+            } else {
+                const effectiveName = safeUser.name?.trim() || profileData?.companyName || profileData?.title || "Unnamed User";
+                const effectiveEmail = safeUser.email?.trim() || profileData?.contactInfo?.email || "";
+                safeUser = {
+                    ...safeUser,
+                    name: effectiveName,
+                    email: effectiveEmail
+                };
+            }
+
             return {
                 ...req,
+                user: safeUser,
                 profile: profileData
             };
         })
@@ -150,15 +210,43 @@ export const getAdminVerificationByIdService = async (id) => {
         throw createApiError(404, "Verification request not found");
     }
 
+    let rawUserId = request.user?._id;
+    if (!rawUserId) {
+        const rawDoc = await VerificationRequest.findById(id).select("user").lean();
+        rawUserId = rawDoc?.user;
+    }
+
     let profile = null;
-    if (request.role === "creator" && request.user?._id) {
-        profile = await CreatorProfile.findOne({ user: request.user._id }).lean();
-    } else if (request.role === "brand" && request.user?._id) {
-        profile = await BrandProfile.findOne({ user: request.user._id }).lean();
+    if (request.role === "creator" && rawUserId) {
+        profile = await CreatorProfile.findOne({ user: rawUserId }).lean();
+    } else if (request.role === "brand" && rawUserId) {
+        profile = await BrandProfile.findOne({ user: rawUserId }).lean();
+    }
+
+    let safeUser = request.user;
+    if (!safeUser) {
+        safeUser = {
+            _id: rawUserId || request._id,
+            name: profile?.companyName || profile?.title || "Deleted User",
+            email: profile?.contactInfo?.email || "Account Deleted",
+            role: request.role,
+            avatar: profile?.profileImage || profile?.logo || "",
+            isDeleted: true,
+            createdAt: request.createdAt
+        };
+    } else {
+        const effectiveName = safeUser.name?.trim() || profile?.companyName || profile?.title || "Unnamed User";
+        const effectiveEmail = safeUser.email?.trim() || profile?.contactInfo?.email || "";
+        safeUser = {
+            ...safeUser,
+            name: effectiveName,
+            email: effectiveEmail
+        };
     }
 
     return {
         ...request,
+        user: safeUser,
         profile
     };
 };
@@ -794,5 +882,35 @@ export const getUserVerificationStatusService = async (userId) => {
         latestDecision: latestHistory,
         history,
         resubmittedAt: request?.resubmittedAt || null
+    };
+};
+
+/**
+ * Safely cleans up orphan VerificationRequest records whose referenced Auth user no longer exists.
+ * Returns count and list of deleted IDs.
+ */
+export const cleanupOrphanVerificationsService = async () => {
+    const allVerifs = await VerificationRequest.find({}).select("_id user role status createdAt").lean();
+    const orphanIds = [];
+
+    for (const v of allVerifs) {
+        if (!v.user) {
+            orphanIds.push(v._id);
+            continue;
+        }
+        const userExists = await Auth.exists({ _id: v.user });
+        if (!userExists) {
+            orphanIds.push(v._id);
+        }
+    }
+
+    if (orphanIds.length > 0) {
+        await VerificationRequest.deleteMany({ _id: { $in: orphanIds } });
+    }
+
+    return {
+        scannedCount: allVerifs.length,
+        deletedCount: orphanIds.length,
+        deletedIds: orphanIds
     };
 };

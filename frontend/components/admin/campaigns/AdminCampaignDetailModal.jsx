@@ -99,6 +99,11 @@ export default function AdminCampaignDetailModal({
 
   const { campaign, brandProfile, bookings = [], bookingStats = {}, auditLogs = [] } = data;
   const isRestricted = Boolean(campaign.moderation?.isRestricted);
+  const hasActiveBookings =
+    (bookingStats.accepted || 0) > 0 ||
+    (bookingStats.in_progress || 0) > 0 ||
+    (bookingStats.completed || 0) > 0;
+  const pendingCount = bookingStats.pending || 0;
 
   const handleActionClick = (targetAction) => {
     setPendingAction(targetAction);
@@ -266,7 +271,7 @@ export default function AdminCampaignDetailModal({
                     <span className="text-xs uppercase font-bold text-secondary tracking-wider">
                       {campaign.category}
                     </span>
-                    <h1 className="text-xl font-serif font-bold text-foreground mt-1">
+                    <h1 className="text-xl font-serif font-bold text-foreground mt-1 break-words">
                       {campaign.title}
                     </h1>
                     <p className="text-xs text-text-secondary mt-1">
@@ -421,8 +426,8 @@ export default function AdminCampaignDetailModal({
                     No creators have applied or booked for this campaign yet.
                   </div>
                 ) : (
-                  <div className="overflow-x-auto border border-border-theme rounded-xl">
-                    <table className="w-full text-left text-xs">
+                  <div className="overflow-x-auto custom-scrollbar border border-border-theme rounded-xl">
+                    <table className="w-full text-left text-xs min-w-[480px]">
                       <thead className="bg-surface-muted/50 text-text-secondary uppercase text-[10px] tracking-wider border-b border-border-theme font-semibold">
                         <tr>
                           <th className="px-3 py-2.5">Creator</th>
@@ -443,8 +448,8 @@ export default function AdminCampaignDetailModal({
                                   className="w-7 h-7 rounded-full bg-purple-500/15 text-purple-600 dark:text-purple-400 font-bold text-[10px] uppercase shrink-0"
                                 />
                                 <div className="min-w-0">
-                                  <div className="truncate">{b.creator?.name || "Anonymous Creator"}</div>
-                                  <div className="text-[10px] text-text-secondary truncate">{b.creator?.email}</div>
+                                  <div className="break-words font-medium">{b.creator?.name || "Anonymous Creator"}</div>
+                                  <div className="text-[10px] text-text-secondary break-all">{b.creator?.email}</div>
                                 </div>
                               </div>
                             </td>
@@ -516,14 +521,14 @@ export default function AdminCampaignDetailModal({
                   />
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5 font-semibold text-foreground text-sm">
-                      <span className="truncate">
+                      <span className="break-words">
                         {brandProfile?.companyName || campaign.brand?.name || "Brand User"}
                       </span>
                       {Boolean(brandProfile?.isVerifiedBusiness) && (
                         <CheckBadgeIcon className="w-4 h-4 text-emerald-500 shrink-0" />
                       )}
                     </div>
-                    <p className="text-xs text-text-secondary truncate">{campaign.brand?.email}</p>
+                    <p className="text-xs text-text-secondary break-all">{campaign.brand?.email}</p>
                   </div>
                 </div>
 
@@ -568,15 +573,24 @@ export default function AdminCampaignDetailModal({
 
               {/* MODERATION REASON INPUT ACCORDION */}
               {showReasonInput && (
-                <div className="bg-surface-muted/50 border border-amber-500/30 rounded-2xl p-4 space-y-3 shadow-xs">
+                <div className={`rounded-2xl p-4 space-y-3 shadow-xs border ${
+                  pendingAction === "delete"
+                    ? "bg-rose-500/5 border-rose-500/40"
+                    : "bg-surface-muted/50 border-amber-500/30"
+                }`}>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wider">
-                      Confirm Action: {pendingAction?.toUpperCase()}
+                    <span className={`text-xs font-semibold uppercase tracking-wider ${
+                      pendingAction === "delete"
+                        ? "text-rose-600 dark:text-rose-400"
+                        : "text-amber-700 dark:text-amber-400"
+                    }`}>
+                      {pendingAction === "delete" ? "Confirm Permanent Deletion" : `Confirm Action: ${pendingAction?.toUpperCase()}`}
                     </span>
                     <button
                       onClick={() => {
                         setShowReasonInput(false);
                         setPendingAction(null);
+                        setModerationReason("");
                       }}
                       className="text-xs text-text-secondary hover:text-foreground cursor-pointer"
                     >
@@ -584,9 +598,40 @@ export default function AdminCampaignDetailModal({
                     </button>
                   </div>
 
+                  {pendingAction === "delete" && (
+                    <div className="space-y-2 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-800 dark:text-rose-300 text-xs leading-relaxed">
+                      <div className="font-bold flex items-center gap-1.5 text-rose-700 dark:text-rose-400 text-xs sm:text-sm">
+                        <TrashIcon className="w-4 h-4 shrink-0" />
+                        <span>Permanent Deletion Warning</span>
+                      </div>
+                      <p>
+                        This campaign document will be <strong>permanently deleted from MongoDB</strong>. This action is irreversible and cannot be undone.
+                      </p>
+                      {pendingCount > 0 ? (
+                        <p className="font-semibold text-rose-700 dark:text-rose-300">
+                          • {pendingCount} open pending application{pendingCount > 1 ? "s" : ""} will be cancelled, and all affected creators will receive cancellation notifications.
+                        </p>
+                      ) : (
+                        <p>
+                          • No pending applications exist for this campaign.
+                        </p>
+                      )}
+                      <p>
+                        • Platform administration audit log will permanently record this removal, and the brand partner will be notified.
+                      </p>
+                      {hasActiveBookings && (
+                        <div className="p-2.5 rounded-lg bg-rose-600/15 border border-rose-600/30 font-bold text-rose-700 dark:text-rose-300">
+                          ⚠️ Cannot Remove: This campaign has active collaborations or completed bookings. Campaign deletion is blocked to preserve contract and financial history. Please close the campaign instead.
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   <p className="text-xs text-text-secondary">
                     {pendingAction === "pause"
                       ? "Mandatory moderation reason (recorded in audit log and notified to brand):"
+                      : pendingAction === "delete"
+                      ? "Optional removal note / justification (recorded in audit log and notified to brand):"
                       : "Optional note or justification for this moderation action:"}
                   </p>
 
@@ -597,16 +642,35 @@ export default function AdminCampaignDetailModal({
                     placeholder={
                       pendingAction === "pause"
                         ? "e.g. Inappropriate deliverables claim or pending brand KYC verification..."
+                        : pendingAction === "delete"
+                        ? "e.g. Violates community terms, spam campaign, or brand requested cleanup..."
                         : "e.g. Issues resolved by brand..."
                     }
                     className="w-full bg-surface border border-border-theme rounded-xl p-2.5 text-xs text-foreground placeholder:text-text-secondary focus:outline-hidden focus:border-amber-500"
                   />
 
+                  {actionError && (
+                    <div className="p-2.5 rounded-xl bg-rose-600/10 border border-rose-600/30 text-rose-600 dark:text-rose-400 text-xs font-semibold">
+                      {actionError}
+                    </div>
+                  )}
+
                   <div className="flex items-center justify-end gap-2">
                     <button
-                      disabled={actionLoading || (pendingAction === "pause" && !moderationReason.trim())}
+                      type="button"
+                      onClick={() => {
+                        setShowReasonInput(false);
+                        setPendingAction(null);
+                        setModerationReason("");
+                      }}
+                      className="px-3 py-1.5 text-xs font-medium rounded-xl text-text-secondary hover:text-foreground border border-border-theme transition-colors cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      disabled={actionLoading || (pendingAction === "pause" && !moderationReason.trim()) || (pendingAction === "delete" && hasActiveBookings)}
                       onClick={handleConfirmAction}
-                      className={`px-3 py-1.5 text-xs font-semibold rounded-xl text-white transition-colors disabled:opacity-50 cursor-pointer shadow-xs ${
+                      className={`px-3.5 py-1.5 text-xs font-semibold rounded-xl text-white transition-colors disabled:opacity-50 cursor-pointer shadow-xs ${
                         pendingAction === "delete"
                           ? "bg-rose-600 hover:bg-rose-700"
                           : pendingAction === "resume"
@@ -614,7 +678,7 @@ export default function AdminCampaignDetailModal({
                           : "bg-amber-600 hover:bg-amber-700"
                       }`}
                     >
-                      {actionLoading ? "Processing..." : `Confirm ${pendingAction}`}
+                      {actionLoading ? "Processing..." : pendingAction === "delete" ? "Permanently Delete Campaign" : `Confirm ${pendingAction}`}
                     </button>
                   </div>
                 </div>

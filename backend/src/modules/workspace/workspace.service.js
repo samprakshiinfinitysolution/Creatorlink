@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 import Workspace from "./workspace.model.js";
+import Payment from "../payments/payment.model.js";
 import Review from "../reviews/reviews.model.js";
 import { attachReviewProfiles } from "../reviews/reviews.service.js";
 import Conversation from "../messages/conversation.model.js";
@@ -206,18 +207,23 @@ const parseDeliverablesToObjects = (rawDeliverables = [], deadline = null) => {
 };
 
 // Helper function to create or retrieve workspace when booking is accepted.
-const createWorkspaceForAcceptedBooking = async (booking) => {
+const createWorkspaceForAcceptedBooking = async (booking, options = {}) => {
     if (!booking || !booking._id) return null;
+    const session = options?.session || null;
 
     // Guard: Do not initialize workspace if the booking was already rejected or cancelled
-    const currentBooking = await mongoose.model("Booking").findById(booking._id).select("status");
+    const currentBookingQuery = mongoose.model("Booking").findById(booking._id).select("status");
+    if (session) currentBookingQuery.session(session);
+    const currentBooking = await currentBookingQuery;
     if (currentBooking && (currentBooking.status === "rejected" || currentBooking.status === "cancelled")) {
         throw createApiError(400, `Cannot initialize workspace for booking with status '${currentBooking.status}'`);
     }
 
-    let workspace = await Workspace.findOne({
+    const wsFindQuery = Workspace.findOne({
         booking: booking._id
     });
+    if (session) wsFindQuery.session(session);
+    let workspace = await wsFindQuery;
 
     if (!workspace) {
         let campaignBrief = "";
@@ -225,9 +231,11 @@ const createWorkspaceForAcceptedBooking = async (booking) => {
             if (typeof booking.campaign === "object" && booking.campaign.description) {
                 campaignBrief = booking.campaign.description;
             } else if (mongoose.Types.ObjectId.isValid(booking.campaign)) {
-                const campaignDoc = await Campaign
+                const campQuery = Campaign
                     .findById(booking.campaign)
                     .select("description");
+                if (session) campQuery.session(session);
+                const campaignDoc = await campQuery;
                 if (campaignDoc && campaignDoc.description) {
                     campaignBrief = campaignDoc.description;
                 }
@@ -254,7 +262,9 @@ const createWorkspaceForAcceptedBooking = async (booking) => {
             try {
                 const serviceId = booking.service._id || booking.service;
                 if (mongoose.Types.ObjectId.isValid(serviceId)) {
-                    const sDoc = await CreatorService.findById(serviceId).select("revisions").lean();
+                    const sQuery = CreatorService.findById(serviceId).select("revisions").lean();
+                    if (session) sQuery.session(session);
+                    const sDoc = await sQuery;
                     if (sDoc && typeof sDoc.revisions === "number" && sDoc.revisions >= 0) {
                         maxRevisions = sDoc.revisions;
                     }
@@ -264,23 +274,30 @@ const createWorkspaceForAcceptedBooking = async (booking) => {
             }
         }
 
+        const workspaceData = {
+            booking: booking._id,
+            campaign: booking.campaign,
+            brand: booking.brand,
+            creator: booking.creator,
+            service: booking.service,
+            agreedPrice: booking.agreedPrice,
+            currency: booking.currency || "INR",
+            brief: campaignBrief,
+            deliverables: structuredDeliverables,
+            deadline: booking.deadline,
+            maxRevisions,
+            status: "in_progress"
+        };
+
         try {
-            workspace = await Workspace.create({
-                booking: booking._id,
-                campaign: booking.campaign,
-                brand: booking.brand,
-                creator: booking.creator,
-                service: booking.service,
-                agreedPrice: booking.agreedPrice,
-                currency: booking.currency || "INR",
-                brief: campaignBrief,
-                deliverables: structuredDeliverables,
-                deadline: booking.deadline,
-                maxRevisions,
-                status: "in_progress"
-            });
+            if (session) {
+                const created = await Workspace.create([workspaceData], { session });
+                workspace = created[0];
+            } else {
+                workspace = await Workspace.create(workspaceData);
+            }
         } catch (createErr) {
-            if (createErr?.code === 11000) {
+            if (!session && createErr?.code === 11000) {
                 workspace = await Workspace.findOne({
                     booking: booking._id
                 });
@@ -293,6 +310,8 @@ const createWorkspaceForAcceptedBooking = async (booking) => {
 
     // Ensure a conversation document is initialized for this accepted booking
     try {
+        const convOptions = { upsert: true, new: true };
+        if (session) convOptions.session = session;
         await Conversation.findOneAndUpdate(
             { booking: booking._id },
             {
@@ -304,10 +323,10 @@ const createWorkspaceForAcceptedBooking = async (booking) => {
                     lastMessageAt: new Date()
                 }
             },
-            { upsert: true, new: true }
+            convOptions
         );
     } catch (convErr) {
-        if (convErr?.code === 11000) {
+        if (!session && convErr?.code === 11000) {
             const existingConv = await Conversation.findOne({ booking: booking._id });
             if (!existingConv) {
                 throw convErr;
@@ -320,11 +339,15 @@ const createWorkspaceForAcceptedBooking = async (booking) => {
     return workspace;
 };
 
-// Safely cleans up workspace and conversation records for a booking that is not accepted (e.g. rejected or cancelled).
+// Safely cleans up or preserves workspace records for a booking that is not accepted (e.g. rejected or cancelled).
+// Under the CreatorLink schema, all non-cancelled workspace statuses (completed, in_progress, approved, submitted, revision_requested)
+// are active collaboration statuses and are strictly protected from deletion, cancellation, or downgrading.
+// Workspaces already in "cancelled" status are preserved in MongoDB without hard deletion to maintain audit history.
+// Conversations and messages are NEVER deleted to prevent orphaned records and loss of communication history.
 const cleanupWorkspaceForBooking = async (bookingId) => {
-    if (!bookingId) return;
+    if (!bookingId || !mongoose.Types.ObjectId.isValid(bookingId)) return;
 
-    // Strict guard: Only clean up collaboration records if the booking is currently in a terminal non-accepted state (rejected or cancelled)
+    // Strict guard: Only inspect collaboration records if the booking is currently in a terminal non-accepted state (rejected or cancelled)
     const booking = await mongoose.model("Booking").findOne({
         _id: bookingId,
         status: { $in: ["rejected", "cancelled"] }
@@ -334,8 +357,53 @@ const cleanupWorkspaceForBooking = async (bookingId) => {
         return;
     }
 
-    await Workspace.deleteMany({ booking: bookingId });
-    await Conversation.deleteMany({ booking: bookingId });
+    const workspaces = await Workspace.find({ booking: bookingId });
+    if (!workspaces || workspaces.length === 0) {
+        return;
+    }
+
+    for (const ws of workspaces) {
+        // 1. Protected statuses that must never be cancelled, deleted, or downgraded
+        const isProtectedStatus = [
+            "completed",
+            "in_progress",
+            "approved",
+            "submitted",
+            "revision_requested"
+        ].includes(ws.status);
+
+        // 2. Check if the workspace is protected by deliverable submissions, revisions, or approval history
+        const hasDeliverableActivity = Array.isArray(ws.deliverables) && ws.deliverables.some((d) =>
+            d.status !== "pending" ||
+            d.submission ||
+            (Array.isArray(d.submissions) && d.submissions.length > 0) ||
+            d.approvedAt ||
+            d.submittedAt ||
+            (typeof d.revisionCount === "number" && d.revisionCount > 0)
+        );
+
+        const hasSubmissions = Array.isArray(ws.submissions) && ws.submissions.length > 0;
+        const hasRevisions = Array.isArray(ws.revisions) && ws.revisions.length > 0;
+
+        // 3. Check if any financial records (Payments) exist for this workspace
+        const paymentCount = await Payment.countDocuments({ workspace: ws._id });
+
+        // 4. Check if any Review records exist for this workspace
+        const reviewCount = await Review.countDocuments({ workspace: ws._id });
+
+        if (isProtectedStatus || hasDeliverableActivity || hasSubmissions || hasRevisions || paymentCount > 0 || reviewCount > 0) {
+            // Workspace has active collaboration, financial, or review history. Keep document intact.
+            continue;
+        }
+
+        // 5. For eligible, genuinely unstarted workspaces, safely transition status to "cancelled" to preserve audit history
+        if (ws.status !== "cancelled") {
+            ws.status = "cancelled";
+            await ws.save();
+        }
+    }
+
+    // Conversations and messages are NEVER deleted in this cleanup flow to preserve chat history and prevent orphaned messages.
 };
 
 // Gets workspaces belonging to creator.

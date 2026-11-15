@@ -1,6 +1,7 @@
 import express from "express";
 import authenticateUser from "../../../middleware/auth.middleware.js";
 import authorizeRoles from "../../../middleware/role.middleware.js";
+import createApiError from "../../../utils/ApiError.js";
 import {
     getAdminCampaigns,
     getAdminCampaignStats,
@@ -83,7 +84,7 @@ router.patch(
         } else if (status === "closed") {
             return moderateCampaignClose(req, res, next);
         }
-        return next();
+        return next(createApiError(400, "Invalid status. Allowed values are 'paused', 'published', or 'closed'"));
     }
 );
 

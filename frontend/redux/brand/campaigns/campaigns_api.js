@@ -50,9 +50,24 @@ const updateCampaign = async (campaignId, campaignData) => {
 };
 
 
+// Permanently deletes one campaign by ID.
+const deleteCampaign = async (campaignId, reason = "") => {
+
+    const response = await axiosInstance.delete(
+        `/brand/campaigns/${campaignId}`,
+        {
+            data: { reason }
+        }
+    );
+
+    return response.data;
+};
+
+
 export {
     createCampaign,
     getBrandCampaigns,
     getCampaignById,
-    updateCampaign
+    updateCampaign,
+    deleteCampaign
 };

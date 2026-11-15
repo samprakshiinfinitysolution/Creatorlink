@@ -292,6 +292,58 @@ export const overrideCollaborationStatusService = async (
 
     const previousStatus = workspace.status;
     const targetStatus = newStatus.toLowerCase();
+
+    const PROTECTED_STATUSES = [
+        "completed",
+        "in_progress",
+        "approved",
+        "submitted",
+        "revision_requested"
+    ];
+
+    // Guard 1: Completed collaborations are strictly protected and cannot be cancelled or downgraded
+    if (previousStatus === "completed" && targetStatus === "cancelled") {
+        throw createApiError(
+            400,
+            "Cannot cancel a collaboration that is already completed. Completed workspaces are protected to preserve financial, deliverable, and contract history."
+        );
+    }
+
+    if (previousStatus === "completed" && targetStatus !== "completed") {
+        throw createApiError(
+            400,
+            "Cannot modify or downgrade a collaboration that is already completed. Completed workspaces are protected to preserve financial, deliverable, and contract history."
+        );
+    }
+
+    // Guard 2: Protected workspace statuses cannot be administratively cancelled
+    if (targetStatus === "cancelled" && PROTECTED_STATUSES.includes(previousStatus)) {
+        throw createApiError(
+            400,
+            `Cannot cancel a collaboration with status '${previousStatus}'. Workspaces with status in_progress, submitted, revision_requested, approved, or completed are protected.`
+        );
+    }
+
+    // Guard 3: Prevent lifecycle downgrades on protected statuses
+    const STATUS_RANKS = {
+        in_progress: 1,
+        submitted: 2,
+        revision_requested: 2,
+        approved: 3,
+        completed: 4
+    };
+
+    if (
+        STATUS_RANKS[targetStatus] !== undefined &&
+        STATUS_RANKS[previousStatus] !== undefined &&
+        STATUS_RANKS[targetStatus] < STATUS_RANKS[previousStatus]
+    ) {
+        throw createApiError(
+            400,
+            `Cannot downgrade collaboration status from '${previousStatus}' to '${targetStatus}'. Protected workspace lifecycle does not allow status downgrading.`
+        );
+    }
+
     workspace.status = targetStatus;
 
     // If marked as completed, set deliverables as approved

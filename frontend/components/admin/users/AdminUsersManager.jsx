@@ -227,8 +227,8 @@ export default function AdminUsersManager() {
 
       {/* Users Table */}
       <div className="rounded-2xl bg-surface border border-border-theme overflow-hidden shadow-xs">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
+        <div className="overflow-x-auto custom-scrollbar">
+          <table className="w-full text-left border-collapse text-xs min-w-[820px]">
             <thead>
               <tr className="border-b border-border-theme bg-surface-muted/50 text-text-secondary uppercase tracking-wider text-[11px] font-semibold">
                 <th className="py-3.5 px-4 sm:px-6">User</th>
@@ -285,9 +285,9 @@ export default function AdminUsersManager() {
                                 : "bg-secondary/15 text-secondary"
                             }`}
                           />
-                          <div className="min-w-0">
-                            <p className="font-semibold text-foreground truncate">{user.name}</p>
-                            <p className="text-[11px] text-text-secondary truncate">{user.email}</p>
+                          <div className="min-w-0 max-w-[220px]">
+                            <p className="font-semibold text-foreground break-words leading-tight">{user.name}</p>
+                            <p className="text-[11px] text-text-secondary break-all">{user.email}</p>
                           </div>
                         </div>
                       </td>

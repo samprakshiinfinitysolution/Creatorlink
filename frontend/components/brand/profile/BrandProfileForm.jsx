@@ -1119,7 +1119,7 @@ export default function BrandProfileForm() {
                                 <span className="block text-xs font-semibold text-slate-900 dark:text-foreground group-hover:text-secondary transition-colors font-sans">
                                   Instagram
                                 </span>
-                                <span className="block text-[11px] text-text-secondary truncate mt-0.5 font-sans">
+                                <span className="block text-[11px] text-text-secondary break-all mt-0.5 font-sans">
                                   {instagramUrl.replace(/^https?:\/\/(www\.)?/, "")}
                                 </span>
                               </div>
@@ -1144,7 +1144,7 @@ export default function BrandProfileForm() {
                                 <span className="block text-xs font-semibold text-slate-900 dark:text-foreground group-hover:text-secondary transition-colors font-sans">
                                   YouTube
                                 </span>
-                                <span className="block text-[11px] text-text-secondary truncate mt-0.5 font-sans">
+                                <span className="block text-[11px] text-text-secondary break-all mt-0.5 font-sans">
                                   {youtubeUrl.replace(/^https?:\/\/(www\.)?/, "")}
                                 </span>
                               </div>
@@ -1169,7 +1169,7 @@ export default function BrandProfileForm() {
                                 <span className="block text-xs font-semibold text-slate-900 dark:text-foreground group-hover:text-secondary transition-colors font-sans">
                                   Facebook
                                 </span>
-                                <span className="block text-[11px] text-text-secondary truncate mt-0.5 font-sans">
+                                <span className="block text-[11px] text-text-secondary break-all mt-0.5 font-sans">
                                   {facebookUrl.replace(/^https?:\/\/(www\.)?/, "")}
                                 </span>
                               </div>
@@ -1194,7 +1194,7 @@ export default function BrandProfileForm() {
                                 <span className="block text-xs font-semibold text-slate-900 dark:text-foreground group-hover:text-secondary transition-colors font-sans">
                                   LinkedIn
                                 </span>
-                                <span className="block text-[11px] text-text-secondary truncate mt-0.5 font-sans">
+                                <span className="block text-[11px] text-text-secondary break-all mt-0.5 font-sans">
                                   {linkedinUrl.replace(/^https?:\/\/(www\.)?/, "")}
                                 </span>
                               </div>

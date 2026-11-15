@@ -98,6 +98,13 @@ const bookingSchema = new mongoose.Schema(
             default: "pending"
         },
 
+        // Context or reason for rejection (e.g. "campaign_closed" or null)
+        rejectionReason: {
+            type: String,
+            trim: true,
+            default: null
+        },
+
         // Indicates whether the booking was initiated by the creator (campaign application) or the brand (direct service hire proposal).
         initiatedBy: {
             type: String,

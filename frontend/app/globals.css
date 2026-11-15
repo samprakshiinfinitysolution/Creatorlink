@@ -309,4 +309,30 @@ body {
     opacity: 1 !important;
     transform: none !important;
   }
-}
+}
+
+
+/* =========================================================
+   NATIVE SELECT & OPTION STYLING (BRAND CONSISTENCY)
+========================================================= */
+select option {
+  background-color: var(--theme-surface, #ffffff);
+  color: var(--foreground, #111111);
+}
+
+.dark select option {
+  background-color: var(--theme-dark-surface, #1b1b1b);
+  color: var(--foreground, #ffffff);
+}
+
+select option:checked,
+select option[selected] {
+  background-color: #e5e7eb !important;
+  color: #111111 !important;
+}
+
+.dark select option:checked,
+.dark select option[selected] {
+  background-color: #2e2c2d !important;
+  color: #ffffff !important;
+}

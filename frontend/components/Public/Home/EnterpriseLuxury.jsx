@@ -80,8 +80,8 @@ export default function EnterpriseLuxury() {
             </p>
           </ScrollReveal>
 
-          {/* 4 METRIC CARDS IN ONE HORIZONTAL ROW */}
-          <div className="grid grid-cols-4 gap-5 lg:gap-6 mb-8">
+          {/* 4 METRIC CARDS (Responsive: 1 col on mobile, 2 on tablet, 4 on desktop) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-8">
             {metrics.map((metric, index) => (
               <ScrollReveal
                 key={metric.id}

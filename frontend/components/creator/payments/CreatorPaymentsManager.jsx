@@ -472,8 +472,8 @@ export default function CreatorPaymentsManager() {
               </div>
             ) : (
               /* Data Table */
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs min-w-[720px]">
+              <div className="overflow-x-auto custom-scrollbar">
+                <table className="w-full text-left text-xs min-w-[860px]">
                   <thead className="bg-neutral-50/70 dark:bg-surface-muted/60 text-text-secondary font-semibold uppercase tracking-wider text-[10px] sm:text-[11px] border-b border-neutral-200/80 dark:border-border-theme">
                     <tr>
                       <th className="py-3 px-4">Campaign &amp; Brand</th>
@@ -539,7 +539,7 @@ export default function CreatorPaymentsManager() {
                                     <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" />
                                   </svg>
                                 </div>
-                                <span className="text-[11px] text-text-secondary block truncate">
+                                <span className="text-[11px] text-text-secondary block break-words">
                                   Brand: {brandName}
                                 </span>
                               </div>

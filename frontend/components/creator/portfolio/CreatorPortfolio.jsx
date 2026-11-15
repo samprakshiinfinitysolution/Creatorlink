@@ -9,6 +9,7 @@ import {
 import PortfolioFormModal, { PortfolioCardCover } from "./PortfolioFormModal";
 import CreatorSidebar from "@/components/creator/dashboard/CreatorSidebar";
 import CreatorHeader from "@/components/creator/dashboard/CreatorHeader";
+import DropdownFilter from "@/components/common/DropdownFilter";
 
 // =========================================================
 // SVG ICONS (Inline Component Library)
@@ -280,28 +281,27 @@ export default function CreatorPortfolio() {
             {/* Filter Dropdowns */}
             <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
               {/* Category Filter */}
-              <select
+              <DropdownFilter
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="text-xs px-3 py-2.5 rounded-xl bg-surface-muted border border-border-theme text-foreground focus:outline-none focus:border-secondary transition-colors cursor-pointer"
-              >
-                {categories.map((cat) => (
-                  <option key={cat} value={cat}>
-                    Category: {cat}
-                  </option>
-                ))}
-              </select>
+                options={categories.map((cat) => ({
+                  value: cat,
+                  label: `Category: ${cat}`,
+                }))}
+                aria-label="Filter portfolio by category"
+              />
 
               {/* Visibility Filter */}
-              <select
+              <DropdownFilter
                 value={visibilityFilter}
                 onChange={(e) => setVisibilityFilter(e.target.value)}
-                className="text-xs px-3 py-2.5 rounded-xl bg-surface-muted border border-border-theme text-foreground focus:outline-none focus:border-secondary transition-colors cursor-pointer"
-              >
-                <option value="All">Status: All</option>
-                <option value="Public">Public Only</option>
-                <option value="Private">Private Only</option>
-              </select>
+                options={[
+                  { value: "All", label: "Status: All" },
+                  { value: "Public", label: "Public Only" },
+                  { value: "Private", label: "Private Only" },
+                ]}
+                aria-label="Filter portfolio by status"
+              />
             </div>
           </div>
 

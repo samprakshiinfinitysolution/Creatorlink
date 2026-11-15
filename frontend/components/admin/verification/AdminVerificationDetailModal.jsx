@@ -112,7 +112,18 @@ export default function AdminVerificationDetailModal({
     profile
   } = request;
 
-  const displayName = user?.name || user?.fullName || "Unnamed User";
+  const displayName =
+    user?.name ||
+    user?.fullName ||
+    profile?.companyName ||
+    profile?.title ||
+    (user?.isDeleted || !user ? "Deleted User" : "Unnamed User");
+  const displayEmail =
+    user?.email ||
+    profile?.contactInfo?.email ||
+    profile?.contactInformation?.email ||
+    (user?.isDeleted || !user ? "Account Deleted" : "No email available");
+  const isDeletedAccount = Boolean(user?.isDeleted || !user);
   const reviewerName = reviewedBy?.name || reviewedBy?.fullName || reviewedBy?.email || "Administrator";
   const hasHistory = Array.isArray(reviewHistory) && reviewHistory.length > 0;
   const isResubmitted = status === "pending" && (Boolean(resubmittedAt) || hasHistory);
@@ -235,17 +246,22 @@ export default function AdminVerificationDetailModal({
                 className="w-14 h-14 rounded-full bg-surface border border-border-theme font-semibold text-lg text-foreground shrink-0 overflow-hidden"
               />
               <div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <h3 className="text-base font-semibold text-foreground">
                     {displayName}
                   </h3>
+                  {isDeletedAccount && (
+                    <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 rounded font-semibold">
+                      Deleted Account
+                    </span>
+                  )}
                   {(status === "approved" || profile?.isVerifiedBadge || profile?.isVerifiedBusiness) && (
                     <span className="text-blue-500" title="Verified Badge Active">
                       <ShieldCheckIcon className="w-4 h-4 inline" />
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-text-secondary">{user?.email}</p>
+                <p className="text-xs text-text-secondary">{displayEmail}</p>
                 <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                   <span
                     className={`text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full ${

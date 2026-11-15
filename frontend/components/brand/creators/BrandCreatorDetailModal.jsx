@@ -492,7 +492,7 @@ export default function BrandCreatorDetailModal({
 
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <h2 className="font-serif font-semibold text-lg sm:text-xl text-foreground truncate" title={name}>
+                  <h2 className="font-serif font-semibold text-lg sm:text-xl text-foreground break-words" title={name}>
                     {name}
                   </h2>
                   {isVerified && (
@@ -505,7 +505,7 @@ export default function BrandCreatorDetailModal({
                   </span>
                 </div>
                 {creator?.title && (
-                  <p className="text-xs text-secondary font-medium mt-0.5 truncate" title={creator.title}>
+                  <p className="text-xs text-secondary font-medium mt-0.5 break-words" title={creator.title}>
                     {creator.title}
                   </p>
                 )}

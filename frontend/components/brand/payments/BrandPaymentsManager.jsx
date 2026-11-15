@@ -409,8 +409,8 @@ export default function BrandPaymentsManager() {
               </div>
             ) : (
               /* Payments Data Table */
-              <div className="overflow-x-auto no-scrollbar">
-                <table className="w-full text-left text-xs min-w-[720px]">
+              <div className="overflow-x-auto custom-scrollbar">
+                <table className="w-full text-left text-xs min-w-[860px]">
                   <thead className="bg-surface-muted/60 text-text-secondary font-semibold uppercase tracking-wider text-[10px] border-b border-border-theme">
                     <tr>
                       <th className="py-3.5 px-4">Campaign &amp; Creator</th>

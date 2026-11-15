@@ -5,7 +5,8 @@ import {
     createCampaignService,
     getMyCampaignsService,
     getCampaignByIdService,
-    updateCampaignService
+    updateCampaignService,
+    deleteBrandCampaignService
 } from "./campaign.service.js";
 
 
@@ -78,9 +79,29 @@ const updateCampaign = asyncHandler(async (req, res) => {
 });
 
 
+// Delete a campaign belonging to the authenticated brand.
+const deleteCampaign = asyncHandler(async (req, res) => {
+    const { reason } = req.body || {};
+
+    const result = await deleteBrandCampaignService(
+        req.user.userId,
+        req.params.id,
+        reason
+    );
+
+    return sendResponse(
+        res,
+        200,
+        result.message || "Campaign deleted successfully",
+        result
+    );
+});
+
+
 export {
     createCampaign,
     getMyCampaigns,
     getCampaignById,
-    updateCampaign
+    updateCampaign,
+    deleteCampaign
 };

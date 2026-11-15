@@ -1692,11 +1692,11 @@ export default function CreatorProfile() {
                             href={websiteUrl.startsWith("http") ? websiteUrl : `https://${websiteUrl}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-[#ff2d6c] hover:underline font-medium truncate max-w-[220px]"
+                            className="inline-flex items-center gap-1 text-[#ff2d6c] hover:underline font-medium break-all"
                             title={websiteUrl}
                           >
                             <GlobeIcon className="w-3.5 h-3.5 text-[#ff2d6c] shrink-0" />
-                            <span className="truncate">{websiteUrl.replace(/^https?:\/\/(www\.)?/, "")}</span>
+                            <span className="break-all">{websiteUrl.replace(/^https?:\/\/(www\.)?/, "")}</span>
                             <ExternalLinkIcon className="w-3 h-3 text-[#ff2d6c] shrink-0" />
                           </a>
                         )}
@@ -2066,7 +2066,7 @@ export default function CreatorProfile() {
                           <MailIcon className="w-4 h-4 text-black dark:text-white" />
                           <span className="font-medium">Email</span>
                         </div>
-                        <span className="font-medium text-slate-900 dark:text-foreground text-right truncate max-w-[170px] min-[400px]:max-w-[240px]">
+                        <span className="font-medium text-slate-900 dark:text-foreground text-right break-all max-w-[200px] min-[400px]:max-w-none">
                           {displayEmail || "Not specified"}
                         </span>
                       </div>
@@ -2086,7 +2086,7 @@ export default function CreatorProfile() {
                                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-muted hover:bg-secondary/10 text-text-secondary hover:text-secondary border border-border-theme hover:border-secondary/30 transition-all text-xs"
                               >
                                 <GlobeIcon className="w-3.5 h-3.5" />
-                                <span className="truncate max-w-[140px]">{websiteUrl.replace(/^https?:\/\//, "")}</span>
+                                <span className="break-all">{websiteUrl.replace(/^https?:\/\//, "")}</span>
                                 <ExternalLinkIcon className="w-3 h-3 opacity-60" />
                               </a>
                             )}

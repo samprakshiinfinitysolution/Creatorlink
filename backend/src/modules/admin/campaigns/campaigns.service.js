@@ -3,8 +3,12 @@ import Campaign from "../../brand/campaigns/campaign.model.js";
 import Auth from "../../auth/auth.model.js";
 import BrandProfile from "../../brand/profile/profile.model.js";
 import Booking from "../../booking/booking.model.js";
+import Workspace from "../../workspace/workspace.model.js";
+import Payment from "../../payments/payment.model.js";
+import Review from "../../reviews/reviews.model.js";
 import AuditLog from "../audit/audit.model.js";
-import { createNotificationService, notifyAdminsSafe } from "../../notifications/notification.service.js";
+import Notification from "../../notifications/notification.model.js";
+import { createNotificationService, createNotificationSafe, notifyAdminsSafe } from "../../notifications/notification.service.js";
 import createApiError from "../../../utils/ApiError.js";
 import { getPagination, getPaginationData } from "../../../utils/pagination.js";
 
@@ -558,66 +562,339 @@ export const moderateCampaignCloseService = async (campaignId, reason, adminId) 
 };
 
 /**
- * Business Rule 6: Safe removal of campaign.
- * - Ensures campaigns with accepted bookings, in_progress collaborations, or completed workspaces cannot be deleted.
- * - Preserves contract and financial history.
+ * Business Rule 6: Safe removal of campaign by platform administration.
+ * - Ensures campaigns with accepted bookings, in_progress collaborations, completed bookings,
+ *   any linked workspaces (including completed), payment records, or review records CANNOT be deleted.
+ * - If deletion is permitted:
+ *   1. Identifies and cancels open pending applications.
+ *   2. Notifies affected creators with deterministic idempotency keys.
+ *   3. Notifies brand with deterministic idempotency key.
+ *   4. Logs audit entry.
+ *   5. Permanently deletes the campaign document from MongoDB.
  */
 export const safeDeleteAdminCampaignService = async (campaignId, adminId, reason = "") => {
-    const campaign = await Campaign.findById(campaignId);
-    if (!campaign) {
-        throw createApiError(404, "Campaign not found");
+    if (!mongoose.Types.ObjectId.isValid(campaignId)) {
+        throw createApiError(400, "Invalid campaign ID");
     }
 
-    // Check existing relationships: accepted bookings or workspaces
-    const activeCollaborations = await Booking.countDocuments({
-        campaign: campaignId,
-        status: { $in: ["accepted", "in_progress", "completed"] }
-    });
+    const campaign = await Campaign.findById(campaignId);
+    if (!campaign) {
+        // Recovery & Idempotency: Check if this campaign was already deleted in a previous call
+        const priorAuditLog = await AuditLog.findOne({
+            targetType: "campaign",
+            targetId: campaignId,
+            action: "CAMPAIGN_SAFE_DELETE"
+        });
 
-    if (activeCollaborations > 0) {
-        throw createApiError(
-            400,
-            `Cannot remove campaign: ${activeCollaborations} accepted collaboration(s) or completed bookings are linked to this campaign. Please close the campaign instead to preserve financial and contract history.`
-        );
+        const priorNotifications = await Notification.find({
+            entityId: campaignId,
+            type: "campaign_deleted"
+        }).lean();
+
+        const cancelledBookings = await Booking.find({
+            campaign: campaignId,
+            status: "cancelled",
+            rejectionReason: "campaign_deleted"
+        }).select("_id creator brand rejectionReason").lean();
+
+        const wasDeleted = !!(priorAuditLog || priorNotifications.length > 0 || cancelledBookings.length > 0);
+
+        if (!wasDeleted) {
+            throw createApiError(404, "Campaign not found");
+        }
+
+        // Campaign was permanently deleted from MongoDB. Complete any missing post-deletion operations.
+        const campaignTitle = priorAuditLog?.previousState?.title ||
+            priorNotifications.find((n) => n.metadata?.title)?.metadata?.title ||
+            "Campaign";
+
+        const brandId = priorNotifications.find((n) => n.idempotencyKey?.endsWith("_brand"))?.recipient ||
+            cancelledBookings[0]?.brand ||
+            null;
+
+        const recoveryErrors = [];
+
+        // 1. Recover any missing Creator notifications
+        for (const booking of cancelledBookings) {
+            if (booking.creator) {
+                const creatorKey = `notif_camp_del_${campaignId}_${booking._id}`;
+                const exists = await Notification.findOne({ idempotencyKey: creatorKey });
+                if (!exists) {
+                    try {
+                        const notif = await createNotificationService({
+                            recipient: booking.creator,
+                            sender: adminId,
+                            type: "campaign_deleted",
+                            title: "Campaign Removed by Administration",
+                            message: `The campaign "${campaignTitle}" was removed by platform administration and your pending application has been cancelled.${reason ? ` Reason: ${reason.trim()}` : ""}`,
+                            entityType: "campaign",
+                            entityId: campaignId,
+                            destination: `/creator/campaigns/applied`,
+                            metadata: {
+                                campaignId,
+                                bookingId: booking._id,
+                                title: campaignTitle,
+                                status: "cancelled",
+                                reason: reason ? reason.trim() : ""
+                            },
+                            idempotencyKey: creatorKey
+                        });
+                        if (!notif) recoveryErrors.push(`Failed to dispatch creator notification for booking ${booking._id}`);
+                    } catch (err) {
+                        recoveryErrors.push(`Creator notification error for booking ${booking._id}: ${err.message}`);
+                    }
+                }
+            }
+        }
+
+        // 2. Recover any missing Brand notification
+        if (brandId) {
+            const brandKey = `notif_camp_del_${campaignId}_brand`;
+            const brandNotifExists = await Notification.findOne({ idempotencyKey: brandKey });
+            if (!brandNotifExists) {
+                try {
+                    const notif = await createNotificationService({
+                        recipient: brandId,
+                        sender: adminId,
+                        type: "campaign_deleted",
+                        title: "Campaign Removed by Administration",
+                        message: `Your campaign "${campaignTitle}" was removed by platform administration.${reason ? ` Reason: ${reason.trim()}` : ""}`,
+                        entityType: "campaign",
+                        entityId: campaignId,
+                        destination: `/brand/campaigns`,
+                        metadata: {
+                            campaignId,
+                            title: campaignTitle,
+                            deleted: true,
+                            reason: reason ? reason.trim() : ""
+                        },
+                        idempotencyKey: brandKey
+                    });
+                    if (!notif) recoveryErrors.push("Failed to dispatch brand notification");
+                } catch (err) {
+                    recoveryErrors.push(`Brand notification error: ${err.message}`);
+                }
+            }
+        }
+
+        // 3. Recover any missing AuditLog entry
+        if (!priorAuditLog) {
+            try {
+                await AuditLog.create({
+                    admin: adminId,
+                    action: "CAMPAIGN_SAFE_DELETE",
+                    targetType: "campaign",
+                    targetId: campaignId,
+                    reason: reason ? reason.trim() : "Safe deletion performed by administration",
+                    previousState: { title: campaignTitle, status: "published" },
+                    newState: { deleted: true }
+                });
+            } catch (err) {
+                recoveryErrors.push(`AuditLog creation error: ${err.message}`);
+            }
+        }
+
+        if (recoveryErrors.length > 0) {
+            throw createApiError(
+                500,
+                `Campaign was deleted, but recovery operations encountered errors: ${recoveryErrors.join("; ")}. Please retry.`
+            );
+        }
+
+        return {
+            campaignId,
+            message: "Campaign was already safely removed and all recovery operations completed"
+        };
     }
 
     const brandId = campaign.brand;
     const campaignTitle = campaign.title;
+    const session = await mongoose.startSession();
+    let pendingBookingsToNotify = [];
 
-    // Cancel any open pending applications
-    await Booking.updateMany(
-        { campaign: campaignId, status: "pending" },
-        { status: "cancelled" }
-    );
-
-    // Delete campaign document
-    await Campaign.findByIdAndDelete(campaignId);
-
-    // Audit log
-    await AuditLog.create({
-        admin: adminId,
-        action: "CAMPAIGN_SAFE_DELETE",
-        targetType: "campaign",
-        targetId: campaignId,
-        reason: reason ? reason.trim() : "Safe deletion performed by administration",
-        previousState: { title: campaignTitle, status: campaign.status },
-        newState: { deleted: true }
-    });
-
-    // Notify brand
     try {
-        await createNotificationService({
-            recipient: brandId,
-            sender: adminId,
-            type: "campaign_deleted",
-            title: "Campaign Removed by Administration",
-            message: `Your campaign "${campaignTitle}" was removed by platform administration.${reason ? ` Reason: ${reason.trim()}` : ""}`,
-            entityType: "campaign",
-            entityId: campaignId,
-            destination: `/brand/campaigns`
+        await session.withTransaction(async () => {
+            // 1. Lock campaign document atomically and set status to "closed"
+            const lockedCampaign = await Campaign.findOneAndUpdate(
+                { _id: campaignId },
+                {
+                    $set: { status: "closed" },
+                    $inc: { __v: 1 }
+                },
+                { session, new: true }
+            );
+
+            if (!lockedCampaign) {
+                throw createApiError(404, "Campaign not found or has already been modified");
+            }
+
+            // 2. Block deletion if any Booking is accepted, in_progress or completed
+            const activeCollaborations = await Booking.countDocuments({
+                campaign: campaignId,
+                status: { $in: ["accepted", "in_progress", "completed"] }
+            }).session(session);
+
+            if (activeCollaborations > 0) {
+                throw createApiError(
+                    400,
+                    `Cannot remove campaign: ${activeCollaborations} accepted collaboration(s) or completed bookings are linked to this campaign. Please close the campaign instead to preserve financial and contract history.`
+                );
+            }
+
+            // 3. Block deletion if ANY Workspace exists for the campaign, including completed Workspaces
+            const workspaceCount = await Workspace.countDocuments({
+                campaign: campaignId
+            }).session(session);
+
+            if (workspaceCount > 0) {
+                throw createApiError(
+                    400,
+                    `Cannot remove campaign: ${workspaceCount} workspace(s) are linked to this campaign. Please close the campaign instead to preserve collaboration history.`
+                );
+            }
+
+            // 4. Block deletion if related Payment records exist
+            const paymentCount = await Payment.countDocuments({
+                campaign: campaignId
+            }).session(session);
+
+            if (paymentCount > 0) {
+                throw createApiError(
+                    400,
+                    `Cannot remove campaign: ${paymentCount} payment record(s) are linked to this campaign. Please close the campaign instead to preserve financial history.`
+                );
+            }
+
+            // 5. Block deletion if related Review records exist
+            const reviewCount = await Review.countDocuments({
+                campaign: campaignId
+            }).session(session);
+
+            if (reviewCount > 0) {
+                throw createApiError(
+                    400,
+                    `Cannot remove campaign: ${reviewCount} review record(s) are linked to this campaign. Please close the campaign instead to preserve review history.`
+                );
+            }
+
+            // 6. Find open pending Bookings and transition them to cancelled inside transaction
+            await Booking.updateMany(
+                {
+                    campaign: campaignId,
+                    status: "pending"
+                },
+                {
+                    $set: {
+                        status: "cancelled",
+                        rejectionReason: "campaign_deleted"
+                    }
+                },
+                { session }
+            );
+
+            // Fetch affected bookings for deterministic post-commit notifications
+            pendingBookingsToNotify = await Booking.find({
+                campaign: campaignId,
+                status: "cancelled",
+                rejectionReason: "campaign_deleted"
+            }).select("_id creator brand").session(session).lean();
+
+            // 7. Permanently delete the campaign document from MongoDB (Hard Delete)
+            try {
+                await Campaign.findByIdAndDelete(campaignId, { session });
+            } catch (deleteError) {
+                if (deleteError?.statusCode) {
+                    throw deleteError;
+                }
+                throw createApiError(
+                    500,
+                    `Failed to permanently delete campaign: ${deleteError?.message || "Database error"}`
+                );
+            }
         });
-    } catch (notifErr) {
-        console.error("Failed to dispatch admin delete notification:", notifErr);
+    } finally {
+        await session.endSession();
+    }
+
+    // Track post-deletion errors to prevent reporting false success if notifications or audit log fail
+    const postDeletionErrors = [];
+
+    // 8. Post-deletion: Notify every affected Creator using deterministic idempotency keys
+    for (const booking of pendingBookingsToNotify) {
+        if (booking.creator) {
+            try {
+                const notif = await createNotificationService({
+                    recipient: booking.creator,
+                    sender: adminId,
+                    type: "campaign_deleted",
+                    title: "Campaign Removed by Administration",
+                    message: `The campaign "${campaignTitle}" was removed by platform administration and your pending application has been cancelled.${reason ? ` Reason: ${reason.trim()}` : ""}`,
+                    entityType: "campaign",
+                    entityId: campaignId,
+                    destination: `/creator/campaigns/applied`,
+                    metadata: {
+                        campaignId,
+                        bookingId: booking._id,
+                        title: campaignTitle,
+                        status: "cancelled",
+                        reason: reason ? reason.trim() : ""
+                    },
+                    idempotencyKey: `notif_camp_del_${campaignId}_${booking._id}`
+                });
+                if (!notif) postDeletionErrors.push(`Failed to dispatch creator notification for booking ${booking._id}`);
+            } catch (err) {
+                postDeletionErrors.push(`Creator notification error for booking ${booking._id}: ${err.message}`);
+            }
+        }
+    }
+
+    // 8. Post-deletion: Notify the Brand using deterministic idempotency key
+    if (brandId) {
+        try {
+            const notif = await createNotificationService({
+                recipient: brandId,
+                sender: adminId,
+                type: "campaign_deleted",
+                title: "Campaign Removed by Administration",
+                message: `Your campaign "${campaignTitle}" was removed by platform administration.${reason ? ` Reason: ${reason.trim()}` : ""}`,
+                entityType: "campaign",
+                entityId: campaignId,
+                destination: `/brand/campaigns`,
+                metadata: {
+                    campaignId,
+                    title: campaignTitle,
+                    deleted: true,
+                    reason: reason ? reason.trim() : ""
+                },
+                idempotencyKey: `notif_camp_del_${campaignId}_brand`
+            });
+            if (!notif) postDeletionErrors.push("Failed to dispatch brand notification");
+        } catch (err) {
+            postDeletionErrors.push(`Brand notification error: ${err.message}`);
+        }
+    }
+
+    // 9. Post-deletion: Create Platform Audit Log
+    try {
+        await AuditLog.create({
+            admin: adminId,
+            action: "CAMPAIGN_SAFE_DELETE",
+            targetType: "campaign",
+            targetId: campaignId,
+            reason: reason ? reason.trim() : "Safe deletion performed by administration",
+            previousState: { title: campaignTitle, status: campaign.status },
+            newState: { deleted: true }
+        });
+    } catch (err) {
+        postDeletionErrors.push(`AuditLog creation error: ${err.message}`);
+    }
+
+    // If any post-deletion operation failed, throw error to prompt retry and avoid reporting false success
+    if (postDeletionErrors.length > 0) {
+        throw createApiError(
+            500,
+            `Campaign was safely deleted from database, but post-deletion operations failed: ${postDeletionErrors.join("; ")}. Please retry the request to complete recovery.`
+        );
     }
 
     return {

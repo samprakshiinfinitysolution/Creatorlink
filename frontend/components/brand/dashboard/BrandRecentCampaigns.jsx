@@ -326,8 +326,8 @@ export default function BrandRecentCampaigns({ campaigns = [] }) {
           </div>
         </div>
       ) : (
-        <div className="overflow-x-auto no-scrollbar -mx-4 px-4 sm:-mx-6 sm:px-6 min-h-[160px]">
-          <table className="w-full text-left text-xs border-collapse min-w-[780px]">
+        <div className="overflow-x-auto custom-scrollbar -mx-4 px-4 sm:-mx-6 sm:px-6 min-h-[160px]">
+          <table className="w-full text-left text-xs border-collapse min-w-[960px]">
             <thead>
               <tr className="border-b border-border-theme bg-surface-muted/40 text-text-secondary uppercase tracking-wider text-[10px] font-semibold">
                 <th className="py-3.5 px-5 min-w-[220px]">Campaign</th>

@@ -437,7 +437,7 @@ export default function LoginForm() {
             className="fixed inset-0"
             onClick={() => !isGoogleLoading && setIsRoleModalOpen(false)}
           />
-          <div className="relative z-10 bg-surface border border-border-theme rounded-2xl sm:rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl space-y-5 animate-in zoom-in-95 duration-200">
+          <div className="relative z-10 bg-surface border border-border-theme rounded-2xl sm:rounded-3xl max-w-md w-full p-5 sm:p-7 shadow-2xl space-y-5 animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
             {/* Header */}
             <div className="flex items-start justify-between gap-3">
               <div>

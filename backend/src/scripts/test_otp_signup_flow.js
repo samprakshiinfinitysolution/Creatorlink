@@ -188,10 +188,14 @@ const runVerification = async () => {
     } finally {
         // CLEANUP TEST DATA TO LEAVE ZERO TRACE
         console.log("\nCleaning up test artifacts...");
+        const usersToDelete = await Auth.find({ email: testEmail }).select("_id").lean();
+        const userIdsToDelete = usersToDelete.map((u) => u._id);
+        if (userIdsToDelete.length > 0) {
+            const VerificationRequest = mongoose.models.VerificationRequest || mongoose.model("VerificationRequest", new mongoose.Schema({}, { strict: false }));
+            await VerificationRequest.deleteMany({ user: { $in: userIdsToDelete } });
+        }
         await Auth.deleteMany({ email: testEmail });
         await PendingRegistration.deleteMany({ email: testEmail });
-        const VerificationRequest = mongoose.models.VerificationRequest || mongoose.model("VerificationRequest", new mongoose.Schema({}, { strict: false }));
-        await VerificationRequest.deleteMany({ email: testEmail });
         console.log("✓ Test records purged. Database state clean.");
         await mongoose.disconnect();
     }

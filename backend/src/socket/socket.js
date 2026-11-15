@@ -437,15 +437,42 @@ const emitNotificationToAdmins = (notificationData, excludeAdminId = null) => {
     }
 };
 
-const emitWorkspaceEvent = (workspaceId, eventName, payload) => {
+const emitWorkspaceEvent = (workspaceId, eventName, payload, participantUserIds = []) => {
     if (!ioInstance || !workspaceId) {
         return false;
     }
 
     try {
-        ioInstance.to(`workspace:${workspaceId.toString()}`).emit(eventName, payload);
-        // Also emit to all connected admins monitoring collaborations and platform telemetry
-        ioInstance.to("role:admin").emit(eventName, payload);
+        let target = ioInstance.to(`workspace:${workspaceId.toString()}`).to("role:admin");
+
+        // Collect authorized participant user rooms to ensure dashboard & manager listeners receive real-time updates
+        const participantRooms = new Set();
+        if (Array.isArray(participantUserIds)) {
+            for (const participantId of participantUserIds) {
+                if (participantId) {
+                    const idStr = participantId._id ? participantId._id.toString() : participantId.toString();
+                    participantRooms.add(`user:${idStr}`);
+                }
+            }
+        }
+
+        // Also check if payload.workspace contains participant references (brand and creator)
+        if (payload?.workspace) {
+            const wsBrand = payload.workspace.brand?._id || payload.workspace.brand;
+            const wsCreator = payload.workspace.creator?._id || payload.workspace.creator;
+            if (wsBrand) {
+                participantRooms.add(`user:${wsBrand.toString()}`);
+            }
+            if (wsCreator) {
+                participantRooms.add(`user:${wsCreator.toString()}`);
+            }
+        }
+
+        for (const room of participantRooms) {
+            target = target.to(room);
+        }
+
+        target.emit(eventName, payload);
         return true;
     } catch (error) {
         console.error(`Socket workspace event emission failed (${eventName}):`, error?.message || error);

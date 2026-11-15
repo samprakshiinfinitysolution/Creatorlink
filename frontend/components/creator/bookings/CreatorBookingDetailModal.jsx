@@ -328,7 +328,7 @@ export default function CreatorBookingDetailModal({
                 </span>
               )}
             </div>
-            <h2 className="font-serif font-medium text-lg sm:text-xl lg:text-2xl text-foreground break-words line-clamp-2">
+            <h2 className="font-serif font-medium text-lg sm:text-xl lg:text-2xl text-foreground break-words leading-snug">
               {campaignTitle}
             </h2>
           </div>
@@ -398,10 +398,10 @@ export default function CreatorBookingDetailModal({
                     <span className="text-[10px] uppercase font-bold tracking-wider text-text-secondary">
                       Brand Client
                     </span>
-                    <h3 className="font-semibold text-foreground text-sm sm:text-base font-sans break-words line-clamp-2">
+                    <h3 className="font-semibold text-foreground text-sm sm:text-base font-sans break-words leading-tight">
                       {brandName}
                     </h3>
-                    <p className="text-xs text-text-secondary truncate mt-0.5">
+                    <p className="text-xs text-text-secondary break-all mt-0.5">
                       {brandEmail}
                     </p>
                   </div>

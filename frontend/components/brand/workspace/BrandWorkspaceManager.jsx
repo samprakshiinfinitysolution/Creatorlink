@@ -462,7 +462,7 @@ export default function BrandWorkspaceManager() {
                           <span className="text-xs font-bold text-neutral-900 dark:text-white block leading-tight">
                             Review Queue
                           </span>
-                          <span className="text-[10px] text-text-secondary truncate block leading-tight mt-0.5">
+                          <span className="text-[10px] text-text-secondary break-words block leading-tight mt-0.5">
                             Draft inspection &amp; revision requests
                           </span>
                         </div>
@@ -482,7 +482,7 @@ export default function BrandWorkspaceManager() {
                           <span className="text-xs font-bold text-neutral-900 dark:text-white block leading-tight">
                             Quality Sign-off
                           </span>
-                          <span className="text-[10px] text-text-secondary truncate block leading-tight mt-0.5">
+                          <span className="text-[10px] text-text-secondary break-words block leading-tight mt-0.5">
                             Final asset &amp; deliverable sign-off
                           </span>
                         </div>
@@ -502,7 +502,7 @@ export default function BrandWorkspaceManager() {
                           <span className="text-xs font-bold text-neutral-900 dark:text-white block leading-tight">
                             Payment Release
                           </span>
-                          <span className="text-[10px] text-text-secondary truncate block leading-tight mt-0.5">
+                          <span className="text-[10px] text-text-secondary break-words block leading-tight mt-0.5">
                             Secure escrow settlement &amp; rating
                           </span>
                         </div>
@@ -797,10 +797,10 @@ export default function BrandWorkspaceManager() {
                             )}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <span className="text-xs font-sans font-semibold text-foreground block truncate">
+                            <span className="text-xs font-sans font-semibold text-foreground block break-words">
                               Creator: {creatorName}
                             </span>
-                            <span className="text-[11px] font-sans text-text-secondary block truncate mt-0.5">
+                            <span className="text-[11px] font-sans text-text-secondary block break-words mt-0.5">
                               {creatorSubtitle}
                             </span>
                           </div>

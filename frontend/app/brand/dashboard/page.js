@@ -130,8 +130,14 @@ function BrandDashboardContent() {
     const consumerId = "brand_dashboard_overview_consumer";
     registerSocketConsumer(consumerId, brandId);
 
+    let debounceTimer = null;
     const handleRealtimeUpdate = () => {
-      handleFetchDashboard();
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
+      debounceTimer = setTimeout(() => {
+        handleFetchDashboard();
+      }, 300);
     };
 
     socket.on("notification:new", handleRealtimeUpdate);
@@ -140,6 +146,9 @@ function BrandDashboardContent() {
     socket.on("workspace:revision_requested", handleRealtimeUpdate);
 
     return () => {
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
       unregisterSocketConsumer(consumerId);
       socket.off("notification:new", handleRealtimeUpdate);
       socket.off("workspace:approved", handleRealtimeUpdate);

@@ -247,7 +247,7 @@ function CreatorCard({ creator, onViewProfile, isSaved, isSaving, onToggleSave, 
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5">
-              <h3 className="font-semibold text-foreground text-sm font-sans truncate" title={name}>
+              <h3 className="font-semibold text-foreground text-sm font-sans break-words" title={name}>
                 {name}
               </h3>
               {isVerified && (
@@ -257,18 +257,18 @@ function CreatorCard({ creator, onViewProfile, isSaved, isSaving, onToggleSave, 
               )}
             </div>
             {creator.title && (
-              <p className="text-[11px] text-text-secondary truncate font-medium mt-0.5" title={creator.title}>
+              <p className="text-[11px] text-text-secondary break-words font-medium mt-0.5" title={creator.title}>
                 {creator.title}
               </p>
             )}
 
-            <div className="flex items-center gap-2 mt-1">
-              <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-semibold bg-secondary/10 text-secondary border border-secondary/20 truncate max-w-[120px]">
+            <div className="flex flex-wrap items-center gap-2 mt-1">
+              <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-semibold bg-secondary/10 text-secondary border border-secondary/20 break-words">
                 {category}
               </span>
-              <span className="flex items-center gap-1 text-[11px] text-text-secondary truncate">
+              <span className="flex items-center gap-1 text-[11px] text-text-secondary break-words">
                 <MapPinIcon />
-                <span className="truncate">{location}</span>
+                <span className="break-words">{location}</span>
               </span>
             </div>
           </div>

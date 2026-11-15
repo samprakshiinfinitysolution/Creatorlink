@@ -1,8 +1,16 @@
 import dotenv from "dotenv";
+dotenv.config({ path: "backend/.env" });
+dotenv.config();
+process.env.SMTP_SERVICE = process.env.SMTP_SERVICE || "gmail";
+process.env.SMTP_USER = process.env.SMTP_USER || process.env.EMAIL || "test@creatorlink.test";
+process.env.SMTP_PASS = process.env.SMTP_PASS || process.env.EMAIL_PASS || "dummy_password";
+
+import dns from "node:dns";
+try { dns.setServers(["8.8.8.8", "8.8.4.4", "1.1.1.1"]); } catch (e) {}
+
 import mongoose from "mongoose";
 import express from "express";
 import cookieParser from "cookie-parser";
-import appRouter from "../routes/index.js";
 import Auth from "../modules/auth/auth.model.js";
 import CreatorProfile from "../modules/creator/profile/profile.model.js";
 import BrandProfile from "../modules/brand/profile/profile.model.js";
@@ -10,9 +18,8 @@ import VerificationRequest from "../modules/admin/verification/verification.mode
 import Notification from "../modules/notifications/notification.model.js";
 import { generateAccessToken } from "../utils/helpers/token.helper.js";
 
-dotenv.config();
-
 const runTest = async () => {
+    const { default: appRouter } = await import("../routes/index.js");
     console.log("=======================================================");
     console.log("STARTING ADMIN VERIFICATION MANAGEMENT INTEGRATION TEST");
     console.log("=======================================================");
@@ -41,23 +48,38 @@ const runTest = async () => {
     const creatorVerificationUrl = `http://localhost:${port}/api/creator/profile/verification`;
     const brandVerificationUrl = `http://localhost:${port}/api/brand/profile/verification`;
 
+    const trackedAuthIds = [];
+    const trackedVerificationIds = [];
     let createdCreatorReqId = null;
     let createdBrandReqId = null;
+    let creatorUser = null;
+    let brandUser = null;
 
     try {
-        // Fetch test users
+        // Fetch admin user (read-only) and create isolated test accounts tracked by exact _id
         const adminUser = await Auth.findOne({ role: "admin" });
-        const creatorUser = await Auth.findOne({ role: "creator" });
-        const brandUser = await Auth.findOne({ role: "brand" });
-
-        if (!adminUser || !creatorUser || !brandUser) {
-            throw new Error("Missing admin, creator, or brand in database for testing");
+        if (!adminUser) {
+            throw new Error("Missing admin user in database for testing");
         }
 
-        // Clean up any stale requests for test users before starting
-        await VerificationRequest.deleteMany({
-            user: { $in: [creatorUser._id, brandUser._id] }
+        const testTimestamp = Date.now();
+        creatorUser = await Auth.create({
+            name: "Test Module Creator",
+            email: `test_mod_creator_${testTimestamp}@creatorlink.test`,
+            role: "creator",
+            password: "TestPassword123!",
+            passwordVersion: 0
         });
+        trackedAuthIds.push(creatorUser._id);
+
+        brandUser = await Auth.create({
+            name: "Test Module Brand",
+            email: `test_mod_brand_${testTimestamp}@creatorlink.test`,
+            role: "brand",
+            password: "TestPassword123!",
+            passwordVersion: 0
+        });
+        trackedAuthIds.push(brandUser._id);
 
         // Ensure creator profile exists for test creator
         let creatorProf = await CreatorProfile.findOne({ user: creatorUser._id });
@@ -149,6 +171,7 @@ const runTest = async () => {
             throw new Error("Failed to submit creator verification request");
         }
         createdCreatorReqId = submitCreatorJson.data._id;
+        trackedVerificationIds.push(createdCreatorReqId);
         console.log(`✓ Creator verification request submitted: ${createdCreatorReqId}`);
 
         // TEST 5: Duplicate pending submission prevention -> 400
@@ -232,6 +255,7 @@ const runTest = async () => {
             throw new Error("Failed to submit brand verification request");
         }
         createdBrandReqId = submitBrandJson.data._id;
+        trackedVerificationIds.push(createdBrandReqId);
         console.log(`✓ Brand verification request submitted: ${createdBrandReqId}`);
 
         // TEST 11: Admin rejects brand verification request with justification -> 200
@@ -278,17 +302,46 @@ const runTest = async () => {
         console.log("ALL 13 ADMIN VERIFICATION INTEGRATION TESTS PASSED 100%");
         console.log("=======================================================");
     } finally {
-        // Cleanup created verification records and test state
-        if (createdCreatorReqId) {
-            await VerificationRequest.findByIdAndDelete(createdCreatorReqId);
-            await Notification.deleteMany({ entityId: createdCreatorReqId });
+        console.log("\n[Test Cleanup] Cleaning up test execution artifacts by exact IDs...");
+        try {
+            // 1. Delete created VerificationRequests by exact IDs
+            if (trackedVerificationIds.length > 0) {
+                const delVerifs = await VerificationRequest.deleteMany({ _id: { $in: trackedVerificationIds } });
+                console.log(`✓ Deleted ${delVerifs.deletedCount} test VerificationRequest record(s).`);
+            }
+
+            // 2. Delete test notifications linked to test requests or test accounts
+            if (trackedVerificationIds.length > 0 || trackedAuthIds.length > 0) {
+                const delNotifs = await Notification.deleteMany({
+                    $or: [
+                        { entityId: { $in: trackedVerificationIds } },
+                        { recipient: { $in: trackedAuthIds } },
+                        { sender: { $in: trackedAuthIds } }
+                    ]
+                });
+                console.log(`✓ Deleted ${delNotifs.deletedCount} test Notification record(s).`);
+            }
+
+            // 3. Delete dependent test profiles before deleting Auth accounts
+            if (trackedAuthIds.length > 0) {
+                const delCreatorProf = await CreatorProfile.deleteMany({ user: { $in: trackedAuthIds } });
+                const delBrandProf = await BrandProfile.deleteMany({ user: { $in: trackedAuthIds } });
+                console.log(`✓ Deleted ${delCreatorProf.deletedCount} test CreatorProfile and ${delBrandProf.deletedCount} test BrandProfile record(s).`);
+            }
+
+            // 4. Delete test Auth accounts by exact IDs
+            if (trackedAuthIds.length > 0) {
+                const delAuth = await Auth.deleteMany({ _id: { $in: trackedAuthIds } });
+                console.log(`✓ Deleted ${delAuth.deletedCount} test Auth account(s).`);
+            }
+
+            console.log("✓ Guaranteed cleanup completed successfully for all test artifacts.");
+        } catch (cleanupErr) {
+            console.error("CRITICAL: Error occurred during test artifact cleanup:", cleanupErr);
+        } finally {
+            server.close();
+            await mongoose.disconnect();
         }
-        if (createdBrandReqId) {
-            await VerificationRequest.findByIdAndDelete(createdBrandReqId);
-            await Notification.deleteMany({ entityId: createdBrandReqId });
-        }
-        server.close();
-        await mongoose.disconnect();
     }
 };
 

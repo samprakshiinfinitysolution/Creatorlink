@@ -205,7 +205,7 @@ export default function BrandPlansCheckout() {
           {/* Success Modal */}
           {successData && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-              <div className="bg-surface border border-border-theme rounded-2xl max-w-md w-full p-6 shadow-2xl text-center space-y-4">
+              <div className="bg-surface border border-border-theme rounded-2xl max-w-md w-full p-4 sm:p-6 shadow-2xl text-center space-y-4 max-h-[90vh] overflow-y-auto">
                 <div className="w-14 h-14 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto text-2xl font-bold">
                   ✓
                 </div>

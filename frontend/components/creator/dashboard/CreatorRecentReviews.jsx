@@ -184,19 +184,19 @@ export default function CreatorRecentReviews({ reviews }) {
                   )}
                 </div>
 
-                <div className="pt-3 border-t border-border-theme/60 flex items-center justify-between gap-3 text-xs">
+                <div className="pt-3 border-t border-border-theme/60 flex flex-col min-[380px]:flex-row min-[380px]:items-center justify-between gap-2 text-xs">
                   <div className="flex items-center gap-2 min-w-0">
                     <ReviewerAvatar
                       name={reviewer}
                       image={reviewerImage}
                       initial={reviewerInitial}
                     />
-                    <span className="font-semibold text-foreground truncate font-sans">
+                    <span className="font-semibold text-foreground break-words font-sans">
                       {reviewer}
                     </span>
                   </div>
                   {rev.campaignTitle && (
-                    <span className="text-[11px] text-text-secondary truncate max-w-[180px] font-sans">
+                    <span className="text-[11px] text-text-secondary break-words font-sans" title={rev.campaignTitle}>
                       {rev.campaignTitle}
                     </span>
                   )}

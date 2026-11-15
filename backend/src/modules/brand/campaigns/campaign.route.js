@@ -7,7 +7,8 @@ import {
     createCampaign,
     getMyCampaigns,
     getCampaignById,
-    updateCampaign
+    updateCampaign,
+    deleteCampaign
 } from "./campaign.controller.js";
 
 import {
@@ -54,6 +55,13 @@ router.patch(
     "/:id",
     validateUpdateCampaign,
     updateCampaign
+);
+
+
+// Permanently delete campaign.
+router.delete(
+    "/:id",
+    deleteCampaign
 );
 
 

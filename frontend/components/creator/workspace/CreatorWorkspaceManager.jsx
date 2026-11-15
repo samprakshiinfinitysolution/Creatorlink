@@ -799,10 +799,10 @@ export default function CreatorWorkspaceManager() {
                             )}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <span className="text-xs font-sans font-semibold text-foreground block truncate">
+                            <span className="text-xs font-sans font-semibold text-foreground block break-words">
                               Brand: {brandName}
                             </span>
-                            <span className="text-[11px] font-sans text-text-secondary block truncate mt-0.5">
+                            <span className="text-[11px] font-sans text-text-secondary block break-words mt-0.5">
                               {brandSubtitle}
                             </span>
                           </div>

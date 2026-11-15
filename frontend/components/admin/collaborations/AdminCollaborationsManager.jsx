@@ -331,8 +331,8 @@ export default function AdminCollaborationsManager() {
 
       {/* TABLE */}
       <div className="bg-surface border border-border-theme rounded-2xl overflow-hidden shadow-xs">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+        <div className="overflow-x-auto custom-scrollbar">
+          <table className="w-full text-left text-xs min-w-[1020px]">
             <thead className="bg-surface-muted/50 text-text-secondary uppercase text-[11px] tracking-wider border-b border-border-theme font-semibold">
               <tr>
                 <th className="px-5 py-3">Campaign / Service</th>
@@ -406,7 +406,7 @@ export default function AdminCollaborationsManager() {
                           className="w-8 h-8 rounded-lg bg-surface-muted border border-border-theme font-bold text-[10px] text-secondary shrink-0"
                         />
                         <div className="min-w-0">
-                          <div className="font-semibold text-foreground truncate max-w-xs">
+                          <div className="font-semibold text-foreground break-words max-w-xs leading-snug">
                             {collab.campaign?.title || collab.service?.title || "Direct Collaboration"}
                           </div>
                           <div className="text-[10px] text-text-secondary capitalize mt-0.5">
@@ -426,15 +426,15 @@ export default function AdminCollaborationsManager() {
                           className="w-8 h-8 rounded-full bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/20 font-bold text-[10px] uppercase shrink-0"
                         />
                         <div className="min-w-0">
-                          <div className="flex items-center gap-1 text-foreground font-medium truncate max-w-[130px]">
-                            <span className="truncate">
+                          <div className="flex items-center gap-1 text-foreground font-medium break-words max-w-[180px]">
+                            <span className="break-words">
                               {collab.brandProfile?.companyName || collab.brand?.name || "Brand"}
                             </span>
                             {Boolean(collab.brandProfile?.isVerifiedBusiness) && (
                               <CheckBadgeIcon className="w-3.5 h-3.5 shrink-0" />
                             )}
                           </div>
-                          <div className="text-[10px] text-text-secondary truncate max-w-[130px]">
+                          <div className="text-[10px] text-text-secondary break-all max-w-[180px]">
                             {collab.brand?.email}
                           </div>
                         </div>
@@ -451,15 +451,15 @@ export default function AdminCollaborationsManager() {
                           className="w-8 h-8 rounded-full bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/20 font-bold text-[10px] uppercase shrink-0"
                         />
                         <div className="min-w-0">
-                          <div className="flex items-center gap-1 text-foreground font-medium truncate max-w-[130px]">
-                            <span className="truncate">
+                          <div className="flex items-center gap-1 text-foreground font-medium break-words max-w-[180px]">
+                            <span className="break-words">
                               {collab.creatorProfile?.displayName || collab.creator?.name || "Creator"}
                             </span>
                             {Boolean(collab.creatorProfile?.isVerifiedBadge) && (
                               <CheckBadgeIcon className="w-3.5 h-3.5 shrink-0" />
                             )}
                           </div>
-                          <div className="text-[10px] text-text-secondary truncate max-w-[130px]">
+                          <div className="text-[10px] text-text-secondary break-all max-w-[180px]">
                             {collab.creator?.email}
                           </div>
                         </div>

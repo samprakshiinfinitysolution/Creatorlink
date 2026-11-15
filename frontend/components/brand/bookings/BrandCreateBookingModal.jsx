@@ -306,7 +306,7 @@ export default function BrandCreateBookingModal({
                       {creatorInitials}
                     </div>
                     <div>
-                      <span className="font-semibold text-foreground block truncate max-w-[200px]">
+                      <span className="font-semibold text-foreground block break-words">
                         {creatorName}
                       </span>
                       <span className="text-[10px] text-text-secondary">
@@ -315,14 +315,14 @@ export default function BrandCreateBookingModal({
                     </div>
                   </div>
 
-                  <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-secondary/10 text-secondary border border-secondary/20 uppercase">
+                  <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-secondary/10 text-secondary border border-secondary/20 uppercase shrink-0">
                     {service?.platform || "Service"}
                   </span>
                 </div>
 
                 <div className="pt-2 border-t border-border-theme flex items-start justify-between gap-3 text-xs">
-                  <div className="min-w-0">
-                    <span className="font-medium text-foreground block truncate" title={serviceTitle}>
+                  <div className="min-w-0 flex-1">
+                    <span className="font-medium text-foreground block break-words" title={serviceTitle}>
                       {serviceTitle}
                     </span>
                     {service?.deliveryTime && (

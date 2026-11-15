@@ -15,6 +15,7 @@ import {
   createCampaign,
   getCampaignById,
   updateCampaign,
+  deleteCampaign,
   clearSelectedCampaign,
 } from "@/redux/brand/campaigns/campaigns_slice";
 import { getBrandBookings as getBrandBookingsApi } from "@/redux/brand/bookings/bookings_api";
@@ -1006,6 +1007,14 @@ export default function BrandCampaignsManager() {
   );
   const [dismissCampaignGuidance, setDismissCampaignGuidance] = useState(false);
 
+  // Delete Campaign Confirmation Modal State
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [campaignToDelete, setCampaignToDelete] = useState(null);
+  const [deleteReason, setDeleteReason] = useState("");
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
+  const [deleteSuccess, setDeleteSuccess] = useState(null);
+
   // Helper to trigger API dispatch with current filters + overrides
   const fetchCampaignsWithFilters = useCallback(
     (overrides = {}) => {
@@ -1436,6 +1445,46 @@ export default function BrandCampaignsManager() {
     setIsEditOpen(true);
   };
 
+  // Handle Delete Action Click
+  const handleDeleteClick = (campaign) => {
+    setCampaignToDelete(campaign);
+    setDeleteReason("");
+    setDeleteError(null);
+    setDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!campaignToDelete) return;
+    setDeleteLoading(true);
+    setDeleteError(null);
+    try {
+      const res = await dispatch(
+        deleteCampaign({
+          campaignId: campaignToDelete._id,
+          reason: deleteReason.trim(),
+        })
+      ).unwrap();
+
+      const successMsg = res?.message || `Campaign "${campaignToDelete.title}" was permanently deleted.`;
+      setDeleteSuccess(successMsg);
+      setDeleteModalOpen(false);
+      setCampaignToDelete(null);
+
+      // Close view modal if it was open for this campaign
+      if (selectedCampaign?._id === campaignToDelete._id) {
+        setIsViewOpen(false);
+        dispatch(clearSelectedCampaign());
+      }
+
+      // Re-fetch brand campaigns list
+      fetchCampaignsWithFilters();
+    } catch (err) {
+      setDeleteError(err || "Failed to delete campaign");
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
   // Handle Edit Submission
   const handleEditSubmit = async (e) => {
     e.preventDefault();
@@ -1601,6 +1650,25 @@ export default function BrandCampaignsManager() {
                 type="button"
                 onClick={() => setFormError("")}
                 className="text-rose-500 hover:text-rose-600 font-bold text-xs"
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
+
+          {/* Delete Success Banner */}
+          {deleteSuccess && (
+            <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-2xl p-4 text-xs font-sans flex items-center justify-between gap-2 animate-in fade-in duration-200">
+              <div className="flex items-center gap-2">
+                <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span>{deleteSuccess}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setDeleteSuccess(null)}
+                className="text-emerald-600 hover:text-emerald-700 font-bold text-xs"
               >
                 Dismiss
               </button>
@@ -1918,6 +1986,14 @@ export default function BrandCampaignsManager() {
                                 title="Edit Campaign"
                               >
                                 <PencilIcon />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteClick(c)}
+                                className="p-1.5 rounded-lg text-text-secondary hover:text-rose-600 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                                title="Delete Campaign"
+                              >
+                                <TrashIcon className="w-4 h-4" />
                               </button>
                             </div>
                           </td>
@@ -2842,7 +2918,7 @@ export default function BrandCampaignsManager() {
                                   image={creatorAvatar}
                                 />
                                 <div className="min-w-0">
-                                  <h5 className="font-semibold text-sm text-foreground truncate">
+                                  <h5 className="font-semibold text-sm text-foreground break-words">
                                     {creatorName}
                                   </h5>
                                   <div className="flex items-center gap-2 mt-0.5 text-[11px] text-text-secondary flex-wrap">
@@ -2877,7 +2953,7 @@ export default function BrandCampaignsManager() {
                                   Service Offering
                                 </span>
                                 <span
-                                  className="font-medium text-foreground mt-0.5 block truncate"
+                                  className="font-medium text-foreground mt-0.5 block break-words"
                                   title={serviceTitle}
                                 >
                                   {serviceTitle}
@@ -3018,13 +3094,26 @@ export default function BrandCampaignsManager() {
                   ? `${applicants.length} total applicant${applicants.length === 1 ? "" : "s"}`
                   : `Created ${formatDate(selectedCampaign?.createdAt)}`}
               </span>
-              <button
-                type="button"
-                onClick={closeViewModal}
-                className="px-5 py-2 rounded-xl bg-surface-muted border border-border-theme text-foreground text-xs font-semibold hover:border-secondary transition-colors cursor-pointer"
-              >
-                Close
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    closeViewModal();
+                    handleDeleteClick(selectedCampaign);
+                  }}
+                  className="px-4 py-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-semibold hover:bg-rose-500/20 transition-colors cursor-pointer flex items-center gap-1.5"
+                >
+                  <TrashIcon className="w-3.5 h-3.5" />
+                  <span>Delete Campaign</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={closeViewModal}
+                  className="px-5 py-2 rounded-xl bg-surface-muted border border-border-theme text-foreground text-xs font-semibold hover:border-secondary transition-colors cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -3493,6 +3582,129 @@ export default function BrandCampaignsManager() {
 
             </form>
 
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* 5. DELETE CAMPAIGN CONFIRMATION MODAL */}
+      {/* ========================================================= */}
+      {deleteModalOpen && campaignToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs overflow-y-auto">
+          <div className="bg-surface border border-border-theme rounded-2xl w-full max-w-lg shadow-2xl animate-in fade-in zoom-in-95 duration-150 my-auto overflow-hidden">
+            {/* Modal Header */}
+            <div className="px-5 sm:px-6 py-4 border-b border-border-theme flex items-center justify-between bg-rose-500/5">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-600 shrink-0">
+                  <TrashIcon className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-serif font-medium text-base sm:text-lg text-foreground">
+                    Delete Campaign Permanently
+                  </h3>
+                  <p className="text-xs text-text-secondary">
+                    Irreversible hard deletion
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!deleteLoading) {
+                    setDeleteModalOpen(false);
+                    setCampaignToDelete(null);
+                    setDeleteError(null);
+                  }
+                }}
+                disabled={deleteLoading}
+                className="p-1 rounded-lg text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors cursor-pointer disabled:opacity-40"
+              >
+                <XMarkIcon />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-5 sm:p-6 space-y-4 text-xs font-sans">
+              {deleteError && (
+                <div className="bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 rounded-xl p-3 flex items-start gap-2">
+                  <svg className="w-4 h-4 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="leading-relaxed">{deleteError}</span>
+                </div>
+              )}
+
+              <div className="p-3.5 bg-surface-muted/60 border border-border-theme rounded-xl space-y-1.5">
+                <p className="font-medium text-foreground text-sm">
+                  {campaignToDelete.title}
+                </p>
+                <div className="flex items-center gap-3 text-text-secondary text-[11px]">
+                  <span>Status: <strong className="text-foreground capitalize">{campaignToDelete.status}</strong></span>
+                  <span>•</span>
+                  <span>Category: <strong className="text-foreground">{campaignToDelete.category || "General"}</strong></span>
+                </div>
+              </div>
+
+              <div className="space-y-2 text-text-secondary leading-relaxed">
+                <p className="font-medium text-foreground">
+                  Are you sure you want to delete this campaign?
+                </p>
+                <ul className="list-disc pl-4 space-y-1 text-[11px]">
+                  <li>This campaign document will be <span className="font-semibold text-rose-600 dark:text-rose-400">permanently removed</span> from the database.</li>
+                  <li>Any <span className="font-semibold text-foreground">pending applications</span> will be cancelled, and creators will be notified.</li>
+                  <li>Campaigns with <span className="font-semibold text-foreground">accepted, in-progress, or completed</span> collaborations cannot be deleted.</li>
+                  <li>Campaigns with existing <span className="font-semibold text-foreground">workspaces, payments, or reviews</span> are protected and cannot be deleted.</li>
+                </ul>
+              </div>
+
+              <div className="space-y-1.5 pt-1">
+                <label className="block text-xs font-medium text-foreground">
+                  Reason for deletion <span className="text-text-secondary font-normal">(Optional)</span>
+                </label>
+                <textarea
+                  rows={2}
+                  value={deleteReason}
+                  onChange={(e) => setDeleteReason(e.target.value)}
+                  placeholder="e.g. Budget reallocation, campaign cancelled, duplicate draft..."
+                  disabled={deleteLoading}
+                  className="w-full px-3 py-2 rounded-xl bg-surface border border-border-theme text-foreground placeholder-text-secondary/50 focus:outline-hidden focus:border-secondary transition-colors text-xs resize-none disabled:opacity-50"
+                />
+              </div>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="px-5 sm:px-6 py-4 border-t border-border-theme flex items-center justify-end gap-2.5 bg-surface-muted/30">
+              <button
+                type="button"
+                onClick={() => {
+                  setDeleteModalOpen(false);
+                  setCampaignToDelete(null);
+                  setDeleteError(null);
+                }}
+                disabled={deleteLoading}
+                className="px-4 py-2 rounded-xl border border-border-theme text-foreground text-xs font-semibold hover:bg-surface-muted transition-colors cursor-pointer disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDelete}
+                disabled={deleteLoading}
+                className="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold transition-all cursor-pointer disabled:opacity-50 flex items-center gap-2"
+              >
+                {deleteLoading ? (
+                  <>
+                    <ArrowPathIcon className="w-3.5 h-3.5 animate-spin" />
+                    <span>Deleting...</span>
+                  </>
+                ) : (
+                  <>
+                    <TrashIcon className="w-3.5 h-3.5" />
+                    <span>Confirm Delete</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}

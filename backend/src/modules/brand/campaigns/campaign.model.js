@@ -195,6 +195,12 @@ const campaignSchema = new mongoose.Schema(
             default: "draft"
         },
 
+        // Tracking distinct pause cycles for notification scoping and deduplication
+        pauseCycle: {
+            type: Number,
+            default: 0
+        },
+
         // Dedicated administrative moderation and restriction tracking
         moderation: {
             isRestricted: {

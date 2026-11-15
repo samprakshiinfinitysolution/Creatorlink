@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import CreatorSidebar from "@/components/creator/dashboard/CreatorSidebar";
 import CreatorHeader from "@/components/creator/dashboard/CreatorHeader";
 import CreatorBookingDetailModal from "./CreatorBookingDetailModal";
+import DropdownFilter from "@/components/common/DropdownFilter";
 import {
   fetchCreatorBookings,
   fetchCreatorBookingById,
@@ -57,6 +58,28 @@ function getBrandInitials(name) {
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   }
   return trimmed[0].toUpperCase();
+}
+
+function getCampaignInitials(title) {
+  if (!title || typeof title !== "string") return "CP";
+  const clean = title.trim();
+  if (!clean) return "CP";
+  const words = clean
+    .split(/[\s\-_/]+/)
+    .map((w) => w.replace(/^[^\p{L}\p{N}]+/u, ""))
+    .filter(Boolean);
+  if (words.length >= 2) {
+    const first = words[0][0] || "";
+    const second = words[1][0] || "";
+    return (first + second).toUpperCase();
+  }
+  if (words.length === 1 && words[0].length >= 2) {
+    return words[0].slice(0, 2).toUpperCase();
+  }
+  if (words.length === 1 && words[0].length === 1) {
+    return words[0].toUpperCase();
+  }
+  return "CP";
 }
 
 function getStatusBadge(status) {
@@ -128,6 +151,46 @@ function BrandAvatar({ brand, name, className = "w-9 h-9 sm:w-10 sm:h-10 text-xs
   return (
     <div
       className={`rounded-full bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 flex items-center justify-center font-sans font-semibold shrink-0 shadow-2xs select-none ${className}`}
+    >
+      {initials}
+    </div>
+  );
+}
+
+// =========================================================
+// REUSABLE CAMPAIGN THUMBNAIL COMPONENT
+// =========================================================
+function CampaignThumbnail({ campaign, title, className = "w-8 h-8 rounded-lg text-[11px]" }) {
+  const [imageError, setImageError] = useState(false);
+  const imageUrl = !imageError
+    ? campaign?.coverImage || campaign?.image || campaign?.thumbnail || ""
+    : "";
+  const displayTitle = campaign?.title || title || "Campaign Collaboration";
+  const initials = getCampaignInitials(displayTitle);
+
+  useEffect(() => {
+    setImageError(false);
+  }, [campaign?.coverImage, campaign?.image, campaign?.thumbnail]);
+
+  if (imageUrl) {
+    return (
+      <div className={`relative overflow-hidden shrink-0 border border-border-theme bg-neutral-100 dark:bg-surface-muted ${className}`}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={imageUrl}
+          alt={displayTitle}
+          className="w-full h-full object-cover object-center"
+          loading="lazy"
+          onError={() => setImageError(true)}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`border border-border-theme bg-neutral-100 text-neutral-800 dark:bg-surface-muted dark:text-neutral-200 flex items-center justify-center font-sans font-bold shrink-0 select-none shadow-2xs ${className}`}
+      title={displayTitle}
     >
       {initials}
     </div>
@@ -512,7 +575,7 @@ export default function CreatorBookingsManager() {
             >
               <div className="flex items-center gap-2 min-w-0">
                 <CheckIcon className="w-4 h-4 shrink-0" />
-                <span className="truncate">{localMessage?.text || successMessage}</span>
+                <span className="break-words">{localMessage?.text || successMessage}</span>
               </div>
               <button
                 type="button"
@@ -558,17 +621,14 @@ export default function CreatorBookingsManager() {
                 <span className="text-[11px] sm:text-xs font-semibold text-text-secondary uppercase tracking-wider shrink-0">
                   Source:
                 </span>
-                <select
+                <DropdownFilter
                   value={originFilter}
                   onChange={(e) => setOriginFilter(e.target.value)}
-                  className="flex-1 sm:flex-none bg-surface-muted/50 border border-border-theme text-foreground text-xs sm:text-sm rounded-xl sm:rounded-2xl px-3 py-2 focus:outline-none focus:border-[#ff2d6c] transition-colors cursor-pointer shrink-0"
-                >
-                  {ORIGIN_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
+                  options={ORIGIN_OPTIONS}
+                  className="flex-1 sm:flex-none shrink-0"
+                  buttonClassName="sm:rounded-2xl py-2"
+                  aria-label="Filter bookings by source"
+                />
               </div>
             </div>
 
@@ -650,7 +710,7 @@ export default function CreatorBookingsManager() {
             {/* Unified Table View (all viewports with horizontal scroll on mobile/tablet) */}
             {(!loading || rawBookings.length > 0) && !error && filteredBookings.length > 0 && (
               <div className="w-full overflow-x-auto custom-scrollbar min-w-0">
-                <table className="w-full text-left text-xs border-collapse min-w-[900px]">
+                <table className="w-full text-left text-xs border-collapse min-w-[1050px]">
                   <thead>
                     <tr className="border-b border-border-theme bg-surface-muted/40 text-text-secondary uppercase tracking-wider text-[10px] font-semibold whitespace-nowrap">
                       <th className="py-3.5 px-5">Brand Client</th>
@@ -700,18 +760,18 @@ export default function CreatorBookingsManager() {
                           className="hover:bg-surface-muted/30 transition-colors"
                         >
                           {/* Brand Info with Profile Avatar */}
-                          <td className="py-4 px-5">
-                            <div className="flex items-center gap-3 min-w-0 max-w-[220px]">
+                          <td className="py-4 px-5 min-w-[200px]">
+                            <div className="flex items-center gap-3 min-w-0">
                               <BrandAvatar
                                 brand={booking.brand}
                                 name={brandName}
                                 className="w-9 h-9 sm:w-10 sm:h-10 text-xs sm:text-sm shrink-0"
                               />
                               <div className="min-w-0 flex-1">
-                                <div className="font-semibold text-foreground text-sm font-sans truncate" title={brandName}>
+                                <div className="font-semibold text-foreground text-sm font-sans break-words leading-tight" title={brandName}>
                                   {brandName}
                                 </div>
-                                <div className="text-[11px] text-text-secondary mt-0.5 truncate" title={brandEmail}>
+                                <div className="text-[11px] text-text-secondary mt-0.5 break-all leading-normal" title={brandEmail}>
                                   {brandEmail}
                                 </div>
                               </div>
@@ -719,37 +779,28 @@ export default function CreatorBookingsManager() {
                           </td>
 
                           {/* Campaign Title & Platform */}
-                          <td className="py-4 px-4">
-                            <div className="flex items-center gap-2.5 max-w-[220px]">
-                              {Boolean(booking.campaign?.coverImage) && (
-                                <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-border-theme bg-neutral-100 dark:bg-surface-muted">
-                                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                                  <img
-                                    src={booking.campaign.coverImage}
-                                    alt={campaignTitle}
-                                    className="w-full h-full object-cover object-center"
-                                    loading="lazy"
-                                    onError={(e) => {
-                                      e.currentTarget.parentElement.style.display = "none";
-                                    }}
-                                  />
-                                </div>
-                              )}
+                          <td className="py-4 px-4 min-w-[240px]">
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <CampaignThumbnail
+                                campaign={booking.campaign}
+                                title={campaignTitle}
+                                className="w-8 h-8 rounded-lg text-[11px]"
+                              />
                               <div className="min-w-0 flex-1">
-                                <div className="font-medium text-foreground text-xs sm:text-sm font-sans truncate" title={campaignTitle}>
+                                <div className="font-medium text-foreground text-xs sm:text-sm font-sans break-words leading-snug" title={campaignTitle}>
                                   {campaignTitle}
                                 </div>
-                                <div className="text-[11px] text-text-secondary mt-0.5 flex items-center gap-1.5 capitalize">
-                                  <span className="truncate">{category}</span>
+                                <div className="text-[11px] text-text-secondary mt-1 flex flex-wrap items-center gap-1.5 capitalize">
+                                  <span className="break-words">{category}</span>
                                   <span>•</span>
-                                  <span className="truncate">{platform}</span>
+                                  <span className="break-words">{platform}</span>
                                 </div>
                               </div>
                             </div>
                           </td>
 
                           {/* Type / Origin */}
-                          <td className="py-4 px-4">
+                          <td className="py-4 px-4 whitespace-nowrap min-w-[110px]">
                             {isBrandProposal ? (
                               <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-blue-500/10 text-blue-500 border border-blue-500/20 whitespace-nowrap">
                                 Direct Proposal
@@ -762,24 +813,24 @@ export default function CreatorBookingsManager() {
                           </td>
 
                           {/* Service Title */}
-                          <td className="py-4 px-4 text-text-secondary font-medium">
-                            <div className="text-foreground font-medium truncate max-w-[150px]" title={serviceTitle}>
+                          <td className="py-4 px-4 text-text-secondary font-medium min-w-[150px]">
+                            <div className="text-foreground font-medium break-words leading-snug" title={serviceTitle}>
                               {serviceTitle}
                             </div>
                             {booking.service?.deliveryTime && (
-                              <div className="text-[10px] text-text-secondary mt-0.5">
+                              <div className="text-[10px] text-text-secondary mt-0.5 whitespace-nowrap">
                                 {booking.service.deliveryTime}d delivery
                               </div>
                             )}
                           </td>
 
                           {/* Price */}
-                          <td className="py-4 px-4 font-bold text-foreground whitespace-nowrap">
+                          <td className="py-4 px-4 font-bold text-foreground whitespace-nowrap min-w-[110px]">
                             {formatCurrency(agreedPrice, currency)}
                           </td>
 
                           {/* Status Badge */}
-                          <td className="py-4 px-4">
+                          <td className="py-4 px-4 whitespace-nowrap min-w-[110px]">
                             <span
                               className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-bold border whitespace-nowrap ${badge.color}`}
                             >
@@ -788,12 +839,12 @@ export default function CreatorBookingsManager() {
                           </td>
 
                           {/* Date */}
-                          <td className="py-4 px-4 text-text-secondary font-medium whitespace-nowrap">
+                          <td className="py-4 px-4 text-text-secondary font-medium whitespace-nowrap min-w-[100px]">
                             {formatDate(booking.createdAt)}
                           </td>
 
                           {/* Actions */}
-                          <td className="py-4 px-5 text-right whitespace-nowrap">
+                          <td className="py-4 px-5 text-right whitespace-nowrap min-w-[140px]">
                             <div className="inline-flex items-center gap-2">
                               {/* Quick Accept/Reject for Brand Proposals */}
                               {isPending && isBrandProposal && (

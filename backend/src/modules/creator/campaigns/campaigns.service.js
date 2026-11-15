@@ -295,8 +295,8 @@ const getDiscoverCampaignsService = async (query = {}) => {
 };
 
 
-// Get a single published campaign by ID for creator view.
-const getDiscoverCampaignByIdService = async (campaignId) => {
+// Get a single published campaign by ID for creator view, or allow applied creators to view non-published campaigns.
+const getDiscoverCampaignByIdService = async (campaignId, creatorId) => {
 
     if (!mongoose.Types.ObjectId.isValid(campaignId)) {
         throw createApiError(
@@ -305,13 +305,8 @@ const getDiscoverCampaignByIdService = async (campaignId) => {
         );
     }
 
-
-    const campaign = await Campaign.findOne({
-        _id: campaignId,
-        status: "published",
-        "moderation.isRestricted": { $ne: true }
-    }).populate("brand", "name email avatar");
-
+    const campaign = await Campaign.findById(campaignId)
+        .populate("brand", "name email avatar");
 
     if (!campaign) {
         throw createApiError(
@@ -320,6 +315,35 @@ const getDiscoverCampaignByIdService = async (campaignId) => {
         );
     }
 
+    // If restricted by platform administration, deny access with 403
+    if (campaign.moderation?.isRestricted) {
+        throw createApiError(
+            403,
+            "This campaign is currently restricted for administrative moderation review."
+        );
+    }
+
+    // Published and unrestricted campaigns are open for public discovery
+    if (campaign.status === "published") {
+        return await attachCampaignBrandProfiles(campaign);
+    }
+
+    // For non-published campaigns (paused, in_progress, completed, closed, draft):
+    // Only creators who have an existing booking/application for this campaign may view its details
+    let hasApplied = false;
+    if (creatorId && mongoose.Types.ObjectId.isValid(creatorId)) {
+        hasApplied = await Booking.exists({
+            campaign: campaignId,
+            creator: creatorId
+        });
+    }
+
+    if (!hasApplied) {
+        throw createApiError(
+            404,
+            "Campaign not found"
+        );
+    }
 
     return await attachCampaignBrandProfiles(campaign);
 };

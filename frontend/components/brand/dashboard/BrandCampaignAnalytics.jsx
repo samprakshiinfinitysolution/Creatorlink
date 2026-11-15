@@ -1045,7 +1045,7 @@ function CampaignPerformanceChart({
 
       {paymentsError && (
         <div className="py-2 px-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-700 dark:text-amber-400 font-sans flex items-center justify-between gap-3">
-          <span className="truncate">
+          <span className="break-words">
             Historical payment transactions could not be retrieved. Displaying confirmed all-time total in legend.
           </span>
           {typeof onRetryPayments === "function" && (
@@ -1063,7 +1063,7 @@ function CampaignPerformanceChart({
 
       {/* Completeness notice when paginated payments exist */}
       {hasMorePayments && (
-        <div className="py-1.5 px-3 rounded-lg bg-surface-muted/30 border border-border-theme/40 text-[10px] text-text-secondary font-sans">
+        <div className="py-1.5 px-3 rounded-lg bg-surface-muted/30 border border-border-theme/40 text-[10px] text-text-secondary font-sans break-words">
           {hasValidTotalCount
             ? `Displaying latest ${paymentsHistory.length} payments of ${totalPaymentItems} total transactions. Older transactions are not included in monthly buckets.`
             : "More payment history exists; older transactions are not included in monthly buckets."}
@@ -1072,10 +1072,10 @@ function CampaignPerformanceChart({
 
       {/* Summary Row */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2 text-[11px] sm:text-xs text-text-secondary pt-2.5 sm:pt-3 border-t border-border-theme font-sans">
-        <span className="truncate">
+        <span className="break-words">
           Confirmed Paid Spend: <strong className="text-foreground font-semibold">{formatCurrency(totalSpending, "INR")}</strong>
         </span>
-        <span className="sm:text-right truncate">
+        <span className="sm:text-right break-words">
           {totalCampaignBudget !== null && totalCampaignBudget !== undefined
             ? `Total Campaign Budget (${totalCampaigns} total): `
             : isPartialCampaignList

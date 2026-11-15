@@ -349,8 +349,8 @@ export default function MaisonProtocol() {
                   </div>
                 </div>
 
-                {/* 6 MILESTONE CARDS IN ONE HORIZONTAL ROW */}
-                <div className="grid grid-cols-6 gap-1.5 sm:gap-3 lg:gap-3.5 items-stretch w-full">
+                {/* 6 MILESTONE CARDS (Responsive: 2 cols on mobile, 3 on tablet, 6 on desktop) */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 lg:gap-3.5 items-stretch w-full">
                   {PIPELINE_STAGES.map((stage) => {
                     const isCompleted = stage.status === "completed";
                     const isActive = stage.status === "active";

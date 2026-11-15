@@ -51,6 +51,28 @@ function getCreatorInitials(name) {
   return trimmed[0].toUpperCase();
 }
 
+function getCampaignInitials(title) {
+  if (!title || typeof title !== "string") return "CP";
+  const clean = title.trim();
+  if (!clean) return "CP";
+  const words = clean
+    .split(/[\s\-_/]+/)
+    .map((w) => w.replace(/^[^\p{L}\p{N}]+/u, ""))
+    .filter(Boolean);
+  if (words.length >= 2) {
+    const first = words[0][0] || "";
+    const second = words[1][0] || "";
+    return (first + second).toUpperCase();
+  }
+  if (words.length === 1 && words[0].length >= 2) {
+    return words[0].slice(0, 2).toUpperCase();
+  }
+  if (words.length === 1 && words[0].length === 1) {
+    return words[0].toUpperCase();
+  }
+  return "CP";
+}
+
 function getStatusBadge(status) {
   switch (status?.toLowerCase()) {
     case "pending":
@@ -89,6 +111,46 @@ function getStatusBadge(status) {
         color: "bg-surface-muted text-text-secondary border-border-theme",
       };
   }
+}
+
+// =========================================================
+// REUSABLE CAMPAIGN THUMBNAIL COMPONENT
+// =========================================================
+function CampaignThumbnail({ campaign, title, className = "w-8 h-8 rounded-lg text-[11px]" }) {
+  const [imageError, setImageError] = useState(false);
+  const imageUrl = !imageError
+    ? campaign?.coverImage || campaign?.image || campaign?.thumbnail || ""
+    : "";
+  const displayTitle = campaign?.title || title || "Campaign";
+  const initials = getCampaignInitials(displayTitle);
+
+  useEffect(() => {
+    setImageError(false);
+  }, [campaign?.coverImage, campaign?.image, campaign?.thumbnail]);
+
+  if (imageUrl) {
+    return (
+      <div className={`relative overflow-hidden shrink-0 border border-border-theme bg-neutral-100 dark:bg-surface-muted ${className}`}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={imageUrl}
+          alt={displayTitle}
+          className="w-full h-full object-cover object-center"
+          loading="lazy"
+          onError={() => setImageError(true)}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`border border-border-theme bg-neutral-100 text-neutral-800 dark:bg-surface-muted dark:text-neutral-200 flex items-center justify-center font-sans font-bold shrink-0 select-none shadow-2xs ${className}`}
+      title={displayTitle}
+    >
+      {initials}
+    </div>
+  );
 }
 
 // =========================================================
@@ -413,7 +475,7 @@ export default function BrandBookingsManager() {
             {/* Booking List Table (Desktop / Tablet / Mobile Responsive) */}
             {(!loading || rawBookings.length > 0) && !error && bookings.length > 0 && (
               <div className="overflow-x-auto no-scrollbar">
-                <table className="w-full text-left text-xs border-collapse min-w-[760px]">
+                <table className="w-full text-left text-xs border-collapse min-w-[950px]">
                   <thead>
                     <tr className="border-b border-border-theme bg-surface-muted/40 text-text-secondary uppercase tracking-wider text-[10px] font-semibold">
                       <th className="py-3.5 px-5">Creator</th>
@@ -493,10 +555,10 @@ export default function BrandBookingsManager() {
                                 )}
                               </div>
                               <div className="min-w-0 flex-1">
-                                <div className="font-semibold text-foreground text-sm font-sans truncate">
+                                <div className="font-semibold text-foreground text-sm font-sans break-words leading-tight">
                                   {creatorName}
                                 </div>
-                                <div className="text-[11px] text-text-secondary mt-0.5 truncate">
+                                <div className="text-[11px] text-text-secondary mt-0.5 break-all leading-normal">
                                   {creatorEmail}
                                 </div>
                               </div>
@@ -504,15 +566,24 @@ export default function BrandBookingsManager() {
                           </td>
 
                           {/* Campaign Title Column */}
-                          <td className="py-4 px-4">
-                            <div className="font-medium text-foreground text-xs sm:text-sm font-sans">
-                              {campaignTitle}
-                            </div>
-                            {booking.campaign?.deadline && (
-                              <div className="text-[10px] text-text-secondary mt-0.5">
-                                Deadline: {formatDate(booking.campaign.deadline)}
+                          <td className="py-4 px-4 min-w-[220px]">
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <CampaignThumbnail
+                                campaign={booking.campaign}
+                                title={campaignTitle}
+                                className="w-8 h-8 rounded-lg text-[11px]"
+                              />
+                              <div className="min-w-0 flex-1">
+                                <div className="font-medium text-foreground text-xs sm:text-sm font-sans break-words leading-snug">
+                                  {campaignTitle}
+                                </div>
+                                {booking.campaign?.deadline && (
+                                  <div className="text-[10px] text-text-secondary mt-0.5 whitespace-nowrap">
+                                    Deadline: {formatDate(booking.campaign.deadline)}
+                                  </div>
+                                )}
                               </div>
-                            )}
+                            </div>
                           </td>
 
                           {/* Category & Platform Column */}

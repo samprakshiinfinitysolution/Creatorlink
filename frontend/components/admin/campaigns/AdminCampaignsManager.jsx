@@ -340,8 +340,8 @@ export default function AdminCampaignsManager() {
 
       {/* CAMPAIGNS TABLE */}
       <div className="bg-surface border border-border-theme rounded-2xl overflow-hidden shadow-xs">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+        <div className="overflow-x-auto custom-scrollbar">
+          <table className="w-full text-left text-xs min-w-[920px]">
             <thead className="bg-surface-muted/50 text-text-secondary uppercase text-[11px] tracking-wider border-b border-border-theme font-semibold">
               <tr>
                 <th className="px-5 py-3.5">Campaign</th>
@@ -410,7 +410,7 @@ export default function AdminCampaignsManager() {
                           className="w-9 h-9 rounded-xl bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/20 font-bold text-xs uppercase shrink-0"
                         />
                         <div className="min-w-0">
-                          <div className="font-semibold text-foreground truncate max-w-xs">{c.title}</div>
+                          <div className="font-semibold text-foreground break-words max-w-xs leading-snug">{c.title}</div>
                           <div className="flex items-center gap-1.5 mt-0.5">
                             <span className="text-[10px] text-text-secondary capitalize">{c.category}</span>
                             <span className="text-text-secondary">•</span>
@@ -430,15 +430,15 @@ export default function AdminCampaignsManager() {
                           className="w-8 h-8 rounded-full bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/20 font-bold text-xs uppercase shrink-0"
                         />
                         <div className="min-w-0">
-                          <div className="flex items-center gap-1 text-foreground font-medium truncate max-w-[150px]">
-                            <span className="truncate">
+                          <div className="flex items-center gap-1 text-foreground font-medium break-words max-w-[180px]">
+                            <span className="break-words">
                               {c.brandProfile?.companyName || c.brand?.name || "Brand User"}
                             </span>
                             {Boolean(c.brandProfile?.isVerifiedBusiness) && (
                               <CheckBadgeIcon className="w-3.5 h-3.5 shrink-0" />
                             )}
                           </div>
-                          <div className="text-[10px] text-text-secondary truncate max-w-[150px]">
+                          <div className="text-[10px] text-text-secondary break-all max-w-[180px]">
                             {c.brand?.email}
                           </div>
                         </div>

@@ -181,11 +181,17 @@ export default function CreatorCampaignDetail({ campaignId }) {
           typeof item.campaign === "string"
             ? item.campaign
             : item.campaign?._id || item.campaignId;
-        return String(targetId) === String(campaignId);
+        return Boolean(targetId) && String(targetId) === String(campaignId);
       })
   );
 
-  const campaign = selectedDiscoverCampaign;
+  // Resolve campaign whether selectedDiscoverCampaign is a direct Campaign document or an applied Booking object
+  const campaign =
+    selectedDiscoverCampaign && typeof selectedDiscoverCampaign === "object"
+      ? (selectedDiscoverCampaign.campaign !== undefined
+          ? selectedDiscoverCampaign.campaign
+          : selectedDiscoverCampaign)
+      : selectedDiscoverCampaign;
 
   // Profile metrics for eligibility comparison
   const creatorFollowers =
@@ -369,11 +375,11 @@ export default function CreatorCampaignDetail({ campaignId }) {
               <div className="flex items-center justify-between gap-3 flex-wrap sm:flex-nowrap border-b border-border-theme pb-5">
                 <div className="flex items-center gap-2.5 flex-wrap">
                   <span className="text-xs font-sans font-bold tracking-wider uppercase text-pink-500 dark:text-pink-400">
-                    {campaign.category || "General"}
+                    {campaign?.category || "General"}
                   </span>
                   <span className="text-border-theme">|</span>
                   <span className="text-xs font-sans font-bold tracking-wider uppercase text-neutral-600 dark:text-neutral-400">
-                    {formatPlatform(campaign.platform)}
+                    {formatPlatform(campaign?.platform)}
                   </span>
                 </div>
 
@@ -381,6 +387,10 @@ export default function CreatorCampaignDetail({ campaignId }) {
                   {isApplied ? (
                     <span className="text-xs font-bold text-emerald-500 uppercase tracking-wide">
                       Already Applied
+                    </span>
+                  ) : campaign?.status !== "published" ? (
+                    <span className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wide px-3 py-1.5 rounded-xl bg-surface-muted border border-border-theme">
+                      Applications Closed
                     </span>
                   ) : (
                     <button
@@ -393,20 +403,20 @@ export default function CreatorCampaignDetail({ campaignId }) {
                     </button>
                   )}
                   <span className="text-xs font-semibold text-text-secondary uppercase tracking-wide">
-                    Status: {campaign.status || "Published"}
+                    Status: {campaign?.status || "Published"}
                   </span>
                 </div>
 
               </div>
               {/* Campaign Cover Banner (if present) */}
-              {(campaign.coverImage || campaign.image) && failedCoverUrl !== (campaign.coverImage || campaign.image) && (
+              {(campaign?.coverImage || campaign?.image) && failedCoverUrl !== (campaign?.coverImage || campaign?.image) && (
                 <div className="relative h-48 sm:h-64 lg:h-72 w-full rounded-2xl overflow-hidden border border-border-theme bg-surface-muted/60 shrink-0">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={campaign.coverImage || campaign.image}
-                    alt={campaign.title || "Campaign banner"}
+                    src={campaign?.coverImage || campaign?.image}
+                    alt={campaign?.title || "Campaign banner"}
                     className="w-full h-full object-cover"
-                    onError={() => setFailedCoverUrl(campaign.coverImage || campaign.image)}
+                    onError={() => setFailedCoverUrl(campaign?.coverImage || campaign?.image)}
                   />
                 </div>
               )}
@@ -414,7 +424,7 @@ export default function CreatorCampaignDetail({ campaignId }) {
               {/* Campaign Header & Brand Info */}
               <div className="space-y-2">
                 <h1 className="font-serif font-medium text-2xl sm:text-3xl text-foreground tracking-tight">
-                  {campaign.title}
+                  {campaign?.title || "Campaign"}
                 </h1>
                 {(campaign.brand?.name || campaign.brand?.companyName) && (
                   <div className="flex items-center gap-2 pt-0.5">
@@ -447,9 +457,9 @@ export default function CreatorCampaignDetail({ campaignId }) {
                     <span className="font-medium">Budget</span>
                   </div>
                   <span className="font-sans font-semibold text-lg sm:text-xl text-foreground block">
-                    {campaign.minBudget && campaign.maxBudget && campaign.minBudget !== campaign.maxBudget
-                      ? `${formatBudget(campaign.minBudget, campaign.currency)} – ${formatBudget(campaign.maxBudget, campaign.currency)}`
-                      : formatBudget(campaign.budget, campaign.currency)}
+                    {campaign?.minBudget && campaign?.maxBudget && campaign.minBudget !== campaign.maxBudget
+                      ? `${formatBudget(campaign.minBudget, campaign?.currency)} – ${formatBudget(campaign.maxBudget, campaign?.currency)}`
+                      : formatBudget(campaign?.budget, campaign?.currency)}
                   </span>
                 </div>
 
@@ -460,7 +470,7 @@ export default function CreatorCampaignDetail({ campaignId }) {
                     <span className="font-medium">Deadline</span>
                   </div>
                   <span className="font-sans font-semibold text-sm text-foreground block">
-                    {formatDate(campaign.deadline)}
+                    {formatDate(campaign?.deadline)}
                   </span>
                 </div>
 
@@ -471,7 +481,7 @@ export default function CreatorCampaignDetail({ campaignId }) {
                     <span className="font-medium">Creators Needed</span>
                   </div>
                   <span className="font-sans font-semibold text-sm text-foreground block">
-                    {campaign.requiredCreators || 1} Creator{(campaign.requiredCreators || 1) > 1 ? "s" : ""}
+                    {campaign?.requiredCreators || 1} Creator{(campaign?.requiredCreators || 1) > 1 ? "s" : ""}
                   </span>
                 </div>
 
@@ -507,12 +517,12 @@ export default function CreatorCampaignDetail({ campaignId }) {
                   Campaign Description
                 </h3>
                 <div className="text-xs sm:text-sm text-text-secondary leading-relaxed whitespace-pre-line bg-surface-muted/30 p-5 rounded-2xl border border-border-theme/60">
-                  {campaign.description || "No detailed description provided."}
+                  {campaign?.description || "No detailed description provided."}
                 </div>
               </div>
 
               {/* Deliverables Section */}
-              {Array.isArray(campaign.deliverables) && campaign.deliverables.length > 0 && (() => {
+              {Array.isArray(campaign?.deliverables) && campaign.deliverables.length > 0 && (() => {
                 const validDeliverables = campaign.deliverables
                   .map(formatDeliverableItem)
                   .filter(Boolean);

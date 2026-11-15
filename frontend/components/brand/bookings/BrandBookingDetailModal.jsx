@@ -82,6 +82,68 @@ function getStatusBadge(status) {
   }
 }
 
+function getCampaignInitials(title) {
+  if (!title || typeof title !== "string") return "CP";
+  const clean = title.trim();
+  if (!clean) return "CP";
+  const words = clean
+    .split(/[\s\-_/]+/)
+    .map((w) => w.replace(/^[^\p{L}\p{N}]+/u, ""))
+    .filter(Boolean);
+  if (words.length >= 2) {
+    const first = words[0][0] || "";
+    const second = words[1][0] || "";
+    return (first + second).toUpperCase();
+  }
+  if (words.length === 1 && words[0].length >= 2) {
+    return words[0].slice(0, 2).toUpperCase();
+  }
+  if (words.length === 1 && words[0].length === 1) {
+    return words[0].toUpperCase();
+  }
+  return "CP";
+}
+
+// =========================================================
+// REUSABLE CAMPAIGN THUMBNAIL COMPONENT
+// =========================================================
+function CampaignThumbnail({ campaign, title, className = "w-8 h-8 rounded-lg text-[11px]" }) {
+  const [imageError, setImageError] = useState(false);
+  const imageUrl = !imageError
+    ? campaign?.coverImage || campaign?.image || campaign?.thumbnail || ""
+    : "";
+  const displayTitle = campaign?.title || title || "Campaign";
+  const initials = getCampaignInitials(displayTitle);
+
+  useEffect(() => {
+    setImageError(false);
+  }, [campaign?.coverImage, campaign?.image, campaign?.thumbnail]);
+
+  if (imageUrl) {
+    return (
+      <div className={`relative overflow-hidden shrink-0 border border-border-theme bg-neutral-100 dark:bg-surface-muted ${className}`}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={imageUrl}
+          alt={displayTitle}
+          className="w-full h-full object-cover object-center"
+          loading="lazy"
+          onError={() => setImageError(true)}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`border border-border-theme bg-neutral-100 text-neutral-800 dark:bg-surface-muted dark:text-neutral-200 flex items-center justify-center font-sans font-bold shrink-0 select-none shadow-2xs ${className}`}
+      title={displayTitle}
+    >
+      {initials}
+    </div>
+  );
+}
+
 // =========================================================
 // SVG ICONS
 // =========================================================
@@ -459,27 +521,34 @@ export default function BrandBookingDetailModal({
       {/* Modal Container */}
       <div className="relative z-10 bg-surface border border-border-theme rounded-2xl max-w-3xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[92vh] sm:max-h-[90vh]">
         {/* Modal Header */}
-        <div className="p-4 sm:p-6 border-b border-border-theme flex items-center justify-between bg-surface">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-secondary/15 text-secondary border border-secondary/20 uppercase tracking-wide">
-                {isBrandInitiated ? "Direct Proposal" : "Booking Request Details"}
-              </span>
-              {booking?.status && (
-                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${badge.color}`}>
-                  {badge.label}
+        <div className="p-4 sm:p-6 border-b border-border-theme flex items-center justify-between bg-surface gap-3">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <CampaignThumbnail
+              campaign={booking?.campaign}
+              title={campaignTitle}
+              className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl text-xs shrink-0"
+            />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-secondary/15 text-secondary border border-secondary/20 uppercase tracking-wide">
+                  {isBrandInitiated ? "Direct Proposal" : "Booking Request Details"}
                 </span>
-              )}
+                {booking?.status && (
+                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${badge.color}`}>
+                    {badge.label}
+                  </span>
+                )}
+              </div>
+              <h2 className="font-sans font-semibold text-lg sm:text-xl text-foreground tracking-tight mt-1 break-words leading-snug">
+                {campaignTitle}
+              </h2>
             </div>
-            <h2 className="font-sans font-semibold text-xl text-foreground tracking-tight mt-1">
-              {campaignTitle}
-            </h2>
           </div>
           <button
             type="button"
             onClick={handleClose}
             disabled={submitting}
-            className="p-2 rounded-xl text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="p-2 rounded-xl text-text-secondary hover:text-foreground hover:bg-surface-muted transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
           >
             <CloseIcon />
           </button>
@@ -536,6 +605,22 @@ export default function BrandBookingDetailModal({
           {/* Booking Details Grid */}
           {booking && (
             <div className="space-y-6">
+
+              {/* Campaign Cover Image Banner (if available) */}
+              {Boolean(booking?.campaign?.coverImage) && (
+                <div className="w-full h-32 sm:h-44 rounded-2xl overflow-hidden relative border border-border-theme bg-surface-muted/30 shrink-0">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={booking.campaign.coverImage}
+                    alt={campaignTitle}
+                    className="w-full h-full object-cover object-center"
+                    loading="lazy"
+                    onError={(e) => {
+                      e.currentTarget.parentElement.style.display = "none";
+                    }}
+                  />
+                </div>
+              )}
 
               {/* Creator & Proposal Overview Card */}
               <div className="bg-surface-muted/40 border border-border-theme rounded-2xl p-5 space-y-4">
@@ -662,9 +747,16 @@ export default function BrandBookingDetailModal({
                   Campaign Information
                 </span>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-                  <div>
-                    <span className="text-text-secondary block">Campaign Title</span>
-                    <span className="font-semibold text-foreground block mt-0.5 break-words">{campaignTitle}</span>
+                  <div className="flex items-center gap-2.5">
+                    <CampaignThumbnail
+                      campaign={booking?.campaign}
+                      title={campaignTitle}
+                      className="w-9 h-9 rounded-xl text-[10px] shrink-0"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <span className="text-text-secondary block">Campaign Title</span>
+                      <span className="font-semibold text-foreground block mt-0.5 break-words leading-tight">{campaignTitle}</span>
+                    </div>
                   </div>
                   <div>
                     <span className="text-text-secondary block">Category</span>

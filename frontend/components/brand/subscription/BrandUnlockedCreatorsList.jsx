@@ -203,19 +203,19 @@ export default function BrandUnlockedCreatorsList() {
                             )}
 
                             {details.businessEmail && (
-                              <div className="flex items-center justify-between p-2 rounded-lg bg-surface-muted/40">
-                                <span className="text-text-secondary font-medium">Email:</span>
-                                <div className="flex items-center gap-2 text-[11px] truncate max-w-[170px]">
+                              <div className="flex items-center justify-between p-2 rounded-lg bg-surface-muted/40 gap-2">
+                                <span className="text-text-secondary font-medium shrink-0">Email:</span>
+                                <div className="flex items-center gap-2 text-[11px] min-w-0">
                                   <a
                                     href={`mailto:${details.businessEmail}`}
-                                    className="text-purple-600 dark:text-purple-400 font-semibold hover:underline truncate"
+                                    className="text-purple-600 dark:text-purple-400 font-semibold hover:underline break-all"
                                   >
                                     {details.businessEmail}
                                   </a>
                                   <button
                                     type="button"
                                     onClick={() => handleCopy(details.businessEmail, `em_${item.unlockId}`)}
-                                    className="text-text-secondary hover:text-foreground cursor-pointer"
+                                    className="text-text-secondary hover:text-foreground cursor-pointer shrink-0"
                                   >
                                     {copiedText === `em_${item.unlockId}` ? "Copied" : "Copy"}
                                   </button>

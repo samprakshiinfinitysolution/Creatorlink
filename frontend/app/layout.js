@@ -20,9 +20,10 @@ export const metadata = {
     "CreatorLink connects visionary creators with premium brands for high-impact campaigns, verified audience metrics, and seamless collaborations.",
   icons: {
     icon: [
-      { url: "/icon.svg", type: "image/svg+xml" },
-      { url: "/favicon.ico" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
     ],
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
   },
 };
 

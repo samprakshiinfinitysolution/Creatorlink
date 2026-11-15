@@ -9,6 +9,7 @@ import {
 } from "@/redux/creator/campaigns/campaigns_slice";
 import CreatorSidebar from "@/components/creator/dashboard/CreatorSidebar";
 import CreatorHeader from "@/components/creator/dashboard/CreatorHeader";
+import DropdownFilter from "@/components/common/DropdownFilter";
 import { normalizeCampaignPlatforms, formatCampaignPlatforms } from "@/lib/campaignPlatforms";
 
 // =========================================================
@@ -404,7 +405,7 @@ export default function CreatorDiscoverCampaignsManager() {
                       <div className="text-xs sm:text-base font-bold text-neutral-900 dark:text-white leading-tight">
                         {activeBriefsCount}
                       </div>
-                      <div className="text-[10px] sm:text-xs text-neutral-500 dark:text-neutral-400 font-sans truncate">
+                      <div className="text-[10px] sm:text-xs text-neutral-500 dark:text-neutral-400 font-sans break-words">
                         Active Briefs
                       </div>
                     </div>
@@ -419,7 +420,7 @@ export default function CreatorDiscoverCampaignsManager() {
                       <div className="text-xs sm:text-base font-bold text-neutral-900 dark:text-white leading-tight">
                         {categoriesCount}
                       </div>
-                      <div className="text-[10px] sm:text-xs text-neutral-500 dark:text-neutral-400 font-sans truncate">
+                      <div className="text-[10px] sm:text-xs text-neutral-500 dark:text-neutral-400 font-sans break-words">
                         Categories
                       </div>
                     </div>
@@ -434,7 +435,7 @@ export default function CreatorDiscoverCampaignsManager() {
                       <div className="text-xs sm:text-base font-bold text-neutral-900 dark:text-white leading-tight">
                         New
                       </div>
-                      <div className="text-[10px] sm:text-xs text-neutral-500 dark:text-neutral-400 font-sans truncate">
+                      <div className="text-[10px] sm:text-xs text-neutral-500 dark:text-neutral-400 font-sans break-words">
                         Opportunities weekly
                       </div>
                     </div>
@@ -561,8 +562,23 @@ export default function CreatorDiscoverCampaignsManager() {
 
           {/* 2. SEARCH & CATEGORY FILTERS SECTION */}
           <div className="bg-surface border border-border-theme rounded-2xl p-3 sm:p-4 shadow-xs space-y-3 sm:space-y-4">
-            {/* Category Navigation Tabs */}
-            <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto custom-scrollbar py-3">
+            {/* Mobile Category Dropdown Filter */}
+            <div className="sm:hidden w-full">
+              <DropdownFilter
+                value={selectedCategory}
+                onChange={(e) => handleCategoryChange(e.target.value)}
+                options={categoryOptions.map((cat) => ({
+                  value: cat,
+                  label: `Category: ${cat}`,
+                }))}
+                className="w-full"
+                buttonClassName="w-full justify-between"
+                aria-label="Filter campaigns by category"
+              />
+            </div>
+
+            {/* Desktop Category Navigation Tabs */}
+            <div className="hidden sm:flex items-center gap-1.5 sm:gap-2 overflow-x-auto custom-scrollbar py-3">
               {categoryOptions.map((cat) => {
                 const isActive = selectedCategory === cat;
                 return (
@@ -741,7 +757,7 @@ export default function CreatorDiscoverCampaignsManager() {
                               {brandInitial}
                             </div>
                           )}
-                          <span className="text-[10px] sm:text-[11px] font-sans font-semibold text-foreground truncate">
+                          <span className="text-[10px] sm:text-[11px] font-sans font-semibold text-foreground break-words">
                             {brandName}
                           </span>
                         </div>
@@ -765,7 +781,7 @@ export default function CreatorDiscoverCampaignsManager() {
                               {brandInitial}
                             </div>
                           )}
-                          <span className="text-xs font-sans text-text-secondary truncate">
+                          <span className="text-xs font-sans text-text-secondary break-words">
                             by {brandName}
                           </span>
                         </div>
@@ -785,7 +801,7 @@ export default function CreatorDiscoverCampaignsManager() {
                           <span className="text-[10px] sm:text-[11px] font-sans font-medium text-text-secondary block leading-none mb-0.5">
                             Campaign Budget
                           </span>
-                          <span className="font-sans font-bold text-lg min-[360px]:text-xl sm:text-2xl text-foreground tabular-nums tracking-tight leading-none block truncate">
+                          <span className="font-sans font-bold text-lg min-[360px]:text-xl sm:text-2xl text-foreground tabular-nums tracking-tight leading-none block break-words">
                             {formatCampaignBudgetRange(campaign)}
                           </span>
                         </div>

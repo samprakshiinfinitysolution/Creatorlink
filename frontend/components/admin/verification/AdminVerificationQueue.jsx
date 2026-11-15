@@ -409,8 +409,8 @@ export default function AdminVerificationQueue() {
       {/* Verification Requests Container: Table (Desktop/Tablet) + Cards (Mobile) */}
       <div className="bg-surface border border-border-theme rounded-2xl overflow-hidden shadow-xs">
         {/* Desktop/Tablet Table Layout */}
-        <div className="hidden md:block overflow-x-auto">
-          <table className="w-full text-left text-xs">
+        <div className="hidden md:block overflow-x-auto custom-scrollbar">
+          <table className="w-full text-left text-xs min-w-[760px]">
             <thead className="bg-surface-muted/50 border-b border-border-theme text-text-secondary uppercase tracking-wider text-[11px] font-semibold">
               <tr>
                 <th className="px-5 py-3.5">Applicant</th>
@@ -463,7 +463,16 @@ export default function AdminVerificationQueue() {
               ) : (
                 verifications.map((item) => {
                   const applicantName =
-                    item.user?.name || item.user?.fullName || "Unnamed User";
+                    item.user?.name ||
+                    item.user?.fullName ||
+                    item.profile?.companyName ||
+                    item.profile?.title ||
+                    (item.user?.isDeleted || !item.user ? "Deleted User" : "Unnamed User");
+                  const applicantEmail =
+                    item.user?.email ||
+                    item.profile?.contactInfo?.email ||
+                    (item.user?.isDeleted || !item.user ? "Account Deleted" : "No email available");
+                  const isDeletedAccount = Boolean(item.user?.isDeleted || !item.user);
                   const initial = applicantName.charAt(0)?.toUpperCase() || "U";
                   const hasReviewHistory = Array.isArray(item.reviewHistory) && item.reviewHistory.length > 0;
                   const isResubmitted = item.status === "pending" && (Boolean(item.resubmittedAt) || hasReviewHistory);
@@ -488,11 +497,18 @@ export default function AdminVerificationQueue() {
                             className="w-8 h-8 rounded-full bg-surface-muted border border-border-theme font-semibold text-xs text-foreground shrink-0 overflow-hidden"
                           />
                           <div className="min-w-0">
-                            <p className="font-medium text-foreground group-hover:text-secondary transition truncate">
-                              {applicantName}
-                            </p>
+                            <div className="flex items-center gap-1.5">
+                              <p className="font-medium text-foreground group-hover:text-secondary transition truncate">
+                                {applicantName}
+                              </p>
+                              {isDeletedAccount && (
+                                <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.2 bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 rounded font-semibold shrink-0">
+                                  Deleted Account
+                                </span>
+                              )}
+                            </div>
                             <p className="text-[11px] text-text-secondary truncate">
-                              {item.user?.email}
+                              {applicantEmail}
                             </p>
                           </div>
                         </div>
@@ -651,7 +667,16 @@ export default function AdminVerificationQueue() {
           ) : (
             verifications.map((item) => {
               const applicantName =
-                item.user?.name || item.user?.fullName || "Unnamed User";
+                item.user?.name ||
+                item.user?.fullName ||
+                item.profile?.companyName ||
+                item.profile?.title ||
+                (item.user?.isDeleted || !item.user ? "Deleted User" : "Unnamed User");
+              const applicantEmail =
+                item.user?.email ||
+                item.profile?.contactInfo?.email ||
+                (item.user?.isDeleted || !item.user ? "Account Deleted" : "No email available");
+              const isDeletedAccount = Boolean(item.user?.isDeleted || !item.user);
               const hasReviewHistory = Array.isArray(item.reviewHistory) && item.reviewHistory.length > 0;
               const isResubmitted = item.status === "pending" && (Boolean(item.resubmittedAt) || hasReviewHistory);
               const latestResubmission = item.resubmittedAt || (isResubmitted ? item.updatedAt : null);
@@ -672,11 +697,18 @@ export default function AdminVerificationQueue() {
                         className="w-10 h-10 rounded-full bg-surface-muted border border-border-theme font-semibold text-xs text-foreground shrink-0 overflow-hidden"
                       />
                       <div className="min-w-0">
-                        <p className="font-semibold text-sm text-foreground truncate">
-                          {applicantName}
-                        </p>
+                        <div className="flex items-center gap-1.5">
+                          <p className="font-semibold text-sm text-foreground truncate">
+                            {applicantName}
+                          </p>
+                          {isDeletedAccount && (
+                            <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.2 bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 rounded font-semibold shrink-0">
+                              Deleted
+                            </span>
+                          )}
+                        </div>
                         <p className="text-[11px] text-text-secondary truncate">
-                          {item.user?.email}
+                          {applicantEmail}
                         </p>
                       </div>
                     </div>
@@ -845,7 +877,7 @@ export default function AdminVerificationQueue() {
             aria-hidden="true"
           />
 
-          <div className="relative w-full max-w-lg bg-surface border border-border-theme rounded-2xl shadow-2xl overflow-hidden z-10 p-6 space-y-4">
+          <div className="relative w-full max-w-lg bg-surface border border-border-theme rounded-2xl shadow-2xl overflow-y-auto max-h-[90vh] z-10 p-4 sm:p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-border-theme pb-4">
               <div>
                 <h3 className="text-base font-bold text-foreground">

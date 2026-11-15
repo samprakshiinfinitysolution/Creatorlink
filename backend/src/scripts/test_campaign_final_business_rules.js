@@ -1,8 +1,15 @@
 import dotenv from "dotenv";
+dotenv.config({ path: "backend/.env" });
+dotenv.config();
+
+// Ensure dummy email credentials exist for nodemailer if not in .env
+process.env.SMTP_SERVICE = process.env.SMTP_SERVICE || "gmail";
+process.env.SMTP_USER = process.env.SMTP_USER || process.env.EMAIL || "test@creatorlink.com";
+process.env.SMTP_PASS = process.env.SMTP_PASS || process.env.EMAIL_PASS || "dummy_password";
+
 import mongoose from "mongoose";
 import express from "express";
 import cookieParser from "cookie-parser";
-import appRouter from "../routes/index.js";
 import Auth from "../modules/auth/auth.model.js";
 import Campaign from "../modules/brand/campaigns/campaign.model.js";
 import CreatorService from "../modules/creator/services/services.model.js";
@@ -10,17 +17,32 @@ import Booking from "../modules/booking/booking.model.js";
 import Workspace from "../modules/workspace/workspace.model.js";
 import AuditLog from "../modules/admin/audit/audit.model.js";
 import Notification from "../modules/notifications/notification.model.js";
+import Subscription from "../modules/subscriptions/subscription.model.js";
+import { createBrandTrialSubscriptionService } from "../modules/subscriptions/trial.service.js";
 import { generateAccessToken } from "../utils/helpers/token.helper.js";
 
-dotenv.config();
-
 const runRegressionTests = async () => {
+    // Dynamically import router after environment variables are set
+    const { default: appRouter } = await import("../routes/index.js");
     console.log("================================================================================");
     console.log("STARTING CREATORLINK CAMPAIGN MANAGEMENT FINAL BUSINESS RULES REGRESSION SUITE");
     console.log("================================================================================");
 
-    await mongoose.connect(process.env.MONGO_URI);
-    console.log("✓ Connected to MongoDB");
+    // Enforce isolated test database
+    const rawUri = process.env.MONGO_URI;
+    if (!rawUri) {
+        throw new Error("MONGO_URI environment variable is missing.");
+    }
+    const isolatedDbName = "creatorlink_business_rules_test";
+    const parsedUri = new URL(rawUri);
+    parsedUri.pathname = `/${isolatedDbName}`;
+    const isolatedUri = parsedUri.toString();
+
+    await mongoose.connect(isolatedUri);
+    console.log(`✓ Connected to isolated test database: "${mongoose.connection.name}"`);
+    if (mongoose.connection.name !== isolatedDbName) {
+        throw new Error(`CRITICAL: Test database name mismatch! Expected '${isolatedDbName}', got '${mongoose.connection.name}'`);
+    }
 
     const app = express();
     app.use(express.json());
@@ -40,51 +62,75 @@ const runRegressionTests = async () => {
     const port = server.address().port;
     const baseUrl = `http://localhost:${port}/api`;
 
+    let adminUser = null;
+    let creatorUser = null;
+    let brandUserA = null;
+    let brandUserB = null;
+    let testService = null;
     let testCampaign = null;
     let testBooking = null;
     let testWorkspace = null;
-    let testService = null;
-    let createdTempBrand = false;
-    let brandUserB = null;
 
     try {
-        // 1. Find or set up test accounts
-        const adminUser = await Auth.findOne({ role: "admin" });
-        const creatorUser = await Auth.findOne({ role: "creator" });
-        const brandUsers = await Auth.find({ role: "brand" }).limit(2);
+        // 1. Setup isolated test accounts
+        adminUser = await Auth.create({
+            name: "Admin Rules Tester",
+            email: `admin_rules_${Date.now()}@creatorlink.test`,
+            password: "Password123!",
+            role: "admin",
+            isEmailVerified: true
+        });
 
-        if (!adminUser || !creatorUser || brandUsers.length < 1) {
-            throw new Error("Missing test users (admin, creator, or brand)");
-        }
+        creatorUser = await Auth.create({
+            name: "Creator Rules Tester",
+            email: `creator_rules_${Date.now()}@creatorlink.test`,
+            password: "Password123!",
+            role: "creator",
+            isEmailVerified: true
+        });
 
-        const brandUserA = brandUsers[0];
-        brandUserB = brandUsers[1];
+        brandUserA = await Auth.create({
+            name: "Brand A Corp",
+            email: `brand_a_rules_${Date.now()}@creatorlink.test`,
+            password: "Password123!",
+            role: "brand",
+            isEmailVerified: true
+        });
 
-        // If only 1 brand in DB, create a temporary brand B for cross-brand test
-        if (!brandUserB) {
-            brandUserB = await Auth.create({
-                name: "Brand B Test Corp",
-                email: `brand_b_test_${Date.now()}@test.com`,
-                password: "Password123!",
-                role: "brand",
-                isEmailVerified: true
-            });
-            createdTempBrand = true;
-        }
+        brandUserB = await Auth.create({
+            name: "Brand B Test Corp",
+            email: `brand_b_rules_${Date.now()}@creatorlink.test`,
+            password: "Password123!",
+            role: "brand",
+            isEmailVerified: true
+        });
 
-        // Ensure creator has a service
-        testService = await CreatorService.findOne({ creator: creatorUser._id });
-        if (!testService) {
-            testService = await CreatorService.create({
-                creator: creatorUser._id,
-                title: "Sponsored Tech Review",
-                description: "Full YouTube review video",
-                category: "Technology",
-                platform: "instagram",
-                pricing: { basic: 15000 },
-                deliveryDays: 7
-            });
-        }
+        // Initialize active trial subscriptions for Brand accounts
+        await createBrandTrialSubscriptionService({
+            brandId: brandUserA._id,
+            email: brandUserA.email,
+            name: brandUserA.name
+        });
+
+        await createBrandTrialSubscriptionService({
+            brandId: brandUserB._id,
+            email: brandUserB.email,
+            name: brandUserB.name
+        });
+
+        // Ensure creator has an active service
+        testService = await CreatorService.create({
+            creator: creatorUser._id,
+            title: "Sponsored Tech Review",
+            description: "Full YouTube review video",
+            category: "Technology",
+            platform: "instagram",
+            price: 15000,
+            deliveryTime: 7,
+            pricing: { basic: 15000 },
+            deliveryDays: 7,
+            isActive: true
+        });
 
         const adminToken = generateAccessToken({
             userId: adminUser._id.toString(),
@@ -109,6 +155,8 @@ const runRegressionTests = async () => {
             role: "creator",
             tokenVersion: creatorUser.passwordVersion || 0
         });
+
+        console.log("✓ Initialized isolated test fixtures and active trial entitlements");
 
         console.log("\n--- TEST 1: Brand Normal Lifecycle (Create Draft -> Edit -> Publish) ---");
         // Brand A creates a campaign
@@ -374,19 +422,35 @@ const runRegressionTests = async () => {
         console.log("ALL 11 CAMPAIGN FINAL BUSINESS RULES REGRESSION TESTS PASSED (100% SUCCESS)!");
         console.log("================================================================================");
     } finally {
-        // Clean up test data
-        if (testWorkspace) await Workspace.deleteOne({ _id: testWorkspace._id });
-        if (testBooking) await Booking.deleteOne({ _id: testBooking._id });
-        if (testCampaign) {
-            await Campaign.deleteOne({ _id: testCampaign._id });
-            await AuditLog.deleteMany({ targetId: testCampaign._id });
-            await Notification.deleteMany({ entityId: testCampaign._id });
+        // Guaranteed cleanup of isolated test data
+        console.log("\nCleaning up regression test data in isolated test database...");
+        try {
+            if (testWorkspace) await Workspace.deleteOne({ _id: testWorkspace._id });
+            if (testBooking) await Booking.deleteOne({ _id: testBooking._id });
+            if (testCampaign) {
+                await Campaign.deleteOne({ _id: testCampaign._id });
+                await AuditLog.deleteMany({ targetId: testCampaign._id });
+                await Notification.deleteMany({ entityId: testCampaign._id });
+            }
+            if (testService) await CreatorService.deleteOne({ _id: testService._id });
+            if (brandUserA) {
+                await Subscription.deleteMany({ brand: brandUserA._id });
+                await Auth.deleteOne({ _id: brandUserA._id });
+            }
+            if (brandUserB) {
+                await Subscription.deleteMany({ brand: brandUserB._id });
+                await Auth.deleteOne({ _id: brandUserB._id });
+            }
+            if (creatorUser) await Auth.deleteOne({ _id: creatorUser._id });
+            if (adminUser) await Auth.deleteOne({ _id: adminUser._id });
+            console.log("✓ Regression cleanup completed successfully.");
+        } catch (cleanupErr) {
+            console.error("Cleanup error in regression tests:", cleanupErr);
         }
-        if (createdTempBrand && brandUserB) {
-            await Auth.deleteOne({ _id: brandUserB._id });
-        }
+
         server.close();
         await mongoose.disconnect();
+        console.log("✓ Disconnected from isolated test database");
     }
 };
 

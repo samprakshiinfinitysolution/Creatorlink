@@ -269,8 +269,8 @@ export default function BrandSubscriptionDashboard() {
                     No payment transactions recorded yet. Free trial does not require any payment method.
                   </div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs">
+                  <div className="overflow-x-auto custom-scrollbar">
+                    <table className="w-full text-left text-xs min-w-[720px]">
                       <thead>
                         <tr className="border-b border-border-theme text-text-secondary font-medium">
                           <th className="py-2.5 px-3">Date</th>
@@ -290,7 +290,7 @@ export default function BrandSubscriptionDashboard() {
                             <td className="py-3 px-3 font-bold text-foreground">
                               {p.currency} {p.amount.toLocaleString()}
                             </td>
-                            <td className="py-3 px-3 font-mono text-[11px] text-text-secondary">{p.razorpayOrderId}</td>
+                            <td className="py-3 px-3 font-mono text-[11px] text-text-secondary break-all">{p.razorpayOrderId}</td>
                             <td className="py-3 px-3">
                               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400">
                                 {p.status}

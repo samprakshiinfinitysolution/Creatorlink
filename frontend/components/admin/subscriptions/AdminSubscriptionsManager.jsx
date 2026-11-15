@@ -557,7 +557,8 @@ export default function AdminSubscriptionsManager() {
 
               {/* Table */}
               <div className="bg-surface border border-border-theme rounded-2xl overflow-hidden shadow-xs">
-                <table className="w-full text-left text-xs">
+                <div className="overflow-x-auto custom-scrollbar">
+                  <table className="w-full text-left text-xs min-w-[880px]">
                   <thead className="bg-surface-muted/40 border-b border-border-theme text-text-secondary font-medium">
                     <tr>
                       <th className="py-3 px-4">Brand</th>
@@ -634,12 +635,13 @@ export default function AdminSubscriptionsManager() {
                 </table>
               </div>
             </div>
-          )}
+          </div>
+        )}
 
-          {/* Create Plan Modal */}
-          {isCreatePlanOpen && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-              <div className="bg-surface border border-border-theme rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+        {/* Create Plan Modal */}
+        {isCreatePlanOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+            <div className="bg-surface border border-border-theme rounded-2xl max-w-lg w-full p-4 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
                 <h3 className="text-base font-bold text-foreground">Create Subscription Plan</h3>
                 <form onSubmit={handleCreatePlanSubmit} className="space-y-3.5 text-xs">
                   <div>
@@ -750,7 +752,7 @@ export default function AdminSubscriptionsManager() {
           {/* Edit Plan Modal */}
           {isEditPlanOpen && editingPlan && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-              <div className="bg-surface border border-border-theme rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+              <div className="bg-surface border border-border-theme rounded-2xl max-w-lg w-full p-4 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
                 <div className="flex items-center justify-between">
                   <h3 className="text-base font-bold text-foreground">Edit Plan (Version Bump)</h3>
                   <span className="text-xs text-text-secondary">Current Version: v{editingPlan.version || 1}</span>
@@ -856,7 +858,7 @@ export default function AdminSubscriptionsManager() {
           {/* Subscriber Dossier & Action Modal */}
           {detailModalOpen && selectedSubDetail && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-              <div className="bg-surface border border-border-theme rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+              <div className="bg-surface border border-border-theme rounded-2xl max-w-2xl w-full p-4 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
                 <div className="flex items-start justify-between border-b border-border-theme pb-3">
                   <div className="flex items-center gap-3">
                     <AdminAvatar

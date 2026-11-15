@@ -7,7 +7,8 @@ import {
     createCampaign as createCampaignApi,
     getBrandCampaigns as getBrandCampaignsApi,
     getCampaignById as getCampaignByIdApi,
-    updateCampaign as updateCampaignApi
+    updateCampaign as updateCampaignApi,
+    deleteCampaign as deleteCampaignApi
 } from "./campaigns_api";
 
 import {
@@ -91,6 +92,26 @@ const updateCampaign = createAsyncThunk(
             return rejectWithValue(
                 error.response?.data?.message ||
                 "Campaign update failed"
+            );
+        }
+    }
+);
+
+
+// Handles campaign deletion by ID.
+const deleteCampaign = createAsyncThunk(
+    "brandCampaigns/deleteCampaign",
+    async ({ campaignId, reason }, { rejectWithValue }) => {
+
+        try {
+
+            return await deleteCampaignApi(campaignId, reason);
+
+        } catch (error) {
+
+            return rejectWithValue(
+                error.response?.data?.message ||
+                "Campaign deletion failed"
             );
         }
     }
@@ -240,6 +261,40 @@ const campaignSlice = createSlice({
             })
 
 
+            // Delete campaign started.
+            .addCase(deleteCampaign.pending, (state) => {
+
+                state.loading = true;
+                state.error = null;
+            })
+
+            // Delete campaign successful.
+            .addCase(deleteCampaign.fulfilled, (state, action) => {
+
+                state.loading = false;
+                const deletedId = action.payload?.data?.campaignId || action.meta?.arg?.campaignId;
+                if (deletedId) {
+                    state.campaigns = state.campaigns.filter(
+                        (item) => item._id !== deletedId
+                    );
+                    if (state.selectedCampaign?._id === deletedId) {
+                        state.selectedCampaign = null;
+                    }
+                    if (state.pagination && state.pagination.totalItems > 0) {
+                        state.pagination.totalItems -= 1;
+                    }
+                }
+                state.error = null;
+            })
+
+            // Delete campaign failed.
+            .addCase(deleteCampaign.rejected, (state, action) => {
+
+                state.loading = false;
+                state.error = action.payload;
+            })
+
+
             // Clear campaign state on auth events.
             .addCase(login.fulfilled, (state) => {
 
@@ -278,7 +333,8 @@ export {
     createCampaign,
     getBrandCampaigns,
     getCampaignById,
-    updateCampaign
+    updateCampaign,
+    deleteCampaign
 };
 
 

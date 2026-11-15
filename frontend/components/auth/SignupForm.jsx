@@ -147,6 +147,14 @@ export default function SignupForm() {
   const [role, setRole] = useState(initialRole);
   const [selectedRole, setSelectedRole] = useState(initialRole);
   const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [errorMsg, setErrorMsg] = useState(null);
+  const [successMsg, setSuccessMsg] = useState(null);
 
   useEffect(() => {
     if (paramRole === "brand" || paramRole === "creator") {
@@ -181,16 +189,6 @@ export default function SignupForm() {
       );
     }
   }, []);
-
-  const [otp, setOtp] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-  const [isVerifying, setIsVerifying] = useState(false);
-  const [isResending, setIsResending] = useState(false);
-  const [resendCooldown, setResendCooldown] = useState(0);
-
-  const [errorMsg, setErrorMsg] = useState(null);
-  const [successMsg, setSuccessMsg] = useState(null);
 
   // Countdown timer for OTP resend cooldown
   useEffect(() => {
@@ -814,7 +812,7 @@ export default function SignupForm() {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-md bg-surface border border-border-theme rounded-3xl p-6 sm:p-7 shadow-2xl space-y-6 relative"
+            className="w-full max-w-md bg-surface border border-border-theme rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-2xl space-y-6 relative max-h-[90vh] overflow-y-auto"
           >
             {/* Close Button */}
             <button

@@ -190,6 +190,7 @@ const getBrandDashboardOverviewService = async (brandId, query = {}) => {
         activeWorkspacesCount,
         activeWorkspaceStatusAgg,
         completedWorkspacesCount,
+        uniqueHiredCreatorsRaw,
         spendingAgg,
         pendingPaymentsAgg,
         paidOrPendingWorkspaceIds,
@@ -264,7 +265,14 @@ const getBrandDashboardOverviewService = async (brandId, query = {}) => {
             status: "completed"
         }),
 
-        // 10. Total Spending: Sum of unique completed/paid payments per workspace grouped by currency (respecting timeframe)
+        // 10. Unique Hired Creators across active and completed collaborations
+        Workspace.distinct("creator", {
+            brand: brandObjectId,
+            status: { $in: ["in_progress", "submitted", "revision_requested", "approved", "completed"] },
+            creator: { $ne: null }
+        }),
+
+        // 11. Total Spending: Sum of unique completed/paid payments per workspace grouped by currency (respecting timeframe)
         Payment.aggregate([
             {
                 $match: paymentSpendingMatch
@@ -441,6 +449,11 @@ const getBrandDashboardOverviewService = async (brandId, query = {}) => {
         ])
     ]);
 
+    // Calculate unique hired creators count safely filtering valid ObjectIds
+    const uniqueHiredCreatorsCount = Array.isArray(uniqueHiredCreatorsRaw)
+        ? uniqueHiredCreatorsRaw.filter((id) => id && mongoose.Types.ObjectId.isValid(id.toString())).length
+        : 0;
+
     // Query unpaid completed workspaces with no existing payment record to prevent double-counting
     const unpaidCompletedWorkspaces = await Workspace.find({
         brand: brandObjectId,
@@ -529,7 +542,8 @@ const getBrandDashboardOverviewService = async (brandId, query = {}) => {
     const activeWorkspaceStatusMap = {
         in_progress: 0,
         submitted: 0,
-        revision_requested: 0
+        revision_requested: 0,
+        approved: 0
     };
     activeWorkspaceStatusAgg.forEach((item) => {
         if (item._id && activeWorkspaceStatusMap[item._id] !== undefined) {
@@ -697,7 +711,14 @@ const getBrandDashboardOverviewService = async (brandId, query = {}) => {
             collaborations: {
                 active: activeWorkspacesCount,
                 completed: completedWorkspacesCount,
+                total: activeWorkspacesCount + completedWorkspacesCount,
+                uniqueCreators: uniqueHiredCreatorsCount,
+                hiredCreators: uniqueHiredCreatorsCount,
                 activeStatusBreakdown: activeWorkspaceStatusMap
+            },
+            hiredCreators: {
+                total: uniqueHiredCreatorsCount,
+                uniqueCount: uniqueHiredCreatorsCount
             },
             totalSpending: {
                 amount: totalSpendingAmount,

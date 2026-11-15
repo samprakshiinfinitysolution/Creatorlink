@@ -26,7 +26,10 @@ const getDiscoverCampaigns = asyncHandler(async (req, res) => {
 // Get single published campaign details for creator.
 const getDiscoverCampaignById = asyncHandler(async (req, res) => {
 
-    const campaign = await getDiscoverCampaignByIdService(req.params.id);
+    const campaign = await getDiscoverCampaignByIdService(
+        req.params.id,
+        req.user.userId
+    );
 
     return sendResponse(
         res,

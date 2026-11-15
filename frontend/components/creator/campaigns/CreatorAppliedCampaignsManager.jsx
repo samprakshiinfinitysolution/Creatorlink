@@ -11,6 +11,7 @@ import {
 } from "@/redux/creator/campaigns/campaigns_slice";
 import CreatorSidebar from "@/components/creator/dashboard/CreatorSidebar";
 import CreatorHeader from "@/components/creator/dashboard/CreatorHeader";
+import DropdownFilter from "@/components/common/DropdownFilter";
 import { socket, registerSocketConsumer, unregisterSocketConsumer } from "@/lib/socket";
 import { normalizeCampaignPlatforms, formatCampaignPlatforms } from "@/lib/campaignPlatforms";
 
@@ -580,8 +581,23 @@ export default function CreatorAppliedCampaignsManager() {
 
           {/* 2. FILTER & SEARCH BAR */}
           <div className="bg-surface border border-border-theme rounded-2xl p-3 sm:p-4 shadow-xs space-y-3 sm:space-y-4">
-            {/* Status Tabs */}
-            <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto custom-scrollbar py-3 select-none">
+            {/* Mobile Status Dropdown Filter */}
+            <div className="sm:hidden w-full">
+              <DropdownFilter
+                value={selectedStatus}
+                onChange={(e) => handleStatusChange(e.target.value)}
+                options={STATUS_TABS.map((tab) => ({
+                  value: tab.id,
+                  label: `Status: ${tab.label}`,
+                }))}
+                className="w-full"
+                buttonClassName="w-full justify-between"
+                aria-label="Filter applied campaigns by status"
+              />
+            </div>
+
+            {/* Desktop Status Tabs */}
+            <div className="hidden sm:flex items-center gap-1.5 sm:gap-2 overflow-x-auto custom-scrollbar py-3 select-none">
               {STATUS_TABS.map((tab) => {
                 const isActive = selectedStatus === tab.id;
                 return (
@@ -788,7 +804,7 @@ export default function CreatorAppliedCampaignsManager() {
                               {brandInitial}
                             </div>
                           )}
-                          <span className="text-[10px] sm:text-[11px] font-sans font-semibold text-foreground truncate">
+                          <span className="text-[10px] sm:text-[11px] font-sans font-semibold text-foreground break-words">
                             {brandName}
                           </span>
                         </div>
@@ -812,7 +828,7 @@ export default function CreatorAppliedCampaignsManager() {
                               {brandInitial}
                             </div>
                           )}
-                          <span className="text-xs font-sans text-text-secondary truncate">
+                          <span className="text-xs font-sans text-text-secondary break-words">
                             by {brandName}
                           </span>
                         </div>

@@ -113,9 +113,15 @@ function CreatorDashboardContent() {
     const consumerId = "creator_dashboard_overview_consumer";
     registerSocketConsumer(consumerId, creatorId);
 
-    const handleRealtimeUpdate = (data) => {
-      // Re-fetch overview when relevant notifications, deliverables or status events occur
-      handleFetchDashboard();
+    let debounceTimer = null;
+    const handleRealtimeUpdate = () => {
+      // Re-fetch overview when relevant notifications, deliverables or status events occur (debounced to avoid duplicate requests)
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
+      debounceTimer = setTimeout(() => {
+        handleFetchDashboard();
+      }, 300);
     };
 
     socket.on("notification:new", handleRealtimeUpdate);
@@ -124,6 +130,9 @@ function CreatorDashboardContent() {
     socket.on("workspace:revision_requested", handleRealtimeUpdate);
 
     return () => {
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
       unregisterSocketConsumer(consumerId);
       socket.off("notification:new", handleRealtimeUpdate);
       socket.off("workspace:approved", handleRealtimeUpdate);

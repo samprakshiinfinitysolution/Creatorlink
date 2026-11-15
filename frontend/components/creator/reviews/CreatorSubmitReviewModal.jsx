@@ -97,9 +97,9 @@ export default function CreatorSubmitReviewModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs overflow-y-auto animate-fade-in font-sans">
-      <div className="relative w-full max-w-lg bg-white dark:bg-[#131318] border border-border-theme dark:border-[#22222e] rounded-2xl shadow-2xl overflow-hidden my-8">
+      <div className="relative w-full max-w-lg bg-white dark:bg-[#131318] border border-border-theme dark:border-[#22222e] rounded-2xl shadow-2xl overflow-hidden my-auto max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border-theme">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-border-theme shrink-0">
           <div>
             <h2 className="text-base font-semibold text-slate-900 dark:text-foreground">
               Review Brand Partner
@@ -118,7 +118,7 @@ export default function CreatorSubmitReviewModal({
         </div>
 
         {/* Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-5 overflow-y-auto">
           {errorMessage && (
             <div className="p-3.5 bg-rose-500/10 border border-rose-500/20 rounded-xl text-xs text-rose-600 dark:text-rose-400">
               {errorMessage}

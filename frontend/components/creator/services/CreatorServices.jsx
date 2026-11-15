@@ -9,6 +9,7 @@ import {
 } from "@/redux/creator/services/services_slice";
 import CreatorSidebar from "@/components/creator/dashboard/CreatorSidebar";
 import CreatorHeader from "@/components/creator/dashboard/CreatorHeader";
+import DropdownFilter from "@/components/common/DropdownFilter";
 import ServiceFormModal, {
   PLATFORM_OPTIONS,
   getDeliverablesList,
@@ -433,10 +434,10 @@ export default function CreatorServices() {
                     <LayersIcon className="w-4 h-4" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <span className="text-[10px] sm:text-[11px] font-medium text-text-secondary block leading-tight truncate">
+                    <span className="text-[10px] sm:text-[11px] font-medium text-text-secondary block leading-tight break-words">
                       Total Services
                     </span>
-                    <span className="font-sans font-bold text-base sm:text-lg text-foreground tracking-tight leading-none block mt-0.5 truncate">
+                    <span className="font-sans font-bold text-base sm:text-lg text-foreground tracking-tight leading-none block mt-0.5 break-words">
                       {totalServicesCount}
                     </span>
                   </div>
@@ -448,10 +449,10 @@ export default function CreatorServices() {
                     <CheckIcon className="w-4 h-4 text-black dark:text-white" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <span className="text-[10px] sm:text-[11px] font-medium text-text-secondary block leading-tight truncate">
+                    <span className="text-[10px] sm:text-[11px] font-medium text-text-secondary block leading-tight break-words">
                       Active Services
                     </span>
-                    <span className="font-sans font-bold text-base sm:text-lg text-foreground tracking-tight leading-none block mt-0.5 truncate">
+                    <span className="font-sans font-bold text-base sm:text-lg text-foreground tracking-tight leading-none block mt-0.5 break-words">
                       {activeServicesCount}
                     </span>
                   </div>
@@ -550,66 +551,63 @@ export default function CreatorServices() {
             {/* Filter & Sort Controls */}
             <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
               {/* Category Filter */}
-              <select
+              <DropdownFilter
                 value={selectedCategory}
                 onChange={(e) => {
                   setSelectedCategory(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="text-xs px-3 py-2.5 rounded-xl bg-surface-muted border border-border-theme text-foreground focus:outline-none focus:border-secondary transition-colors cursor-pointer"
-              >
-                {categoryOptions.map((cat) => (
-                  <option key={cat} value={cat}>
-                    Category: {cat}
-                  </option>
-                ))}
-              </select>
+                options={categoryOptions.map((cat) => ({
+                  value: cat,
+                  label: `Category: ${cat}`,
+                }))}
+                aria-label="Filter services by category"
+              />
 
               {/* Platform Filter */}
-              <select
+              <DropdownFilter
                 value={selectedPlatform}
                 onChange={(e) => {
                   setSelectedPlatform(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="text-xs px-3 py-2.5 rounded-xl bg-surface-muted border border-border-theme text-foreground focus:outline-none focus:border-secondary transition-colors cursor-pointer"
-              >
-                <option value="All">Platform: All</option>
-                {PLATFORM_OPTIONS.map((p) => (
-                  <option key={p.value} value={p.value}>
-                    {p.label}
-                  </option>
-                ))}
-              </select>
+                options={[
+                  { value: "All", label: "Platform: All" },
+                  ...PLATFORM_OPTIONS,
+                ]}
+                aria-label="Filter services by platform"
+              />
 
               {/* Status Filter */}
-              <select
+              <DropdownFilter
                 value={selectedStatus}
                 onChange={(e) => {
                   setSelectedStatus(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="text-xs px-3 py-2.5 rounded-xl bg-surface-muted border border-border-theme text-foreground focus:outline-none focus:border-secondary transition-colors cursor-pointer"
-              >
-                <option value="All">Status: All</option>
-                <option value="true">Active Only</option>
-                <option value="false">Inactive Only</option>
-              </select>
+                options={[
+                  { value: "All", label: "Status: All" },
+                  { value: "true", label: "Active Only" },
+                  { value: "false", label: "Inactive Only" },
+                ]}
+                aria-label="Filter services by status"
+              />
 
               {/* Sort By */}
-              <select
+              <DropdownFilter
                 value={sortBy}
                 onChange={(e) => {
                   setSortBy(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="text-xs px-3 py-2.5 rounded-xl bg-surface-muted border border-border-theme text-foreground focus:outline-none focus:border-secondary transition-colors cursor-pointer"
-              >
-                <option value="createdAt">Sort: Date</option>
-                <option value="title">Sort: Title</option>
-                <option value="price">Sort: Price</option>
-                <option value="deliveryTime">Sort: Delivery Time</option>
-              </select>
+                options={[
+                  { value: "createdAt", label: "Sort: Date" },
+                  { value: "title", label: "Sort: Title" },
+                  { value: "price", label: "Sort: Price" },
+                  { value: "deliveryTime", label: "Sort: Delivery Time" },
+                ]}
+                aria-label="Sort services"
+              />
             </div>
           </div>
 

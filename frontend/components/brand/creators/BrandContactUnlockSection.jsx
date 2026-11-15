@@ -103,7 +103,7 @@ export default function BrandContactUnlockSection({ creatorId, creatorName }) {
             {details.whatsappNumber ? (
               <div className="p-3 rounded-xl bg-surface border border-border-theme flex flex-col justify-between gap-1.5">
                 <span className="text-[11px] font-medium text-text-secondary uppercase">WhatsApp</span>
-                <span className="text-xs font-semibold text-foreground truncate">{details.whatsappNumber}</span>
+                <span className="text-xs font-semibold text-foreground break-words">{details.whatsappNumber}</span>
                 <div className="flex items-center gap-2 pt-1">
                   <a
                     href={`https://wa.me/${details.whatsappNumber.replace(/[^0-9]/g, "")}`}
@@ -132,7 +132,7 @@ export default function BrandContactUnlockSection({ creatorId, creatorName }) {
             {details.businessPhone ? (
               <div className="p-3 rounded-xl bg-surface border border-border-theme flex flex-col justify-between gap-1.5">
                 <span className="text-[11px] font-medium text-text-secondary uppercase">Direct Phone</span>
-                <span className="text-xs font-semibold text-foreground truncate">{details.businessPhone}</span>
+                <span className="text-xs font-semibold text-foreground break-words">{details.businessPhone}</span>
                 <div className="flex items-center gap-2 pt-1">
                   <a href={`tel:${details.businessPhone}`} className="text-[11px] font-semibold text-blue-600 hover:underline">
                     Call ↗
@@ -156,7 +156,7 @@ export default function BrandContactUnlockSection({ creatorId, creatorName }) {
             {details.businessEmail ? (
               <div className="p-3 rounded-xl bg-surface border border-border-theme flex flex-col justify-between gap-1.5">
                 <span className="text-[11px] font-medium text-text-secondary uppercase">Business Email</span>
-                <span className="text-xs font-semibold text-foreground truncate">{details.businessEmail}</span>
+                <span className="text-xs font-semibold text-foreground break-all">{details.businessEmail}</span>
                 <div className="flex items-center gap-2 pt-1">
                   <a href={`mailto:${details.businessEmail}`} className="text-[11px] font-semibold text-purple-600 hover:underline">
                     Email ↗
@@ -243,7 +243,7 @@ export default function BrandContactUnlockSection({ creatorId, creatorName }) {
       {/* Confirmation Modal */}
       {showConfirmModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="bg-surface border border-border-theme rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+          <div className="bg-surface border border-border-theme rounded-2xl max-w-md w-full p-4 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <h3 className="text-base font-semibold text-foreground">
               Unlock Contact for {creatorName || "this Creator"}?
             </h3>

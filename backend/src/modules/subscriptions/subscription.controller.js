@@ -7,7 +7,7 @@ import SubscriptionPayment from "./subscriptionPayment.model.js";
 import Auth from "../auth/auth.model.js";
 import { createBrandTrialSubscriptionService } from "./trial.service.js";
 import { evaluateBrandEntitlement } from "./entitlement.service.js";
-import { syncBrandSubscriptionExpiry } from "./expiry.service.js";
+import { syncBrandSubscriptionExpiry, syncCreatorSubscriptionExpiry } from "./expiry.service.js";
 import {
     checkCreatorUnlockStatusService,
     unlockCreatorContactService,
@@ -67,16 +67,76 @@ export const getSubscriptionStatus = asyncHandler(async (req, res) => {
 
 /**
  * Returns all active subscription plans available for purchase.
+ * Supports optional role filtering via query (?role=creator or ?role=brand).
  * GET /api/subscriptions/plans
  */
 export const getAvailablePlans = asyncHandler(async (req, res) => {
-    const plans = await SubscriptionPlan.find({ isActive: true }).sort({ priceMonthly: 1 });
+    const roleParam = req.query.role || req.query.targetRole;
+    const filter = { isActive: true };
+    if (roleParam && ["brand", "creator"].includes(roleParam.toLowerCase())) {
+        filter.targetRole = roleParam.toLowerCase();
+    }
+    const plans = await SubscriptionPlan.find(filter).sort({ priceMonthly: 1 });
 
     return sendResponse(
         res,
         200,
         "Available subscription plans retrieved successfully",
         plans
+    );
+});
+
+/**
+ * Returns active Creator subscription plans available for purchase.
+ * Restricted to authenticated Creator accounts.
+ * GET /api/subscriptions/creator/plans
+ */
+export const getCreatorAvailablePlans = asyncHandler(async (req, res) => {
+    const plans = await SubscriptionPlan.find({
+        isActive: true,
+        targetRole: "creator"
+    }).sort({ priceMonthly: 1 });
+
+    return sendResponse(
+        res,
+        200,
+        "Available Creator subscription plans retrieved successfully",
+        plans
+    );
+});
+
+/**
+ * Returns current subscription document for the authenticated Creator.
+ * Strictly uses req.user authentication; never accepts client-provided user IDs.
+ * Handles never-purchased, active, canceled, suspended, and expired states.
+ * GET /api/subscriptions/creator/current
+ */
+export const getCreatorCurrentSubscription = asyncHandler(async (req, res) => {
+    const creatorId = req.user.userId || req.user._id;
+
+    // Trigger proactive expiry evaluation
+    await syncCreatorSubscriptionExpiry(creatorId);
+
+    const subscription = await Subscription.findOne({
+        subscriber: creatorId,
+        subscriberRole: "creator"
+    }).populate("plan");
+
+    // Case 1: Creator has never purchased a subscription, or only has a pre-activation record without plan/payment
+    if (!subscription || (subscription.status === "expired" && !subscription.razorpayPaymentId && !subscription.currentPeriodStart)) {
+        return sendResponse(
+            res,
+            200,
+            "Current subscription retrieved successfully",
+            null
+        );
+    }
+
+    return sendResponse(
+        res,
+        200,
+        "Current subscription retrieved successfully",
+        subscription
     );
 });
 
@@ -268,5 +328,7 @@ export default {
     getSubscriptionPayments,
     checkCreatorUnlockStatus,
     unlockCreatorContact,
-    getBrandUnlockedCreators
+    getBrandUnlockedCreators,
+    getCreatorAvailablePlans,
+    getCreatorCurrentSubscription
 };

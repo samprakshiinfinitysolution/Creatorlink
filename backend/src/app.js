@@ -9,8 +9,8 @@ const app = express();
 
 const allowedOrigins = [
     process.env.FRONTEND_URL,
-    "http://192.168.1.21:3005",
-    "http://localhost:3005"
+    "http://192.168.1.21:3000",
+    "http://localhost:3000"
 ].filter(Boolean);
 
 // Allows the frontend to communicate with the backend.
@@ -26,8 +26,15 @@ app.use(
     })
 );
 
-// Reads JSON data from requests.
-app.use(express.json());
+
+// Reads JSON data from requests and preserves raw Buffer for webhook verification.
+app.use(
+    express.json({
+        verify: (req, res, buf) => {
+            req.rawBody = buf;
+        }
+    })
+);
 
 // Reads form data from requests.
 app.use(express.urlencoded({ extended: true }));

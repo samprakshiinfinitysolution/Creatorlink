@@ -1165,7 +1165,7 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                   {/* Left: Brand/Campaign Logo + Info */}
                   <div className="flex items-start gap-4">
                     {/* Brand Logo Card */}
-                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white dark:bg-zinc-850 border border-gray-100 dark:border-zinc-700 shadow-xs flex items-center justify-center p-2 shrink-0 overflow-hidden">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 shadow-xs flex items-center justify-center p-2 shrink-0 overflow-hidden">
                       {brandLogo && !failedBrandLogo ? (
                         /* eslint-disable-next-line @next/next/no-img-element */
                         <img
@@ -1256,58 +1256,61 @@ export default function CreatorWorkspaceDetail({ workspaceId }) {
                 </div>
 
                 {/* 4 Stat Cards in 4-Column Responsive Grid (Matching Reference) */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-3.5 pt-4 border-t border-gray-100 dark:border-zinc-800">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 pt-4 border-t border-gray-100 dark:border-zinc-800">
                   {/* Stat 1: AGREED PRICE */}
-                  <div className="bg-white dark:bg-zinc-850 border border-gray-100 dark:border-zinc-800 rounded-2xl p-4 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+                  <div className="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-2xl p-4 flex flex-col justify-center min-w-0 shadow-[0_1px_3px_rgba(0,0,0,0.02)] transition-colors">
                     <span className="text-[10px] font-bold text-gray-400 dark:text-zinc-400 uppercase tracking-wider block">
                       AGREED PRICE
                     </span>
-                    <span className="font-sans font-bold text-lg sm:text-xl text-gray-900 dark:text-white mt-1 block">
+                    <span className="font-sans font-bold text-lg sm:text-xl text-gray-900 dark:text-white mt-1 block truncate">
                       {formatPrice(workspace?.agreedPrice, workspace?.currency)}
                     </span>
                   </div>
 
                   {/* Stat 2: Deadline */}
-                  <div className="bg-white dark:bg-zinc-850 border border-gray-100 dark:border-zinc-800 rounded-2xl p-4 flex items-center gap-3 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
-                    <div className="w-9 h-9 rounded-xl bg-gray-50 dark:bg-zinc-800 text-gray-700 dark:text-gray-300 flex items-center justify-center shrink-0">
+                  <div className="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-2xl p-4 flex items-center gap-3 min-w-0 shadow-[0_1px_3px_rgba(0,0,0,0.02)] transition-colors">
+                    <div className="w-9 h-9 rounded-xl bg-gray-50 dark:bg-zinc-800 text-gray-700 dark:text-gray-300 border border-transparent dark:border-zinc-700/50 flex items-center justify-center shrink-0">
                       <CalendarIcon className="w-4 h-4 text-gray-700 dark:text-gray-300" />
                     </div>
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <span className="text-[10px] font-bold text-gray-400 dark:text-zinc-400 uppercase tracking-wider block">
                         Deadline
                       </span>
-                      <span className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white mt-0.5 block break-words">
+                      <span className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white mt-0.5 block truncate sm:break-words">
                         {deadlineFormatted}
                       </span>
                     </div>
                   </div>
 
                   {/* Stat 3: Platform */}
-                  <div className="bg-white dark:bg-zinc-850 border border-gray-100 dark:border-zinc-800 rounded-2xl p-4 flex items-center gap-3 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
-                    <div className="w-9 h-9 rounded-xl bg-gray-50 dark:bg-zinc-800 text-gray-700 dark:text-gray-300 flex items-center justify-center shrink-0">
+                  <div className="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-2xl p-4 flex items-center gap-3 min-w-0 shadow-[0_1px_3px_rgba(0,0,0,0.02)] transition-colors">
+                    <div className="w-9 h-9 rounded-xl bg-gray-50 dark:bg-zinc-800 text-gray-700 dark:text-gray-300 border border-transparent dark:border-zinc-700/50 flex items-center justify-center shrink-0">
                       <ShieldCheckIcon className="w-4 h-4 text-gray-700 dark:text-gray-300" />
                     </div>
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <span className="text-[10px] font-bold text-gray-400 dark:text-zinc-400 uppercase tracking-wider block">
                         Platform
                       </span>
-                      <span className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white mt-0.5 capitalize block break-words">
+                      <span
+                        className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white mt-0.5 capitalize block break-words"
+                        title={platformLabel}
+                      >
                         {platformLabel}
                       </span>
                     </div>
                   </div>
 
                   {/* Stat 4: Selected Service */}
-                  <div className="bg-white dark:bg-zinc-850 border border-gray-100 dark:border-zinc-800 rounded-2xl p-4 flex items-center gap-3 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
-                    <div className="w-9 h-9 rounded-xl bg-gray-50 dark:bg-zinc-800 text-gray-700 dark:text-gray-300 flex items-center justify-center shrink-0">
+                  <div className="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-2xl p-4 flex items-center gap-3 min-w-0 shadow-[0_1px_3px_rgba(0,0,0,0.02)] transition-colors">
+                    <div className="w-9 h-9 rounded-xl bg-gray-50 dark:bg-zinc-800 text-gray-700 dark:text-gray-300 border border-transparent dark:border-zinc-700/50 flex items-center justify-center shrink-0">
                       <LayersIcon className="w-4 h-4 text-gray-700 dark:text-gray-300" />
                     </div>
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <span className="text-[10px] font-bold text-gray-400 dark:text-zinc-400 uppercase tracking-wider block">
                         Selected Service
                       </span>
                       <span
-                        className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white mt-0.5 block break-words"
+                        className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white mt-0.5 block truncate sm:break-words"
                         title={service?.title || "Custom Package"}
                       >
                         {service?.title || "Custom Package"}

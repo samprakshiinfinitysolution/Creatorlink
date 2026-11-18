@@ -3,17 +3,17 @@ import os from "os";
 function getLocalDevOrigins() {
   const origins = [
     "192.168.1.21",
-    "192.168.1.21:3005",
+    "192.168.1.21:3000",
     "192.168.1.21",
-    "192.168.1.21:3005",
+    "192.168.1.21:3000",
     "localhost",
-    "localhost:3005",
+    "localhost:3000",
     "127.0.0.1",
-    "127.0.0.1:3005",
+    "127.0.0.1:3000",
     "0.0.0.0",
-    "0.0.0.0:3005",
+    "0.0.0.0:3000",
     "192.168.1.10",
-    "192.168.1.10:3005",
+    "192.168.1.10:3000",
   ];
   try {
     const interfaces = os.networkInterfaces();
@@ -21,7 +21,7 @@ function getLocalDevOrigins() {
       for (const iface of interfaces[name] || []) {
         if (iface.family === "IPv4" && !iface.internal) {
           origins.push(iface.address);
-          origins.push(`${iface.address}:3005`);
+          origins.push(`${iface.address}:3000`);
         }
       }
     }

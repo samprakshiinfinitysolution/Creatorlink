@@ -10,22 +10,65 @@ const allowedPlatforms = [
     "website"
 ];
 
-// Helper to normalize platform input (supports string, comma-separated string, or array)
+// Helper to validate and normalize platform input.
+// Supports string, comma-separated string, or array of strings.
+// Rejects invalid types, empty items, and unsupported platform names.
 const normalizePlatformInput = (value) => {
     let rawList = [];
     if (Array.isArray(value)) {
-        rawList = value;
+        if (value.length === 0) {
+            throw createApiError(400, "Invalid platform. Select at least one valid target platform.");
+        }
+        for (const item of value) {
+            if (typeof item !== "string" || !item.trim()) {
+                throw createApiError(400, "Each platform must be a valid non-empty string");
+            }
+            rawList.push(item.trim().toLowerCase());
+        }
     } else if (typeof value === "string") {
-        rawList = value.split(",");
+        if (!value.trim()) {
+            throw createApiError(400, "Invalid platform. Select at least one valid target platform.");
+        }
+        const items = value.split(",");
+        for (const item of items) {
+            const trimmed = item.trim().toLowerCase();
+            if (!trimmed) {
+                throw createApiError(400, "Each platform must be a valid non-empty string");
+            }
+            rawList.push(trimmed);
+        }
     } else {
-        return [];
+        throw createApiError(400, "Platform must be a string or an array of strings");
     }
 
-    const normalized = rawList
-        .map((item) => (typeof item === "string" ? item.trim().toLowerCase() : ""))
-        .filter(Boolean);
+    const uniqueList = Array.from(new Set(rawList));
+    const invalidItems = uniqueList.filter((p) => !allowedPlatforms.includes(p));
+    if (invalidItems.length > 0) {
+        throw createApiError(
+            400,
+            `Invalid platform: ${invalidItems.join(", ")}. Allowed: ${allowedPlatforms.join(", ")}`
+        );
+    }
 
-    return Array.from(new Set(normalized));
+    return uniqueList;
+};
+
+// Numeric validation helpers
+const isValidNumericInput = (val) => {
+    if (typeof val === "number") {
+        return Number.isFinite(val);
+    }
+    if (typeof val === "string" && val.trim() !== "") {
+        const num = Number(val.trim());
+        return Number.isFinite(num);
+    }
+    return false;
+};
+
+const toFiniteNumber = (val) => {
+    if (typeof val === "number") return val;
+    if (typeof val === "string" && val.trim() !== "") return Number(val.trim());
+    return NaN;
 };
 
 
@@ -45,14 +88,29 @@ const validateAudienceTargeting = (audienceTargeting) => {
         if (typeof audienceTargeting !== "object" || Array.isArray(audienceTargeting)) {
             throw createApiError(400, "Audience targeting must be an object");
         }
-        if (audienceTargeting.gender && !["all", "male", "female", "other"].includes(audienceTargeting.gender.toLowerCase())) {
-            throw createApiError(400, "Invalid audience gender. Allowed: all, male, female, other");
+        if (audienceTargeting.gender !== undefined && audienceTargeting.gender !== null) {
+            if (typeof audienceTargeting.gender !== "string") {
+                throw createApiError(400, "Invalid audience gender. Allowed: all, male, female, other");
+            }
+            const normalizedGender = audienceTargeting.gender.trim().toLowerCase();
+            if (!["all", "male", "female", "other"].includes(normalizedGender)) {
+                throw createApiError(400, "Invalid audience gender. Allowed: all, male, female, other");
+            }
+            audienceTargeting.gender = normalizedGender;
         }
-        if (audienceTargeting.age && typeof audienceTargeting.age !== "string") {
+        if (audienceTargeting.age !== undefined && audienceTargeting.age !== null && typeof audienceTargeting.age !== "string") {
             throw createApiError(400, "Audience age must be a string");
         }
-        if (audienceTargeting.geography && !Array.isArray(audienceTargeting.geography) && typeof audienceTargeting.geography !== "string") {
-            throw createApiError(400, "Audience geography must be a string or array of strings");
+        if (audienceTargeting.geography !== undefined && audienceTargeting.geography !== null) {
+            if (typeof audienceTargeting.geography === "string") {
+                // String is allowed
+            } else if (Array.isArray(audienceTargeting.geography)) {
+                if (audienceTargeting.geography.some((geo) => typeof geo !== "string" || !geo.trim())) {
+                    throw createApiError(400, "Every geography element must be a non-empty string");
+                }
+            } else {
+                throw createApiError(400, "Audience geography must be a string or array of strings");
+            }
         }
     }
 };
@@ -69,8 +127,10 @@ const validateUsageRights = (usageRights) => {
         if (usageRights.paidAds !== undefined && typeof usageRights.paidAds !== "boolean") {
             throw createApiError(400, "paidAds must be a boolean");
         }
-        if (usageRights.duration && typeof usageRights.duration !== "string") {
-            throw createApiError(400, "Usage duration must be a string");
+        if (usageRights.duration !== undefined && usageRights.duration !== null) {
+            if (typeof usageRights.duration !== "string") {
+                throw createApiError(400, "Usage duration must be a string");
+            }
         }
         if (usageRights.exclusivity !== undefined && typeof usageRights.exclusivity !== "boolean") {
             throw createApiError(400, "exclusivity must be a boolean");
@@ -103,33 +163,81 @@ const validateCreatorRequirements = (creatorRequirements) => {
 // Validates campaign creation data.
 const validateCreateCampaign = (req, res, next) => {
 
-    // Auto-sync budget, minBudget, and maxBudget before validation
-    if (req.body.budget === undefined || req.body.budget === null || req.body.budget === "") {
-        if (req.body.maxBudget !== undefined && req.body.maxBudget !== null && req.body.maxBudget !== "") {
-            req.body.budget = Number(req.body.maxBudget);
-        } else if (req.body.minBudget !== undefined && req.body.minBudget !== null && req.body.minBudget !== "") {
-            req.body.budget = Number(req.body.minBudget);
-        }
-    } else {
-        req.body.budget = Number(req.body.budget);
-    }
-
-    if (req.body.minBudget !== undefined && req.body.minBudget !== null && req.body.minBudget !== "") {
-        req.body.minBudget = Number(req.body.minBudget);
-    } else if (req.body.budget !== undefined && !Number.isNaN(req.body.budget)) {
-        req.body.minBudget = req.body.budget;
-    }
-
-    if (req.body.maxBudget !== undefined && req.body.maxBudget !== null && req.body.maxBudget !== "") {
-        req.body.maxBudget = Number(req.body.maxBudget);
-    } else if (req.body.budget !== undefined && !Number.isNaN(req.body.budget)) {
-        req.body.maxBudget = req.body.budget;
-    }
-
-    // Support either platform or platforms alias and normalize to array
+    // Support either platform or platforms alias
     if (req.body.platform === undefined && req.body.platforms !== undefined) {
         req.body.platform = req.body.platforms;
         delete req.body.platforms;
+    }
+
+    // Validate explicitly provided budget fields for finite numbers
+    if (req.body.budget !== undefined) {
+        if (req.body.budget === null || !isValidNumericInput(req.body.budget)) {
+            throw createApiError(400, "Budget must be a valid positive number");
+        }
+        const parsedBudget = toFiniteNumber(req.body.budget);
+        if (parsedBudget < 0) {
+            throw createApiError(400, "Budget must be a valid positive number");
+        }
+        req.body.budget = parsedBudget;
+    }
+
+    if (req.body.minBudget !== undefined) {
+        if (req.body.minBudget === null || !isValidNumericInput(req.body.minBudget)) {
+            throw createApiError(400, "Minimum budget must be a non-negative number");
+        }
+        const parsedMin = toFiniteNumber(req.body.minBudget);
+        if (parsedMin < 0) {
+            throw createApiError(400, "Minimum budget must be a non-negative number");
+        }
+        req.body.minBudget = parsedMin;
+    }
+
+    if (req.body.maxBudget !== undefined) {
+        if (req.body.maxBudget === null || !isValidNumericInput(req.body.maxBudget)) {
+            throw createApiError(400, "Maximum budget must be a non-negative number");
+        }
+        const parsedMax = toFiniteNumber(req.body.maxBudget);
+        if (parsedMax < 0) {
+            throw createApiError(400, "Maximum budget must be a non-negative number");
+        }
+        req.body.maxBudget = parsedMax;
+    }
+
+    // Auto-sync budget, minBudget, and maxBudget if omitted
+    if (req.body.budget === undefined) {
+        if (req.body.maxBudget !== undefined) {
+            req.body.budget = req.body.maxBudget;
+        } else if (req.body.minBudget !== undefined) {
+            req.body.budget = req.body.minBudget;
+        }
+    }
+
+    if (req.body.minBudget === undefined && req.body.budget !== undefined) {
+        req.body.minBudget = req.body.budget;
+    }
+
+    if (req.body.maxBudget === undefined && req.body.budget !== undefined) {
+        req.body.maxBudget = req.body.budget;
+    }
+
+    if (
+        req.body.minBudget !== undefined &&
+        req.body.maxBudget !== undefined &&
+        req.body.minBudget > req.body.maxBudget
+    ) {
+        throw createApiError(400, "Minimum budget cannot exceed maximum budget");
+    }
+
+    // Validate required creators
+    if (req.body.requiredCreators !== undefined && req.body.requiredCreators !== null) {
+        if (!isValidNumericInput(req.body.requiredCreators)) {
+            throw createApiError(400, "Required creators must be at least 1");
+        }
+        const parsedCreators = toFiniteNumber(req.body.requiredCreators);
+        if (parsedCreators < 1) {
+            throw createApiError(400, "Required creators must be at least 1");
+        }
+        req.body.requiredCreators = parsedCreators;
     }
 
     const {
@@ -159,9 +267,10 @@ const validateCreateCampaign = (req, res, next) => {
         platform === undefined ||
         platform === null ||
         budget === undefined ||
-        Number.isNaN(budget) ||
+        budget === null ||
         !deadline ||
         requiredCreators === undefined ||
+        requiredCreators === null ||
         !deliverables
     ) {
         throw createApiError(
@@ -222,43 +331,9 @@ const validateCreateCampaign = (req, res, next) => {
     }
 
 
-    // Validate platform (supports single or multiple platforms).
-    const normalizedPlatforms = normalizePlatformInput(platform);
-    if (
-        normalizedPlatforms.length === 0 ||
-        normalizedPlatforms.some((p) => !allowedPlatforms.includes(p))
-    ) {
-        throw createApiError(
-            400,
-            "Invalid platform. Select at least one valid target platform."
-        );
-    }
-    req.body.platform = normalizedPlatforms;
+    // Validate and normalize platform (supports single or multiple platforms).
+    req.body.platform = normalizePlatformInput(platform);
 
-
-    // Validate budget.
-    if (
-        typeof budget !== "number" ||
-        Number.isNaN(budget) ||
-        budget < 0
-    ) {
-        throw createApiError(
-            400,
-            "Budget must be a valid positive number"
-        );
-    }
-
-    if (minBudget !== undefined && (typeof minBudget !== "number" || Number.isNaN(minBudget) || minBudget < 0)) {
-        throw createApiError(400, "Minimum budget must be a non-negative number");
-    }
-
-    if (maxBudget !== undefined && (typeof maxBudget !== "number" || Number.isNaN(maxBudget) || maxBudget < 0)) {
-        throw createApiError(400, "Maximum budget must be a non-negative number");
-    }
-
-    if (minBudget !== undefined && maxBudget !== undefined && minBudget > maxBudget) {
-        throw createApiError(400, "Minimum budget cannot exceed maximum budget");
-    }
 
     // Validate metadata objects
     validateAudienceTargeting(audienceTargeting);
@@ -383,29 +458,38 @@ const validateUpdateCampaign = (req, res, next) => {
         );
     }
 
-    // Sync and validate budget ranges if provided
-    if (req.body.maxBudget !== undefined && req.body.maxBudget !== null && req.body.maxBudget !== "") {
-        req.body.maxBudget = Number(req.body.maxBudget);
-        if (Number.isNaN(req.body.maxBudget) || req.body.maxBudget < 0) {
+    // Validate budget ranges if provided
+    if (req.body.maxBudget !== undefined) {
+        if (req.body.maxBudget === null || !isValidNumericInput(req.body.maxBudget)) {
             throw createApiError(400, "Maximum budget must be a non-negative number");
         }
-        if (req.body.budget === undefined) {
-            req.body.budget = req.body.maxBudget;
+        const parsedMax = toFiniteNumber(req.body.maxBudget);
+        if (parsedMax < 0) {
+            throw createApiError(400, "Maximum budget must be a non-negative number");
         }
+        req.body.maxBudget = parsedMax;
     }
 
-    if (req.body.minBudget !== undefined && req.body.minBudget !== null && req.body.minBudget !== "") {
-        req.body.minBudget = Number(req.body.minBudget);
-        if (Number.isNaN(req.body.minBudget) || req.body.minBudget < 0) {
+    if (req.body.minBudget !== undefined) {
+        if (req.body.minBudget === null || !isValidNumericInput(req.body.minBudget)) {
             throw createApiError(400, "Minimum budget must be a non-negative number");
         }
+        const parsedMin = toFiniteNumber(req.body.minBudget);
+        if (parsedMin < 0) {
+            throw createApiError(400, "Minimum budget must be a non-negative number");
+        }
+        req.body.minBudget = parsedMin;
     }
 
-    if (req.body.budget !== undefined && req.body.budget !== null && req.body.budget !== "") {
-        req.body.budget = Number(req.body.budget);
-        if (Number.isNaN(req.body.budget) || req.body.budget < 0) {
+    if (req.body.budget !== undefined) {
+        if (req.body.budget === null || !isValidNumericInput(req.body.budget)) {
             throw createApiError(400, "Budget must be a valid positive number");
         }
+        const parsedBudget = toFiniteNumber(req.body.budget);
+        if (parsedBudget < 0) {
+            throw createApiError(400, "Budget must be a valid positive number");
+        }
+        req.body.budget = parsedBudget;
     }
 
     if (
@@ -416,16 +500,26 @@ const validateUpdateCampaign = (req, res, next) => {
         throw createApiError(400, "Minimum budget cannot exceed maximum budget");
     }
 
+    // Validate required creators if provided
+    if (req.body.requiredCreators !== undefined) {
+        if (req.body.requiredCreators === null || !isValidNumericInput(req.body.requiredCreators)) {
+            throw createApiError(400, "Required creators must be at least 1");
+        }
+        const parsedCreators = toFiniteNumber(req.body.requiredCreators);
+        if (parsedCreators < 1) {
+            throw createApiError(400, "Required creators must be at least 1");
+        }
+        req.body.requiredCreators = parsedCreators;
+    }
+
     const {
         title,
         description,
         category,
         coverImage,
         platform,
-        budget,
         currency,
         deadline,
-        requiredCreators,
         deliverables,
         audienceTargeting,
         usageRights,
@@ -532,21 +626,6 @@ const validateUpdateCampaign = (req, res, next) => {
         throw createApiError(
             400,
             "Invalid deadline"
-        );
-    }
-
-
-    // Validate required creators if provided.
-    if (
-        requiredCreators !== undefined &&
-        (
-            typeof requiredCreators !== "number" ||
-            requiredCreators < 1
-        )
-    ) {
-        throw createApiError(
-            400,
-            "Required creators must be at least 1"
         );
     }
 

@@ -7,6 +7,7 @@ import SubscriptionPayment from "./subscriptionPayment.model.js";
 import Auth from "../auth/auth.model.js";
 import { createBrandTrialSubscriptionService } from "./trial.service.js";
 import { createNotificationService } from "../notifications/notification.service.js";
+import { grantCreatorSubscriptionCreditsService } from "./creatorCredit.service.js";
 import createApiError from "../../utils/ApiError.js";
 
 /**
@@ -54,15 +55,26 @@ export const verifyRazorpaySignature = ({ razorpay_order_id, razorpay_payment_id
 };
 
 /**
- * Creates a Razorpay payment order for a Brand subscription plan.
+ * Creates a Razorpay payment order for a Brand or Creator subscription plan.
  * 
  * @param {Object} params
- * @param {string|ObjectId} params.brandId - Authenticated Brand user ID
+ * @param {string|ObjectId} [params.userId] - Authenticated user ID (polymorphic)
+ * @param {string|ObjectId} [params.brandId] - Authenticated user ID (backward compatibility)
  * @param {string|ObjectId} params.planId - Target SubscriptionPlan ID
  * @param {string} params.billingCycle - "monthly" | "yearly"
  * @returns {Promise<Object>}
  */
-export const createSubscriptionOrderService = async ({ brandId, planId, billingCycle }) => {
+export const createSubscriptionOrderService = async ({
+    userId,
+    brandId,
+    planId,
+    billingCycle
+}) => {
+    const subscriberId = userId || brandId;
+    if (!subscriberId) {
+        throw createApiError(400, "Authenticated user ID is required to create subscription order");
+    }
+
     if (!["monthly", "yearly"].includes(billingCycle)) {
         throw createApiError(400, "Billing cycle must be either 'monthly' or 'yearly'");
     }
@@ -72,40 +84,146 @@ export const createSubscriptionOrderService = async ({ brandId, planId, billingC
         throw createApiError(404, "Subscription plan not found or is currently inactive");
     }
 
-    const brandUser = await Auth.findById(brandId).select("name email role");
-    if (!brandUser || brandUser.role !== "brand") {
-        throw createApiError(403, "Only brand accounts can purchase subscriptions");
+    const user = await Auth.findById(subscriberId).select("name email role");
+    if (!user) {
+        throw createApiError(404, "Authenticated user account not found");
     }
 
-    // Find current subscription document to link
-    let subscription = await Subscription.findOne({ brand: brandId });
-    if (!subscription) {
-        // Automatically initialize trial or base subscription record for existing brands
-        const trialResult = await createBrandTrialSubscriptionService({
-            brandId: brandUser._id,
-            email: brandUser.email,
-            name: brandUser.name
+    const userRole = user.role;
+    if (!["brand", "creator"].includes(userRole)) {
+        throw createApiError(403, `Only brand and creator accounts can purchase subscriptions (role: ${userRole})`);
+    }
+
+    const planTargetRole = (plan.targetRole || "brand").toLowerCase();
+    if (userRole !== planTargetRole) {
+        throw createApiError(
+            400,
+            `Role mismatch: User with role '${userRole}' cannot purchase a plan with target role '${planTargetRole}'`
+        );
+    }
+
+    const isBrand = userRole === "brand";
+    const isCreator = userRole === "creator";
+
+    // Validate Creator plan credit configuration
+    if (isCreator) {
+        const credits = plan.monthlyApplicationCredits;
+        if (!credits || !Number.isInteger(Number(credits)) || Number(credits) <= 0) {
+            throw createApiError(
+                400,
+                `Creator plan '${plan.name}' must have a positive integer monthlyApplicationCredits configured (found: ${credits})`
+            );
+        }
+    }
+
+    // Resolve subscription document to link
+    let subscription;
+    if (isBrand) {
+        subscription = await Subscription.findOne({ brand: subscriberId });
+        if (!subscription) {
+            // Automatically initialize trial or base subscription record for existing brands
+            const trialResult = await createBrandTrialSubscriptionService({
+                brandId: user._id,
+                email: user.email,
+                name: user.name
+            });
+            subscription = trialResult?.subscription || (await Subscription.findOne({ brand: subscriberId }));
+        }
+    } else if (isCreator) {
+        // For Creator: find existing subscription or create a non-trial subscription record safely
+        subscription = await Subscription.findOne({
+            subscriber: subscriberId,
+            subscriberRole: "creator"
         });
-        subscription = trialResult?.subscription || (await Subscription.findOne({ brand: brandId }));
+
+        if (!subscription) {
+            const now = new Date();
+            try {
+                subscription = await Subscription.findOneAndUpdate(
+                    {
+                        subscriber: subscriberId,
+                        subscriberRole: "creator"
+                    },
+                    {
+                        $setOnInsert: {
+                            subscriber: subscriberId,
+                            subscriberRole: "creator",
+                            plan: plan._id,
+                            planSnapshot: {
+                                name: plan.name,
+                                slug: plan.slug,
+                                version: plan.version || 1,
+                                price: billingCycle === "yearly" ? plan.priceYearly : plan.priceMonthly,
+                                currency: plan.currency || "INR",
+                                billingCycle,
+                                targetRole: "creator",
+                                monthlyContactQuota: 0,
+                                monthlyApplicationCredits: plan.monthlyApplicationCredits,
+                                features: plan.features || []
+                            },
+                            status: "expired", // Safe pre-activation non-trial status; grants zero trial privileges
+                            billingCycle,
+                            isComplimentary: false,
+                            currentPeriodStart: now,
+                            currentPeriodEnd: now,
+                            quotaState: {
+                                trialQuotaLimit: 0,
+                                trialQuotaUsed: 0,
+                                monthlyQuotaLimit: 0,
+                                monthlyQuotaUsed: 0,
+                                monthlyCreditsAllocated: 0,
+                                creditsUsed: 0
+                            }
+                        }
+                    },
+                    {
+                        new: true,
+                        upsert: true,
+                        setDefaultsOnInsert: true
+                    }
+                );
+            } catch (upsertErr) {
+                // If a race condition occurred between concurrent requests, fetch the created record
+                subscription = await Subscription.findOne({
+                    subscriber: subscriberId,
+                    subscriberRole: "creator"
+                });
+                if (!subscription) {
+                    throw upsertErr;
+                }
+            }
+        }
+    }
+
+    if (!subscription) {
+        throw createApiError(500, "Failed to resolve or initialize subscription record");
     }
 
     const amount = billingCycle === "yearly" ? plan.priceYearly : plan.priceMonthly;
     const amountInPaise = Math.round(amount * 100);
 
     const razorpay = getRazorpayInstance();
+    const shortReceipt = `sub_${Date.now().toString().slice(-8)}_${subscriberId.toString().slice(-4)}`;
 
-    const shortReceipt = `sub_${Date.now().toString().slice(-8)}_${brandId.toString().slice(-4)}`;
+    const notes = {
+        subscriberId: subscriberId.toString(),
+        subscriberRole: userRole,
+        planId: plan._id.toString(),
+        billingCycle,
+        planSlug: plan.slug
+    };
+
+    if (isBrand) {
+        notes.brandId = subscriberId.toString();
+    } else {
+        notes.creatorId = subscriberId.toString();
+    }
 
     const options = {
         amount: amountInPaise,
         currency: plan.currency || "INR",
         receipt: shortReceipt,
-        notes: {
-            brandId: brandId.toString(),
-            planId: plan._id.toString(),
-            billingCycle,
-            planSlug: plan.slug
-        }
+        notes
     };
 
     let razorpayOrder;
@@ -117,8 +235,9 @@ export const createSubscriptionOrderService = async ({ brandId, planId, billingC
     }
 
     // Record pending transaction in dedicated SubscriptionPayment ledger
-    const payment = await SubscriptionPayment.create({
-        brand: brandId,
+    const paymentData = {
+        subscriber: subscriberId,
+        subscriberRole: userRole,
         subscription: subscription._id,
         plan: plan._id,
         amount,
@@ -127,9 +246,15 @@ export const createSubscriptionOrderService = async ({ brandId, planId, billingC
         status: "pending",
         razorpayOrderId: razorpayOrder.id,
         razorpayPaymentId: ""
-    });
+    };
 
-    return {
+    if (isBrand) {
+        paymentData.brand = subscriberId;
+    }
+
+    const payment = await SubscriptionPayment.create(paymentData);
+
+    const responseData = {
         orderId: razorpayOrder.id,
         amount: razorpayOrder.amount,
         currency: razorpayOrder.currency,
@@ -140,36 +265,373 @@ export const createSubscriptionOrderService = async ({ brandId, planId, billingC
             name: plan.name,
             slug: plan.slug,
             billingCycle,
-            monthlyContactQuota: plan.monthlyContactQuota
+            targetRole: plan.targetRole || userRole,
+            monthlyContactQuota: plan.monthlyContactQuota || 0,
+            monthlyApplicationCredits: plan.monthlyApplicationCredits || 0
         },
-        brand: {
-            name: brandUser.name,
-            email: brandUser.email
+        subscriber: {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            role: userRole
         }
+    };
+
+    // Preserve existing brand object for backward compatibility with Brand frontends
+    if (isBrand) {
+        responseData.brand = {
+            name: user.name,
+            email: user.email
+        };
+    }
+
+    return responseData;
+};
+
+/**
+ * Reusable internal activation engine for Brand and Creator subscriptions.
+ * Invoked by both verified client checkout verification and verified webhook events.
+ * 
+ * Rules:
+ * 1. Executes payment status update, subscription activation, and creator credit allocation atomically.
+ * 2. Uses MongoDB transactions where supported; aborts cleanly on error.
+ * 3. Idempotent: If payment is already captured, returns existing state without re-granting credits or quotas.
+ * 
+ * @param {Object} params
+ * @param {Object} params.payment - SubscriptionPayment mongoose document (or loaded document)
+ * @param {string} params.razorpayPaymentId - Confirmed Razorpay payment ID
+ * @param {mongoose.ClientSession} [params.session] - Optional parent transaction session
+ * @returns {Promise<Object>}
+ */
+export const executeSubscriptionActivation = async ({
+    payment,
+    razorpayPaymentId,
+    session: externalSession = null
+}) => {
+    if (!payment) {
+        throw createApiError(404, "Subscription payment record required for activation");
+    }
+
+    if (!razorpayPaymentId || typeof razorpayPaymentId !== "string" || !razorpayPaymentId.trim()) {
+        throw createApiError(400, "Genuine Razorpay payment ID is required for activation");
+    }
+
+    const cleanPaymentId = razorpayPaymentId.trim();
+
+    const doActivation = async (activeSession) => {
+        // Fetch fresh payment state within session to guard against concurrent activation
+        const currentPayment = await SubscriptionPayment.findById(payment._id)
+            .populate("plan")
+            .session(activeSession);
+
+        if (!currentPayment) {
+            throw createApiError(404, "Subscription payment record not found during activation");
+        }
+
+        const plan = currentPayment.plan;
+        if (!plan) {
+            throw createApiError(404, "Subscription plan associated with order not found");
+        }
+
+        // Strict role validation: payment subscriberRole and plan targetRole must be present, valid, and matching
+        const ALLOWED_ROLES = ["brand", "creator"];
+        const paymentRole = currentPayment.subscriberRole;
+        const planRole = plan.targetRole;
+
+        if (!paymentRole || typeof paymentRole !== "string" || !ALLOWED_ROLES.includes(paymentRole.toLowerCase())) {
+            throw createApiError(
+                400,
+                `Invalid or missing subscriber role '${paymentRole}' on payment. Allowed roles are: ${ALLOWED_ROLES.join(", ")}.`
+            );
+        }
+
+        if (!planRole || typeof planRole !== "string" || !ALLOWED_ROLES.includes(planRole.toLowerCase())) {
+            throw createApiError(
+                400,
+                `Invalid or missing target role '${planRole}' on plan. Allowed roles are: ${ALLOWED_ROLES.join(", ")}.`
+            );
+        }
+
+        const normalizedPaymentRole = paymentRole.toLowerCase();
+        const normalizedPlanRole = planRole.toLowerCase();
+
+        if (normalizedPaymentRole !== normalizedPlanRole) {
+            throw createApiError(
+                400,
+                `Role mismatch: payment subscriber role '${normalizedPaymentRole}' does not match plan target role '${normalizedPlanRole}'.`
+            );
+        }
+
+        const isCreator = normalizedPaymentRole === "creator";
+        const isBrand = normalizedPaymentRole === "brand";
+
+        let subscriberId;
+        let creditsToGrant = 0;
+        if (isCreator) {
+            if (!currentPayment.subscriber) {
+                throw createApiError(400, "Creator payment record is missing required subscriber ID");
+            }
+            subscriberId = currentPayment.subscriber;
+
+            // Validate Creator plan credits before status mutation
+            creditsToGrant = Number(plan.monthlyApplicationCredits);
+            if (!Number.isInteger(creditsToGrant) || creditsToGrant <= 0) {
+                throw createApiError(
+                    400,
+                    `Cannot activate Creator subscription: Plan '${plan.name}' has invalid monthlyApplicationCredits (${plan.monthlyApplicationCredits}). Positive integer required.`
+                );
+            }
+        } else {
+            subscriberId = currentPayment.brand || currentPayment.subscriber;
+            if (!subscriberId) {
+                throw createApiError(400, "Brand payment record is missing required brand subscriber ID");
+            }
+        }
+
+        // Idempotency check: if payment already captured, verify payment ID consistency
+        if (currentPayment.status === "captured") {
+            const storedPaymentId = (currentPayment.razorpayPaymentId || "").trim();
+            if (!storedPaymentId) {
+                console.error(
+                    `[Activation Reconciliation Conflict] Payment record ${currentPayment._id} for order ${currentPayment.razorpayOrderId} is marked captured but has a missing or empty stored payment ID. Incoming payment ID '${cleanPaymentId}' requires reconciliation.`
+                );
+                throw createApiError(
+                    409,
+                    `Payment conflict: Order ${currentPayment.razorpayOrderId} is marked captured but is missing its original payment ID. Processing payment ID '${cleanPaymentId}' requires reconciliation.`
+                );
+            }
+
+            if (storedPaymentId !== cleanPaymentId) {
+                console.error(
+                    `[Activation Reconciliation Conflict] Payment record ${currentPayment._id} for order ${currentPayment.razorpayOrderId} is already captured with payment ID '${storedPaymentId}', but activation was requested with different payment ID '${cleanPaymentId}'.`
+                );
+                throw createApiError(
+                    409,
+                    `Payment conflict: Order ${currentPayment.razorpayOrderId} was already captured with payment ID '${storedPaymentId}'. Activation with different payment ID '${cleanPaymentId}' requires reconciliation.`
+                );
+            }
+
+            const currentSub = await Subscription.findById(currentPayment.subscription).session(activeSession);
+            return {
+                isSuccess: true,
+                alreadyVerified: true,
+                subscription: currentSub,
+                payment: currentPayment,
+                isCreator,
+                subscriberId,
+                plan
+            };
+        }
+
+        const now = new Date();
+        const isYearly = currentPayment.billingCycle === "yearly";
+        const durationDays = isYearly ? 365 : 30;
+
+        // 1. Update payment status to "captured"
+        currentPayment.status = "captured";
+        currentPayment.razorpayPaymentId = cleanPaymentId;
+        currentPayment.paidAt = now;
+        await currentPayment.save({ session: activeSession });
+
+        // 2. Fetch subscription document to activate
+        const subscription = await Subscription.findById(currentPayment.subscription).session(activeSession);
+        if (!subscription) {
+            throw createApiError(404, "Subscription record to activate not found");
+        }
+
+        // Safe period extension: if subscription is currently active, extend from existing currentPeriodEnd
+        const isCurrentlyActive = subscription.status === "active" &&
+            subscription.currentPeriodEnd &&
+            new Date(subscription.currentPeriodEnd) > now;
+
+        const currentPeriodStart = isCurrentlyActive && subscription.currentPeriodStart
+            ? subscription.currentPeriodStart
+            : now;
+
+        const periodBaseDate = isCurrentlyActive
+            ? new Date(subscription.currentPeriodEnd)
+            : now;
+
+        const currentPeriodEnd = new Date(periodBaseDate.getTime() + durationDays * 24 * 60 * 60 * 1000);
+
+        const calendarMonthKey = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
+
+        subscription.plan = plan._id;
+        subscription.planSnapshot = {
+            name: plan.name,
+            slug: plan.slug,
+            version: plan.version || 1,
+            price: currentPayment.amount,
+            currency: currentPayment.currency,
+            billingCycle: currentPayment.billingCycle,
+            targetRole: normalizedPlanRole,
+            monthlyContactQuota: isBrand ? (plan.monthlyContactQuota || 0) : 0,
+            monthlyApplicationCredits: isCreator ? (plan.monthlyApplicationCredits || 0) : 0,
+            features: plan.features || []
+        };
+        subscription.status = "active";
+        subscription.billingCycle = currentPayment.billingCycle;
+        subscription.isComplimentary = false;
+        subscription.currentPeriodStart = currentPeriodStart;
+        subscription.currentPeriodEnd = currentPeriodEnd;
+        subscription.cancelAtPeriodEnd = false;
+        subscription.canceledAt = null;
+        subscription.gracePeriodEnd = null;
+        subscription.razorpayOrderId = currentPayment.razorpayOrderId;
+        subscription.razorpayPaymentId = cleanPaymentId;
+
+        if (isBrand) {
+            subscription.subscriberRole = "brand";
+            subscription.brand = subscriberId;
+            subscription.subscriber = subscriberId;
+            subscription.quotaState = {
+                trialQuotaLimit: 5,
+                trialQuotaUsed: subscription.quotaState?.trialQuotaUsed || 0,
+                currentCalendarMonthKey: calendarMonthKey,
+                monthlyQuotaLimit: plan.monthlyContactQuota || 0,
+                monthlyQuotaUsed: 0,
+                monthlyCreditsAllocated: 0,
+                creditsUsed: 0
+            };
+        } else {
+            subscription.subscriber = subscriberId;
+            subscription.subscriberRole = "creator";
+            subscription.brand = undefined; // Never populate or depend on brand for Creator
+            subscription.quotaState = {
+                trialQuotaLimit: 0,
+                trialQuotaUsed: 0,
+                currentCalendarMonthKey: calendarMonthKey,
+                monthlyQuotaLimit: 0,
+                monthlyQuotaUsed: 0,
+                monthlyCreditsAllocated: plan.monthlyApplicationCredits || 0,
+                creditsUsed: 0
+            };
+        }
+
+        await subscription.save({ session: activeSession });
+
+        // 3. For Creator subscriptions: Grant monthly application credits idempotently
+        if (isCreator) {
+            await grantCreatorSubscriptionCreditsService({
+                creatorId: subscriberId,
+                subscriptionId: subscription._id,
+                paymentId: currentPayment._id,
+                credits: creditsToGrant,
+                reason: `Subscription activation: ${plan.name} (${currentPayment.billingCycle})`,
+                session: activeSession
+            });
+        }
+
+        return {
+            isSuccess: true,
+            alreadyVerified: false,
+            subscription,
+            payment: currentPayment,
+            isCreator,
+            subscriberId,
+            plan
+        };
+    };
+
+    let result;
+    if (externalSession) {
+        result = await doActivation(externalSession);
+    } else {
+        const session = await mongoose.startSession();
+        try {
+            session.startTransaction();
+            result = await doActivation(session);
+            await session.commitTransaction();
+        } catch (err) {
+            if (session.inTransaction()) {
+                await session.abortTransaction();
+            }
+
+            // Fail safely if MongoDB standalone environment cannot run transactions
+            if (
+                err.message &&
+                (err.message.includes("Transaction numbers are only allowed") ||
+                    err.message.includes("replica set") ||
+                    err.message.includes("standalone"))
+            ) {
+                throw createApiError(
+                    500,
+                    "MongoDB transactions are required for subscription activation and payment processing. Please ensure MongoDB is running as a replica set."
+                );
+            }
+
+            throw err;
+        } finally {
+            await session.endSession();
+        }
+    }
+
+    // 4. Dispatch notification to Subscriber (outside transaction to prevent rollback on notification failure)
+    if (result && !result.alreadyVerified && result.subscriberId) {
+        try {
+            const isCreatorSub = result.isCreator;
+            const notifMsg = isCreatorSub
+                ? `Your ${result.plan.name} (${result.payment.billingCycle}) subscription is now active! You have ${result.plan.monthlyApplicationCredits || 0} application credits available.`
+                : `Your ${result.plan.name} (${result.payment.billingCycle}) subscription is now active! You have ${result.plan.monthlyContactQuota || 0} creator contact unlocks available for this monthly cycle.`;
+
+            await createNotificationService({
+                recipient: result.subscriberId,
+                sender: null,
+                type: "subscription_activated",
+                title: "Subscription Activated",
+                message: notifMsg,
+                entityType: "subscription",
+                entityId: result.subscription._id,
+                destination: isCreatorSub ? "/creator/dashboard" : "/brand/subscription",
+                metadata: {
+                    planName: result.plan.name,
+                    billingCycle: result.payment.billingCycle,
+                    amount: result.payment.amount,
+                    currency: result.payment.currency
+                },
+                idempotencyKey: `sub_act_${result.payment._id}`
+            });
+        } catch (notifErr) {
+            console.error("Failed to send subscription activation notification:", notifErr);
+        }
+    }
+
+    return {
+        isSuccess: true,
+        alreadyVerified: result.alreadyVerified,
+        subscription: result.subscription,
+        payment: result.payment
     };
 };
 
 /**
- * Verifies Razorpay payment signature and activates/renews Brand's subscription.
+ * Verifies Razorpay payment signature and activates/renews Brand or Creator subscription.
  * 
  * @param {Object} params
- * @param {string|ObjectId} params.brandId - Authenticated Brand user ID
+ * @param {string|ObjectId} [params.userId] - Authenticated user ID (polymorphic)
+ * @param {string|ObjectId} [params.brandId] - Authenticated Brand user ID (backward compatibility)
  * @param {string} params.razorpay_order_id
  * @param {string} params.razorpay_payment_id
  * @param {string} params.razorpay_signature
  * @returns {Promise<Object>}
  */
 export const verifySubscriptionPaymentService = async ({
+    userId,
     brandId,
     razorpay_order_id,
     razorpay_payment_id,
     razorpay_signature
 }) => {
+    const authUserId = userId || brandId;
+    if (!authUserId) {
+        throw createApiError(401, "Authentication is required to verify subscription payment");
+    }
+
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
         throw createApiError(400, "Missing required Razorpay payment confirmation parameters");
     }
 
-    // 1. Verify HMAC SHA-256 signature
+    // 1. Verify HMAC SHA-256 checkout signature
     const isValid = verifyRazorpaySignature({
         razorpay_order_id,
         razorpay_payment_id,
@@ -189,12 +651,76 @@ export const verifySubscriptionPaymentService = async ({
         throw createApiError(404, "Subscription payment order record not found");
     }
 
-    if (payment.brand.toString() !== brandId.toString()) {
-        throw createApiError(403, "Payment order does not belong to the authenticated brand");
+    // Strict subscriber ownership resolution
+    let expectedSubscriberId;
+    if (payment.subscriberRole === "creator") {
+        if (!payment.subscriber) {
+            throw createApiError(400, "Creator payment order is missing required subscriber ID");
+        }
+        expectedSubscriberId = payment.subscriber;
+    } else if (payment.subscriberRole === "brand") {
+        expectedSubscriberId = payment.brand || payment.subscriber;
+        if (!expectedSubscriberId) {
+            throw createApiError(400, "Brand payment order is missing required subscriber ID");
+        }
+    } else {
+        throw createApiError(400, `Invalid subscriber role '${payment.subscriberRole}' on payment order`);
     }
 
-    // Idempotency check: if payment is already captured, return existing state
+    if (expectedSubscriberId.toString() !== authUserId.toString()) {
+        throw createApiError(403, "Payment order does not belong to the authenticated user");
+    }
+
+    // Validate payment role and plan target role consistency before proceeding or fast-pathing
+    const plan = payment.plan;
+    if (!plan) {
+        throw createApiError(404, "Subscription plan associated with payment record not found");
+    }
+
+    const ALLOWED_ROLES = ["brand", "creator"];
+    const paymentRole = payment.subscriberRole;
+    const planRole = plan.targetRole;
+
+    if (!paymentRole || typeof paymentRole !== "string" || !ALLOWED_ROLES.includes(paymentRole.toLowerCase())) {
+        throw createApiError(400, `Invalid or missing subscriber role '${paymentRole}' on payment record.`);
+    }
+
+    if (!planRole || typeof planRole !== "string" || !ALLOWED_ROLES.includes(planRole.toLowerCase())) {
+        throw createApiError(400, `Invalid or missing target role '${planRole}' on plan.`);
+    }
+
+    if (paymentRole.toLowerCase() !== planRole.toLowerCase()) {
+        throw createApiError(
+            400,
+            `Role mismatch: payment subscriber role '${paymentRole}' does not match plan target role '${planRole}'.`
+        );
+    }
+
+    // Fast-path Idempotency check: if payment is already captured, verify payment ID consistency
     if (payment.status === "captured") {
+        const storedPaymentId = (payment.razorpayPaymentId || "").trim();
+        const incomingPaymentId = (razorpay_payment_id || "").trim();
+
+        if (!storedPaymentId) {
+            console.error(
+                `[Payment Reconciliation Conflict] Order ${razorpay_order_id} is marked captured but has a missing or empty stored payment ID. Incoming payment ID '${incomingPaymentId}' requires reconciliation.`
+            );
+            throw createApiError(
+                409,
+                `Payment conflict: Order ${razorpay_order_id} is marked captured but is missing its original payment ID. Processing payment ID '${incomingPaymentId}' requires reconciliation.`
+            );
+        }
+
+        if (storedPaymentId !== incomingPaymentId) {
+            console.error(
+                `[Payment Reconciliation Conflict] Order ${razorpay_order_id} is already captured with payment ${storedPaymentId}, but incoming verification passed different payment ${incomingPaymentId}. Requires reconciliation.`
+            );
+            throw createApiError(
+                409,
+                `Payment conflict: Order ${razorpay_order_id} was already captured with payment ID '${storedPaymentId}'. Incoming payment ID '${incomingPaymentId}' requires reconciliation.`
+            );
+        }
+
         const currentSub = await Subscription.findById(payment.subscription);
         return {
             isSuccess: true,
@@ -204,119 +730,60 @@ export const verifySubscriptionPaymentService = async ({
         };
     }
 
-    const plan = payment.plan;
-    if (!plan) {
-        throw createApiError(404, "Subscription plan associated with order not found");
-    }
-
-    const now = new Date();
-    const isYearly = payment.billingCycle === "yearly";
-    const durationDays = isYearly ? 365 : 30;
-    const currentPeriodStart = now;
-    const currentPeriodEnd = new Date(now.getTime() + durationDays * 24 * 60 * 60 * 1000);
-
-    const calendarMonthKey = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
-
-    // 3. Update payment status to "captured"
-    payment.status = "captured";
-    payment.razorpayPaymentId = razorpay_payment_id;
-    payment.paidAt = now;
-    await payment.save();
-
-    // 4. Activate or renew Subscription with immutable plan snapshot
-    const subscription = await Subscription.findById(payment.subscription);
-    if (!subscription) {
-        throw createApiError(404, "Subscription record to activate not found");
-    }
-
-    subscription.plan = plan._id;
-    subscription.planSnapshot = {
-        name: plan.name,
-        slug: plan.slug,
-        version: plan.version || 1,
-        price: payment.amount,
-        currency: payment.currency,
-        billingCycle: payment.billingCycle,
-        monthlyContactQuota: plan.monthlyContactQuota,
-        features: plan.features || []
-    };
-    subscription.status = "active";
-    subscription.billingCycle = payment.billingCycle;
-    subscription.isComplimentary = false;
-    subscription.currentPeriodStart = currentPeriodStart;
-    subscription.currentPeriodEnd = currentPeriodEnd;
-    subscription.cancelAtPeriodEnd = false;
-    subscription.canceledAt = null;
-    subscription.gracePeriodEnd = null;
-    subscription.razorpayOrderId = razorpay_order_id;
-    subscription.razorpayPaymentId = razorpay_payment_id;
-
-    // Reset monthly quota for the new active billing period
-    subscription.quotaState = {
-        trialQuotaLimit: 5,
-        trialQuotaUsed: subscription.quotaState?.trialQuotaUsed || 0,
-        currentCalendarMonthKey: calendarMonthKey,
-        monthlyQuotaLimit: plan.monthlyContactQuota,
-        monthlyQuotaUsed: 0
-    };
-
-    await subscription.save();
-
-    // 5. Dispatch notification to Brand
-    try {
-        await createNotificationService({
-            recipient: brandId,
-            sender: null,
-            type: "subscription_activated",
-            title: "Subscription Activated",
-            message: `Your ${plan.name} (${payment.billingCycle}) subscription is now active! You have ${plan.monthlyContactQuota} creator contact unlocks available for this monthly cycle.`,
-            entityType: "subscription",
-            entityId: subscription._id,
-            destination: "/brand/subscription",
-            metadata: {
-                planName: plan.name,
-                billingCycle: payment.billingCycle,
-                amount: payment.amount,
-                currency: payment.currency
-            },
-            idempotencyKey: `sub_act_${payment._id}`
-        });
-    } catch (notifErr) {
-        console.error("Failed to send subscription activation notification:", notifErr);
-    }
-
-    return {
-        isSuccess: true,
-        alreadyVerified: false,
-        subscription,
-        payment
-    };
+    // 3. Delegate to shared activation engine
+    return await executeSubscriptionActivation({
+        payment,
+        razorpayPaymentId: razorpay_payment_id
+    });
 };
 
 /**
  * Handles incoming Razorpay Webhook events for subscriptions idempotently.
+ * Uses the exact rawBuffer for cryptographic HMAC-SHA256 signature verification.
  * 
- * @param {string|Buffer} rawBody
+ * @param {Buffer} rawBody
  * @param {string} signature
  * @returns {Promise<Object>}
  */
 export const handleSubscriptionWebhookService = async (rawBody, signature) => {
     const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
 
-    if (webhookSecret && signature) {
-        const expectedSignature = crypto
-            .createHmac("sha256", webhookSecret)
-            .update(rawBody)
-            .digest("hex");
-
-        if (expectedSignature !== signature) {
-            throw createApiError(400, "Invalid Razorpay webhook signature");
-        }
+    // 1. Webhook Secret must be mandatory - never skip signature verification
+    if (!webhookSecret || !webhookSecret.trim()) {
+        throw createApiError(
+            500,
+            "Razorpay webhook secret is not configured on the backend server. Set RAZORPAY_WEBHOOK_SECRET in environment."
+        );
     }
 
+    if (!signature) {
+        throw createApiError(400, "Missing Razorpay webhook signature header");
+    }
+
+    if (!rawBody || !Buffer.isBuffer(rawBody)) {
+        throw createApiError(
+            400,
+            "Raw request body Buffer is required for Razorpay webhook verification."
+        );
+    }
+
+    // 2. Cryptographically verify webhook signature using raw body Buffer
+    const expectedSignature = crypto
+        .createHmac("sha256", webhookSecret.trim())
+        .update(rawBody)
+        .digest("hex");
+
+    const expectedBuf = Buffer.from(expectedSignature, "utf8");
+    const actualBuf = Buffer.from(signature, "utf8");
+
+    if (expectedBuf.length !== actualBuf.length || !crypto.timingSafeEqual(expectedBuf, actualBuf)) {
+        throw createApiError(400, "Invalid Razorpay webhook signature");
+    }
+
+    // 3. Parse event payload directly from verified raw Buffer
     let event;
     try {
-        event = typeof rawBody === "string" ? JSON.parse(rawBody) : JSON.parse(rawBody.toString("utf8"));
+        event = JSON.parse(rawBody.toString("utf8"));
     } catch {
         throw createApiError(400, "Invalid JSON payload in webhook");
     }
@@ -330,28 +797,87 @@ export const handleSubscriptionWebhookService = async (rawBody, signature) => {
         return { handled: false, reason: "No order ID found in webhook payload" };
     }
 
-    const payment = await SubscriptionPayment.findOne({ razorpayOrderId });
+    const payment = await SubscriptionPayment.findOne({ razorpayOrderId }).populate("plan");
     if (!payment) {
         return { handled: false, reason: "Not a subscription payment order" };
     }
 
+    // 3. Process supported payment events
     if (eventType === "payment.captured" || eventType === "order.paid") {
-        if (payment.status !== "captured") {
-            const razorpayPaymentId = paymentEntity?.id || payment.razorpayPaymentId || `pay_${Date.now()}`;
-            // Delegate to verify flow without user auth requirement
-            await verifySubscriptionPaymentService({
-                brandId: payment.brand,
-                razorpay_order_id: razorpayOrderId,
-                razorpay_payment_id: razorpayPaymentId,
-                razorpay_signature: "webhook_verified" // bypass signature when webhook secret verified
-            }).catch(console.error);
+        const candidateFromPayload = (typeof paymentEntity?.id === "string" && paymentEntity.id.trim()) ? paymentEntity.id.trim() : null;
+        const candidateFromPayment = (typeof payment.razorpayPaymentId === "string" && payment.razorpayPaymentId.trim()) ? payment.razorpayPaymentId.trim() : null;
+        const genuinePaymentId = candidateFromPayload || candidateFromPayment;
+
+        // If payment is already captured, verify payment ID consistency
+        if (payment.status === "captured") {
+            const storedPaymentId = (payment.razorpayPaymentId || "").trim();
+            if (!storedPaymentId) {
+                console.error(
+                    `[Webhook Payment Conflict] Order ${razorpayOrderId} is marked captured but is missing a stored payment ID. Webhook received ${candidateFromPayload ? `payment '${candidateFromPayload}'` : "no payment ID"}. Requires reconciliation.`
+                );
+                return {
+                    handled: false,
+                    conflict: true,
+                    statusCode: 409,
+                    reason: `Payment conflict: Order ${razorpayOrderId} is marked captured but is missing its original payment ID. ${candidateFromPayload ? `Received payment '${candidateFromPayload}'` : "Payload missing payment ID"} requires reconciliation.`,
+                    event: eventType,
+                    orderId: razorpayOrderId,
+                    storedPaymentId: "",
+                    incomingPaymentId: candidateFromPayload || ""
+                };
+            }
+
+            if (candidateFromPayload && storedPaymentId !== candidateFromPayload) {
+                console.error(
+                    `[Webhook Payment Conflict] Order ${razorpayOrderId} already captured with payment '${storedPaymentId}'. Webhook received different payment '${candidateFromPayload}'. Requires reconciliation.`
+                );
+                return {
+                    handled: false,
+                    conflict: true,
+                    statusCode: 409,
+                    reason: `Payment conflict: Order ${razorpayOrderId} already captured with payment '${storedPaymentId}', received '${candidateFromPayload}'`,
+                    event: eventType,
+                    orderId: razorpayOrderId,
+                    storedPaymentId,
+                    incomingPaymentId: candidateFromPayload
+                };
+            }
+            return {
+                handled: true,
+                event: eventType,
+                status: "captured",
+                alreadyCaptured: true
+            };
         }
+
+        // For pending/non-captured payments, genuine payment ID is required to proceed with activation
+        if (!genuinePaymentId) {
+            console.warn(
+                `[Webhook] Activation deferred: No genuine Razorpay payment ID found in payload or payment record. Event: '${eventType}', Order: '${razorpayOrderId}'`
+            );
+            return {
+                handled: false,
+                deferred: true,
+                reason: "Missing genuine Razorpay payment ID for activation",
+                event: eventType,
+                orderId: razorpayOrderId
+            };
+        }
+
+        // Directly invoke shared activation engine with genuine payment ID
+        await executeSubscriptionActivation({
+            payment,
+            razorpayPaymentId: genuinePaymentId
+        });
+
         return { handled: true, event: eventType, status: "captured" };
     }
 
     if (eventType === "payment.failed") {
-        payment.status = "failed";
-        await payment.save();
+        if (payment.status !== "captured") {
+            payment.status = "failed";
+            await payment.save();
+        }
         return { handled: true, event: eventType, status: "failed" };
     }
 
@@ -362,6 +888,7 @@ export default {
     verifyRazorpaySignature,
     createSubscriptionOrderService,
     verifySubscriptionPaymentService,
-    handleSubscriptionWebhookService
+    handleSubscriptionWebhookService,
+    executeSubscriptionActivation
 };
 

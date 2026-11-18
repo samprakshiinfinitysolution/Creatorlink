@@ -32,9 +32,20 @@ const planSnapshotSchema = new mongoose.Schema(
             enum: ["trial", "monthly", "yearly"],
             required: true
         },
+        targetRole: {
+            type: String,
+            enum: ["brand", "creator"],
+            default: "brand"
+        },
         monthlyContactQuota: {
             type: Number,
             required: true,
+            default: 0,
+            min: 0
+        },
+        monthlyApplicationCredits: {
+            type: Number,
+            default: 0,
             min: 0
         },
         features: [
@@ -76,6 +87,18 @@ const quotaStateSchema = new mongoose.Schema(
             type: Number,
             default: 0,
             min: 0
+        },
+
+        // Creator application credits
+        monthlyCreditsAllocated: {
+            type: Number,
+            default: 0,
+            min: 0
+        },
+        creditsUsed: {
+            type: Number,
+            default: 0,
+            min: 0
         }
     },
     { _id: false }
@@ -86,7 +109,27 @@ const subscriptionSchema = new mongoose.Schema(
         brand: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Auth",
-            required: true
+            required: function () {
+                return !this.subscriberRole || this.subscriberRole === "brand";
+            }
+        },
+        subscriber: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Auth",
+            default: function () {
+                return this.brand || null;
+            },
+            required: function () {
+                return this.subscriberRole === "creator";
+            },
+            index: true
+        },
+        subscriberRole: {
+            type: String,
+            enum: ["brand", "creator"],
+            default: "brand",
+            required: true,
+            index: true
         },
         plan: {
             type: mongoose.Schema.Types.ObjectId,
@@ -190,7 +233,34 @@ subscriptionSchema.index(
         name: "unique_active_brand_subscription",
         unique: true,
         partialFilterExpression: {
-            status: { $in: ["trialing", "active", "past_due"] }
+            status: { $in: ["trialing", "active", "past_due"] },
+            brand: { $type: "objectId" }
+        }
+    }
+);
+
+// Database-enforced invariant: A Subscriber can have at most ONE current subscription (trialing, active, or past_due)
+subscriptionSchema.index(
+    { subscriber: 1, subscriberRole: 1 },
+    {
+        name: "unique_active_subscriber_subscription",
+        unique: true,
+        partialFilterExpression: {
+            status: { $in: ["trialing", "active", "past_due"] },
+            subscriber: { $type: "objectId" }
+        }
+    }
+);
+
+// Database-enforced invariant: A Creator can have at most ONE subscription document (all statuses including expired pre-activation)
+subscriptionSchema.index(
+    { subscriber: 1, subscriberRole: 1 },
+    {
+        name: "unique_creator_subscription",
+        unique: true,
+        partialFilterExpression: {
+            subscriberRole: "creator",
+            subscriber: { $type: "objectId" }
         }
     }
 );
@@ -198,6 +268,7 @@ subscriptionSchema.index(
 // Indexes for administrative monitoring and expiration checks
 subscriptionSchema.index({ currentPeriodEnd: 1, status: 1 });
 subscriptionSchema.index({ brand: 1, createdAt: -1 });
+subscriptionSchema.index({ subscriber: 1, createdAt: -1 });
 
 const Subscription = mongoose.model("Subscription", subscriptionSchema);
 

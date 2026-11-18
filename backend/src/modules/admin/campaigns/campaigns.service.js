@@ -389,6 +389,48 @@ export const moderateCampaignPauseService = async (campaignId, reason, adminId) 
         console.error("Failed to dispatch admin pause notification:", notifErr);
     }
 
+    // Notify creators who have pending applications about the campaign pause
+    try {
+        const pendingBookings = await Booking.find({
+            campaign: campaign._id,
+            status: "pending"
+        }).select("_id creator").lean();
+
+        if (pendingBookings.length > 0) {
+            const pauseTimestamp = campaign.moderation?.restrictedAt instanceof Date
+                ? campaign.moderation.restrictedAt.getTime()
+                : Date.now();
+
+            const seenCreators = new Set();
+            for (const booking of pendingBookings) {
+                if (!booking.creator) continue;
+                const creatorIdStr = booking.creator.toString();
+                if (seenCreators.has(creatorIdStr)) continue;
+                seenCreators.add(creatorIdStr);
+
+                await createNotificationSafe({
+                    recipient: booking.creator,
+                    sender: adminId,
+                    type: "campaign_moderation_paused",
+                    title: "Campaign Temporarily Paused",
+                    message: `The campaign "${campaign.title}" has been temporarily paused by the admin. Your application is still pending. You will be able to proceed once the campaign is resumed.`,
+                    entityType: "campaign",
+                    entityId: campaign._id,
+                    destination: "/creator/campaigns",
+                    metadata: {
+                        campaignId: campaign._id,
+                        bookingId: booking._id,
+                        title: campaign.title,
+                        action: "admin_paused"
+                    },
+                    idempotencyKey: `notif_admin_camp_pause_${campaign._id}_${creatorIdStr}_${pauseTimestamp}`
+                });
+            }
+        }
+    } catch (creatorNotifErr) {
+        console.error("Failed to dispatch creator pause notifications:", creatorNotifErr?.message || creatorNotifErr);
+    }
+
     return campaign;
 };
 
@@ -472,6 +514,48 @@ export const moderateCampaignResumeService = async (campaignId, reason, adminId)
         }, { excludeAdminId: adminId });
     } catch (notifErr) {
         console.error("Failed to dispatch admin resume notification:", notifErr);
+    }
+
+    // Notify creators who have pending applications about the campaign resume
+    try {
+        const pendingBookings = await Booking.find({
+            campaign: campaign._id,
+            status: "pending"
+        }).select("_id creator").lean();
+
+        if (pendingBookings.length > 0) {
+            const resumeTimestamp = campaign.moderation?.resolvedAt instanceof Date
+                ? campaign.moderation.resolvedAt.getTime()
+                : Date.now();
+
+            const seenCreators = new Set();
+            for (const booking of pendingBookings) {
+                if (!booking.creator) continue;
+                const creatorIdStr = booking.creator.toString();
+                if (seenCreators.has(creatorIdStr)) continue;
+                seenCreators.add(creatorIdStr);
+
+                await createNotificationSafe({
+                    recipient: booking.creator,
+                    sender: adminId,
+                    type: "campaign_moderation_resolved",
+                    title: "Campaign Resumed",
+                    message: `The campaign "${campaign.title}" has been resumed by the admin. Your application is still pending, and the brand can now review it.`,
+                    entityType: "campaign",
+                    entityId: campaign._id,
+                    destination: "/creator/campaigns",
+                    metadata: {
+                        campaignId: campaign._id,
+                        bookingId: booking._id,
+                        title: campaign.title,
+                        action: "admin_resumed"
+                    },
+                    idempotencyKey: `notif_admin_camp_resume_${campaign._id}_${creatorIdStr}_${resumeTimestamp}`
+                });
+            }
+        }
+    } catch (creatorNotifErr) {
+        console.error("Failed to dispatch creator resume notifications:", creatorNotifErr?.message || creatorNotifErr);
     }
 
     return campaign;

@@ -74,6 +74,7 @@ router.use("/creator/reviews", creatorReviewRouter);
 // Subscription routes.
 router.use("/subscriptions", subscriptionRoutes);
 router.use("/brand/subscriptions", subscriptionRoutes);
+router.use("/creator/subscriptions", subscriptionRoutes);
 
 // Brand routes.
 router.use("/brand/dashboard", brandDashboardRoutes);

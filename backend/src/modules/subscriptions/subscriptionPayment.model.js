@@ -5,7 +5,27 @@ const subscriptionPaymentSchema = new mongoose.Schema(
         brand: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Auth",
-            required: true
+            required: function () {
+                return !this.subscriberRole || this.subscriberRole === "brand";
+            }
+        },
+        subscriber: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Auth",
+            default: function () {
+                return this.brand || null;
+            },
+            required: function () {
+                return this.subscriberRole === "creator";
+            },
+            index: true
+        },
+        subscriberRole: {
+            type: String,
+            enum: ["brand", "creator"],
+            default: "brand",
+            required: true,
+            index: true
         },
         subscription: {
             type: mongoose.Schema.Types.ObjectId,
@@ -67,7 +87,16 @@ const subscriptionPaymentSchema = new mongoose.Schema(
 );
 
 subscriptionPaymentSchema.index({ brand: 1, createdAt: -1 });
-subscriptionPaymentSchema.index({ razorpayPaymentId: 1 }, { sparse: true });
+subscriptionPaymentSchema.index({ subscriber: 1, createdAt: -1 });
+subscriptionPaymentSchema.index(
+    { razorpayPaymentId: 1 },
+    {
+        unique: true,
+        partialFilterExpression: {
+            razorpayPaymentId: { $type: "string", $gt: "" }
+        }
+    }
+);
 
 const SubscriptionPayment = mongoose.model("SubscriptionPayment", subscriptionPaymentSchema);
 

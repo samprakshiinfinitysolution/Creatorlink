@@ -38,10 +38,30 @@ const createCampaignService = async (brandId, campaignData) => {
         );
     }
 
-    if (campaignData.maxBudget !== undefined && campaignData.maxBudget !== null && campaignData.maxBudget !== "") {
-        campaignData.budget = Number(campaignData.maxBudget);
-    } else if (campaignData.minBudget !== undefined && campaignData.minBudget !== null && campaignData.minBudget !== "") {
-        campaignData.budget = Number(campaignData.minBudget);
+    if (campaignData.budget === undefined || campaignData.budget === null || campaignData.budget === "") {
+        if (campaignData.maxBudget !== undefined && campaignData.maxBudget !== null && campaignData.maxBudget !== "") {
+            campaignData.budget = Number(campaignData.maxBudget);
+        } else if (campaignData.minBudget !== undefined && campaignData.minBudget !== null && campaignData.minBudget !== "") {
+            campaignData.budget = Number(campaignData.minBudget);
+        }
+    } else {
+        campaignData.budget = Number(campaignData.budget);
+    }
+
+    if (campaignData.minBudget === undefined || campaignData.minBudget === null || campaignData.minBudget === "") {
+        if (campaignData.budget !== undefined && Number.isFinite(campaignData.budget)) {
+            campaignData.minBudget = campaignData.budget;
+        }
+    } else {
+        campaignData.minBudget = Number(campaignData.minBudget);
+    }
+
+    if (campaignData.maxBudget === undefined || campaignData.maxBudget === null || campaignData.maxBudget === "") {
+        if (campaignData.budget !== undefined && Number.isFinite(campaignData.budget)) {
+            campaignData.maxBudget = campaignData.budget;
+        }
+    } else {
+        campaignData.maxBudget = Number(campaignData.maxBudget);
     }
 
     const campaign = await Campaign.create({
@@ -340,10 +360,26 @@ const updateCampaignService = async (
     }
 
 
+    // Consistency check against existing campaign values when updating budget range
+    if (updateData.minBudget !== undefined || updateData.maxBudget !== undefined) {
+        const effectiveMinBudget = updateData.minBudget !== undefined ? updateData.minBudget : campaign.minBudget;
+        const effectiveMaxBudget = updateData.maxBudget !== undefined ? updateData.maxBudget : campaign.maxBudget;
+
+        if (
+            effectiveMinBudget !== undefined && effectiveMinBudget !== null &&
+            effectiveMaxBudget !== undefined && effectiveMaxBudget !== null &&
+            Number(effectiveMinBudget) > Number(effectiveMaxBudget)
+        ) {
+            throw createApiError(400, "Minimum budget cannot exceed maximum budget");
+        }
+    }
+
     if (updateData.maxBudget !== undefined && updateData.maxBudget !== null && updateData.maxBudget !== "") {
-        updateData.budget = Number(updateData.maxBudget);
+        if (updateData.budget === undefined) {
+            updateData.budget = Number(updateData.maxBudget);
+        }
     } else if (updateData.budget !== undefined && updateData.budget !== null && updateData.budget !== "") {
-        if (updateData.maxBudget === undefined) {
+        if (updateData.maxBudget === undefined && (campaign.maxBudget === null || campaign.maxBudget === undefined)) {
             updateData.maxBudget = Number(updateData.budget);
         }
     }

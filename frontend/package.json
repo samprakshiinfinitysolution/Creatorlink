@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "node scripts/patch-next-network-ip.mjs && next dev --hostname 0.0.0.0 --port 3005",
+    "dev": "node scripts/patch-next-network-ip.mjs && next dev --hostname 0.0.0.0 --port 3000",
     "build": "next build",
-    "start": "next start --port 3005",
+    "start": "next start --port 3000",
     "lint": "eslint",
     "postinstall": "node scripts/patch-next-network-ip.mjs"
   },

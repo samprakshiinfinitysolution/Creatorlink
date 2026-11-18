@@ -12,7 +12,7 @@ import {
  * POST /api/subscriptions/payment/order
  */
 export const createSubscriptionOrder = asyncHandler(async (req, res) => {
-    const brandId = req.user.userId || req.user._id;
+    const userId = req.user.userId || req.user._id;
     const { planId, billingCycle } = req.body;
 
     if (!planId) {
@@ -23,7 +23,8 @@ export const createSubscriptionOrder = asyncHandler(async (req, res) => {
     }
 
     const orderData = await createSubscriptionOrderService({
-        brandId,
+        userId,
+        brandId: userId, // Preserve backward compatibility for callers/tests passing brandId
         planId,
         billingCycle
     });
@@ -41,7 +42,7 @@ export const createSubscriptionOrder = asyncHandler(async (req, res) => {
  * POST /api/subscriptions/payment/verify
  */
 export const verifySubscriptionPayment = asyncHandler(async (req, res) => {
-    const brandId = req.user.userId || req.user._id;
+    const userId = req.user.userId || req.user._id;
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
 
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
@@ -49,7 +50,8 @@ export const verifySubscriptionPayment = asyncHandler(async (req, res) => {
     }
 
     const result = await verifySubscriptionPaymentService({
-        brandId,
+        userId,
+        brandId: userId,
         razorpay_order_id,
         razorpay_payment_id,
         razorpay_signature
@@ -71,9 +73,14 @@ export const verifySubscriptionPayment = asyncHandler(async (req, res) => {
  */
 export const handleSubscriptionWebhook = asyncHandler(async (req, res) => {
     const signature = req.headers["x-razorpay-signature"] || "";
-    const rawBody = req.body;
+    if (!req.rawBody || !Buffer.isBuffer(req.rawBody)) {
+        throw createApiError(
+            400,
+            "Raw request body is missing or invalid. Webhook signature verification requires original unparsed Buffer."
+        );
+    }
 
-    const result = await handleSubscriptionWebhookService(rawBody, signature);
+    const result = await handleSubscriptionWebhookService(req.rawBody, signature);
 
     return res.status(200).json({
         status: "ok",

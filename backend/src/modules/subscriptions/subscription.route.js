@@ -11,7 +11,9 @@ import {
     getSubscriptionPayments,
     checkCreatorUnlockStatus,
     unlockCreatorContact,
-    getBrandUnlockedCreators
+    getBrandUnlockedCreators,
+    getCreatorAvailablePlans,
+    getCreatorCurrentSubscription
 } from "./subscription.controller.js";
 
 import {
@@ -22,8 +24,13 @@ import {
 
 const router = express.Router();
 
-// Publicly viewable active subscription plans
+// Publicly viewable active subscription plans (optional ?role=creator or ?role=brand filter)
 router.get("/plans", getAvailablePlans);
+
+// Creator-protected subscription endpoints
+router.get("/creator/plans", authenticateUser, authorizeRoles("creator"), getCreatorAvailablePlans);
+router.get("/creator/current", authenticateUser, authorizeRoles("creator"), getCreatorCurrentSubscription);
+router.get("/plans/creator", authenticateUser, authorizeRoles("creator"), getCreatorAvailablePlans);
 
 // Brand-protected subscription endpoints
 router.get("/current", authenticateUser, authorizeRoles("brand"), getCurrentSubscription);
@@ -39,8 +46,8 @@ router.get("/unlocks/check/:creatorId", authenticateUser, authorizeRoles("brand"
 router.post("/unlocks/:creatorId", authenticateUser, authorizeRoles("brand"), unlockCreatorContact);
 
 // Razorpay Subscription Payment endpoints
-router.post("/payment/order", authenticateUser, authorizeRoles("brand"), createSubscriptionOrder);
-router.post("/payment/verify", authenticateUser, authorizeRoles("brand"), verifySubscriptionPayment);
+router.post("/payment/order", authenticateUser, authorizeRoles("brand", "creator"), createSubscriptionOrder);
+router.post("/payment/verify", authenticateUser, authorizeRoles("brand", "creator"), verifySubscriptionPayment);
 router.post("/payment/webhook", handleSubscriptionWebhook);
 
 export default router;

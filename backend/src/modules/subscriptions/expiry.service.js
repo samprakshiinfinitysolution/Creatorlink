@@ -1,6 +1,7 @@
 import Subscription from "./subscription.model.js";
 import Campaign from "../brand/campaigns/campaign.model.js";
 import { createNotificationService } from "../notifications/notification.service.js";
+import { expireCreatorSubscriptionCreditsService } from "./creatorCredit.service.js";
 
 /**
  * Synchronizes subscription expiration and pauses eligible published campaigns for a specific Brand.
@@ -92,43 +93,135 @@ export const syncBrandSubscriptionExpiry = async (brandId) => {
 };
 
 /**
- * Sweeps all active/trialing/past_due subscriptions in database and expires overdue accounts.
+ * Synchronizes subscription expiration for a specific Creator.
+ * 
+ * Rules:
+ * 1. Detects expired paid subscription based on current server UTC timestamp.
+ * 2. Sets subscription.status = "expired".
+ * 3. Atomically zeroes out unused credits via expireCreatorSubscriptionCreditsService.
+ * 4. Dispatches an in-app notification to the Creator informing them of the expiry.
+ * 
+ * @param {string|ObjectId} creatorId - Creator user ID
+ * @param {Date} [currentDate=new Date()]
+ * @returns {Promise<{ isExpired: boolean, expiredCredits: number }>}
+ */
+export const syncCreatorSubscriptionExpiry = async (creatorId, currentDate = new Date()) => {
+    const subscription = await Subscription.findOne({
+        subscriber: creatorId,
+        subscriberRole: "creator"
+    });
+
+    if (!subscription) {
+        return { isExpired: false, expiredCredits: 0 };
+    }
+
+    const now = currentDate instanceof Date ? currentDate : new Date(currentDate);
+    const periodEnd = subscription.currentPeriodEnd ? new Date(subscription.currentPeriodEnd) : null;
+
+    let isExpired = false;
+    if (subscription.status === "past_due") {
+        const graceEnd = subscription.gracePeriodEnd ? new Date(subscription.gracePeriodEnd) : null;
+        isExpired = Boolean(graceEnd && now > graceEnd);
+    } else {
+        isExpired = Boolean(periodEnd && now >= periodEnd);
+    }
+
+    if (!isExpired) {
+        return { isExpired: false, expiredCredits: 0 };
+    }
+
+    let expiredCredits = 0;
+    if (["trialing", "active", "past_due", "canceled"].includes(subscription.status)) {
+        subscription.status = "expired";
+        await subscription.save();
+
+        const expireResult = await expireCreatorSubscriptionCreditsService({
+            creatorId,
+            subscriptionId: subscription._id
+        });
+        expiredCredits = expireResult.expiredCredits || 0;
+
+        try {
+            await createNotificationService({
+                recipient: creatorId,
+                sender: null,
+                type: "subscription_expired",
+                title: "Creator Subscription Expired",
+                message: `Your ${subscription.planSnapshot?.name || "Creator"} subscription has expired. Any unused credits have expired. Renew your plan to continue applying to campaigns.`,
+                entityType: "subscription",
+                entityId: subscription._id,
+                destination: "/creator/dashboard",
+                metadata: {
+                    billingCycle: subscription.billingCycle,
+                    expiredCredits
+                },
+                idempotencyKey: `sub_expired_${subscription._id}_${subscription.status}`
+            });
+        } catch (notifErr) {
+            console.error("Failed to send creator subscription expiration notification:", notifErr);
+        }
+    }
+
+    return {
+        isExpired: true,
+        expiredCredits
+    };
+};
+
+/**
+ * Sweeps all active/trialing/past_due/canceled subscriptions in database and expires overdue accounts.
  * Safe to run as a recurring cron/background task.
  * 
- * @returns {Promise<{ processedCount: number, expiredCount: number, pausedCampaignsCount: number }>}
+ * @param {Date} [currentDate=new Date()]
+ * @returns {Promise<{ processedCount: number, brandExpiredCount: number, creatorExpiredCount: number, expiredCount: number, pausedCampaignsCount: number, totalExpiredCredits: number }>}
  */
-export const processSubscriptionExpirations = async () => {
-    const now = new Date();
+export const processSubscriptionExpirations = async (currentDate = new Date()) => {
+    const now = currentDate instanceof Date ? currentDate : new Date(currentDate);
     
-    // Find active or trialing subscriptions that have passed their expiration timestamp
+    // Find active, trialing, past_due, or canceled subscriptions that have passed their expiration timestamp
     const overdueSubscriptions = await Subscription.find({
-        status: { $in: ["trialing", "active", "past_due"] },
+        status: { $in: ["trialing", "active", "past_due", "canceled"] },
         $or: [
             { billingCycle: "trial", trialEndDate: { $lte: now } },
             { billingCycle: { $ne: "trial" }, currentPeriodEnd: { $lte: now } }
         ]
     });
 
-    let expiredCount = 0;
+    let brandExpiredCount = 0;
+    let creatorExpiredCount = 0;
     let totalPausedCampaigns = 0;
+    let totalExpiredCredits = 0;
 
     for (const sub of overdueSubscriptions) {
-        const result = await syncBrandSubscriptionExpiry(sub.brand);
-        if (result.isExpired) {
-            expiredCount++;
-            totalPausedCampaigns += result.pausedCampaignsCount;
+        if (sub.subscriberRole === "creator") {
+            const result = await syncCreatorSubscriptionExpiry(sub.subscriber, now);
+            if (result.isExpired) {
+                creatorExpiredCount++;
+                totalExpiredCredits += result.expiredCredits || 0;
+            }
+        } else {
+            const brandId = sub.brand || sub.subscriber;
+            const result = await syncBrandSubscriptionExpiry(brandId);
+            if (result.isExpired) {
+                brandExpiredCount++;
+                totalPausedCampaigns += result.pausedCampaignsCount;
+            }
         }
     }
 
     return {
         processedCount: overdueSubscriptions.length,
-        expiredCount,
-        pausedCampaignsCount: totalPausedCampaigns
+        brandExpiredCount,
+        creatorExpiredCount,
+        expiredCount: brandExpiredCount + creatorExpiredCount,
+        pausedCampaignsCount: totalPausedCampaigns,
+        totalExpiredCredits
     };
 };
 
 export default {
     syncBrandSubscriptionExpiry,
+    syncCreatorSubscriptionExpiry,
     processSubscriptionExpirations
 };
 

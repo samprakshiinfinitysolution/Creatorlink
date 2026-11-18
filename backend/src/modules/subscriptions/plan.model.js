@@ -16,6 +16,13 @@ const subscriptionPlanSchema = new mongoose.Schema(
             trim: true,
             maxlength: 50
         },
+        targetRole: {
+            type: String,
+            enum: ["brand", "creator"],
+            default: "brand",
+            required: true,
+            index: true
+        },
         version: {
             type: Number,
             default: 1,
@@ -46,8 +53,23 @@ const subscriptionPlanSchema = new mongoose.Schema(
         },
         monthlyContactQuota: {
             type: Number,
-            required: true,
-            min: 1
+            default: 0,
+            min: 0,
+            validate: {
+                validator: function (val) {
+                    const role = this?.targetRole || "brand";
+                    if (role === "brand") {
+                        return typeof val === "number" && val >= 1;
+                    }
+                    return typeof val === "number" && val >= 0;
+                },
+                message: "monthlyContactQuota must be at least 1 for brand plans"
+            }
+        },
+        monthlyApplicationCredits: {
+            type: Number,
+            default: 0,
+            min: 0
         },
         trialAllowed: {
             type: Boolean,
@@ -69,8 +91,9 @@ const subscriptionPlanSchema = new mongoose.Schema(
     }
 );
 
-// Clean compound index for active plans sorted by newest
+// Clean compound indexes for active plans sorted by newest
 subscriptionPlanSchema.index({ isActive: 1, createdAt: -1 });
+subscriptionPlanSchema.index({ targetRole: 1, isActive: 1, createdAt: -1 });
 
 const SubscriptionPlan = mongoose.model("SubscriptionPlan", subscriptionPlanSchema);
 

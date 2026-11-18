@@ -953,7 +953,6 @@ export default function BrandCampaignsManager() {
     maxBudget: "",
     deadline: "",
     requiredCreators: "1",
-    audienceAge: "All",
     audienceGender: "all",
     audienceGeography: "",
     usageOrganic: true,
@@ -967,7 +966,7 @@ export default function BrandCampaignsManager() {
   const [createDeliverables, setCreateDeliverables] = useState([]);
   const [createDeliverableInput, setCreateDeliverableInput] = useState("");
 
-  // Edit Form State
+  // Edit Form State & Synchronization Tracking
   const initialEditForm = {
     title: "",
     description: "",
@@ -980,7 +979,6 @@ export default function BrandCampaignsManager() {
     deadline: "",
     requiredCreators: "1",
     status: "draft",
-    audienceAge: "All",
     audienceGender: "all",
     audienceGeography: "",
     usageOrganic: true,
@@ -990,7 +988,17 @@ export default function BrandCampaignsManager() {
     minFollowers: "",
     minEngagementRate: "",
   };
-  const [editForm, setEditForm] = useState(initialEditForm);
+  const [editForm, _setEditForm] = useState(initialEditForm);
+  const editingCampaignIdRef = useRef(null);
+  const isEditDirtyRef = useRef(false);
+  const syncedCampaignIdRef = useRef(null);
+
+  // Wrapper for setEditForm so that user-driven edits mark the form as dirty
+  const setEditForm = useCallback((val) => {
+    isEditDirtyRef.current = true;
+    _setEditForm(val);
+  }, []);
+
   const [editDeliverables, setEditDeliverables] = useState([]);
   const [editDeliverableInput, setEditDeliverableInput] = useState("");
 
@@ -1064,26 +1072,111 @@ export default function BrandCampaignsManager() {
       });
   }, [dispatch]);
 
+  // Helper to map a campaign (from table list row or getCampaignById) to Edit Form state
+  const mapCampaignToEditForm = (campaign) => {
+    if (!campaign) return initialEditForm;
+
+    const budgetStr =
+      campaign.budget !== undefined && campaign.budget !== null
+        ? String(campaign.budget)
+        : "";
+    const minBudgetStr =
+      campaign.minBudget !== undefined && campaign.minBudget !== null
+        ? String(campaign.minBudget)
+        : budgetStr;
+    const maxBudgetStr =
+      campaign.maxBudget !== undefined && campaign.maxBudget !== null
+        ? String(campaign.maxBudget)
+        : budgetStr;
+
+    const minFollowersStr =
+      campaign.creatorRequirements?.minFollowers !== undefined &&
+      campaign.creatorRequirements?.minFollowers !== null
+        ? String(campaign.creatorRequirements.minFollowers)
+        : "";
+    const minEngagementRateStr =
+      campaign.creatorRequirements?.minEngagementRate !== undefined &&
+      campaign.creatorRequirements?.minEngagementRate !== null
+        ? String(campaign.creatorRequirements.minEngagementRate)
+        : "";
+
+    const usageOrganic =
+      campaign.usageRights?.organicUsage !== undefined
+        ? Boolean(campaign.usageRights.organicUsage)
+        : true;
+    const usagePaidAds =
+      campaign.usageRights?.paidAds !== undefined
+        ? Boolean(campaign.usageRights.paidAds)
+        : false;
+    const usageDuration = campaign.usageRights?.duration || "30 days";
+    const usageExclusivity =
+      campaign.usageRights?.exclusivity !== undefined
+        ? Boolean(campaign.usageRights.exclusivity)
+        : false;
+
+    const audienceGender = campaign.audienceTargeting?.gender || "all";
+    const audienceGeography = Array.isArray(campaign.audienceTargeting?.geography)
+      ? campaign.audienceTargeting.geography.join(", ")
+      : (campaign.audienceTargeting?.geography || "");
+
+    return {
+      title: campaign.title || "",
+      description: campaign.description || "",
+      category: campaign.category || "",
+      coverImage: campaign.coverImage || campaign.image || "",
+      platform: normalizeCampaignPlatforms(campaign.platform, ["instagram"]),
+      budget: budgetStr,
+      minBudget: minBudgetStr,
+      maxBudget: maxBudgetStr,
+      deadline: formatDateForInput(campaign.deadline),
+      requiredCreators:
+        campaign.requiredCreators !== undefined && campaign.requiredCreators !== null
+          ? String(campaign.requiredCreators)
+          : "1",
+      status: campaign.status || "draft",
+      audienceGender,
+      audienceGeography,
+      usageOrganic,
+      usagePaidAds,
+      usageDuration,
+      usageExclusivity,
+      minFollowers: minFollowersStr,
+      minEngagementRate: minEngagementRateStr,
+    };
+  };
+
   // Sync Edit Form whenever selectedCampaign updates in Redux
   useEffect(() => {
-    if (isEditOpen && selectedCampaign) {
-      queueMicrotask(() => {
-        setEditForm({
-          title: selectedCampaign.title || "",
-          description: selectedCampaign.description || "",
-          category: selectedCampaign.category || "",
-          coverImage: selectedCampaign.coverImage || selectedCampaign.image || "",
-          platform: normalizeCampaignPlatforms(selectedCampaign.platform, ["instagram"]),
-          budget: selectedCampaign.budget !== undefined ? String(selectedCampaign.budget) : "",
-          deadline: formatDateForInput(selectedCampaign.deadline),
-          requiredCreators: selectedCampaign.requiredCreators !== undefined ? String(selectedCampaign.requiredCreators) : "1",
-          status: selectedCampaign.status || "draft",
-        });
-        setEditDeliverables(
-          Array.isArray(selectedCampaign.deliverables) ? [...selectedCampaign.deliverables] : []
-        );
-      });
+    if (!isEditOpen || !selectedCampaign) return;
+
+    const selectedId = selectedCampaign._id || selectedCampaign.id;
+    const currentEditingId = editingCampaignIdRef.current;
+
+    // Prevent an outdated selectedCampaign response from initializing the wrong campaign
+    if (!selectedId || !currentEditingId || selectedId !== currentEditingId) {
+      return;
     }
+
+    // Prevent API synchronization from overwriting user-entered changes after editing begins
+    if (isEditDirtyRef.current) {
+      return;
+    }
+
+    // Prevent redundant resync if this exact campaign was already synced
+    if (syncedCampaignIdRef.current === selectedId) {
+      return;
+    }
+
+    queueMicrotask(() => {
+      // Re-verify dirty status before applying async sync
+      if (isEditDirtyRef.current) return;
+
+      _setEditForm(mapCampaignToEditForm(selectedCampaign));
+      setEditDeliverables(
+        Array.isArray(selectedCampaign.deliverables) ? [...selectedCampaign.deliverables] : []
+      );
+      syncedCampaignIdRef.current = selectedId;
+    });
   }, [isEditOpen, selectedCampaign]);
 
   // Handlers for Toolbar Controls
@@ -1139,12 +1232,14 @@ export default function BrandCampaignsManager() {
   // Deliverables Handlers for Edit Form
   const addEditDeliverable = () => {
     if (editDeliverableInput.trim()) {
+      isEditDirtyRef.current = true;
       setEditDeliverables((prev) => [...prev, editDeliverableInput.trim()]);
       setEditDeliverableInput("");
     }
   };
 
   const removeEditDeliverable = (index) => {
+    isEditDirtyRef.current = true;
     setEditDeliverables((prev) => prev.filter((_, i) => i !== index));
   };
 
@@ -1220,7 +1315,6 @@ export default function BrandCampaignsManager() {
       requiredCreators: Number(createForm.requiredCreators),
       deliverables: createDeliverables,
       audienceTargeting: {
-        age: createForm.audienceAge || "All",
         gender: createForm.audienceGender || "all",
         geography: createForm.audienceGeography
           ? createForm.audienceGeography.split(",").map((s) => s.trim()).filter(Boolean)
@@ -1411,34 +1505,17 @@ export default function BrandCampaignsManager() {
   // Handle Edit Action Click
   const handleEditClick = (campaign) => {
     setFormError("");
+    const campaignId = campaign?._id || campaign?.id;
+    editingCampaignIdRef.current = campaignId || null;
+    isEditDirtyRef.current = false;
+    syncedCampaignIdRef.current = null;
+
     if (campaign) {
-      setEditForm({
-        title: campaign.title || "",
-        description: campaign.description || "",
-        category: campaign.category || "",
-        coverImage: campaign.coverImage || campaign.image || "",
-        platform: normalizeCampaignPlatforms(campaign.platform, ["instagram"]),
-        budget: campaign.budget !== undefined ? String(campaign.budget) : "",
-        minBudget: campaign.minBudget !== undefined && campaign.minBudget !== null ? String(campaign.minBudget) : (campaign.budget !== undefined ? String(campaign.budget) : ""),
-        maxBudget: campaign.maxBudget !== undefined && campaign.maxBudget !== null ? String(campaign.maxBudget) : (campaign.budget !== undefined ? String(campaign.budget) : ""),
-        deadline: formatDateForInput(campaign.deadline),
-        requiredCreators: campaign.requiredCreators !== undefined ? String(campaign.requiredCreators) : "1",
-        status: campaign.status || "draft",
-        audienceAge: campaign.audienceTargeting?.age || "All",
-        audienceGender: campaign.audienceTargeting?.gender || "all",
-        audienceGeography: Array.isArray(campaign.audienceTargeting?.geography) ? campaign.audienceTargeting.geography.join(", ") : (campaign.audienceTargeting?.geography || ""),
-        usageOrganic: campaign.usageRights?.organicUsage !== undefined ? Boolean(campaign.usageRights.organicUsage) : true,
-        usagePaidAds: Boolean(campaign.usageRights?.paidAds),
-        usageDuration: campaign.usageRights?.duration || "30 days",
-        usageExclusivity: Boolean(campaign.usageRights?.exclusivity),
-        minFollowers: campaign.creatorRequirements?.minFollowers ? String(campaign.creatorRequirements.minFollowers) : "",
-        minEngagementRate: campaign.creatorRequirements?.minEngagementRate ? String(campaign.creatorRequirements.minEngagementRate) : "",
-      });
+      _setEditForm(mapCampaignToEditForm(campaign));
       setEditDeliverables(
         Array.isArray(campaign.deliverables) ? [...campaign.deliverables] : []
       );
     }
-    const campaignId = campaign._id || campaign.id;
     if (campaignId) {
       dispatch(getCampaignById(campaignId));
     }
@@ -1497,15 +1574,19 @@ export default function BrandCampaignsManager() {
       return;
     }
 
-    const campaignId = selectedCampaign?._id || selectedCampaign?.id;
+    const campaignId = editingCampaignIdRef.current || selectedCampaign?._id || selectedCampaign?.id;
     if (!campaignId) {
       setFormError("Campaign ID missing.");
       return;
     }
 
     setSubmitting(true);
-    const effEditMaxBudget = editForm.maxBudget ? Number(editForm.maxBudget) : Number(editForm.budget || 0);
-    const effEditMinBudget = editForm.minBudget ? Number(editForm.minBudget) : (editForm.budget ? Number(editForm.budget) : 0);
+    const effEditMaxBudget = editForm.maxBudget !== "" && editForm.maxBudget !== undefined && !isNaN(Number(editForm.maxBudget))
+      ? Number(editForm.maxBudget)
+      : Number(editForm.budget || 0);
+    const effEditMinBudget = editForm.minBudget !== "" && editForm.minBudget !== undefined && !isNaN(Number(editForm.minBudget))
+      ? Number(editForm.minBudget)
+      : (editForm.budget !== "" && !isNaN(Number(editForm.budget)) ? Number(editForm.budget) : 0);
 
     const payload = {
       campaignId,
@@ -1523,21 +1604,24 @@ export default function BrandCampaignsManager() {
         deliverables: editDeliverables,
         status: editForm.status,
         audienceTargeting: {
-          age: editForm.audienceAge || "All",
           gender: editForm.audienceGender || "all",
           geography: editForm.audienceGeography
             ? editForm.audienceGeography.split(",").map((s) => s.trim()).filter(Boolean)
             : [],
         },
         usageRights: {
-          organicUsage: Boolean(editForm.usageOrganic),
-          paidAds: Boolean(editForm.usagePaidAds),
+          organicUsage: editForm.usageOrganic !== undefined ? Boolean(editForm.usageOrganic) : true,
+          paidAds: editForm.usagePaidAds !== undefined ? Boolean(editForm.usagePaidAds) : false,
           duration: editForm.usageDuration || "30 days",
-          exclusivity: Boolean(editForm.usageExclusivity),
+          exclusivity: editForm.usageExclusivity !== undefined ? Boolean(editForm.usageExclusivity) : false,
         },
         creatorRequirements: {
-          minFollowers: editForm.minFollowers ? Number(editForm.minFollowers) : 0,
-          minEngagementRate: editForm.minEngagementRate ? Number(editForm.minEngagementRate) : 0,
+          minFollowers: editForm.minFollowers !== "" && editForm.minFollowers !== undefined && !isNaN(Number(editForm.minFollowers))
+            ? Number(editForm.minFollowers)
+            : 0,
+          minEngagementRate: editForm.minEngagementRate !== "" && editForm.minEngagementRate !== undefined && !isNaN(Number(editForm.minEngagementRate))
+            ? Number(editForm.minEngagementRate)
+            : 0,
         },
       },
     };
@@ -1548,6 +1632,9 @@ export default function BrandCampaignsManager() {
     if (updateCampaign.fulfilled.match(actionResult)) {
       setIsEditOpen(false);
       dispatch(clearSelectedCampaign());
+      editingCampaignIdRef.current = null;
+      isEditDirtyRef.current = false;
+      syncedCampaignIdRef.current = null;
       setSuccessMsg("Campaign updated successfully!");
       setTimeout(() => setSuccessMsg(""), 4000);
       // Removed redundant fetchCampaignsWithFilters() call because updateCampaign.fulfilled
@@ -1587,6 +1674,9 @@ export default function BrandCampaignsManager() {
     setIsEditOpen(false);
     setFormError("");
     dispatch(clearSelectedCampaign());
+    editingCampaignIdRef.current = null;
+    isEditDirtyRef.current = false;
+    syncedCampaignIdRef.current = null;
   };
 
   const currentPage = pagination?.page || page;
@@ -2243,25 +2333,7 @@ export default function BrandCampaignsManager() {
                 <span className="text-[11px] font-bold text-foreground uppercase tracking-wider block">
                   Audience Targeting
                 </span>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="space-y-1">
-                    <label className="block text-[11px] text-text-secondary font-medium">
-                      Target Age Bracket
-                    </label>
-                    <select
-                      value={createForm.audienceAge}
-                      onChange={(e) => setCreateForm({ ...createForm, audienceAge: e.target.value })}
-                      className="w-full bg-surface-muted/60 border border-border-theme text-foreground text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-secondary transition-colors cursor-pointer"
-                    >
-                      <option value="All">All Ages</option>
-                      <option value="13-17">13 - 17</option>
-                      <option value="18-24">18 - 24</option>
-                      <option value="25-34">25 - 34</option>
-                      <option value="35-44">35 - 44</option>
-                      <option value="45+">45+</option>
-                    </select>
-                  </div>
-
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <label className="block text-[11px] text-text-secondary font-medium">
                       Gender
@@ -3365,25 +3437,7 @@ export default function BrandCampaignsManager() {
                 <span className="text-[11px] font-bold text-foreground uppercase tracking-wider block">
                   Audience Targeting
                 </span>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="space-y-1">
-                    <label className="block text-[11px] text-text-secondary font-medium">
-                      Target Age Bracket
-                    </label>
-                    <select
-                      value={editForm.audienceAge}
-                      onChange={(e) => setEditForm({ ...editForm, audienceAge: e.target.value })}
-                      className="w-full bg-surface-muted/60 border border-border-theme text-foreground text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-secondary transition-colors cursor-pointer"
-                    >
-                      <option value="All">All Ages</option>
-                      <option value="13-17">13 - 17</option>
-                      <option value="18-24">18 - 24</option>
-                      <option value="25-34">25 - 34</option>
-                      <option value="35-44">35 - 44</option>
-                      <option value="45+">45+</option>
-                    </select>
-                  </div>
-
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <label className="block text-[11px] text-text-secondary font-medium">
                       Gender

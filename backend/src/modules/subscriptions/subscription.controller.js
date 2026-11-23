@@ -4,6 +4,7 @@ import createApiError from "../../utils/ApiError.js";
 import Subscription from "./subscription.model.js";
 import SubscriptionPlan from "./plan.model.js";
 import SubscriptionPayment from "./subscriptionPayment.model.js";
+import CreatorCreditBalance from "./creatorCreditBalance.model.js";
 import Auth from "../auth/auth.model.js";
 import { createBrandTrialSubscriptionService } from "./trial.service.js";
 import { evaluateBrandEntitlement } from "./entitlement.service.js";
@@ -68,14 +69,27 @@ export const getSubscriptionStatus = asyncHandler(async (req, res) => {
 /**
  * Returns all active subscription plans available for purchase.
  * Supports optional role filtering via query (?role=creator or ?role=brand).
+ * Throws HTTP 400 on invalid role filter to prevent unintended mixed plan exposure.
  * GET /api/subscriptions/plans
  */
 export const getAvailablePlans = asyncHandler(async (req, res) => {
     const roleParam = req.query.role || req.query.targetRole;
     const filter = { isActive: true };
-    if (roleParam && ["brand", "creator"].includes(roleParam.toLowerCase())) {
-        filter.targetRole = roleParam.toLowerCase();
+
+    if (roleParam) {
+        const normalizedRole = roleParam.toString().trim().toLowerCase();
+        if (!["brand", "creator"].includes(normalizedRole)) {
+            throw createApiError(
+                400,
+                `Invalid plan role filter '${roleParam}'. Allowed values are: 'brand', 'creator'.`
+            );
+        }
+        filter.targetRole = normalizedRole;
+    } else {
+        // Default to brand plans for public discovery backward compatibility
+        filter.targetRole = "brand";
     }
+
     const plans = await SubscriptionPlan.find(filter).sort({ priceMonthly: 1 });
 
     return sendResponse(
@@ -132,11 +146,26 @@ export const getCreatorCurrentSubscription = asyncHandler(async (req, res) => {
         );
     }
 
+    // Fetch authoritative creator application credit balance
+    const creditBalance = await CreatorCreditBalance.findOne({ creator: creatorId }).lean();
+    const subscriptionObj = subscription.toObject();
+    subscriptionObj.creditBalance = creditBalance
+        ? {
+            currentBalance: creditBalance.currentBalance ?? 0,
+            lifetimeIssued: creditBalance.lifetimeIssued ?? 0,
+            lifetimeConsumed: creditBalance.lifetimeConsumed ?? 0
+        }
+        : {
+            currentBalance: 0,
+            lifetimeIssued: 0,
+            lifetimeConsumed: 0
+        };
+
     return sendResponse(
         res,
         200,
         "Current subscription retrieved successfully",
-        subscription
+        subscriptionObj
     );
 });
 

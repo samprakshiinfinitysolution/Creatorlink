@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
+import axiosInstance from "@/lib/axios";
 import { getServices } from "@/redux/creator/services/services_slice";
 import ServiceFormModal from "@/components/creator/services/ServiceFormModal";
 
@@ -49,6 +50,35 @@ function RefreshIcon({ className = "w-4 h-4" }) {
   );
 }
 
+function TicketIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
+    </svg>
+  );
+}
+
+// Helper to determine if an API error message is specifically related to creator subscription or application credits
+const isSubscriptionOrCreditError = (err) => {
+  if (!err) return false;
+  const msg = (typeof err === "string" ? err : err.message || "").toLowerCase();
+
+  // If the error pertains to the brand's subscription, do not misclassify as a creator subscription error
+  if (msg.includes("brand's subscription") || msg.includes("brand subscription")) {
+    return false;
+  }
+
+  return (
+    msg.includes("creator subscription") ||
+    msg.includes("application credit") ||
+    msg.includes("application credits") ||
+    msg.includes("insufficient application") ||
+    msg.includes("active creator subscription") ||
+    msg.includes("upgrade or renew your plan") ||
+    msg.includes("renew your plan")
+  );
+};
+
 export default function ApplyToCampaignModal({
   isOpen,
   onClose,
@@ -79,6 +109,11 @@ export default function ApplyToCampaignModal({
   const [isCreateServiceOpen, setIsCreateServiceOpen] = useState(false);
   const [successBannerMsg, setSuccessBannerMsg] = useState(null);
 
+  // Soft Subscription & Credit State (undefined = unknown; null = confirmed no subscription)
+  const [subChecking, setSubChecking] = useState(true);
+  const [subChecked, setSubChecked] = useState(false);
+  const [subscriptionData, setSubscriptionData] = useState(undefined);
+
   const handleClose = () => {
     if (submitting) return;
     setSelectedServiceId("");
@@ -88,14 +123,61 @@ export default function ApplyToCampaignModal({
     setIsStepValidated(false);
     setIsCreateServiceOpen(false);
     setSuccessBannerMsg(null);
+    setSubscriptionData(undefined);
+    setSubChecking(true);
+    setSubChecked(false);
     onClose();
   };
 
-  // Fetch active creator services when modal opens
+  // Fetch active creator services & perform soft subscription check when modal opens
   useEffect(() => {
+    let isMounted = true;
+
     if (isOpen) {
       dispatch(getServices({ isActive: "true" }));
+
+      const checkSubscription = async () => {
+        try {
+          const res = await axiosInstance.get("/subscriptions/creator/current");
+          if (isMounted) {
+            if (res.data?.success) {
+              const returnedData = res.data.data;
+              if (returnedData === null) {
+                // Confirmed no subscription exists (Free tier confirmed by backend)
+                setSubscriptionData(null);
+              } else if (returnedData && typeof returnedData === "object" && !Array.isArray(returnedData)) {
+                // Valid subscription document object
+                setSubscriptionData(returnedData);
+              } else {
+                // data field is missing, undefined, or invalid: eligibility is unknown
+                setSubscriptionData(undefined);
+              }
+            } else {
+              // Unsuccessful response: eligibility is unknown; never assume Free account
+              setSubscriptionData(undefined);
+            }
+            setSubChecked(true);
+          }
+        } catch (err) {
+          // If check fails or network issues occur: eligibility is unknown; do NOT block creator
+          console.warn("Could not retrieve current creator subscription:", err);
+          if (isMounted) {
+            setSubscriptionData(undefined);
+            setSubChecked(true);
+          }
+        } finally {
+          if (isMounted) {
+            setSubChecking(false);
+          }
+        }
+      };
+
+      checkSubscription();
     }
+
+    return () => {
+      isMounted = false;
+    };
   }, [dispatch, isOpen]);
 
   if (!isOpen) return null;
@@ -103,6 +185,97 @@ export default function ApplyToCampaignModal({
   const activeServices = Array.isArray(services)
     ? services.filter((s) => s && (s.isActive === true || s.isActive === undefined))
     : [];
+
+  // Derive remaining credit balance safely without unverified assumptions
+  const remainingCredits =
+    subscriptionData?.creditBalance?.currentBalance !== undefined
+      ? subscriptionData.creditBalance.currentBalance
+      : typeof subscriptionData?.quotaState?.monthlyCreditsAllocated === "number" &&
+        typeof subscriptionData?.quotaState?.creditsUsed === "number"
+      ? Math.max(0, subscriptionData.quotaState.monthlyCreditsAllocated - subscriptionData.quotaState.creditsUsed)
+      : typeof subscriptionData?.planSnapshot?.monthlyApplicationCredits === "number" &&
+        typeof subscriptionData?.quotaState?.creditsUsed === "number"
+      ? Math.max(0, subscriptionData.planSnapshot.monthlyApplicationCredits - subscriptionData.quotaState.creditsUsed)
+      : null;
+
+  // Derive eligibility safely following backend evaluateCreatorEntitlement rules
+  const getEntitlementAssessment = () => {
+    // If check hasn't completed, is still loading, or returned an unsuccessful response:
+    // Eligibility is unknown -> keep submission enabled and let authoritative backend evaluate.
+    if (subChecking || !subChecked || subscriptionData === undefined) {
+      return { isConfirmedIneligible: false, reasonType: null };
+    }
+
+    // 1. Confirmed No Subscription (Free account confirmed by successful API response)
+    if (subscriptionData === null) {
+      return { isConfirmedIneligible: true, reasonType: "no_subscription" };
+    }
+
+    const now = new Date();
+    const status = subscriptionData.status;
+    const periodEnd = subscriptionData.currentPeriodEnd ? new Date(subscriptionData.currentPeriodEnd) : null;
+    const graceEnd = subscriptionData.gracePeriodEnd ? new Date(subscriptionData.gracePeriodEnd) : null;
+
+    // 2. Suspended by platform administration
+    if (status === "suspended") {
+      return { isConfirmedIneligible: true, reasonType: "suspended" };
+    }
+
+    // 3. Status explicitly expired
+    if (status === "expired") {
+      return { isConfirmedIneligible: true, reasonType: "expired" };
+    }
+
+    // 4. Active status: valid while currentPeriodEnd is in the future
+    if (status === "active") {
+      if (periodEnd && !isNaN(periodEnd.getTime()) && now >= periodEnd) {
+        return { isConfirmedIneligible: true, reasonType: "expired" };
+      }
+      if (remainingCredits !== null && remainingCredits === 0) {
+        return { isConfirmedIneligible: true, reasonType: "zero_credits" };
+      }
+      return { isConfirmedIneligible: false, reasonType: null };
+    }
+
+    // 5. Canceled status: per backend entitlement rules, remains active and entitled until currentPeriodEnd
+    if (status === "canceled") {
+      if (periodEnd && !isNaN(periodEnd.getTime())) {
+        if (now < periodEnd) {
+          // Entitled until end of billing cycle
+          if (remainingCredits !== null && remainingCredits === 0) {
+            return { isConfirmedIneligible: true, reasonType: "zero_credits" };
+          }
+          return { isConfirmedIneligible: false, reasonType: null };
+        } else {
+          return { isConfirmedIneligible: true, reasonType: "expired" };
+        }
+      }
+      // If periodEnd is missing, frontend cannot reliably determine -> do not block
+      return { isConfirmedIneligible: false, reasonType: null };
+    }
+
+    // 6. Past-due status: per backend entitlement rules, remains active within gracePeriodEnd
+    if (status === "past_due") {
+      if (graceEnd && !isNaN(graceEnd.getTime())) {
+        if (now <= graceEnd) {
+          // Active within grace period
+          if (remainingCredits !== null && remainingCredits === 0) {
+            return { isConfirmedIneligible: true, reasonType: "zero_credits" };
+          }
+          return { isConfirmedIneligible: false, reasonType: null };
+        } else {
+          return { isConfirmedIneligible: true, reasonType: "grace_expired" };
+        }
+      }
+      // If gracePeriodEnd is missing or indeterminate, keep submission enabled and let backend decide
+      return { isConfirmedIneligible: false, reasonType: null };
+    }
+
+    // Any other status: if frontend cannot reliably determine, keep submission enabled
+    return { isConfirmedIneligible: false, reasonType: null };
+  };
+
+  const { isConfirmedIneligible, reasonType } = getEntitlementAssessment();
 
   const handleSelectService = (service) => {
     const serviceId = service._id || service.id;
@@ -173,7 +346,7 @@ export default function ApplyToCampaignModal({
 
   const handleContinue = (e) => {
     e.preventDefault();
-    if (submitting) return;
+    if (submitting || isConfirmedIneligible) return;
     setValidationError(null);
 
     if (!selectedServiceId) {
@@ -194,6 +367,7 @@ export default function ApplyToCampaignModal({
 
     setIsStepValidated(true);
 
+    // Preserve exact existing payload contract
     onContinue({
       campaignId,
       serviceId: selectedServiceId,
@@ -292,6 +466,76 @@ export default function ApplyToCampaignModal({
               </span>
             </div>
           </div>
+
+          {/* Application Credit Information Bar */}
+          <div className="p-3 rounded-xl bg-surface-muted/60 border border-border-theme flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
+            <div className="flex items-center gap-2 text-text-secondary">
+              <TicketIcon className="w-4 h-4 text-secondary shrink-0" />
+              <span>
+                Consumes <strong>1 Application Credit</strong> on successful application
+              </span>
+            </div>
+
+            {subChecking ? (
+              <div className="flex items-center gap-1.5 text-text-secondary text-[11px]">
+                <div className="w-3 h-3 border-2 border-secondary border-t-transparent rounded-full animate-spin shrink-0" />
+                <span>Checking credits...</span>
+              </div>
+            ) : remainingCredits !== null ? (
+              <span
+                className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full inline-flex items-center self-start sm:self-auto ${
+                  remainingCredits > 0
+                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                    : "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20"
+                }`}
+              >
+                {remainingCredits} {remainingCredits === 1 ? "credit" : "credits"} available
+              </span>
+            ) : null}
+          </div>
+
+          {/* Ineligible Subscription / Zero Credits Advisory Banner */}
+          {isConfirmedIneligible && (
+            <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs text-amber-900 dark:text-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in">
+              <div className="space-y-1">
+                <div className="flex items-center gap-1.5 font-bold">
+                  <span>⚠️</span>
+                  <span>
+                    {reasonType === "no_subscription"
+                      ? "Active Subscription Required to Apply"
+                      : reasonType === "zero_credits"
+                      ? "Zero Application Credits Remaining"
+                      : reasonType === "suspended"
+                      ? "Subscription Suspended"
+                      : "Subscription Inactive or Expired"}
+                  </span>
+                </div>
+                <p className="text-[11px] text-amber-800 dark:text-amber-300 leading-relaxed">
+                  {reasonType === "no_subscription"
+                    ? "Applying to brand campaigns requires an active Creator membership. Free accounts can manage portfolio and services, but need an active plan to pitch."
+                    : reasonType === "zero_credits"
+                    ? "You have used all application credits for your current billing cycle. Upgrade your plan to receive additional application credits immediately."
+                    : reasonType === "suspended"
+                    ? "Your Creator subscription has been suspended by administration. Please manage your account to restore pitching privileges."
+                    : "Your Creator subscription has expired or billing period has ended. Renew your plan to unlock campaign pitches and receive monthly credits."}
+                </p>
+              </div>
+              <Link
+                href="/creator/subscription/plans"
+                className="inline-flex items-center justify-center gap-1 px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs transition-colors shrink-0 shadow-xs text-center"
+              >
+                <span>
+                  {reasonType === "no_subscription"
+                    ? "Upgrade to Apply"
+                    : reasonType === "zero_credits"
+                    ? "Get More Credits"
+                    : "Renew Subscription"}
+                </span>
+                <span>→</span>
+              </Link>
+            </div>
+          )}
+
           {/* Success Banner when service is created */}
           {successBannerMsg && (
             <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 p-3 rounded-xl text-xs font-medium flex items-center justify-between gap-2 animate-in fade-in">
@@ -326,9 +570,34 @@ export default function ApplyToCampaignModal({
 
           {/* Submission Error Banner */}
           {submitError && (
-            <div className="bg-red-500/10 border border-red-500/30 text-red-500 p-3 rounded-xl text-xs font-medium">
-              {typeof submitError === "string" ? submitError : "Campaign application failed. Please try again."}
-            </div>
+            isSubscriptionOrCreditError(submitError) ? (
+              <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-xs text-rose-700 dark:text-rose-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-1.5 font-bold text-rose-800 dark:text-rose-200">
+                    <span>⚠️</span>
+                    <span>Subscription or Credit Required</span>
+                  </div>
+                  <p className="text-[11px] leading-relaxed">
+                    {typeof submitError === "string"
+                      ? submitError
+                      : submitError.message || "An active subscription or credit is required."}
+                  </p>
+                </div>
+                <Link
+                  href="/creator/subscription/plans"
+                  className="inline-flex items-center justify-center gap-1 px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs transition-colors shrink-0 shadow-xs text-center"
+                >
+                  <span>Upgrade / Renew Plan</span>
+                  <span>→</span>
+                </Link>
+              </div>
+            ) : (
+              <div className="bg-red-500/10 border border-red-500/30 text-red-500 p-3 rounded-xl text-xs font-medium animate-in fade-in">
+                {typeof submitError === "string"
+                  ? submitError
+                  : submitError.message || "Campaign application failed. Please try again."}
+              </div>
+            )
           )}
 
           {/* Loading Skeleton */}
@@ -531,14 +800,20 @@ export default function ApplyToCampaignModal({
             <button
               type="button"
               onClick={handleContinue}
-              disabled={submitting}
-              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-neutral-950 text-white text-xs font-semibold tracking-wide border border-neutral-900 shadow-xs hover:bg-neutral-900 hover:border-neutral-800 hover:shadow-xs hover:shadow-pink-500/10 active:scale-[0.99] transition-all duration-200 ease-out cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed dark:bg-neutral-100 dark:text-neutral-950 dark:border-neutral-200 dark:hover:bg-neutral-200"
+              disabled={submitting || isConfirmedIneligible}
+              className={`inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold tracking-wide border shadow-xs transition-all duration-200 ease-out cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+                isConfirmedIneligible
+                  ? "bg-surface-muted text-text-secondary border-border-theme"
+                  : "bg-neutral-950 text-white border-neutral-900 hover:bg-neutral-900 hover:border-neutral-800 hover:shadow-xs hover:shadow-pink-500/10 active:scale-[0.99] dark:bg-neutral-100 dark:text-neutral-950 dark:border-neutral-200 dark:hover:bg-neutral-200"
+              }`}
             >
               {submitting ? (
                 <>
-                  <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin dark:border-neutral-900" />
                   <span>Submitting...</span>
                 </>
+              ) : isConfirmedIneligible ? (
+                <span>Subscription Required</span>
               ) : (
                 <span>Continue</span>
               )}

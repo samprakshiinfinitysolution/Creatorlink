@@ -30,7 +30,6 @@ router.get("/plans", getAvailablePlans);
 // Creator-protected subscription endpoints
 router.get("/creator/plans", authenticateUser, authorizeRoles("creator"), getCreatorAvailablePlans);
 router.get("/creator/current", authenticateUser, authorizeRoles("creator"), getCreatorCurrentSubscription);
-router.get("/plans/creator", authenticateUser, authorizeRoles("creator"), getCreatorAvailablePlans);
 
 // Brand-protected subscription endpoints
 router.get("/current", authenticateUser, authorizeRoles("brand"), getCurrentSubscription);

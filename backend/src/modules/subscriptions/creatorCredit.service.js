@@ -469,6 +469,42 @@ export const expireCreatorSubscriptionCreditsService = async ({
 };
 
 /**
+ * Calculates the calendar-month anniversary date for a given subscription period month index.
+ * Handles month-end clamping safely (e.g. Jan 31 -> Feb 28/29, Mar 31, Apr 30).
+ * 
+ * @param {Date|string} startDate - Subscription currentPeriodStart
+ * @param {number} monthIndex - Month index (1 to 12)
+ * @returns {Date} Calculated anniversary Date object in UTC
+ */
+export const calculateMonthlyAnniversaryDate = (startDate, monthIndex) => {
+    const base = new Date(startDate);
+    const originalDay = base.getUTCDate();
+    const originalHours = base.getUTCHours();
+    const originalMinutes = base.getUTCMinutes();
+    const originalSeconds = base.getUTCSeconds();
+    const originalMs = base.getUTCMilliseconds();
+
+    const targetYear = base.getUTCFullYear();
+    const targetMonth = base.getUTCMonth() + (monthIndex - 1);
+
+    // Days in target month: Date.UTC(year, targetMonth + 1, 0) gives the last day of targetMonth
+    const lastDayOfTargetMonth = new Date(Date.UTC(targetYear, targetMonth + 1, 0)).getUTCDate();
+
+    // Clamp day if the original anniversary day exceeds the target month's last day
+    const clampedDay = Math.min(originalDay, lastDayOfTargetMonth);
+
+    return new Date(Date.UTC(
+        targetYear,
+        targetMonth,
+        clampedDay,
+        originalHours,
+        originalMinutes,
+        originalSeconds,
+        originalMs
+    ));
+};
+
+/**
  * Evaluates active and canceled Creator subscriptions and grants eligible monthly credit allocations.
  * Catches up safely on missed scheduler intervals.
  * 
@@ -492,8 +528,8 @@ export const processCreatorMonthlyAllocationsService = async (currentDate = new 
     for (const sub of eligibleSubscriptions) {
         processedCount++;
         try {
-            // Suspended or past_due subscriptions are ineligible
-            if (sub.status === "suspended" || sub.status === "past_due") {
+            // Suspended, expired or past_due subscriptions are ineligible
+            if (sub.status === "suspended" || sub.status === "expired" || sub.status === "past_due") {
                 continue;
             }
 
@@ -510,12 +546,12 @@ export const processCreatorMonthlyAllocationsService = async (currentDate = new 
             const start = new Date(sub.currentPeriodStart);
             const end = new Date(sub.currentPeriodEnd);
 
-            // Month 1 was granted on activation.
-            // Check months 2 through 12:
+            // Month 1 was granted on initial payment activation.
+            // Check months 2 through 12 using calendar-month anniversary clamping:
             for (let m = 2; m <= 12; m++) {
-                const dueDate = new Date(start.getTime() + (m - 1) * 30 * 24 * 60 * 60 * 1000);
+                const dueDate = calculateMonthlyAnniversaryDate(start, m);
 
-                // Do not allocate beyond subscription currentPeriodEnd
+                // Never allocate on or after currentPeriodEnd
                 if (dueDate >= end) {
                     break;
                 }
@@ -549,9 +585,113 @@ export const processCreatorMonthlyAllocationsService = async (currentDate = new 
     };
 };
 
+/**
+ * Atomically deducts 1 campaign application credit from a Creator's balance and records an audit ledger entry.
+ * 
+ * Rules:
+ * 1. Atomically decrements currentBalance by 1 and increments lifetimeConsumed by 1 using conditional query ($gte: 1).
+ * 2. If currentBalance < 1, fails with 403 Insufficient application credits.
+ * 3. Inserts an immutable CreditTransaction with type 'application_deduction', amount: -1.
+ * 4. Must run inside the provided transaction session to ensure atomicity with Booking creation.
+ * 
+ * @param {Object} params
+ * @param {string|mongoose.Types.ObjectId} params.creatorId
+ * @param {string|mongoose.Types.ObjectId} params.bookingId
+ * @param {string|mongoose.Types.ObjectId} [params.campaignId]
+ * @param {string} [params.campaignTitle]
+ * @param {mongoose.ClientSession} params.session
+ * @returns {Promise<{ isSuccess: boolean, alreadyDeducted: boolean, transaction: Object, creditBalance: Object }>}
+ */
+export const deductCreatorApplicationCreditService = async ({
+    creatorId,
+    bookingId,
+    campaignId,
+    campaignTitle,
+    session
+}) => {
+    if (!creatorId || !mongoose.Types.ObjectId.isValid(creatorId)) {
+        throw createApiError(400, "Valid creator ID is required to deduct application credit");
+    }
+    if (!bookingId || !mongoose.Types.ObjectId.isValid(bookingId)) {
+        throw createApiError(400, "Valid booking ID is required to deduct application credit");
+    }
+    if (!session) {
+        throw createApiError(500, "A database session is required for atomic credit deduction");
+    }
+
+    const idempotencyKey = `sub_deduct_booking_${bookingId.toString()}`;
+
+    // Fast-path idempotency check within session
+    const existingTx = await CreditTransaction.findOne({ idempotencyKey }).session(session);
+    if (existingTx) {
+        const currentBalance = await CreatorCreditBalance.findOne({ creator: creatorId }).session(session);
+        return {
+            isSuccess: true,
+            alreadyDeducted: true,
+            transaction: existingTx,
+            creditBalance: currentBalance
+        };
+    }
+
+    // 1. Conditional atomic deduction on CreatorCreditBalance
+    // Guarantees under concurrency that if two requests race with balance=1, only one succeeds.
+    const updatedBalance = await CreatorCreditBalance.findOneAndUpdate(
+        {
+            creator: creatorId,
+            currentBalance: { $gte: 1 }
+        },
+        {
+            $inc: {
+                currentBalance: -1,
+                lifetimeConsumed: 1
+            }
+        },
+        {
+            new: true,
+            session
+        }
+    );
+
+    if (!updatedBalance) {
+        throw createApiError(
+            403,
+            "Insufficient application credits. Please upgrade or renew your plan to apply for campaigns."
+        );
+    }
+
+    // 2. Insert immutable audit ledger record
+    const [transaction] = await CreditTransaction.create(
+        [
+            {
+                creator: creatorId,
+                type: "application_deduction",
+                amount: -1,
+                balanceAfter: updatedBalance.currentBalance,
+                referenceType: "booking",
+                referenceId: bookingId,
+                performedBy: creatorId,
+                reason: campaignTitle
+                    ? `Campaign application: ${campaignTitle}`
+                    : "Campaign application deduction (1 credit)",
+                idempotencyKey
+            }
+        ],
+        { session }
+    );
+
+    return {
+        isSuccess: true,
+        alreadyDeducted: false,
+        transaction,
+        creditBalance: updatedBalance
+    };
+};
+
 export default {
     grantCreatorSubscriptionCreditsService,
     allocateCreatorMonthlyCreditsService,
     expireCreatorSubscriptionCreditsService,
-    processCreatorMonthlyAllocationsService
+    processCreatorMonthlyAllocationsService,
+    calculateMonthlyAnniversaryDate,
+    deductCreatorApplicationCreditService
 };

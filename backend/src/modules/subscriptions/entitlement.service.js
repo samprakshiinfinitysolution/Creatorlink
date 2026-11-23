@@ -1,6 +1,7 @@
 import Subscription from "./subscription.model.js";
 import SubscriptionPlan from "./plan.model.js";
 import Auth from "../auth/auth.model.js";
+import CreatorCreditBalance from "./creatorCreditBalance.model.js";
 import { createBrandTrialSubscriptionService } from "./trial.service.js";
 import createApiError from "../../utils/ApiError.js";
 
@@ -298,9 +299,177 @@ export const requireBrandSubscription = (actionName = "this action") => {
     };
 };
 
+/**
+ * Centrally evaluates whether a Creator account holds active entitlement to apply for campaigns.
+ * 
+ * Rules:
+ * 1. Creator must have a subscription with subscriberRole: "creator".
+ * 2. Active Paid: status === "active" and now < currentPeriodEnd.
+ * 3. Cancel at Period End: status === "canceled" and now < currentPeriodEnd.
+ * 4. Past Due: access permitted ONLY within the configured grace period (now <= gracePeriodEnd).
+ * 5. Expired or Suspended: access blocked.
+ * 6. Checks available application credits from CreatorCreditBalance (currentBalance >= 1).
+ * 
+ * @param {string|mongoose.Types.ObjectId} creatorId - Creator Auth ID
+ * @param {mongoose.ClientSession} [session=null] - Optional transaction session
+ * @returns {Promise<Object>} Entitlement evaluation breakdown
+ */
+export const evaluateCreatorEntitlement = async (creatorId, session = null) => {
+    if (!creatorId) {
+        throw createApiError(400, "Creator ID is required for entitlement evaluation");
+    }
+
+    const query = Subscription.findOne({
+        subscriber: creatorId,
+        subscriberRole: "creator"
+    }).populate("plan");
+
+    if (session) {
+        query.session(session);
+    }
+
+    const subscription = await query;
+
+    if (!subscription) {
+        return {
+            hasEntitlement: false,
+            canApply: false,
+            status: "none",
+            billingCycle: "none",
+            isExpired: true,
+            isSuspended: false,
+            inGracePeriod: false,
+            currentBalance: 0,
+            reason: "An active Creator subscription is required to apply for campaigns.",
+            subscription: null
+        };
+    }
+
+    const now = new Date();
+    const isSuspended = subscription.status === "suspended";
+    let isExpired = false;
+    let inGracePeriod = false;
+    let hasEntitlement = false;
+    let reason = "";
+
+    const periodEnd = subscription.currentPeriodEnd ? new Date(subscription.currentPeriodEnd) : null;
+    isExpired = Boolean(periodEnd && now >= periodEnd);
+
+    if (isSuspended) {
+        hasEntitlement = false;
+        reason = "Creator subscription is suspended by platform administration.";
+    } else if (subscription.status === "expired") {
+        hasEntitlement = false;
+        reason = "Creator subscription has expired. Please renew your plan to apply for campaigns.";
+    } else if (subscription.status === "active") {
+        if (!isExpired) {
+            hasEntitlement = true;
+            reason = "Active Creator subscription entitlement.";
+        } else {
+            hasEntitlement = false;
+            reason = "Creator subscription period has ended. Please renew your plan.";
+        }
+    } else if (subscription.status === "canceled") {
+        if (periodEnd && now < periodEnd) {
+            hasEntitlement = true;
+            reason = "Subscription canceled at period end, access active until end of billing cycle.";
+        } else {
+            hasEntitlement = false;
+            reason = "Creator subscription has been canceled and billing period has ended.";
+        }
+    } else if (subscription.status === "past_due") {
+        const graceEnd = subscription.gracePeriodEnd ? new Date(subscription.gracePeriodEnd) : null;
+        if (graceEnd && now <= graceEnd) {
+            inGracePeriod = true;
+            hasEntitlement = true;
+            reason = `Subscription is past due, but active within grace period ending ${graceEnd.toISOString()}.`;
+        } else {
+            hasEntitlement = false;
+            reason = "Subscription grace period has expired. Please resolve payment to regain access.";
+        }
+    } else {
+        hasEntitlement = false;
+        reason = `Creator subscription status is "${subscription.status}".`;
+    }
+
+    // Check available application credits only if entitled
+    let currentBalance = 0;
+    if (hasEntitlement) {
+        const balanceQuery = CreatorCreditBalance.findOne({ creator: creatorId });
+        if (session) {
+            balanceQuery.session(session);
+        }
+        const creditBalanceDoc = await balanceQuery;
+        currentBalance = creditBalanceDoc ? creditBalanceDoc.currentBalance : 0;
+    }
+
+    const canApply = hasEntitlement && currentBalance >= 1;
+
+    if (hasEntitlement && currentBalance < 1) {
+        reason = "Insufficient application credits. Please upgrade or renew your plan to apply for campaigns.";
+    }
+
+    return {
+        hasEntitlement,
+        canApply,
+        status: subscription.status,
+        billingCycle: subscription.billingCycle,
+        isExpired,
+        isSuspended,
+        inGracePeriod,
+        currentBalance,
+        reason,
+        currentPeriodStart: subscription.currentPeriodStart,
+        currentPeriodEnd: subscription.currentPeriodEnd,
+        gracePeriodEnd: subscription.gracePeriodEnd,
+        planSnapshot: subscription.planSnapshot || null,
+        subscription
+    };
+};
+
+/**
+ * Express middleware to enforce creator subscription entitlement on API routes.
+ */
+export const requireCreatorSubscription = (actionName = "apply for campaigns") => {
+    return async (req, res, next) => {
+        try {
+            const creatorId = req.user?.userId || req.user?._id;
+            if (!creatorId) {
+                throw createApiError(401, "Authentication required");
+            }
+
+            const entitlement = await evaluateCreatorEntitlement(creatorId);
+            if (!entitlement.hasEntitlement) {
+                return res.status(403).json({
+                    success: false,
+                    message: `An active Creator subscription is required to ${actionName}. ${entitlement.reason}`,
+                    upgradeRequired: true,
+                    entitlement
+                });
+            }
+
+            if (entitlement.currentBalance < 1) {
+                return res.status(403).json({
+                    success: false,
+                    message: `Insufficient application credits to ${actionName}. Please upgrade or renew your plan to receive more credits.`,
+                    upgradeRequired: true,
+                    entitlement
+                });
+            }
+
+            req.creatorEntitlement = entitlement;
+            next();
+        } catch (error) {
+            next(error);
+        }
+    };
+};
+
 export default {
     GRACE_PERIOD_MS,
     evaluateBrandEntitlement,
+    evaluateCreatorEntitlement,
     validateCampaignUpdateEntitlement,
-    requireBrandSubscription
+    requireBrandSubscription,
+    requireCreatorSubscription
 };

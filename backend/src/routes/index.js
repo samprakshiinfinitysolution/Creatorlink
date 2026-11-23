@@ -2,6 +2,7 @@ import { Router } from "express";
 
 import authRoutes from "../modules/auth/auth.route.js";
 import creatorProfileRoutes from "../modules/creator/profile/profile.route.js";
+import creatorInstagramRoutes from "../modules/creator/instagram/instagram.route.js";
 import creatorPortfolioRoutes from "../modules/creator/portfolio/portfolio.route.js";
 import creatorServiceRoutes from "../modules/creator/services/services.route.js";
 import creatorCampaignRoutes from "../modules/creator/campaigns/campaigns.route.js";
@@ -70,11 +71,11 @@ router.use("/creator/workspace", creatorWorkspaceRouter);
 router.use("/creator/messages", creatorMessagesRouter);
 router.use("/creator/payments", creatorPaymentRouter);
 router.use("/creator/reviews", creatorReviewRouter);
+router.use("/creator/instagram", creatorInstagramRoutes);
 
 // Subscription routes.
 router.use("/subscriptions", subscriptionRoutes);
 router.use("/brand/subscriptions", subscriptionRoutes);
-router.use("/creator/subscriptions", subscriptionRoutes);
 
 // Brand routes.
 router.use("/brand/dashboard", brandDashboardRoutes);

@@ -12,7 +12,8 @@ import {
     cleanupWorkspaceForBooking
 } from "../workspace/workspace.service.js";
 import { createNotificationSafe } from "../notifications/notification.service.js";
-import { evaluateBrandEntitlement } from "../subscriptions/entitlement.service.js";
+import { evaluateBrandEntitlement, evaluateCreatorEntitlement } from "../subscriptions/entitlement.service.js";
+import { deductCreatorApplicationCreditService } from "../subscriptions/creatorCredit.service.js";
 import createApiError from "../../utils/ApiError.js";
 
 import {
@@ -38,6 +39,21 @@ const createBookingService = async (creatorId, bookingData) => {
 
     try {
         await session.withTransaction(async () => {
+            // 0. Verify Creator Subscription Entitlement & Available Credits inside the transaction
+            const creatorEntitlement = await evaluateCreatorEntitlement(creatorId, session);
+            if (!creatorEntitlement.hasEntitlement) {
+                throw createApiError(
+                    403,
+                    creatorEntitlement.reason || "An active Creator subscription is required to apply for campaigns."
+                );
+            }
+            if (creatorEntitlement.currentBalance < 1) {
+                throw createApiError(
+                    403,
+                    "Insufficient application credits. Please upgrade or renew your plan to apply for campaigns."
+                );
+            }
+
             // 1. Verify selected creator service exists, is active, and belongs to creator.
             const service = await CreatorService.findOne({
                 _id: serviceId,
@@ -139,10 +155,27 @@ const createBookingService = async (creatorId, bookingData) => {
                 { session }
             );
 
+            // 7. Atomically deduct exactly 1 application credit and record immutable audit ledger entry
+            await deductCreatorApplicationCreditService({
+                creatorId,
+                bookingId: booking._id,
+                campaignId: campaign._id,
+                campaignTitle: campaign.title,
+                session
+            });
+
             createdBooking = booking;
             campaignDocForNotif = campaign;
             finalPriceForNotif = finalPrice;
         });
+    } catch (err) {
+        if (err.code === 11000 && (err.keyPattern?.campaign || err.message?.includes("campaign_1_creator_1"))) {
+            throw createApiError(
+                400,
+                "You have already applied to this campaign"
+            );
+        }
+        throw err;
     } finally {
         await session.endSession();
     }

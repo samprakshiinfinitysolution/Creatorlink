@@ -205,7 +205,7 @@ function CreatorCard({ creator, onViewProfile, isSaved, isSaving, onToggleSave, 
   const category = creator.category || "General";
   const bio = creator.bio || "Content Creator & Collaborator";
   const followersStr = formatFollowers(creator.followerCount);
-  const engagement = typeof creator.engagementRate === "number" ? `${creator.engagementRate}%` : "0%";
+  const engagement = typeof creator.engagementRate === "number" ? `${creator.engagementRate}%` : "Unavailable";
   const hasRating = typeof creator.rating === "number" && creator.rating > 0;
   const ratingStr = hasRating ? `${creator.rating}` : "New";
   const reviewCount = creator.reviewCount || 0;

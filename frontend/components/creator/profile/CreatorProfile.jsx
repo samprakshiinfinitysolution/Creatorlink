@@ -13,6 +13,7 @@ import {
 import { fetchCreatorWorkspaces } from "@/redux/creator/workspace/workspace_slice";
 import { updateAuthUserName } from "@/redux/auth/auth_slice";
 import { uploadSingleImageApi } from "@/lib/upload";
+import axiosInstance from "@/lib/axios";
 import ProfileVerificationStatusCard from "@/components/common/ProfileVerificationStatusCard";
 
 // =========================================================
@@ -723,6 +724,7 @@ export default function CreatorProfile() {
   const [initialFetchDone, setInitialFetchDone] = useState(false);
   const [isRetrying, setIsRetrying] = useState(false);
   const [lastFetchError, setLastFetchError] = useState("");
+  const [instagramAccount, setInstagramAccount] = useState(null);
 
   const fileInputRef = useRef(null);
 
@@ -733,6 +735,27 @@ export default function CreatorProfile() {
   const authUser = useSelector((state) => state.auth?.user);
   const { workspaces, pagination: workspacePagination } = useSelector(
     (state) => state.creatorWorkspace || {}
+  );
+
+  // Fetch connected Instagram account status for protection of social metrics
+  useEffect(() => {
+    axiosInstance
+      .get("/creator/instagram/account")
+      .then((res) => {
+        if (res.data?.data?.account) {
+          setInstagramAccount(res.data.data.account);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const isInstagramLinked = Boolean(
+    (instagramAccount && instagramAccount.status !== "DISCONNECTED") ||
+    (profile?.instagramConnection && profile.instagramConnection.status !== "DISCONNECTED")
+  );
+  const isInstagramExpired = Boolean(
+    instagramAccount?.status === "EXPIRED" ||
+    profile?.instagramConnection?.status === "EXPIRED"
   );
 
   const [formData, setFormData] = useState({
@@ -1803,7 +1826,7 @@ export default function CreatorProfile() {
                     <div className="h-10 w-px bg-border-theme" />
                     <div className="text-center sm:text-left">
                       <span className="block text-[22px] sm:text-[24px] font-semibold font-sans text-slate-900 dark:text-foreground leading-none">
-                        {engagementRate !== null ? `${engagementRate}%` : "0%"}
+                        {engagementRate !== null ? `${engagementRate}%` : "Unavailable"}
                       </span>
                       <span className="block text-[10px] sm:text-[11px] text-text-secondary mt-1.5 font-sans leading-tight">
                         Engagement
@@ -2941,9 +2964,23 @@ export default function CreatorProfile() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 font-sans">
                   {/* Follower Count */}
                   <div className="space-y-1.5">
-                    <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
-                      Follower Count
-                    </label>
+                    <div className="flex items-center justify-between gap-2">
+                      <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
+                        Follower Count
+                      </label>
+                      {isInstagramLinked && (
+                        <span
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium shrink-0 ${
+                            isInstagramExpired
+                              ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
+                              : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                          }`}
+                        >
+                          <InstagramIcon className="w-3 h-3 shrink-0" />
+                          <span>{isInstagramExpired ? "Synced via Instagram (Expired)" : "Synced via Instagram"}</span>
+                        </span>
+                      )}
+                    </div>
                     <div className="relative flex items-center">
                       <span className="absolute left-3.5 text-text-secondary pointer-events-none">
                         <UsersIcon className="w-4 h-4" />
@@ -2955,20 +2992,42 @@ export default function CreatorProfile() {
                         step="1"
                         value={formData.followerCount}
                         onChange={handleInputChange}
+                        disabled={isInstagramLinked}
+                        readOnly={isInstagramLinked}
                         placeholder="e.g. 125000"
-                        className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-surface border border-slate-300 dark:border-border-theme text-foreground text-xs sm:text-sm rounded-xl focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/40 transition-colors"
+                        className={`w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm rounded-xl border focus:outline-none transition-colors ${
+                          isInstagramLinked
+                            ? "bg-slate-100 dark:bg-surface-muted/60 border-slate-200 dark:border-border-theme/60 text-text-secondary cursor-not-allowed select-none"
+                            : "bg-white dark:bg-surface border-slate-300 dark:border-border-theme text-foreground focus:border-secondary focus:ring-1 focus:ring-secondary/40"
+                        }`}
                       />
                     </div>
                     <p className="text-[11px] text-text-secondary">
-                      Total followers or subscribers across your channels (integer, min 0).
+                      {isInstagramLinked
+                        ? "Verified and automatically synced from your connected Instagram account."
+                        : "Total followers or subscribers across your channels (integer, min 0)."}
                     </p>
                   </div>
 
                   {/* Engagement Rate */}
                   <div className="space-y-1.5">
-                    <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
-                      Engagement Rate (%)
-                    </label>
+                    <div className="flex items-center justify-between gap-2">
+                      <label className="block text-xs font-semibold text-foreground uppercase tracking-wider">
+                        Engagement Rate (%)
+                      </label>
+                      {isInstagramLinked && (
+                        <span
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium shrink-0 ${
+                            isInstagramExpired
+                              ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
+                              : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                          }`}
+                        >
+                          <InstagramIcon className="w-3 h-3 shrink-0" />
+                          <span>{isInstagramExpired ? "Synced via Instagram (Expired)" : "Synced via Instagram"}</span>
+                        </span>
+                      )}
+                    </div>
                     <div className="relative flex items-center">
                       <span className="absolute left-3.5 text-text-secondary pointer-events-none font-bold text-xs">
                         %
@@ -2977,16 +3036,23 @@ export default function CreatorProfile() {
                         type="number"
                         name="engagementRate"
                         min="0"
-                        max="100"
-                        step="0.1"
+                        step="0.01"
                         value={formData.engagementRate}
                         onChange={handleInputChange}
+                        disabled={isInstagramLinked}
+                        readOnly={isInstagramLinked}
                         placeholder="e.g. 4.8"
-                        className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-surface border border-slate-300 dark:border-border-theme text-foreground text-xs sm:text-sm rounded-xl focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/40 transition-colors"
+                        className={`w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm rounded-xl border focus:outline-none transition-colors ${
+                          isInstagramLinked
+                            ? "bg-slate-100 dark:bg-surface-muted/60 border-slate-200 dark:border-border-theme/60 text-text-secondary cursor-not-allowed select-none"
+                            : "bg-white dark:bg-surface border-slate-300 dark:border-border-theme text-foreground focus:border-secondary focus:ring-1 focus:ring-secondary/40"
+                        }`}
                       />
                     </div>
                     <p className="text-[11px] text-text-secondary">
-                      Average engagement percentage between 0 and 100 (e.g. 4.8).
+                      {isInstagramLinked
+                        ? "Verified and automatically calculated from your recent Instagram posts."
+                        : "Average engagement percentage based on your social channels."}
                     </p>
                   </div>
                 </div>

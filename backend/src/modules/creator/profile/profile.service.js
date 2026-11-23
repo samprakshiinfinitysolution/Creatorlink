@@ -1,5 +1,6 @@
 import CreatorProfile from "./profile.model.js";
 import Auth from "../../auth/auth.model.js";
+import InstagramAccount from "../instagram/instagram.model.js";
 import createApiError from "../../../utils/ApiError.js";
 import Portfolio from "../portfolio/portfolio.model.js";
 import CreatorService from "../services/services.model.js";
@@ -31,16 +32,29 @@ const createProfileService = async (userId, profileData) => {
     delete sanitizedData.isVerifiedBadge;
     delete sanitizedData.isOnboarded;
 
-    if (sanitizedData.followerCount !== undefined && sanitizedData.followerCount !== null && sanitizedData.followerCount !== "") {
-        sanitizedData.followerCount = Math.round(Number(sanitizedData.followerCount));
-    } else if (sanitizedData.followerCount === "") {
-        sanitizedData.followerCount = null;
-    }
+    // Check for linked Instagram account (CONNECTED or EXPIRED) to protect verified social metrics
+    const linkedInstagram = await InstagramAccount.findOne({
+        creator: userId,
+        status: { $ne: "DISCONNECTED" }
+    }).select("followersCount engagementRate status").lean();
 
-    if (sanitizedData.engagementRate !== undefined && sanitizedData.engagementRate !== null && sanitizedData.engagementRate !== "") {
-        sanitizedData.engagementRate = Number(parseFloat(sanitizedData.engagementRate).toFixed(2));
-    } else if (sanitizedData.engagementRate === "") {
-        sanitizedData.engagementRate = null;
+    if (linkedInstagram) {
+        // Protect verified metrics: populate from Instagram and ignore client-supplied input
+        sanitizedData.followerCount = typeof linkedInstagram.followersCount === "number" ? linkedInstagram.followersCount : null;
+        sanitizedData.engagementRate = typeof linkedInstagram.engagementRate === "number" ? linkedInstagram.engagementRate : null;
+    } else {
+        // Manual input handling for non-connected creators
+        if (sanitizedData.followerCount !== undefined && sanitizedData.followerCount !== null && sanitizedData.followerCount !== "") {
+            sanitizedData.followerCount = Math.round(Number(sanitizedData.followerCount));
+        } else if (sanitizedData.followerCount === "") {
+            sanitizedData.followerCount = null;
+        }
+
+        if (sanitizedData.engagementRate !== undefined && sanitizedData.engagementRate !== null && sanitizedData.engagementRate !== "") {
+            sanitizedData.engagementRate = Number(parseFloat(sanitizedData.engagementRate).toFixed(2));
+        } else if (sanitizedData.engagementRate === "") {
+            sanitizedData.engagementRate = null;
+        }
     }
 
 
@@ -104,6 +118,21 @@ const getMyProfileService = async (userId) => {
         console.error("Failed to attach collaborationsCount to creator profile:", collabErr);
     }
 
+    try {
+        const instagramAccount = await InstagramAccount.findOne({
+            creator: userId,
+            status: { $ne: "DISCONNECTED" }
+        }).select("status username").lean();
+        profileObj.instagramConnection = instagramAccount ? {
+            isConnected: instagramAccount.status ? instagramAccount.status === "CONNECTED" : true,
+            isExpired: instagramAccount.status === "EXPIRED",
+            status: instagramAccount.status || "CONNECTED",
+            username: instagramAccount.username
+        } : null;
+    } catch (igErr) {
+        console.error("Failed to attach instagramConnection status to creator profile:", igErr);
+    }
+
     return profileObj;
 };
 
@@ -120,21 +149,33 @@ const updateProfileService = async (userId, profileData) => {
     delete updateOps.isVerifiedBadge;
     delete updateOps.isOnboarded;
 
-    // Update follower count
-    if (updateOps.followerCount !== undefined) {
-        if (updateOps.followerCount === null || updateOps.followerCount === "") {
-            updateOps.followerCount = null;
-        } else {
-            updateOps.followerCount = Math.round(Number(updateOps.followerCount));
-        }
-    }
+    // Check if creator has an active/linked Instagram account (CONNECTED or EXPIRED)
+    const isInstagramLinked = await InstagramAccount.exists({
+        creator: userId,
+        status: { $ne: "DISCONNECTED" }
+    });
 
-    // Update engagement rate
-    if (updateOps.engagementRate !== undefined) {
-        if (updateOps.engagementRate === null || updateOps.engagementRate === "") {
-            updateOps.engagementRate = null;
-        } else {
-            updateOps.engagementRate = Number(parseFloat(updateOps.engagementRate).toFixed(2));
+    if (isInstagramLinked) {
+        // Protected social metrics: Client request CANNOT overwrite Meta-verified metrics
+        delete updateOps.followerCount;
+        delete updateOps.engagementRate;
+    } else {
+        // Update follower count for non-connected creators
+        if (updateOps.followerCount !== undefined) {
+            if (updateOps.followerCount === null || updateOps.followerCount === "") {
+                updateOps.followerCount = null;
+            } else {
+                updateOps.followerCount = Math.round(Number(updateOps.followerCount));
+            }
+        }
+
+        // Update engagement rate for non-connected creators
+        if (updateOps.engagementRate !== undefined) {
+            if (updateOps.engagementRate === null || updateOps.engagementRate === "") {
+                updateOps.engagementRate = null;
+            } else {
+                updateOps.engagementRate = Number(parseFloat(updateOps.engagementRate).toFixed(2));
+            }
         }
     }
 
@@ -246,6 +287,31 @@ const completeOnboardingService = async (userId, data = {}) => {
         delete sanitizedData.isVerifiedBadge;
         delete sanitizedData.isOnboarded;
         delete sanitizedData.name;
+
+        // Check for linked Instagram account (CONNECTED or EXPIRED) to protect verified social metrics
+        const linkedInstagram = await InstagramAccount.findOne({
+            creator: userId,
+            status: { $ne: "DISCONNECTED" }
+        }).select("followersCount engagementRate status").lean();
+
+        if (linkedInstagram) {
+            // Protect verified metrics: populate from Instagram and ignore client-supplied input
+            sanitizedData.followerCount = typeof linkedInstagram.followersCount === "number" ? linkedInstagram.followersCount : null;
+            sanitizedData.engagementRate = typeof linkedInstagram.engagementRate === "number" ? linkedInstagram.engagementRate : null;
+        } else {
+            // Manual input handling for non-connected creators
+            if (sanitizedData.followerCount !== undefined && sanitizedData.followerCount !== null && sanitizedData.followerCount !== "") {
+                sanitizedData.followerCount = Math.round(Number(sanitizedData.followerCount));
+            } else if (sanitizedData.followerCount === "") {
+                sanitizedData.followerCount = null;
+            }
+
+            if (sanitizedData.engagementRate !== undefined && sanitizedData.engagementRate !== null && sanitizedData.engagementRate !== "") {
+                sanitizedData.engagementRate = Number(parseFloat(sanitizedData.engagementRate).toFixed(2));
+            } else if (sanitizedData.engagementRate === "") {
+                sanitizedData.engagementRate = null;
+            }
+        }
 
         profile = await CreatorProfile.create({
             ...sanitizedData,

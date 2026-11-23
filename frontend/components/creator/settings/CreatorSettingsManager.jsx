@@ -148,6 +148,7 @@ function formatAccountType(accountType) {
 export default function CreatorSettingsManager() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoadingAccount, setIsLoadingAccount] = useState(true);
   const [connectedAccount, setConnectedAccount] = useState(null);
   const [failedImageUrl, setFailedImageUrl] = useState("");
@@ -273,6 +274,40 @@ export default function CreatorSettingsManager() {
         message: errorMsg,
       });
       setIsConnecting(false);
+    }
+  };
+
+  // Handle manual refresh / sync of Instagram metrics
+  const handleRefreshMetrics = async () => {
+    if (isRefreshing || !connectedAccount) return;
+    setIsRefreshing(true);
+    setFeedback(null);
+
+    try {
+      const res = await axiosInstance.post("/creator/instagram/refresh");
+      const updatedData = res.data?.data?.account;
+      if (updatedData) {
+        setConnectedAccount(updatedData);
+      }
+      setFeedback({
+        type: "success",
+        message: res.data?.message || "Instagram metrics refreshed successfully!",
+      });
+    } catch (err) {
+      console.error("Failed to refresh Instagram metrics:", err);
+      const errorMsg =
+        err.response?.data?.message ||
+        "Failed to refresh Instagram metrics. Please try again later.";
+      setFeedback({
+        type: "error",
+        message: errorMsg,
+      });
+      // If unauthorized/expired, reload account details
+      if (err.response?.status === 401) {
+        fetchConnectedAccount();
+      }
+    } finally {
+      setIsRefreshing(false);
     }
   };
 
@@ -471,7 +506,50 @@ export default function CreatorSettingsManager() {
                             Posts
                           </span>
                         </div>
+
+                        {/* Engagement Rate Pill */}
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface border border-border-theme shadow-2xs">
+                          <span className="font-semibold text-foreground text-xs sm:text-[13px] font-sans">
+                            {typeof connectedAccount.engagementRate === "number"
+                              ? `${connectedAccount.engagementRate}%`
+                              : "Unavailable"}
+                          </span>
+                          <span className="text-[11px] text-text-secondary font-medium font-sans">
+                            Engagement
+                          </span>
+                        </div>
+
+                        {/* Average Likes */}
+                        {typeof connectedAccount.averageLikes === "number" && (
+                          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface border border-border-theme shadow-2xs">
+                            <span className="font-semibold text-foreground text-xs sm:text-[13px] font-sans">
+                              {connectedAccount.averageLikes.toLocaleString()}
+                            </span>
+                            <span className="text-[11px] text-text-secondary font-medium font-sans">
+                              Avg Likes
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Average Comments */}
+                        {typeof connectedAccount.averageComments === "number" && (
+                          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface border border-border-theme shadow-2xs">
+                            <span className="font-semibold text-foreground text-xs sm:text-[13px] font-sans">
+                              {connectedAccount.averageComments.toLocaleString()}
+                            </span>
+                            <span className="text-[11px] text-text-secondary font-medium font-sans">
+                              Avg Comments
+                            </span>
+                          </div>
+                        )}
                       </div>
+
+                      {/* Engagement Basis Note */}
+                      {typeof connectedAccount.engagementPostCount === "number" && connectedAccount.engagementPostCount > 0 && (
+                        <p className="text-[10px] text-text-secondary font-medium font-sans">
+                          Engagement calculated from {connectedAccount.engagementPostCount} recent posts
+                        </p>
+                      )}
 
                       {/* Last Synced Date */}
                       <p className="text-[10px] text-text-secondary flex items-center gap-1.5">
@@ -486,29 +564,52 @@ export default function CreatorSettingsManager() {
                   )}
                 </div>
 
-                <button
-                  type="button"
-                  onClick={handleConnectInstagram}
-                  disabled={isConnecting}
-                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#ff2d6c] to-[#e0144c] hover:opacity-95 text-white text-xs font-semibold tracking-wide transition-all shadow-xs hover:shadow-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
-                >
-                  {isConnecting ? (
-                    <>
-                      <SpinnerIcon className="w-4 h-4" />
-                      <span>Connecting...</span>
-                    </>
-                  ) : connectedAccount ? (
-                    <>
-                      <InstagramIcon className="w-4 h-4" />
-                      <span>Reconnect Instagram</span>
-                    </>
-                  ) : (
-                    <>
-                      <InstagramIcon className="w-4 h-4" />
-                      <span>Connect Instagram</span>
-                    </>
+                <div className="flex items-center gap-2.5 flex-wrap shrink-0">
+                  {connectedAccount && !isExpired && (
+                    <button
+                      type="button"
+                      onClick={handleRefreshMetrics}
+                      disabled={isRefreshing || isConnecting}
+                      className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-border-theme hover:bg-surface-muted text-foreground text-xs font-semibold tracking-wide transition-all shadow-2xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+                    >
+                      {isRefreshing ? (
+                        <>
+                          <SpinnerIcon className="w-3.5 h-3.5" />
+                          <span>Syncing...</span>
+                        </>
+                      ) : (
+                        <>
+                          <ClockIcon className="w-3.5 h-3.5 text-text-secondary" />
+                          <span>Sync Metrics</span>
+                        </>
+                      )}
+                    </button>
                   )}
-                </button>
+
+                  <button
+                    type="button"
+                    onClick={handleConnectInstagram}
+                    disabled={isConnecting || isRefreshing}
+                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#ff2d6c] to-[#e0144c] hover:opacity-95 text-white text-xs font-semibold tracking-wide transition-all shadow-xs hover:shadow-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+                  >
+                    {isConnecting ? (
+                      <>
+                        <SpinnerIcon className="w-4 h-4" />
+                        <span>Connecting...</span>
+                      </>
+                    ) : connectedAccount ? (
+                      <>
+                        <InstagramIcon className="w-4 h-4" />
+                        <span>Reconnect Instagram</span>
+                      </>
+                    ) : (
+                      <>
+                        <InstagramIcon className="w-4 h-4" />
+                        <span>Connect Instagram</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             )}
           </section>

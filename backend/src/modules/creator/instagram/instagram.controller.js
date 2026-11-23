@@ -3,7 +3,8 @@ import sendResponse from "../../../utils/response.js";
 import {
     generateInstagramConnectUrl,
     processInstagramOAuthCallback,
-    getConnectedInstagramAccount
+    getConnectedInstagramAccount,
+    refreshInstagramAccountMetrics
 } from "./instagram.service.js";
 
 // Initiates the Meta Instagram Unified Login OAuth flow for the authenticated creator.
@@ -58,8 +59,22 @@ const getConnectedInstagramAccountDetails = asyncHandler(async (req, res) => {
     );
 });
 
+// Manually refreshes Instagram metrics (profile & engagement) for the authenticated creator.
+// Excludes encrypted credentials and returns safe updated account metrics.
+const refreshInstagramAccount = asyncHandler(async (req, res) => {
+    const data = await refreshInstagramAccountMetrics(req.user.userId);
+
+    return sendResponse(
+        res,
+        200,
+        data.message || "Instagram metrics refreshed successfully",
+        data
+    );
+});
+
 export {
     initiateInstagramConnect,
     handleInstagramCallback,
-    getConnectedInstagramAccountDetails
+    getConnectedInstagramAccountDetails,
+    refreshInstagramAccount
 };

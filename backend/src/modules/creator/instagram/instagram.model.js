@@ -81,6 +81,57 @@ const instagramAccountSchema = new mongoose.Schema(
             min: 0
         },
 
+        // Calculated engagement rate percentage based on recent eligible posts ((avgLikes + avgComments) / followers) * 100.
+        // Defaults to null to distinguish uncalculated accounts from genuine 0% engagement.
+        engagementRate: {
+            type: Number,
+            default: null,
+            min: 0
+        },
+
+        // Average likes count across sampled eligible recent posts.
+        averageLikes: {
+            type: Number,
+            default: null,
+            min: 0
+        },
+
+        // Average comments count across sampled eligible recent posts.
+        averageComments: {
+            type: Number,
+            default: null,
+            min: 0
+        },
+
+        // Number of eligible recent posts included in the engagement sample (0 to 12).
+        engagementPostCount: {
+            type: Number,
+            default: 0,
+            min: 0
+        },
+
+        // Timestamp when engagement metrics were last calculated and synced from Meta Graph API.
+        engagementLastSyncedAt: {
+            type: Date,
+            default: null
+        },
+
+        // Flag indicating whether CreatorProfile metrics need reconciliation
+        // (set to true if CreatorProfile update fails during standalone non-transaction connect/sync).
+        needsProfileSync: {
+            type: Boolean,
+            default: false,
+            index: true
+        },
+
+        // Monotonic version counter incremented on every fresh sync from Meta API.
+        // Prevents out-of-order or stale reconciliation writes.
+        syncVersion: {
+            type: Number,
+            default: 0,
+            index: true
+        },
+
         // AES-256-GCM encrypted access token (never stored in plaintext).
         encryptedAccessToken: {
             type: encryptedTokenSchema,
@@ -95,6 +146,22 @@ const instagramAccountSchema = new mongoose.Schema(
         // Timestamp of the most recent data sync from Meta Graph API.
         lastSyncedAt: {
             type: Date
+        },
+
+        // Connection status of the Instagram integration.
+        // Defaults to CONNECTED ensuring backward compatibility with existing documents.
+        status: {
+            type: String,
+            enum: ["CONNECTED", "DISCONNECTED", "EXPIRED"],
+            default: "CONNECTED",
+            index: true
+        },
+
+        // Reason or error message when the connection is disconnected or expired.
+        disconnectionReason: {
+            type: String,
+            trim: true,
+            default: ""
         }
     },
     {

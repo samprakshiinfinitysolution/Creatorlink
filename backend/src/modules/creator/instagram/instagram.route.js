@@ -4,7 +4,8 @@ import authorizeRoles from "../../../middleware/role.middleware.js";
 import {
     initiateInstagramConnect,
     handleInstagramCallback,
-    getConnectedInstagramAccountDetails
+    getConnectedInstagramAccountDetails,
+    refreshInstagramAccount
 } from "./instagram.controller.js";
 
 const router = express.Router();
@@ -23,6 +24,22 @@ router.get(
     authenticateUser,
     authorizeRoles("creator"),
     getConnectedInstagramAccountDetails
+);
+
+// Manually refreshes Instagram profile metrics and engagement statistics for the authenticated creator.
+router.post(
+    "/refresh",
+    authenticateUser,
+    authorizeRoles("creator"),
+    refreshInstagramAccount
+);
+
+// Also provide /sync alias for convenience
+router.post(
+    "/sync",
+    authenticateUser,
+    authorizeRoles("creator"),
+    refreshInstagramAccount
 );
 
 // Public OAuth callback invoked by Meta after creator completes or cancels authorization.

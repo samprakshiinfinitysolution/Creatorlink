@@ -426,17 +426,16 @@ const createProfileValidation = (req, res, next) => {
         }
     }
 
-    // Validate engagementRate (numeric percentage, 0 to 100).
+    // Validate engagementRate (non-negative numeric percentage).
     if (engagementRate !== undefined && engagementRate !== null && engagementRate !== "") {
         const parsedEng = Number(engagementRate);
         if (
-            Number.isNaN(parsedEng) ||
-            parsedEng < 0 ||
-            parsedEng > 100
+            !Number.isFinite(parsedEng) ||
+            parsedEng < 0
         ) {
             throw createApiError(
                 400,
-                "Engagement rate must be between 0 and 100"
+                "Engagement rate must be a non-negative finite number"
             );
         }
     }

@@ -141,8 +141,15 @@ const profileSchema = new mongoose.Schema(
         engagementRate: {
             type: Number,
             default: null,
-            min: 0,
-            max: 100
+            min: 0
+        },
+
+        // Monotonic version counter for Instagram metric syncs.
+        // Rejects any concurrent or out-of-order write from an older syncVersion.
+        instagramSyncVersion: {
+            type: Number,
+            default: 0,
+            index: true
         },
 
         // Indicates whether this profile is an explicitly seeded demo account.

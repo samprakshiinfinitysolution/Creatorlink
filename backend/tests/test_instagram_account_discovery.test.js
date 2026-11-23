@@ -7,7 +7,11 @@ import { connectTestDatabase } from "../src/config/database.js";
 import {
     fetchAssignedInstagramAccounts,
     fetchInstagramAccountProfile,
-    processInstagramOAuthCallback
+    processInstagramOAuthCallback,
+    classifyMetaError,
+    handleMetaGraphApiError,
+    getConnectedInstagramAccount,
+    persistInstagramConnection
 } from "../src/modules/creator/instagram/instagram.service.js";
 import { generateOAuthState } from "../src/modules/creator/instagram/instagramOAuthState.helper.js";
 import InstagramOAuthState from "../src/modules/creator/instagram/instagramOAuthState.model.js";
@@ -724,6 +728,114 @@ try {
     assert.strictEqual(resultMulti.profile, undefined, "Profile must not be arbitrarily fetched");
     assert.ok(resultMulti.redirectUrl.includes("instagram=multiple_accounts"));
     console.log("✓ Multiple accounts integration: connection NOT completed (requiresSelection: true, no accessToken exposed).");
+
+    // -------------------------------------------------------------------------
+    // 12. Phase 2: Meta Graph API Error Classification & Token Invalidation
+    // -------------------------------------------------------------------------
+    console.log("\n--- 12. Testing Meta Error Classification & Token Invalidation ---");
+
+    // 12A. classifyMetaError Unit Checks
+    // Code 190 without subcode
+    const generic190 = classifyMetaError({ code: 190, message: "Invalid OAuth access token." });
+    assert.strictEqual(generic190.isInvalidToken, true);
+    assert.strictEqual(generic190.code, 190);
+    assert.ok(generic190.userFriendlyReason.includes("expired or is no longer valid"));
+
+    // Code 190 Subcode 458 (Deauthorized/Revoked)
+    const sub458 = classifyMetaError({ code: 190, error_subcode: 458, message: "User revoked" });
+    assert.strictEqual(sub458.isInvalidToken, true);
+    assert.strictEqual(sub458.subcode, 458);
+    assert.ok(sub458.userFriendlyReason.includes("revoked or the application was uninstalled"));
+
+    // Code 190 Subcode 460 (Password changed/session reset)
+    const sub460 = classifyMetaError({ code: 190, error_subcode: 460, message: "Password reset" });
+    assert.strictEqual(sub460.isInvalidToken, true);
+    assert.strictEqual(sub460.subcode, 460);
+    assert.ok(sub460.userFriendlyReason.includes("session was reset or password was changed"));
+
+    // Code 190 Subcode 463 (Token expired)
+    const sub463 = classifyMetaError({ code: 190, error_subcode: 463, message: "Session expired" });
+    assert.strictEqual(sub463.isInvalidToken, true);
+    assert.strictEqual(sub463.subcode, 463);
+    assert.ok(sub463.userFriendlyReason.includes("access token has expired"));
+
+    // Code 190 Subcode 467 (Invalidated/Logged out)
+    const sub467 = classifyMetaError({ code: 190, error_subcode: 467, message: "Logged out" });
+    assert.strictEqual(sub467.isInvalidToken, true);
+    assert.strictEqual(sub467.subcode, 467);
+    assert.ok(sub467.userFriendlyReason.includes("invalidated or user logged out"));
+
+    // Code 10: Permission error MUST NOT be classified as invalid token
+    const code10 = classifyMetaError({ code: 10, message: "Application does not have capability" });
+    assert.strictEqual(code10.isInvalidToken, false);
+    assert.strictEqual(code10.code, 10);
+    assert.ok(code10.userFriendlyReason.includes("does not have permission"));
+
+    // Code 100: Parameter error MUST NOT be classified as invalid token
+    const code100 = classifyMetaError({ code: 100, message: "Tried accessing nonexisting field" });
+    assert.strictEqual(code100.isInvalidToken, false);
+    assert.strictEqual(code100.code, 100);
+
+    // Null/undefined error
+    const nullError = classifyMetaError(null);
+    assert.strictEqual(nullError.isInvalidToken, false);
+
+    console.log("✓ Meta error classification passed: Code 190 & subcodes (458, 460, 463, 467) detected; Code 10 & 100 NOT marked invalid.");
+
+    // 12B. handleMetaGraphApiError: Invalidation updates document status to EXPIRED
+    const testPhase2Creator = new mongoose.Types.ObjectId();
+    const testPhase2IgId = "17841499999999999";
+    await InstagramAccount.deleteMany({ creator: testPhase2Creator });
+
+    await InstagramAccount.create({
+        creator: testPhase2Creator,
+        instagramUserId: testPhase2IgId,
+        username: "phase2_creator",
+        followersCount: 1000,
+        mediaCount: 10,
+        encryptedAccessToken: { iv: "a".repeat(24), content: "b".repeat(32), tag: "c".repeat(32) },
+        status: "CONNECTED",
+        disconnectionReason: ""
+    });
+
+    // Verify initial status is CONNECTED
+    const initialAccount = await getConnectedInstagramAccount(testPhase2Creator);
+    assert.strictEqual(initialAccount.isConnected, true);
+    assert.strictEqual(initialAccount.account.status, "CONNECTED");
+    assert.strictEqual(initialAccount.account.disconnectionReason, "");
+
+    // Simulate Code 10 permission error -> status MUST NOT change
+    await handleMetaGraphApiError(
+        { code: 10, message: "(#10) Missing capability" },
+        { creatorId: testPhase2Creator, operation: "testPermissionCheck" }
+    );
+    const afterCode10Account = await getConnectedInstagramAccount(testPhase2Creator);
+    assert.strictEqual(afterCode10Account.isConnected, true);
+    assert.strictEqual(afterCode10Account.account.status, "CONNECTED", "Status must remain CONNECTED on Code 10");
+    assert.strictEqual(afterCode10Account.account.disconnectionReason, "", "Reason must remain empty on Code 10");
+
+    // Simulate Code 100 parameter error -> status MUST NOT change
+    await handleMetaGraphApiError(
+        { code: 100, message: "Invalid field" },
+        { creatorId: testPhase2Creator, operation: "testParamCheck" }
+    );
+    const afterCode100Account = await getConnectedInstagramAccount(testPhase2Creator);
+    assert.strictEqual(afterCode100Account.isConnected, true);
+    assert.strictEqual(afterCode100Account.account.status, "CONNECTED", "Status must remain CONNECTED on Code 100");
+
+    // Simulate Code 190 token invalidation -> status MUST update to EXPIRED
+    await handleMetaGraphApiError(
+        { code: 190, error_subcode: 463, message: "Session expired" },
+        { creatorId: testPhase2Creator, operation: "testProfileSync" }
+    );
+    const afterCode190Account = await getConnectedInstagramAccount(testPhase2Creator);
+    assert.strictEqual(afterCode190Account.isConnected, false, "isConnected must be false when EXPIRED");
+    assert.strictEqual(afterCode190Account.account.status, "EXPIRED", "Status must be EXPIRED on Code 190");
+    assert.ok(afterCode190Account.account.disconnectionReason.includes("access token has expired"));
+
+    // Cleanup Phase 2 test records
+    await InstagramAccount.deleteMany({ creator: testPhase2Creator });
+    console.log("✓ handleMetaGraphApiError passed: Code 190 marks document EXPIRED; Code 10 & Code 100 retain CONNECTED status.");
 
 } finally {
     global.fetch = originalFetch;

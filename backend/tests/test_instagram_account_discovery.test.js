@@ -497,9 +497,10 @@ try {
     // Verify Graph API URL & Bearer token
     assert.strictEqual(
         capturedProfileUrl,
-        "https://graph.facebook.com/v27.0/1784140001?fields=id,username,name,account_type,profile_picture_url,followers_count,media_count"
+        "https://graph.facebook.com/v27.0/1784140001?fields=id,username,name,profile_picture_url,followers_count,media_count"
     );
     assert.strictEqual(capturedProfileHeaders.Authorization, `Bearer ${mockToken}`);
+    assert.strictEqual(profile.accountType, "", "Missing account_type defaults to empty string");
     console.log("✓ Profile successfully fetched with verified field parity and InstagramAccount model compatibility.");
 
     // -------------------------------------------------------------------------
@@ -641,7 +642,6 @@ try {
                 id: "1784140001",
                 username: "solo_creator",
                 name: "Solo Creator",
-                account_type: "CREATOR",
                 profile_picture_url: "https://example.com/solo.jpg",
                 followers_count: 25000,
                 media_count: 50
@@ -661,14 +661,14 @@ try {
     assert.ok(resultSingle.profile, "Profile data must be returned internally");
     assert.strictEqual(resultSingle.profile.instagramUserId, "1784140001");
     assert.strictEqual(resultSingle.profile.username, "solo_creator");
-    assert.strictEqual(resultSingle.profile.accountType, "CREATOR", "Profile accountType must be CREATOR");
+    assert.strictEqual(resultSingle.profile.accountType, "", "Profile accountType must default to empty string when not provided by Meta");
     assert.strictEqual(resultSingle.profile.followersCount, 25000);
     assert.strictEqual(resultSingle.profile.mediaCount, 50);
 
     // Verify persistence in MongoDB
     const persistedAccount = await InstagramAccount.findOne({ creator: testCreatorId });
     assert.ok(persistedAccount, "Account must be persisted in MongoDB");
-    assert.strictEqual(persistedAccount.accountType, "CREATOR", "Persisted account must have accountType saved as CREATOR in MongoDB");
+    assert.strictEqual(persistedAccount.accountType, "", "Persisted account must have accountType saved as empty string in MongoDB");
 
     // Secrets hygiene
     assert.ok(!resultSingle.redirectUrl.includes(testSecretToken), "Token must NEVER leak in redirectUrl");

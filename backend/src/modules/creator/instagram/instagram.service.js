@@ -213,7 +213,7 @@ const fetchInstagramAccountProfile = async (instagramAccountId, accessToken) => 
     }
 
     const cleanAccountId = instagramAccountId.trim();
-    const profileUrl = `https://graph.facebook.com/v27.0/${encodeURIComponent(cleanAccountId)}?fields=id,username,name,account_type,profile_picture_url,followers_count,media_count`;
+    const profileUrl = `https://graph.facebook.com/v27.0/${encodeURIComponent(cleanAccountId)}?fields=id,username,name,profile_picture_url,followers_count,media_count`;
 
     let response;
     try {
@@ -225,18 +225,31 @@ const fetchInstagramAccountProfile = async (instagramAccountId, accessToken) => 
             }
         });
     } catch {
-        throw new Error("Network error occurred while fetching Instagram profile metrics.");
+        const netErr = new Error("Network error occurred while fetching Instagram profile metrics.");
+        netErr.operation = "fetchInstagramAccountProfile";
+        throw netErr;
     }
 
     let data;
     try {
         data = await response.json();
     } catch {
-        throw new Error("Received malformed or non-JSON response while fetching Instagram profile.");
+        const parseErr = new Error("Received malformed or non-JSON response while fetching Instagram profile.");
+        parseErr.operation = "fetchInstagramAccountProfile";
+        parseErr.status = response?.status;
+        throw parseErr;
     }
 
     if (!response.ok || !data || data.error) {
-        throw new Error("Meta API rejected the request to fetch Instagram profile.");
+        const metaError = new Error("Meta API rejected the request to fetch Instagram profile.");
+        metaError.operation = "fetchInstagramAccountProfile";
+        metaError.status = response?.status;
+        if (data && typeof data === "object" && data.error) {
+            metaError.metaCode = data.error.code;
+            metaError.metaMessage = data.error.message;
+            metaError.fbtraceId = data.error.fbtrace_id;
+        }
+        throw metaError;
     }
 
     if (!data || typeof data !== "object" || Array.isArray(data)) {
@@ -592,6 +605,14 @@ const processInstagramOAuthCallback = async ({
             tokenData.accessToken
         );
     } catch (profileErr) {
+        console.error("[Instagram Profile Fetch Error]", {
+            operation: profileErr?.operation || "fetchInstagramAccountProfile",
+            status: profileErr?.status || null,
+            metaCode: profileErr?.metaCode || null,
+            metaMessage: profileErr?.metaMessage || profileErr?.message || null,
+            fbtraceId: profileErr?.fbtraceId || null
+        });
+
         let safeMessage = "Failed to load Instagram profile metrics. Please try again.";
         const errMsg = (profileErr && profileErr.message) || "";
 

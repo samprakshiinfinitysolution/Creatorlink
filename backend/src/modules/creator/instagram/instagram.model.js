@@ -95,6 +95,22 @@ const instagramAccountSchema = new mongoose.Schema(
         // Timestamp of the most recent data sync from Meta Graph API.
         lastSyncedAt: {
             type: Date
+        },
+
+        // Connection status of the Instagram integration.
+        // Defaults to CONNECTED ensuring backward compatibility with existing documents.
+        status: {
+            type: String,
+            enum: ["CONNECTED", "DISCONNECTED", "EXPIRED"],
+            default: "CONNECTED",
+            index: true
+        },
+
+        // Reason or error message when the connection is disconnected or expired.
+        disconnectionReason: {
+            type: String,
+            trim: true,
+            default: ""
         }
     },
     {

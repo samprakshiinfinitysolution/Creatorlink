@@ -165,8 +165,9 @@ export default function CreatorSettingsManager() {
     return axiosInstance
       .get("/creator/instagram/account")
       .then((res) => {
-        if (res.data?.data?.isConnected && res.data?.data?.account) {
-          setConnectedAccount(res.data.data.account);
+        const accountData = res.data?.data?.account;
+        if (accountData) {
+          setConnectedAccount(accountData);
         } else {
           setConnectedAccount(null);
         }
@@ -280,6 +281,8 @@ export default function CreatorSettingsManager() {
     failedImageUrl !== connectedAccount?.profilePictureUrl;
 
   const accountTypeBadge = formatAccountType(connectedAccount?.accountType);
+  const isExpired = connectedAccount?.status === "EXPIRED";
+  const isConnected = Boolean(connectedAccount) && !isExpired;
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
@@ -355,7 +358,12 @@ export default function CreatorSettingsManager() {
                   <span className="w-1.5 h-1.5 rounded-full bg-neutral-400/50" />
                   <span className="h-3 w-16 bg-neutral-400/20 rounded" />
                 </span>
-              ) : connectedAccount ? (
+              ) : isExpired ? (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shrink-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                  Connection Expired
+                </span>
+              ) : isConnected ? (
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                   Connected
@@ -433,6 +441,15 @@ export default function CreatorSettingsManager() {
                   </div>
                   {connectedAccount ? (
                     <div className="space-y-2 pt-0.5">
+                      {isExpired && (
+                        <div className="flex items-center gap-1.5 text-[11px] text-amber-600 dark:text-amber-400 font-medium">
+                          <AlertCircleIcon className="w-3.5 h-3.5 shrink-0" />
+                          <span>
+                            {connectedAccount.disconnectionReason ||
+                              "Instagram connection expired. Please reconnect."}
+                          </span>
+                        </div>
+                      )}
                       {/* Metric Cards / Pills */}
                       <div className="flex items-center gap-2 flex-wrap">
                         {/* Followers Pill */}

@@ -3,13 +3,130 @@ import {
     generateOAuthState,
     consumeOAuthState
 } from "./instagramOAuthState.helper.js";
-import { encryptToken } from "../../../utils/helpers/encryption.helper.js";
+import { encryptToken, decryptToken } from "../../../utils/helpers/encryption.helper.js";
 import InstagramAccount from "./instagram.model.js";
 import CreatorProfile from "../profile/profile.model.js";
 
 // Helper to determine the configured frontend base URL without trailing slashes.
 const getFrontendBaseUrl = () => {
     return (process.env.FRONTEND_URL || "http://localhost:3000").replace(/\/+$/, "");
+};
+
+/**
+ * Classifies a Meta Graph API error payload into a standardized diagnostic object.
+ * Identifies token invalidation (Code 190) and categorizes known subcodes without exposing secrets.
+ *
+ * @param {Object} errorPayload - Raw error object from Meta response (data.error or response body).
+ * @returns {Object} Normalized classification with isInvalidToken, code, subcode, and userFriendlyReason.
+ */
+const classifyMetaError = (errorPayload) => {
+    if (!errorPayload || typeof errorPayload !== "object") {
+        return {
+            isInvalidToken: false,
+            code: null,
+            subcode: null,
+            type: "UnknownError",
+            metaMessage: "Unknown Meta API error.",
+            userFriendlyReason: "Meta API request failed."
+        };
+    }
+
+    const rawError = errorPayload.error || errorPayload;
+    const code = Number.isInteger(Number(rawError.code)) ? Number(rawError.code) : null;
+    const subcode = Number.isInteger(Number(rawError.error_subcode)) ? Number(rawError.error_subcode) : null;
+    const type = typeof rawError.type === "string" ? rawError.type.trim() : "OAuthException";
+    const metaMessage = typeof rawError.message === "string" ? rawError.message.trim() : "";
+    const fbtraceId = typeof rawError.fbtrace_id === "string" ? rawError.fbtrace_id.trim() : null;
+
+    // Strict detection: Code 190 represents OAuth token invalidation / revocation / expiration.
+    // Explicitly reject permission errors (Code 10), parameter errors (Code 100), rate limits, etc.
+    if (code === 190) {
+        let userFriendlyReason = "Instagram access token has expired or is no longer valid. Please reconnect.";
+
+        if (subcode === 458) {
+            userFriendlyReason = "Instagram connection was revoked or the application was uninstalled.";
+        } else if (subcode === 460) {
+            userFriendlyReason = "Instagram session was reset or password was changed. Please reconnect.";
+        } else if (subcode === 463) {
+            userFriendlyReason = "Instagram access token has expired. Please reconnect.";
+        } else if (subcode === 467) {
+            userFriendlyReason = "Instagram access token has been invalidated or user logged out.";
+        }
+
+        return {
+            isInvalidToken: true,
+            code,
+            subcode,
+            type,
+            metaMessage,
+            userFriendlyReason,
+            fbtraceId
+        };
+    }
+
+    return {
+        isInvalidToken: false,
+        code,
+        subcode,
+        type,
+        metaMessage,
+        userFriendlyReason: code === 10
+            ? "Application does not have permission or capability for this action."
+            : (metaMessage || "Meta API request failed."),
+        fbtraceId
+    };
+};
+
+/**
+ * Centrally handles Meta Graph API errors.
+ * Classifies the error, updates MongoDB status to EXPIRED if token is revoked/invalid (Code 190),
+ * and logs safe diagnostics without exposing tokens or secrets.
+ *
+ * @param {Object} errorPayload - Raw error object from Meta response (data.error or Error with meta properties).
+ * @param {Object} [context={}] - Context containing creatorId, instagramUserId, and/or operation name.
+ * @returns {Promise<Object>} Normalized classification result.
+ */
+const handleMetaGraphApiError = async (errorPayload, context = {}) => {
+    const classification = classifyMetaError(errorPayload);
+    const operation = context.operation || "MetaGraphApi";
+
+    // Safe diagnostic logging: NEVER print access tokens, secrets, or encryption keys
+    console.error(`[Meta Graph API Error] [${operation}]:`, {
+        code: classification.code,
+        subcode: classification.subcode,
+        type: classification.type,
+        message: classification.metaMessage,
+        isInvalidToken: classification.isInvalidToken,
+        fbtraceId: classification.fbtraceId
+    });
+
+    // If actual token invalidation is confirmed (Code 190), mark account as EXPIRED in MongoDB
+    if (classification.isInvalidToken) {
+        const query = {};
+        if (context.creatorId) {
+            query.creator = context.creatorId;
+        } else if (context.instagramAccountId || context.instagramUserId) {
+            query.instagramUserId = (context.instagramAccountId || context.instagramUserId).toString().trim();
+        }
+
+        if (Object.keys(query).length > 0) {
+            try {
+                await InstagramAccount.findOneAndUpdate(
+                    query,
+                    {
+                        $set: {
+                            status: "EXPIRED",
+                            disconnectionReason: classification.userFriendlyReason
+                        }
+                    }
+                );
+            } catch (dbErr) {
+                console.error("[Meta Graph API Error] Failed to update account status to EXPIRED:", dbErr.message);
+            }
+        }
+    }
+
+    return classification;
 };
 
 // Generates the official Meta Unified Login OAuth authorization URL for a CreatorLink creator.
@@ -123,7 +240,7 @@ const exchangeMetaAuthorizationCode = async (code) => {
 
 // Discovers assigned Instagram Professional accounts via Meta Graph API v27.0.
 // Handles zero, single, and multiple assigned accounts safely.
-const fetchAssignedInstagramAccounts = async (accessToken) => {
+const fetchAssignedInstagramAccounts = async (accessToken, context = {}) => {
     if (!accessToken || typeof accessToken !== "string" || accessToken.trim().length === 0) {
         throw new Error("Access token is required for account discovery.");
     }
@@ -151,6 +268,12 @@ const fetchAssignedInstagramAccounts = async (accessToken) => {
     }
 
     if (!response.ok || !data || data.error) {
+        if (data && typeof data === "object" && data.error) {
+            await handleMetaGraphApiError(data.error, {
+                ...context,
+                operation: "fetchAssignedInstagramAccounts"
+            });
+        }
         throw new Error("Meta API rejected the request to discover assigned Instagram accounts.");
     }
 
@@ -203,7 +326,7 @@ const fetchAssignedInstagramAccounts = async (accessToken) => {
 
 // Fetches verified profile fields and metrics for a specific Instagram Professional account.
 // Validates types strictly, checks ID parity, and ensures metric values are non-negative finite numbers.
-const fetchInstagramAccountProfile = async (instagramAccountId, accessToken) => {
+const fetchInstagramAccountProfile = async (instagramAccountId, accessToken, context = {}) => {
     if (!instagramAccountId || typeof instagramAccountId !== "string" || instagramAccountId.trim().length === 0) {
         throw new Error("Instagram account ID must be a non-empty string.");
     }
@@ -241,13 +364,25 @@ const fetchInstagramAccountProfile = async (instagramAccountId, accessToken) => 
     }
 
     if (!response.ok || !data || data.error) {
+        let classification = null;
+        if (data && typeof data === "object" && data.error) {
+            classification = await handleMetaGraphApiError(data.error, {
+                ...context,
+                instagramAccountId: cleanAccountId,
+                operation: "fetchInstagramAccountProfile"
+            });
+        }
+
         const metaError = new Error("Meta API rejected the request to fetch Instagram profile.");
         metaError.operation = "fetchInstagramAccountProfile";
         metaError.status = response?.status;
         if (data && typeof data === "object" && data.error) {
             metaError.metaCode = data.error.code;
+            metaError.metaSubcode = data.error.error_subcode;
             metaError.metaMessage = data.error.message;
             metaError.fbtraceId = data.error.fbtrace_id;
+            metaError.isInvalidToken = classification?.isInvalidToken || false;
+            metaError.userFriendlyReason = classification?.userFriendlyReason || "";
         }
         throw metaError;
     }
@@ -419,6 +554,8 @@ const persistInstagramConnection = async ({ creatorId, tokenData, profileData })
                     mediaCount: Math.floor(profileData.mediaCount),
                     encryptedAccessToken: encryptedToken,
                     tokenExpiresAt,
+                    status: "CONNECTED",
+                    disconnectionReason: "",
                     lastSyncedAt: new Date()
                 }
             },
@@ -564,7 +701,7 @@ const processInstagramOAuthCallback = async ({
     // 5. Step 5C: Discover assigned Instagram Professional accounts
     let discoveryResult;
     try {
-        discoveryResult = await fetchAssignedInstagramAccounts(tokenData.accessToken);
+        discoveryResult = await fetchAssignedInstagramAccounts(tokenData.accessToken, { creatorId });
     } catch (discoveryErr) {
         let safeMessage = "Unable to find connected Instagram account. Please ensure an Instagram Creator or Business account is linked and selected.";
         const errMsg = (discoveryErr && discoveryErr.message) || "";
@@ -602,7 +739,8 @@ const processInstagramOAuthCallback = async ({
     try {
         profileData = await fetchInstagramAccountProfile(
             discoveryResult.selectedAccount.id,
-            tokenData.accessToken
+            tokenData.accessToken,
+            { creatorId, instagramAccountId: discoveryResult.selectedAccount.id }
         );
     } catch (profileErr) {
         console.error("[Instagram Profile Fetch Error]", {
@@ -668,8 +806,10 @@ const getConnectedInstagramAccount = async (creatorId) => {
         };
     }
 
+    const isConnected = account.status ? account.status === "CONNECTED" : true;
+
     return {
-        isConnected: true,
+        isConnected,
         account: {
             instagramUserId: account.instagramUserId,
             username: account.username,
@@ -677,6 +817,8 @@ const getConnectedInstagramAccount = async (creatorId) => {
             profilePictureUrl: account.profilePictureUrl || "",
             followersCount: typeof account.followersCount === "number" ? account.followersCount : 0,
             mediaCount: typeof account.mediaCount === "number" ? account.mediaCount : 0,
+            status: account.status || "CONNECTED",
+            disconnectionReason: account.disconnectionReason || "",
             lastSyncedAt: account.lastSyncedAt || null,
             createdAt: account.createdAt,
             updatedAt: account.updatedAt
@@ -691,5 +833,7 @@ export {
     fetchAssignedInstagramAccounts,
     fetchInstagramAccountProfile,
     persistInstagramConnection,
-    getConnectedInstagramAccount
+    getConnectedInstagramAccount,
+    classifyMetaError,
+    handleMetaGraphApiError
 };

@@ -14,8 +14,66 @@ import ChangePasswordForm from "@/components/common/Security/ChangePasswordForm"
 // =========================================================
 function InstagramIcon({ className = "w-5 h-5" }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" strokeWidth={2.5} />
+    </svg>
+  );
+}
+
+function UsersIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.805 3.75 3.75 0 00-5.741-3.238M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-15 9a5.25 5.25 0 0110.5 0v.75H6v-.75z" />
+    </svg>
+  );
+}
+
+function PhotoIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+    </svg>
+  );
+}
+
+function ChartBarIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+    </svg>
+  );
+}
+
+function HeartIcon({ className = "w-3.5 h-3.5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+    </svg>
+  );
+}
+
+function ChatBubbleIcon({ className = "w-3.5 h-3.5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a.75.75 0 01-.84-.84 4.542 4.542 0 00.99-2.073A7.838 7.838 0 013 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
+    </svg>
+  );
+}
+
+function ExternalLinkIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+    </svg>
+  );
+}
+
+function SyncArrowsIcon({ className = "w-3.5 h-3.5" }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
     </svg>
   );
 }
@@ -109,7 +167,7 @@ function ClockIcon({ className = "w-3 h-3" }) {
   );
 }
 
-function formatSyncDate(dateValue) {
+function formatSyncDateWithTime(dateValue) {
   if (!dateValue) return "Sync time unavailable";
   const date = new Date(dateValue);
   const time = date.getTime();
@@ -118,13 +176,19 @@ function formatSyncDate(dateValue) {
   }
 
   try {
-    return `Last synced: ${new Intl.DateTimeFormat(undefined, {
-      year: "numeric",
-      month: "short",
+    const formattedDate = new Intl.DateTimeFormat("en-GB", {
       day: "numeric",
+      month: "short",
+      year: "numeric",
+    }).format(date);
+
+    const formattedTime = new Intl.DateTimeFormat("en-US", {
       hour: "numeric",
       minute: "2-digit",
-    }).format(date)}`;
+      hour12: true,
+    }).format(date).toLowerCase();
+
+    return `Last synced: ${formattedDate}, ${formattedTime}`;
   } catch {
     return "Sync time unavailable";
   }
@@ -137,21 +201,12 @@ function formatMetricCount(value) {
   return num.toLocaleString();
 }
 
-function formatAccountType(accountType) {
-  if (!accountType || typeof accountType !== "string") return null;
-  const normalized = accountType.trim().toUpperCase();
-  if (normalized === "CREATOR") return "Creator Account";
-  if (normalized === "BUSINESS") return "Business Account";
-  return null;
-}
-
 export default function CreatorSettingsManager() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoadingAccount, setIsLoadingAccount] = useState(true);
   const [connectedAccount, setConnectedAccount] = useState(null);
-  const [failedImageUrl, setFailedImageUrl] = useState("");
   const [feedback, setFeedback] = useState(null);
 
   const searchParams = useSearchParams();
@@ -311,11 +366,6 @@ export default function CreatorSettingsManager() {
     }
   };
 
-  const showProfileImage =
-    Boolean(connectedAccount?.profilePictureUrl) &&
-    failedImageUrl !== connectedAccount?.profilePictureUrl;
-
-  const accountTypeBadge = formatAccountType(connectedAccount?.accountType);
   const isExpired = connectedAccount?.status === "EXPIRED";
   const isConnected = Boolean(connectedAccount) && !isExpired;
 
@@ -330,7 +380,7 @@ export default function CreatorSettingsManager() {
         <CreatorHeader setMobileOpen={setMobileOpen} />
 
         {/* Settings Main Container */}
-        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6 max-w-4xl w-full mx-auto min-w-0">
+        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6 w-full min-w-0">
           {/* Header Title & Actions Banner */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
@@ -359,54 +409,43 @@ export default function CreatorSettingsManager() {
           </div>
 
           {/* Instagram Integration Section */}
-          <section className="bg-surface border border-border-theme rounded-2xl p-5 sm:p-6 shadow-xs space-y-5">
-            <div className="flex items-start justify-between gap-4 pb-4 border-b border-border-theme">
-              <div className="flex items-center gap-3">
-                {showProfileImage ? (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img
-                    src={connectedAccount.profilePictureUrl}
-                    alt={connectedAccount.username ? `@${connectedAccount.username}` : "Instagram profile"}
-                    width={40}
-                    height={40}
-                    referrerPolicy="no-referrer"
-                    onError={() => setFailedImageUrl(connectedAccount.profilePictureUrl)}
-                    className="w-10 h-10 rounded-full object-cover shrink-0 shadow-xs border border-border-theme"
-                  />
-                ) : (
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-                    <InstagramIcon className="w-5 h-5" />
-                  </div>
-                )}
+          <section className="bg-surface border border-border-theme rounded-2xl p-6 sm:p-7 shadow-xs space-y-6">
+            {/* Header: Instagram icon on top-left, title and description, Connected badge on top-right */}
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start sm:items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-neutral-100 dark:bg-neutral-800 text-[#171717] dark:text-neutral-100 flex items-center justify-center shrink-0 border border-neutral-200/60 dark:border-neutral-700">
+                  <InstagramIcon className="w-5 h-5 text-[#171717] dark:text-neutral-100" />
+                </div>
                 <div>
-                  <h2 className="text-base font-semibold text-foreground font-sans">
+                  <h2 className="text-base sm:text-lg font-bold text-foreground font-sans tracking-tight">
                     Instagram Integration
                   </h2>
-                  <p className="text-xs text-text-secondary mt-0.5">
+                  <p className="text-xs sm:text-sm text-text-secondary mt-0.5 font-sans">
                     Connect your Instagram Professional account to sync verified metrics and portfolio content.
                   </p>
                 </div>
               </div>
 
+              {/* Status Badge */}
               {isLoadingAccount ? (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium bg-neutral-500/10 text-neutral-400 border border-neutral-500/10 animate-pulse shrink-0">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-neutral-500/10 text-neutral-400 border border-neutral-500/10 animate-pulse shrink-0">
                   <span className="w-1.5 h-1.5 rounded-full bg-neutral-400/50" />
                   <span className="h-3 w-16 bg-neutral-400/20 rounded" />
                 </span>
               ) : isExpired ? (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shrink-0">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                  Connection Expired
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200/50 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800/40 shrink-0">
+                  <AlertCircleIcon className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                  <span>Connection Expired</span>
                 </span>
               ) : isConnected ? (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                  Connected
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800/40 shrink-0">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                  <span>Connected</span>
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-neutral-500/10 text-neutral-600 dark:text-neutral-400 border border-neutral-500/20 shrink-0">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-neutral-500/10 text-neutral-600 dark:text-neutral-400 border border-neutral-500/20 shrink-0">
                   <span className="w-1.5 h-1.5 rounded-full bg-neutral-400" />
-                  Ready to Connect
+                  <span>Ready to Connect</span>
                 </span>
               )}
             </div>
@@ -447,171 +486,183 @@ export default function CreatorSettingsManager() {
               </div>
             )}
 
-            {/* Action Box */}
+            {/* Middle Section: Account Information and 3 Metrics */}
             {isLoadingAccount ? (
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 rounded-xl bg-surface-muted/30 border border-border-theme animate-pulse">
-                <div className="space-y-2">
-                  <div className="h-3.5 w-44 bg-foreground/10 rounded" />
-                  <div className="h-2.5 w-64 sm:w-80 bg-foreground/10 rounded" />
+              <div className="space-y-4 animate-pulse pt-1">
+                <div className="h-4 w-48 bg-foreground/10 rounded" />
+                <div className="h-6 w-60 bg-foreground/10 rounded" />
+                <div className="flex gap-2">
+                  <div className="h-6 w-24 bg-foreground/10 rounded-full" />
+                  <div className="h-6 w-28 bg-foreground/10 rounded-full" />
                 </div>
-                <div className="h-9 w-36 bg-foreground/10 rounded-xl shrink-0" />
               </div>
-            ) : (
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 rounded-xl bg-surface-muted/30 border border-border-theme">
+            ) : connectedAccount ? (
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pt-1">
+                {/* Left: Account title, handle, and pills */}
                 <div className="space-y-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-xs font-semibold text-foreground">
-                      Instagram Professional Account
-                    </h3>
-                    {connectedAccount && (
-                      <span className="text-[11px] font-medium text-[#ff2d6c] dark:text-[#ff4f87]">
-                        @{connectedAccount.username}
+                  <div className="text-xs sm:text-sm font-semibold text-foreground font-sans">
+                    Instagram Professional Account
+                  </div>
+                  <div className="flex items-center gap-2 pt-0.5">
+                    <span className="text-lg sm:text-xl font-bold text-foreground font-sans tracking-tight">
+                      @{connectedAccount.username}
+                    </span>
+                    <a
+                      href={`https://instagram.com/${connectedAccount.username}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#171717] dark:text-neutral-200 hover:text-[#ff2d6c] transition-colors p-0.5"
+                      title="View profile on Instagram"
+                    >
+                      <ExternalLinkIcon className="w-4 h-4 text-[#171717] dark:text-neutral-200" />
+                    </a>
+                  </div>
+
+                  {isExpired && (
+                    <div className="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400 font-medium pt-1">
+                      <AlertCircleIcon className="w-4 h-4 shrink-0" />
+                      <span>
+                        {connectedAccount.disconnectionReason || "Instagram connection expired. Please reconnect."}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Avg Likes & Avg Comments Pills */}
+                  <div className="flex items-center gap-2 pt-2 flex-wrap">
+                    {typeof connectedAccount.averageLikes === "number" && (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 border border-neutral-200/60 dark:border-neutral-700/60">
+                        <HeartIcon className="w-3.5 h-3.5 text-[#171717] dark:text-neutral-200" />
+                        <span>{connectedAccount.averageLikes.toLocaleString()} Avg Likes</span>
                       </span>
                     )}
-                    {accountTypeBadge && (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-neutral-500/10 text-neutral-600 dark:text-neutral-300 border border-neutral-500/20">
-                        {accountTypeBadge}
+                    {typeof connectedAccount.averageComments === "number" && (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 border border-neutral-200/60 dark:border-neutral-700/60">
+                        <ChatBubbleIcon className="w-3.5 h-3.5 text-[#171717] dark:text-neutral-200" />
+                        <span>{connectedAccount.averageComments.toLocaleString()} Avg Comments</span>
                       </span>
                     )}
                   </div>
-                  {connectedAccount ? (
-                    <div className="space-y-2 pt-0.5">
-                      {isExpired && (
-                        <div className="flex items-center gap-1.5 text-[11px] text-amber-600 dark:text-amber-400 font-medium">
-                          <AlertCircleIcon className="w-3.5 h-3.5 shrink-0" />
-                          <span>
-                            {connectedAccount.disconnectionReason ||
-                              "Instagram connection expired. Please reconnect."}
-                          </span>
-                        </div>
-                      )}
-                      {/* Metric Cards / Pills */}
-                      <div className="flex items-center gap-2 flex-wrap">
-                        {/* Followers Pill */}
-                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface border border-border-theme shadow-2xs">
-                          <span className="font-semibold text-foreground text-xs sm:text-[13px] font-sans">
-                            {formatMetricCount(connectedAccount.followersCount)}
-                          </span>
-                          <span className="text-[11px] text-text-secondary font-medium font-sans">
-                            Followers
-                          </span>
-                        </div>
-
-                        {/* Posts Pill */}
-                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface border border-border-theme shadow-2xs">
-                          <span className="font-semibold text-foreground text-xs sm:text-[13px] font-sans">
-                            {formatMetricCount(connectedAccount.mediaCount)}
-                          </span>
-                          <span className="text-[11px] text-text-secondary font-medium font-sans">
-                            Posts
-                          </span>
-                        </div>
-
-                        {/* Engagement Rate Pill */}
-                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface border border-border-theme shadow-2xs">
-                          <span className="font-semibold text-foreground text-xs sm:text-[13px] font-sans">
-                            {typeof connectedAccount.engagementRate === "number"
-                              ? `${connectedAccount.engagementRate}%`
-                              : "Unavailable"}
-                          </span>
-                          <span className="text-[11px] text-text-secondary font-medium font-sans">
-                            Engagement
-                          </span>
-                        </div>
-
-                        {/* Average Likes */}
-                        {typeof connectedAccount.averageLikes === "number" && (
-                          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface border border-border-theme shadow-2xs">
-                            <span className="font-semibold text-foreground text-xs sm:text-[13px] font-sans">
-                              {connectedAccount.averageLikes.toLocaleString()}
-                            </span>
-                            <span className="text-[11px] text-text-secondary font-medium font-sans">
-                              Avg Likes
-                            </span>
-                          </div>
-                        )}
-
-                        {/* Average Comments */}
-                        {typeof connectedAccount.averageComments === "number" && (
-                          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface border border-border-theme shadow-2xs">
-                            <span className="font-semibold text-foreground text-xs sm:text-[13px] font-sans">
-                              {connectedAccount.averageComments.toLocaleString()}
-                            </span>
-                            <span className="text-[11px] text-text-secondary font-medium font-sans">
-                              Avg Comments
-                            </span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Engagement Basis Note */}
-                      {typeof connectedAccount.engagementPostCount === "number" && connectedAccount.engagementPostCount > 0 && (
-                        <p className="text-[10px] text-text-secondary font-medium font-sans">
-                          Engagement calculated from {connectedAccount.engagementPostCount} recent posts
-                        </p>
-                      )}
-
-                      {/* Last Synced Date */}
-                      <p className="text-[10px] text-text-secondary flex items-center gap-1.5">
-                        <ClockIcon className="w-3 h-3 text-text-secondary/70 shrink-0" />
-                        <span>{formatSyncDate(connectedAccount.lastSyncedAt)}</span>
-                      </p>
-                    </div>
-                  ) : (
-                    <p className="text-[11px] text-text-secondary max-w-md leading-relaxed">
-                      Connecting your account verifies your follower count, media statistics, and posts directly via official Meta APIs.
-                    </p>
-                  )}
                 </div>
 
-                <div className="flex items-center gap-2.5 flex-wrap shrink-0">
-                  {connectedAccount && !isExpired && (
-                    <button
-                      type="button"
-                      onClick={handleRefreshMetrics}
-                      disabled={isRefreshing || isConnecting}
-                      className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-border-theme hover:bg-surface-muted text-foreground text-xs font-semibold tracking-wide transition-all shadow-2xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
-                    >
-                      {isRefreshing ? (
-                        <>
-                          <SpinnerIcon className="w-3.5 h-3.5" />
-                          <span>Syncing...</span>
-                        </>
-                      ) : (
-                        <>
-                          <ClockIcon className="w-3.5 h-3.5 text-text-secondary" />
-                          <span>Sync Metrics</span>
-                        </>
-                      )}
-                    </button>
-                  )}
+                {/* Right: Three metrics arranged horizontally */}
+                <div className="flex items-center gap-5 sm:gap-8 lg:gap-10 flex-wrap">
+                  {/* Followers */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-2xl bg-neutral-100 dark:bg-neutral-800 text-[#171717] dark:text-neutral-100 flex items-center justify-center shrink-0 border border-neutral-200/60 dark:border-neutral-700">
+                      <UsersIcon className="w-5 h-5 text-[#171717] dark:text-neutral-100" />
+                    </div>
+                    <div>
+                      <div className="text-xl sm:text-2xl font-bold text-foreground font-sans tracking-tight leading-none">
+                        {formatMetricCount(connectedAccount.followersCount)}
+                      </div>
+                      <div className="text-xs text-text-secondary font-medium font-sans mt-1">
+                        Followers
+                      </div>
+                    </div>
+                  </div>
 
+                  {/* Posts */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-2xl bg-neutral-100 dark:bg-neutral-800 text-[#171717] dark:text-neutral-100 flex items-center justify-center shrink-0 border border-neutral-200/60 dark:border-neutral-700">
+                      <PhotoIcon className="w-5 h-5 text-[#171717] dark:text-neutral-100" />
+                    </div>
+                    <div>
+                      <div className="text-xl sm:text-2xl font-bold text-foreground font-sans tracking-tight leading-none">
+                        {formatMetricCount(connectedAccount.mediaCount)}
+                      </div>
+                      <div className="text-xs text-text-secondary font-medium font-sans mt-1">
+                        Posts
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Engagement */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-2xl bg-neutral-100 dark:bg-neutral-800 text-[#171717] dark:text-neutral-100 flex items-center justify-center shrink-0 border border-neutral-200/60 dark:border-neutral-700">
+                      <ChartBarIcon className="w-5 h-5 text-[#171717] dark:text-neutral-100" />
+                    </div>
+                    <div>
+                      <div className="text-xl sm:text-2xl font-bold text-foreground font-sans tracking-tight leading-none">
+                        {typeof connectedAccount.engagementRate === "number"
+                          ? `${connectedAccount.engagementRate}%`
+                          : "Unavailable"}
+                      </div>
+                      <div className="text-xs text-text-secondary font-medium font-sans mt-1">
+                        Engagement
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <div className="text-xs sm:text-sm font-semibold text-foreground font-sans">
+                  Instagram Professional Account
+                </div>
+                <p className="text-xs sm:text-sm text-text-secondary mt-1 max-w-lg leading-relaxed font-sans">
+                  Connecting your account verifies your follower count, media statistics, and posts directly via official Meta APIs.
+                </p>
+              </div>
+            )}
+
+            {/* Footer: Last synced on left, Sync Metrics & Reconnect on right */}
+            <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-border-theme">
+              <div className="flex items-center gap-2 text-xs text-text-secondary font-medium font-sans">
+                <ClockIcon className="w-4 h-4 text-[#171717] dark:text-neutral-300 shrink-0" />
+                <span>
+                  {connectedAccount
+                    ? formatSyncDateWithTime(connectedAccount.lastSyncedAt || connectedAccount.updatedAt)
+                    : "Sync time unavailable"}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2.5 self-end sm:self-auto">
+                {connectedAccount && !isExpired && (
                   <button
                     type="button"
-                    onClick={handleConnectInstagram}
-                    disabled={isConnecting || isRefreshing}
-                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#ff2d6c] to-[#e0144c] hover:opacity-95 text-white text-xs font-semibold tracking-wide transition-all shadow-xs hover:shadow-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+                    onClick={handleRefreshMetrics}
+                    disabled={isRefreshing || isConnecting}
+                    className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-700 text-xs font-semibold text-neutral-900 dark:text-neutral-100 shadow-2xs transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isConnecting ? (
+                    {isRefreshing ? (
                       <>
-                        <SpinnerIcon className="w-4 h-4" />
-                        <span>Connecting...</span>
-                      </>
-                    ) : connectedAccount ? (
-                      <>
-                        <InstagramIcon className="w-4 h-4" />
-                        <span>Reconnect Instagram</span>
+                        <SpinnerIcon className="w-3.5 h-3.5 text-[#171717] dark:text-white" />
+                        <span>Syncing...</span>
                       </>
                     ) : (
                       <>
-                        <InstagramIcon className="w-4 h-4" />
-                        <span>Connect Instagram</span>
+                        <SyncArrowsIcon className="w-3.5 h-3.5 text-[#171717] dark:text-neutral-200" />
+                        <span>Sync Metrics</span>
                       </>
                     )}
                   </button>
-                </div>
+                )}
+
+                <button
+                  type="button"
+                  onClick={handleConnectInstagram}
+                  disabled={isConnecting || isRefreshing}
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-[#ff2d6c] hover:bg-[#e0144c] text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isConnecting ? (
+                    <>
+                      <SpinnerIcon className="w-3.5 h-3.5 text-white" />
+                      <span>Connecting...</span>
+                    </>
+                  ) : connectedAccount ? (
+                    <>
+                      <InstagramIcon className="w-3.5 h-3.5 text-white" />
+                      <span>Reconnect Instagram</span>
+                    </>
+                  ) : (
+                    <>
+                      <InstagramIcon className="w-3.5 h-3.5 text-white" />
+                      <span>Connect Instagram</span>
+                    </>
+                  )}
+                </button>
               </div>
-            )}
+            </div>
           </section>
 
           {/* Security & Authentication Section */}

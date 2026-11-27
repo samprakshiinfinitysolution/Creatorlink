@@ -5,10 +5,29 @@ import {
     initiateInstagramConnect,
     handleInstagramCallback,
     getConnectedInstagramAccountDetails,
-    refreshInstagramAccount
+    refreshInstagramAccount,
+    disconnectInstagramAccountHandler,
+    selectInstagramAccount,
+    getPendingInstagramAccounts
 } from "./instagram.controller.js";
 
 const router = express.Router();
+
+// Retrieves eligible accounts from a valid selection ticket
+router.post(
+    "/pending-accounts",
+    authenticateUser,
+    authorizeRoles("creator"),
+    getPendingInstagramAccounts
+);
+
+// Selects a specific Instagram account when Meta OAuth yields multiple accounts
+router.post(
+    "/select-account",
+    authenticateUser,
+    authorizeRoles("creator"),
+    selectInstagramAccount
+);
 
 // Initiates Meta Instagram Unified Login OAuth for the currently authenticated creator.
 router.get(
@@ -40,6 +59,21 @@ router.post(
     authenticateUser,
     authorizeRoles("creator"),
     refreshInstagramAccount
+);
+
+// Disconnects connected Instagram account and resets verified metrics.
+router.post(
+    "/disconnect",
+    authenticateUser,
+    authorizeRoles("creator"),
+    disconnectInstagramAccountHandler
+);
+
+router.delete(
+    "/account",
+    authenticateUser,
+    authorizeRoles("creator"),
+    disconnectInstagramAccountHandler
 );
 
 // Public OAuth callback invoked by Meta after creator completes or cancels authorization.

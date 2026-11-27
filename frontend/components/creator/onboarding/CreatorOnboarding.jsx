@@ -3,8 +3,9 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
+import axiosInstance from "@/lib/axios";
 import {
   getCreatorProfile,
   createCreatorProfile,
@@ -48,6 +49,117 @@ function formatErrorMessage(err, fallback = "An unexpected error occurred.") {
     }
   }
   return String(err) || fallback;
+}
+
+// =========================================================
+// INSTAGRAM VALIDATION & NORMALIZATION HELPERS
+// =========================================================
+const INSTAGRAM_RESERVED_PATHS = new Set([
+  "p",
+  "reel",
+  "reels",
+  "tv",
+  "stories",
+  "explore",
+  "direct",
+  "accounts",
+  "developer",
+  "about",
+  "legal",
+  "help",
+  "privacy",
+  "terms",
+  "support",
+  "api",
+  "directory",
+  "emails",
+  "guide",
+  "login",
+  "logout"
+]);
+
+function parseInstagramInput(input) {
+  if (!input || typeof input !== "string") {
+    return { isValid: false, username: "" };
+  }
+  const raw = input.trim();
+  if (!raw) {
+    return { isValid: false, username: "" };
+  }
+
+  let candidate = "";
+  const isUrlLike =
+    /^(https?:\/\/|[a-z0-9-]+\.[a-z0-9-]+|\/)/i.test(raw) ||
+    raw.includes("/") ||
+    raw.includes("://");
+
+  if (isUrlLike) {
+    let urlString = raw;
+    if (!/^https?:\/\//i.test(urlString)) {
+      urlString = `https://${urlString}`;
+    }
+
+    let parsedUrl;
+    try {
+      parsedUrl = new URL(urlString);
+    } catch {
+      return { isValid: false, username: "" };
+    }
+
+    const host = parsedUrl.hostname.toLowerCase();
+    if (host !== "instagram.com" && host !== "www.instagram.com") {
+      return { isValid: false, username: "" };
+    }
+
+    const segments = parsedUrl.pathname.split("/").filter(Boolean);
+    if (segments.length === 0) {
+      return { isValid: false, username: "" };
+    }
+
+    const firstSegment = segments[0].toLowerCase();
+    if (INSTAGRAM_RESERVED_PATHS.has(firstSegment)) {
+      return { isValid: false, username: "" };
+    }
+
+    if (segments.length > 1) {
+      return { isValid: false, username: "" };
+    }
+
+    candidate = segments[0];
+  } else {
+    // Handle format: @username or username
+    candidate = raw.replace(/^@+/, "").trim();
+  }
+
+  if (!candidate || candidate.length < 1 || candidate.length > 30) {
+    return { isValid: false, username: "" };
+  }
+
+  // Instagram username rules: letters, digits, underscores, dots.
+  // Cannot start or end with dot, no consecutive dots.
+  if (!/^[a-zA-Z0-9._]+$/.test(candidate)) {
+    return { isValid: false, username: "" };
+  }
+
+  if (candidate.startsWith(".") || candidate.endsWith(".") || candidate.includes("..")) {
+    return { isValid: false, username: "" };
+  }
+
+  if (INSTAGRAM_RESERVED_PATHS.has(candidate.toLowerCase())) {
+    return { isValid: false, username: "" };
+  }
+
+  return { isValid: true, username: candidate.toLowerCase() };
+}
+
+function normalizeInstagramUsername(input) {
+  const { username } = parseInstagramInput(input);
+  return username;
+}
+
+function isValidInstagramInput(input) {
+  const { isValid } = parseInstagramInput(input);
+  return isValid;
 }
 
 // =========================================================
@@ -453,6 +565,24 @@ export default function CreatorOnboarding() {
   const { portfolios } = useSelector((state) => state.portfolio || {});
   const { services } = useSelector((state) => state.services || {});
 
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const lastProcessedQueryRef = useRef("");
+
+  // Instagram connection & verification state
+  const [connectedInstagramAccount, setConnectedInstagramAccount] = useState(null);
+  const [isLoadingInstagram, setIsLoadingInstagram] = useState(true);
+  const [isConnectingInstagram, setIsConnectingInstagram] = useState(false);
+  const [instagramFeedback, setInstagramFeedback] = useState(null);
+
+  // Multiple Instagram accounts selection state
+  const [selectableAccounts, setSelectableAccounts] = useState([]);
+  const [selectedAccountId, setSelectedAccountId] = useState("");
+  const [pendingSelectionTicket, setPendingSelectionTicket] = useState(null);
+  const [isLoadingSelectableAccounts, setIsLoadingSelectableAccounts] = useState(false);
+  const [isSelectingAccount, setIsSelectingAccount] = useState(false);
+  const [isSelectionModalOpen, setIsSelectionModalOpen] = useState(false);
+
   // Current onboarding step (1 = Profile Info, 2 = Portfolio, 3 = Services, 4 = Payment Details)
   const [currentStep, setCurrentStep] = useState(1);
 
@@ -567,6 +697,188 @@ export default function CreatorOnboarding() {
           "Stripe card verification is not configured on this environment. CreatorLink is currently integrated with Razorpay Test Mode. You can proceed with Complete Onboarding below.",
       });
     }, 600);
+  };
+
+  // Fetch connected Instagram account details
+  const fetchConnectedInstagramAccount = useCallback(() => {
+    return axiosInstance
+      .get("/creator/instagram/account")
+      .then((res) => {
+        const account = res.data?.data?.account;
+        if (account && account.status === "CONNECTED") {
+          setConnectedInstagramAccount(account);
+          setFormData((prev) => {
+            if (!prev.socialLinks.instagram) {
+              return {
+                ...prev,
+                socialLinks: {
+                  ...prev.socialLinks,
+                  instagram: `https://instagram.com/${account.username}`
+                }
+              };
+            }
+            return prev;
+          });
+        } else {
+          setConnectedInstagramAccount(null);
+        }
+      })
+      .catch(() => {
+        setConnectedInstagramAccount(null);
+      })
+      .finally(() => {
+        setIsLoadingInstagram(false);
+      });
+  }, []);
+
+  // Fetch Instagram connection on mount
+  useEffect(() => {
+    fetchConnectedInstagramAccount();
+  }, [fetchConnectedInstagramAccount]);
+
+  // Handle Meta OAuth redirect back to Creator Onboarding
+  useEffect(() => {
+    if (!searchParams) return;
+    const instagramStatus = searchParams.get("instagram");
+    if (!instagramStatus) return;
+
+    const currentQueryKey = searchParams.toString();
+    if (lastProcessedQueryRef.current === currentQueryKey) return;
+    lastProcessedQueryRef.current = currentQueryKey;
+
+    if (instagramStatus === "success") {
+      const rawUser = searchParams.get("username")?.trim();
+      setInstagramFeedback({
+        type: "success",
+        message: rawUser
+          ? `Instagram account @${rawUser.replace(/^@/, "")} connected successfully!`
+          : "Instagram account connected successfully!"
+      });
+      fetchConnectedInstagramAccount();
+    } else if (instagramStatus === "cancelled") {
+      setInstagramFeedback({
+        type: "warning",
+        message: "Instagram connection was cancelled. Verification is required to proceed."
+      });
+    } else if (instagramStatus === "multiple_accounts") {
+      const ticket = searchParams.get("ticket");
+      if (ticket) {
+        setPendingSelectionTicket(ticket);
+        setSelectedAccountId("");
+        setSelectableAccounts([]);
+        setIsLoadingSelectableAccounts(true);
+        setIsSelectionModalOpen(true);
+        setInstagramFeedback(null);
+
+        axiosInstance
+          .post("/creator/instagram/pending-accounts", { ticket })
+          .then((res) => {
+            const accounts = res.data?.data?.accounts;
+            if (Array.isArray(accounts) && accounts.length > 0) {
+              setSelectableAccounts(accounts);
+            } else {
+              setIsSelectionModalOpen(false);
+              setInstagramFeedback({
+                type: "warning",
+                message: "No eligible Instagram accounts found in the selection session. Please reconnect."
+              });
+            }
+          })
+          .catch((err) => {
+            console.error("Failed to load selectable Instagram accounts:", err);
+            setIsSelectionModalOpen(false);
+            const errorMsg =
+              err.response?.data?.message ||
+              "Failed to load eligible Instagram accounts. Please try reconnecting.";
+            setInstagramFeedback({
+              type: "warning",
+              message: errorMsg
+            });
+          })
+          .finally(() => {
+            setIsLoadingSelectableAccounts(false);
+          });
+      } else {
+        setInstagramFeedback({
+          type: "warning",
+          message: "Multiple Instagram Professional accounts were found. Please ensure only one professional account is linked to your Facebook page."
+        });
+      }
+    } else if (instagramStatus === "error") {
+      const msg = searchParams.get("message")?.trim();
+      setInstagramFeedback({
+        type: "error",
+        message: msg || "Instagram authorization failed. Please try again."
+      });
+    }
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("instagram");
+    params.delete("username");
+    params.delete("message");
+    params.delete("ticket");
+    const newQuery = params.toString();
+    const cleanUrl = newQuery ? `${pathname}?${newQuery}` : pathname;
+    router.replace(cleanUrl, { scroll: false });
+  }, [searchParams, router, pathname, fetchConnectedInstagramAccount]);
+
+  // Handle account selection when multiple Instagram accounts are returned
+  const handleConfirmAccountSelection = async () => {
+    if (!pendingSelectionTicket || !selectedAccountId) return;
+    setIsSelectingAccount(true);
+    try {
+      const res = await axiosInstance.post("/creator/instagram/select-account", {
+        ticket: pendingSelectionTicket,
+        selectedAccountId,
+        origin: "onboarding"
+      });
+      setIsSelectionModalOpen(false);
+      setPendingSelectionTicket(null);
+      setSelectableAccounts([]);
+      const connectedUser = res.data?.data?.account?.username;
+      setInstagramFeedback({
+        type: "success",
+        message: connectedUser
+          ? `Instagram account @${connectedUser} connected successfully!`
+          : "Instagram account connected successfully!"
+      });
+      await fetchConnectedInstagramAccount();
+    } catch (err) {
+      const errorMsg =
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to select Instagram account. Please try reconnecting.";
+      setInstagramFeedback({
+        type: "error",
+        message: errorMsg
+      });
+    } finally {
+      setIsSelectingAccount(false);
+    }
+  };
+
+  // Initiate Instagram OAuth flow with origin=onboarding
+  const handleConnectInstagram = async () => {
+    setIsConnectingInstagram(true);
+    setInstagramFeedback(null);
+    try {
+      const res = await axiosInstance.get("/creator/instagram/connect?origin=onboarding");
+      const authUrl = res.data?.data?.authUrl;
+      if (!authUrl) {
+        throw new Error("Authorization URL was not returned by server.");
+      }
+      window.location.href = authUrl;
+    } catch (err) {
+      const errorMsg =
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to initiate Instagram connection. Please try again.";
+      setInstagramFeedback({
+        type: "error",
+        message: errorMsg
+      });
+      setIsConnectingInstagram(false);
+    }
   };
 
   // Profile image upload state
@@ -1077,6 +1389,23 @@ export default function CreatorOnboarding() {
         return;
       }
 
+      // Prevent Step 1 continuation while Instagram account status is still being fetched from the server
+      if (isLoadingInstagram) {
+        triggerValidationError("Checking Instagram connection status... Please wait a moment.");
+        return;
+      }
+
+      const isInstagramConnected = Boolean(
+        connectedInstagramAccount &&
+        connectedInstagramAccount.status === "CONNECTED" &&
+        connectedInstagramAccount.username
+      );
+
+      if (!isInstagramConnected) {
+        triggerValidationError("Please click 'Connect Instagram' to authenticate and connect your account before continuing.");
+        return;
+      }
+
       const hasAtLeastOneSocialLink = Object.values(formData.socialLinks).some(
         (link) => typeof link === "string" && link.trim().length > 0
       );
@@ -1263,6 +1592,13 @@ export default function CreatorOnboarding() {
       setCurrentStep((prev) => prev - 1);
     }
   };
+
+  // Connected Instagram status
+  const isInstagramConnected = Boolean(
+    connectedInstagramAccount &&
+      connectedInstagramAccount.status === "CONNECTED" &&
+      connectedInstagramAccount.username
+  );
 
   return (
     <div className="w-full min-h-screen bg-[#fff0f3] dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 flex flex-col justify-between p-4 sm:p-8 lg:p-12 transition-colors duration-300 font-sans">
@@ -1704,17 +2040,104 @@ export default function CreatorOnboarding() {
                           Social Channels & Links
                         </label>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                          {/* Instagram */}
-                          <div className="relative flex items-center">
-                            <InstagramIcon className="w-4 h-4 text-pink-500 absolute left-3" />
-                            <input
-                              type="text"
-                              name="instagram"
-                              value={formData.socialLinks.instagram}
-                              onChange={handleSocialChange}
-                              placeholder="Instagram Username / URL"
-                              className="w-full pl-9 pr-3 py-2 rounded-xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 focus:outline-none focus:border-pink-500 transition-all"
-                            />
+                          {/* Instagram Channel Connection */}
+                          <div className="col-span-1 sm:col-span-2 space-y-2">
+                            {isLoadingInstagram ? (
+                              <div className="p-4 rounded-2xl bg-neutral-50/70 dark:bg-neutral-900/40 border border-neutral-200/80 dark:border-neutral-800 flex items-center gap-3">
+                                <svg className="animate-spin w-5 h-5 text-neutral-400" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                </svg>
+                                <span className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">
+                                  Checking Instagram connection status...
+                                </span>
+                              </div>
+                            ) : isInstagramConnected ? (
+                              <div className="p-4 rounded-2xl bg-neutral-50/70 dark:bg-neutral-900/40 border border-emerald-200/80 dark:border-emerald-800/80 transition-all">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-pink-50 dark:bg-pink-950/40 flex items-center justify-center text-pink-500 shrink-0">
+                                      <InstagramIcon className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                      <span className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 block">
+                                        Instagram Account
+                                      </span>
+                                      <span className="text-sm font-bold text-neutral-900 dark:text-neutral-100 flex items-center gap-1.5 mt-0.5">
+                                        @{connectedInstagramAccount.username}
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                                    <CheckIcon className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 stroke-[3]" />
+                                    <span>Connected</span>
+                                  </span>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="p-4 rounded-2xl bg-neutral-50/70 dark:bg-neutral-900/40 border border-neutral-200/80 dark:border-neutral-800 transition-all">
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-pink-50 dark:bg-pink-950/40 flex items-center justify-center text-pink-500 shrink-0">
+                                      <InstagramIcon className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                      <h4 className="text-sm font-bold text-neutral-900 dark:text-neutral-100">
+                                        Connect your Instagram account
+                                      </h4>
+                                      <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
+                                        Connect your Instagram Professional account to verify your identity.
+                                      </p>
+                                    </div>
+                                  </div>
+
+                                  <button
+                                    type="button"
+                                    onClick={handleConnectInstagram}
+                                    disabled={isConnectingInstagram || isLoadingInstagram}
+                                    className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-[#ff2d6c] hover:bg-[#e0144c] text-white text-xs font-semibold shadow-2xs transition-colors cursor-pointer shrink-0 disabled:opacity-50"
+                                  >
+                                    {isConnectingInstagram ? (
+                                      <>
+                                        <svg className="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
+                                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                        </svg>
+                                        <span>Connecting...</span>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <InstagramIcon className="w-4 h-4 text-white" />
+                                        <span>Connect Instagram</span>
+                                      </>
+                                    )}
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Instagram Notification Banner */}
+                            {instagramFeedback && (
+                              <div
+                                className={`text-[11px] p-2.5 rounded-xl flex items-center justify-between gap-2 ${
+                                  instagramFeedback.type === "success"
+                                    ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900"
+                                    : instagramFeedback.type === "warning"
+                                    ? "bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400 border border-amber-200 dark:border-amber-900"
+                                    : "bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-400 border border-red-200 dark:border-red-900"
+                                }`}
+                              >
+                                <span>{instagramFeedback.message}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => setInstagramFeedback(null)}
+                                  className="text-xs opacity-60 hover:opacity-100 cursor-pointer"
+                                >
+                                  ✕
+                                </button>
+                              </div>
+                            )}
                           </div>
                           {/* YouTube */}
                           <div className="relative flex items-center">
@@ -2337,7 +2760,13 @@ export default function CreatorOnboarding() {
                 <button
                   type="button"
                   onClick={handleContinue}
-                  disabled={isSubmitting || deletingProjectId || deletingServiceId || isInitialLoading}
+                  disabled={
+                    isSubmitting ||
+                    deletingProjectId ||
+                    deletingServiceId ||
+                    isInitialLoading ||
+                    (currentStep === 1 && isLoadingInstagram)
+                  }
                   className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-neutral-950 text-white hover:bg-neutral-800 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-neutral-200 text-sm font-semibold transition-all shadow-xs cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? (
@@ -2391,6 +2820,124 @@ export default function CreatorOnboarding() {
           dispatch(getServices({ limit: 50 }));
         }}
       />
+
+      {/* =========================================================
+          MODAL: MULTIPLE INSTAGRAM ACCOUNTS SELECTION
+      ========================================================= */}
+      {isSelectionModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5 animate-in zoom-in-95 duration-150">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-pink-50 dark:bg-pink-950/40 text-pink-500 flex items-center justify-center shrink-0">
+                <InstagramIcon className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-neutral-950 dark:text-white">
+                  Select Instagram Account
+                </h3>
+                <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
+                  Multiple professional accounts were found. Choose which one to connect.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-2 max-h-60 overflow-y-auto">
+              {isLoadingSelectableAccounts ? (
+                <div className="flex flex-col items-center justify-center py-8 text-neutral-400 gap-2">
+                  <svg className="animate-spin w-5 h-5 text-[#ff2d6c]" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  <p className="text-xs">Loading available Instagram accounts...</p>
+                </div>
+              ) : selectableAccounts.length === 0 ? (
+                <div className="text-center py-6 text-xs text-neutral-400">
+                  No accounts found. Please reconnect to try again.
+                </div>
+              ) : (
+                selectableAccounts.map((acc) => {
+                  const isSelected = selectedAccountId === acc.id;
+                  return (
+                    <button
+                      key={acc.id}
+                      type="button"
+                      onClick={() => setSelectedAccountId(acc.id)}
+                      className={`w-full flex items-center justify-between p-3.5 rounded-2xl border text-left transition-all cursor-pointer ${
+                        isSelected
+                          ? "border-[#ff2d6c] bg-pink-50/50 dark:bg-pink-950/20 shadow-xs"
+                          : "border-neutral-200 dark:border-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-700 bg-white dark:bg-neutral-950"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold ${
+                          isSelected
+                            ? "bg-[#ff2d6c] text-white"
+                            : "bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300"
+                        }`}>
+                          @
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-neutral-900 dark:text-neutral-100">
+                            @{acc.username}
+                          </p>
+                          <p className="text-[10px] text-neutral-400">
+                            ID: {acc.id}
+                          </p>
+                        </div>
+                      </div>
+                      <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${
+                        isSelected
+                          ? "border-[#ff2d6c] bg-[#ff2d6c] text-white"
+                          : "border-neutral-300 dark:border-neutral-700"
+                      }`}>
+                        {isSelected && <CheckIcon className="w-3 h-3 stroke-[3]" />}
+                      </div>
+                    </button>
+                  );
+                })
+              )}
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-neutral-100 dark:border-neutral-800">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsSelectionModalOpen(false);
+                  setPendingSelectionTicket(null);
+                  setSelectedAccountId("");
+                  setSelectableAccounts([]);
+                  setInstagramFeedback({
+                    type: "warning",
+                    message: "Instagram account selection was cancelled."
+                  });
+                }}
+                disabled={isSelectingAccount}
+                className="px-4 py-2 rounded-xl text-xs font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmAccountSelection}
+                disabled={!selectedAccountId || isSelectingAccount || isLoadingSelectableAccounts}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#ff2d6c] hover:bg-[#e0144c] text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+              >
+                {isSelectingAccount ? (
+                  <>
+                    <svg className="animate-spin w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    <span>Connecting...</span>
+                  </>
+                ) : (
+                  <span>Connect Selected Account</span>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

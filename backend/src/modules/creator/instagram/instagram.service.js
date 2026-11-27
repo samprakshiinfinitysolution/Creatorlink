@@ -1,12 +1,17 @@
+import crypto from "crypto";
 import mongoose from "mongoose";
 import createApiError from "../../../utils/ApiError.js";
 import {
+    getSigningSecret,
     generateOAuthState,
-    consumeOAuthState
+    consumeOAuthState,
+    getVerifiedOriginFromState
 } from "./instagramOAuthState.helper.js";
+import InstagramOAuthState from "./instagramOAuthState.model.js";
 import { encryptToken, decryptToken } from "../../../utils/helpers/encryption.helper.js";
 import InstagramAccount from "./instagram.model.js";
 import CreatorProfile from "../profile/profile.model.js";
+import { invalidateHomepageCache } from "../../homepage/homepage.service.js";
 
 // Helper to determine the configured frontend base URL without trailing slashes.
 const getFrontendBaseUrl = () => {
@@ -169,7 +174,7 @@ const handleMetaGraphApiError = async (errorPayload, context = {}) => {
 };
 
 // Generates the official Meta Unified Login OAuth authorization URL for a CreatorLink creator.
-const generateInstagramConnectUrl = async (creatorId) => {
+const generateInstagramConnectUrl = async (creatorId, origin = "settings") => {
     if (!creatorId) {
         throw createApiError(400, "Creator ID is required to generate Instagram connection URL.");
     }
@@ -186,7 +191,8 @@ const generateInstagramConnectUrl = async (creatorId) => {
     }
 
     // 1. Generate high-entropy, signed OAuth state and record in MongoDB for single-use verification
-    const state = await generateOAuthState(creatorId);
+    const cleanOrigin = origin === "onboarding" ? "onboarding" : "settings";
+    const state = await generateOAuthState(creatorId, cleanOrigin);
 
     // 2. Construct the exact Unified Login authorization URL
     const authUrl = new URL("https://www.facebook.com/dialog/oauth");
@@ -763,21 +769,30 @@ const calculateInstagramEngagement = (eligiblePosts, followersCount) => {
 // Persists verified Instagram account credentials and profile metrics into MongoDB.
 // Encrypts access token with AES-256-GCM, prevents duplicate/cross-creator accounts,
 // calculates token expiration, updates InstagramAccount atomically, and syncs CreatorProfile.
-const persistInstagramConnection = async ({ creatorId, tokenData, profileData, engagementMetrics = null }) => {
+// Supports claimContext { nonceHash, claimId } for atomic transactional fencing during account selection.
+const persistInstagramConnection = async ({
+    creatorId,
+    tokenData,
+    profileData,
+    engagementMetrics = null,
+    origin = "settings",
+    claimContext = null
+}) => {
     const frontendBaseUrl = getFrontendBaseUrl();
+    const targetRoute = origin === "onboarding" ? "onboarding" : "settings";
 
     // 1. Strict input validation before any database operations
     if (!creatorId) {
         return {
             success: false,
-            redirectUrl: `${frontendBaseUrl}/creator/settings?instagram=error&message=${encodeURIComponent("Creator ID is required for persistence.")}`
+            redirectUrl: `${frontendBaseUrl}/creator/${targetRoute}?instagram=error&message=${encodeURIComponent("Creator ID is required for persistence.")}`
         };
     }
 
     if (!tokenData || typeof tokenData !== "object" || typeof tokenData.accessToken !== "string" || tokenData.accessToken.trim().length === 0) {
         return {
             success: false,
-            redirectUrl: `${frontendBaseUrl}/creator/settings?instagram=error&message=${encodeURIComponent("Valid access token is required for persistence.")}`
+            redirectUrl: `${frontendBaseUrl}/creator/${targetRoute}?instagram=error&message=${encodeURIComponent("Valid access token is required for persistence.")}`
         };
     }
 
@@ -797,29 +812,56 @@ const persistInstagramConnection = async ({ creatorId, tokenData, profileData, e
     ) {
         return {
             success: false,
-            redirectUrl: `${frontendBaseUrl}/creator/settings?instagram=error&message=${encodeURIComponent("Valid Instagram profile data is required for persistence.")}`
+            redirectUrl: `${frontendBaseUrl}/creator/${targetRoute}?instagram=error&message=${encodeURIComponent("Valid Instagram profile data is required for persistence.")}`
         };
     }
 
-    // 2. Cross-creator conflict check: ensure this Instagram account isn't already bound to another creator
+    // 2. Account conflict checks
     try {
+        // 2A. Cross-creator conflict check: ensure this Instagram account isn't already bound to another creator
         const conflictingAccount = await InstagramAccount.findOne({
             instagramUserId: profileData.instagramUserId.trim(),
             creator: { $ne: creatorId }
         });
 
         if (conflictingAccount) {
+            const conflictMsg = "This Instagram account is already connected to another CreatorLink profile.";
             return {
                 success: false,
-                redirectUrl: `${frontendBaseUrl}/creator/settings?instagram=error&message=${encodeURIComponent(
-                    "This Instagram account is already connected to another CreatorLink profile."
+                message: conflictMsg,
+                redirectUrl: `${frontendBaseUrl}/creator/${targetRoute}?instagram=error&message=${encodeURIComponent(
+                    conflictMsg
                 )}`
             };
         }
-    } catch {
+
+        // 2B. Same-creator different account check: prevent silent overwrite of an existing connected account
+        const existingCreatorAccount = await InstagramAccount.findOne({
+            creator: creatorId,
+            status: "CONNECTED"
+        });
+
+        if (
+            existingCreatorAccount &&
+            existingCreatorAccount.instagramUserId &&
+            existingCreatorAccount.instagramUserId.trim() !== profileData.instagramUserId.trim()
+        ) {
+            const conflictMessage = `You already have @${existingCreatorAccount.username || "another account"} connected. Please disconnect it first before connecting a different account.`;
+            return {
+                success: false,
+                isClaimFencingError: Boolean(claimContext),
+                message: conflictMessage,
+                redirectUrl: `${frontendBaseUrl}/creator/${targetRoute}?instagram=error&message=${encodeURIComponent(
+                    conflictMessage
+                )}`
+            };
+        }
+    } catch (checkErr) {
+        console.error("[Instagram Persistence Availability Check Error]:", checkErr?.message);
         return {
             success: false,
-            redirectUrl: `${frontendBaseUrl}/creator/settings?instagram=error&message=${encodeURIComponent(
+            message: "Database error occurred while checking account availability.",
+            redirectUrl: `${frontendBaseUrl}/creator/${targetRoute}?instagram=error&message=${encodeURIComponent(
                 "Database error occurred while checking account availability."
             )}`
         };
@@ -832,7 +874,7 @@ const persistInstagramConnection = async ({ creatorId, tokenData, profileData, e
     } catch {
         return {
             success: false,
-            redirectUrl: `${frontendBaseUrl}/creator/settings?instagram=error&message=${encodeURIComponent(
+            redirectUrl: `${frontendBaseUrl}/creator/${targetRoute}?instagram=error&message=${encodeURIComponent(
                 "Failed to securely store Instagram credentials."
             )}`
         };
@@ -916,6 +958,66 @@ const persistInstagramConnection = async ({ creatorId, tokenData, profileData, e
         // In standalone mode, use born-dirty strategy: write needsProfileSync: true upfront.
         // In transaction mode, write needsProfileSync: false initially because transaction commits atomically.
         const initialNeedsProfileSync = !useTransaction;
+
+        // Fencing check inside transaction if claimContext is present:
+        // Verifies within the session that this request's claimId is STILL active and unexpired.
+        if (useTransaction && claimContext) {
+            const now = new Date();
+            const activeClaim = await InstagramOAuthState.findOneAndUpdate(
+                {
+                    nonceHash: claimContext.nonceHash,
+                    creator: creatorId,
+                    claimId: claimContext.claimId,
+                    isCompleted: { $ne: true },
+                    claimExpiresAt: { $gt: now },
+                    expiresAt: { $gt: now }
+                },
+                {
+                    $set: {
+                        isConsumed: true,
+                        isCompleted: true,
+                        completedAt: now,
+                        claimExpiresAt: null
+                    }
+                },
+                { returnDocument: "after", ...sessionOpt }
+            );
+
+            if (!activeClaim) {
+                // Fencing rejected: lease expired or was reclaimed by another request
+                const conflictErr = new Error("Selection ticket claim was superseded or expired before persistence.");
+                conflictErr.isClaimFencingError = true;
+                throw conflictErr;
+            }
+        } else if (!useTransaction && claimContext) {
+            // Standalone mode: Cannot guarantee cross-collection atomicity without replica set transactions.
+            // Strict fencing across InstagramOAuthState and InstagramAccount is not physically possible in standalone MongoDB.
+            const allowStandalone = process.env.ALLOW_STANDALONE_SELECTION === "true" || process.env.NODE_ENV === "test";
+            if (!allowStandalone) {
+                const standaloneErr = new Error(
+                    "Multi-document transaction support (MongoDB replica set) is required to guarantee secure account selection claim fencing. Standalone MongoDB cannot guarantee cross-collection atomicity."
+                );
+                standaloneErr.isStandaloneUnsupported = true;
+                throw standaloneErr;
+            }
+
+            // In allowed standalone environments (e.g. dev/test), perform a best-effort check before writing.
+            const now = new Date();
+            const activeClaimStandalone = await InstagramOAuthState.findOne({
+                nonceHash: claimContext.nonceHash,
+                creator: creatorId,
+                claimId: claimContext.claimId,
+                isCompleted: { $ne: true },
+                claimExpiresAt: { $gt: now },
+                expiresAt: { $gt: now }
+            });
+
+            if (!activeClaimStandalone) {
+                const conflictErr = new Error("Selection ticket claim was superseded or expired before persistence.");
+                conflictErr.isClaimFencingError = true;
+                throw conflictErr;
+            }
+        }
 
         const savedAccount = await InstagramAccount.findOneAndUpdate(
             { creator: creatorId },
@@ -1010,10 +1112,66 @@ const persistInstagramConnection = async ({ creatorId, tokenData, profileData, e
             session = null;
         }
 
+        if (dbErr?.isClaimFencingError) {
+            return {
+                success: false,
+                isClaimFencingError: true,
+                message: dbErr.message,
+                redirectUrl: `${frontendBaseUrl}/creator/${targetRoute}?instagram=error&message=${encodeURIComponent(
+                    dbErr.message
+                )}`
+            };
+        }
+
+        if (dbErr?.isStandaloneUnsupported) {
+            return {
+                success: false,
+                isStandaloneUnsupported: true,
+                message: dbErr.message,
+                redirectUrl: `${frontendBaseUrl}/creator/${targetRoute}?instagram=error&message=${encodeURIComponent(
+                    dbErr.message
+                )}`
+            };
+        }
+
         // Standalone fallback: execute one-time retry ONLY on confirmed unsupported-topology signatures
         if (useTransaction && isTransactionUnsupportedError(dbErr)) {
             useTransaction = false;
             try {
+                if (claimContext) {
+                    const allowStandalone = process.env.ALLOW_STANDALONE_SELECTION === "true" || process.env.NODE_ENV === "test";
+                    if (!allowStandalone) {
+                        return {
+                            success: false,
+                            message: "Multi-document transaction support (MongoDB replica set) is required to guarantee secure account selection claim fencing. Standalone MongoDB cannot guarantee cross-collection atomicity.",
+                            redirectUrl: `${frontendBaseUrl}/creator/${targetRoute}?instagram=error&message=${encodeURIComponent(
+                                "Multi-document transaction support (MongoDB replica set) is required to guarantee secure account selection claim fencing."
+                            )}`
+                        };
+                    }
+
+                    const fallbackNow = new Date();
+                    const activeClaimStandalone = await InstagramOAuthState.findOne({
+                        nonceHash: claimContext.nonceHash,
+                        creator: creatorId,
+                        claimId: claimContext.claimId,
+                        isCompleted: { $ne: true },
+                        claimExpiresAt: { $gt: fallbackNow },
+                        expiresAt: { $gt: fallbackNow }
+                    });
+
+                    if (!activeClaimStandalone) {
+                        return {
+                            success: false,
+                            isClaimFencingError: true,
+                            message: "Selection ticket claim was superseded or expired before persistence.",
+                            redirectUrl: `${frontendBaseUrl}/creator/${targetRoute}?instagram=error&message=${encodeURIComponent(
+                                "Selection ticket claim was superseded or expired before persistence."
+                            )}`
+                        };
+                    }
+                }
+
                 const savedAccount = await InstagramAccount.findOneAndUpdate(
                     { creator: creatorId },
                     {
@@ -1077,9 +1235,14 @@ const persistInstagramConnection = async ({ creatorId, tokenData, profileData, e
                     } catch {}
                 }
 
+                try {
+                    invalidateHomepageCache();
+                } catch {}
+
                 return {
                     success: true,
-                    redirectUrl: `${frontendBaseUrl}/creator/settings?instagram=success&username=${encodeURIComponent(
+                    isTransactionFinalized: false,
+                    redirectUrl: `${frontendBaseUrl}/creator/${targetRoute}?instagram=success&username=${encodeURIComponent(
                         profileData.username.trim()
                     )}`
                 };
@@ -1099,7 +1262,7 @@ const persistInstagramConnection = async ({ creatorId, tokenData, profileData, e
 
             return {
                 success: false,
-                redirectUrl: `${frontendBaseUrl}/creator/settings?instagram=error&message=${encodeURIComponent(
+                redirectUrl: `${frontendBaseUrl}/creator/${targetRoute}?instagram=error&message=${encodeURIComponent(
                     safeMsg
                 )}`
             };
@@ -1108,7 +1271,7 @@ const persistInstagramConnection = async ({ creatorId, tokenData, profileData, e
         console.error("[Instagram Persistence Error]:", dbErr.message);
         return {
             success: false,
-            redirectUrl: `${frontendBaseUrl}/creator/settings?instagram=error&message=${encodeURIComponent(
+            redirectUrl: `${frontendBaseUrl}/creator/${targetRoute}?instagram=error&message=${encodeURIComponent(
                 "Failed to save Instagram connection to database."
             )}`
         };
@@ -1121,9 +1284,14 @@ const persistInstagramConnection = async ({ creatorId, tokenData, profileData, e
     }
 
     // 7. Success redirect: only reached after successful InstagramAccount persistence
+    try {
+        invalidateHomepageCache();
+    } catch {}
+
     return {
         success: true,
-        redirectUrl: `${frontendBaseUrl}/creator/settings?instagram=success&username=${encodeURIComponent(
+        isTransactionFinalized: Boolean(useTransaction && claimContext),
+        redirectUrl: `${frontendBaseUrl}/creator/${targetRoute}?instagram=success&username=${encodeURIComponent(
             profileData.username.trim()
         )}`
     };
@@ -1141,18 +1309,21 @@ const processInstagramOAuthCallback = async ({
 }) => {
     const frontendBaseUrl = getFrontendBaseUrl();
 
+    // Cryptographically derive target route (onboarding vs settings) from HMAC-verified state signature
+    let targetRoute = getVerifiedOriginFromState(state);
+
     // 1. Handle Meta-reported authorization errors (e.g. user denied or cancelled permissions)
     if (error || errorReason || errorDescription) {
         if (error === "access_denied" || errorReason === "user_denied") {
             return {
                 success: false,
-                redirectUrl: `${frontendBaseUrl}/creator/settings?instagram=cancelled`
+                redirectUrl: `${frontendBaseUrl}/creator/${targetRoute}?instagram=cancelled`
             };
         }
 
         return {
             success: false,
-            redirectUrl: `${frontendBaseUrl}/creator/settings?instagram=error&message=${encodeURIComponent("Instagram authorization failed. Please try again.")}`
+            redirectUrl: `${frontendBaseUrl}/creator/${targetRoute}?instagram=error&message=${encodeURIComponent("Instagram authorization failed. Please try again.")}`
         };
     }
 
@@ -1167,15 +1338,20 @@ const processInstagramOAuthCallback = async ({
     ) {
         return {
             success: false,
-            redirectUrl: `${frontendBaseUrl}/creator/settings?instagram=error&message=${encodeURIComponent("Required authorization parameters were not provided.")}`
+            redirectUrl: `${frontendBaseUrl}/creator/${targetRoute}?instagram=error&message=${encodeURIComponent("Required authorization parameters were not provided.")}`
         };
     }
 
-    // 3. Atomically consume OAuth state and securely retrieve authenticated creator ID
+    // 3. Atomically consume OAuth state and securely retrieve authenticated creator ID and origin
     let creatorId;
+    let origin = targetRoute;
     try {
         const consumed = await consumeOAuthState(state.trim());
         creatorId = consumed.creatorId;
+        if (consumed.origin) {
+            origin = consumed.origin === "onboarding" ? "onboarding" : "settings";
+            targetRoute = origin;
+        }
     } catch (stateErr) {
         let safeMessage = "Invalid or untrusted authorization session.";
         const errMsg = (stateErr && stateErr.message) || "";
@@ -1188,7 +1364,7 @@ const processInstagramOAuthCallback = async ({
 
         return {
             success: false,
-            redirectUrl: `${frontendBaseUrl}/creator/settings?instagram=error&message=${encodeURIComponent(safeMessage)}`
+            redirectUrl: `${frontendBaseUrl}/creator/${targetRoute}?instagram=error&message=${encodeURIComponent(safeMessage)}`
         };
     }
 
@@ -1208,7 +1384,7 @@ const processInstagramOAuthCallback = async ({
 
         return {
             success: false,
-            redirectUrl: `${frontendBaseUrl}/creator/settings?instagram=error&message=${encodeURIComponent(safeMessage)}`
+            redirectUrl: `${frontendBaseUrl}/creator/${targetRoute}?instagram=error&message=${encodeURIComponent(safeMessage)}`
         };
     }
 
@@ -1226,25 +1402,37 @@ const processInstagramOAuthCallback = async ({
 
         return {
             success: false,
-            redirectUrl: `${frontendBaseUrl}/creator/settings?instagram=error&message=${encodeURIComponent(safeMessage)}`
+            redirectUrl: `${frontendBaseUrl}/creator/${targetRoute}?instagram=error&message=${encodeURIComponent(safeMessage)}`
         };
     }
 
     // If multiple accounts are connected, do NOT arbitrarily select data[0].
     // The connection is NOT completed because an account has not been selected or bound.
-    // Return a clearly distinguishable requiresSelection result without marking connection as completed.
-    // NOTE: For production multi-account support, when frontend account selection is implemented,
-    // a secure server-side pending authorization session (e.g. encrypted temporary storage with
-    // a single-use nonce and short TTL) will be required so the creator can pick an account
-    // without exposing access tokens or keeping insecure state.
+    // Return a clearly distinguishable requiresSelection result with an encrypted and HMAC-signed ticket.
     if (discoveryResult.requiresSelection) {
+        let selectionTicket = null;
+        try {
+            selectionTicket = await generateAccountSelectionTicket({
+                creatorId,
+                accessToken: tokenData.accessToken,
+                expiresIn: tokenData.expiresIn || 5184000,
+                accounts: discoveryResult.accounts
+            });
+        } catch (ticketErr) {
+            console.error("[Instagram Selection Ticket Generation Error]", ticketErr);
+        }
+
+        const ticketParam = selectionTicket ? `&ticket=${encodeURIComponent(selectionTicket)}` : "";
+
         return {
             success: false,
             completed: false,
             requiresSelection: true,
             creatorId,
+            origin,
             accounts: discoveryResult.accounts,
-            redirectUrl: `${frontendBaseUrl}/creator/settings?instagram=multiple_accounts`
+            selectionTicket,
+            redirectUrl: `${frontendBaseUrl}/creator/${targetRoute}?instagram=multiple_accounts${ticketParam}`
         };
     }
 
@@ -1274,7 +1462,7 @@ const processInstagramOAuthCallback = async ({
 
         return {
             success: false,
-            redirectUrl: `${frontendBaseUrl}/creator/settings?instagram=error&message=${encodeURIComponent(safeMessage)}`
+            redirectUrl: `${frontendBaseUrl}/creator/${targetRoute}?instagram=error&message=${encodeURIComponent(safeMessage)}`
         };
     }
 
@@ -1291,7 +1479,6 @@ const processInstagramOAuthCallback = async ({
             operation: mediaErr?.operation || "fetchRecentInstagramMedia",
             message: mediaErr?.message
         });
-        // Media API failure must not fail an otherwise valid Instagram connection
     }
 
     // Step 5E: Calculate engagement metrics from eligible posts and followers count
@@ -1306,7 +1493,8 @@ const processInstagramOAuthCallback = async ({
         creatorId,
         tokenData,
         profileData,
-        engagementMetrics
+        engagementMetrics,
+        origin
     });
 
     if (!persistenceResult.success) {
@@ -1317,10 +1505,10 @@ const processInstagramOAuthCallback = async ({
     }
 
     // 8. Internal return for callers/tests.
-    // Secrets hygiene: Tokens are stored encrypted in MongoDB and never returned or exposed.
     return {
         success: true,
         creatorId,
+        origin,
         profile: profileData,
         engagement: engagementMetrics,
         redirectUrl: persistenceResult.redirectUrl
@@ -1414,6 +1602,12 @@ const reconcilePendingProfileSync = async (creatorId, cachedAccount = null) => {
             }
         );
 
+        if (clearResult.modifiedCount > 0) {
+            try {
+                invalidateHomepageCache();
+            } catch {}
+        }
+
         return clearResult.modifiedCount > 0;
     } catch (reconcileErr) {
         console.error("[Instagram Reconcile Pending Profile Sync Error]:", reconcileErr.message);
@@ -1434,10 +1628,11 @@ const getConnectedInstagramAccount = async (creatorId) => {
         .select("-encryptedAccessToken")
         .lean();
 
-    if (!account) {
+    if (!account || account.status === "DISCONNECTED") {
         return {
             isConnected: false,
-            account: null
+            account: null,
+            status: account ? "DISCONNECTED" : "NOT_CONNECTED"
         };
     }
 
@@ -1690,6 +1885,10 @@ const refreshInstagramAccountMetrics = async (creatorId) => {
                 }
             }
 
+            try {
+                invalidateHomepageCache();
+            } catch {}
+
             return {
                 success: true,
                 message: "Instagram metrics refreshed successfully",
@@ -1782,6 +1981,10 @@ const refreshInstagramAccountMetrics = async (creatorId) => {
                         } catch {}
                     }
 
+                    try {
+                        invalidateHomepageCache();
+                    } catch {}
+
                     return {
                         success: true,
                         message: "Instagram metrics refreshed successfully",
@@ -1869,6 +2072,453 @@ const syncStaleInstagramAccounts = async ({ staleThresholdHours = 24, batchLimit
     return results;
 };
 
+/**
+ * Disconnects the connected Instagram account for the authenticated creator.
+ * Sets status to DISCONNECTED, nullifies encrypted tokens, clears verified CreatorProfile metrics,
+ * and invalidates the homepage cache so the creator's profile immediately reflects the disconnect.
+ *
+ * @param {string|ObjectId} creatorId - Authenticated creator ID
+ * @returns {Promise<Object>} Safe disconnect result
+ */
+const disconnectInstagramAccount = async (creatorId) => {
+    if (!creatorId) {
+        throw createApiError(400, "Creator ID is required to disconnect Instagram account.");
+    }
+
+    const account = await InstagramAccount.findOne({ creator: creatorId });
+
+    if (!account || account.status === "DISCONNECTED") {
+        return {
+            success: true,
+            message: "No active Instagram connection found to disconnect."
+        };
+    }
+
+    // Atomically mark InstagramAccount as DISCONNECTED
+    await InstagramAccount.updateOne(
+        { _id: account._id },
+        {
+            $set: {
+                status: "DISCONNECTED",
+                disconnectionReason: "Disconnected by creator",
+                encryptedAccessToken: {
+                    iv: "000000000000000000000000",
+                    content: "disconnected",
+                    tag: "00000000000000000000000000000000"
+                },
+                lastSyncedAt: new Date()
+            }
+        }
+    );
+
+    // Atomically reset verified Instagram metrics on CreatorProfile
+    await CreatorProfile.updateOne(
+        { user: creatorId },
+        {
+            $set: {
+                followerCount: null,
+                engagementRate: null,
+                instagramSyncVersion: null,
+                "socialLinks.instagram": ""
+            }
+        }
+    );
+
+    // Invalidate homepage cache so changes show immediately
+    try {
+        invalidateHomepageCache();
+    } catch {}
+
+    return {
+        success: true,
+        message: "Instagram account disconnected successfully"
+    };
+};
+
+/**
+ * Completes Instagram account connection when Meta OAuth returned multiple accounts
+ * and the creator explicitly selects which account to bind.
+ */
+/**
+ * Generates an encrypted and signed selection ticket for multiple Instagram accounts.
+ * The payload is encrypted with AES-256-GCM so sensitive fields (accounts, tokens)
+ * are not visible via Base64 decoding, signed with HMAC-SHA256, and tracked in InstagramOAuthState.
+ */
+const generateAccountSelectionTicket = async ({ creatorId, accessToken, expiresIn, accounts }) => {
+    const rawNonce = crypto.randomBytes(32).toString("hex");
+    const nonceHash = crypto.createHash("sha256").update(rawNonce).digest("hex");
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+    // Track ticket nonce in InstagramOAuthState for single-use consumption
+    await InstagramOAuthState.create({
+        creator: creatorId,
+        nonceHash,
+        expiresAt,
+        isConsumed: false
+    });
+
+    const payloadObj = {
+        c: creatorId.toString(),
+        t: accessToken,
+        exp: expiresIn || 5184000,
+        acc: accounts,
+        n: rawNonce,
+        expAt: expiresAt.getTime()
+    };
+
+    const encryptedBundle = encryptToken(JSON.stringify(payloadObj));
+    const serializedCiphertext = `${encryptedBundle.iv}:${encryptedBundle.content}:${encryptedBundle.tag}`;
+
+    const signingSecret = getSigningSecret();
+    const signature = crypto.createHmac("sha256", signingSecret).update(serializedCiphertext).digest("hex");
+
+    return Buffer.from(JSON.stringify({ c: serializedCiphertext, s: signature })).toString("base64url");
+};
+
+const CLAIM_LEASE_DURATION_MS = 60 * 1000; // 60 seconds processing lease
+
+/**
+ * Parses and verifies an account selection ticket.
+ * Checks HMAC signature in constant time, decrypts AES-256-GCM payload,
+ * validates expiry, creator ownership, and non-completed state.
+ * Does NOT consume the ticket (allowing read access for /pending-accounts).
+ */
+const parseAndVerifySelectionTicket = async (ticket, creatorId) => {
+    if (!ticket || typeof ticket !== "string" || ticket.trim().length === 0) {
+        throw createApiError(400, "Selection ticket is required.");
+    }
+
+    let parsedEnvelope;
+    try {
+        const decoded = Buffer.from(ticket.trim(), "base64url").toString("utf8");
+        parsedEnvelope = JSON.parse(decoded);
+    } catch {
+        throw createApiError(400, "Invalid selection ticket format.");
+    }
+
+    if (!parsedEnvelope || typeof parsedEnvelope !== "object" || !parsedEnvelope.c || !parsedEnvelope.s) {
+        throw createApiError(400, "Malformed selection ticket envelope.");
+    }
+
+    const signingSecret = getSigningSecret();
+    const expectedSig = crypto.createHmac("sha256", signingSecret).update(parsedEnvelope.c).digest("hex");
+
+    const sigBuf = Buffer.from(parsedEnvelope.s, "hex");
+    const expBuf = Buffer.from(expectedSig, "hex");
+    if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) {
+        throw createApiError(403, "Invalid or tampered selection ticket signature.");
+    }
+
+    const parts = parsedEnvelope.c.split(":");
+    if (parts.length !== 3) {
+        throw createApiError(400, "Malformed selection ticket ciphertext.");
+    }
+
+    let decryptedText;
+    try {
+        decryptedText = decryptToken({
+            iv: parts[0],
+            content: parts[1],
+            tag: parts[2]
+        });
+    } catch {
+        throw createApiError(400, "Failed to decrypt selection ticket.");
+    }
+
+    let payload;
+    try {
+        payload = JSON.parse(decryptedText);
+    } catch {
+        throw createApiError(400, "Malformed selection ticket decrypted payload.");
+    }
+
+    if (payload.expAt && Date.now() > payload.expAt) {
+        throw createApiError(400, "Selection ticket has expired. Please initiate Instagram connection again.");
+    }
+
+    if (creatorId && payload.c !== creatorId.toString()) {
+        throw createApiError(403, "Selection ticket was issued to a different creator.");
+    }
+
+    if (!payload.n || typeof payload.n !== "string") {
+        throw createApiError(400, "Selection ticket missing security nonce.");
+    }
+
+    const nonceHash = crypto.createHash("sha256").update(payload.n).digest("hex");
+    const stateDoc = await InstagramOAuthState.findOne({ nonceHash });
+
+    if (!stateDoc) {
+        throw createApiError(400, "Selection ticket session was not found or has expired.");
+    }
+
+    if (new Date() > new Date(stateDoc.expiresAt)) {
+        throw createApiError(400, "Selection ticket has expired. Please initiate Instagram connection again.");
+    }
+
+    // A completed ticket can never be reused
+    if (stateDoc.isCompleted) {
+        throw createApiError(403, "Selection ticket has already been used. Please initiate Instagram connection again.");
+    }
+
+    // An active processing lease cannot be re-read as available
+    const now = new Date();
+    if (stateDoc.isConsumed && (!stateDoc.claimExpiresAt || stateDoc.claimExpiresAt > now)) {
+        throw createApiError(403, "Selection ticket is currently being processed or has already been used.");
+    }
+
+    return { payload, nonceHash };
+};
+
+/**
+ * Retrieves eligible accounts from a valid selection ticket for the authenticated creator.
+ */
+const getEligibleAccountsFromSelectionTicket = async ({ creatorId, ticket }) => {
+    const { payload } = await parseAndVerifySelectionTicket(ticket, creatorId);
+    return {
+        accounts: Array.isArray(payload.acc) ? payload.acc : []
+    };
+};
+
+/**
+ * Persists selected Instagram account using a verified selection ticket.
+ * Atomically claims the ticket prior to external API calls and persistence to prevent concurrent race conditions.
+ * If external calls or persistence fail, releases the claim so the creator can retry within TTL.
+ */
+const selectAndPersistInstagramAccount = async ({
+    creatorId,
+    ticket,
+    selectedAccountId,
+    origin = "settings",
+    _testHooks = null
+}) => {
+    if (!creatorId) {
+        throw createApiError(400, "Creator ID is required.");
+    }
+    if (!selectedAccountId || typeof selectedAccountId !== "string" || selectedAccountId.trim().length === 0) {
+        throw createApiError(400, "Selected account ID is required.");
+    }
+
+    const { payload, nonceHash } = await parseAndVerifySelectionTicket(ticket, creatorId);
+
+    const matchedAccount = Array.isArray(payload.acc) && payload.acc.find((a) => a.id === selectedAccountId.trim());
+    if (!matchedAccount) {
+        throw createApiError(400, "Selected account ID does not belong to the discovered eligible accounts.");
+    }
+
+    // Atomic claim with cryptographically random claimId & lease:
+    // Only ONE request can hold the active claim lease.
+    // Matches if unconsumed (isConsumed: false) OR if previous claim lease has expired and ticket was never completed.
+    // Verifies nonceHash matches, creator matches, isCompleted is not true, and ticket expiresAt is in the future.
+    const now = new Date();
+    const claimExpiresAt = new Date(now.getTime() + CLAIM_LEASE_DURATION_MS);
+    const claimId = crypto.randomBytes(24).toString("hex");
+
+    const claimedState = await InstagramOAuthState.findOneAndUpdate(
+        {
+            nonceHash,
+            creator: creatorId,
+            expiresAt: { $gt: now },
+            isCompleted: { $ne: true },
+            $or: [
+                { isConsumed: false },
+                { isConsumed: true, claimExpiresAt: { $lte: now } }
+            ]
+        },
+        {
+            $set: {
+                isConsumed: true,
+                claimId,
+                consumedAt: now,
+                claimExpiresAt
+            }
+        },
+        { returnDocument: "after" }
+    );
+
+    if (!claimedState) {
+        // Determine whether completed, active lease, expired, or creator mismatch
+        const existingRecord = await InstagramOAuthState.findOne({ nonceHash });
+        if (existingRecord && existingRecord.isCompleted) {
+            throw createApiError(403, "Selection ticket has already been used. Please initiate Instagram connection again.");
+        }
+        if (existingRecord && existingRecord.isConsumed && existingRecord.claimExpiresAt > now) {
+            throw createApiError(403, "Selection ticket is currently being processed by another request. Please try again shortly.");
+        }
+        if (existingRecord && existingRecord.expiresAt <= now) {
+            throw createApiError(400, "Selection ticket has expired. Please initiate Instagram connection again.");
+        }
+        if (existingRecord && existingRecord.creator.toString() !== creatorId.toString()) {
+            throw createApiError(403, "Selection ticket was issued to a different creator.");
+        }
+        throw createApiError(403, "Selection ticket is invalid or has already been claimed by another request.");
+    }
+
+    const accessToken = payload.t;
+
+    try {
+        // Step 1: Fetch profile details & metrics for the selected account
+        const profileData = await fetchInstagramAccountProfile(
+            selectedAccountId.trim(),
+            accessToken,
+            { creatorId, instagramAccountId: selectedAccountId.trim() }
+        );
+
+        // Step 2: Fetch recent media items (non-fatal)
+        let mediaResult = { success: false, eligiblePosts: [] };
+        try {
+            mediaResult = await fetchRecentInstagramMedia(
+                selectedAccountId.trim(),
+                accessToken,
+                { creatorId, instagramAccountId: selectedAccountId.trim() }
+            );
+        } catch (mediaErr) {
+            console.warn("[Instagram Media Fetch Non-fatal Error in Select Account]", mediaErr?.message);
+        }
+
+        // Step 3: Calculate engagement metrics
+        let engagementMetrics = null;
+        const postsToCalculate = mediaResult?.eligiblePosts || mediaResult?.posts || [];
+        if (mediaResult?.success && Array.isArray(postsToCalculate)) {
+            engagementMetrics = calculateInstagramEngagement(postsToCalculate, profileData.followersCount);
+        }
+
+        const tokenData = {
+            accessToken,
+            tokenType: "bearer",
+            expiresIn: payload.exp || 5184000
+        };
+
+        // Pre-persistence Fencing Check:
+        // Atomically verify that this request's claimId is STILL the active claim and lease has not expired.
+        // If another request reclaimed the lease while this request was fetching external APIs, reject immediately.
+        const prePersistNow = new Date();
+        const activeLease = await InstagramOAuthState.findOne({
+            nonceHash,
+            creator: creatorId,
+            claimId,
+            isCompleted: { $ne: true },
+            claimExpiresAt: { $gt: prePersistNow },
+            expiresAt: { $gt: prePersistNow }
+        });
+
+        if (!activeLease) {
+            throw createApiError(
+                403,
+                "Selection ticket claim has expired or was reclaimed by another request. Account was not connected."
+            );
+        }
+
+        // Test hook to allow concurrency and lease expiration testing immediately after pre-persistence check
+        if (_testHooks && typeof _testHooks._afterPrePersistCheck === "function") {
+            await _testHooks._afterPrePersistCheck({ creatorId, claimId, nonceHash });
+        }
+
+        // Step 4: Persist connection with atomic claim fencing
+        // Passes claimContext { nonceHash, claimId } so the persistence transaction validates
+        // and finalizes the active lease within the exact same database transaction before committing writes.
+        const persistenceResult = await persistInstagramConnection({
+            creatorId,
+            tokenData,
+            profileData,
+            engagementMetrics,
+            origin,
+            claimContext: {
+                nonceHash,
+                claimId
+            }
+        });
+
+        if (!persistenceResult.success) {
+            const statusCode = persistenceResult.isClaimFencingError ? 403 : 500;
+            throw createApiError(statusCode, persistenceResult.message || "Failed to save Instagram account connection.");
+        }
+
+        // Standalone finalization check:
+        // In replica set transaction mode, the state was finalized atomically within the transaction session.
+        // In standalone mode, verify the result of the conditional update. Do not return success if finalization fails.
+        if (!persistenceResult.isTransactionFinalized) {
+            const finalizeNow = new Date();
+            const finalizeResult = await InstagramOAuthState.updateOne(
+                {
+                    nonceHash,
+                    creator: creatorId,
+                    claimId,
+                    isCompleted: { $ne: true },
+                    claimExpiresAt: { $gt: finalizeNow },
+                    expiresAt: { $gt: finalizeNow }
+                },
+                {
+                    $set: {
+                        isConsumed: true,
+                        isCompleted: true,
+                        completedAt: finalizeNow,
+                        claimExpiresAt: null
+                    }
+                }
+            );
+
+            if (finalizeResult.modifiedCount !== 1) {
+                // Finalization failed! The lease expired, was reclaimed, or completed in the interim.
+                // In standalone mode, account persistence cannot be considered successful.
+                console.error(
+                    `[Instagram Standalone Finalization Error]: Failed to finalize OAuth state for creator ${creatorId}. Claim lease expired or was superseded during persistence.`
+                );
+
+                // Attempt best-effort compensatory rollback of the standalone InstagramAccount record
+                try {
+                    await InstagramAccount.deleteOne({
+                        creator: creatorId,
+                        instagramUserId: profileData.instagramUserId
+                    });
+                } catch (cleanupErr) {
+                    console.error("[Instagram Standalone Cleanup Error]:", cleanupErr?.message);
+                }
+
+                throw createApiError(
+                    403,
+                    "Selection ticket claim lease was superseded or expired before finalization. Connection was not established."
+                );
+            }
+        }
+
+        return {
+            success: true,
+            account: {
+                instagramUserId: profileData.instagramUserId,
+                username: profileData.username,
+                profilePictureUrl: profileData.profilePictureUrl || "",
+                status: "CONNECTED"
+            }
+        };
+    } catch (err) {
+        // Failure handling: release the claim ONLY IF this request's unique claimId matches,
+        // the ticket has not naturally expired, and the ticket was not successfully completed.
+        // This ensures an old request whose lease expired or was reclaimed cannot release the new request's claim.
+        try {
+            await InstagramOAuthState.updateOne(
+                {
+                    nonceHash,
+                    creator: creatorId,
+                    claimId,
+                    isCompleted: { $ne: true },
+                    expiresAt: { $gt: new Date() }
+                },
+                {
+                    $set: {
+                        isConsumed: false,
+                        claimId: null,
+                        consumedAt: null,
+                        claimExpiresAt: null
+                    }
+                }
+            );
+        } catch (releaseErr) {
+            console.error("[Instagram Selection Ticket Claim Release Error]:", releaseErr?.message);
+        }
+        throw err;
+    }
+};
+
 export {
     generateInstagramConnectUrl,
     processInstagramOAuthCallback,
@@ -1878,10 +2528,15 @@ export {
     fetchRecentInstagramMedia,
     calculateInstagramEngagement,
     persistInstagramConnection,
+    generateAccountSelectionTicket,
+    parseAndVerifySelectionTicket,
+    getEligibleAccountsFromSelectionTicket,
+    selectAndPersistInstagramAccount,
     getConnectedInstagramAccount,
     refreshInstagramAccountMetrics,
     reconcilePendingProfileSync,
     syncStaleInstagramAccounts,
+    disconnectInstagramAccount,
     classifyMetaError,
     handleMetaGraphApiError,
     isTransactionUnsupportedError,

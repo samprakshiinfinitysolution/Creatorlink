@@ -6,6 +6,7 @@ import Portfolio from "../creator/portfolio/portfolio.model.js";
 import Booking from "../booking/booking.model.js";
 import Campaign from "../brand/campaigns/campaign.model.js";
 import BrandProfile from "../brand/profile/profile.model.js";
+import InstagramAccount from "../creator/instagram/instagram.model.js";
 
 /**
  * Helper to derive a clean creator handle (@username).
@@ -145,6 +146,14 @@ let lastCacheTimestamp = 0;
 const CACHE_TTL_MS = 20 * 1000;
 
 /**
+ * Busts the homepage in-memory cache to ensure newly connected or updated creators appear immediately.
+ */
+export const invalidateHomepageCache = () => {
+    cachedFeaturedData = null;
+    lastCacheTimestamp = 0;
+};
+
+/**
  * Service to fetch featured homepage data:
  * - Top 4 creators based on follower count (descending), with consistent tie-breaking
  * - Latest brand collaboration record
@@ -277,6 +286,30 @@ export const getHomepageFeaturedService = async () => {
                 ],
                 as: "portfolios"
             }
+        },
+        {
+            $lookup: {
+                from: InstagramAccount.collection.name,
+                let: { creatorAuthId: "$user._id" },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: {
+                                $and: [
+                                    { $eq: ["$creator", "$$creatorAuthId"] },
+                                    { $ne: ["$status", "DISCONNECTED"] }
+                                ]
+                            }
+                        }
+                    }
+                ],
+                as: "instagramAccounts"
+            }
+        },
+        {
+            $addFields: {
+                activeInstagram: { $arrayElemAt: ["$instagramAccounts", 0] }
+            }
         }
     ];
 
@@ -335,13 +368,41 @@ export const getHomepageFeaturedService = async () => {
                     ],
                     as: "portfolios"
                 }
+            },
+            {
+                $lookup: {
+                    from: InstagramAccount.collection.name,
+                    let: { creatorAuthId: "$user._id" },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: [
+                                        { $eq: ["$creator", "$$creatorAuthId"] },
+                                        { $ne: ["$status", "DISCONNECTED"] }
+                                    ]
+                                }
+                            }
+                        }
+                    ],
+                    as: "instagramAccounts"
+                }
+            },
+            {
+                $addFields: {
+                    activeInstagram: { $arrayElemAt: ["$instagramAccounts", 0] }
+                }
             }
         ]),
         CreatorProfile.countDocuments({ isPublic: { $ne: false } })
     ]);
 
     const formatCreatorRecord = (c) => {
-        const handle = deriveCreatorHandle(c.user?.name, c.socialLinks);
+        const activeIg = c.activeInstagram;
+        let handle = deriveCreatorHandle(c.user?.name, c.socialLinks);
+        if (activeIg?.username && typeof activeIg.username === "string" && activeIg.username.trim()) {
+            handle = `@${activeIg.username.trim()}`;
+        }
 
         // Calculate starting price: only return positive price, else null (Price on request)
         let startingPrice = null;
@@ -379,16 +440,34 @@ export const getHomepageFeaturedService = async () => {
         // Display image priority: profile image first; portfolio cover only as a fallback; else null
         const displayImage = profileImage || portfolioCover || null;
 
-        // Missing data rules:
-        // Only positive metrics are considered valid numbers; 0, negative or missing is returned as null.
+        // Missing data rules & verified ownership:
+        // 1. If an active verified Instagram account is linked, use its verified metrics.
+        // 2. If no active Instagram is connected, but instagramSyncVersion is set, this is an orphaned/stale snapshot -> return null.
+        // 3. Otherwise, use positive manual metrics; 0, negative or missing is returned as null ("Not added").
+        let rawFollowerCount = c.followerCount;
+        let rawEngagementRate = c.engagementRate;
+
+        if (activeIg) {
+            if (typeof activeIg.followersCount === "number" && !isNaN(activeIg.followersCount) && activeIg.followersCount > 0) {
+                rawFollowerCount = activeIg.followersCount;
+            }
+            if (typeof activeIg.engagementRate === "number" && !isNaN(activeIg.engagementRate) && activeIg.engagementRate > 0) {
+                rawEngagementRate = activeIg.engagementRate;
+            }
+        } else if (c.instagramSyncVersion) {
+            // Orphaned snapshot without connected Instagram account: prevent displaying stale metrics
+            rawFollowerCount = null;
+            rawEngagementRate = null;
+        }
+
         const followerCount =
-            typeof c.followerCount === "number" && !isNaN(c.followerCount) && c.followerCount > 0
-                ? c.followerCount
+            typeof rawFollowerCount === "number" && !isNaN(rawFollowerCount) && rawFollowerCount > 0
+                ? rawFollowerCount
                 : null;
 
         const engagementRate =
-            typeof c.engagementRate === "number" && !isNaN(c.engagementRate) && c.engagementRate > 0
-                ? c.engagementRate
+            typeof rawEngagementRate === "number" && !isNaN(rawEngagementRate) && rawEngagementRate > 0
+                ? rawEngagementRate
                 : null;
 
         return {

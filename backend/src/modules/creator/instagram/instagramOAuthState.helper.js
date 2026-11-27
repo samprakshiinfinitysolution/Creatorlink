@@ -27,7 +27,7 @@ const getSigningSecret = () => {
 };
 
 // Generates a cryptographically random, signed OAuth state and records it in MongoDB.
-const generateOAuthState = async (creatorId) => {
+const generateOAuthState = async (creatorId, origin = "settings") => {
     if (!creatorId) {
         throw new Error("Invalid creatorId: creatorId is required to generate OAuth state.");
     }
@@ -37,6 +37,8 @@ const generateOAuthState = async (creatorId) => {
     if (!mongoose.Types.ObjectId.isValid(creatorIdStr)) {
         throw new Error("Invalid creatorId: creatorId must be a valid MongoDB ObjectId.");
     }
+
+    const cleanOrigin = origin === "onboarding" ? "onboarding" : "settings";
 
     // 1. Validate signing configuration BEFORE touching the database.
     // If the signing secret is invalid or missing, this throws immediately without leaving orphan records.
@@ -66,11 +68,12 @@ const generateOAuthState = async (creatorId) => {
     const payload = {
         c: creatorIdStr,
         n: rawNonce,
-        exp: expiresAt.getTime()
+        exp: expiresAt.getTime(),
+        o: cleanOrigin
     };
 
     // 7. Sign the canonical string representation with HMAC-SHA256.
-    const serializedPayload = `${payload.c}:${payload.n}:${payload.exp}`;
+    const serializedPayload = `${payload.c}:${payload.n}:${payload.exp}:${payload.o}`;
     const signature = crypto
         .createHmac("sha256", signingSecret)
         .update(serializedPayload)
@@ -116,7 +119,8 @@ const consumeOAuthState = async (stateString) => {
         throw new Error("Invalid OAuth state: state payload must be a JSON object.");
     }
 
-    const { c: creatorId, n: rawNonce, exp: expiresAtTime, sig: signature } = parsedState;
+    const { c: creatorId, n: rawNonce, exp: expiresAtTime, o: rawOrigin, sig: signature } = parsedState;
+    const origin = rawOrigin === "onboarding" ? "onboarding" : "settings";
 
     // 3. Strict field validations.
     if (!creatorId || typeof creatorId !== "string" || !mongoose.Types.ObjectId.isValid(creatorId.trim())) {
@@ -141,9 +145,12 @@ const consumeOAuthState = async (stateString) => {
         throw new Error("OAuth state has expired. Please initiate Instagram connection again.");
     }
 
-    // 5. Verify HMAC signature in constant time.
+    // 5. Verify HMAC signature in constant time (supports both origin-scoped and legacy payloads).
     const signingSecret = getSigningSecret();
-    const serializedPayload = `${creatorId.trim()}:${rawNonce.trim()}:${expiresAtTime}`;
+    const serializedPayloadWithOrigin = `${creatorId.trim()}:${rawNonce.trim()}:${expiresAtTime}:${origin}`;
+    const serializedPayloadLegacy = `${creatorId.trim()}:${rawNonce.trim()}:${expiresAtTime}`;
+
+    const serializedPayload = rawOrigin ? serializedPayloadWithOrigin : serializedPayloadLegacy;
     const expectedSignature = crypto
         .createHmac("sha256", signingSecret)
         .update(serializedPayload)
@@ -200,11 +207,40 @@ const consumeOAuthState = async (stateString) => {
     }
 
     return {
-        creatorId: consumedState.creator.toString()
+        creatorId: consumedState.creator.toString(),
+        origin
     };
 };
 
+/**
+ * Cryptographically verifies the signature on an OAuth state string and extracts the origin
+ * ('onboarding' or 'settings') without consuming the state from the database.
+ * If the signature is invalid, tampered, or missing, safely defaults to 'settings'.
+ */
+const getVerifiedOriginFromState = (stateString) => {
+    if (!stateString || typeof stateString !== "string") return "settings";
+    try {
+        const decodedJson = Buffer.from(stateString.trim(), "base64url").toString("utf8");
+        const parsed = JSON.parse(decodedJson);
+        if (!parsed || !parsed.c || !parsed.n || !parsed.exp || !parsed.sig) return "settings";
+        const origin = parsed.o === "onboarding" ? "onboarding" : "settings";
+        const signingSecret = getSigningSecret();
+        const payloadWithOrigin = `${parsed.c.trim()}:${parsed.n.trim()}:${parsed.exp}:${origin}`;
+        const payloadLegacy = `${parsed.c.trim()}:${parsed.n.trim()}:${parsed.exp}`;
+        const serialized = parsed.o ? payloadWithOrigin : payloadLegacy;
+        const expectedSig = crypto.createHmac("sha256", signingSecret).update(serialized).digest("hex");
+        const sigBuf = Buffer.from(parsed.sig.trim(), "hex");
+        const expBuf = Buffer.from(expectedSig, "hex");
+        if (sigBuf.length === expBuf.length && crypto.timingSafeEqual(sigBuf, expBuf)) {
+            return origin;
+        }
+    } catch {}
+    return "settings";
+};
+
 export {
+    getSigningSecret,
     generateOAuthState,
-    consumeOAuthState
+    consumeOAuthState,
+    getVerifiedOriginFromState
 };

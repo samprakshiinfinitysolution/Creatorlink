@@ -129,6 +129,20 @@ const getMyProfileService = async (userId) => {
             status: instagramAccount.status || "CONNECTED",
             username: instagramAccount.username
         } : null;
+
+        // Auto-heal orphaned Instagram snapshots:
+        // If profile has instagramSyncVersion set, but no active connected/expired InstagramAccount exists for this creator,
+        // it means the connection was transferred, deleted, or orphaned. Clean up stale verified metrics so ghost followers/ER
+        // are not displayed while Settings says "Ready to Connect".
+        if (!instagramAccount && profileObj.instagramSyncVersion) {
+            profileObj.followerCount = null;
+            profileObj.engagementRate = null;
+            profileObj.instagramSyncVersion = null;
+            CreatorProfile.updateOne(
+                { user: userId, instagramSyncVersion: { $ne: null } },
+                { $set: { followerCount: null, engagementRate: null, instagramSyncVersion: null } }
+            ).catch((err) => console.error("Failed to clean up orphaned creator profile Instagram metrics:", err));
+        }
     } catch (igErr) {
         console.error("Failed to attach instagramConnection status to creator profile:", igErr);
     }

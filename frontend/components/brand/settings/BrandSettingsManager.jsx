@@ -58,7 +58,7 @@ export default function BrandSettingsManager() {
         <BrandHeader setMobileOpen={setMobileOpen} />
 
         {/* Settings Main Container */}
-        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6 max-w-4xl w-full mx-auto min-w-0">
+        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6 w-full min-w-0">
           {/* Header Title & Actions Banner */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
@@ -125,3 +125,4 @@ export default function BrandSettingsManager() {
     </div>
   );
 }
+

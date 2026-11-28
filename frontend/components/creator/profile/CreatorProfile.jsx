@@ -803,6 +803,21 @@ export default function CreatorProfile() {
   // Sync form data whenever profile in Redux updates, unless the user is actively editing
   useEffect(() => {
     if (profile && !isEditing) {
+      const isConnected = isInstagramLinked && !isInstagramExpired;
+      const connectedIgUsername = instagramAccount?.username || profile.instagramConnection?.username || "";
+      const verifiedIgUrl = connectedIgUsername ? `https://instagram.com/${connectedIgUsername}` : "";
+      const expectedIgUrl = isConnected && verifiedIgUrl ? verifiedIgUrl : (profile.socialLinks?.instagram || verifiedIgUrl);
+      const resolvedFollowers = profile.followerCount !== undefined && profile.followerCount !== null
+        ? String(profile.followerCount)
+        : (instagramAccount?.followersCount !== undefined && instagramAccount?.followersCount !== null
+            ? String(instagramAccount.followersCount)
+            : "");
+      const resolvedEngagement = profile.engagementRate !== undefined && profile.engagementRate !== null
+        ? String(profile.engagementRate)
+        : (instagramAccount?.engagementRate !== undefined && instagramAccount?.engagementRate !== null
+            ? String(instagramAccount.engagementRate)
+            : "");
+
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({
         name: profile.user?.name || authUser?.name || "",
@@ -814,7 +829,7 @@ export default function CreatorProfile() {
         profileImage: profile.profileImage || "",
         isPublic: profile.isPublic ?? true,
         socialLinks: {
-          instagram: profile.socialLinks?.instagram || "",
+          instagram: expectedIgUrl,
           facebook: profile.socialLinks?.facebook || "",
           twitter: profile.socialLinks?.twitter || "",
           youtube: profile.socialLinks?.youtube || "",
@@ -825,14 +840,8 @@ export default function CreatorProfile() {
         gender: profile.gender || "",
         languages: Array.isArray(profile.languages) ? profile.languages : [],
         ethnicity: profile.ethnicity || "",
-        followerCount:
-          profile.followerCount !== undefined && profile.followerCount !== null
-            ? String(profile.followerCount)
-            : "",
-        engagementRate:
-          profile.engagementRate !== undefined && profile.engagementRate !== null
-            ? String(profile.engagementRate)
-            : "",
+        followerCount: resolvedFollowers,
+        engagementRate: resolvedEngagement,
       });
     } else if (!profile && authUser && !isEditing) {
       setFormData((prev) => ({
@@ -840,7 +849,7 @@ export default function CreatorProfile() {
         name: authUser.name || prev.name,
       }));
     }
-  }, [profile, authUser, isEditing]);
+  }, [profile, authUser, isEditing, instagramAccount]);
 
   // Top-level input change handler
   const handleInputChange = (e) => {
@@ -983,6 +992,21 @@ export default function CreatorProfile() {
     setKeywordInput("");
     setLanguageInput("");
     if (profile) {
+      const isConnected = isInstagramLinked && !isInstagramExpired;
+      const connectedIgUsername = instagramAccount?.username || profile.instagramConnection?.username || "";
+      const verifiedIgUrl = connectedIgUsername ? `https://instagram.com/${connectedIgUsername}` : "";
+      const expectedIgUrl = isConnected && verifiedIgUrl ? verifiedIgUrl : (profile.socialLinks?.instagram || verifiedIgUrl);
+      const resolvedFollowers = profile.followerCount !== undefined && profile.followerCount !== null
+        ? String(profile.followerCount)
+        : (instagramAccount?.followersCount !== undefined && instagramAccount?.followersCount !== null
+            ? String(instagramAccount.followersCount)
+            : "");
+      const resolvedEngagement = profile.engagementRate !== undefined && profile.engagementRate !== null
+        ? String(profile.engagementRate)
+        : (instagramAccount?.engagementRate !== undefined && instagramAccount?.engagementRate !== null
+            ? String(instagramAccount.engagementRate)
+            : "");
+
       setFormData({
         name: profile.user?.name || authUser?.name || "",
         title: profile.title || "",
@@ -993,7 +1017,7 @@ export default function CreatorProfile() {
         profileImage: profile.profileImage || "",
         isPublic: profile.isPublic ?? true,
         socialLinks: {
-          instagram: profile.socialLinks?.instagram || "",
+          instagram: expectedIgUrl,
           facebook: profile.socialLinks?.facebook || "",
           twitter: profile.socialLinks?.twitter || "",
           youtube: profile.socialLinks?.youtube || "",
@@ -1004,14 +1028,8 @@ export default function CreatorProfile() {
         gender: profile.gender || "",
         languages: Array.isArray(profile.languages) ? profile.languages : [],
         ethnicity: profile.ethnicity || "",
-        followerCount:
-          profile.followerCount !== undefined && profile.followerCount !== null
-            ? String(profile.followerCount)
-            : "",
-        engagementRate:
-          profile.engagementRate !== undefined && profile.engagementRate !== null
-            ? String(profile.engagementRate)
-            : "",
+        followerCount: resolvedFollowers,
+        engagementRate: resolvedEngagement,
       });
     } else if (authUser) {
       setFormData((prev) => ({
@@ -1276,7 +1294,13 @@ export default function CreatorProfile() {
     profile?.bio ||
     formData.bio ||
     "Digital creator, fashion enthusiast, and creative visual storyteller collaborating with modern brands. Passionate about curating high-aesthetic lifestyle content and connecting authentic audiences with innovative products.";
- const instagramUrl = profile?.socialLinks?.instagram || formData.socialLinks?.instagram || "";
+  const isInstagramConnected = isInstagramLinked && !isInstagramExpired;
+  const connectedIgUsername = instagramAccount?.username || profile?.instagramConnection?.username || "";
+  const verifiedInstagramUrl = connectedIgUsername ? `https://instagram.com/${connectedIgUsername}` : "";
+  const instagramUrl =
+    isInstagramConnected && verifiedInstagramUrl
+      ? verifiedInstagramUrl
+      : (profile?.socialLinks?.instagram || formData.socialLinks?.instagram || verifiedInstagramUrl);
   const twitterUrl = profile?.socialLinks?.twitter || formData.socialLinks?.twitter || "";
   const youtubeUrl = profile?.socialLinks?.youtube || formData.socialLinks?.youtube || "";
   const tiktokUrl = profile?.socialLinks?.tiktok || formData.socialLinks?.tiktok || "";
@@ -1290,8 +1314,14 @@ export default function CreatorProfile() {
     typeof profile?.collaborationsCount === "number" && profile.collaborationsCount > 0
       ? profile.collaborationsCount
       : dynamicWorkspacesCount || profile?.collaborationsCount || profile?.completedCampaignsCount || 0;
-  const followerCount = typeof profile?.followerCount === "number" ? profile.followerCount : null;
-  const engagementRate = typeof profile?.engagementRate === "number" ? profile.engagementRate : null;
+  const followerCount =
+    typeof profile?.followerCount === "number"
+      ? profile.followerCount
+      : (typeof instagramAccount?.followersCount === "number" ? instagramAccount.followersCount : null);
+  const engagementRate =
+    typeof profile?.engagementRate === "number"
+      ? profile.engagementRate
+      : (typeof instagramAccount?.engagementRate === "number" ? instagramAccount.engagementRate : null);
   const isPublic = profile?.isPublic ?? formData.isPublic ?? true;
   const joinedOn = formatJoinedDate(profile?.createdAt || profile?.user?.createdAt || authUser?.createdAt);
 
@@ -1676,6 +1706,27 @@ export default function CreatorProfile() {
                             Verified Creator
                           </span>
                         )}
+                        {connectedIgUsername && isInstagramLinked && !isInstagramExpired && (
+                          <a
+                            href={instagramUrl || `https://instagram.com/${connectedIgUsername}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#fff0f4] dark:bg-[#ff2d6c]/10 text-[#ff2d6c] border border-[#ff2d6c]/20 hover:border-[#ff2d6c]/40 transition-colors shadow-2xs"
+                            title={`Connected Instagram: @${connectedIgUsername}`}
+                          >
+                            <InstagramIcon className="w-3 h-3" />
+                            <span>@{connectedIgUsername}</span>
+                          </a>
+                        )}
+                        {connectedIgUsername && isInstagramExpired && (
+                          <span
+                            className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shadow-2xs"
+                            title="Instagram Connection Expired"
+                          >
+                            <InstagramIcon className="w-3 h-3" />
+                            <span>@{connectedIgUsername} (Expired)</span>
+                          </span>
+                        )}
                       </div>
 
 
@@ -1732,7 +1783,7 @@ export default function CreatorProfile() {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="p-1 rounded-md text-text-secondary hover:text-[#ff2d6c] hover:bg-[#fff0f4] dark:hover:bg-[#ff2d6c]/10 transition-colors"
-                                title="Instagram"
+                                title={connectedIgUsername ? `@${connectedIgUsername} on Instagram` : "Instagram"}
                               >
                                 <InstagramIcon className="w-3.5 h-3.5" />
                               </a>
@@ -2121,7 +2172,7 @@ export default function CreatorProfile() {
                                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-muted hover:bg-secondary/10 text-text-secondary hover:text-secondary border border-border-theme hover:border-secondary/30 transition-all text-xs"
                               >
                                 <InstagramIcon className="w-3.5 h-3.5" />
-                                <span>Instagram</span>
+                                <span>{connectedIgUsername ? `@${connectedIgUsername}` : "Instagram"}</span>
                                 <ExternalLinkIcon className="w-3 h-3 opacity-60" />
                               </a>
                             )}

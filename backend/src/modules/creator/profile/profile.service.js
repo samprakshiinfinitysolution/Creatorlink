@@ -122,10 +122,14 @@ const getMyProfileService = async (userId) => {
         const instagramAccount = await InstagramAccount.findOne({
             creator: userId,
             status: { $ne: "DISCONNECTED" }
-        }).select("status username").lean();
+        }).select("status username followersCount engagementRate syncVersion").lean();
+
+        const isConnected = instagramAccount ? (instagramAccount.status ? instagramAccount.status === "CONNECTED" : true) : false;
+        const isExpired = instagramAccount ? instagramAccount.status === "EXPIRED" : false;
+
         profileObj.instagramConnection = instagramAccount ? {
-            isConnected: instagramAccount.status ? instagramAccount.status === "CONNECTED" : true,
-            isExpired: instagramAccount.status === "EXPIRED",
+            isConnected,
+            isExpired,
             status: instagramAccount.status || "CONNECTED",
             username: instagramAccount.username
         } : null;
@@ -142,6 +146,66 @@ const getMyProfileService = async (userId) => {
                 { user: userId, instagramSyncVersion: { $ne: null } },
                 { $set: { followerCount: null, engagementRate: null, instagramSyncVersion: null } }
             ).catch((err) => console.error("Failed to clean up orphaned creator profile Instagram metrics:", err));
+        }
+
+        // Active connection synchronization:
+        // If an active CONNECTED Instagram account exists, ensure the returned profile response contains
+        // verified follower count, engagement rate, and the official Instagram profile URL.
+        if (isConnected) {
+            let needsDbSync = false;
+            const dbUpdate = {};
+
+            // 1. Follower Count synchronization
+            if (typeof instagramAccount.followersCount === "number") {
+                if (profileObj.followerCount === null || profileObj.followerCount === undefined || profileObj.followerCount !== instagramAccount.followersCount) {
+                    profileObj.followerCount = instagramAccount.followersCount;
+                    dbUpdate.followerCount = instagramAccount.followersCount;
+                    needsDbSync = true;
+                }
+            }
+
+            // 2. Engagement Rate synchronization
+            if (typeof instagramAccount.engagementRate === "number") {
+                if (profileObj.engagementRate === null || profileObj.engagementRate === undefined || profileObj.engagementRate !== instagramAccount.engagementRate) {
+                    profileObj.engagementRate = instagramAccount.engagementRate;
+                    dbUpdate.engagementRate = instagramAccount.engagementRate;
+                    needsDbSync = true;
+                }
+            }
+
+            // 3. Instagram Profile URL synchronization from verified username
+            const expectedIgUrl = (instagramAccount.username && typeof instagramAccount.username === "string" && instagramAccount.username.trim())
+                ? `https://instagram.com/${instagramAccount.username.trim()}`
+                : "";
+            if (expectedIgUrl) {
+                if (!profileObj.socialLinks) {
+                    profileObj.socialLinks = {};
+                }
+                const currentIgUrl = typeof profileObj.socialLinks.instagram === "string"
+                    ? profileObj.socialLinks.instagram.trim()
+                    : "";
+                if (currentIgUrl !== expectedIgUrl) {
+                    profileObj.socialLinks.instagram = expectedIgUrl;
+                    dbUpdate["socialLinks.instagram"] = expectedIgUrl;
+                    needsDbSync = true;
+                }
+            }
+
+            // 4. Sync version tracking
+            if (typeof instagramAccount.syncVersion === "number") {
+                if (profileObj.instagramSyncVersion !== instagramAccount.syncVersion) {
+                    profileObj.instagramSyncVersion = instagramAccount.syncVersion;
+                    dbUpdate.instagramSyncVersion = instagramAccount.syncVersion;
+                    needsDbSync = true;
+                }
+            }
+
+            if (needsDbSync && Object.keys(dbUpdate).length > 0) {
+                CreatorProfile.updateOne(
+                    { user: userId },
+                    { $set: dbUpdate }
+                ).catch((err) => console.error("Failed to synchronize CreatorProfile Instagram snapshot:", err));
+            }
         }
     } catch (igErr) {
         console.error("Failed to attach instagramConnection status to creator profile:", igErr);
@@ -164,15 +228,21 @@ const updateProfileService = async (userId, profileData) => {
     delete updateOps.isOnboarded;
 
     // Check if creator has an active/linked Instagram account (CONNECTED or EXPIRED)
-    const isInstagramLinked = await InstagramAccount.exists({
+    const linkedInstagram = await InstagramAccount.findOne({
         creator: userId,
         status: { $ne: "DISCONNECTED" }
-    });
+    }).select("status username followersCount engagementRate").lean();
+
+    const isInstagramLinked = Boolean(linkedInstagram);
 
     if (isInstagramLinked) {
-        // Protected social metrics: Client request CANNOT overwrite Meta-verified metrics
+        // Protected social metrics & link: Client request CANNOT overwrite Meta-verified metrics or Instagram URL
         delete updateOps.followerCount;
         delete updateOps.engagementRate;
+        if (updateOps.socialLinks && typeof updateOps.socialLinks === "object") {
+            delete updateOps.socialLinks.instagram;
+        }
+        delete updateOps["socialLinks.instagram"];
     } else {
         // Update follower count for non-connected creators
         if (updateOps.followerCount !== undefined) {
@@ -219,6 +289,11 @@ const updateProfileService = async (userId, profileData) => {
             updateOps[`socialLinks.${key}`] = value;
         }
         delete updateOps.socialLinks;
+    }
+
+    // Protect verified Instagram link from any client overwrite when Instagram is linked (CONNECTED or EXPIRED)
+    if (isInstagramLinked) {
+        delete updateOps["socialLinks.instagram"];
     }
 
     const profile = await CreatorProfile.findOneAndUpdate(
@@ -273,6 +348,13 @@ const updateProfileService = async (userId, profileData) => {
     } catch (socketErr) {
         console.error("Failed to emit creator profile update to admins:", socketErr);
     }
+
+    profileObj.instagramConnection = linkedInstagram ? {
+        isConnected: linkedInstagram.status ? linkedInstagram.status === "CONNECTED" : true,
+        isExpired: linkedInstagram.status === "EXPIRED",
+        status: linkedInstagram.status || "CONNECTED",
+        username: linkedInstagram.username
+    } : null;
 
     return profileObj;
 };
